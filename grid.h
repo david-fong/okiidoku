@@ -7,16 +7,20 @@
 
 #include <cstdint>
 #include <cstdlib>
-#include <ctime>
+#include <iostream>
+#include <vector>
+#include <string>
 #include <algorithm>
 using namespace std;
 
-#define MIN_ORDER 3
-#define MAX_ORDER 5
+// Evaulates to <o> bounded to the range [3, 5]
+#define CLEAN_ORDER(o) ((o < 3) ? 3 : ((o > 5) ? 5 : o))
+
+// IMPORTANT: can only handle length <= 32 (ie. order <= floor(sqrt(32)))
 typedef int32_t occmask_t;
 
 /**
- * order limited to range [MIN_ORDER, MAX_ORDER].
+ * 
  */
 class Game { // ======================================================================
 //////////////////////////////////////////////////////////////////////////////////////
@@ -26,8 +30,9 @@ private:
 	 */
 	class Tile {
 	public:
-		Tile(int rowLength);
-		bool canChange;
+		Tile();
+		Tile(int rowLen);
+		bool fixedVal;
 		int  biasIndex;
 		int  value;
 	};
@@ -38,14 +43,14 @@ public: // =====================================================================
 	 * 
 	 */
 	Game(int order);
-
-	&ostream operator<<(ostream& os, const Game& game);
+	void init();
+	//void print();
 
 
 private: // ==========================================================================
 	// Private fields: ---------------------------------------------------------------
-	int order, length, area;
-	Tile *const grid;
+	const int order, length, area;
+	vector<Tile> grid;
 	vector<occmask_t> rowBin, colBin, blkBin;
 	vector<vector<int>> rowBiases;
 
@@ -54,6 +59,9 @@ private: // ====================================================================
 	Tile* setNextValid(int index);
 	// Seed all tiles of blocks along the main diagonal:
 	void seed0();
+	// Generates a random solution.
+	// Any previous seeds must not make generating a solution impossible.
+	void generateSolution();
 
 	// Inline functions: -------------------------------------------------------------
 	bool isClear(Tile const * t) { return t->biasIndex == length; }
