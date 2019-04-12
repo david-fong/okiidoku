@@ -30,28 +30,27 @@ void Game::runNew() {
 		random_shuffle(rowBiases[i].begin(), rowBiases[i].end() - 1);
 	}
 	// Generate a solution:
-	seed0();
+	SEED0();
 	generateSolution();
 }
 
 
-// TODO: change col and blk to pointers to their bins:
-Game::Tile* Game::setNextValid(int index) {
+Game::Tile* Game::setNextValid(const int index) {
 	const int row = getRow(index);
-	const int col = getCol(index);
-	const int blk = getBlk(row, col);
+	occmask_t *const colBin = &colBins[getCol(index)];
+	occmask_t *const blkBin = &blkBins[getBlk(index)];
 
 	// If the tile is currently already set, clear it:
 	Tile* t = &grid[index];
 	if (t->biasIndex != length) {
 		const int valInv = ~(0b1 << t->value);
 		rowBins[row] &= valInv;
-		colBins[col] &= valInv;
-		blkBins[blk] &= valInv;
+		*colBin &= valInv;
+		*blkBin &= valInv;
 	}
 	t->value = length;
 
-	occmask_t invalidBin = rowBins[row] | colBins[col] | blkBins[blk];
+	occmask_t invalidBin = rowBins[row] | *colBin | *blkBin;
 	++(t->biasIndex) %= length + 1;
 	for (; t->biasIndex < length; t->biasIndex++) {
 		// If a valid value is found for this tile:
@@ -59,8 +58,8 @@ Game::Tile* Game::setNextValid(int index) {
 		const occmask_t valBit = 0b1 << t->value;
 		if (!(invalidBin & valBit)) {
 			rowBins[row] |= valBit;
-			colBins[col] |= valBit;
-			blkBins[blk] |= valBit;
+			*colBin |= valBit;
+			*blkBin |= valBit;
 			break;
 		}
 	}
@@ -75,9 +74,64 @@ void Game::seed0() {
 				setNextValid(b + r + c)->fixedVal = true;
 }
 
+void Game::seed0b() {
+	// Get offsets to blocks along top and left edge:
+	vector<int> blocks;
+	int bRow = order * length;
+	for (int i = 0; i < length; i += order)
+		blocks.push_back(i);
+	for (int i = bRow; i < area; i += bRow)
+		blocks.push_back(i);
+
+	for (int i = 0; i < blocks.size(); i++)
+		for (int r = 0; r < bRow; r += length)
+			for (int c = 0; c < order; c++)
+				setNextValid(blocks[i] + r + c)->fixedVal = true;
+}
+
 int Game::seed1() {
 	int count = 0;
-	vector<short> possibilities;
+
+	class Capacity {
+	public:
+		Capacity(Game& ctx) : ctx(ctx) {
+			const occmask_t initialCpct = (0b1 << (ctx.length + 1)) - 1;
+			rowCpct = vector<occmask_t>(ctx.length, initialCpct);
+			colCpct = vector<occmask_t>(ctx.length, initialCpct);
+			blkCpct = vector<occmask_t>(ctx.length, initialCpct);
+
+			buckets = vector<vector<int>>(ctx.length, vector<int>());
+			for (int i = 0; i < ctx.area; i++) {
+				buckets[ctx.length - 1].push_back(i);
+			}
+			// Take cencus of previous seeds:
+			for (int i = 0; i < ctx.area; i++) {
+				if (ctx.grid[i].fixedVal) set(i);
+			}
+
+			//for (int i = 0; i < ctx.area; i++) {
+			//	// Take the minimum of the worst-case
+			//	// context capacities in bit-bar format:
+			//	const occmask_t cpct = (
+			//		rowCpct[ctx.getRow(i)] &
+			//		colCpct[ctx.getCol(i)] &
+			//		blkCpct[ctx.getBlk(i)]);
+			//}
+		}
+		void set(int index) {
+			rowCpct[ctx.getRow(index)] >>= 1;
+			colCpct[ctx.getCol(index)] >>= 1;
+			blkCpct[ctx.getBlk(index)] >>= 1;
+			// For each affected tile, update its bucket in the buckets field:
+			// TODO: since I'll need to go through each affected tile, I might as
+			//  well go back to implementing this as a 2D array of int's :|
+		}
+	private:
+		const Game& ctx;
+		vector<vector<int>> buckets;
+		vector<occmask_t> rowCpct, colCpct, blkCpct;
+	} capacity(*this);
+
 	return count;
 }
 

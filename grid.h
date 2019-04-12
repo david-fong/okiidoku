@@ -18,6 +18,8 @@ using namespace std;
 // IMPORTANT: can only handle length <= 32 (ie. order <= floor(sqrt(32)))
 typedef int32_t occmask_t;
 
+#define SEED0 seed0 // one of { seed0, seed0b, }
+
 /**
  * 
  */
@@ -55,27 +57,32 @@ public: // =====================================================================
 
 private: // ==========================================================================
 	// Private fields: ---------------------------------------------------------------
-	const int order, length, area;
+	const int order;
+	const int length;
+	const int area;
 	vector<Tile> grid;
-	vector<occmask_t> rowBins, colBins, blkBins;
+	vector<occmask_t> rowBins;
+	vector<occmask_t> colBins;
+	vector<occmask_t> blkBins;
 	vector<vector<int>> rowBiases;
 
 	// Solution generation methods: --------------------------------------------------
 	// Returns the tile at index.
-	Tile* setNextValid(int index);
+	Tile* setNextValid(const int index);
 	// Seed all tiles of blocks along the main diagonal:
 	void seed0();
+	void seed0b();
 	int  seed1();
 	// Generates a random solution.
 	// Any previous seeds must not make generating a solution impossible.
 	void generateSolution();
 
 	// Inline functions: -------------------------------------------------------------
-	bool isClear(Tile const * t) { return t->biasIndex == length; }
-	int getRow(int index) { return index / length; }
-	int getCol(int index) { return index % length; }
-	int getBlk(int index) { return getBlk(getRow(index), getCol(index)); }
-	int getBlk(int row, int col) { return (row / order) * order + (col / order); }
+	bool isClear(Tile const * t) const { return t->biasIndex == length; }
+	int getRow(int index) const { return index / length; }
+	int getCol(int index) const { return index % length; }
+	int getBlk(int index) const { return getBlk(getRow(index), getCol(index)); }
+	int getBlk(int row, int col) const { return (row / order) * order + (col / order); }
 	
 //////////////////////////////////////////////////////////////////////////////////////
 }; // ================================================================================
