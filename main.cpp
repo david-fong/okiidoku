@@ -6,12 +6,11 @@ using namespace std;
  * 
  */
 int main() {
-	Game game(3);
-	game.init();
-	//game.print();
-
-	cout << "say gg or die O_o" << endl;
-	string gg;
-	getline(cin, gg);
+	Game game(4);
+	do {
+		game.runNew();
+		game.print();
+		cout << "Press <Enter> to continue, or anything else to quit." << endl;
+	} while (getchar() == '\n');
 	return 0;
 }

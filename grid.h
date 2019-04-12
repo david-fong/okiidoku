@@ -5,7 +5,6 @@
 #ifndef _GRID_H_
 #define _GRID_H_
 
-#include <cstdint>
 #include <cstdlib>
 #include <iostream>
 #include <vector>
@@ -42,16 +41,23 @@ public: // =====================================================================
 	/**
 	 * 
 	 */
+	class OPseedException: public exception {
+		virtual const char* what() const throw() {
+			return "seed methods made it impossible to generate any solutions.";
+		}
+	} OPseed;
+
+	// Constructor:
 	Game(int order);
-	void init();
-	//void print();
+	void runNew();
+	void print();
 
 
 private: // ==========================================================================
 	// Private fields: ---------------------------------------------------------------
 	const int order, length, area;
 	vector<Tile> grid;
-	vector<occmask_t> rowBin, colBin, blkBin;
+	vector<occmask_t> rowBins, colBins, blkBins;
 	vector<vector<int>> rowBiases;
 
 	// Solution generation methods: --------------------------------------------------
@@ -59,6 +65,7 @@ private: // ====================================================================
 	Tile* setNextValid(int index);
 	// Seed all tiles of blocks along the main diagonal:
 	void seed0();
+	int  seed1();
 	// Generates a random solution.
 	// Any previous seeds must not make generating a solution impossible.
 	void generateSolution();

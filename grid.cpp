@@ -5,25 +5,31 @@ Game::Tile::Tile()           : fixedVal(false), biasIndex(0),      value(0) {}
 Game::Tile::Tile(int rowLen) : fixedVal(false), biasIndex(rowLen), value(rowLen) {}
 
 Game::Game(int order) : order(CLEAN_ORDER(order)), length(order * order), area(length * length) {
-	grid = vector<Game::Tile>(area, Tile(length));
+	grid    = vector<Tile>(area);
+	rowBins = vector<occmask_t>(length);
+	colBins = vector<occmask_t>(length);
+	blkBins = vector<occmask_t>(length);
 
-	rowBin = vector<occmask_t>(length, 0);
-	colBin = vector<occmask_t>(length, 0);
-	blkBin = vector<occmask_t>(length, 0);
-
-	// Scramble each row's value-guessing-order:
-	// *set the <length>'th entry to <length>
 	for (int i = 0; i < length; i++) {
 		vector<int> seq;
 		for (int i = 0; i <= length; i++) seq.push_back(i);
 		rowBiases.push_back(seq);
 	}
-	for (int i = 0; i < length; i++) {
-		random_shuffle(rowBiases[i].begin(), prev(rowBiases[i].end()));
-	}
 }
 
-void Game::init() {
+void Game::runNew() {
+	// Initialize all values as empty:
+	fill(grid.begin(), grid.end(), Tile(length));
+	fill(rowBins.begin(), rowBins.end(), 0);
+	fill(colBins.begin(), colBins.end(), 0);
+	fill(blkBins.begin(), blkBins.end(), 0);
+
+	// Scramble each row's value-guessing-order:
+	// *set the <length>'th entry to <length>
+	for (int i = 0; i < length; i++) {
+		random_shuffle(rowBiases[i].begin(), rowBiases[i].end() - 1);
+	}
+	// Generate a solution:
 	seed0();
 	generateSolution();
 }
@@ -39,22 +45,22 @@ Game::Tile* Game::setNextValid(int index) {
 	Tile* t = &grid[index];
 	if (t->biasIndex != length) {
 		const int valInv = ~(0b1 << t->value);
-		rowBin[row] &= valInv;
-		colBin[col] &= valInv;
-		blkBin[blk] &= valInv;
+		rowBins[row] &= valInv;
+		colBins[col] &= valInv;
+		blkBins[blk] &= valInv;
 	}
 	t->value = length;
 
-	occmask_t invalidBin = rowBin[row] | colBin[col] | blkBin[blk];
+	occmask_t invalidBin = rowBins[row] | colBins[col] | blkBins[blk];
 	++(t->biasIndex) %= length + 1;
 	for (; t->biasIndex < length; t->biasIndex++) {
 		// If a valid value is found for this tile:
 		t->value = rowBiases[row][t->biasIndex];
 		const occmask_t valBit = 0b1 << t->value;
 		if (!(invalidBin & valBit)) {
-			rowBin[row] |= valBit;
-			colBin[col] |= valBit;
-			blkBin[blk] |= valBit;
+			rowBins[row] |= valBit;
+			colBins[col] |= valBit;
+			blkBins[blk] |= valBit;
 			break;
 		}
 	}
@@ -69,15 +75,28 @@ void Game::seed0() {
 				setNextValid(b + r + c)->fixedVal = true;
 }
 
+int Game::seed1() {
+	int count = 0;
+	vector<short> possibilities;
+	return count;
+}
+
 void Game::generateSolution() {
 	// Skip all seeded starting tiles:
 	int i = 0;
 	while (grid[i].fixedVal && i < area) i++;
 
 	while (i < area) {
+		// Push a new permutation:
 		if (isClear(setNextValid(i))) {
-			while (--i >= 0 && grid[i].fixedVal);
+
+			// Pop and step backward:
+			do {
+				// Fail if no solution could be found:
+				if (--i < 0) throw Game::OPseed;
+			} while (grid[i].fixedVal);
 		}
+		// Step forward to push a new permutation:
 		else { while (++i < area && grid[i].fixedVal); }
 	}
 	// When done, set all values as fixed:
@@ -86,16 +105,11 @@ void Game::generateSolution() {
 	}
 }
 
-//void Game::print() {
-//	const int W = 3;
-//	char* str = calloc(area + length, W * sizeof(char));
-//	for (int r = 0; r < length; r++) {
-//		for (int c = 0; c < length; c++) {
-//			sprintf(str + (r * (length + 1)) + c), "%*d", W, grid[r * length + c]);
-//		}
-//		sprintf(str + r + length), "%*.*s", W, W, '\n\n');
-//	}
-//	printf("%c\n", str);
-//	free(str);
-//	return;
-//}
+void Game::print() {
+	for (int i = 0; i < area; i++) {
+		Tile* t = &grid[i];
+		const string pad((i % length == 0) ? "\n " : " ");
+		cout << pad << (isClear(t) ? -1: t->value);
+	}
+	cout << endl;
+}
