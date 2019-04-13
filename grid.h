@@ -16,7 +16,7 @@ using namespace std;
 #define CLEAN_ORDER(o) ((o < 3) ? 3 : ((o > 5) ? 5 : o))
 
 // IMPORTANT: can only handle length <= 32 (ie. order <= floor(sqrt(32)))
-typedef int32_t occmask_t;
+typedef uint32_t occmask_t;
 
 #define SEED0 seed0 // one of { seed0, seed0b, }
 
@@ -33,9 +33,9 @@ private:
 	public:
 		Tile();
 		Tile(int rowLen);
-		bool fixedVal;
-		int  biasIndex;
-		int  value;
+		bool  fixedVal;
+		short biasIndex;
+		short value;
 	};
 
 
@@ -64,15 +64,17 @@ private: // ====================================================================
 	vector<occmask_t> rowBins;
 	vector<occmask_t> colBins;
 	vector<occmask_t> blkBins;
-	vector<vector<int>> rowBiases;
+	vector<vector<short>> rowBiases;
 
 	// Solution generation methods: --------------------------------------------------
+	void clear();
 	// Returns the tile at index.
 	Tile* setNextValid(const int index);
+	int   seed1Bitmask(const int index, const occmask_t min);
 	// Seed all tiles of blocks along the main diagonal:
 	void seed0();
 	void seed0b();
-	int  seed1();
+	int  seed1(int ceiling);
 	// Generates a random solution.
 	// Any previous seeds must not make generating a solution impossible.
 	void generateSolution();
