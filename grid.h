@@ -19,7 +19,6 @@ using namespace std;
 typedef uint32_t occmask_t;
 
 #define SEED0 seed0 // one of { seed0, seed0b, }
-#define SEED1ADD 2
 
 /**
  * 
@@ -44,8 +43,6 @@ public: // =====================================================================
 	/**
 	 * 
 	 */
-	// Thrown during solution generation if previous seeding
-	// operations rule out any seed-compliant configurations.
 	class OPseedException: public exception {
 		virtual const char* what() const throw() {
 			return "seed methods made it impossible to generate any solutions.";
@@ -73,11 +70,11 @@ private: // ====================================================================
 	void clear();
 	// Returns the tile at index.
 	Tile* setNextValid(const int index);
-	void  seed1setBWCO(const int index, const occmask_t min);
+	int   seed1Bitmask(const int index, const occmask_t min);
 	// Seed all tiles of blocks along the main diagonal:
 	void seed0();
 	void seed0b();
-	int  seed1(const int ceiling);
+	int  seed1(int ceiling);
 	// Generates a random solution.
 	// Any previous seeds must not make generating a solution impossible.
 	void generateSolution();
