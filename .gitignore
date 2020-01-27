@@ -1,0 +1,13 @@
+
+*~
+*.swp
+*.swo
+Session.vim
+
+/.vs/
+/.vscode/
+/Debug/
+/x64/
+*.sln
+*.vcxproj*
+
