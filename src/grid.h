@@ -20,6 +20,7 @@ using namespace std;
  */
 typedef uint32_t occmask_t;
 typedef  uint8_t value_t;
+typedef  uint8_t order_t;
 typedef  uint8_t length_t;
 typedef uint16_t area_t;
 
@@ -54,7 +55,7 @@ public:
     } OPseed;
 
     // Constructor:
-    Game(const length_t order);
+    Game(const order_t order);
     void runNew();
     void print();
 
@@ -89,6 +90,11 @@ private:
     length_t getCol(const area_t index) const { return index % length; }
     length_t getBlk(const area_t index) const { return getBlk(getRow(index), getCol(index)); }
     length_t getBlk(const length_t row, const length_t col) const { return (row / order) * order + (col / order); }
+
+public:
+    static const length_t seed1Constants[];
 };
+
+const length_t Game::seed1Constants[] = { 0, 0, 0, 0, 3, 9, };
 
 #endif

@@ -12,7 +12,7 @@ Game::Tile::Tile(const value_t rowLen):
     biasIndex   (rowLen),
     value       (rowLen) {}
 
-Game::Game(const length_t _order):
+Game::Game(const order_t _order):
     order   (CLEAN_ORDER(_order)),
     length  (order  * order),
     area    (length * length)
@@ -47,8 +47,7 @@ void Game::runNew() {
     }
     // Generate a solution:
     SEED0();
-    print();
-    //cout << seed1(2 * order + 1) << endl;
+    cout << seed1(order + seed1Constants[order]) << endl;
     generateSolution();
     // When done, set all values as fixed:
     for (int i = 0; i < area; i++) {
@@ -61,7 +60,7 @@ void Game::seed0() {
     const area_t bRow = order * length;
     for (area_t b = 0; b < area; b += bRow + order)
         for (area_t r = 0; r < bRow; r += length)
-            for (length_t c = 0; c < order; c++)
+            for (order_t c = 0; c < order; c++)
                 setNextValid(b + r + c)->fixedVal = true;
 }
 
@@ -76,7 +75,7 @@ void Game::seed0b() {
 
     for (length_t i = 0; i < blocks.size(); i++)
         for (area_t r = 0; r < bRow; r += length)
-            for (length_t c = 0; c < order; c++)
+            for (order_t c = 0; c < order; c++)
                 setNextValid(blocks[i] + r + c)->fixedVal = true;
 }
 
@@ -192,7 +191,7 @@ void Game::print() {
     cout << setbase(16);
     for (area_t i = 0; i < area; i++) {
         if ((i % length) == 0) {
-            cout << '$' << endl;
+            cout << "\n";
         }
         Tile const *const t = &grid[i];
         cout << setw(2) << (uint16_t)t->value;
