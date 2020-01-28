@@ -1,18 +1,18 @@
 
 #include "grid.h"
 
-Game::Tile::Tile()           : fixedVal(false), biasIndex(0),      value(0) {}
-Game::Tile::Tile(int rowLen) : fixedVal(false), biasIndex(rowLen), value(rowLen) {}
+Game::Tile::Tile() : fixedVal(false), biasIndex(0), value(0) {}
+Game::Tile::Tile(const value_t rowLen) : fixedVal(false), biasIndex(rowLen), value(rowLen) {}
 
-Game::Game(int _order) : order(CLEAN_ORDER(_order)), length(order * order), area(length * length) {
+Game::Game(const length_t _order) : order(CLEAN_ORDER(_order)), length(order * order), area(length * length) {
     grid    = vector<Tile>(area);
     rowBins = vector<occmask_t>(length);
     colBins = vector<occmask_t>(length);
     blkBins = vector<occmask_t>(length);
 
     for (int i = 0; i < length; i++) {
-        vector<short> seq;
-        for (short i = 0; i <= length; i++) seq.push_back(i);
+        vector<value_t> seq;
+        for (value_t i = 0; i <= length; i++) seq.push_back(i);
         rowBiases.push_back(seq);
     }
 }
@@ -44,7 +44,7 @@ void Game::runNew() {
 }
 
 
-int Game::seed1Bitmask(const int index, const occmask_t min) {
+int Game::seed1Bitmask(const area_t index, const occmask_t min) {
     occmask_t* row = &rowBins[getRow(index)];
     occmask_t* col = &colBins[getCol(index)];
     occmask_t* blk = &blkBins[getBlk(index)];
@@ -61,25 +61,25 @@ int Game::seed1Bitmask(const int index, const occmask_t min) {
 }
 
 void Game::seed0() {
-    const int bRow = order * length;
-    for (int b = 0; b < area; b += bRow + order)
-        for (int r = 0; r < bRow; r += length)
-            for (int c = 0; c < order; c++)
+    const area_t bRow = order * length;
+    for (area_t b = 0; b < area; b += bRow + order)
+        for (area_t r = 0; r < bRow; r += length)
+            for (length_t c = 0; c < order; c++)
                 setNextValid(b + r + c)->fixedVal = true;
 }
 
 void Game::seed0b() {
     // Get offsets to blocks along top and left edge:
     vector<int> blocks;
-    int bRow = order * length;
-    for (int i = 0; i < length; i += order)
+    area_t bRow = order * length;
+    for (length_t i = 0; i < length; i += order)
         blocks.push_back(i);
-    for (int i = bRow; i < area; i += bRow)
+    for (area_t i = bRow; i < area; i += bRow)
         blocks.push_back(i);
 
     for (int i = 0; i < blocks.size(); i++)
-        for (int r = 0; r < bRow; r += length)
-            for (int c = 0; c < order; c++)
+        for (area_t r = 0; r < bRow; r += length)
+            for (length_t c = 0; c < order; c++)
                 setNextValid(blocks[i] + r + c)->fixedVal = true;
 }
 
@@ -108,7 +108,7 @@ int Game::seed1(int ceiling) {
     }
 
     int count = 0;
-    for (int i = 0; i < area; i++) {
+    for (area_t i = 0; i < area; i++) {
         if (occ.grid[i].fixedVal && !grid[i].fixedVal) {
             count++;
             setNextValid(i)->fixedVal = true;;
@@ -118,8 +118,8 @@ int Game::seed1(int ceiling) {
 }
 
 
-Game::Tile* Game::setNextValid(const int index) {
-    const int row = getRow(index);
+Game::Tile* Game::setNextValid(const area_t index) {
+    const length_t row = getRow(index);
     occmask_t *const colBin = &colBins[getCol(index)];
     occmask_t *const blkBin = &blkBins[getBlk(index)];
 
@@ -150,7 +150,7 @@ Game::Tile* Game::setNextValid(const int index) {
 }
 
 void Game::generateSolution() {
-    int i = 0;
+    area_t i = 0;
     // Skip all seeded starting tiles:
     while (grid[i].fixedVal && i < area) i++;
 
@@ -160,8 +160,8 @@ void Game::generateSolution() {
             // Pop and step backward:
             do {
                 // Fail if no solution could be found:
-                if (--i < 0) { throw Game::OPseed; }
-            } while (grid[i].fixedVal);
+                if (i == 0) { throw Game::OPseed; }
+            } while (grid[--i].fixedVal);
         } else {
             // Step forward to push a new permutation:
             while (++i < area && grid[i].fixedVal);
@@ -170,7 +170,7 @@ void Game::generateSolution() {
 }
 
 void Game::print() {
-    for (int i = 0; i < area; i++) {
+    for (area_t i = 0; i < area; i++) {
         Tile* t = &grid[i];
         const string pad((i % length == 0) ? "\n " : " ");
         cout << pad << (isClear(t) ? -1: t->value);
