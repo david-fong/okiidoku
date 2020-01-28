@@ -4,7 +4,7 @@
 Game::Tile::Tile()           : fixedVal(false), biasIndex(0),      value(0) {}
 Game::Tile::Tile(int rowLen) : fixedVal(false), biasIndex(rowLen), value(rowLen) {}
 
-Game::Game(int order) : order(CLEAN_ORDER(order)), length(order * order), area(length * length) {
+Game::Game(int _order) : order(CLEAN_ORDER(_order)), length(order * order), area(length * length) {
     grid    = vector<Tile>(area);
     rowBins = vector<occmask_t>(length);
     colBins = vector<occmask_t>(length);
@@ -37,39 +37,12 @@ void Game::runNew() {
     SEED0();
     seed1(2 * order + 1);
     generateSolution();
+    // When done, set all values as fixed:
+    for (int i = 0; i < area; i++) {
+        grid[i].fixedVal = true;
+    }
 }
 
-
-Game::Tile* Game::setNextValid(const int index) {
-    const int row = getRow(index);
-    occmask_t *const colBin = &colBins[getCol(index)];
-    occmask_t *const blkBin = &blkBins[getBlk(index)];
-
-    // If the tile is currently already set, clear it:
-    Tile* t = &grid[index];
-    if (t->biasIndex != length) {
-        const occmask_t valInv = ~(0b1 << t->value);
-        rowBins[row] &= valInv;
-        *colBin &= valInv;
-        *blkBin &= valInv;
-    }
-    t->value = length;
-
-    occmask_t invalidBin = rowBins[row] | *colBin | *blkBin;
-    ++(t->biasIndex) %= length + 1;
-    for (; t->biasIndex < length; t->biasIndex++) {
-        // If a valid value is found for this tile:
-        t->value = rowBiases[row][t->biasIndex];
-        const occmask_t valBit = 0b1 << t->value;
-        if (!(invalidBin & valBit)) {
-            rowBins[row] |= valBit;
-            *colBin |= valBit;
-            *blkBin |= valBit;
-            break;
-        }
-    }
-    return t;
-}
 
 int Game::seed1Bitmask(const int index, const occmask_t min) {
     occmask_t* row = &rowBins[getRow(index)];
@@ -144,27 +117,55 @@ int Game::seed1(int ceiling) {
     return count;
 }
 
+
+Game::Tile* Game::setNextValid(const int index) {
+    const int row = getRow(index);
+    occmask_t *const colBin = &colBins[getCol(index)];
+    occmask_t *const blkBin = &blkBins[getBlk(index)];
+
+    Tile *const t = &grid[index];
+    if (!isClear(t)) {
+        // If the tile is currently already set, clear it:
+        const occmask_t eraseMask = ~(0b1 << t->value);
+        rowBins[row] &= eraseMask;
+        *colBin &= eraseMask;
+        *blkBin &= eraseMask;
+    }
+    t->value = length;
+
+    occmask_t invalidBin = rowBins[row] | *colBin | *blkBin;
+    ++(t->biasIndex) %= length + 1;
+    for (; t->biasIndex < length; t->biasIndex++) {
+        t->value = rowBiases[row][t->biasIndex];
+        const occmask_t valBit = 0b1 << t->value;
+        if (!(invalidBin & valBit)) {
+            // If a valid value is found for this tile:
+            rowBins[row] |= valBit;
+            *colBin |= valBit;
+            *blkBin |= valBit;
+            break;
+        }
+    }
+    return t;
+}
+
 void Game::generateSolution() {
-    // Skip all seeded starting tiles:
     int i = 0;
+    // Skip all seeded starting tiles:
     while (grid[i].fixedVal && i < area) i++;
 
     while (i < area) {
         // Push a new permutation:
         if (isClear(setNextValid(i))) {
-
             // Pop and step backward:
             do {
                 // Fail if no solution could be found:
                 if (--i < 0) { throw Game::OPseed; }
             } while (grid[i].fixedVal);
+        } else {
+            // Step forward to push a new permutation:
+            while (++i < area && grid[i].fixedVal);
         }
-        // Step forward to push a new permutation:
-        else { while (++i < area && grid[i].fixedVal); }
-    }
-    // When done, set all values as fixed:
-    for (int i = 0; i < area; i++) {
-        grid[i].fixedVal = true;
     }
 }
 

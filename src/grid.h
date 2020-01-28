@@ -1,7 +1,3 @@
-
-/**
- * 
- */
 #ifndef _GRID_H_
 #define _GRID_H_
 
@@ -13,18 +9,18 @@
 using namespace std;
 
 // Evaulates to <o> bounded to the range [3, 5]
-#define CLEAN_ORDER(o) ((o < 3) ? 3 : ((o > 5) ? 5 : o))
+#define CLEAN_ORDER(o) (((o) < 3) ? 3 : (((o) > 5) ? 5 : (o)))
 
 // IMPORTANT: can only handle length <= 32 (ie. order <= floor(sqrt(32)))
 typedef uint32_t occmask_t;
 
 #define SEED0 seed0 // one of { seed0, seed0b, }
 
+
 /**
  * 
  */
-class Game { // ======================================================================
-//////////////////////////////////////////////////////////////////////////////////////
+class Game {
 private:
     /**
      * When clear, biasIndex is the parent Game's length (same for value).
@@ -38,8 +34,7 @@ private:
         short value;
     };
 
-
-public: // ===========================================================================
+public:
     /**
      * 
      */
@@ -54,9 +49,8 @@ public: // =====================================================================
     void runNew();
     void print();
 
-
-private: // ==========================================================================
-    // Private fields: ---------------------------------------------------------------
+private:
+    // Private fields:
     const int order;
     const int length;
     const int area;
@@ -66,7 +60,7 @@ private: // ====================================================================
     vector<occmask_t> blkBins;
     vector<vector<short>> rowBiases;
 
-    // Solution generation methods: --------------------------------------------------
+    // Solution generation methods:
     void clear();
     // Returns the tile at index.
     Tile* setNextValid(const int index);
@@ -85,7 +79,6 @@ private: // ====================================================================
     int getCol(int index) const { return index % length; }
     int getBlk(int index) const { return getBlk(getRow(index), getCol(index)); }
     int getBlk(int row, int col) const { return (row / order) * order + (col / order); }
-    
-//////////////////////////////////////////////////////////////////////////////////////
-}; // ================================================================================
+};
+
 #endif

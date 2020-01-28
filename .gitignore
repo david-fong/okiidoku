@@ -4,10 +4,12 @@
 *.swo
 Session.vim
 
-/.vs/
 /.vscode/
+/.vs/
 /Debug/
 /x64/
 *.sln
 *.vcxproj*
+
+/build/
 
