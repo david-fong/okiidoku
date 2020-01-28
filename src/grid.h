@@ -14,7 +14,7 @@ using namespace std;
 /**
  * IMPORTANT:
  * - occmask_t  : mask width `order^2` bits.
- * - value_t    : uint range [0, order^2].
+ * - value_t    : uint range [0, order^2 +1].
  * - length_t   : uint range [0, order^2].
  * - area_t     : uint range [0, order^4].
  */
@@ -73,16 +73,17 @@ private:
     void clear();
     // Returns the tile at index.
     Tile* setNextValid(const area_t index);
-    int   seed1Bitmask(const area_t index, const occmask_t min);
     // Seed all tiles of blocks along the main diagonal:
     void seed0();
     void seed0b();
-    int  seed1(int ceiling);
+    bool seed1Bitmask(const area_t index, const occmask_t min);
+    // returns the number of seeded tiles.
+    area_t seed1(int ceiling);
     // Generates a random solution.
     // Any previous seeds must not make generating a solution impossible.
     void generateSolution();
 
-    // Inline functions: -------------------------------------------------------------
+    // Inline functions:
     bool isClear(Tile const *const t) const { return t->biasIndex == length; }
     length_t getRow(const area_t index) const { return index / length; }
     length_t getCol(const area_t index) const { return index % length; }

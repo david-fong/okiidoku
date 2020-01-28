@@ -10,8 +10,8 @@ int main() {
     do {
         game.runNew();
         game.print();
-        cout << "Press <Enter> to continue, or anything else to quit." << endl;
-    } while (getchar() == '\n');
+        cout << "Enter 'y' to continue, or anything else to quit." << endl;
+    } while (getchar() == 'y');
     return 0;
 }
 

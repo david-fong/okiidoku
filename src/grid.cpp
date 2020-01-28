@@ -1,16 +1,28 @@
+#include <iomanip>
 
 #include "grid.h"
 
-Game::Tile::Tile() : fixedVal(false), biasIndex(0), value(0) {}
-Game::Tile::Tile(const value_t rowLen) : fixedVal(false), biasIndex(rowLen), value(rowLen) {}
+Game::Tile::Tile():
+    fixedVal    (false),
+    biasIndex   (0),
+    value       (0) {}
 
-Game::Game(const length_t _order) : order(CLEAN_ORDER(_order)), length(order * order), area(length * length) {
+Game::Tile::Tile(const value_t rowLen):
+    fixedVal    (false),
+    biasIndex   (rowLen),
+    value       (rowLen) {}
+
+Game::Game(const length_t _order):
+    order   (CLEAN_ORDER(_order)),
+    length  (order  * order),
+    area    (length * length)
+{
     grid    = vector<Tile>(area);
     rowBins = vector<occmask_t>(length);
     colBins = vector<occmask_t>(length);
     blkBins = vector<occmask_t>(length);
 
-    for (int i = 0; i < length; i++) {
+    for (length_t i = 0; i < length; i++) {
         vector<value_t> seq;
         for (value_t i = 0; i <= length; i++) seq.push_back(i);
         rowBiases.push_back(seq);
@@ -35,7 +47,8 @@ void Game::runNew() {
     }
     // Generate a solution:
     SEED0();
-    seed1(2 * order + 1);
+    print();
+    //cout << seed1(2 * order + 1) << endl;
     generateSolution();
     // When done, set all values as fixed:
     for (int i = 0; i < area; i++) {
@@ -43,22 +56,6 @@ void Game::runNew() {
     }
 }
 
-
-int Game::seed1Bitmask(const area_t index, const occmask_t min) {
-    occmask_t* row = &rowBins[getRow(index)];
-    occmask_t* col = &colBins[getCol(index)];
-    occmask_t* blk = &blkBins[getBlk(index)];
-
-    if ((*row | *col | *blk) <= min) {
-        // seed this tile:
-        grid[index].fixedVal = true;
-        *row = (*row << 1) | 0b1;
-        *col = (*col << 1) | 0b1;
-        *blk = (*blk << 1) | 0b1;
-        return 1;
-    }
-    return 0;
-}
 
 void Game::seed0() {
     const area_t bRow = order * length;
@@ -70,27 +67,43 @@ void Game::seed0() {
 
 void Game::seed0b() {
     // Get offsets to blocks along top and left edge:
-    vector<int> blocks;
-    area_t bRow = order * length;
+    vector<area_t> blocks;
+    const area_t bRow = order * length;
     for (length_t i = 0; i < length; i += order)
         blocks.push_back(i);
     for (area_t i = bRow; i < area; i += bRow)
         blocks.push_back(i);
 
-    for (int i = 0; i < blocks.size(); i++)
+    for (length_t i = 0; i < blocks.size(); i++)
         for (area_t r = 0; r < bRow; r += length)
             for (length_t c = 0; c < order; c++)
                 setNextValid(blocks[i] + r + c)->fixedVal = true;
 }
 
-int Game::seed1(int ceiling) {
-    ceiling = -1 << (ceiling - 1);
+bool Game::seed1Bitmask(const area_t index, const occmask_t min) {
+    occmask_t* row = &rowBins[getRow(index)];
+    occmask_t* col = &colBins[getCol(index)];
+    occmask_t* blk = &blkBins[getBlk(index)];
+
+    if ((*row | *col | *blk) <= min) {
+        // seed this tile:
+        grid[index].fixedVal = true;
+        *row = (*row << 1) | 0b1;
+        *col = (*col << 1) | 0b1;
+        *blk = (*blk << 1) | 0b1;
+        return true;
+    }
+    return false;
+}
+
+area_t Game::seed1(int ceiling) {
+    ceiling = ~0 << (ceiling - 1);
     Game occ(order);
     occ.clear();
 
     // Scan forward past those already seeded.
     for (int i = 0; i < area; i++) {
-        if (grid[i].fixedVal) { occ.seed1Bitmask(i, -1); }
+        if (grid[i].fixedVal) { occ.seed1Bitmask(i, ~0); }
     }
     int i = -1;
     while (grid[++i].fixedVal);
@@ -104,7 +117,9 @@ int Game::seed1(int ceiling) {
 
         // Advance and wrap-around if necessary:
         while (++i < area && occ.grid[i].fixedVal);
-        if (i == area) { i = 0; min <<= 1; min |= 0b1; }
+        if (i == area) {
+            i = 0; min <<= 1;
+        }
     }
 
     int count = 0;
@@ -131,21 +146,24 @@ Game::Tile* Game::setNextValid(const area_t index) {
         *colBin &= eraseMask;
         *blkBin &= eraseMask;
     }
+    // descriptive (but not meaningful, according to spec) default value:
     t->value = length;
 
     occmask_t invalidBin = rowBins[row] | *colBin | *blkBin;
-    ++(t->biasIndex) %= length + 1;
-    for (; t->biasIndex < length; t->biasIndex++) {
-        t->value = rowBiases[row][t->biasIndex];
-        const occmask_t valBit = 0b1 << t->value;
+    value_t biasIndex = (t->biasIndex + 1) % (length + 1);
+    for (; biasIndex < length; biasIndex++) {
+        value_t value = rowBiases[row][biasIndex];
+        const occmask_t valBit = 0b1 << value;
         if (!(invalidBin & valBit)) {
             // If a valid value is found for this tile:
             rowBins[row] |= valBit;
             *colBin |= valBit;
             *blkBin |= valBit;
+            t->value = value;
             break;
         }
     }
+    t->biasIndex = biasIndex;
     return t;
 }
 
@@ -169,11 +187,16 @@ void Game::generateSolution() {
     }
 }
 
+
 void Game::print() {
+    cout << setbase(16);
     for (area_t i = 0; i < area; i++) {
-        Tile* t = &grid[i];
-        const string pad((i % length == 0) ? "\n " : " ");
-        cout << pad << (isClear(t) ? -1: t->value);
+        if ((i % length) == 0) {
+            cout << '$' << endl;
+        }
+        Tile const *const t = &grid[i];
+        cout << setw(2) << (uint16_t)t->value;
     }
-    cout << endl;
+    cout << setbase(10) << endl;
 }
+
