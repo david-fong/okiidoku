@@ -15,6 +15,7 @@ using namespace std;
  * IMPORTANT:
  * - occmask_t  : mask width `order^2` bits.
  * - value_t    : uint range [0, order^2 +1].
+ * - order_t    : uint range [0, order  ].
  * - length_t   : uint range [0, order^2].
  * - area_t     : uint range [0, order^4].
  */
@@ -57,7 +58,8 @@ public:
     // Constructor:
     Game(const order_t order);
     void runNew();
-    void print();
+    void print(ostream& out) const;
+    void prettyPrint(ostream& out) const;
 
 private:
     // Private fields:
@@ -73,26 +75,27 @@ private:
     // Solution generation methods:
     void clear();
     // Returns the tile at index.
-    Tile* setNextValid(const area_t index);
+    Tile& setNextValid(const area_t index);
     // Seed all tiles of blocks along the main diagonal:
     void seed0();
     void seed0b();
     bool seed1Bitmask(const area_t index, const occmask_t min);
-    // returns the number of seeded tiles.
+    // returns the number of additionally seeded tiles.
     area_t seed1(int ceiling);
     // Generates a random solution.
     // Any previous seeds must not make generating a solution impossible.
     void generateSolution();
 
     // Inline functions:
-    bool isClear(Tile const *const t) const { return t->biasIndex == length; }
+    bool isClear(const Tile& t) const { return t.biasIndex == length; }
     length_t getRow(const area_t index) const { return index / length; }
     length_t getCol(const area_t index) const { return index % length; }
     length_t getBlk(const area_t index) const { return getBlk(getRow(index), getCol(index)); }
     length_t getBlk(const length_t row, const length_t col) const { return (row / order) * order + (col / order); }
 
-public:
+private:
     static const length_t seed1Constants[];
+    static int myRandom (const int i) { return rand() % i; }
 };
 
 const length_t Game::seed1Constants[] = { 0, 0, 0, 0, 3, 9, };

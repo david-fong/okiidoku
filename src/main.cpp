@@ -1,6 +1,8 @@
-#include <chrono>
+#include <cstdlib>
 #include <iomanip>
-#include <locale>
+#include <chrono>
+#include <ctime>
+#include <clocale>
 
 #include "grid.cpp"
 
@@ -21,14 +23,28 @@ string formatWithCommas(T value)
 
 
 /**
- * 
+ * ARGUMENTS
+ * 0. executable name (fixed).
+ * 1. grid order (default: 4).
+ * 2. scramble random key (default: time).
  */
 int main(int argc, char const *const argv[]) {
-    // Argument parsing:
-    cout << endl << "USAGE: The grid order (in range [3,5]) can be passed in as arg1." << endl << endl;
-    string arg1 = (argc > 1) ? argv[1] : "4";
-    const order_t userOrder = stoi(arg1, NULL);
-    cout << "";
+    cout << endl << "PARSED ARGUMENTS:" << endl;
+    order_t userOrder;
+    {
+        // Arg ONE:
+        string arg1 = (argc > 1) ? argv[1] : "4";
+        userOrder = stoi(arg1, NULL);
+        cout << "- ARG 1 [[ grid order ]] : " << (uint16_t)userOrder << endl;
+    } {
+        // Arg TWO:
+        unsigned int srandKey = (argc > 2)
+            ? stoi(argv[2])
+            : time(NULL);
+        srand(srandKey);
+        cout << "- ARG 2 [[ srand key  ]] : " << srandKey << endl;
+    }
+    cout << endl;
 
     // Generator loop:
     Game game(userOrder);
@@ -37,7 +53,7 @@ int main(int argc, char const *const argv[]) {
         game.runNew();
         auto timeFinish = high_resolution_clock::now();
         auto timeDuration = duration_cast<microseconds>(timeFinish - timeStart);
-        game.print();
+        game.print(cout);
         cout << "Time elapsed: " << formatWithCommas(timeDuration.count()) << "us" << endl;
         cout << "Press enter to continue, or anything else to quit." << endl;
     } while (cin.get() == '\n');
