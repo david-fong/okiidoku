@@ -47,7 +47,7 @@ void Game::runNew() {
     }
     // Generate a solution:
     SEED0();
-    cout << seed1(order + seed1Constants[order]) << endl;
+    cout << "@ Stage 2: Seeds added: " << seed1(order + seed1Constants[order]);
     generateSolution();
     // When done, set all values as fixed:
     for (int i = 0; i < area; i++) {
