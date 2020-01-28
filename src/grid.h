@@ -8,6 +8,7 @@
 #include <algorithm>
 using namespace std;
 
+
 // Evaulates to <o> bounded to the range [3, 5]
 #define CLEAN_ORDER(o) (((o) < 3) ? 3 : (((o) > 5) ? 5 : (o)))
 
@@ -98,6 +99,6 @@ private:
     static int myRandom (const int i) { return rand() % i; }
 };
 
-const length_t Game::seed1Constants[] = { 0, 0, 0, 0, 3, 9, };
+const length_t Game::seed1Constants[] = { 0, 0, 0, 0, 2, 9, };
 
 #endif

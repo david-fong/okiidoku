@@ -198,12 +198,6 @@ area_t Game::seed1(int ceiling) {
         // Advance and wrap-around if necessary:
         while (++i < area && occ.grid[i].fixedVal);
         if (i == area) {
-for (area_t i = 0; i < area; i++) {
-    if (occ.grid[i].fixedVal && !grid[i].fixedVal) {
-        setNextValid(i).fixedVal = true;
-    }
-}
-print(cout);
             i = 0; min = (min << 1) | 0b1;
             while (occ.grid[++i].fixedVal);
         }
@@ -213,7 +207,7 @@ print(cout);
     for (area_t i = 0; i < area; i++) {
         if (occ.grid[i].fixedVal && !grid[i].fixedVal) {
             count++;
-            //setNextValid(i).fixedVal = true;
+            setNextValid(i).fixedVal = true;
         }
     }
     return count;
