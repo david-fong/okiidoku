@@ -8,6 +8,7 @@
 
 #include "grid.h"
 
+
 Game::Tile::Tile(void):
     fixedVal    (false),
     biasIndex   (0),
@@ -31,12 +32,15 @@ Game::Game(const order_t _order, ostream& outStream):
         }
         rowBiases.push_back(seq);
     }
+    outStream.imbue(locale(outStream.getloc(), new MyNumpunct()));
+    outStream.precision(3);
+    outStream << fixed;
 }
 
 void Game::print(void) const {
     outStream << setbase(16);
     for (area_t i = 0; i < area; i++) {
-        if ((i % length) == 0) {
+        if ((i % length) == 0 && i != 0) {
             outStream << "\n";
         }
         const Tile& t = grid[i];
@@ -52,35 +56,39 @@ void Game::print(void) const {
 
 void Game::clear(void) {
     // Initialize all values as empty:
-    // TODO: fill new Tiles in ctor, call new Tile::clear method here.
     for_each(grid.begin(), grid.end(), [this](Tile& t){ t.clear(length); });
     fill(rowBins.begin(), rowBins.end(), 0);
     fill(colBins.begin(), colBins.end(), 0);
     fill(blkBins.begin(), blkBins.end(), 0);
-}
 
-void Game::runNew(void) {
-    clear();
     // Scramble each row's value-guessing-order:
     // *set the <length>'th entry to <length>
     for (length_t i = 0; i < length; i++) {
         random_shuffle(rowBiases[i].begin(), rowBiases[i].end() - 1, myRandom);
     }
-    // Generate a solution:
+}
+
+void Game::runNew(void) {
+#define STATW << setw(10)
+    clear();
+    // Call the seeding routines:
     const area_t seed0Seeds     = SEED0();
     const area_t seed1Seeds     = seed1(order + seed1Constants[order]);
+    outStream << "stage 01 seeds: " STATW << seed0Seeds << endl;
+    outStream << "stage 02 seeds: " STATW << seed1Seeds << endl;
+
+    // Generate a new solution:
     const clock_t clockStart    = clock();
     const opcount_t numSolveOps = generateSolution();
     const clock_t clockFinish   = clock();
-    const double cpuTimeElapsed = ((double)(clockFinish - clockStart)) / CLOCKS_PER_SEC;
-    outStream << "stage 01 seeds: " << seed0Seeds << endl;
-    outStream << "stage 02 seeds: " << seed1Seeds << endl;
-    outStream << "num operations: " << numSolveOps << endl;
-    outStrean << "cpu time used:  " << cpuTimeElapsed << endl;
+    const double processorTime  = ((double)(clockFinish - clockStart)) / CLOCKS_PER_SEC;
+    outStream << "num operations: " STATW << numSolveOps << endl;
+    outStream << "processor secs: " STATW << processorTime << endl;
+
     // When done, set all values as fixed:
-    for (int i = 0; i < area; i++) {
-        grid[i].fixedVal = true;
-    }
+    //for (int i = 0; i < area; i++) {
+    //    grid[i].fixedVal = true;
+    //}
     // Print out the grid:
     print();
 }
@@ -94,6 +102,10 @@ opcount_t Game::generateSolution(void) {
     while (i < area) {
         // Push a new permutation:
         numOperations++;
+        if (numOperations / area > GIVEUP_RATIO) {
+            outStream << "! ATTENTION: gave up this attempt." << endl;
+            return 0;
+        }
         if (isClear(setNextValid(i))) {
             // Pop and step backward:
             do {
@@ -141,7 +153,6 @@ Game::Tile& Game::setNextValid(const area_t index) {
     t.biasIndex = biasIndex;
     return t;
 }
-
 
 
 

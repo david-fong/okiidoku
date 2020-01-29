@@ -1,11 +1,13 @@
 #ifndef _GRID_H_
 #define _GRID_H_
 
+#include <locale>
 using namespace std;
 
 
 // Evaulates to <o> bounded to the range [3, 5]
 #define CLEAN_ORDER(o) (((o) < 3) ? 3 : (((o) > 5) ? 5 : (o)))
+#define GIVEUP_RATIO 20'000
 
 /**
  * IMPORTANT:
@@ -84,8 +86,9 @@ private:
     bool seed1Bitmask(const area_t index, const occmask_t min);
     // returns the number of additionally seeded tiles.
     area_t seed1(int ceiling);
-    // Generates a random solution.
-    // Any previous seeds must not make generating a solution impossible.
+    // Generates a random solution. Returns the number of operations or
+    // zero if the give-up threshold was reached. Any previous seeds must
+    // not make generating a solution impossible.
     opcount_t generateSolution();
 
     // Inline functions:
@@ -98,6 +101,11 @@ private:
 private:
     static const length_t seed1Constants[];
     static int myRandom (const int i) { return rand() % i; }
+    struct MyNumpunct : numpunct<char> {
+        string do_grouping() const {
+            return "\03";
+        }
+    };
 };
 
 const length_t Game::seed1Constants[] = { 0, 0, 0, 0, 2, 9, };

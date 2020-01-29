@@ -1,23 +1,9 @@
 #include <cstdlib>
-#include <iomanip>
 #include <ctime>
-#include <clocale>
 
 #include "grid.cpp"
 
 using namespace std;
-
-
-static locale myLocale;
-
-template<class T>
-string formatWithCommas(T value)
-{
-    stringstream ss;
-    ss.imbue(myLocale);
-    ss << std::fixed << value;
-    return ss.str();
-}
 
 
 /**
@@ -36,9 +22,7 @@ int main(int argc, char const *const argv[]) {
         cout << "- ARG 1 [[ grid order ]] : " << (uint16_t)userOrder << endl;
     } {
         // Arg TWO:
-        unsigned int srandKey = (argc > 2)
-            ? stoi(argv[2])
-            : time(NULL);
+        unsigned int srandKey = (argc > 2) ? stoi(argv[2]) : time(NULL);
         srand(srandKey);
         cout << "- ARG 2 [[ srand key  ]] : " << srandKey << endl;
     }
@@ -48,8 +32,7 @@ int main(int argc, char const *const argv[]) {
     Game game(userOrder, cout);
     do {
         game.runNew();
-        cout << "Time elapsed: " << formatWithCommas(timeDuration.count()) << "us" << endl;
-        cout << "Press enter to continue, or anything else to quit." << endl;
+        //cout << "Press enter to continue, or anything else to quit." << endl;
     } while (cin.get() == '\n');
 
     // End of program:
