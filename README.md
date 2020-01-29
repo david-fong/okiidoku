@@ -3,5 +3,5 @@
 
 Goal: write a high-performance solution generator
 
-![](/images/testo.png)
+![](/images/test0.png)
 

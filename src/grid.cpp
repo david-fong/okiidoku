@@ -41,6 +41,7 @@ Game::Game(const order_t _order, ostream& outStream, const bool isPretty):
 }
 
 void Game::print(void) const {
+    // TODO: handle pretty-print style.
     outStream << setbase(16);
     for (area_t i = 0; i < area; i++) {
         if ((i % length) == 0 && i != 0) {

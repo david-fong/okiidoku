@@ -13,6 +13,7 @@ using namespace std;
  * 2. scramble random key (default: time).
  */
 int main(int argc, char const *const argv[]) {
+    cout << "sizeof Tile: " << sizeof(Game::Tile) << endl;
     cout << endl << "PARSED ARGUMENTS:" << endl;
     order_t userOrder;
     bool isPretty;

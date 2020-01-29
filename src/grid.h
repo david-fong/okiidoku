@@ -31,7 +31,7 @@ typedef unsigned long long opcount_t;
  * 
  */
 class Game {
-private:
+public:
     /**
      * When clear, biasIndex is the parent Game's length (same for value).
      */
@@ -49,16 +49,6 @@ private:
     };
 
 public:
-    /**
-     * 
-     */
-    class OPseedException: public exception {
-        virtual const char* what() const throw() {
-            return "seed methods made it impossible to generate any solutions.";
-        }
-    } OPseed;
-
-    // Constructor:
     Game(const order_t, ostream&, const bool isPretty);
     void runNew(void);
     void print(void) const;
@@ -101,6 +91,13 @@ private:
     length_t getCol(const area_t index) const { return index % length; }
     length_t getBlk(const area_t index) const { return getBlk(getRow(index), getCol(index)); }
     length_t getBlk(const length_t row, const length_t col) const { return (row / order) * order + (col / order); }
+
+public:
+    class OPseedException: public exception {
+        virtual const char* what() const throw() {
+            return "seed methods made it impossible to generate any solutions.";
+        }
+    } OPseed;
 
 private:
     static const length_t seed1Constants[];
