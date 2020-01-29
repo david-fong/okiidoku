@@ -1,18 +1,20 @@
+#include <cstdlib>
+#include <iostream>
 #include <iomanip>
+#include <algorithm>
+#include <vector>
+#include <string>
+#include <ctime>
 
 #include "grid.h"
 
-Game::Tile::Tile():
+Game::Tile::Tile(void):
     fixedVal    (false),
     biasIndex   (0),
     value       (0) {}
 
-Game::Tile::Tile(const value_t rowLen):
-    fixedVal    (false),
-    biasIndex   (rowLen),
-    value       (rowLen) {}
-
-Game::Game(const order_t _order):
+Game::Game(const order_t _order, ostream& outStream):
+    outStream(outStream),
     order   (CLEAN_ORDER(_order)),
     length  (order  * order),
     area    (length * length)
@@ -24,21 +26,40 @@ Game::Game(const order_t _order):
 
     for (length_t i = 0; i < length; i++) {
         vector<value_t> seq;
-        for (value_t i = 0; i <= length; i++) seq.push_back(i);
+        for (value_t i = 0; i <= length; i++) {
+            seq.push_back(i);
+        }
         rowBiases.push_back(seq);
     }
 }
 
-void Game::clear() {
+void Game::print(void) const {
+    outStream << setbase(16);
+    for (area_t i = 0; i < area; i++) {
+        if ((i % length) == 0) {
+            outStream << "\n";
+        }
+        const Tile& t = grid[i];
+        if (isClear(t)) {
+            outStream << "  ";
+        } else {
+            outStream << ((t.fixedVal) ? "." : " ");
+            outStream << (uint16_t)t.value;
+        }
+    }
+    outStream << setbase(10) << endl;
+}
+
+void Game::clear(void) {
     // Initialize all values as empty:
     // TODO: fill new Tiles in ctor, call new Tile::clear method here.
-    fill(grid.begin(), grid.end(), Tile(length));
+    for_each(grid.begin(), grid.end(), [this](Tile& t){ t.clear(length); });
     fill(rowBins.begin(), rowBins.end(), 0);
     fill(colBins.begin(), colBins.end(), 0);
     fill(blkBins.begin(), blkBins.end(), 0);
 }
 
-void Game::runNew() {
+void Game::runNew(void) {
     clear();
     // Scramble each row's value-guessing-order:
     // *set the <length>'th entry to <length>
@@ -46,13 +67,45 @@ void Game::runNew() {
         random_shuffle(rowBiases[i].begin(), rowBiases[i].end() - 1, myRandom);
     }
     // Generate a solution:
-    SEED0();
-    cout << "@ Stage 2: Seeds added: " << seed1(order + seed1Constants[order]);
-    generateSolution();
+    const area_t seed0Seeds     = SEED0();
+    const area_t seed1Seeds     = seed1(order + seed1Constants[order]);
+    const clock_t clockStart    = clock();
+    const opcount_t numSolveOps = generateSolution();
+    const clock_t clockFinish   = clock();
+    const double cpuTimeElapsed = ((double)(clockFinish - clockStart)) / CLOCKS_PER_SEC;
+    outStream << "stage 01 seeds: " << seed0Seeds << endl;
+    outStream << "stage 02 seeds: " << seed1Seeds << endl;
+    outStream << "num operations: " << numSolveOps << endl;
+    outStrean << "cpu time used:  " << cpuTimeElapsed << endl;
     // When done, set all values as fixed:
     for (int i = 0; i < area; i++) {
         grid[i].fixedVal = true;
     }
+    // Print out the grid:
+    print();
+}
+
+opcount_t Game::generateSolution(void) {
+    opcount_t numOperations = 0;
+    area_t i = 0;
+    // Skip all seeded starting tiles:
+    while (grid[i].fixedVal && i < area) i++;
+
+    while (i < area) {
+        // Push a new permutation:
+        numOperations++;
+        if (isClear(setNextValid(i))) {
+            // Pop and step backward:
+            do {
+                // Fail if no solution could be found:
+                if (i == 0) { throw Game::OPseed; }
+            } while (grid[--i].fixedVal);
+        } else {
+            // Step forward to push a new permutation:
+            while (++i < area && grid[i].fixedVal);
+        }
+    }
+    return numOperations;
 }
 
 Game::Tile& Game::setNextValid(const area_t index) {
@@ -89,42 +142,6 @@ Game::Tile& Game::setNextValid(const area_t index) {
     return t;
 }
 
-void Game::generateSolution() {
-    area_t i = 0;
-    // Skip all seeded starting tiles:
-    while (grid[i].fixedVal && i < area) i++;
-
-    while (i < area) {
-        // Push a new permutation:
-        if (isClear(setNextValid(i))) {
-            // Pop and step backward:
-            do {
-                // Fail if no solution could be found:
-                if (i == 0) { throw Game::OPseed; }
-            } while (grid[--i].fixedVal);
-        } else {
-            // Step forward to push a new permutation:
-            while (++i < area && grid[i].fixedVal);
-        }
-    }
-}
-
-void Game::print(ostream& out) const {
-    out << setbase(16);
-    for (area_t i = 0; i < area; i++) {
-        if ((i % length) == 0) {
-            out << "\n";
-        }
-        const Tile& t = grid[i];
-        if (isClear(t)) {
-            out << "  ";
-        } else {
-            out  << ((t.fixedVal) ? "." : " ");
-            out << (uint16_t)t.value;
-        }
-    }
-    out << setbase(10) << endl;
-}
 
 
 
@@ -136,16 +153,22 @@ void Game::print(ostream& out) const {
 
 
 
-
-void Game::seed0() {
+area_t Game::seed0(void) {
+    area_t count = 0;
     const area_t bRow = order * length;
-    for (area_t b = 0; b < area; b += bRow + order)
-        for (area_t r = 0; r < bRow; r += length)
-            for (order_t c = 0; c < order; c++)
+    for (area_t b = 0; b < area; b += bRow + order) {
+        for (area_t r = 0; r < bRow; r += length) {
+            for (order_t c = 0; c < order; c++) {
                 setNextValid(b + r + c).fixedVal = true;
+                count++;
+            }
+        }
+    }
+    return count;
 }
 
-void Game::seed0b() {
+area_t Game::seed0b(void) {
+    area_t count = 0;
     // Get offsets to blocks along top and left edge:
     vector<area_t> blocks;
     const area_t bRow = order * length;
@@ -154,10 +177,15 @@ void Game::seed0b() {
     for (area_t i = bRow; i < area; i += bRow)
         blocks.push_back(i);
 
-    for (length_t i = 0; i < blocks.size(); i++)
-        for (area_t r = 0; r < bRow; r += length)
-            for (order_t c = 0; c < order; c++)
+    for (length_t i = 0; i < blocks.size(); i++) {
+        for (area_t r = 0; r < bRow; r += length) {
+            for (order_t c = 0; c < order; c++) {
                 setNextValid(blocks[i] + r + c).fixedVal = true;
+                count++;
+            }
+        }
+    }
+    return count;
 }
 
 bool Game::seed1Bitmask(const area_t index, const occmask_t min) {
@@ -178,10 +206,12 @@ bool Game::seed1Bitmask(const area_t index, const occmask_t min) {
 
 area_t Game::seed1(int ceiling) {
     ceiling = ~0 << (ceiling);
-    Game occ(order);
+    Game occ(order, outStream);
     occ.clear();
     for (area_t i = 0; i < area; i++) {
-        if (grid[i].fixedVal) { occ.seed1Bitmask(i, ~0); }
+        if (grid[i].fixedVal) {
+            occ.seed1Bitmask(i, ~0);
+        }
     }
 
     area_t i = -1;
@@ -206,8 +236,8 @@ area_t Game::seed1(int ceiling) {
     area_t count = 0;
     for (area_t i = 0; i < area; i++) {
         if (occ.grid[i].fixedVal && !grid[i].fixedVal) {
-            count++;
             setNextValid(i).fixedVal = true;
+            count++;
         }
     }
     return count;

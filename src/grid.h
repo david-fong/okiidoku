@@ -1,11 +1,6 @@
 #ifndef _GRID_H_
 #define _GRID_H_
 
-#include <cstdlib>
-#include <iostream>
-#include <vector>
-#include <string>
-#include <algorithm>
 using namespace std;
 
 
@@ -25,6 +20,7 @@ typedef  uint8_t value_t;
 typedef  uint8_t order_t;
 typedef  uint8_t length_t;
 typedef uint16_t area_t;
+typedef unsigned long long opcount_t;
 
 #define SEED0 seed0 // one of { seed0, seed0b, }
 
@@ -39,9 +35,13 @@ private:
      */
     class Tile {
     public:
-        Tile();
-        Tile(const value_t rowLen);
-        bool    fixedVal;
+        Tile(void);
+        void clear(const value_t rowLen) {
+            fixedVal = false;
+            biasIndex = rowLen;
+            value = rowLen;
+        }
+        bool fixedVal;
         value_t biasIndex;
         value_t value;
     };
@@ -57,13 +57,14 @@ public:
     } OPseed;
 
     // Constructor:
-    Game(const order_t order);
-    void runNew();
-    void print(ostream& out) const;
-    void prettyPrint(ostream& out) const;
+    Game(const order_t, ostream&);
+    void runNew(void);
+    void print(void) const;
+    void prettyPrint(void) const;
 
 private:
     // Private fields:
+    ostream& outStream;
     const int order;
     const int length;
     const int area;
@@ -74,18 +75,18 @@ private:
     vector<vector<value_t>> rowBiases;
 
     // Solution generation methods:
-    void clear();
+    void clear(void);
     // Returns the tile at index.
     Tile& setNextValid(const area_t index);
     // Seed all tiles of blocks along the main diagonal:
-    void seed0();
-    void seed0b();
+    area_t seed0(void);
+    area_t seed0b(void);
     bool seed1Bitmask(const area_t index, const occmask_t min);
     // returns the number of additionally seeded tiles.
     area_t seed1(int ceiling);
     // Generates a random solution.
     // Any previous seeds must not make generating a solution impossible.
-    void generateSolution();
+    opcount_t generateSolution();
 
     // Inline functions:
     bool isClear(const Tile& t) const { return t.biasIndex == length; }

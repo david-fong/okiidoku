@@ -1,13 +1,11 @@
 #include <cstdlib>
 #include <iomanip>
-#include <chrono>
 #include <ctime>
 #include <clocale>
 
 #include "grid.cpp"
 
 using namespace std;
-using namespace std::chrono;
 
 
 static locale myLocale;
@@ -47,13 +45,9 @@ int main(int argc, char const *const argv[]) {
     cout << endl;
 
     // Generator loop:
-    Game game(userOrder);
+    Game game(userOrder, cout);
     do {
-        auto timeStart = high_resolution_clock::now();
         game.runNew();
-        auto timeFinish = high_resolution_clock::now();
-        auto timeDuration = duration_cast<microseconds>(timeFinish - timeStart);
-        game.print(cout);
         cout << "Time elapsed: " << formatWithCommas(timeDuration.count()) << "us" << endl;
         cout << "Press enter to continue, or anything else to quit." << endl;
     } while (cin.get() == '\n');
