@@ -14,11 +14,12 @@ Game::Tile::Tile(void):
     biasIndex   (0),
     value       (0) {}
 
-Game::Game(const order_t _order, ostream& outStream):
-    outStream(outStream),
-    order   (CLEAN_ORDER(_order)),
-    length  (order  * order),
-    area    (length * length)
+Game::Game(const order_t _order, ostream& outStream, const bool isPretty):
+    order       (CLEAN_ORDER(_order)),
+    length      (order  * order),
+    area        (length * length),
+    outStream   (outStream),
+    isPretty    (isPretty)
 {
     grid    = vector<Tile>(area);
     rowBins = vector<occmask_t>(length);
@@ -32,6 +33,8 @@ Game::Game(const order_t _order, ostream& outStream):
         }
         rowBiases.push_back(seq);
     }
+    totalGenCount = 0;
+    successfulGenCount = 0;
     outStream.imbue(locale(outStream.getloc(), new MyNumpunct()));
     outStream.precision(3);
     outStream << fixed;
@@ -62,7 +65,7 @@ void Game::clear(void) {
     fill(blkBins.begin(), blkBins.end(), 0);
 
     // Scramble each row's value-guessing-order:
-    // *set the <length>'th entry to <length>
+    // note: must keep the <length>'th entry as <length>.
     for (length_t i = 0; i < length; i++) {
         random_shuffle(rowBiases[i].begin(), rowBiases[i].end() - 1, myRandom);
     }
@@ -70,6 +73,8 @@ void Game::clear(void) {
 
 void Game::runNew(void) {
 #define STATW << setw(10)
+// ^mechanism to statically toggle alignment:
+    printMessageBar("START " + to_string(totalGenCount));
     clear();
     // Call the seeding routines:
     const area_t seed0Seeds     = SEED0();
@@ -85,12 +90,9 @@ void Game::runNew(void) {
     outStream << "num operations: " STATW << numSolveOps << endl;
     outStream << "processor secs: " STATW << processorTime << endl;
 
-    // When done, set all values as fixed:
-    //for (int i = 0; i < area; i++) {
-    //    grid[i].fixedVal = true;
-    //}
     // Print out the grid:
     print();
+    printMessageBar((numSolveOps == 0) ? "ABORT" : "DONE");
 }
 
 opcount_t Game::generateSolution(void) {
@@ -103,7 +105,7 @@ opcount_t Game::generateSolution(void) {
         // Push a new permutation:
         numOperations++;
         if (numOperations / area > GIVEUP_RATIO) {
-            outStream << "! ATTENTION: gave up this attempt." << endl;
+            totalGenCount++;
             return 0;
         }
         if (isClear(setNextValid(i))) {
@@ -117,6 +119,8 @@ opcount_t Game::generateSolution(void) {
             while (++i < area && grid[i].fixedVal);
         }
     }
+    totalGenCount++;
+    successfulGenCount++;
     return numOperations;
 }
 
@@ -161,6 +165,23 @@ Game::Tile& Game::setNextValid(const area_t index) {
 
 
 
+
+
+void Game::printMessageBar(const string& msg) const {
+    unsigned long long barLength = (isPretty)
+        ? (length * 2) // TODO
+        : (length * 2);
+    if (barLength < msg.length() + 8) {
+        barLength = msg.length() + 8;
+    }
+    string bar(barLength, '=');
+    if (!msg.empty()) {
+        bar.replace(4, msg.length(), msg);
+        bar.at(3) = ' ';
+        bar.at(4 + msg.length()) = ' ';
+    }
+    outStream << bar << endl;
+}
 
 
 
@@ -217,7 +238,7 @@ bool Game::seed1Bitmask(const area_t index, const occmask_t min) {
 
 area_t Game::seed1(int ceiling) {
     ceiling = ~0 << (ceiling);
-    Game occ(order, outStream);
+    Game occ(order, outStream, false);
     occ.clear();
     for (area_t i = 0; i < area; i++) {
         if (grid[i].fixedVal) {

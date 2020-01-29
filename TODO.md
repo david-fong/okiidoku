@@ -8,3 +8,5 @@
   - If it contributes significantly, find way to take it out?
 - Try making traversal order not grid-row-major:
   - Sort ascending non-seeded num-options.
+- Make Game ctor take arg for whether or not to print in pretty format.
+  - This is so that the `printBar` function can adjust accordingly.

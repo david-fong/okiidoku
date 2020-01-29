@@ -59,14 +59,12 @@ public:
     } OPseed;
 
     // Constructor:
-    Game(const order_t, ostream&);
+    Game(const order_t, ostream&, const bool isPretty);
     void runNew(void);
     void print(void) const;
-    void prettyPrint(void) const;
 
 private:
     // Private fields:
-    ostream& outStream;
     const int order;
     const int length;
     const int area;
@@ -75,21 +73,27 @@ private:
     vector<occmask_t> colBins;
     vector<occmask_t> blkBins;
     vector<vector<value_t>> rowBiases;
+    unsigned long totalGenCount;
+    unsigned long successfulGenCount;
+    ostream& outStream;
+    const bool isPretty;
 
-    // Solution generation methods:
     void clear(void);
     // Returns the tile at index.
     Tile& setNextValid(const area_t index);
+    // Generates a random solution. Returns the number of operations or
+    // zero if the give-up threshold was reached. Any previous seeds must
+    // not make generating a solution impossible.
+    opcount_t generateSolution();
+
+    void printMessageBar(const string&) const;
+
     // Seed all tiles of blocks along the main diagonal:
     area_t seed0(void);
     area_t seed0b(void);
     bool seed1Bitmask(const area_t index, const occmask_t min);
     // returns the number of additionally seeded tiles.
     area_t seed1(int ceiling);
-    // Generates a random solution. Returns the number of operations or
-    // zero if the give-up threshold was reached. Any previous seeds must
-    // not make generating a solution impossible.
-    opcount_t generateSolution();
 
     // Inline functions:
     bool isClear(const Tile& t) const { return t.biasIndex == length; }
