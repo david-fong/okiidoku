@@ -1,0 +1,488 @@
+
+PARSED ARGUMENTS:
+- ARG 1 [[ grid order ]] : 4
+- ARG 2 [[ srand key  ]] : 1580325439
+
+
+=== START 0 ====================
+stage 01 seeds:         64
+stage 02 seeds:         28
+num operations:     74,948
+processor secs:      0.001
+.b.f.8.5.4.3 9 a 2 6 d e 7 c 1 0
+.c.2.7.d.8.f e 5 9 b 1 0 a 4 3 6
+.0.1.9.3 7 2.d 6.f 4 a c 8 e b 5
+.4.a.e.6 1 0 c.b 7.8 5 3 9 f 2 d
+.1.c a f.3.7.4.d 6 5 9 2 b 0 e 8
+.8.4 6 7.a.b.1.9 0 e c d f 2 5 3
+ d 3.b 2.6.5.0.e 8 7.4 f 1 a c 9
+ 5 e 0.9.f.c.8.2 1 a 3.b 4 d 6 7
+ 2 d.c b e a 7 0.3.9.8.1.6 5 4 f
+ f 0 5.1 9 4 2 8.b.d.e.6 c.3 7 a
+ e 9 4 8 5 1.6 3.a.c.f.7 0 b.d 2
+ 6 7 3 a b d f.c.5.0.2.4 e 8 9.1
+ 7 b d e 0 8 a 1.c 2 6 5.3.9.f.4
+ 9 8 1 4 d 6 5 f e.3 b a.2.7.0.c
+ 3 5 f c 2 9 b 7 4 1.0 8.d.6.a.e
+ a 6 2 0 c e 3 4 d f 7.9.5.1.8.b
+=== DONE =======================
+
+=== START 1 ====================
+stage 01 seeds:         64
+stage 02 seeds:         28
+num operations:     21,456
+processor secs:      0.000
+.5.6.f.1.9.3 0 c b 4 e 7 8 a 2 d
+.4.a.9.d.5.b 8 f c 2 0 1 6 3 7 e
+.0.8.e.3 4 7.d 2.f a 6 5 1 b 9 c
+.7.2.b.c e 1 6.a 3.8 d 9 0 4 5 f
+.a.b 8 2.1.5.f.4 6 3 7 e 9 d c 0
+.f.5 0 e.a.c.3.6 d 9 8 2 4 7 1 b
+ d c.6 4.b.2.9.7 1 f.a 0 5 e 3 8
+ 3 9 1.7.d.0.e.8 5 b 4.c 2 f a 6
+ 1 d.c 5 3 4 a b.2.6.9.8.e 0 f 7
+ 8 4 7.0 f 6 c e.a.5.1.3 d.9 b 2
+ 2 e a b 7 9.1 5.4.0.f.d c 6.8 3
+ 9 f 3 6 0 8 2.d.e.7.c.b a 5 4.1
+ c 0 4 9 8 f 5 1.7 d 3 6.b.2.e.a
+ b 1 5 a 6 d 7 3 8.e 2 4.f.c.0.9
+ 6 3 2 f c e b 9 0 1.5 a.7.8.d.4
+ e 7 d 8 2 a 4 0 9 c b.f.3.1.6.5
+=== DONE =======================
+
+=== START 2 ====================
+stage 01 seeds:         64
+stage 02 seeds:         28
+num operations:     29,522
+processor secs:      0.000
+.c.4.9.b.6.3 1 2 a 5 0 7 8 f d e
+.f.e.7.1.0.d 9 8 c 3 6 2 5 a 4 b
+.a.3.2.5 7 4.c b.f d e 8 1 0 9 6
+.8.6.0.d e f a.5 1.9 b 4 2 3 7 c
+.3.1 5 0.f.2.8.7 6 a c d 4 b e 9
+.e.f b 2.d.c.3.a 4 7 5 9 0 6 8 1
+ 9 a.c 7.1.6.0.4 8 b.2 e 3 d f 5
+ 4 d 8.6.5.9.b.e 0 1 f.3 7 c a 2
+ 5 2.4 f b a d 9.7.6.3.1.e 8 c 0
+ 6 0 a.8 c 5 e f.9.2.4.b d.1 3 7
+ d 9 e c 2 1.7 3.5.8.a.0 6 4.b f
+ 7 b 1 3 8 0 4.6.e.f.d.c 9 5 2.a
+ 2 c d 4 3 7 6 1.b 0 9 f.a.e.5.8
+ 0 8 3 9 a b 2 c d.e 1 5.f.7.6.4
+ 1 7 f a 4 e 5 d 2 c.8 6.b.9.0.3
+ b 5 6 e 9 8 f 0 3 4 7.a.c.2.1.d
+=== DONE =======================
+
+=== START 3 ====================
+stage 01 seeds:         64
+stage 02 seeds:         28
+num operations:     19,120
+processor secs:      0.002
+.5.e.0.8.1.d 2 f 9 3 4 a 6 7 c b
+.7.f.3.2.a.9 b 8 1 6 c e 5 4 0 d
+.a.9.4.6 3 7.e c.b d 5 0 2 8 1 f
+.b.1.c.d 5 0 4.6 2.7 f 8 e 3 a 9
+.2.7 6 1.b.f.8.d a 0 e 9 c 5 4 3
+.8.5 9 4.e.6.a.3 7 c b 1 d f 2 0
+ c 0.d a.9.4.5.1 6 f.3 2 8 b 7 e
+ 3 b e.f.0.2.c.7 d 5 8.4 1 6 9 a
+ 4 8.b 7 f 5 0 9.3.2.1.6.a e d c
+ f a 5.0 7 1 3 b.8.e.d.c 9.2 6 4
+ 9 6 1 c 8 e.d 2.f.4.a.7 b 0.3 5
+ d 3 2 e c a 6.4.0.b.9.5 f 1 8.7
+ 1 2 7 b d c f a.e 8 0 3.4.9.5.6
+ e c a 5 6 8 7 0 4.9 2 b.3.d.f.1
+ 0 d 8 3 4 b 9 5 c 1.6 f.7.a.e.2
+ 6 4 f 9 2 3 1 e 5 a 7.d.0.c.b.8
+=== DONE =======================
+
+=== START 4 ====================
+stage 01 seeds:         64
+stage 02 seeds:         28
+num operations:     39,820
+processor secs:      0.001
+.9.5.e.3.6.c d 1 8 a b f 7 0 2 4
+.c.7.6.a.8.3 e 0 9 1 4 2 d 5 f b
+.2.0.4.b f a.9 5.e d 6 7 1 3 8 c
+.f.d.8.1 b 2 4.7 3.0 5 c 6 9 a e
+.0.9 3 8.a.e.f.d b 6 1 5 c 4 7 2
+.e.f b 2.5.4.1.c a 3 7 d 8 6 0 9
+ a 4.d 6.7.b.3.9 2 8.c 0 e f 1 5
+ 7 1 5.c.2.0.6.8 4 f e.9 a d b 3
+ 6 8.7 f d 5 0 e.1.b.2.3.4 c 9 a
+ 1 2 c.0 3 9 8 f.d.7.a.4 5.b e 6
+ 3 b 9 5 4 7.a 2.6.c.0.e f 1.d 8
+ d e a 4 1 6 c.b.f.5.9.8 2 7 3.0
+ 8 6 0 e c f 2 3.5 9 d 1.b.a.4.7
+ 4 c f 7 9 d b 6 0.e 8 a.3.2.5.1
+ 5 a 1 d 0 8 7 4 c 2.3 b.9.e.6.f
+ b 3 2 9 e 1 5 a 7 4 f.6.0.8.c.d
+=== DONE =======================
+
+=== START 5 ====================
+stage 01 seeds:         64
+stage 02 seeds:         28
+num operations:    511,636
+processor secs:      0.053
+.d.9.8.0.e.f 5 b 6 2 4 1 a c 3 7
+.4.e.c.5.d.0 1 7 9 f a 3 2 b 6 8
+.3.6.7.a 4 8.9 2.e c d b 5 1 0 f
+.2.1.b.f 6 3 a.c 7.5 0 8 e 9 d 4
+.c.f 6 e.1.4.7.a d 8 b 5 0 3 9 2
+.b.d 0 4.2.c.3.e a 6 9 f 8 7 5 1
+ 9 5.2 7.0.b.8.6 1 3.c 4 d e f a
+ a 8 1.3.f.9.d.5 2 e 7.0 6 4 b c
+ e c.f d 9 1 2 3.8.7.5.a.b 6 4 0
+ 1 4 9.8 7 6 e f.0.b.2.c 3.d a 5
+ 5 2 3 b c a.0 d.f.4.6.9 1 8.7 e
+ 7 0 a 6 8 5 b.4.3.1.e.d c f 2.9
+ f 3 d 1 5 2 c 9.4 0 8 6.7.a.e.b
+ 0 7 4 c 3 e 6 8 b.a f 2.9.5.1.d
+ 6 a 5 9 b 7 f 0 c d.1 e.4.2.8.3
+ 8 b e 2 a d 4 1 5 9 3.7.f.0.c.6
+=== DONE =======================
+
+=== START 6 ====================
+stage 01 seeds:         64
+stage 02 seeds:         28
+num operations:    304,588
+processor secs:      0.017
+.c.f.1.6.2.a 4 5 d 3 b 0 8 7 9 e
+.3.7.d.8.1.6 b e 9 a 5 f 4 c 2 0
+.a.4.b.5 9 0.f 8.c 7 e 2 1 d 6 3
+.9.0.2.e 7 3 d.c 1.4 8 6 a f b 5
+.5.9 6 1.a.f.c.4 8 0 d b e 3 7 2
+.4.a e 3.5.b.8.9 7 2 6 1 f 0 d c
+ 2 c.0 d.e.1.7.6 3 f.9 4 5 8 a b
+ b 8 f.7.0.2.3.d e 5 c.a 6 9 4 1
+ f 1.9 a 3 7 0 b.5.6.2.8.d e c 4
+ d 5 8.2 4 9 6 a.0.e.f.c 3.b 1 7
+ 0 3 7 c d 5.e f.b.1.4.9 2 6.8 a
+ e 6 4 b 8 c 2.1.a.d.7.3 0 5 f.9
+ 7 d a f 6 4 9 3.2 c 0 e.b.1.5.8
+ 1 b c 4 f e a 7 6.8 3 5.9.2.0.d
+ 6 2 3 9 c 8 5 0 4 b.1 d.7.a.e.f
+ 8 e 5 0 b d 1 2 f 9 a.7.c.4.3.6
+=== DONE =======================
+
+=== START 7 ====================
+stage 01 seeds:         64
+stage 02 seeds:         28
+num operations:  1,796,608
+processor secs:      0.146
+.0.b.e.d.a.9 3 c 5 8 7 4 1 2 6 f
+.1.3.5.f.0.8 7 2 e 9 6 b d 4 a c
+.8.9.4.a 1 6.5 f.d 0 2 c b e 3 7
+.2.6.7.c 4 e d.b 3.1 f a 9 0 8 5
+.5.e 3 7.b.d.8.1 9 c 4 0 f a 2 6
+.c.8 9 4.5.f.a.e 6 2 1 3 0 7 b d
+ d f.1 2.c.0.6.9 8 b.a 7 e 5 4 3
+ a 0 6.b.3.4.2.7 f e d.5 8 c 9 1
+ 4 7.a 6 f 1 c 0.b.d.9.2.5 3 e 8
+ 3 d 2.9 e 5 b 8.4.7.c.6 a.f 1 0
+ f c 0 1 2 3.9 d.a.5.8.e 6 b.7 4
+ b 5 8 e 7 a 4.6.1.3.0.f c 9 d.2
+ 7 2 c 5 9 b 1 4.0 6 e d.3.8.f.a
+ 9 a d 0 6 7 e 3 2.f 5 8.4.1.c.b
+ e 4 b 8 d 2 f 5 c a.3 1.7.6.0.9
+ 6 1 f 3 8 c 0 a 7 4 b.9.2.d.5.e
+=== DONE =======================
+
+=== START 8 ====================
+stage 01 seeds:         64
+stage 02 seeds:         28
+num operations:     30,174
+processor secs:      0.002
+.e.9.d.4.b.a 5 6 f 1 0 3 2 7 c 8
+.1.8.5.a.d.4 3 9 2 7 c 6 f b e 0
+.3.f.2.0 7 1.e c.4 b 5 8 9 6 d a
+.b.c.7.6 2 0 f.8 a.9 e d 5 3 1 4
+.d.e f 8.9.5.c.a 7 6 2 4 b 1 0 3
+.5.a 0 c.3.7.8.b 1 f d e 6 2 4 9
+ 6 4.9 b.1.e.2.f 3 c.a 0 d 8 5 7
+ 7 1 3.2.6.d.0.4 5 8 9.b e c a f
+ c 0.6 f 8 b 4 e.d.a.3.9.1 5 7 2
+ 8 7 1.d f c 9 5.e.4.b.2 0.a 3 6
+ 9 2 e 5 a 6.d 3.8.0.7.1 4 f.b c
+ 4 b a 3 0 2 7.1.6.5.f.c 8 e 9.d
+ 0 3 8 1 4 9 b 7.c 2 6 5.a.d.f.e
+ a d b 7 5 3 6 2 9.e 4 f.c.0.8.1
+ 2 5 4 e c f 1 d 0 3.8 a.7.9.6.b
+ f 6 c 9 e 8 a 0 b d 1.7.3.4.2.5
+=== DONE =======================
+
+=== START 9 ====================
+stage 01 seeds:         64
+stage 02 seeds:         28
+num operations:    463,544
+processor secs:      0.037
+.2.e.4.9.5.1 b c 6 d a f 8 0 7 3
+.5.b.3.f.8.4 9 7 c 1 2 0 6 d e a
+.6.7.a.0 3 d.e f.4 8 9 b c 1 5 2
+.d.c.8.1 6 0 a.2 5.e 7 3 b 9 f 4
+.f.2 b c.9.e.5.a 3 7 1 6 d 4 8 0
+.e.5 9 6.f.8.0.1 d 4 b a 3 7 2 c
+ 4 a.0 d.7.3.c.b 8 5.e 2 1 f 6 9
+ 8 3 1.7.4.6.2.d 0 c f.9 5 b a e
+ 1 6.f 3 0 7 8 5.e.a.4.d.2 c 9 b
+ b 8 5.a 2 9 d 6.7.3.0.c f.e 4 1
+ 7 9 d e c f.4 3.b.2.5.1 a 6.0 8
+ c 0 2 4 a b 1.e.9.f.6.8 7 3 d.5
+ 0 1 c 2 e a 7 4.f 6 3 5.9.8.b.d
+ 3 d 7 8 b 2 6 0 a.9 c 4.e.5.1.f
+ 9 f 6 b 1 5 3 8 2 0.d e.4.a.c.7
+ a 4 e 5 d c f 9 1 b 8.7.0.2.3.6
+=== DONE =======================
+
+=== START 10 ===================
+stage 01 seeds:         64
+stage 02 seeds:         28
+num operations:          0
+processor secs:      0.266
+.f.5.b.3.9.7 c 2 4 d e a 8 1 6 0
+.6.a.c.1.d.5 f 0 9 b 8 2 e 3 4 7
+.d.e.9.0 4 6.3 8.5 1 7 f b a c 2
+.4.2.7.8 b e a.1 6.3 0 c f d 9 5
+.7.0 a 2.f.1.6.c b e d 4 5 8 3 9
+.5.d 6 4.7.8.0.a 3 f 2 9 c b e 1
+ e 3.8 b.5.2.9.4 a c.1 7 d 0 f 6
+ 9 c 1.f.e.b.d.3 0 6 5.8 2 4 7 a
+ c 7.4 6 2 a b d.e.9.f.0.1 5 8 3
+ 2 8 e.9 6 c 5 7.d.a.3.1 4.f 0 b
+ b f 0 d    .e  .2.4.6.5    .a  
+              .f.8.7.c.b      .e
+                .7      .a.e.2.8
+                  .2    .3.7.1.f
+                    .a  .6.c.b.4
+                      .6.0.9.5.d
+=== ABORT ======================
+
+=== START 11 ===================
+stage 01 seeds:         64
+stage 02 seeds:         28
+num operations:    611,964
+processor secs:      0.054
+.6.c.2.5.4.8 1 a 9 b 0 7 d 3 e f
+.f.a.d.e.0.6 b 2 8 3 4 1 7 9 5 c
+.3.b.4.9 e 7.5 f.d 2 a c 8 6 0 1
+.8.1.0.7 3 d 9.c 6.5 e f b 4 a 2
+.2.6 f b.5.a.c.8 7 0 1 d 3 e 9 4
+.5.8 e 3.6.1.d.4 c f b 9 a 2 7 0
+ 1 7.a d.9.3.f.0 4 e.5 2 c 8 6 b
+ 0 4 9.c.b.2.e.7 a 6 3.8 5 1 f d
+ 9 5.7 f c e 4 d.0.1.8.3.2 a b 6
+ a d b.1 7 0 2 3.e.c.f.6 9.5 4 8
+ 4 e 8 2 f 5.6 9.b.7.d.a 1 0.c 3
+ c 0 3 6 8 b a.1.2.4.9.5 f 7 d.e
+ b f 5 a 2 9 8 e.3 d 6 4.0.c.1.7
+ d 9 1 4 a c 3 6 f.8 7 0.e.b.2.5
+ 7 2 6 8 1 f 0 b 5 9.c e.4.d.3.a
+ e 3 c 0 d 4 7 5 1 a 2.b.6.f.8.9
+=== DONE =======================
+
+=== START 12 ===================
+stage 01 seeds:         64
+stage 02 seeds:         28
+num operations:    236,834
+processor secs:      0.014
+.6.4.d.2.3.8 c 9 0 1 7 f e 5 b a
+.f.3.a.9.5.4 b e 8 d c 6 1 2 7 0
+.5.7.1.e d 0.2 f.3 4 a b 8 6 9 c
+.0.c.8.b 1 6 a.7 9.2 e 5 4 3 d f
+.b.6 4 f.7.1.d.0 2 5 3 c 9 e a 8
+.e.0 c 5.8.2.9.3 a b f d 6 7 1 4
+ 7 d.9 3.a.e.f.c 4 6.1 8 5 0 2 b
+ a 8 2.1.4.b.5.6 e 7 0.9 f d c 3
+ d b.e 4 2 9 0 a.5.3.8.7.c f 6 1
+ 2 a 3.7 6 c 4 1.f.9.d.0 b.8 5 e
+ 1 9 6 0 f d.8 5.b.c.2.e a 4.3 7
+ c 5 f 8 e 7 3.b.1.a.6.4 d 9 0.2
+ 4 f b d c 3 6 2.7 e 9 1.0.a.8.5
+ 3 e 7 6 0 f 1 d c.8 5 a.2.b.4.9
+ 9 2 5 c b a e 8 d 0.4 3.7.1.f.6
+ 8 1 0 a 9 5 7 4 6 f b.2.3.c.e.d
+=== DONE =======================
+
+=== START 13 ===================
+stage 01 seeds:         64
+stage 02 seeds:         28
+num operations:          0
+processor secs:      0.231
+.c.9.f.7.0.e a 5 6 2 8 d 1 4 3 b
+.4.5.3.1.d.8 b c a e f 9 2 7 0 6
+.6.0.8.d 7 2.4 9.3 1 5 b f c a e
+.b.e.2.a 3 6 1.f 7.0 c 4 9 d 8 5
+.f.d a b.e.1.c.2 9 6 4 3 0 8 5 7
+.e.1 c 9.a.f.d.0 b 5 7 8 4 2 6 3
+ 5 2.0 4.8.9.6.3 c d.1          
+      .3.5.b.7.4      .f        
+    .b          .4.9.2.6.3      
+      .2        .d.8.a.1  .6    
+            .8  .5.3.e.c    .f  
+              .6.f.b.0.7      .8
+                .e      .5.9.7.2
+                  .a    .b.f.d.c
+                    .9  .8.e.4.0
+                      .5.6.3.1.a
+=== ABORT ======================
+
+=== START 14 ===================
+stage 01 seeds:         64
+stage 02 seeds:         28
+num operations:          0
+processor secs:      0.295
+.b.7.8.6.9.e c 3 f 0 1 d 4 2 5 a
+.2.a.4.d.f.8 1 5 6 7 b 9 0 c 3 e
+.c.9.f.3 2 0.6 b.a 5 4 e 7 8 1 d
+.5.1.0.e d 7 4.a 8.2 3 c f 9 b 6
+.f.5 6 c.e.b.a.2 0 d 8 3 1 7 9 4
+.d.2 a 8.6.4.3.1 5 9 e 7 c b f 0
+ 3 0.b 4.5.9.7.8 1 f.c 6 a e d 2
+ 7 e 9.1.0.c.d.f 4 a 2.b 5 6 8 3
+ e 3.5 9 c 6 2 7.d.b.a.0.8 1 4 f
+ 8 6 2.0 3 5 f 9.c.1.7.4 e.d a b
+ a d        .b  .2.6.9.8    .7  
+              .0.3.e.5.f      .9
+                .7      .9.4.e.1
+                  .c    .b.a.6.7
+                    .6  .2.f.0.8
+                      .a.d.3.c.5
+=== ABORT ======================
+
+=== START 15 ===================
+stage 01 seeds:         64
+stage 02 seeds:         28
+num operations:    254,614
+processor secs:      0.017
+.f.1.5.4.0.a e 7 c 6 8 2 b d 9 3
+.2.6.a.e.4.f 3 b 5 7 d 9 8 1 c 0
+.b.0.9.d 8 c.5 1.e f a 3 4 7 6 2
+.c.3.8.7 6 2 9.d b.4 1 0 f e a 5
+.5.8 c 3.9.7.a.4 0 b 6 d 2 f e 1
+.7.9 e b.1.0.8.c a 3 2 f 5 4 d 6
+ 6 f.4 2.3.e.d.5 8 c.9 1 a b 0 7
+ d a 0.1.f.6.b.2 7 5 4.e 3 9 8 c
+ 8 2.b f 5 d 6 3.9.1.c.4.e 0 7 a
+ 9 4 3.c 2 1 f 0.d.a.e.7 6.5 b 8
+ a d 7 6 b 4.c e.f.0.5.8 1 3.2 9
+ 0 e 1 5 a 9 7.8.6.2.3.b d c f.4
+ 1 c 2 8 e b 4 f.3 9 7 a.0.6.5.d
+ 3 7 f a d 5 0 9 4.8 b 6.c.2.1.e
+ 4 5 d 0 7 8 1 6 2 e.f c.9.a.3.b
+ e b 6 9 c 3 2 a 1 d 0.5.7.8.4.f
+=== DONE =======================
+
+=== START 16 ===================
+stage 01 seeds:         64
+stage 02 seeds:         28
+num operations:    197,154
+processor secs:      0.006
+.7.c.b.3.f.1 6 a e 2 4 5 8 d 0 9
+.d.4.e.0.b.2 9 8 c 6 7 1 3 a f 5
+.f.6.1.a 3 d.e 5.b 8 0 9 4 c 7 2
+.8.5.9.2 0 4 7.c f.d a 3 e b 1 6
+.1.2 5 c.a.8.b.9 6 4 e d f 0 3 7
+.3.8 d b.2.5.f.7 0 9 1 c 6 e 4 a
+ 4 0.a 9.6.e.d.3 7 5.f 2 c 1 8 b
+ e f 6.7.1.c.4.0 3 b 8.a 5 2 9 d
+ 2 b.f 5 c 6 8 e.4.3.9.0.d 7 a 1
+ 0 3 8.4 7 a 1 2.d.c.5.6 b.9 e f
+ a e c 6 9 0.3 d.1.7.b.f 2 8.5 4
+ 9 1 7 d 4 f 5.b.a.e.2.8 0 3 6.c
+ b d 0 1 e 7 2 6.9 f 3 4.a.5.c.8
+ c 7 3 8 d 9 0 4 5.a 6 b.1.f.2.e
+ 5 9 4 f 8 b a 1 2 0.c e.7.6.d.3
+ 6 a 2 e 5 3 c f 8 1 d.7.9.4.b.0
+=== DONE =======================
+
+=== START 17 ===================
+stage 01 seeds:         64
+stage 02 seeds:         28
+num operations:     47,418
+processor secs:      0.003
+.f.e.0.5.3.d b 4 8 a 9 c 7 2 1 6
+.8.3.b.2.f.7 1 6 e 4 5 0 d a 9 c
+.a.7.9.6 5 c.0 8.2 d 1 f 3 e 4 b
+.4.1.c.d a e 9.2 b.7 6 3 0 5 8 f
+.d.a 5 c.8.f.4.e 1 3 b 2 6 9 7 0
+.b.4 8 9.7.6.5.a c f 0 e 1 3 2 d
+ 7 2.1 3.0.b.c.d 6 8.4 9 e f a 5
+ 6 f e.0.9.1.2.3 7 5 a.d b 8 c 4
+ 2 0.4 a e 3 d 9.5.6.f.8.c 7 b 1
+ e 8 d.f 1 0 a b.9.c.3.7 4.6 5 2
+ c 9 6 b 4 5.7 f.a.2.d.1 8 0.3 e
+ 3 5 7 1 6 2 8.c.0.b.e.4 a d f.9
+ 0 6 a 4 c 9 f 1.3 e 8 5.2.b.d.7
+ 9 b 2 8 d 4 6 7 f.0 c a.5.1.e.3
+ 1 c 3 7 b 8 e 5 d 9.2 6.f.4.0.a
+ 5 d f e 2 a 3 0 4 1 7.b.9.c.6.8
+=== DONE =======================
+
+=== START 18 ===================
+stage 01 seeds:         64
+stage 02 seeds:         28
+num operations:          0
+processor secs:      0.287
+.1.4.9.6.d.a 3 5 f 0 7 2 e 8 b c
+.e.d.8.5.7.2 c b 9 a 3 4 0 f 1 6
+.b.a.0.7 f e.8 6.5 1 c d 4 2 9 3
+.f.3.c.2 0 4 9.1 b.e 6 8 5 d 7 a
+.a.1 6 c.2.7.b.e 3 9 8 0 f 4 d 5
+.2.b 5 9.4.8.0.a 1 d e f 3 c 6 7
+ d 7.e 8.3.9.5.f c 6.4 a 1 b 2 0
+ 3 f 4.0.1.c.6.d 2 7 b.5 8 a e 9
+ 6 c.d a 8 b e 2.7.3.5.1.9 0 4 f
+ 0 8 b.3 9 5 7 4.a.f.d.e 6.1 c 2
+ 4 9 f e 6 1.a 3.8.2.0.c b 7.5 d
+ 7 5 2 1 c d f.0.6.4.9.b a 3 8.e
+ 9 e 1 b 5 3 d c.0 8 a 7.2.6.f.4
+ 5 0 7 4 b 6 2 8 e.c f 3.d.9.a.1
+ 8 6 3 d a f 1      .2  .c.5.0.b
+                      .9.7.e.3.8
+=== ABORT ======================
+
+=== START 19 ===================
+stage 01 seeds:         64
+stage 02 seeds:         28
+num operations:    284,158
+processor secs:      0.015
+.d.9.c.b.7.0 e 3 1 f 4 8 a 5 6 2
+.a.1.5.8.d.c 9 2 0 7 6 3 e f b 4
+.6.2.3.4 8 f.b a.c e 9 5 d 1 7 0
+.7.0.e.f 6 1 4.5 d.b 2 a 8 c 3 9
+.3.a f 6.4.7.0.b 5 8 e 9 1 2 d c
+.1.7 9 2.a.3.5.c b 6 d f 4 0 e 8
+ 4 b.0 d.e.2.8.f a 3.c 1 5 6 9 7
+ c e 8.5.1.d.6.9 4 2 0.7 3 a f b
+ 2 5.4 0 3 b 7 e.6.1.f.d.9 8 c a
+ 8 3 d.7 c 6 f 4.2.9.a.e 0.b 1 5
+ f c b a 9 8.1 d.3.4.5.0 6 7.2 e
+ 9 6 1 e 5 a 2.0.7.c.8.b f d 4.3
+ e 8 a 9 b 4 c 1.f 0 7 6.2.3.5.d
+ 5 f 6 c 0 e 3 8 9.d b 2.7.4.a.1
+ b d 7 3 2 9 a 6 8 5.1 4.c.e.0.f
+ 0 4 2 1 f 5 d 7 e a 3.c.b.9.8.6
+=== DONE =======================
+
+=== START 20 ===================
+stage 01 seeds:         64
+stage 02 seeds:         28
+num operations:  4,039,966
+processor secs:      0.296
+.2.c.5.d.0.1 e 3 7 b 6 9 f a 4 8
+.6.b.a.4.f.5 c 8 3 0 e 2 d 1 7 9
+.7.8.0.1 6 9.4 2.5 a f d c e b 3
+.f.9.3.e 7 d b.a c.4 8 1 5 2 6 0
+.c.2 b 0.8.e.d.1 4 7 3 5 6 9 a f
+.e.4 9 a.5.2.0.b f 1 d 6 8 3 c 7
+ d f.1 6.c.3.7.9 2 8.a 0 4 b 5 e
+ 8 5 7.3.a.4.f.6 9 c b.e 2 d 0 1
+ 5 a.4 c 9 7 6 d.0.e.2.f.3 8 1 b
+ b e 8.2 4 c 1 5.6.3.9.a 7.0 f d
+ 3 1 6 f 2 8.a 0.b.d.4.7 e 5.9 c
+ 0 7 d 9 e b 3.f.1.5.c.8 a 4 2.6
+ a 3 f 8 1 0 5 c.d 2 7 b.9.6.e.4
+ 9 d 2 7 b f 8 e a.6 1 4.0.c.3.5
+ 1 6 c 5 d a 9 4 e f.0 3.b.7.8.2
+ 4 0 e b 3 6 2 7 8 9 5.c.1.f.d.a
+=== DONE =======================

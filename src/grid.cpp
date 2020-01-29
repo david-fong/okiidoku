@@ -74,6 +74,7 @@ void Game::clear(void) {
 void Game::runNew(void) {
 #define STATW << setw(10)
 // ^mechanism to statically toggle alignment:
+    outStream << endl;
     printMessageBar("START " + to_string(totalGenCount));
     clear();
     // Call the seeding routines:
