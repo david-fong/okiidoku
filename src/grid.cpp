@@ -9,10 +9,11 @@
 #include "grid.h"
 
 
-Game::Tile::Tile(void):
-    fixedVal    (false),
+Game::Tile::Tile(const area_t index):
+    index       (index),
     biasIndex   (0),
-    value       (0) {}
+    value       (0),
+    fixedVal    (false) {}
 
 Game::Game(const order_t _order, ostream& outStream, const bool isPretty):
     order       (CLEAN_ORDER(_order)),
@@ -21,11 +22,14 @@ Game::Game(const order_t _order, ostream& outStream, const bool isPretty):
     outStream   (outStream),
     isPretty    (isPretty)
 {
-    grid    = vector<Tile>(area);
+    grid    = vector<Tile>();
     rowBins = vector<occmask_t>(length);
     colBins = vector<occmask_t>(length);
     blkBins = vector<occmask_t>(length);
 
+    for (area_t i = 0; i < area; i++) {
+        grid.push_back(Tile(i));
+    }
     for (length_t i = 0; i < length; i++) {
         vector<value_t> seq;
         for (value_t i = 0; i <= length; i++) {
@@ -35,7 +39,11 @@ Game::Game(const order_t _order, ostream& outStream, const bool isPretty):
     }
     totalGenCount = 0;
     successfulGenCount = 0;
-    outStream.imbue(locale(outStream.getloc(), new MyNumpunct()));
+
+    // Output formatting:
+    if (isPretty) {
+        outStream.imbue(locale(outStream.getloc(), new MyNumpunct()));
+    }
     outStream.precision(3);
     outStream << fixed;
 }
@@ -58,7 +66,7 @@ void Game::print(void) const {
     outStream << setbase(10) << endl;
 }
 
-void Game::clear(void) {
+void Game::clear(const bool printSeedInfo) {
     // Initialize all values as empty:
     for_each(grid.begin(), grid.end(), [this](Tile& t){ t.clear(length); });
     fill(rowBins.begin(), rowBins.end(), 0);
@@ -70,33 +78,19 @@ void Game::clear(void) {
     for (length_t i = 0; i < length; i++) {
         random_shuffle(rowBiases[i].begin(), rowBiases[i].end() - 1, myRandom);
     }
-}
-
-void Game::runNew(void) {
-#define STATW << setw(10)
-// ^mechanism to statically toggle alignment:
-    printMessageBar("START " + to_string(totalGenCount));
-    clear();
     // Call the seeding routines:
-    const area_t seed0Seeds     = seed0();
-    const area_t seed1Seeds     = seed1(order + seed1Constants[order]);
-    outStream << "stage 01 seeds: " STATW << seed0Seeds << endl;
-    outStream << "stage 02 seeds: " STATW << seed1Seeds << endl;
-
-    // Generate a new solution:
-    const clock_t clockStart    = clock();
-    const opcount_t numSolveOps = generateSolution();
-    const clock_t clockFinish   = clock();
-    const double processorTime  = ((double)(clockFinish - clockStart)) / CLOCKS_PER_SEC;
-    outStream << "num operations: " STATW << numSolveOps << endl;
-    outStream << "processor secs: " STATW << processorTime << endl;
-
-    // Print out the grid:
-    print();
-    printMessageBar((numSolveOps == 0) ? "ABORT" : "DONE");
+    const area_t seed0Seeds = seed0();
+    const area_t seed1Seeds = seed1(order + seed1Constants[order]);
+    if (printSeedInfo) {
+        outStream << "stage 01 seeds: " STATW << seed0Seeds << endl;
+        outStream << "stage 02 seeds: " STATW << seed1Seeds << endl;
+    }
+    traversalPath = vector<Tile&>();
+    // TODO: ^ initialize with all non-seeded Tiles sorted descending by num-candidates.
 }
 
 opcount_t Game::generateSolution(void) {
+    opcount_t giveupThreshold = GIVEUP_RATIO * area * area;
     opcount_t numOperations = 0;
     area_t i = 0;
     // Skip all seeded starting tiles:
@@ -105,7 +99,7 @@ opcount_t Game::generateSolution(void) {
     while (i < area) {
         // Push a new permutation:
         numOperations++;
-        if (numOperations / area > GIVEUP_RATIO) {
+        if (numOperations > giveupThreshold) {
             totalGenCount++;
             return 0;
         }
@@ -163,7 +157,6 @@ Game::Tile& Game::setNextValid(const area_t index) {
 
 
 
-
 bool Game::runCommand(const string& cmdLine) {
     // purposely use cout instead of this.outStream.
     size_t tokenPos;
@@ -197,20 +190,42 @@ bool Game::runCommand(const string& cmdLine) {
     return true;
 }
 
-void Game::runMultiple(unsigned int numAttempts) {
+void Game::runNew(void) {
 #define STATW << setw(10)
 // ^mechanism to statically toggle alignment:
+    printMessageBar("START " + to_string(totalGenCount));
+    clear(true);
+
+    // Generate a new solution:
+    const clock_t clockStart    = clock();
+    const opcount_t numSolveOps = generateSolution();
+    const clock_t clockFinish   = clock();
+    const double processorTime  = ((double)(clockFinish - clockStart)) / CLOCKS_PER_SEC;
+    outStream << "num operations: " STATW << numSolveOps << endl;
+    outStream << "processor secs: " STATW << processorTime << endl;
+
+    // Print out the grid:
+    print();
+    printMessageBar((numSolveOps == 0) ? "ABORT" : "DONE");
+}
+
+void Game::runMultiple(unsigned int numAttempts) {
+#define PRINT_COLS 8
+#define STATW << setw(10)
+// ^mechanism to statically toggle alignment:
+    const opcount_t initialGenCount = totalGenCount;
     outStream << endl;
     printMessageBar("START x" + to_string(numAttempts));
     for (unsigned int attemptNum = 0; attemptNum < numAttempts; attemptNum++) {
-        clear();
-        seed0();
-        seed1(order + seed1Constants[order]);
+        clear(false);
         const opcount_t numSolveOps = generateSolution();
         if (numSolveOps == 0) {
-            outStream STATW << "abort" << endl;
+            outStream STATW << "---";
         } else {
-            outStream STATW << numSolveOps << endl;
+            outStream STATW << numSolveOps;
+        }
+        if ((totalGenCount - initialGenCount) % PRINT_COLS == 0) {
+            outStream << endl;
         }
     }
     printMessageBar("DONE x" + to_string(numAttempts));

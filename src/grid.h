@@ -8,8 +8,8 @@ using namespace std;
 
 // Evaulates to <o> bounded to the range [2, 5]
 #define CLEAN_ORDER(o) (((o) < 2) ? 2 : (((o) > 5) ? 5 : (o)))
-#define GIVEUP_RATIO 20'000
-// TODO ^consumer code assumes num operations is proportional to area. it that true?
+#define GIVEUP_RATIO 128
+// TODO ^consumer code assumes num operations is proportional to area^2. it that true?
 
 /**
  * IMPORTANT:
@@ -37,15 +37,16 @@ public:
      */
     class Tile {
     public:
-        Tile(void);
+        Tile(const area_t index);
         void clear(const value_t rowLen) {
-            fixedVal = false;
             biasIndex = rowLen;
             value = rowLen;
+            fixedVal = false;
         }
-        bool fixedVal;
+        const area_t index;
         value_t biasIndex;
         value_t value;
+        bool fixedVal;
     };
 
 public:
@@ -67,12 +68,13 @@ private:
     vector<occmask_t> colBins;
     vector<occmask_t> blkBins;
     vector<vector<value_t>> rowBiases;
+    vector<Tile&> traversalPath;
     unsigned long totalGenCount;
     unsigned long successfulGenCount;
     ostream& outStream;
     const bool isPretty;
 
-    void clear(void);
+    void clear(const bool printSeedInfo);
     // Returns the tile at index.
     Tile& setNextValid(const area_t index);
     // Generates a random solution. Returns the number of operations or
