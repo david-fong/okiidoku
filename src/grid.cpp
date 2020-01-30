@@ -79,7 +79,7 @@ void Game::runNew(void) {
     printMessageBar("START " + to_string(totalGenCount));
     clear();
     // Call the seeding routines:
-    const area_t seed0Seeds     = SEED0();
+    const area_t seed0Seeds     = seed0();
     const area_t seed1Seeds     = seed1(order + seed1Constants[order]);
     outStream << "stage 01 seeds: " STATW << seed0Seeds << endl;
     outStream << "stage 02 seeds: " STATW << seed1Seeds << endl;
@@ -165,56 +165,70 @@ Game::Tile& Game::setNextValid(const area_t index) {
 
 
 
-
-
-
-
-void Game::printMessageBar(const string& msg) const {
-    unsigned long long barLength = (isPretty)
-        ? (length * 2) // TODO
-        : (length * 2);
-    if (barLength < msg.length() + 8) {
-        barLength = msg.length() + 8;
+bool Game::runCommand(const string& cmdLine) {
+    // purposely use cout instead of this.outStream.
+    size_t tokenPos;
+    const string cmdName = cmdLine.substr(0, tokenPos = cmdLine.find(" "));
+    const string acdArgs = cmdLine.substr(tokenPos + 1, string::npos);
+    const auto it = COMMAND_MAP.find(command);
+    if (it == COMMAND_MAP.end()) {
+        // No command name was matched
+        cout << "command not found. enter \"help\" for the help menu." << endl;
+        return false;
     }
-    string bar(barLength, '=');
-    if (!msg.empty()) {
-        bar.replace(4, msg.length(), msg);
-        bar.at(3) = ' ';
-        bar.at(4 + msg.length()) = ' ';
+    switch (it->second) {
+        case HELP:
+            cout << HELP_MESSAGE << endl;
+            break;
+        case QUIT:
+            return false;
+        case RUN_SINGLE:
+            runNew();
+            break;
+        case RUN_MULTIPLE:
+            try {
+                runMultiple(stoi(cmdArgs));
+            } catch (const invalid_argument& ia) {
+                cout << "could not convert " << cmdArgs << " to an integer." << endl;
+            }
+            break;
+        default:
+            break; // unreachable.
     }
-    outStream << bar << endl;
+    return true;
+}
+
+void Game::runMultiple(unsigned int numAttempts) {
+#define STATW << setw(10)
+// ^mechanism to statically toggle alignment:
+    outStream << endl;
+    printMessageBar("START x" + to_string(numAttempts));
+    for (unsigned int attemptNum = 0; attemptNum < numAttempts; attemptNum++) {
+        clear();
+        seed0();
+        seed1(order + seed1Constants[order]);
+        const opcount_t numSolveOps = generateSolution();
+        if (numSolveOps == 0) {
+            outStream << "abort" << endl;
+        } else {
+            outStream STATW << numSolveOps << endl;
+        }
+    }
+    printMessageBar("DONE x" + to_string(numAttempts));
 }
 
 
 
+
+
 area_t Game::seed0(void) {
+    if (order <= 2) return 0; // overpowered.
     area_t count = 0;
     const area_t bRow = order * length;
     for (area_t b = 0; b < area; b += bRow + order) {
         for (area_t r = 0; r < bRow; r += length) {
             for (order_t c = 0; c < order; c++) {
                 setNextValid(b + r + c).fixedVal = true;
-                count++;
-            }
-        }
-    }
-    return count;
-}
-
-area_t Game::seed0b(void) {
-    area_t count = 0;
-    // Get offsets to blocks along top and left edge:
-    vector<area_t> blocks;
-    const area_t bRow = order * length;
-    for (length_t i = 0; i < length; i += order)
-        blocks.push_back(i);
-    for (area_t i = bRow; i < area; i += bRow)
-        blocks.push_back(i);
-
-    for (length_t i = 0; i < blocks.size(); i++) {
-        for (area_t r = 0; r < bRow; r += length) {
-            for (order_t c = 0; c < order; c++) {
-                setNextValid(blocks[i] + r + c).fixedVal = true;
                 count++;
             }
         }
@@ -239,6 +253,7 @@ bool Game::seed1Bitmask(const area_t index, const occmask_t min) {
 }
 
 area_t Game::seed1(int ceiling) {
+    if (order <= 2) return 0; // overpowered.
     ceiling = ~0 << (ceiling);
     Game occ(order, outStream, false);
     occ.clear();
@@ -275,5 +290,23 @@ area_t Game::seed1(int ceiling) {
         }
     }
     return count;
+}
+
+
+
+void Game::printMessageBar(const string& msg) const {
+    unsigned long long barLength = (isPretty)
+        ? ((length + order + 1) * 2)
+        : (length * 2);
+    if (barLength < msg.length() + 8) {
+        barLength = msg.length() + 8;
+    }
+    string bar(barLength, '=');
+    if (!msg.empty()) {
+        bar.replace(4, msg.length(), msg);
+        bar.at(3) = ' ';
+        bar.at(4 + msg.length()) = ' ';
+    }
+    outStream << bar << endl;
 }
 

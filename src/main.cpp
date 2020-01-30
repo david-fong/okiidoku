@@ -1,5 +1,6 @@
 #include <cstdlib>
 #include <ctime>
+//#include <iostream>
 
 #include "grid.cpp"
 
@@ -35,12 +36,13 @@ int main(int argc, char const *const argv[]) {
 
     // Generator loop:
     Game game(userOrder, cout, isPretty);
+    string command;
     do {
-        game.runNew();
-        //cout << "Press enter to continue, or anything else to quit." << endl;
-    } while (cin.get() == '\n');
+        getline(cin, command);
+    } while (game.runCommand(command));
 
     // End of program:
+    cout << endl << "bye bye!" << endl;
     return 0;
 }
 
