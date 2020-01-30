@@ -18,6 +18,7 @@ int main(int argc, char const *const argv[]) {
     cout << endl << "PARSED ARGUMENTS:" << endl;
     order_t userOrder;
     bool isPretty;
+    ostream& outStream = cout;
     {
         // Arg ONE (order):
         string arg1 = (argc > 1) ? argv[1] : "4";
@@ -32,12 +33,14 @@ int main(int argc, char const *const argv[]) {
         // Arg THREE (pretty output):
         isPretty = false; // TODO
     }
-    cout << endl;
+    // Print help menu:
+    cout << Game::HELP_MESSAGE;
 
     // Generator loop:
-    Game game(userOrder, cout, isPretty);
+    Game game(userOrder, outStream, isPretty);
     string command;
     do {
+        cout << Game::REPL_PROMPT;
         getline(cin, command);
     } while (game.runCommand(command));
 

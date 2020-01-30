@@ -75,7 +75,6 @@ void Game::clear(void) {
 void Game::runNew(void) {
 #define STATW << setw(10)
 // ^mechanism to statically toggle alignment:
-    outStream << endl;
     printMessageBar("START " + to_string(totalGenCount));
     clear();
     // Call the seeding routines:
@@ -169,12 +168,12 @@ bool Game::runCommand(const string& cmdLine) {
     // purposely use cout instead of this.outStream.
     size_t tokenPos;
     const string cmdName = cmdLine.substr(0, tokenPos = cmdLine.find(" "));
-    const string acdArgs = cmdLine.substr(tokenPos + 1, string::npos);
-    const auto it = COMMAND_MAP.find(command);
+    const string cmdArgs = cmdLine.substr(tokenPos + 1, string::npos);
+    const auto it = COMMAND_MAP.find(cmdName);
     if (it == COMMAND_MAP.end()) {
         // No command name was matched
         cout << "command not found. enter \"help\" for the help menu." << endl;
-        return false;
+        return true;
     }
     switch (it->second) {
         case HELP:
@@ -209,7 +208,7 @@ void Game::runMultiple(unsigned int numAttempts) {
         seed1(order + seed1Constants[order]);
         const opcount_t numSolveOps = generateSolution();
         if (numSolveOps == 0) {
-            outStream << "abort" << endl;
+            outStream STATW << "abort" << endl;
         } else {
             outStream STATW << numSolveOps << endl;
         }

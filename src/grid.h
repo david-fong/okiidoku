@@ -103,18 +103,10 @@ public:
         }
     } OPseed;
 
-    enum Command {
-        HELP, QUIT, RUN_SINGLE, RUN_MULTIPLE,
-    };
-    static const map<string, Command> COMMAND_MAP = {
-        { "help", HELP },
-        { "quit", QUIT },
-        { "exit", QUIT },
-        { "", RUN_SINGLE },
-        { "trials", RUN_MULTIPLE }
-    }
-
-    static const string HELP_MESSAGE = ""; // TODO
+    typedef enum { HELP, QUIT, RUN_SINGLE, RUN_MULTIPLE, } Command;
+    static const map<string, Command> COMMAND_MAP;
+    static const string HELP_MESSAGE;
+    static const string REPL_PROMPT;
 
 private:
     static const length_t seed1Constants[];
@@ -126,6 +118,21 @@ private:
     };
 };
 
+const map<string, Game::Command> Game::COMMAND_MAP = {
+    { "help", HELP },
+    { "quit", QUIT },
+    { "exit", QUIT },
+    { "", RUN_SINGLE },
+    { "trials", RUN_MULTIPLE }
+};
+const string Game::HELP_MESSAGE = "\nCOMMAND MENU:"
+    "\n- help"
+    "\n- quit"
+    "\n- exit"
+    "\n- "
+    "\n- trials <n>"
+    "\n";
+const string Game::REPL_PROMPT = "\n> ";
 const length_t Game::seed1Constants[] = { 0, 0, 0, 0, 2, 9, };
 
 #endif
