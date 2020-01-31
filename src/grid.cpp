@@ -70,13 +70,15 @@ void Game::print(void) const {
     outStream << setbase(10) << endl;
 }
 
-void Game::clear(const bool printSeedInfo) {
+void Game::clear(void) {
     // Initialize all values as empty:
-    for (Tile& t : grid) { t.clear(length); };
+    for (Tile& t : grid) { t.clear(length); }
     fill(rowBins.begin(), rowBins.end(), 0);
     fill(colBins.begin(), colBins.end(), 0);
     fill(blkBins.begin(), blkBins.end(), 0);
+}
 
+void Game::seed(const bool printInfo) {
     // Scramble each row's value-guessing-order:
     // note: must keep the <length>'th entry as <length>.
     for (length_t i = 0; i < length; i++) {
@@ -85,7 +87,7 @@ void Game::clear(const bool printSeedInfo) {
     // Call the seeding routines:
     const area_t seed0Seeds = seed0();
     const area_t seed1Seeds = seed1(order + seed1Constants[order]);
-    if (printSeedInfo) {
+    if (printInfo) {
         outStream << "stage 01 seeds: " STATW << seed0Seeds << endl;
         outStream << "stage 02 seeds: " STATW << seed1Seeds << endl;
     }
@@ -93,7 +95,12 @@ void Game::clear(const bool printSeedInfo) {
     for (const Tile& t : grid) {
         if (isClear(t)) traversalPath.push_back(t);
     }
+    sort(traversalPath.begin(), traversalPath.end(),
+            [this](const Tile& t1, const Tile& t2){
+        return 
+    });
     // TODO: ^ initialize with all non-seeded Tiles sorted descending by num-candidates.
+
 }
 
 opcount_t Game::generateSolution(void) {
@@ -160,6 +167,18 @@ Game::Tile& Game::setNextValid(const area_t index) {
     return t;
 }
 
+length_t Game::tileNumCandidates(const area_t index) const {
+    const unoccMask = ~(rowBins[getRow(index)]
+        | colBins[getCol(index)]
+        | blkBins[getBlk(index)]);
+    value_t numCandidates = 0;
+    for (length_t i = 0; i < length; i++) {
+        if (unoccMask & 0b1) numCandidates++;
+        unoccMask >>= 1;
+    }
+    return numCandidates;
+}
+
 
 
 
@@ -199,7 +218,8 @@ bool Game::runCommand(const string& cmdLine) {
 
 void Game::runNew(void) {
     printMessageBar("START " + to_string(totalGenCount));
-    clear(true);
+    clear();
+    seed(true);
 
     // Generate a new solution:
     const clock_t clockStart    = clock();
@@ -220,7 +240,8 @@ void Game::runMultiple(unsigned int numAttempts) {
     outStream << endl;
     printMessageBar("START x" + to_string(numAttempts));
     for (unsigned int attemptNum = 0; attemptNum < numAttempts; attemptNum++) {
-        clear(false);
+        clear();
+        seed(false);
         const opcount_t numSolveOps = generateSolution();
         if (numSolveOps == 0) {
             outStream STATW << "---";
@@ -273,7 +294,7 @@ area_t Game::seed1(int ceiling) {
     if (order <= 2) return 0; // overpowered.
     ceiling = ~0 << (ceiling);
     Game occ(order, outStream, false);
-    occ.clear(false);
+    occ.clear(); // no seeding required.
     for (area_t i = 0; i < area; i++) {
         if (grid[i].fixedVal) {
             occ.seed1Bitmask(i, ~0);

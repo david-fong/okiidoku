@@ -74,7 +74,8 @@ private:
     ostream& outStream;
     const bool isPretty;
 
-    void clear(const bool printSeedInfo);
+    void clear(void);
+    void seed(const bool printInfo);
     // Returns the tile at index.
     Tile& setNextValid(const area_t index);
     // Generates a random solution. Returns the number of operations or
@@ -82,6 +83,7 @@ private:
     // not make generating a solution impossible.
     opcount_t generateSolution();
 
+    length_t tileNumCandidates(const area_t) const;
     void printMessageBar(const string&) const;
 
     // Seed all tiles of blocks along the main diagonal:
@@ -123,14 +125,12 @@ private:
 const map<string, Game::Command> Game::COMMAND_MAP = {
     { "help", HELP },
     { "quit", QUIT },
-    { "exit", QUIT },
     { "", RUN_SINGLE },
     { "trials", RUN_MULTIPLE }
 };
 const string Game::HELP_MESSAGE = "\nCOMMAND MENU:"
     "\n- help"
     "\n- quit"
-    "\n- exit"
     "\n- <enter>"
     "\n- trials <n>"
     "\n";

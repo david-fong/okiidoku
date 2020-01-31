@@ -12,6 +12,5 @@
 *.vcxproj*
 
 /build/
-build
 *.exe
 
