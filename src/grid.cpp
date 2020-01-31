@@ -9,6 +9,10 @@
 #include "grid.h"
 
 
+#define STATW << setw(10)
+// ^mechanism to statically toggle alignment:
+
+
 Game::Tile::Tile(const area_t index):
     index       (index),
     biasIndex   (0),
@@ -68,7 +72,7 @@ void Game::print(void) const {
 
 void Game::clear(const bool printSeedInfo) {
     // Initialize all values as empty:
-    for_each(grid.begin(), grid.end(), [this](Tile& t){ t.clear(length); });
+    for (Tile& t : grid) { t.clear(length); };
     fill(rowBins.begin(), rowBins.end(), 0);
     fill(colBins.begin(), colBins.end(), 0);
     fill(blkBins.begin(), blkBins.end(), 0);
@@ -85,7 +89,10 @@ void Game::clear(const bool printSeedInfo) {
         outStream << "stage 01 seeds: " STATW << seed0Seeds << endl;
         outStream << "stage 02 seeds: " STATW << seed1Seeds << endl;
     }
-    traversalPath = vector<Tile&>();
+    traversalPath = vector<Tile>();
+    for (const Tile& t : grid) {
+        if (isClear(t)) traversalPath.push_back(t);
+    }
     // TODO: ^ initialize with all non-seeded Tiles sorted descending by num-candidates.
 }
 
@@ -191,8 +198,6 @@ bool Game::runCommand(const string& cmdLine) {
 }
 
 void Game::runNew(void) {
-#define STATW << setw(10)
-// ^mechanism to statically toggle alignment:
     printMessageBar("START " + to_string(totalGenCount));
     clear(true);
 
@@ -211,8 +216,6 @@ void Game::runNew(void) {
 
 void Game::runMultiple(unsigned int numAttempts) {
 #define PRINT_COLS 8
-#define STATW << setw(10)
-// ^mechanism to statically toggle alignment:
     const opcount_t initialGenCount = totalGenCount;
     outStream << endl;
     printMessageBar("START x" + to_string(numAttempts));
@@ -270,7 +273,7 @@ area_t Game::seed1(int ceiling) {
     if (order <= 2) return 0; // overpowered.
     ceiling = ~0 << (ceiling);
     Game occ(order, outStream, false);
-    occ.clear();
+    occ.clear(false);
     for (area_t i = 0; i < area; i++) {
         if (grid[i].fixedVal) {
             occ.seed1Bitmask(i, ~0);

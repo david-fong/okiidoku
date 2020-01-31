@@ -68,7 +68,7 @@ private:
     vector<occmask_t> colBins;
     vector<occmask_t> blkBins;
     vector<vector<value_t>> rowBiases;
-    vector<Tile&> traversalPath;
+    vector<Tile> traversalPath;
     unsigned long totalGenCount;
     unsigned long successfulGenCount;
     ostream& outStream;
@@ -131,7 +131,7 @@ const string Game::HELP_MESSAGE = "\nCOMMAND MENU:"
     "\n- help"
     "\n- quit"
     "\n- exit"
-    "\n- "
+    "\n- <enter>"
     "\n- trials <n>"
     "\n";
 const string Game::REPL_PROMPT = "\n> ";
