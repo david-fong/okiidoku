@@ -4,7 +4,8 @@
 *.swo
 *Session.vim
 
-/.vscode/
+/.vscode/**/*
+!/.vscode/cSpell.json
 /.vs/
 /Debug/
 /x64/

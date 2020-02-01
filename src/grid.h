@@ -3,10 +3,11 @@
 
 #include <locale>
 #include <map>
+#include <vector>
 using namespace std;
 
 
-// Evaulates to <o> bounded to the range [2, 5]
+// Evaluates to <o> bounded to the range [2, 5]
 #define CLEAN_ORDER(o) (((o) < 2) ? 2 : (((o) > 5) ? 5 : (o)))
 #define GIVEUP_RATIO 128
 // TODO ^consumer code assumes num operations is proportional to area^2. it that true?

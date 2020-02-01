@@ -1,0 +1,21 @@
+{
+    "name": "sudoku C++",
+    "description": "",
+    "language": "en-GB",
+    "enabledLanguageIds": [
+        "c",
+        "cpp",
+        "markdown",
+        "plaintext",
+        "text",
+        "json",
+        "jsonc"
+    ],
+    "words": [
+        "retval",
+        "giveup",
+        "occmask",
+        "opcount",
+        "statw"
+    ]
+}

@@ -1,3 +1,5 @@
+#include "grid.h"
+
 #include <cstdlib>
 #include <iostream>
 #include <iomanip>
@@ -5,8 +7,6 @@
 #include <vector>
 #include <string>
 #include <ctime>
-
-#include "grid.h"
 
 
 #define STATW << setw(10)
@@ -52,6 +52,7 @@ Game::Game(const order_t _order, ostream& outStream, const bool isPretty):
     outStream << fixed;
 }
 
+
 void Game::print(void) const {
     // TODO: handle pretty-print style.
     outStream << setbase(16);
@@ -92,15 +93,13 @@ void Game::seed(const bool printInfo) {
         outStream << "stage 02 seeds: " STATW << seed1Seeds << endl;
     }
     traversalPath = vector<Tile>();
-    for (const Tile& t : grid) {
+    for (Tile& t : grid) {
         if (isClear(t)) traversalPath.push_back(t);
     }
     sort(traversalPath.begin(), traversalPath.end(),
-            [this](const Tile& t1, const Tile& t2){
-        return 
+            [this](Tile& t1, Tile& t2) -> bool {
+        return tileNumCandidates(t1.index) < tileNumCandidates(t2.index);
     });
-    // TODO: ^ initialize with all non-seeded Tiles sorted descending by num-candidates.
-
 }
 
 opcount_t Game::generateSolution(void) {
@@ -168,7 +167,7 @@ Game::Tile& Game::setNextValid(const area_t index) {
 }
 
 length_t Game::tileNumCandidates(const area_t index) const {
-    const unoccMask = ~(rowBins[getRow(index)]
+    occmask_t unoccMask = ~(rowBins[getRow(index)]
         | colBins[getCol(index)]
         | blkBins[getBlk(index)]);
     value_t numCandidates = 0;
