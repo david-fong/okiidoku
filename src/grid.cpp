@@ -2,14 +2,14 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <ostream>
 #include <iomanip>
 #include <algorithm>
-#include <vector>
 #include <string>
 #include <ctime>
 
 
-#define STATW << setw(10)
+#define STATW << std::setw(10)
 // ^mechanism to statically toggle alignment:
 
 
@@ -19,48 +19,48 @@ Game::Tile::Tile(const area_t index):
     value       (0),
     fixedVal    (false) {}
 
-Game::Game(const order_t _order, ostream& outStream, const bool isPretty):
+Game::Game(const order_t _order, std::ostream& outStream, const bool isPretty):
     order       (CLEAN_ORDER(_order)),
     length      (order  * order),
     area        (length * length),
     outStream   (outStream),
     isPretty    (isPretty)
 {
-    grid    = vector<Tile>();
-    rowBins = vector<occmask_t>(length);
-    colBins = vector<occmask_t>(length);
-    blkBins = vector<occmask_t>(length);
+    grid.reserve(area);
+    rowBins.resize(length);
+    colBins.resize(length);
+    blkBins.resize(length);
 
-    for (area_t i = 0; i < area; i++) {
-        grid.push_back(Tile(i));
+    for (int i = 0; i < area; i++) {
+        grid.emplace_back(i);
     }
     for (length_t i = 0; i < length; i++) {
-        vector<value_t> seq;
+        std::vector<value_t> seq;
         for (value_t i = 0; i <= length; i++) {
             seq.push_back(i);
         }
-        rowBiases.push_back(seq);
+        rowBiases.push_back(std::move(seq));
     }
     totalGenCount = 0;
     successfulGenCount = 0;
 
     // Output formatting:
     if (isPretty) {
-        outStream.imbue(locale(outStream.getloc(), new MyNumpunct()));
+        outStream.imbue(std::locale(outStream.getloc(), new MyNumpunct()));
     }
     outStream.precision(3);
-    outStream << fixed;
+    outStream << std::fixed;
 }
 
 
 void Game::print(void) const {
     // TODO: handle pretty-print style.
-    outStream << setbase(16);
+    outStream << std::setbase(16);
     for (area_t i = 0; i < area; i++) {
         if ((i % length) == 0 && i != 0) {
             outStream << "\n";
         }
-        const Tile& t = grid[i];
+        Tile const& t = grid.at(i);
         if (isClear(t)) {
             outStream << "  ";
         } else {
@@ -68,36 +68,36 @@ void Game::print(void) const {
             outStream << (uint16_t)t.value;
         }
     }
-    outStream << setbase(10) << endl;
+    outStream << std::setbase(10) << std::endl;
 }
 
 void Game::clear(void) {
     // Initialize all values as empty:
-    for (Tile& t : grid) { t.clear(length); }
-    fill(rowBins.begin(), rowBins.end(), 0);
-    fill(colBins.begin(), colBins.end(), 0);
-    fill(blkBins.begin(), blkBins.end(), 0);
+    std::for_each(grid.begin(), grid.end(), [this](Tile& t){ t.clear(length); });
+    std::fill(rowBins.begin(), rowBins.end(), 0);
+    std::fill(colBins.begin(), colBins.end(), 0);
+    std::fill(blkBins.begin(), blkBins.end(), 0);
+    traversalPath.clear();
 }
 
 void Game::seed(const bool printInfo) {
     // Scramble each row's value-guessing-order:
     // note: must keep the <length>'th entry as <length>.
     for (length_t i = 0; i < length; i++) {
-        random_shuffle(rowBiases[i].begin(), rowBiases[i].end() - 1, myRandom);
+        std::random_shuffle(rowBiases[i].begin(), rowBiases[i].end() - 1, myRandom);
     }
     // Call the seeding routines:
     const area_t seed0Seeds = seed0();
     const area_t seed1Seeds = seed1(order + seed1Constants[order]);
     if (printInfo) {
-        outStream << "stage 01 seeds: " STATW << seed0Seeds << endl;
-        outStream << "stage 02 seeds: " STATW << seed1Seeds << endl;
+        outStream << "stage 01 seeds: " STATW << seed0Seeds << std::endl;
+        outStream << "stage 02 seeds: " STATW << seed1Seeds << std::endl;
     }
-    traversalPath = vector<Tile>();
-    for (Tile& t : grid) {
+    std::for_each(grid.begin(), grid.end(), [this](Tile const& t){
         if (isClear(t)) traversalPath.push_back(t);
-    }
-    sort(traversalPath.begin(), traversalPath.end(),
-            [this](Tile& t1, Tile& t2) -> bool {
+    });
+    std::sort(traversalPath.begin(), traversalPath.end(),
+            [this](Tile const& t1, Tile const& t2) -> bool {
         return tileNumCandidates(t1.index) < tileNumCandidates(t2.index);
     });
 }
@@ -148,7 +148,7 @@ Game::Tile& Game::setNextValid(const area_t index) {
     // descriptive (but not meaningful, according to spec) default value:
     t.value = length;
 
-    occmask_t invalidBin = rowBins[row] | colBin | blkBin;
+    const occmask_t invalidBin = rowBins[row] | colBin | blkBin;
     value_t biasIndex = (t.biasIndex + 1) % (length + 1);
     for (; biasIndex < length; biasIndex++) {
         value_t value = rowBiases[row][biasIndex];
@@ -182,20 +182,20 @@ length_t Game::tileNumCandidates(const area_t index) const {
 
 
 
-bool Game::runCommand(const string& cmdLine) {
+bool Game::runCommand(const std::string& cmdLine) {
     // purposely use cout instead of this.outStream.
     size_t tokenPos;
-    const string cmdName = cmdLine.substr(0, tokenPos = cmdLine.find(" "));
-    const string cmdArgs = cmdLine.substr(tokenPos + 1, string::npos);
+    const std::string cmdName = cmdLine.substr(0, tokenPos = cmdLine.find(" "));
+    const std::string cmdArgs = cmdLine.substr(tokenPos + 1, std::string::npos);
     const auto it = COMMAND_MAP.find(cmdName);
     if (it == COMMAND_MAP.end()) {
         // No command name was matched
-        cout << "command not found. enter \"help\" for the help menu." << endl;
+        std::cout << "command not found. enter \"help\" for the help menu." << std::endl;
         return true;
     }
     switch (it->second) {
         case HELP:
-            cout << HELP_MESSAGE << endl;
+            std::cout << HELP_MESSAGE << std::endl;
             break;
         case QUIT:
             return false;
@@ -204,9 +204,9 @@ bool Game::runCommand(const string& cmdLine) {
             break;
         case RUN_MULTIPLE:
             try {
-                runMultiple(stoi(cmdArgs));
-            } catch (const invalid_argument& ia) {
-                cout << "could not convert " << cmdArgs << " to an integer." << endl;
+                runMultiple(std::stoi(cmdArgs));
+            } catch (const std::invalid_argument& ia) {
+                std::cout << "could not convert " << cmdArgs << " to an integer." << std::endl;
             }
             break;
         default:
@@ -216,7 +216,7 @@ bool Game::runCommand(const string& cmdLine) {
 }
 
 void Game::runNew(void) {
-    printMessageBar("START " + to_string(totalGenCount));
+    printMessageBar("START " + std::to_string(totalGenCount));
     clear();
     seed(true);
 
@@ -225,8 +225,8 @@ void Game::runNew(void) {
     const opcount_t numSolveOps = generateSolution();
     const clock_t clockFinish   = clock();
     const double processorTime  = ((double)(clockFinish - clockStart)) / CLOCKS_PER_SEC;
-    outStream << "num operations: " STATW << numSolveOps << endl;
-    outStream << "processor secs: " STATW << processorTime << endl;
+    outStream << "num operations: " STATW << numSolveOps << std::endl;
+    outStream << "processor secs: " STATW << processorTime << std::endl;
 
     // Print out the grid:
     print();
@@ -236,8 +236,8 @@ void Game::runNew(void) {
 void Game::runMultiple(unsigned int numAttempts) {
 #define PRINT_COLS 8
     const opcount_t initialGenCount = totalGenCount;
-    outStream << endl;
-    printMessageBar("START x" + to_string(numAttempts));
+    outStream << std::endl;
+    printMessageBar("START x" + std::to_string(numAttempts));
     for (unsigned int attemptNum = 0; attemptNum < numAttempts; attemptNum++) {
         clear();
         seed(false);
@@ -248,10 +248,10 @@ void Game::runMultiple(unsigned int numAttempts) {
             outStream STATW << numSolveOps;
         }
         if ((totalGenCount - initialGenCount) % PRINT_COLS == 0) {
-            outStream << endl;
+            outStream << std::endl;
         }
     }
-    printMessageBar("DONE x" + to_string(numAttempts));
+    printMessageBar("DONE x" + std::to_string(numAttempts));
 }
 
 
@@ -331,19 +331,19 @@ area_t Game::seed1(int ceiling) {
 
 
 
-void Game::printMessageBar(const string& msg) const {
+void Game::printMessageBar(const std::string& msg) const {
     unsigned long long barLength = (isPretty)
         ? ((length + order + 1) * 2)
         : (length * 2);
     if (barLength < msg.length() + 8) {
         barLength = msg.length() + 8;
     }
-    string bar(barLength, '=');
+    std::string bar(barLength, '=');
     if (!msg.empty()) {
         bar.replace(4, msg.length(), msg);
         bar.at(3) = ' ';
         bar.at(4 + msg.length()) = ' ';
     }
-    outStream << bar << endl;
+    outStream << bar << std::endl;
 }
 

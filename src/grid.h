@@ -2,9 +2,8 @@
 #define _GRID_H_
 
 #include <locale>
-#include <map>
 #include <vector>
-using namespace std;
+#include <map>
 
 
 // Evaluates to <o> bounded to the range [2, 5]
@@ -37,24 +36,33 @@ public:
      * When clear, biasIndex is the parent Game's length (same for value).
      */
     class Tile {
+        friend Game;
     public:
-        Tile(const area_t index);
+        explicit Tile(const area_t index);
         void clear(const value_t rowLen) {
             biasIndex = rowLen;
             value = rowLen;
             fixedVal = false;
         }
         const area_t index;
+        friend void swap(Tile& a, Tile& b)
+        {
+            using std::swap;
+            swap(a.biasIndex, b.biasIndex);
+            swap(a.value, b.value);
+            swap(a.fixedVal, b.fixedVal);
+        }
+    protected:
         value_t biasIndex;
         value_t value;
         bool fixedVal;
     };
 
 public:
-    Game(const order_t, ostream&, const bool isPretty);
+    Game(const order_t, std::ostream&, const bool isPretty);
 
     // return false if command is to exit the program:
-    bool runCommand(const string& cmdLine);
+    bool runCommand(const std::string& cmdLine);
     void runNew(void);
     void runMultiple(unsigned int);
     void print(void) const;
@@ -64,15 +72,15 @@ private:
     const int order;
     const int length;
     const int area;
-    vector<Tile> grid;
-    vector<occmask_t> rowBins;
-    vector<occmask_t> colBins;
-    vector<occmask_t> blkBins;
-    vector<vector<value_t>> rowBiases;
-    vector<Tile> traversalPath;
+    std::vector<Tile> grid;
+    std::vector<occmask_t> rowBins;
+    std::vector<occmask_t> colBins;
+    std::vector<occmask_t> blkBins;
+    std::vector<std::vector<value_t>> rowBiases;
+    std::vector<Tile> traversalPath;
     unsigned long totalGenCount;
     unsigned long successfulGenCount;
-    ostream& outStream;
+    std::ostream& outStream;
     const bool isPretty;
 
     void clear(void);
@@ -85,7 +93,7 @@ private:
     opcount_t generateSolution();
 
     length_t tileNumCandidates(const area_t) const;
-    void printMessageBar(const string&) const;
+    void printMessageBar(std::string const&) const;
 
     // Seed all tiles of blocks along the main diagonal:
     area_t seed0(void);
@@ -95,47 +103,49 @@ private:
     area_t seed1(int ceiling);
 
     // Inline functions:
-    bool isClear(const Tile& t) const { return t.biasIndex == length; }
+    bool isClear(Tile const& t) const { return t.biasIndex == length; }
     length_t getRow(const area_t index) const { return index / length; }
     length_t getCol(const area_t index) const { return index % length; }
     length_t getBlk(const area_t index) const { return getBlk(getRow(index), getCol(index)); }
     length_t getBlk(const length_t row, const length_t col) const { return (row / order) * order + (col / order); }
 
 public:
-    class OPseedException : public exception {
+    class OPseedException : public std::exception {
         virtual const char* what() const throw() {
             return "seed methods made it impossible to generate any solutions.";
         }
     } OPseed;
 
     typedef enum { HELP, QUIT, RUN_SINGLE, RUN_MULTIPLE, } Command;
-    static const map<string, Command> COMMAND_MAP;
-    static const string HELP_MESSAGE;
-    static const string REPL_PROMPT;
+    static const std::map<std::string, Command> COMMAND_MAP;
+    static const std::string HELP_MESSAGE;
+    static const std::string REPL_PROMPT;
 
 private:
     static const length_t seed1Constants[];
     static int myRandom (const int i) { return rand() % i; }
-    struct MyNumpunct : numpunct<char> {
-        string do_grouping() const {
+    struct MyNumpunct : std::numpunct<char> {
+        std::string do_grouping() const {
             return "\03";
         }
     };
 };
 
-const map<string, Game::Command> Game::COMMAND_MAP = {
+
+
+const std::map<std::string, Game::Command> Game::COMMAND_MAP = {
     { "help", HELP },
     { "quit", QUIT },
     { "", RUN_SINGLE },
     { "trials", RUN_MULTIPLE }
 };
-const string Game::HELP_MESSAGE = "\nCOMMAND MENU:"
+const std::string Game::HELP_MESSAGE = "\nCOMMAND MENU:"
     "\n- help"
     "\n- quit"
     "\n- <enter>"
     "\n- trials <n>"
     "\n";
-const string Game::REPL_PROMPT = "\n> ";
+const std::string Game::REPL_PROMPT = "\n> ";
 const length_t Game::seed1Constants[] = { 0, 0, 0, 0, 2, 9, };
 
 #endif

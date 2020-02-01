@@ -1,9 +1,8 @@
 #include <cstdlib>
+#include <iostream>
 #include <ctime>
 
 #include "grid.cpp"
-
-using namespace std;
 
 
 /**
@@ -13,38 +12,38 @@ using namespace std;
  * 2. scramble random key (default: time).
  */
 int main(int argc, char const *const argv[]) {
-    cout << "sizeof Tile: " << sizeof(Game::Tile) << endl;
-    cout << endl << "PARSED ARGUMENTS:" << endl;
+    std::cout << "sizeof Tile: " << sizeof(Game::Tile) << std::endl;
+    std::cout << std::endl << "PARSED ARGUMENTS:" << std::endl;
     order_t userOrder;
     bool isPretty;
-    ostream& outStream = cout;
+    std::ostream& outStream = std::cout;
     {
         // Arg ONE (order):
-        string arg1 = (argc > 1) ? argv[1] : "4";
-        userOrder = stoi(arg1, NULL);
-        cout << "- ARG 1 [[ grid order ]] : " << (uint16_t)userOrder << endl;
+        std::string arg1 = (argc > 1) ? argv[1] : "4";
+        userOrder = std::stoi(arg1, NULL);
+        std::cout << "- ARG 1 [[ grid order ]] : " << (uint16_t)userOrder << std::endl;
     } {
         // Arg TWO (srand key):
-        unsigned int srandKey = (argc > 2) ? stoi(argv[2]) : time(NULL);
+        unsigned int srandKey = (argc > 2) ? std::stoi(argv[2]) : time(NULL);
         srand(srandKey);
-        cout << "- ARG 2 [[ srand key  ]] : " << srandKey << endl;
+        std::cout << "- ARG 2 [[ srand key  ]] : " << srandKey << std::endl;
     } {
         // Arg THREE (pretty output):
         isPretty = false; // TODO
     }
     // Print help menu:
-    cout << Game::HELP_MESSAGE;
+    std::cout << Game::HELP_MESSAGE;
 
     // Generator loop:
     Game game(userOrder, outStream, isPretty);
-    string command;
+    std::string command;
     do {
-        cout << Game::REPL_PROMPT;
-        getline(cin, command);
+        std::cout << Game::REPL_PROMPT;
+        std::getline(std::cin, command);
     } while (game.runCommand(command));
 
     // End of program:
-    cout << endl << "bye bye!" << endl;
+    std::cout << std::endl << "bye bye!" << std::endl;
     return 0;
 }
 
