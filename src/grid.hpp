@@ -1,7 +1,6 @@
 #ifndef _GRID_H_
 #define _GRID_H_
 
-#include <locale>
 #include <vector>
 #include <map>
 
@@ -87,7 +86,7 @@ private:
     // not make generating a solution impossible.
     opcount_t generateSolution();
 
-    length_t tileNumCandidates(const area_t) const;
+    length_t tileNumNonCandidates(const area_t) const;
     void printMessageBar(std::string const&) const;
 
     // Seed all tiles of blocks along the main diagonal:

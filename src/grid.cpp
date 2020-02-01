@@ -1,16 +1,17 @@
 #include "grid.hpp"
 
-#include <cstdlib>
-#include <iostream>
-#include <ostream>
-#include <iomanip>
-#include <algorithm>
-#include <string>
-#include <ctime>
+#include <iostream>     // cout,
+#include <iomanip>      // setbase, setw,
+#include <algorithm>    // sort, random_shuffle,
+#include <numeric>      // iota,
+#include <string>       // string,
+#include <ctime>        // clock,
 
 
 #define STATW << std::setw(10)
 // ^mechanism to statically toggle alignment:
+
+#define TRAVERSE_BY_BOTTLENECK
 
 
 Game::Tile::Tile(const area_t index):
@@ -32,13 +33,13 @@ Game::Game(const order_t _order, std::ostream& outStream, const bool isPretty):
     blkBins.resize(length);
 
     for (int i = 0; i < area; i++) {
+        // Construct a new Tile with index `i` at the back.
         grid.emplace_back(i);
     }
+    rowBiases.reserve(length);
     for (length_t i = 0; i < length; i++) {
-        std::vector<value_t> seq;
-        for (value_t i = 0; i <= length; i++) {
-            seq.push_back(i);
-        }
+        std::vector<value_t> seq(length);
+        std::iota(seq.begin(), seq.end(), 0);
         rowBiases.push_back(std::move(seq));
     }
     totalGenCount = 0;
@@ -92,10 +93,12 @@ void Game::seed(const bool printInfo) {
         outStream << "stage 01 seeds: " STATW << seed0Seeds << std::endl;
         outStream << "stage 02 seeds: " STATW << seed1Seeds << std::endl;
     }
-    // std::sort(grid.begin(), grid.end(),
-    //         [this](Tile const& t1, Tile const& t2) -> bool {
-    //     return tileNumCandidates(t1.index) < tileNumCandidates(t2.index);
-    // });
+#ifdef TRAVERSE_BY_BOTTLENECK
+    std::sort(grid.begin(), grid.end(),
+            [this](Tile const& t1, Tile const& t2) -> bool {
+        return tileNumNonCandidates(t1.index) < tileNumNonCandidates(t2.index);
+    });
+#endif
 }
 
 
@@ -133,6 +136,7 @@ Game::Tile& Game::setNextValid(const area_t index) {
     occmask_t& rowBin = rowBins[getRow(index)];
     occmask_t& colBin = colBins[getCol(index)];
     occmask_t& blkBin = blkBins[getBlk(index)];
+    //__builtin_ffsl(0); // TODO: investigate ways to use this for performance gains.
 
     Tile& t = grid[index];
     if (!isClear(t)) {
@@ -163,16 +167,12 @@ Game::Tile& Game::setNextValid(const area_t index) {
     return t;
 }
 
-length_t Game::tileNumCandidates(const area_t index) const {
-    occmask_t unoccMask = ~(rowBins[getRow(index)]
+length_t Game::tileNumNonCandidates(const area_t index) const {
+    return __builtin_popcount(
+          rowBins[getRow(index)]
         | colBins[getCol(index)]
-        | blkBins[getBlk(index)]);
-    value_t numCandidates = 0;
-    for (length_t i = 0; i < length; i++) {
-        if (unoccMask & 0b1) numCandidates++;
-        unoccMask >>= 1;
-    }
-    return numCandidates;
+        | blkBins[getBlk(index)]
+    );
 }
 
 
@@ -226,7 +226,9 @@ void Game::runNew(void) {
     outStream << "processor secs: " STATW << processorTime << std::endl;
 
     // Print out the grid:
+#ifdef TRAVERSE_BY_BOTTLENECK
     std::sort(grid.begin(), grid.end());
+#endif
     print();
     printMessageBar((numSolveOps == 0) ? "ABORT" : "DONE");
 }

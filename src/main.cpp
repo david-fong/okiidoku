@@ -1,6 +1,4 @@
-#include <cstdlib>
 #include <iostream>
-#include <ctime>
 
 #include "grid.cpp"
 
