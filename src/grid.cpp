@@ -182,7 +182,7 @@ length_t Game::tileNumCandidates(const area_t index) const {
 
 
 
-bool Game::runCommand(const std::string& cmdLine) {
+bool Game::runCommand(std::string const& cmdLine) {
     // purposely use cout instead of this.outStream.
     size_t tokenPos;
     const std::string cmdName = cmdLine.substr(0, tokenPos = cmdLine.find(" "));
@@ -205,7 +205,7 @@ bool Game::runCommand(const std::string& cmdLine) {
         case RUN_MULTIPLE:
             try {
                 runMultiple(std::stoi(cmdArgs));
-            } catch (const std::invalid_argument& ia) {
+            } catch (std::invalid_argument const& ia) {
                 std::cout << "could not convert " << cmdArgs << " to an integer." << std::endl;
             }
             break;
@@ -331,7 +331,7 @@ area_t Game::seed1(int ceiling) {
 
 
 
-void Game::printMessageBar(const std::string& msg) const {
+void Game::printMessageBar(std::string const& msg) const {
     unsigned long long barLength = (isPretty)
         ? ((length + order + 1) * 2)
         : (length * 2);

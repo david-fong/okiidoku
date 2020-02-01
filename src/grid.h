@@ -44,15 +44,8 @@ public:
             value = rowLen;
             fixedVal = false;
         }
-        const area_t index;
-        friend void swap(Tile& a, Tile& b)
-        {
-            using std::swap;
-            swap(a.biasIndex, b.biasIndex);
-            swap(a.value, b.value);
-            swap(a.fixedVal, b.fixedVal);
-        }
     protected:
+        area_t index;
         value_t biasIndex;
         value_t value;
         bool fixedVal;
