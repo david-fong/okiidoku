@@ -1,4 +1,4 @@
-#include "grid.h"
+#include "grid.hpp"
 
 #include <cstdlib>
 #include <iostream>
@@ -52,7 +52,6 @@ Game::Game(const order_t _order, std::ostream& outStream, const bool isPretty):
     outStream << std::fixed;
 }
 
-
 void Game::print(void) const {
     // TODO: handle pretty-print style.
     outStream << std::setbase(16);
@@ -70,6 +69,7 @@ void Game::print(void) const {
     }
     outStream << std::setbase(10) << std::endl;
 }
+
 
 void Game::clear(void) {
     // Initialize all values as empty:
@@ -102,29 +102,30 @@ void Game::seed(const bool printInfo) {
     });
 }
 
+
 opcount_t Game::generateSolution(void) {
     opcount_t giveupThreshold = GIVEUP_RATIO * area * area;
     opcount_t numOperations = 0;
-    area_t i = 0;
+    std::vector<Tile>::iterator it = this->traversalPath.begin();
     // Skip all seeded starting tiles:
-    while (grid[i].fixedVal && i < area) i++;
+    while (it->fixedVal && it < traversalPath.end()) it++;
 
-    while (i < area) {
+    while (it < traversalPath.end()) {
         // Push a new permutation:
         numOperations++;
         if (numOperations > giveupThreshold) {
             totalGenCount++;
             return 0;
         }
-        if (isClear(setNextValid(i))) {
+        if (isClear(setNextValid(it->index))) {
             // Pop and step backward:
             do {
                 // Fail if no solution could be found:
-                if (i == 0) { throw Game::OPseed; }
-            } while (grid[--i].fixedVal);
+                if (it == traversalPath.begin()) { throw Game::OPseed; }
+            } while ((--it)->fixedVal);
         } else {
             // Step forward to push a new permutation:
-            while (++i < area && grid[i].fixedVal);
+            while (++it < traversalPath.end() && it->fixedVal);
         }
     }
     totalGenCount++;
