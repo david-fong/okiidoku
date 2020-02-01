@@ -77,14 +77,13 @@ void Game::clear(void) {
     std::fill(rowBins.begin(), rowBins.end(), 0);
     std::fill(colBins.begin(), colBins.end(), 0);
     std::fill(blkBins.begin(), blkBins.end(), 0);
-    traversalPath.clear();
 }
 
 void Game::seed(const bool printInfo) {
     // Scramble each row's value-guessing-order:
     // note: must keep the <length>'th entry as <length>.
-    for (length_t i = 0; i < length; i++) {
-        std::random_shuffle(rowBiases[i].begin(), rowBiases[i].end() - 1, myRandom);
+    for (auto& rowBias : rowBiases) {
+        std::random_shuffle(rowBias.begin(), rowBias.end() - 1, myRandom);
     }
     // Call the seeding routines:
     const area_t seed0Seeds = seed0();
@@ -93,24 +92,21 @@ void Game::seed(const bool printInfo) {
         outStream << "stage 01 seeds: " STATW << seed0Seeds << std::endl;
         outStream << "stage 02 seeds: " STATW << seed1Seeds << std::endl;
     }
-    std::for_each(grid.begin(), grid.end(), [this](Tile const& t){
-        if (isClear(t)) traversalPath.push_back(t);
-    });
-    std::sort(traversalPath.begin(), traversalPath.end(),
-            [this](Tile const& t1, Tile const& t2) -> bool {
-        return tileNumCandidates(t1.index) < tileNumCandidates(t2.index);
-    });
+    // std::sort(grid.begin(), grid.end(),
+    //         [this](Tile const& t1, Tile const& t2) -> bool {
+    //     return tileNumCandidates(t1.index) < tileNumCandidates(t2.index);
+    // });
 }
 
 
 opcount_t Game::generateSolution(void) {
     opcount_t giveupThreshold = GIVEUP_RATIO * area * area;
     opcount_t numOperations = 0;
-    std::vector<Tile>::iterator it = this->traversalPath.begin();
+    std::vector<Tile>::iterator it = grid.begin();
     // Skip all seeded starting tiles:
-    while (it->fixedVal && it < traversalPath.end()) it++;
+    while (it->fixedVal && it < grid.end()) it++;
 
-    while (it < traversalPath.end()) {
+    while (it < grid.end()) {
         // Push a new permutation:
         numOperations++;
         if (numOperations > giveupThreshold) {
@@ -121,11 +117,11 @@ opcount_t Game::generateSolution(void) {
             // Pop and step backward:
             do {
                 // Fail if no solution could be found:
-                if (it == traversalPath.begin()) { throw Game::OPseed; }
+                if (it == grid.begin()) { throw Game::OPseed; }
             } while ((--it)->fixedVal);
         } else {
             // Step forward to push a new permutation:
-            while (++it < traversalPath.end() && it->fixedVal);
+            while (++it < grid.end() && it->fixedVal);
         }
     }
     totalGenCount++;
@@ -134,7 +130,7 @@ opcount_t Game::generateSolution(void) {
 }
 
 Game::Tile& Game::setNextValid(const area_t index) {
-    const length_t row = getRow(index);
+    occmask_t& rowBin = rowBins[getRow(index)];
     occmask_t& colBin = colBins[getCol(index)];
     occmask_t& blkBin = blkBins[getBlk(index)];
 
@@ -142,21 +138,21 @@ Game::Tile& Game::setNextValid(const area_t index) {
     if (!isClear(t)) {
         // If the tile is currently already set, clear it:
         const occmask_t eraseMask = ~(0b1 << t.value);
-        rowBins[row] &= eraseMask;
+        rowBin &= eraseMask;
         colBin &= eraseMask;
         blkBin &= eraseMask;
     }
-    // descriptive (but not meaningful, according to spec) default value:
+    // default value:
     t.value = length;
 
-    const occmask_t invalidBin = rowBins[row] | colBin | blkBin;
+    const occmask_t invalidBin = rowBin | colBin | blkBin;
     value_t biasIndex = (t.biasIndex + 1) % (length + 1);
     for (; biasIndex < length; biasIndex++) {
-        value_t value = rowBiases[row][biasIndex];
+        value_t value = rowBiases[getRow(index)][biasIndex];
         const occmask_t valBit = 0b1 << value;
         if (!(invalidBin & valBit)) {
             // If a valid value is found for this tile:
-            rowBins[row] |= valBit;
+            rowBin |= valBit;
             colBin |= valBit;
             blkBin |= valBit;
             t.value = value;
@@ -226,10 +222,11 @@ void Game::runNew(void) {
     const opcount_t numSolveOps = generateSolution();
     const clock_t clockFinish   = clock();
     const double processorTime  = ((double)(clockFinish - clockStart)) / CLOCKS_PER_SEC;
-    outStream << "num operations: " STATW << numSolveOps << std::endl;
+    outStream << "num operations: " STATW << numSolveOps   << std::endl;
     outStream << "processor secs: " STATW << processorTime << std::endl;
 
     // Print out the grid:
+    std::sort(grid.begin(), grid.end());
     print();
     printMessageBar((numSolveOps == 0) ? "ABORT" : "DONE");
 }
@@ -243,6 +240,7 @@ void Game::runMultiple(unsigned int numAttempts) {
         clear();
         seed(false);
         const opcount_t numSolveOps = generateSolution();
+        // No need to sort grid back into order: No content print.
         if (numSolveOps == 0) {
             outStream STATW << "---";
         } else {

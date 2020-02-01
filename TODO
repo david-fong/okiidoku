@@ -5,6 +5,11 @@
   - Report findings in the main readme file.
 - Try printing size of Tile with and without the fixedVal field
   - If it contributes significantly, find way to take it out?
+
+## "Failed" Experiment
+
+This didn't end up working.
+
 - Try making traversal order not grid-row-major and see if it improves performance:
   - Hypothesis: Tiles with fewer candidates are like the solution space's dominant bottlenecks. If we were to leave them to the end, we may spend many long advances creating almost-complete solutions that cannot be complete because they violate the bottlenecks (and possibly often in similar ways). If we start with them first, we may be less likely to encounter that problem.
   - Need to give the Tile class an instance field for their og index since that's how we index their group-occupancy vectors and rowBias vectors.

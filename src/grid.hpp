@@ -44,6 +44,9 @@ public:
             value = rowLen;
             fixedVal = false;
         }
+        bool operator<(Tile const& other) const {
+            return index < other.index;
+        }
     protected:
         area_t index;
         value_t biasIndex;
@@ -70,7 +73,6 @@ private:
     std::vector<occmask_t> colBins;
     std::vector<occmask_t> blkBins;
     std::vector<std::vector<value_t>> rowBiases;
-    std::vector<Tile> traversalPath;
     unsigned long totalGenCount;
     unsigned long successfulGenCount;
     std::ostream& outStream;
