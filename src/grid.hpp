@@ -49,11 +49,15 @@ public:
     protected:
         area_t index;
         value_t biasIndex;
-        value_t value;
+        value_t value; // undefined if clear.
         bool fixedVal;
     };
 
+
 public:
+    const int order;
+    const int length;
+    const int area;
     Game(const order_t, std::ostream&, const bool isPretty);
 
     // return false if command is to exit the program:
@@ -61,12 +65,11 @@ public:
     void runNew(void);
     void runMultiple(unsigned int);
     void print(void) const;
+    void printMessageBar(std::string const&, unsigned int, const char = '=') const;
+    void printMessageBar(std::string const&, const char = '=') const;
 
 private:
     // Private fields:
-    const int order;
-    const int length;
-    const int area;
     std::vector<Tile> grid;
     std::vector<occmask_t> rowBins;
     std::vector<occmask_t> colBins;
@@ -74,24 +77,22 @@ private:
     std::vector<std::vector<value_t>> rowBiases;
     unsigned long totalGenCount;
     unsigned long successfulGenCount;
+
     std::ostream& outStream;
     const bool isPretty;
+    const unsigned int statsWidth;
 
     void clear(void);
     void seed(const bool printInfo);
-    // Returns the tile at index.
-    Tile& setNextValid(const area_t index);
     // Generates a random solution. Returns the number of operations or
     // zero if the give-up threshold was reached. Any previous seeds must
     // not make generating a solution impossible.
     opcount_t generateSolution();
-
+    // Returns the tile at index.
+    Tile& setNextValid(const area_t index);
     length_t tileNumNonCandidates(const area_t) const;
-    void printMessageBar(std::string const&) const;
 
-    // Seed all tiles of blocks along the main diagonal:
     area_t seed0(void);
-    area_t seed0b(void);
     bool seed1Bitmask(const area_t index, const occmask_t min);
     // returns the number of additionally seeded tiles.
     area_t seed1(int ceiling);
@@ -101,7 +102,7 @@ private:
     length_t getRow(const area_t index) const { return index / length; }
     length_t getCol(const area_t index) const { return index % length; }
     length_t getBlk(const area_t index) const { return getBlk(getRow(index), getCol(index)); }
-    length_t getBlk(const length_t row, const length_t col) const { return (row / order) * order + (col / order); }
+    length_t getBlk(const length_t row, const length_t col) const { return ((row / order) * order) + (col / order); }
 
 public:
     class OPseedException : public std::exception {
@@ -134,11 +135,11 @@ const std::map<std::string, Game::Command> Game::COMMAND_MAP = {
     { "trials", RUN_MULTIPLE }
 };
 const std::string Game::HELP_MESSAGE = "\nCOMMAND MENU:"
-    "\n- help"
-    "\n- quit"
-    "\n- <enter>"
-    "\n- trials <n>"
-    "\n";
+    "\n- help           print this help menu."
+    "\n- quit           terminate this program."
+    "\n- {enter}        generate a single solution."
+    "\n- trials <n>     generate <n> solutions."
+    ;
 const std::string Game::REPL_PROMPT = "\n> ";
 const length_t Game::seed1Constants[] = { 0, 0, 0, 0, 2, 9, };
 

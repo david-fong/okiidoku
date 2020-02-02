@@ -5,13 +5,14 @@
 #include <algorithm>    // sort, random_shuffle,
 #include <numeric>      // iota,
 #include <string>       // string,
+#include <bitset>       // bitset,
 #include <ctime>        // clock,
 
 
-#define STATW << std::setw(10)
+#define STATW << std::setw(this->statsWidth)
 // ^mechanism to statically toggle alignment:
 
-#define TRAVERSE_BY_BOTTLENECK
+#define TRAVERSE_BY_BOTTLENECK false
 
 
 Game::Tile::Tile(const area_t index):
@@ -25,7 +26,8 @@ Game::Game(const order_t _order, std::ostream& outStream, const bool isPretty):
     length      (order  * order),
     area        (length * length),
     outStream   (outStream),
-    isPretty    (isPretty)
+    isPretty    (isPretty),
+    statsWidth  (10)
 {
     grid.reserve(area);
     rowBins.resize(length);
@@ -38,9 +40,8 @@ Game::Game(const order_t _order, std::ostream& outStream, const bool isPretty):
     }
     rowBiases.reserve(length);
     for (length_t i = 0; i < length; i++) {
-        std::vector<value_t> seq(length);
-        std::iota(seq.begin(), seq.end(), 0);
-        rowBiases.push_back(std::move(seq));
+        rowBiases.emplace_back(length + 1);
+        std::iota(rowBiases[i].begin(), rowBiases[i].end(), 0);
     }
     totalGenCount = 0;
     successfulGenCount = 0;
@@ -93,7 +94,7 @@ void Game::seed(const bool printInfo) {
         outStream << "stage 01 seeds: " STATW << seed0Seeds << std::endl;
         outStream << "stage 02 seeds: " STATW << seed1Seeds << std::endl;
     }
-#ifdef TRAVERSE_BY_BOTTLENECK
+#if TRAVERSE_BY_BOTTLENECK == true
     std::sort(grid.begin(), grid.end(),
             [this](Tile const& t1, Tile const& t2) -> bool {
         return tileNumNonCandidates(t1.index) < tileNumNonCandidates(t2.index);
@@ -147,7 +148,7 @@ Game::Tile& Game::setNextValid(const area_t index) {
         blkBin &= eraseMask;
     }
     // default value:
-    t.value = length;
+    //t.value = length;
 
     const occmask_t invalidBin = rowBin | colBin | blkBin;
     value_t biasIndex = (t.biasIndex + 1) % (length + 1);
@@ -224,9 +225,10 @@ void Game::runNew(void) {
     const double processorTime  = ((double)(clockFinish - clockStart)) / CLOCKS_PER_SEC;
     outStream << "num operations: " STATW << numSolveOps   << std::endl;
     outStream << "processor secs: " STATW << processorTime << std::endl;
+    printMessageBar("", '-');
 
     // Print out the grid:
-#ifdef TRAVERSE_BY_BOTTLENECK
+#if TRAVERSE_BY_BOTTLENECK == true
     std::sort(grid.begin(), grid.end());
 #endif
     print();
@@ -235,24 +237,37 @@ void Game::runNew(void) {
 
 void Game::runMultiple(unsigned int numAttempts) {
 #define PRINT_COLS 8
-    const opcount_t initialGenCount = totalGenCount;
+    unsigned long totalNumTrials = 0;
+    unsigned long successfulNumTrials = 0;
+    double totalSuccessfulOperationCount = 0.0;
     outStream << std::endl;
-    printMessageBar("START x" + std::to_string(numAttempts));
+    printMessageBar("START x" + std::to_string(numAttempts), (statsWidth * PRINT_COLS));
     for (unsigned int attemptNum = 0; attemptNum < numAttempts; attemptNum++) {
         clear();
         seed(false);
         const opcount_t numSolveOps = generateSolution();
+        totalNumTrials++;
         // No need to sort grid back into order: No content print.
         if (numSolveOps == 0) {
             outStream STATW << "---";
         } else {
+            successfulNumTrials++;
+            totalSuccessfulOperationCount += numSolveOps;
             outStream STATW << numSolveOps;
         }
-        if ((totalGenCount - initialGenCount) % PRINT_COLS == 0) {
+        if (totalNumTrials % PRINT_COLS == 0) {
             outStream << std::endl;
         }
     }
-    printMessageBar("DONE x" + std::to_string(numAttempts));
+    if (totalNumTrials % PRINT_COLS != 0) {
+        // Final newline:
+        outStream << std::endl;
+    }
+    const opcount_t averageNumSolveOps = (opcount_t)(totalSuccessfulOperationCount / successfulNumTrials);
+    printMessageBar("", (statsWidth * PRINT_COLS), '-');
+    outStream << "avg num operations" STATW << averageNumSolveOps << std::endl;
+    outStream << "num aborted trials" STATW << (totalNumTrials - successfulNumTrials) << std::endl;
+    printMessageBar("DONE x" + std::to_string(numAttempts), (statsWidth * PRINT_COLS));
 }
 
 
@@ -332,14 +347,15 @@ area_t Game::seed1(int ceiling) {
 
 
 
-void Game::printMessageBar(std::string const& msg) const {
-    unsigned long long barLength = (isPretty)
-        ? ((length + order + 1) * 2)
-        : (length * 2);
+void Game::printMessageBar(
+    std::string const& msg,
+    unsigned int barLength,
+    const char fillChar
+) const {
     if (barLength < msg.length() + 8) {
         barLength = msg.length() + 8;
     }
-    std::string bar(barLength, '=');
+    std::string bar(barLength, fillChar);
     if (!msg.empty()) {
         bar.replace(4, msg.length(), msg);
         bar.at(3) = ' ';
@@ -348,3 +364,12 @@ void Game::printMessageBar(std::string const& msg) const {
     outStream << bar << std::endl;
 }
 
+void Game::printMessageBar(
+    std::string const& msg,
+    const char fillChar
+) const {
+    const unsigned int barLength = (isPretty)
+        ? ((length + order + 1) * 2)
+        : (length * 2);
+    return printMessageBar(msg, barLength, fillChar);
+}
