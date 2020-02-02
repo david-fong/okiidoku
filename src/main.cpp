@@ -10,7 +10,7 @@
  * 2. scramble random key (default: time).
  */
 int main(int argc, char const *const argv[]) {
-    std::cout << "sizeof Tile: " << sizeof(Sudoku::Tile) << std::endl;
+    std::cout << std::endl << "sizeof Tile: " << sizeof(Sudoku::Tile) << " bytes" << std::endl;
     std::cout << std::endl << "PARSED ARGUMENTS:" << std::endl;
     order_t userOrder;
     bool isPretty;
@@ -27,7 +27,7 @@ int main(int argc, char const *const argv[]) {
         std::cout << "- ARG 2 [[ srand key  ]] : " << srandKey << std::endl;
     } {
         // Arg THREE (pretty output):
-        isPretty = false; // TODO
+        isPretty = true; // TODO
     }
     // Print help menu:
     std::cout << Sudoku::HELP_MESSAGE << std::endl;

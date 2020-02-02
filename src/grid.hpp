@@ -66,7 +66,7 @@ public:
     // return false if command is to exit the program:
     bool runCommand(const std::string& cmdLine);
     void runNew(void);
-    void runMultiple(unsigned int);
+    void runMultiple(const unsigned int);
     void print(void) const;
     void printMessageBar(std::string const&, unsigned int, const char = '=') const;
     void printMessageBar(std::string const&, const char = '=') const;

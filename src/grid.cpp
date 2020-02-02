@@ -40,7 +40,7 @@ Sudoku::Sudoku(const order_t _order, std::ostream& outStream, const bool isPrett
     }
     totalGenCount = 0;
     successfulGenCount = 0;
-    doSeeding = true;
+    doSeeding = false; // it's faster :O
 
     // Output formatting:
     if (isPretty) {
@@ -51,12 +51,20 @@ Sudoku::Sudoku(const order_t _order, std::ostream& outStream, const bool isPrett
 }
 
 void Sudoku::print(void) const {
-    // TODO: handle pretty-print style.
+    static std::string vbar = ' ' + std::string(((length + order + 1) * 2 - 1), '-');
+    for (int i = 0; i <= order; i++) {
+        vbar[1 + i * 2 * (order + 1)] = '+';
+    }
     outStream << std::setbase(16);
     for (area_t i = 0; i < area; i++) {
         if ((i % length) == 0 && i != 0) {
+            if (isPretty) outStream << " |";
             outStream << "\n";
         }
+        if (isPretty && (i % (order * length) == 0)) {
+            outStream << vbar << std::endl;
+        }
+        if (isPretty && (i % order) == 0) outStream << " |";
         Tile const& t = grid.at(i);
         if (isClear(t)) {
             outStream << "  ";
@@ -68,6 +76,9 @@ void Sudoku::print(void) const {
                 outStream << (char)('a' + t.value);
             }
         }
+    }
+    if (isPretty) {
+        outStream << " |\n" << vbar;
     }
     outStream << std::setbase(10) << std::endl;
 }
@@ -229,7 +240,7 @@ void Sudoku::runNew(void) {
     const double processorTime  = ((double)(clockFinish - clockStart)) / CLOCKS_PER_SEC;
     outStream << "num operations: " STATW << numSolveOps   << std::endl;
     outStream << "processor secs: " STATW << processorTime << std::endl;
-    printMessageBar("", '-');
+    if (!isPretty) printMessageBar("", '-');
 
     // Print out the grid:
 #if TRAVERSE_BY_BOTTLENECK == true
@@ -239,8 +250,8 @@ void Sudoku::runNew(void) {
     printMessageBar((numSolveOps == 0) ? "ABORT" : "DONE");
 }
 
-void Sudoku::runMultiple(unsigned int numAttempts) {
-#define PRINT_COLS 8
+void Sudoku::runMultiple(const unsigned int numAttempts) {
+#define PRINT_COLS ((order < 3) ? 16 : 8)
     unsigned long totalNumTrials = 0;
     unsigned long successfulNumTrials = 0;
     double totalSuccessfulOperationCount = 0.0;
@@ -311,7 +322,6 @@ bool Sudoku::seed1Bitmask(const area_t index, const occmask_t min) {
 }
 
 area_t Sudoku::seed1(int ceiling) {
-    if (order <= 2) return 0; // overpowered. // TODO does this do anything? we already have the static array.
     ceiling = ~0 << (ceiling);
     Sudoku occ(order, outStream, false);
     occ.clear(); // no seeding required.
