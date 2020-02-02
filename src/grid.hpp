@@ -10,12 +10,6 @@
 #define GIVEUP_RATIO 0.5
 // TODO ^consumer code assumes num operations is proportional to area^2. it that true?
 
-/**
- * It turns out that the way that I am doing seeding does not change
- * the number of operations taken to generate a solution, which I was
- * incredibly surprised to find.
- */
-#define DO_SEEDING true
 
 /**
  * IMPORTANT:
@@ -36,21 +30,22 @@ typedef unsigned long long opcount_t;
 /**
  * 
  */
-class Game {
+class Sudoku {
 public:
     /**
-     * When clear, biasIndex is the parent Game's length (same for value).
+     * When clear, biasIndex is the parent Sudoku's length (same for value).
      */
     class Tile {
-        friend Game;
+        friend Sudoku;
     public:
-        explicit Tile(const area_t index);
+        Tile(void) = delete;
+        explicit Tile(const area_t index):
+            index       (index),
+            biasIndex   (0),
+            value       (0) {}
         void clear(const value_t rowLen) {
             biasIndex = rowLen;
             value = rowLen;
-            #if DO_SEEDING == true
-            fixedVal = false;
-            #endif
         }
         bool operator<(Tile const& other) const {
             return index < other.index;
@@ -59,9 +54,6 @@ public:
         area_t index;
         value_t biasIndex;
         value_t value; // undefined if clear.
-        #if DO_SEEDING == true
-        bool fixedVal;
-        #endif
     };
 
 
@@ -69,7 +61,7 @@ public:
     const int order;
     const int length;
     const int area;
-    Game(const order_t, std::ostream&, const bool isPretty);
+    Sudoku(const order_t, std::ostream&, const bool isPretty);
 
     // return false if command is to exit the program:
     bool runCommand(const std::string& cmdLine);
@@ -82,6 +74,7 @@ public:
 private:
     // Private fields:
     std::vector<Tile> grid;
+    std::vector<bool> seeds;
     std::vector<occmask_t> rowBins;
     std::vector<occmask_t> colBins;
     std::vector<occmask_t> blkBins;
@@ -89,6 +82,7 @@ private:
     unsigned long totalGenCount;
     unsigned long successfulGenCount;
 
+    bool doSeeding;
     std::ostream& outStream;
     const bool isPretty;
     const unsigned int statsWidth;
@@ -122,7 +116,7 @@ public:
         }
     } OPseed;
 
-    typedef enum { HELP, QUIT, RUN_SINGLE, RUN_MULTIPLE, } Command;
+    typedef enum { HELP, QUIT, RUN_SINGLE, RUN_MULTIPLE, TOGGLE_SEEDING, } Command;
     static const std::map<std::string, Command> COMMAND_MAP;
     static const std::string HELP_MESSAGE;
     static const std::string REPL_PROMPT;
@@ -139,19 +133,21 @@ private:
 
 
 
-const std::map<std::string, Game::Command> Game::COMMAND_MAP = {
+const std::map<std::string, Sudoku::Command> Sudoku::COMMAND_MAP = {
     { "help", HELP },
     { "quit", QUIT },
     { "", RUN_SINGLE },
-    { "trials", RUN_MULTIPLE }
+    { "trials", RUN_MULTIPLE },
+    { "seed", TOGGLE_SEEDING }
 };
-const std::string Game::HELP_MESSAGE = "\nCOMMAND MENU:"
+const std::string Sudoku::HELP_MESSAGE = "\nCOMMAND MENU:"
     "\n- help           print this help menu."
     "\n- quit           terminate this program."
     "\n- {enter}        generate a single solution."
     "\n- trials <n>     generate <n> solutions."
+    "\n- seed           toggle whether seeding is performed."
     ;
-const std::string Game::REPL_PROMPT = "\n> ";
-const length_t Game::seed1Constants[] = { 0, 0, 0, 0, 2, 4, };
+const std::string Sudoku::REPL_PROMPT = "\n> ";
+const length_t Sudoku::seed1Constants[] = { 0, 0, 0, 0, 4+2, 5+4, };
 
 #endif

@@ -10,7 +10,7 @@
  * 2. scramble random key (default: time).
  */
 int main(int argc, char const *const argv[]) {
-    std::cout << "sizeof Tile: " << sizeof(Game::Tile) << std::endl;
+    std::cout << "sizeof Tile: " << sizeof(Sudoku::Tile) << std::endl;
     std::cout << std::endl << "PARSED ARGUMENTS:" << std::endl;
     order_t userOrder;
     bool isPretty;
@@ -30,13 +30,13 @@ int main(int argc, char const *const argv[]) {
         isPretty = false; // TODO
     }
     // Print help menu:
-    std::cout << Game::HELP_MESSAGE << std::endl;
+    std::cout << Sudoku::HELP_MESSAGE << std::endl;
 
     // Generator loop:
-    Game game(userOrder, outStream, isPretty);
+    Sudoku game(userOrder, outStream, isPretty);
     std::string command;
     do {
-        std::cout << Game::REPL_PROMPT;
+        std::cout << Sudoku::REPL_PROMPT;
         std::getline(std::cin, command);
     } while (game.runCommand(command));
 
@@ -44,4 +44,3 @@ int main(int argc, char const *const argv[]) {
     std::cout << std::endl << "bye bye!" << std::endl;
     return 0;
 }
-

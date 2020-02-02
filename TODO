@@ -7,7 +7,12 @@
   - If it contributes significantly, find way to take it out?
 - Change occmask_t fields to use std::bitset.
   - Can try adding a short-circuit step to traversal: if setting an occ bit makes all its bits set for a group and that group has a tile that is clear, then backtrack. This would only be efficient if we maintain a bitset for each group of each type saying which tiles are clear... We should try this as an experiment.
-- Perform benchmarks comparing performance (time and number of operations) with and without seeds.
+
+## OK cool
+
+An old TODO: Perform benchmarks comparing performance (time and number of operations) with and without seeds.
+
+For 16x16, running 1024 trials, using no seeds was much faster in terms of time, had less than half the number of aborted trials, and took about six times fewer operations. I am shocked. This is amazing.
 
 ## "Failed" Experiment
 

@@ -12,10 +12,13 @@
         "jsonc"
     ],
     "words": [
+        "sudoku",
         "retval",
         "giveup",
         "occmask",
         "opcount",
-        "statw"
+        "statw",
+
+        "stoi"
     ]
 }
