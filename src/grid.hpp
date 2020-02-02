@@ -7,8 +7,15 @@
 
 // Evaluates to <o> bounded to the range [2, 5]
 #define CLEAN_ORDER(o) (((o) < 2) ? 2 : (((o) > 5) ? 5 : (o)))
-#define GIVEUP_RATIO 128
+#define GIVEUP_RATIO 0.5
 // TODO ^consumer code assumes num operations is proportional to area^2. it that true?
+
+/**
+ * It turns out that the way that I am doing seeding does not change
+ * the number of operations taken to generate a solution, which I was
+ * incredibly surprised to find.
+ */
+#define DO_SEEDING true
 
 /**
  * IMPORTANT:
@@ -41,7 +48,9 @@ public:
         void clear(const value_t rowLen) {
             biasIndex = rowLen;
             value = rowLen;
+            #if DO_SEEDING == true
             fixedVal = false;
+            #endif
         }
         bool operator<(Tile const& other) const {
             return index < other.index;
@@ -50,7 +59,9 @@ public:
         area_t index;
         value_t biasIndex;
         value_t value; // undefined if clear.
+        #if DO_SEEDING == true
         bool fixedVal;
+        #endif
     };
 
 
@@ -141,6 +152,6 @@ const std::string Game::HELP_MESSAGE = "\nCOMMAND MENU:"
     "\n- trials <n>     generate <n> solutions."
     ;
 const std::string Game::REPL_PROMPT = "\n> ";
-const length_t Game::seed1Constants[] = { 0, 0, 0, 0, 2, 9, };
+const length_t Game::seed1Constants[] = { 0, 0, 0, 0, 2, 4, };
 
 #endif

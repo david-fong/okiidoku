@@ -2,11 +2,11 @@
 
 #include <iostream>     // cout,
 #include <iomanip>      // setbase, setw,
-#include <algorithm>    // sort, random_shuffle,
+#include <ctime>        // clock,
 #include <numeric>      // iota,
+#include <algorithm>    // sort, random_shuffle,
 #include <string>       // string,
 #include <bitset>       // bitset,
-#include <ctime>        // clock,
 
 
 #define STATW << std::setw(this->statsWidth)
@@ -18,8 +18,11 @@
 Game::Tile::Tile(const area_t index):
     index       (index),
     biasIndex   (0),
-    value       (0),
-    fixedVal    (false) {}
+    value       (0)
+#if DO_SEEDING == true
+    ,fixedVal    (false)
+#endif
+    {}
 
 Game::Game(const order_t _order, std::ostream& outStream, const bool isPretty):
     order       (CLEAN_ORDER(_order)),
@@ -65,8 +68,16 @@ void Game::print(void) const {
         if (isClear(t)) {
             outStream << "  ";
         } else {
+#if DO_SEEDING == true
             outStream << ((t.fixedVal) ? "." : " ");
-            outStream << (uint16_t)t.value;
+#else
+            outStream << " ";
+#endif
+            if (order < 5) {
+                outStream << (uint16_t)t.value;
+            } else {
+                outStream << (char)('a' + t.value);
+            }
         }
     }
     outStream << std::setbase(10) << std::endl;
@@ -82,11 +93,13 @@ void Game::clear(void) {
 }
 
 void Game::seed(const bool printInfo) {
+    // TODO: move this shuffle to clear and retry seeding comparison. We probably forgot about this.
     // Scramble each row's value-guessing-order:
     // note: must keep the <length>'th entry as <length>.
     for (auto& rowBias : rowBiases) {
         std::random_shuffle(rowBias.begin(), rowBias.end() - 1, myRandom);
     }
+#if DO_SEEDING == true
     // Call the seeding routines:
     const area_t seed0Seeds = seed0();
     const area_t seed1Seeds = seed1(order + seed1Constants[order]);
@@ -100,16 +113,18 @@ void Game::seed(const bool printInfo) {
         return tileNumNonCandidates(t1.index) < tileNumNonCandidates(t2.index);
     });
 #endif
+#endif
 }
 
 
 opcount_t Game::generateSolution(void) {
-    opcount_t giveupThreshold = GIVEUP_RATIO * area * area;
+    opcount_t giveupThreshold = GIVEUP_RATIO * (area * area * area);
     opcount_t numOperations = 0;
     std::vector<Tile>::iterator it = grid.begin();
     // Skip all seeded starting tiles:
+#if DO_SEEDING == true
     while (it->fixedVal && it < grid.end()) it++;
-
+#endif
     while (it < grid.end()) {
         // Push a new permutation:
         numOperations++;
@@ -119,13 +134,19 @@ opcount_t Game::generateSolution(void) {
         }
         if (isClear(setNextValid(it->index))) {
             // Pop and step backward:
+#if DO_SEEDING == true
             do {
-                // Fail if no solution could be found:
                 if (it == grid.begin()) { throw Game::OPseed; }
             } while ((--it)->fixedVal);
         } else {
-            // Step forward to push a new permutation:
             while (++it < grid.end() && it->fixedVal);
+#else
+            // Fail if no solution could be found:
+            if (it-- == grid.begin()) { throw Game::OPseed; }
+        } else {
+            // Step forward to push a new permutation:
+            it++;
+#endif
         }
     }
     totalGenCount++;
@@ -273,7 +294,7 @@ void Game::runMultiple(unsigned int numAttempts) {
 
 
 
-
+#if DO_SEEDING == true
 area_t Game::seed0(void) {
     if (order <= 2) return 0; // overpowered.
     area_t count = 0;
@@ -344,6 +365,7 @@ area_t Game::seed1(int ceiling) {
     }
     return count;
 }
+#endif
 
 
 

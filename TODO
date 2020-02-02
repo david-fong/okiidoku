@@ -7,6 +7,7 @@
   - If it contributes significantly, find way to take it out?
 - Change occmask_t fields to use std::bitset.
   - Can try adding a short-circuit step to traversal: if setting an occ bit makes all its bits set for a group and that group has a tile that is clear, then backtrack. This would only be efficient if we maintain a bitset for each group of each type saying which tiles are clear... We should try this as an experiment.
+- Perform benchmarks comparing performance (time and number of operations) with and without seeds.
 
 ## "Failed" Experiment
 
@@ -17,3 +18,8 @@ This didn't end up working.
   - Need to give the Tile class an instance field for their og index since that's how we index their group-occupancy vectors and rowBias vectors.
   - Invariant: At the beginning of solution generation, we can filter for all un-seeded tiles and sort them in ascending order of number of remaining candidates. I haven't thought it out 100% yet, but I believe we cannot update this traversal order intermittently (even if we only sort those past the current traversal index) because it could make us miss some outputs or put us in an infinite loop of testing a cycle of outputs. I feel like that's a bit of a bummer, but at this point there are many things I'm not sure of yet, so I'll try to hold that feeling back.
 
+## Bookmarks
+
+```text
+https://gcc.gnu.org/onlinedocs/gcc/Other-Builtins.html
+```

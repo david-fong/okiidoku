@@ -30,7 +30,7 @@ int main(int argc, char const *const argv[]) {
         isPretty = false; // TODO
     }
     // Print help menu:
-    std::cout << Game::HELP_MESSAGE;
+    std::cout << Game::HELP_MESSAGE << std::endl;
 
     // Generator loop:
     Game game(userOrder, outStream, isPretty);
