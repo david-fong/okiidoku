@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 
 #include "grid.cpp"
 
@@ -8,32 +9,44 @@
  * 0. executable name (fixed).
  * 1. grid order (default: 4).
  * 2. scramble random key (default: time).
+ * 3. output file name.
  */
-int main(int argc, char const *const argv[]) {
+int main(const int argc, char const *const argv[]) {
     std::cout << std::endl << "sizeof Tile: " << sizeof(Sudoku::Tile) << " bytes" << std::endl;
     std::cout << std::endl << "PARSED ARGUMENTS:" << std::endl;
-    order_t userOrder;
-    bool isPretty;
-    std::ostream& outStream = std::cout;
-    {
-        // Arg ONE (order):
-        std::string arg1 = (argc > 1) ? argv[1] : "4";
-        userOrder = std::stoi(arg1, NULL);
-        std::cout << "- ARG 1 [[ grid order ]] : " << (uint16_t)userOrder << std::endl;
-    } {
-        // Arg TWO (srand key):
-        unsigned int srandKey = (argc > 2) ? std::stoi(argv[2]) : time(NULL);
-        srand(srandKey);
-        std::cout << "- ARG 2 [[ srand key  ]] : " << srandKey << std::endl;
-    } {
-        // Arg THREE (pretty output):
-        isPretty = true; // TODO
+
+    order_t         userOrder;      // 1
+    unsigned int    srandKey;       // 2
+    std::string     outFileName;    // 3
+    std::ostream*   outStream;      // 3
+
+    userOrder = std::stoi(((argc > 1) ? argv[1] : "4"), NULL);
+    if (argc > 2 && !std::string(argv[2]).empty()) {
+        srandKey = std::stoi(argv[2]);
+    } else {
+        srandKey = std::time(NULL);
     }
+    if (argc > 3) {
+        // TODO: handle if file already exists: prompt user for whether to overwrite.
+        outFileName = argv[3];
+        outStream = new std::ofstream(outFileName);
+    } else {
+        outFileName = "std::cout";
+        outStream = &std::cout;
+    }
+
+    std::cout << "- ARG 1 [[ grid order  ]] : " << (uint16_t)userOrder << std::endl;
+    std::cout << "- ARG 2 [[ srand key   ]] : " << srandKey    << std::endl;
+    std::cout << "- ARG 3 [[ output file ]] : " << outFileName << std::endl;
+
+    // Scramble the random number generator:
+    std::srand(srandKey);
+
     // Print help menu:
     std::cout << Sudoku::HELP_MESSAGE << std::endl;
 
     // Generator loop:
-    Sudoku game(userOrder, outStream, isPretty);
+    Sudoku game(userOrder, *outStream);
     std::string command;
     do {
         std::cout << Sudoku::REPL_PROMPT;

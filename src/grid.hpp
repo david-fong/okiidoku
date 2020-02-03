@@ -7,7 +7,7 @@
 
 // Evaluates to <o> bounded to the range [2, 5]
 #define CLEAN_ORDER(o) (((o) < 2) ? 2 : (((o) > 5) ? 5 : (o)))
-#define GIVEUP_RATIO 0.5
+#define GIVEUP_THRESH_COEFF 0.7
 // TODO ^consumer code assumes num operations is proportional to area^2. it that true?
 
 
@@ -61,7 +61,7 @@ public:
     const int order;
     const int length;
     const int area;
-    Sudoku(const order_t, std::ostream&, const bool isPretty);
+    Sudoku(const order_t, std::ostream&);
 
     // return false if command is to exit the program:
     bool runCommand(const std::string& cmdLine);
@@ -134,20 +134,20 @@ private:
 
 
 const std::map<std::string, Sudoku::Command> Sudoku::COMMAND_MAP = {
-    { "help", HELP },
-    { "quit", QUIT },
-    { "", RUN_SINGLE },
+    { "help",   HELP },
+    { "quit",   QUIT },
+    { "",       RUN_SINGLE },
     { "trials", RUN_MULTIPLE },
-    { "seed", TOGGLE_SEEDING }
+    { "seed",   TOGGLE_SEEDING }
 };
 const std::string Sudoku::HELP_MESSAGE = "\nCOMMAND MENU:"
     "\n- help           print this help menu."
     "\n- quit           terminate this program."
     "\n- {enter}        generate a single solution."
     "\n- trials <n>     generate <n> solutions."
-    "\n- seed           toggle whether seeding is performed."
+    "\n- seed           toggle seeding step (slower when included)."
     ;
 const std::string Sudoku::REPL_PROMPT = "\n> ";
-const length_t Sudoku::seed1Constants[] = { 0, 0, 0, 0, 4+2, 5+4, };
+const length_t Sudoku::seed1Constants[] = { 0, 0, 0, 3+0, 4+2, 5+4, };
 
 #endif

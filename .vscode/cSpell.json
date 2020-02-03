@@ -19,6 +19,7 @@
         "opcount",
         "statw",
 
-        "stoi"
+        "stoi",
+        "cout"
     ]
 }

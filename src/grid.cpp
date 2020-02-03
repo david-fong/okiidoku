@@ -15,13 +15,13 @@
 #define TRAVERSE_BY_BOTTLENECK false
 
 
-Sudoku::Sudoku(const order_t _order, std::ostream& outStream, const bool isPretty):
+Sudoku::Sudoku(const order_t _order, std::ostream& outStream):
     order       (CLEAN_ORDER(_order)),
     length      (order  * order),
     area        (length * length),
     outStream   (outStream),
-    isPretty    (isPretty),
-    statsWidth  (order * 3)
+    isPretty    (&outStream == &std::cout),
+    statsWidth  (0.5 * length + 4)
 {
     grid.reserve(area);
     seeds.resize(area, false);
@@ -62,7 +62,7 @@ void Sudoku::print(void) const {
             outStream << "\n";
         }
         if (isPretty && (i % (order * length) == 0)) {
-            outStream << vbar << std::endl;
+            outStream << vbar << '\n';
         }
         if (isPretty && (i % order) == 0) outStream << " |";
         Tile const& t = grid.at(i);
@@ -117,8 +117,7 @@ void Sudoku::seed(const bool printInfo) {
 
 
 opcount_t Sudoku::generateSolution(void) {
-    const opcount_t giveupThreshold = GIVEUP_RATIO * (area * area * area)
-        * ((doSeeding) ? ((double)order / (order - 1)) : 1);
+    static const opcount_t giveupThreshold = GIVEUP_THRESH_COEFF * (area * area * area);
     opcount_t numOperations = 0;
     std::vector<Tile>::iterator it = grid.begin();
     // Skip all seeded starting tiles:
@@ -251,12 +250,12 @@ void Sudoku::runNew(void) {
 }
 
 void Sudoku::runMultiple(const unsigned int numAttempts) {
-#define PRINT_COLS ((order < 3) ? 16 : 8)
+    static const unsigned PRINT_COLS = ((unsigned[]){0,0,16,12,8,1})[order];
     unsigned long totalNumTrials = 0;
     unsigned long successfulNumTrials = 0;
     double totalSuccessfulOperationCount = 0.0;
-    outStream << std::endl;
     printMessageBar("START x" + std::to_string(numAttempts), (statsWidth * PRINT_COLS));
+
     for (unsigned int attemptNum = 0; attemptNum < numAttempts; attemptNum++) {
         clear();
         seed(false);
@@ -278,11 +277,20 @@ void Sudoku::runMultiple(const unsigned int numAttempts) {
         // Final newline:
         outStream << std::endl;
     }
-    const opcount_t averageNumSolveOps = (opcount_t)(totalSuccessfulOperationCount / successfulNumTrials);
+
+    // Print stats:
+    const double averageNumSolveOps = (successfulNumTrials == 0) ? 0.0
+        : ((double)totalSuccessfulOperationCount / successfulNumTrials);
     printMessageBar("", (statsWidth * PRINT_COLS), '-');
     outStream << "avg num operations" STATW << averageNumSolveOps << std::endl;
     outStream << "num aborted trials" STATW << (totalNumTrials - successfulNumTrials) << std::endl;
     printMessageBar("DONE x" + std::to_string(numAttempts), (statsWidth * PRINT_COLS));
+
+    // If printing to file and some time has passed, emit a beep sound:
+    if (&outStream != &std::cout) {
+        // TODO: count processor time please.
+        std::cout << '\a' << std::flush;
+    }
 }
 
 
@@ -291,7 +299,7 @@ void Sudoku::runMultiple(const unsigned int numAttempts) {
 area_t Sudoku::seed0(void) {
     if (order <= 2) return 0; // overpowered.
     area_t count = 0;
-    const area_t bRow = order * length;
+    static const area_t bRow = order * length;
     for (area_t b = 0; b < area; b += bRow + order) {
         for (area_t r = 0; r < bRow; r += length) {
             for (order_t c = 0; c < order; c++) {
@@ -323,7 +331,7 @@ bool Sudoku::seed1Bitmask(const area_t index, const occmask_t min) {
 
 area_t Sudoku::seed1(int ceiling) {
     ceiling = ~0 << (ceiling);
-    Sudoku occ(order, outStream, false);
+    static Sudoku occ(order, outStream);
     occ.clear(); // no seeding required.
     for (area_t i = 0; i < area; i++) {
         if (seeds[i]) {
