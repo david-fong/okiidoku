@@ -138,14 +138,14 @@ const std::map<std::string, Sudoku::Command> Sudoku::COMMAND_MAP = {
     { "quit",   QUIT },
     { "",       RUN_SINGLE },
     { "trials", RUN_MULTIPLE },
-    { "seed",   TOGGLE_SEEDING }
+    { "doseed", TOGGLE_SEEDING }
 };
 const std::string Sudoku::HELP_MESSAGE = "\nCOMMAND MENU:"
     "\n- help           print this help menu."
     "\n- quit           terminate this program."
     "\n- {enter}        generate a single solution."
     "\n- trials <n>     generate <n> solutions."
-    "\n- seed           toggle seeding step (slower when included)."
+    "\n- doseed         toggle seeding step (slower when on)."
     ;
 const std::string Sudoku::REPL_PROMPT = "\n> ";
 const length_t Sudoku::seed1Constants[] = { 0, 0, 0, 3+0, 4+2, 5+4, };

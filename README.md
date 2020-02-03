@@ -39,7 +39,7 @@ The equation described above would be quite complex. As a first step, we can tak
 
 `TODO: create diagrams illustrating the logic and insert them here.`
 
-The above diagram shows that for a block `B_i,j`, the number of combinations of symbols according to this traversal order is no more than:
+The above diagram shows that for a block `B_i,j`, the number of combinations of symbols according to this traversal order is no more than (graph's vertical axis is in log scale):
 
 <img src="images/solution_space_graphs.png" width="55%" align="left" />
 

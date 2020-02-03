@@ -118,11 +118,12 @@ void Sudoku::seed(const bool printInfo) {
 
 
 opcount_t Sudoku::generateSolution(void) {
+    const bool doSeeding = this->doSeeding; // cache
     static const opcount_t giveupThreshold = GIVEUP_THRESH_COEFF * (area * area * area);
     opcount_t numOperations = 0;
     std::vector<Tile>::iterator it = grid.begin();
     // Skip all seeded starting tiles:
-    while (seeds[it->index] && it < grid.end()) it++;
+    while (doSeeding && seeds[it->index] && it < grid.end()) it++;
     while (it < grid.end()) {
         // Push a new permutation:
         numOperations++;
@@ -134,9 +135,12 @@ opcount_t Sudoku::generateSolution(void) {
             // Pop and step backward:
             do {
                 if (it == grid.begin()) { throw Sudoku::OPseed; }
-            } while (seeds[(--it)->index]);
+                it--;
+            } while (doSeeding && seeds[(it)->index]);
         } else {
-            while (++it < grid.end() && seeds[it->index]);
+            do {
+                it++;
+            } while (doSeeding && it < grid.end() && seeds[it->index]);
         }
     }
     totalGenCount++;
