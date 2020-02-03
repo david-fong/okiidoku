@@ -1,7 +1,9 @@
 
 # Sudoku with C++
 
-Sudoku is a favourite puzzle of mine. When I started programming in my first year of university, I wrote a solution generator in C. It was pretty terrible, but I was very proud of it. After getting introduced to Java, I wrote another version
+Sudoku is a favourite puzzle of mine. When I started programming in my first year of university, I wrote a solution generator in C. It was pretty terrible, but I was very happy with it. I [reworked it after learning Java](https://github.com/david-fong/Sudoku-J), then later made this, and next, I look to write [a hardware implementation in System Verilog](https://github.com/david-fong/Sudoku-SV).
+
+I'm quite proud of this version. It can dance circles around my earlier attempts written in C and Java (because I figured out some new tricks). You can find sample benchmark statistics in the [sample data](/sample_data) folder, or clone, build, and run it for yourself (I've set up a handy [REPL](https://wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop)). I was especially and delightfully surprised to find that it can occasionally generate 25x25 solutions within a matter of seconds, which I previously thought I would never have the pleasure of being able to say.
 
 !["Example 9x9 generations"](/images/test0.png)
 
