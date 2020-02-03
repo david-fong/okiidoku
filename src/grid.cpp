@@ -9,7 +9,8 @@
 #include <bitset>       // bitset,
 
 
-#define STATW << std::setw(this->statsWidth)
+#define STATW_I << std::setw(this->statsWidth)
+#define STATW_D << std::setw(this->statsWidth + 4)
 // ^mechanism to statically toggle alignment:
 
 #define TRAVERSE_BY_BOTTLENECK false
@@ -21,7 +22,7 @@ Sudoku::Sudoku(const order_t _order, std::ostream& outStream):
     area        (length * length),
     outStream   (outStream),
     isPretty    (&outStream == &std::cout),
-    statsWidth  (0.5 * length + 4)
+    statsWidth  ((0.5 * length) + 3)
 {
     grid.reserve(area);
     seeds.resize(area, false);
@@ -104,8 +105,8 @@ void Sudoku::seed(const bool printInfo) {
     const area_t seed0Seeds = seed0();
     const area_t seed1Seeds = seed1(seed1Constants[order]);
     if (printInfo) {
-        outStream << "stage 01 seeds: " STATW << seed0Seeds << std::endl;
-        outStream << "stage 02 seeds: " STATW << seed1Seeds << std::endl;
+        outStream << "stage 01 seeds: " STATW_I << seed0Seeds << std::endl;
+        outStream << "stage 02 seeds: " STATW_I << seed1Seeds << std::endl;
     }
 #if TRAVERSE_BY_BOTTLENECK == true
     std::sort(grid.begin(), grid.end(),
@@ -237,8 +238,8 @@ void Sudoku::runNew(void) {
     const opcount_t numSolveOps = generateSolution();
     const clock_t clockFinish   = clock();
     const double processorTime  = ((double)(clockFinish - clockStart)) / CLOCKS_PER_SEC;
-    outStream << "num operations: " STATW << numSolveOps   << std::endl;
-    outStream << "processor secs: " STATW << processorTime << std::endl;
+    outStream << "num operations: " STATW_I << numSolveOps   << std::endl;
+    outStream << "processor secs: " STATW_D << processorTime << std::endl;
     if (!isPretty) printMessageBar("", '-');
 
     // Print out the grid:
@@ -263,11 +264,11 @@ void Sudoku::runMultiple(const unsigned int numAttempts) {
         totalNumTrials++;
         // No need to sort grid back into order: No content print.
         if (numSolveOps == 0) {
-            outStream STATW << "---";
+            outStream STATW_I << "---";
         } else {
             successfulNumTrials++;
             totalSuccessfulOperationCount += numSolveOps;
-            outStream STATW << numSolveOps;
+            outStream STATW_I << numSolveOps;
         }
         if (totalNumTrials % PRINT_COLS == 0) {
             outStream << std::endl;
@@ -282,8 +283,8 @@ void Sudoku::runMultiple(const unsigned int numAttempts) {
     const double averageNumSolveOps = (successfulNumTrials == 0) ? 0.0
         : ((double)totalSuccessfulOperationCount / successfulNumTrials);
     printMessageBar("", (statsWidth * PRINT_COLS), '-');
-    outStream << "avg num operations" STATW << averageNumSolveOps << std::endl;
-    outStream << "num aborted trials" STATW << (totalNumTrials - successfulNumTrials) << std::endl;
+    outStream << "avg num operations" STATW_D << averageNumSolveOps << std::endl;
+    outStream << "num aborted trials" STATW_I << (totalNumTrials - successfulNumTrials) << std::endl;
     printMessageBar("DONE x" + std::to_string(numAttempts), (statsWidth * PRINT_COLS));
 
     // If printing to file and some time has passed, emit a beep sound:
