@@ -31,6 +31,8 @@ Sudoku::Sudoku(const order_t _order, std::ostream& os):
         rowBiases.emplace_back(length + 1);
         std::iota(rowBiases[i].begin(), rowBiases[i].end(), 0);
     }
+    traversalOrder.reserve(area);
+    setGenPath(BLOCK_COLS);
     totalGenCount = 0;
     successfulGenCount = 0;
 
@@ -104,7 +106,7 @@ Sudoku::opcount_t Sudoku::generateSolution(void) {
             totalGenCount++;
             return 0;
         }
-        if (isClear(setNextValid(index))) {
+        if (isClear(setNextValid(traversalOrder[index]))) {
             // Pop and step backward:
             if (index == 0) {
                 // No solution could be found. Treat as if abort.
@@ -165,6 +167,25 @@ Sudoku::length_t Sudoku::tileNumNonCandidates(const area_t index) const noexcept
     );
 }
 
+void Sudoku::setGenPath(const GenPath newGenPath) noexcept {
+    switch (newGenPath) {
+        case ROW_MAJOR:
+            std::iota(traversalOrder.begin(), traversalOrder.end(), 0);
+            break;
+        case BLOCK_COLS: {
+            area_t i = 0;
+            for (order_t blkCol = 0; blkCol < order; blkCol++) {
+                for (length_t row = 0; row < length; row++) {
+                    for (order_t bCol = 0; bCol < order; bCol++) {
+                        traversalOrder[i++] = (blkCol * order) + (row * length) + (bCol);
+                    }
+                }
+            }
+            break; }
+    }
+    genPath = newGenPath;
+}
+
 
 
 
@@ -195,6 +216,10 @@ bool Sudoku::runCommand(std::string const& cmdLine) {
             } catch (std::invalid_argument const& ia) {
                 std::cout << "could not convert " << cmdArgs << " to an integer." << std::endl;
             }
+            break;
+        case SET_GENPATH:
+            setGenPath((GenPath)((genPath + 1) % (GenPath_MAX + 1)));
+            std::cout << "generator path is now set to: " << Sudoku::GenPath_Names[genPath] << std::endl;
             break;
         default:
             break; // unreachable.
