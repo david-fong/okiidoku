@@ -38,6 +38,7 @@ namespace Sudoku {
     const std::string REPL_PROMPT = "\n> ";
 
     typedef enum { TWO = 2, THREE = 3, FOUR = 4, FIVE = 5, } Order;
+    const std::vector<Order> OrderVec = { TWO, THREE, FOUR, FIVE, };
 
     /**
      * 
@@ -89,9 +90,9 @@ namespace Sudoku {
 
     private:
         std::vector<Tile> grid;
-        std::vector<occmask_t> rowBins;
-        std::vector<occmask_t> colBins;
-        std::vector<occmask_t> blkBins;
+        std::vector<occmask_t> rowSymbolOccMasks;
+        std::vector<occmask_t> colSymbolOccMasks;
+        std::vector<occmask_t> blkSymbolOccMasks;
         std::vector<std::vector<value_t>> rowBiases;
         std::vector<area_t> traversalOrder;
         GenPath genPath;

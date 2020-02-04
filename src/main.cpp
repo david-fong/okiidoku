@@ -49,7 +49,11 @@ int main(const int argc, char const *const argv[]) {
         case FOUR:  { Solver<FOUR>  game(*outStream); break; }
         case FIVE:  { Solver<FIVE>  game(*outStream); break; }
         default:
-            std::cout << "order must be " << std::endl;
+            std::cout << "\nFAILED:\norder must be one of: [ ";
+            for (Order o : OrderVec) {
+                std::cout << o << ", ";
+            }
+            std::cout << "]" << std::endl;
             break;
     }
 

@@ -23,9 +23,9 @@ Sudoku::Solver<O>::Solver(std::ostream& os):
     statsWidth  ((0.5 * length) + 3)
 {
     grid.resize(area);
-    rowBins.resize(length);
-    colBins.resize(length);
-    blkBins.resize(length);
+    rowSymbolOccMasks.resize(length);
+    colSymbolOccMasks.resize(length);
+    blkSymbolOccMasks.resize(length);
 
     rowBiases.reserve(length);
     for (length_t i = 0; i < length; i++) {
@@ -91,9 +91,9 @@ template <Sudoku::Order O>
 void Sudoku::Solver<O>::clear(void) {
     // Initialize all values as empty:
     std::for_each(grid.begin(), grid.end(), [this](Tile& t){ t.clear(length); });
-    std::fill(rowBins.begin(), rowBins.end(), 0);
-    std::fill(colBins.begin(), colBins.end(), 0);
-    std::fill(blkBins.begin(), blkBins.end(), 0);
+    std::fill(rowSymbolOccMasks.begin(), rowSymbolOccMasks.end(), 0);
+    std::fill(colSymbolOccMasks.begin(), colSymbolOccMasks.end(), 0);
+    std::fill(blkSymbolOccMasks.begin(), blkSymbolOccMasks.end(), 0);
 }
 
 template <Sudoku::Order O>
@@ -137,9 +137,9 @@ typename Sudoku::Solver<O>::opcount_t Sudoku::Solver<O>::generateSolution(void) 
 
 template <Sudoku::Order O>
 typename Sudoku::Solver<O>::Tile const& Sudoku::Solver<O>::setNextValid(const area_t index) {
-    occmask_t& rowBin = rowBins[getRow(index)];
-    occmask_t& colBin = colBins[getCol(index)];
-    occmask_t& blkBin = blkBins[getBlk(index)];
+    occmask_t& rowBin = rowSymbolOccMasks[getRow(index)];
+    occmask_t& colBin = colSymbolOccMasks[getCol(index)];
+    occmask_t& blkBin = blkSymbolOccMasks[getBlk(index)];
     //__builtin_ffsl(0); // TODO: investigate ways to use this for performance gains.
 
     Tile& t = grid[index];
@@ -175,9 +175,9 @@ typename Sudoku::Solver<O>::Tile const& Sudoku::Solver<O>::setNextValid(const ar
 template <Sudoku::Order O>
 typename Sudoku::Solver<O>::length_t Sudoku::Solver<O>::tileNumNonCandidates(const area_t index) const noexcept {
     return __builtin_popcount(
-          rowBins[getRow(index)]
-        | colBins[getCol(index)]
-        | blkBins[getBlk(index)]
+          rowSymbolOccMasks[getRow(index)]
+        | colSymbolOccMasks[getCol(index)]
+        | blkSymbolOccMasks[getBlk(index)]
     );
 }
 
