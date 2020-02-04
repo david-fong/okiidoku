@@ -78,7 +78,7 @@ private:
     unsigned long totalGenCount;
     unsigned long successfulGenCount;
 
-    std::ostream& outStream;
+    std::ostream& os;
     const bool isPretty;
     const unsigned int statsWidth;
 

@@ -13,12 +13,12 @@
 // ^mechanism to statically toggle alignment:
 
 
-Sudoku::Sudoku(const order_t _order, std::ostream& outStream):
+Sudoku::Sudoku(const order_t _order, std::ostream& os):
     order       (CLEAN_ORDER(_order)),
     length      (order  * order),
     area        (length * length),
-    outStream   (outStream),
-    isPretty    (&outStream == &std::cout),
+    os          (os),
+    isPretty    (&os == &std::cout),
     statsWidth  ((0.5 * length) + 3)
 {
     grid.resize(area);
@@ -36,10 +36,10 @@ Sudoku::Sudoku(const order_t _order, std::ostream& outStream):
 
     // Output formatting:
     if (isPretty) {
-        outStream.imbue(std::locale(outStream.getloc(), new MyNumpunct()));
+        os.imbue(std::locale(os.getloc(), new MyNumpunct()));
     }
-    outStream.precision(3);
-    outStream << std::fixed;
+    os.precision(3);
+    os << std::fixed;
 }
 
 void Sudoku::print(void) const {
@@ -47,32 +47,32 @@ void Sudoku::print(void) const {
     for (int i = 0; i <= order; i++) {
         vbar[1 + i * 2 * (order + 1)] = '+';
     }
-    outStream << std::setbase(16);
+    os << std::setbase(16);
     for (area_t i = 0; i < area; i++) {
         if ((i % length) == 0 && i != 0) {
-            if (isPretty) outStream << " |";
-            outStream << "\n";
+            if (isPretty) os << " |";
+            os << "\n";
         }
         if (isPretty && (i % (order * length) == 0)) {
-            outStream << vbar << '\n';
+            os << vbar << '\n';
         }
-        if (isPretty && (i % order) == 0) outStream << " |";
+        if (isPretty && (i % order) == 0) os << " |";
         Tile const& t = grid.at(i);
         if (isClear(t)) {
-            outStream << "  ";
+            os << "  ";
         } else {
-            outStream << " ";
+            os << " ";
             if (order < 5) {
-                outStream << (uint16_t)t.value;
+                os << (uint16_t)t.value;
             } else {
-                outStream << (char)('a' + t.value);
+                os << (char)('a' + t.value);
             }
         }
     }
     if (isPretty) {
-        outStream << " |\n" << vbar;
+        os << " |\n" << vbar;
     }
-    outStream << std::setbase(10) << std::endl;
+    os << std::setbase(10) << std::endl;
 }
 
 
@@ -170,7 +170,7 @@ Sudoku::length_t Sudoku::tileNumNonCandidates(const area_t index) const noexcept
 
 
 bool Sudoku::runCommand(std::string const& cmdLine) {
-    // Purposely use cout instead of this.outStream.
+    // Purposely use cout instead of this.os.
     size_t tokenPos;
     const std::string cmdName = cmdLine.substr(0, tokenPos = cmdLine.find(" "));
     const std::string cmdArgs = cmdLine.substr(tokenPos + 1, std::string::npos);
@@ -208,57 +208,55 @@ void Sudoku::runNew(void) {
     seed(true);
 
     // Generate a new solution:
-    const clock_t clockStart    = clock();
+    const clock_t    clockStart = std::clock();
     const opcount_t numSolveOps = generateSolution();
-    const clock_t clockFinish   = clock();
-    const double processorTime  = ((double)(clockFinish - clockStart)) / CLOCKS_PER_SEC;
+    const clock_t   clockFinish = std::clock();
+    const double  processorTime = ((double)(clockFinish - clockStart)) / CLOCKS_PER_SEC;
 
-    outStream << "num operations: " STATW_I << numSolveOps   << std::endl;
-    outStream << "processor secs: " STATW_D << processorTime << std::endl;
+    os << "num operations: " STATW_I << numSolveOps << std::endl;
+    os << "processor time: " STATW_D << processorTime << " sec" << std::endl;
     if (!isPretty) printMessageBar("", '-');
     print();
     printMessageBar((numSolveOps == 0) ? "ABORT" : "DONE");
 }
 
 void Sudoku::runMultiple(const unsigned int numAttempts) {
-    static const unsigned PRINT_COLS = ((unsigned[]){0,0,16,12,8,1})[order];
-    unsigned long totalNumTrials = 0;
-    unsigned long successfulNumTrials = 0;
-    double totalSuccessfulOperationCount = 0.0;
+#define totalNumTrials      (totalGenCount      - initialTotalGenCount)
+#define successfulNumTrials (successfulGenCount - initialSuccessfulGenCount)
+    static const unsigned PRINT_COLS     = ((unsigned[]){0,0,16,12,8,1})[order];
+    const auto initialTotalGenCount      = totalGenCount;
+    const auto initialSuccessfulGenCount = successfulGenCount;
+    double trialsNumSolveOps = 0.0;
+    double totalClockTicks   = 0.0;
     printMessageBar("START x" + std::to_string(numAttempts), (statsWidth * PRINT_COLS));
 
     for (unsigned int attemptNum = 0; attemptNum < numAttempts; attemptNum++) {
         clear();
         seed(false);
+        const clock_t    clockStart = std::clock();
         const opcount_t numSolveOps = generateSolution();
-        totalNumTrials++;
-        // No need to sort grid back into order: No content print.
+        totalClockTicks += (std::clock() - clockStart);
+        trialsNumSolveOps += numSolveOps;
         if (numSolveOps == 0) {
-            outStream STATW_I << "---";
+            os STATW_I << "---";
         } else {
-            successfulNumTrials++;
-            totalSuccessfulOperationCount += numSolveOps;
-            outStream STATW_I << numSolveOps;
+            os STATW_I << numSolveOps;
         }
-        if (totalNumTrials % PRINT_COLS == 0) {
-            outStream << std::endl;
-        }
+        if (totalNumTrials % PRINT_COLS == 0) { os << '\n'; }
     }
-    if (totalNumTrials % PRINT_COLS != 0) {
-        // Final newline:
-        outStream << std::endl;
-    }
+    if (totalNumTrials % PRINT_COLS != 0) { os << '\n'; }
 
     // Print stats:
     const double averageNumSolveOps = (successfulNumTrials == 0) ? 0.0
-        : ((double)totalSuccessfulOperationCount / successfulNumTrials);
+        : ((double)trialsNumSolveOps / successfulNumTrials);
     printMessageBar("", (statsWidth * PRINT_COLS), '-');
-    outStream << "avg num operations" STATW_D << averageNumSolveOps << std::endl;
-    outStream << "num aborted trials" STATW_I << (totalNumTrials - successfulNumTrials) << std::endl;
+    os << "num aborted trials: " STATW_I << (totalNumTrials - successfulNumTrials) << std::endl;
+    os << "avg num operations: " STATW_D << averageNumSolveOps << std::endl;
+    os << "sum processor time: " STATW_D << (totalClockTicks / CLOCKS_PER_SEC) << " sec" << std::endl;
     printMessageBar("DONE x" + std::to_string(numAttempts), (statsWidth * PRINT_COLS));
 
     // If printing to file and some time has passed, emit a beep sound:
-    if (&outStream != &std::cout) {
+    if (&os != &std::cout) {
         // TODO: count processor time please.
         std::cout << '\a' << std::flush;
     }
@@ -280,7 +278,7 @@ void Sudoku::printMessageBar(
         bar.at(3) = ' ';
         bar.at(4 + msg.length()) = ' ';
     }
-    outStream << bar << std::endl;
+    os << bar << std::endl;
 }
 
 void Sudoku::printMessageBar(
