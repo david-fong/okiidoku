@@ -5,8 +5,6 @@
 #include <map>
 
 
-// Evaluates to <o> bounded to the range [2, 5]
-#define CLEAN_ORDER(o) (((o) < 2) ? 2 : (((o) > 5) ? 5 : (o)))
 #define GIVEUP_THRESH_COEFF 0.7
 // TODO ^consumer code assumes num operations is proportional to area^2. it that true?
 
@@ -18,34 +16,38 @@
 namespace Sudoku {
 
     typedef enum { ROW_MAJOR, BLOCK_COLS, GenPath_MAX = BLOCK_COLS, } GenPath;
-    static const std::vector<std::string> GenPath_Names = {
+    const std::vector<std::string> GenPath_Names = {
         "rowmajor",
         "blockcol",
     };
     typedef enum { HELP, QUIT, RUN_SINGLE, RUN_MULTIPLE, SET_GENPATH, } Command;
-    static const std::map<std::string, Command> COMMAND_MAP = {
+    const std::map<std::string, Command> COMMAND_MAP = {
         { "help",       HELP },
         { "quit",       QUIT },
         { "",           RUN_SINGLE },
         { "trials",     RUN_MULTIPLE },
         { "genpath",    SET_GENPATH },
     };
-    static const std::string HELP_MESSAGE = "\nCOMMAND MENU:"
+    const std::string HELP_MESSAGE = "\nCOMMAND MENU:"
         "\n- help           print this help menu."
         "\n- quit           terminate this program."
         "\n- {enter}        generate a single solution."
         "\n- trials <n>     generate <n> solutions."
         "\n- genpath        cycle generator traversal path."
         ;
-    static const std::string REPL_PROMPT = "\n> ";
+    const std::string REPL_PROMPT = "\n> ";
+
+    typedef enum { TWO = 2, THREE = 3, FOUR = 4, FIVE = 5, } Order;
 
     /**
      * 
      */
-    //template<int O>
+    template <Order O>
     class Solver {
 
     public:
+        // TODO: use std::conditional.
+        // TODO: later: try using std::bitset from <numeric>
         typedef uint32_t occmask_t; // mask width `order^2` bits.
         typedef  uint8_t value_t;   // uint range [0, order^2].
         typedef  uint8_t order_t;   // uint range [0, order  ].
@@ -75,7 +77,7 @@ namespace Sudoku {
         const order_t   order;
         const length_t  length;
         const area_t    area;
-        explicit Solver(const order_t, std::ostream&);
+        explicit Solver(std::ostream&);
 
         // Return false if command is to exit the program:
         bool runCommand(const std::string& cmdLine);

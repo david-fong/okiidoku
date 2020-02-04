@@ -12,9 +12,6 @@
  * 3. output file name.
  */
 int main(const int argc, char const *const argv[]) {
-    std::cout << std::endl << "sizeof Tile: " << sizeof(Sudoku::Solver::Tile) << " bytes" << std::endl;
-    std::cout << std::endl << "PARSED ARGUMENTS:" << std::endl;
-
     unsigned int    userOrder;      // 1
     unsigned int    srandKey;       // 2
     std::string     outFileName;    // 3
@@ -35,6 +32,7 @@ int main(const int argc, char const *const argv[]) {
         outStream = &std::cout;
     }
 
+    std::cout << std::endl << "PARSED ARGUMENTS:" << std::endl;
     std::cout << "- ARG 1 [[ grid order  ]] : " << (uint16_t)userOrder << std::endl;
     std::cout << "- ARG 2 [[ srand key   ]] : " << srandKey    << std::endl;
     std::cout << "- ARG 3 [[ output file ]] : " << outFileName << std::endl;
@@ -42,16 +40,18 @@ int main(const int argc, char const *const argv[]) {
     // Scramble the random number generator:
     std::srand(srandKey);
 
-    // Print help menu:
-    std::cout << Sudoku::HELP_MESSAGE << std::endl;
-
-    // Generator loop:
-    Sudoku::Solver game(userOrder, *outStream);
-    std::string command;
-    do {
-        std::cout << Sudoku::REPL_PROMPT;
-        std::getline(std::cin, command);
-    } while (game.runCommand(command));
+    // Create a Solver of the specified order:
+    // (It will automatically enter its REPL).
+    switch (static_cast<Sudoku::Order>(userOrder)) {
+        using namespace Sudoku;
+        case TWO:   { Solver<TWO>   game(*outStream); break; }
+        case THREE: { Solver<THREE> game(*outStream); break; }
+        case FOUR:  { Solver<FOUR>  game(*outStream); break; }
+        case FIVE:  { Solver<FIVE>  game(*outStream); break; }
+        default:
+            std::cout << "order must be " << std::endl;
+            break;
+    }
 
     // End of program:
     std::cout << std::endl << "bye bye!" << std::endl;

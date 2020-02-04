@@ -25,6 +25,7 @@ For 16x16, running 1024 trials, using no seeds was much faster in terms of time,
 - 1580684771 is a seed where for order-5 generations which succeed quickly for runs #1, #5, #9, #15.
 - 1580685437 #2, #7, #18, #19, #35,
 - 1580685741 #1, #14,
+- 1580858187 #0, #3, #4, #6,
 
 ## "Failed" Experiment
 
