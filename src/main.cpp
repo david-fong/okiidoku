@@ -12,7 +12,7 @@
  * 3. output file name.
  */
 int main(const int argc, char const *const argv[]) {
-    std::cout << std::endl << "sizeof Tile: " << sizeof(Sudoku::Tile) << " bytes" << std::endl;
+    std::cout << std::endl << "sizeof Tile: " << sizeof(Sudoku::Solver::Tile) << " bytes" << std::endl;
     std::cout << std::endl << "PARSED ARGUMENTS:" << std::endl;
 
     unsigned int    userOrder;      // 1
@@ -46,7 +46,7 @@ int main(const int argc, char const *const argv[]) {
     std::cout << Sudoku::HELP_MESSAGE << std::endl;
 
     // Generator loop:
-    Sudoku game(userOrder, *outStream);
+    Sudoku::Solver game(userOrder, *outStream);
     std::string command;
     do {
         std::cout << Sudoku::REPL_PROMPT;

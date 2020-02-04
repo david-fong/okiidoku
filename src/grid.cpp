@@ -13,7 +13,7 @@
 // ^mechanism to statically toggle alignment:
 
 
-Sudoku::Sudoku(const order_t _order, std::ostream& os):
+Sudoku::Solver::Solver(const order_t _order, std::ostream& os):
     order       (CLEAN_ORDER(_order)),
     length      (order  * order),
     area        (length * length),
@@ -44,7 +44,7 @@ Sudoku::Sudoku(const order_t _order, std::ostream& os):
     os << std::fixed;
 }
 
-void Sudoku::print(void) const {
+void Sudoku::Solver::print(void) const {
     static std::string vbar = ' ' + std::string(((length + order + 1) * 2 - 1), '-');
     for (int i = 0; i <= order; i++) {
         vbar[1 + i * 2 * (order + 1)] = '+';
@@ -78,7 +78,7 @@ void Sudoku::print(void) const {
 }
 
 
-void Sudoku::clear(void) {
+void Sudoku::Solver::clear(void) {
     // Initialize all values as empty:
     std::for_each(grid.begin(), grid.end(), [this](Tile& t){ t.clear(length); });
     std::fill(rowBins.begin(), rowBins.end(), 0);
@@ -86,7 +86,7 @@ void Sudoku::clear(void) {
     std::fill(blkBins.begin(), blkBins.end(), 0);
 }
 
-void Sudoku::seed(const bool printInfo) {
+void Sudoku::Solver::seed(const bool printInfo) {
     // Scramble each row's value-guessing-order:
     // note: must keep the <length>'th entry as <length>.
     for (auto& rowBias : rowBiases) {
@@ -95,7 +95,7 @@ void Sudoku::seed(const bool printInfo) {
 }
 
 
-Sudoku::opcount_t Sudoku::generateSolution(void) {
+Sudoku::Solver::opcount_t Sudoku::Solver::generateSolution(void) {
     static const opcount_t giveupThreshold = GIVEUP_THRESH_COEFF * (area * area * area);
     opcount_t numOperations = 0;
     register area_t index = 0;
@@ -123,7 +123,7 @@ Sudoku::opcount_t Sudoku::generateSolution(void) {
     return numOperations;
 }
 
-Sudoku::Tile const& Sudoku::setNextValid(const area_t index) {
+Sudoku::Solver::Tile const& Sudoku::Solver::setNextValid(const area_t index) {
     occmask_t& rowBin = rowBins[getRow(index)];
     occmask_t& colBin = colBins[getCol(index)];
     occmask_t& blkBin = blkBins[getBlk(index)];
@@ -159,7 +159,7 @@ Sudoku::Tile const& Sudoku::setNextValid(const area_t index) {
     return t;
 }
 
-Sudoku::length_t Sudoku::tileNumNonCandidates(const area_t index) const noexcept {
+Sudoku::Solver::length_t Sudoku::Solver::tileNumNonCandidates(const area_t index) const noexcept {
     return __builtin_popcount(
           rowBins[getRow(index)]
         | colBins[getCol(index)]
@@ -167,7 +167,7 @@ Sudoku::length_t Sudoku::tileNumNonCandidates(const area_t index) const noexcept
     );
 }
 
-void Sudoku::setGenPath(const GenPath newGenPath) noexcept {
+void Sudoku::Solver::setGenPath(const GenPath newGenPath) noexcept {
     switch (newGenPath) {
         case ROW_MAJOR:
             std::iota(traversalOrder.begin(), traversalOrder.end(), 0);
@@ -190,7 +190,7 @@ void Sudoku::setGenPath(const GenPath newGenPath) noexcept {
 
 
 
-bool Sudoku::runCommand(std::string const& cmdLine) {
+bool Sudoku::Solver::runCommand(std::string const& cmdLine) {
     // Purposely use cout instead of this.os.
     size_t tokenPos;
     const std::string cmdName = cmdLine.substr(0, tokenPos = cmdLine.find(" "));
@@ -227,7 +227,7 @@ bool Sudoku::runCommand(std::string const& cmdLine) {
     return true;
 }
 
-void Sudoku::runNew(void) {
+void Sudoku::Solver::runNew(void) {
     printMessageBar("START " + std::to_string(totalGenCount));
     clear();
     seed(true);
@@ -245,7 +245,7 @@ void Sudoku::runNew(void) {
     printMessageBar((numSolveOps == 0) ? "ABORT" : "DONE");
 }
 
-void Sudoku::runMultiple(const unsigned int numAttempts) {
+void Sudoku::Solver::runMultiple(const unsigned int numAttempts) {
 #define totalNumTrials      (totalGenCount      - initialTotalGenCount)
 #define successfulNumTrials (successfulGenCount - initialSuccessfulGenCount)
     static const unsigned PRINT_COLS     = ((unsigned[]){0,0,16,12,8,1})[order];
@@ -289,7 +289,7 @@ void Sudoku::runMultiple(const unsigned int numAttempts) {
 
 
 
-void Sudoku::printMessageBar(
+void Sudoku::Solver::printMessageBar(
     std::string const& msg,
     unsigned int barLength,
     const char fillChar
@@ -306,7 +306,7 @@ void Sudoku::printMessageBar(
     os << bar << std::endl;
 }
 
-void Sudoku::printMessageBar(
+void Sudoku::Solver::printMessageBar(
     std::string const& msg,
     const char fillChar
 ) const {
