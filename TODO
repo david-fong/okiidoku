@@ -10,6 +10,9 @@
 - Make non-prompt output text print to cout and to outStream (if outStream is not same as cout).
   - This includes the preamble of parameters that were parsed.
   - Investigate if it is simplest to do this with a macro :P.
+- Set a compilation flag for whether to track number of operations on a Tile per run.
+  - This would help me get an overview of what traversals look like and what patterns there are.
+- Make the Sudoku class take type parameters for the field widths, and then the main function use a switch statement to instantiate one.
 
 ## OK cool
 

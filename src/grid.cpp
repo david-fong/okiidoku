@@ -21,15 +21,11 @@ Sudoku::Sudoku(const order_t _order, std::ostream& outStream):
     isPretty    (&outStream == &std::cout),
     statsWidth  ((0.5 * length) + 3)
 {
-    grid.reserve(area);
+    grid.resize(area);
     rowBins.resize(length);
     colBins.resize(length);
     blkBins.resize(length);
 
-    for (int i = 0; i < area; i++) {
-        // Construct a new Tile with index `i` at the back.
-        grid.emplace_back(i);
-    }
     rowBiases.reserve(length);
     for (length_t i = 0; i < length; i++) {
         rowBiases.emplace_back(length + 1);
@@ -97,23 +93,27 @@ void Sudoku::seed(const bool printInfo) {
 }
 
 
-opcount_t Sudoku::generateSolution(void) {
+Sudoku::opcount_t Sudoku::generateSolution(void) {
     static const opcount_t giveupThreshold = GIVEUP_THRESH_COEFF * (area * area * area);
     opcount_t numOperations = 0;
-    std::vector<Tile>::iterator it = grid.begin();
-    while (it < grid.end()) {
+    register area_t index = 0;
+    while (index < area) {
         // Push a new permutation:
         numOperations++;
         if (numOperations > giveupThreshold) {
             totalGenCount++;
             return 0;
         }
-        if (isClear(setNextValid(it->index))) {
+        if (isClear(setNextValid(index))) {
             // Pop and step backward:
-            if (it == grid.begin()) { throw Sudoku::OPseed; }
-            it--;
+            if (index == 0) {
+                // No solution could be found. Treat as if abort.
+                totalGenCount++;
+                return 0;
+            }
+            index--;
         } else {
-            it++;
+            index++;
         }
     }
     totalGenCount++;
@@ -121,7 +121,7 @@ opcount_t Sudoku::generateSolution(void) {
     return numOperations;
 }
 
-Sudoku::Tile& Sudoku::setNextValid(const area_t index) {
+Sudoku::Tile const& Sudoku::setNextValid(const area_t index) {
     occmask_t& rowBin = rowBins[getRow(index)];
     occmask_t& colBin = colBins[getCol(index)];
     occmask_t& blkBin = blkBins[getBlk(index)];
@@ -135,13 +135,14 @@ Sudoku::Tile& Sudoku::setNextValid(const area_t index) {
         colBin &= eraseMask;
         blkBin &= eraseMask;
     }
-    // default value:
-    //t.value = length;
 
     const occmask_t invalidBin = rowBin | colBin | blkBin;
+    // Note: The below line is the only push to make the size of the
+    // biasIndex field fit the range [0,order^2+1], but the trick is
+    // that this will autowrap to zero, which takes the mod as desired.
     value_t biasIndex = (t.biasIndex + 1) % (length + 1);
     for (; biasIndex < length; biasIndex++) {
-        value_t value = rowBiases[getRow(index)][biasIndex];
+        const value_t value = rowBiases[getRow(index)][biasIndex];
         const occmask_t valBit = 0b1 << value;
         if (!(invalidBin & valBit)) {
             // If a valid value is found for this tile:
@@ -156,7 +157,7 @@ Sudoku::Tile& Sudoku::setNextValid(const area_t index) {
     return t;
 }
 
-length_t Sudoku::tileNumNonCandidates(const area_t index) const {
+Sudoku::length_t Sudoku::tileNumNonCandidates(const area_t index) const noexcept {
     return __builtin_popcount(
           rowBins[getRow(index)]
         | colBins[getCol(index)]
@@ -211,14 +212,10 @@ void Sudoku::runNew(void) {
     const opcount_t numSolveOps = generateSolution();
     const clock_t clockFinish   = clock();
     const double processorTime  = ((double)(clockFinish - clockStart)) / CLOCKS_PER_SEC;
+
     outStream << "num operations: " STATW_I << numSolveOps   << std::endl;
     outStream << "processor secs: " STATW_D << processorTime << std::endl;
     if (!isPretty) printMessageBar("", '-');
-
-    // Print out the grid:
-#if TRAVERSE_BY_BOTTLENECK == true
-    std::sort(grid.begin(), grid.end());
-#endif
     print();
     printMessageBar((numSolveOps == 0) ? "ABORT" : "DONE");
 }

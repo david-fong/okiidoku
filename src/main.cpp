@@ -15,7 +15,7 @@ int main(const int argc, char const *const argv[]) {
     std::cout << std::endl << "sizeof Tile: " << sizeof(Sudoku::Tile) << " bytes" << std::endl;
     std::cout << std::endl << "PARSED ARGUMENTS:" << std::endl;
 
-    order_t         userOrder;      // 1
+    unsigned int    userOrder;      // 1
     unsigned int    srandKey;       // 2
     std::string     outFileName;    // 3
     std::ostream*   outStream;      // 3
