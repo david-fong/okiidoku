@@ -74,7 +74,6 @@ public:
 private:
     // Private fields:
     std::vector<Tile> grid;
-    std::vector<bool> seeds;
     std::vector<occmask_t> rowBins;
     std::vector<occmask_t> colBins;
     std::vector<occmask_t> blkBins;
@@ -82,7 +81,6 @@ private:
     unsigned long totalGenCount;
     unsigned long successfulGenCount;
 
-    bool doSeeding;
     std::ostream& outStream;
     const bool isPretty;
     const unsigned int statsWidth;
@@ -97,17 +95,12 @@ private:
     Tile& setNextValid(const area_t index);
     length_t tileNumNonCandidates(const area_t) const;
 
-    area_t seed0(void);
-    bool seed1Bitmask(const area_t index, const occmask_t min);
-    // returns the number of additionally seeded tiles.
-    area_t seed1(int ceiling);
-
     // Inline functions:
-    bool isClear(Tile const& t) const { return t.biasIndex == length; }
-    length_t getRow(const area_t index) const { return index / length; }
-    length_t getCol(const area_t index) const { return index % length; }
-    length_t getBlk(const area_t index) const { return getBlk(getRow(index), getCol(index)); }
-    length_t getBlk(const length_t row, const length_t col) const { return ((row / order) * order) + (col / order); }
+    bool isClear(Tile const& t) const noexcept { return t.biasIndex == length; }
+    length_t getRow(const area_t index) const noexcept { return index / length; }
+    length_t getCol(const area_t index) const noexcept { return index % length; }
+    length_t getBlk(const area_t index) const noexcept { return getBlk(getRow(index), getCol(index)); }
+    length_t getBlk(const length_t row, const length_t col) const noexcept { return ((row / order) * order) + (col / order); }
 
 public:
     class OPseedException : public std::exception {
@@ -122,7 +115,6 @@ public:
     static const std::string REPL_PROMPT;
 
 private:
-    static const length_t seed1Constants[];
     static int myRandom (const int i) { return rand() % i; }
     struct MyNumpunct : std::numpunct<char> {
         std::string do_grouping() const {
@@ -138,16 +130,13 @@ const std::map<std::string, Sudoku::Command> Sudoku::COMMAND_MAP = {
     { "quit",   QUIT },
     { "",       RUN_SINGLE },
     { "trials", RUN_MULTIPLE },
-    { "doseed", TOGGLE_SEEDING }
 };
 const std::string Sudoku::HELP_MESSAGE = "\nCOMMAND MENU:"
     "\n- help           print this help menu."
     "\n- quit           terminate this program."
     "\n- {enter}        generate a single solution."
     "\n- trials <n>     generate <n> solutions."
-    "\n- doseed         toggle seeding step (slower when on)."
     ;
 const std::string Sudoku::REPL_PROMPT = "\n> ";
-const length_t Sudoku::seed1Constants[] = { 0, 0, 0, 3+0, 4+2, 5+4, };
 
 #endif

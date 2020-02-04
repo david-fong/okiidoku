@@ -4,16 +4,13 @@
 #include <iomanip>      // setbase, setw,
 #include <ctime>        // clock,
 #include <numeric>      // iota,
-#include <algorithm>    // sort, random_shuffle,
+#include <algorithm>    // random_shuffle,
 #include <string>       // string,
-#include <bitset>       // bitset,
 
 
 #define STATW_I << std::setw(this->statsWidth)
 #define STATW_D << std::setw(this->statsWidth + 4)
 // ^mechanism to statically toggle alignment:
-
-#define TRAVERSE_BY_BOTTLENECK false
 
 
 Sudoku::Sudoku(const order_t _order, std::ostream& outStream):
@@ -25,7 +22,6 @@ Sudoku::Sudoku(const order_t _order, std::ostream& outStream):
     statsWidth  ((0.5 * length) + 3)
 {
     grid.reserve(area);
-    seeds.resize(area, false);
     rowBins.resize(length);
     colBins.resize(length);
     blkBins.resize(length);
@@ -41,7 +37,6 @@ Sudoku::Sudoku(const order_t _order, std::ostream& outStream):
     }
     totalGenCount = 0;
     successfulGenCount = 0;
-    doSeeding = false; // it's faster :O
 
     // Output formatting:
     if (isPretty) {
@@ -70,7 +65,7 @@ void Sudoku::print(void) const {
         if (isClear(t)) {
             outStream << "  ";
         } else {
-            outStream << ((seeds[i]) ? "." : " ");
+            outStream << " ";
             if (order < 5) {
                 outStream << (uint16_t)t.value;
             } else {
@@ -88,7 +83,6 @@ void Sudoku::print(void) const {
 void Sudoku::clear(void) {
     // Initialize all values as empty:
     std::for_each(grid.begin(), grid.end(), [this](Tile& t){ t.clear(length); });
-    std::fill(seeds.begin(), seeds.end(), false);
     std::fill(rowBins.begin(), rowBins.end(), 0);
     std::fill(colBins.begin(), colBins.end(), 0);
     std::fill(blkBins.begin(), blkBins.end(), 0);
@@ -100,30 +94,13 @@ void Sudoku::seed(const bool printInfo) {
     for (auto& rowBias : rowBiases) {
         std::random_shuffle(rowBias.begin(), rowBias.end() - 1, myRandom);
     }
-    // Call the seeding routines:
-    if (!doSeeding) return;
-    const area_t seed0Seeds = seed0();
-    const area_t seed1Seeds = seed1(seed1Constants[order]);
-    if (printInfo) {
-        outStream << "stage 01 seeds: " STATW_I << seed0Seeds << std::endl;
-        outStream << "stage 02 seeds: " STATW_I << seed1Seeds << std::endl;
-    }
-#if TRAVERSE_BY_BOTTLENECK == true
-    std::sort(grid.begin(), grid.end(),
-            [this](Tile const& t1, Tile const& t2) -> bool {
-        return tileNumNonCandidates(t1.index) < tileNumNonCandidates(t2.index);
-    });
-#endif
 }
 
 
 opcount_t Sudoku::generateSolution(void) {
-    const bool doSeeding = this->doSeeding; // cache
     static const opcount_t giveupThreshold = GIVEUP_THRESH_COEFF * (area * area * area);
     opcount_t numOperations = 0;
     std::vector<Tile>::iterator it = grid.begin();
-    // Skip all seeded starting tiles:
-    while (doSeeding && seeds[it->index] && it < grid.end()) it++;
     while (it < grid.end()) {
         // Push a new permutation:
         numOperations++;
@@ -133,14 +110,10 @@ opcount_t Sudoku::generateSolution(void) {
         }
         if (isClear(setNextValid(it->index))) {
             // Pop and step backward:
-            do {
-                if (it == grid.begin()) { throw Sudoku::OPseed; }
-                it--;
-            } while (doSeeding && seeds[(it)->index]);
+            if (it == grid.begin()) { throw Sudoku::OPseed; }
+            it--;
         } else {
-            do {
-                it++;
-            } while (doSeeding && it < grid.end() && seeds[it->index]);
+            it++;
         }
     }
     totalGenCount++;
@@ -196,7 +169,7 @@ length_t Sudoku::tileNumNonCandidates(const area_t index) const {
 
 
 bool Sudoku::runCommand(std::string const& cmdLine) {
-    // purposely use cout instead of this.outStream.
+    // Purposely use cout instead of this.outStream.
     size_t tokenPos;
     const std::string cmdName = cmdLine.substr(0, tokenPos = cmdLine.find(" "));
     const std::string cmdArgs = cmdLine.substr(tokenPos + 1, std::string::npos);
@@ -222,10 +195,6 @@ bool Sudoku::runCommand(std::string const& cmdLine) {
                 std::cout << "could not convert " << cmdArgs << " to an integer." << std::endl;
             }
             break;
-        case TOGGLE_SEEDING: {
-            doSeeding = !doSeeding;
-            std::cout << "seeding is now " << ((doSeeding) ? "on" : "off") << std::endl;
-            break; }
         default:
             break; // unreachable.
     }
@@ -296,82 +265,6 @@ void Sudoku::runMultiple(const unsigned int numAttempts) {
         // TODO: count processor time please.
         std::cout << '\a' << std::flush;
     }
-}
-
-
-
-
-area_t Sudoku::seed0(void) {
-    if (order <= 2) return 0; // overpowered.
-    area_t count = 0;
-    static const area_t bRow = order * length;
-    for (area_t b = 0; b < area; b += bRow + order) {
-        for (area_t r = 0; r < bRow; r += length) {
-            for (order_t c = 0; c < order; c++) {
-                const area_t index = b + r + c;
-                setNextValid(index);
-                seeds[index] = true;
-                count++;
-            }
-        }
-    }
-    return count;
-}
-
-bool Sudoku::seed1Bitmask(const area_t index, const occmask_t min) {
-    occmask_t& row = rowBins[getRow(index)];
-    occmask_t& col = colBins[getCol(index)];
-    occmask_t& blk = blkBins[getBlk(index)];
-
-    if ((row | col | blk) < min) {
-        // seed this tile:
-        seeds[index] = true;
-        row = (row << 1) | 0b1;
-        col = (col << 1) | 0b1;
-        blk = (blk << 1) | 0b1;
-        return true;
-    }
-    return false;
-}
-
-area_t Sudoku::seed1(int ceiling) {
-    ceiling = ~0 << (ceiling);
-    static Sudoku occ(order, outStream);
-    occ.clear(); // no seeding required.
-    for (area_t i = 0; i < area; i++) {
-        if (seeds[i]) {
-            occ.seed1Bitmask(i, ~0);
-        }
-    }
-
-    area_t i = -1;
-    // Scan forward past those already seeded.
-    while (occ.seeds[++i]);
-    occmask_t min = (
-        occ.rowBins[getRow(i)] |
-        occ.colBins[getCol(i)] |
-        occ.blkBins[getBlk(i)] );
-
-    while (!(min & ceiling)) {
-        occ.seed1Bitmask(i, min);
-
-        // Advance and wrap-around if necessary:
-        while (++i < area && occ.seeds[i]);
-        if (i == area) {
-            i = 0; min = (min << 1) | 0b1;
-            while (occ.seeds[++i]);
-        }
-    }
-
-    area_t count = 0;
-    for (area_t i = 0; i < area; i++) {
-        if (occ.seeds[i] && !seeds[i]) {
-            setNextValid(i);
-            seeds[i] = true;
-            count++;
-        }
-    }
-    return count;
 }
 
 
