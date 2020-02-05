@@ -10,8 +10,6 @@
 
 
 /**
- * Note: Since most of my static members don't depend on the template
- * parameter, I moved them out to this namespace.
  */
 namespace Sudoku {
 
@@ -39,8 +37,46 @@ namespace Sudoku {
         ;
     const std::string REPL_PROMPT = "\n> ";
 
-    typedef enum { TWO = 2, THREE = 3, FOUR = 4, FIVE = 5, } Order;
-    const std::vector<Order> OrderVec = { TWO, THREE, FOUR, FIVE, };
+    /**
+     * About this enum template argument + conditional types approach:
+     * (My learnings, resulting design choices, and their rationales)
+     * 
+     * First of all, the primary goal / benefit of this additional
+     * complexity is that it optimizes on space usage: Smaller-order
+     * grids will require less space for class members. I believe that
+     * this will contribute to improved usage of the processor cache.
+     * 
+     * As I learned what design choices could be made, I kept in mind
+     * these things:
+     * 1. I want there to be well defined constraints on what values
+     * can be provided as the template argument for order (reasonable
+     * values are in the range [2,5]).
+     * 2. Even though my REPL needs all the template expansions, I want
+     * any caller code to be able to choose to omit certain expansions.
+     * 3. I want to keep the conditional sizing typedefs internalized
+     * to my code so there is no chance that it can be used incorrectly.
+     * 
+     * Keeping in mind the main goal (space optimization), let's see
+     * some alternative designs / implementations that could achieve
+     * the goal, but would violate my wishes:
+     * 
+     * 1. Make the sizing typedefs all template arguments. This clearly
+     * violates #3, and does nothing to help #1. I could partially fix
+     * #3 and #1 by providing named bundles with correct parameters via:
+     *    1'. Partial template specification in the cpp file (violates #2).
+     *    1''. Using alias templates in the hpp or cpp file.
+     * 2. Take an unsigned short as a template argument for the grid's
+     * order, and use conditional types. A small advantage here is that
+     * I can condition typedefs on ranges of the order argument instead
+     * of specifiers for each value. This addresses #2 and #3, but not #1,
+     * which would require definitions of valid bounds on the order, and
+     * for calling code to use literal numbers if constructing solvers of
+     * statically-unknown size.
+     * 3. The solution I chose: Addresses all my wishes and suffers from
+     * none of the undesirable side effects of the other designs.
+     */
+    typedef enum { ORD_2 = 2, ORD_3 = 3, ORD_4 = 4, ORD_5 = 5, ORD_DEFAULT = ORD_4, } Order;
+    const std::vector<Order> OrderVec = { ORD_2, ORD_3, ORD_4, ORD_5, };
 
     /**
      * 
@@ -54,32 +90,32 @@ namespace Sudoku {
         // width:  4   9  16  25  36  49  64  81 100 121
         // round:  8  16  16  32  64  64  64 128 128 128
         typedef
-            typename std::conditional<(O < 3), std::uint8_t,
-            typename std::conditional<(O < 5), std::uint16_t,
-            typename std::conditional<(O < 6), std::uint32_t,
-            typename std::conditional<(O < 9), unsigned long,
+            typename std::conditional_t<(O < 3), std::uint8_t,
+            typename std::conditional_t<(O < 5), std::uint16_t,
+            typename std::conditional_t<(O < 6), std::uint32_t,
+            typename std::conditional_t<(O < 9), unsigned long,
             unsigned long long
-        >::type>::type>::type>::type occmask_t;
+        >>>> occmask_t;
 
         // uint range [0, order].
         typedef std::uint8_t order_t;
 
         // uint range [0, order^2].
         typedef
-            typename std::conditional<(O <  4), std::uint8_t,
-            typename std::conditional<(O < 16), std::uint16_t,
+            typename std::conditional_t<(O <  4), std::uint8_t,
+            typename std::conditional_t<(O < 16), std::uint16_t,
             std::uint32_t
-        >::type>::type length_t;
+        >> length_t;
 
         // uint range [0, order^4].
         // order:   2    3    4    5     6     7
         // area:   16   81  256  625  1296  2401
         // bytes:   2    2    3    4     4     4
         typedef
-            typename std::conditional<(O < 4), std::uint8_t,
-            typename std::conditional<(O < 8), std::uint16_t,
+            typename std::conditional_t<(O < 4), std::uint8_t,
+            typename std::conditional_t<(O < 8), std::uint16_t,
             std::uint32_t
-        >::type>::type area_t;
+        >> area_t;
 
         // uint range [0, order^2].
         typedef length_t value_t;

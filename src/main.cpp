@@ -17,7 +17,7 @@ int main(const int argc, char const *const argv[]) {
     std::string     outFileName;    // 3
     std::ostream*   outStream;      // 3
 
-    userOrder = (argc > 1) ? std::stoi(argv[1]) : Sudoku::Order::FOUR;
+    userOrder = (argc > 1) ? std::stoi(argv[1]) : Sudoku::Order::ORD_DEFAULT;
     if (argc > 2 && !std::string(argv[2]).empty()) {
         srandKey = std::stoi(argv[2]);
     } else {
@@ -44,10 +44,10 @@ int main(const int argc, char const *const argv[]) {
     // (It will automatically enter its REPL).
     switch (static_cast<Sudoku::Order>(userOrder)) {
         using namespace Sudoku;
-        case TWO:   { Solver<TWO>   game(*outStream); break; }
-        case THREE: { Solver<THREE> game(*outStream); break; }
-        case FOUR:  { Solver<FOUR>  game(*outStream); break; }
-        case FIVE:  { Solver<FIVE>  game(*outStream); break; }
+        case ORD_2: { Solver<ORD_2> game(*outStream); break; }
+        case ORD_3: { Solver<ORD_3> game(*outStream); break; }
+        case ORD_4: { Solver<ORD_4> game(*outStream); break; }
+        case ORD_5: { Solver<ORD_5> game(*outStream); break; }
         default:
             std::cout << "\nFAILED:\norder must be one of: [ ";
             for (Order o : OrderVec) {

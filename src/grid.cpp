@@ -295,10 +295,10 @@ void Sudoku::Solver<O>::runMultiple(const unsigned int numAttempts) {
             os STATW_I << numSolveOps;
         }
         if (totalNumTrials % PRINT_COLS == 0) {
-            if (O < Order::FOUR || (totalNumTrials / 8) % PRINT_COLS != 0) {
+            if (O < Order::ORD_4 || (totalNumTrials / 4) % PRINT_COLS != 0) {
                 os << '\n'; // Runs are lightning fast.
             } else {
-                os << std::endl; // Runs are slow. Give updates more frequently.
+                os << std::endl; // Runs are slower. Give updates more frequently.
             }
         }
     }
