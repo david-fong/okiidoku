@@ -17,7 +17,7 @@ int main(const int argc, char const *const argv[]) {
     std::string     outFileName;    // 3
     std::ostream*   outStream;      // 3
 
-    userOrder = std::stoi(((argc > 1) ? argv[1] : "4"), NULL);
+    userOrder = (argc > 1) ? std::stoi(argv[1]) : Sudoku::Order::FOUR;
     if (argc > 2 && !std::string(argv[2]).empty()) {
         srandKey = std::stoi(argv[2]);
     } else {

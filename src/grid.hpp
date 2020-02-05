@@ -20,10 +20,11 @@ namespace Sudoku {
         "rowmajor",
         "blockcol",
     };
-    typedef enum { HELP, QUIT, RUN_SINGLE, RUN_MULTIPLE, SET_GENPATH, } Command;
+    typedef enum { HELP, QUIT, SOLVE, RUN_SINGLE, RUN_MULTIPLE, SET_GENPATH, } Command;
     const std::map<std::string, Command> COMMAND_MAP = {
         { "help",       HELP },
         { "quit",       QUIT },
+        { "solve",      SOLVE },
         { "",           RUN_SINGLE },
         { "trials",     RUN_MULTIPLE },
         { "genpath",    SET_GENPATH },
@@ -31,6 +32,7 @@ namespace Sudoku {
     const std::string HELP_MESSAGE = "\nCOMMAND MENU:"
         "\n- help           print this help menu."
         "\n- quit           terminate this program."
+        "\n- solve <file>   solve the puzzle in <file>."
         "\n- {enter}        generate a single solution."
         "\n- trials <n>     generate <n> solutions."
         "\n- genpath        cycle generator traversal path."
@@ -47,13 +49,42 @@ namespace Sudoku {
     class Solver {
 
     public:
-        // TODO: use std::conditional.
-        // TODO: later: try using std::bitset from <numeric>
-        typedef uint32_t occmask_t; // mask width `order^2` bits.
-        typedef  uint8_t value_t;   // uint range [0, order^2].
-        typedef  uint8_t order_t;   // uint range [0, order  ].
-        typedef  uint8_t length_t;  // uint range [0, order^2].
-        typedef uint16_t area_t;    // uint range [0, order^4].
+        // mask width `order^2` bits.
+        // order:  2   3   4   5   6   7   8   9  10  11
+        // width:  4   9  16  25  36  49  64  81 100 121
+        // round:  8  16  16  32  64  64  64 128 128 128
+        typedef
+            typename std::conditional<(O < 3), std::uint8_t,
+            typename std::conditional<(O < 5), std::uint16_t,
+            typename std::conditional<(O < 6), std::uint32_t,
+            typename std::conditional<(O < 9), unsigned long,
+            unsigned long long
+        >::type>::type>::type>::type occmask_t;
+
+        // uint range [0, order].
+        typedef std::uint8_t order_t;
+
+        // uint range [0, order^2].
+        typedef
+            typename std::conditional<(O <  4), std::uint8_t,
+            typename std::conditional<(O < 16), std::uint16_t,
+            std::uint32_t
+        >::type>::type length_t;
+
+        // uint range [0, order^4].
+        // order:   2    3    4    5     6     7
+        // area:   16   81  256  625  1296  2401
+        // bytes:   2    2    3    4     4     4
+        typedef
+            typename std::conditional<(O < 4), std::uint8_t,
+            typename std::conditional<(O < 8), std::uint16_t,
+            std::uint32_t
+        >::type>::type area_t;
+
+        // uint range [0, order^2].
+        typedef length_t value_t;
+
+        // very big.
         typedef unsigned long long opcount_t;
 
     public:
@@ -77,7 +108,7 @@ namespace Sudoku {
     public:
         const order_t   order;
         const length_t  length;
-        const area_t    area;
+        const unsigned  area;
         explicit Solver(std::ostream&);
 
         // Return false if command is to exit the program:

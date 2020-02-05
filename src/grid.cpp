@@ -2,6 +2,7 @@
 
 #include <iostream>     // cout,
 #include <iomanip>      // setbase, setw,
+#include <fstream>      // fistream,
 #include <ctime>        // clock,
 #include <numeric>      // iota,
 #include <algorithm>    // random_shuffle,
@@ -56,7 +57,7 @@ Sudoku::Solver<O>::Solver(std::ostream& os):
 template <Sudoku::Order O>
 void Sudoku::Solver<O>::print(void) const {
     static std::string vbar = ' ' + std::string(((length + order + 1) * 2 - 1), '-');
-    for (int i = 0; i <= order; i++) {
+    for (order_t i = 0; i <= order; i++) {
         vbar[1 + i * 2 * (order + 1)] = '+';
     }
     os << std::setbase(16);
@@ -223,6 +224,14 @@ bool Sudoku::Solver<O>::runCommand(std::string const& cmdLine) {
             break;
         case QUIT:
             return false;
+        case SOLVE: {
+            std::ifstream puzzleFile(cmdArgs);
+            if (!puzzleFile.good()) {
+                std::cout << "the specified file could not be opened for reading" << std::endl;
+                break;
+            }
+            // TODO
+            break; }
         case RUN_SINGLE:
             runNew();
             break;
@@ -285,7 +294,13 @@ void Sudoku::Solver<O>::runMultiple(const unsigned int numAttempts) {
         } else {
             os STATW_I << numSolveOps;
         }
-        if (totalNumTrials % PRINT_COLS == 0) { os << '\n'; }
+        if (totalNumTrials % PRINT_COLS == 0) {
+            if (O < Order::FOUR || (totalNumTrials / 8) % PRINT_COLS != 0) {
+                os << '\n'; // Runs are lightning fast.
+            } else {
+                os << std::endl; // Runs are slow. Give updates more frequently.
+            }
+        }
     }
     if (totalNumTrials % PRINT_COLS != 0) { os << '\n'; }
 

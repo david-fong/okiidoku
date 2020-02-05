@@ -1,6 +1,17 @@
 
 # Things To Do
 
+## Higher Priority
+
+- Set a compilation flag for whether to track number of operations on a Tile per run.
+  - This would help me get an overview of what traversals look like and what patterns there are.
+- Make the Sudoku class take type parameters for the field widths, and then the main function use a switch statement to instantiate one.
+- Implement a solver
+  - Interface: reads a file as plaintext, solves (checking for multiple solutions), then asks to write solutions to a new file (user provides empty string to indicate choose suitable name based on input file name)
+  - Implementation / representation: Add back the separate seeds array as a function-scoped variable
+
+## Lower Priority
+
 - Run some more repeated tests and get some performance data.
   - Report findings in the main readme file.
 - Change occmask_t fields to use std::bitset.
@@ -8,9 +19,6 @@
 - Make non-prompt output text print to cout and to outStream (if outStream is not same as cout).
   - This includes the preamble of parameters that were parsed.
   - Investigate if it is simplest to do this with a macro :P.
-- Set a compilation flag for whether to track number of operations on a Tile per run.
-  - This would help me get an overview of what traversals look like and what patterns there are.
-- Make the Sudoku class take type parameters for the field widths, and then the main function use a switch statement to instantiate one.
 
 ## OK cool
 
