@@ -23,17 +23,9 @@ Sudoku::Solver<O>::Solver(std::ostream& os):
     isPretty    (&os == &std::cout),
     statsWidth  ((0.5 * length) + 3)
 {
-    grid.resize(area);
-    rowSymbolOccMasks.resize(length);
-    colSymbolOccMasks.resize(length);
-    blkSymbolOccMasks.resize(length);
-
-    rowBiases.reserve(length);
     for (length_t i = 0; i < length; i++) {
-        rowBiases.emplace_back(length + 1);
         std::iota(rowBiases[i].begin(), rowBiases[i].end(), 0);
     }
-    traversalOrder.reserve(area);
     setGenPath(BLOCK_COLS);
     totalGenCount = 0;
     successfulGenCount = 0;
@@ -92,9 +84,9 @@ template <Sudoku::Order O>
 void Sudoku::Solver<O>::clear(void) {
     // Initialize all values as empty:
     std::for_each(grid.begin(), grid.end(), [this](Tile& t){ t.clear(length); });
-    std::fill(rowSymbolOccMasks.begin(), rowSymbolOccMasks.end(), 0);
-    std::fill(colSymbolOccMasks.begin(), colSymbolOccMasks.end(), 0);
-    std::fill(blkSymbolOccMasks.begin(), blkSymbolOccMasks.end(), 0);
+    rowSymbolOccMasks.fill(0);
+    colSymbolOccMasks.fill(0);
+    blkSymbolOccMasks.fill(0);
 }
 
 template <Sudoku::Order O>

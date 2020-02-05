@@ -1,7 +1,7 @@
 #ifndef _GRID_H_
 #define _GRID_H_
 
-#include <vector>
+#include <array>
 #include <map>
 
 
@@ -14,7 +14,7 @@
 namespace Sudoku {
 
     typedef enum { ROW_MAJOR, BLOCK_COLS, GenPath_MAX = BLOCK_COLS, } GenPath;
-    const std::vector<std::string> GenPath_Names = {
+    const std::array<std::string, 2> GenPath_Names = {
         "rowmajor",
         "blockcol",
     };
@@ -76,7 +76,7 @@ namespace Sudoku {
      * none of the undesirable side effects of the other designs.
      */
     typedef enum { ORD_2 = 2, ORD_3 = 3, ORD_4 = 4, ORD_5 = 5, ORD_DEFAULT = ORD_4, } Order;
-    const std::vector<Order> OrderVec = { ORD_2, ORD_3, ORD_4, ORD_5, };
+    const std::array<Order, 4> OrderVec = { ORD_2, ORD_3, ORD_4, ORD_5, };
 
     /**
      * 
@@ -135,6 +135,8 @@ namespace Sudoku {
                 biasIndex = rowLen;
                 value = rowLen;
             }
+            // std::enable_if_t<(O == ORD_5), std::string> toString();
+            // std::enable_if_t<(O < ORD_5), std::string> toString();
         protected:
             value_t biasIndex;
             value_t value; // undefined if clear.
@@ -156,12 +158,12 @@ namespace Sudoku {
         void printMessageBar(std::string const&, const char = '=') const;
 
     private:
-        std::vector<Tile> grid;
-        std::vector<occmask_t> rowSymbolOccMasks;
-        std::vector<occmask_t> colSymbolOccMasks;
-        std::vector<occmask_t> blkSymbolOccMasks;
-        std::vector<std::vector<value_t>> rowBiases;
-        std::vector<area_t> traversalOrder;
+        std::array<Tile, O*O*O*O> grid;
+        std::array<occmask_t, O*O> rowSymbolOccMasks;
+        std::array<occmask_t, O*O> colSymbolOccMasks;
+        std::array<occmask_t, O*O> blkSymbolOccMasks;
+        std::array<std::array<value_t, O*O+1>, O*O> rowBiases;
+        std::array<area_t, O*O*O*O> traversalOrder;
         GenPath genPath;
         unsigned long totalGenCount;
         unsigned long successfulGenCount;
