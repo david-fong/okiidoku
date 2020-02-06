@@ -9,22 +9,22 @@
 #include <string>       // string,
 
 
+// Mechanism to statically toggle alignment:
 #define STATW_I << std::setw(this->statsWidth)
 #define STATW_D << std::setw(this->statsWidth + 4)
-// ^mechanism to statically toggle alignment:
+
+static std::string createHSepString(unsigned int order);
 
 
 template <Sudoku::Order O>
 Sudoku::Solver<O>::Solver(std::ostream& os):
-    order       (O),
-    length      (order  * order),
-    area        (length * length),
     os          (os),
     isPretty    (&os == &std::cout),
-    statsWidth  ((0.5 * length) + 3)
+    statsWidth  ((0.5 * length) + 3),
+    gridHSepString(createHSepString(order))
 {
-    for (length_t i = 0; i < length; i++) {
-        std::iota(rowBiases[i].begin(), rowBiases[i].end(), 0);
+    for (auto& rowBias : rowBiases) {
+        std::iota(rowBias.begin(), rowBias.end(), 0);
     }
     setGenPath(BLOCK_COLS);
     totalGenCount = 0;
@@ -48,10 +48,6 @@ Sudoku::Solver<O>::Solver(std::ostream& os):
 
 template <Sudoku::Order O>
 void Sudoku::Solver<O>::print(void) const {
-    static std::string vbar = ' ' + std::string(((length + order + 1) * 2 - 1), '-');
-    for (order_t i = 0; i <= order; i++) {
-        vbar[1 + i * 2 * (order + 1)] = '+';
-    }
     os << std::setbase(16);
     for (area_t i = 0; i < area; i++) {
         if ((i % length) == 0 && i != 0) {
@@ -59,7 +55,7 @@ void Sudoku::Solver<O>::print(void) const {
             os << "\n";
         }
         if (isPretty && (i % (order * length) == 0)) {
-            os << vbar << '\n';
+            os << gridHSepString << '\n';
         }
         if (isPretty && (i % order) == 0) os << " |";
         Tile const& t = grid.at(i);
@@ -75,14 +71,13 @@ void Sudoku::Solver<O>::print(void) const {
         }
     }
     if (isPretty) {
-        os << " |\n" << vbar;
+        os << " |\n" << gridHSepString;
     }
     os << std::setbase(10) << std::endl;
 }
 
 template <Sudoku::Order O>
 void Sudoku::Solver<O>::clear(void) {
-    // Initialize all values as empty:
     std::for_each(grid.begin(), grid.end(), [this](Tile& t){ t.clear(length); });
     rowSymbolOccMasks.fill(0);
     colSymbolOccMasks.fill(0);
@@ -105,12 +100,6 @@ typename Sudoku::Solver<O>::opcount_t Sudoku::Solver<O>::generateSolution(void) 
     opcount_t numOperations = 0;
     register area_t index = 0;
     while (index < area) {
-        // Push a new permutation:
-        numOperations++;
-        if (numOperations > giveupThreshold) {
-            totalGenCount++;
-            return 0;
-        }
         if (isClear(setNextValid(traversalOrder[index]))) {
             // Pop and step backward:
             if (index == 0) {
@@ -121,6 +110,12 @@ typename Sudoku::Solver<O>::opcount_t Sudoku::Solver<O>::generateSolution(void) 
             index--;
         } else {
             index++;
+        }
+        // Check if the giveup threshold has been exceeded:
+        numOperations++;
+        if (numOperations > giveupThreshold) {
+            totalGenCount++;
+            return 0;
         }
     }
     totalGenCount++;
@@ -219,7 +214,7 @@ bool Sudoku::Solver<O>::runCommand(std::string const& cmdLine) {
         case SOLVE: {
             std::ifstream puzzleFile(cmdArgs);
             if (!puzzleFile.good()) {
-                std::cout << "the specified file could not be opened for reading" << std::endl;
+                std::cout << "the specified file could not be opened for reading." << std::endl;
                 break;
             }
             // TODO
@@ -235,7 +230,7 @@ bool Sudoku::Solver<O>::runCommand(std::string const& cmdLine) {
             }
             break;
         case SET_GENPATH:
-            setGenPath((GenPath)((genPath + 1) % (GenPath_MAX + 1)));
+            setGenPath(static_cast<GenPath>((genPath + 1) % (GenPath_MAX + 1)));
             std::cout << "generator path is now set to: " << Sudoku::GenPath_Names[genPath] << std::endl;
             break;
         default:
@@ -265,11 +260,10 @@ void Sudoku::Solver<O>::runNew(void) {
 
 template <Sudoku::Order O>
 void Sudoku::Solver<O>::runMultiple(const unsigned int numAttempts) {
-#define totalNumTrials      (totalGenCount      - initialTotalGenCount)
-#define successfulNumTrials (successfulGenCount - initialSuccessfulGenCount)
-    static const unsigned PRINT_COLS     = ((unsigned[]){0,0,16,12,8,1})[order];
-    const auto initialTotalGenCount      = totalGenCount;
-    const auto initialSuccessfulGenCount = successfulGenCount;
+    static const unsigned PRINT_COLS    = ((unsigned[]){0,0,16,12,8,1})[order];
+    static const unsigned PRINT_ROW_BUF = ((unsigned[]){0,0, 0, 0,4,1})[order];
+    opcount_t numTotalTrials   = 0;
+    opcount_t numSuccessTrials = 0;
     double trialsNumSolveOps = 0.0;
     double totalClockTicks   = 0.0;
     printMessageBar("START x" + std::to_string(numAttempts), (statsWidth * PRINT_COLS));
@@ -277,37 +271,38 @@ void Sudoku::Solver<O>::runMultiple(const unsigned int numAttempts) {
     for (unsigned int attemptNum = 0; attemptNum < numAttempts; attemptNum++) {
         clear();
         seed(false);
-        const clock_t    clockStart = std::clock();
+        const clock_t clockStart = std::clock();
         const opcount_t numSolveOps = generateSolution();
+        numTotalTrials++;
         totalClockTicks += (std::clock() - clockStart);
         trialsNumSolveOps += numSolveOps;
         if (numSolveOps == 0) {
             os STATW_I << "---";
         } else {
+            numSuccessTrials++;
             os STATW_I << numSolveOps;
         }
-        if (totalNumTrials % PRINT_COLS == 0) {
-            if (O < Order::ORD_4 || (totalNumTrials / 4) % PRINT_COLS != 0) {
+        if (numTotalTrials % PRINT_COLS == 0) {
+            if (PRINT_ROW_BUF != 0 && (numTotalTrials / PRINT_COLS) % PRINT_ROW_BUF != 0) {
                 os << '\n'; // Runs are lightning fast.
             } else {
                 os << std::endl; // Runs are slower. Give updates more frequently.
             }
         }
     }
-    if (totalNumTrials % PRINT_COLS != 0) { os << '\n'; }
+    if (numTotalTrials % PRINT_COLS != 0) { os << '\n'; }
 
     // Print stats:
-    const double averageNumSolveOps = (successfulNumTrials == 0) ? 0.0
-        : ((double)trialsNumSolveOps / successfulNumTrials);
+    const double averageNumSolveOps = (numSuccessTrials == 0) ? 0.0
+        : ((double)trialsNumSolveOps / numSuccessTrials);
     printMessageBar("", (statsWidth * PRINT_COLS), '-');
-    os << "num aborted trials: " STATW_I << (totalNumTrials - successfulNumTrials) << std::endl;
-    os << "avg num operations: " STATW_D << averageNumSolveOps << std::endl;
+    os << "num aborted trials: " STATW_I << (numTotalTrials - numSuccessTrials) << std::endl;
+    os << "avg num operations: " STATW_D << (averageNumSolveOps) << std::endl;
     os << "sum processor time: " STATW_D << (totalClockTicks / CLOCKS_PER_SEC) << " sec" << std::endl;
     printMessageBar("DONE x" + std::to_string(numAttempts), (statsWidth * PRINT_COLS));
 
-    // If printing to file and some time has passed, emit a beep sound:
-    if (&os != &std::cout) {
-        // TODO: count processor time please.
+    // Emit a beep sound if the trials took longer than ten seconds:
+    if (totalClockTicks / CLOCKS_PER_SEC > 10.0) {
         std::cout << '\a' << std::flush;
     }
 }
@@ -333,12 +328,18 @@ void Sudoku::Solver<O>::printMessageBar(
 }
 
 template <Sudoku::Order O>
-void Sudoku::Solver<O>::printMessageBar(
-    std::string const& msg,
-    const char fillChar
-) const {
+void Sudoku::Solver<O>::printMessageBar(std::string const& msg, const char fillChar) const {
     const unsigned int barLength = (isPretty)
-        ? ((length + order + 1) * 2)
+        ? ((length + order + 1) * 2 + 1)
         : (length * 2);
     return printMessageBar(msg, barLength, fillChar);
+}
+
+static std::string createHSepString(unsigned int order) {
+    std::string vbar = ' ' + std::string((((order * (order + 1)) + 1) * 2 - 1), '-');
+    for (unsigned int i = 0; i <= order; i++) {
+        // Insert crosses at vbar intersections.
+        vbar[(2 * (order + 1) * i) + 1] = '+';
+    }
+    return std::move(vbar);
 }

@@ -144,9 +144,9 @@ namespace Sudoku {
 
 
     public:
-        const order_t   order;
-        const length_t  length;
-        const unsigned  area;
+        const order_t   order   = O;
+        const length_t  length  = O * O;
+        const unsigned  area    = O * O * O * O;
         explicit Solver(std::ostream&);
 
         // Return false if command is to exit the program:
@@ -171,6 +171,7 @@ namespace Sudoku {
         std::ostream& os;
         const bool isPretty;
         const unsigned int statsWidth;
+        const std::string gridHSepString;
 
         void clear(void);
         void seed(const bool printInfo);

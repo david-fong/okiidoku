@@ -44,10 +44,10 @@ int main(const int argc, char const *const argv[]) {
     // (It will automatically enter its REPL).
     switch (static_cast<Sudoku::Order>(userOrder)) {
         using namespace Sudoku;
-        case ORD_2: { Solver<ORD_2> game(*outStream); break; }
-        case ORD_3: { Solver<ORD_3> game(*outStream); break; }
-        case ORD_4: { Solver<ORD_4> game(*outStream); break; }
-        case ORD_5: { Solver<ORD_5> game(*outStream); break; }
+        case ORD_2: { Solver<ORD_2> s(*outStream); break; }
+        case ORD_3: { Solver<ORD_3> s(*outStream); break; }
+        case ORD_4: { Solver<ORD_4> s(*outStream); break; }
+        case ORD_5: { Solver<ORD_5> s(*outStream); break; }
         default:
             std::cout << "\nFAILED:\norder must be one of: [ ";
             for (Order o : OrderVec) {
