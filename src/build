@@ -2,7 +2,27 @@
 # I apologize for committing the platform-specific sed filter.
 # I want to keep this script in the repo so please bear with it
 # as a viewer and fellow programmer :)
+#
+# Personal notes:
+# https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html
 set -e
-#readonly COMPILER='clang++ -target x86_64-w64-mingw64 -fcolor-diagnostics -fansi-escape-codes -ferror-limit=4'
-readonly COMPILER='g++ -fdiagnostics-color=always -fmax-errors=4'
-$COMPILER -O3 -Wall "$@" main.cpp -o main.exe |& sed 's/C:\\mingw64\\x86_64-8.1.0-posix-seh\\lib\\gcc\\x86_64-w64-mingw32\\8.1.0\\include/\\STDLIB/g'
+readonly CONTEXT="${BASH_SOURCE[1]}"
+
+if [[ "$@" =~ '--clang' ]]
+then
+    readonly COMPILER='clang++ -target x86_64-w64-mingw64 -fcolor-diagnostics -fansi-escape-codes -ferror-limit=4'
+else
+    # Use g++ by default.
+    readonly COMPILER='g++ -fdiagnostics-color=always -fmax-errors=4'
+fi
+
+declare OPTS=''
+if [[ "$@" =~ '-d'|'--debug' ]]
+then
+    echo -e '\nbuilding with profiling support.'
+    OPTS+="-pg -fprofile-generate=${CONTEXT}/.profile"
+fi
+
+declare -r SHORTEN_STDLIB_PATH='s/C:\\mingw64\\x86_64-8.1.0-posix-seh\\lib\\gcc\\x86_64-w64-mingw32\\8.1.0\\include/\\STDLIB/g'
+
+${COMPILER} -Wall -O3 ${OPTS} main.cpp -o main.exe |& sed ${SHORTEN_STDLIB_PATH}

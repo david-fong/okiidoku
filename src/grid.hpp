@@ -63,12 +63,10 @@ namespace Sudoku {
      * 2. Take an unsigned short as a template argument for the grid's
      * order, and use conditional types. A small advantage here is that
      * I can condition typedefs on ranges of the order argument instead
-     * of specifiers for each value. This addresses #2 and #3, but not #1,
-     * which would require definitions of valid bounds on the order, and
-     * for calling code to use literal numbers if constructing solvers of
-     * statically-unknown size.
-     * 3. The solution I chose: Addresses all my wishes and suffers from
-     * none of the undesirable side effects of the other designs.
+     * of specifiers for each value. Use static assertions for valid range.
+     * 3. Like the above solution, but uses enums (I didn't know about
+     * static casts when I chose this solution - I will switch to #2 if
+     * I find need to).
      */
     typedef enum { ORD_2 = 2, ORD_3 = 3, ORD_4 = 4, ORD_5 = 5, ORD_DEFAULT = ORD_4, } Order;
     const std::array<Order, 4> OrderVec = { ORD_2, ORD_3, ORD_4, ORD_5, };
@@ -127,8 +125,9 @@ namespace Sudoku {
         class Tile {
             friend Solver;
         public:
-            void clear(const value_t rowLen) noexcept {
-                biasIndex = rowLen;
+            void clear(void) noexcept {
+                biasIndex = length;
+                //value = length;
             }
             // std::enable_if_t<(O == ORD_5), std::string> toString();
             // std::enable_if_t<(O < ORD_5), std::string> toString();
@@ -142,10 +141,11 @@ namespace Sudoku {
         static constexpr order_t    order   = O;
         static constexpr length_t   length  = O * O;
         static constexpr area_t     area    = O * O * O * O;
+
         explicit Solver(std::ostream&);
 
         // Return false if command is to exit the program:
-        bool runCommand(const std::string& cmdLine);
+        bool runCommand(std::string const& cmdLine);
         void runNew(void);
         void runMultiple(const unsigned long);
         void print(void) const;
@@ -163,14 +163,15 @@ namespace Sudoku {
 
         /**
          * https://www.desmos.com/calculator/8taqzelils
+         * give up if number of operations performed exceeds this value.
          */
-        static constexpr opcount_t giveupThreshold = ((const opcount_t[]){0,2,26,5200,5000000,500000000})[O];
+        static constexpr opcount_t giveupThreshold = ((const opcount_t[]){0,1,26,5200,5000000,500000000})[O];
         unsigned long totalGenCount;
         unsigned long successfulGenCount;
 
         std::ostream& os;
         const bool isPretty;
-        const unsigned int statsWidth;
+        static constexpr unsigned int statsWidth = (0.5 * length) + 3;
         const std::string gridHSepString;
 
         void clear(void);
@@ -181,15 +182,15 @@ namespace Sudoku {
         opcount_t generateSolution(void);
         // Returns the tile at index.
         Tile const& setNextValid(const area_t index);
-        length_t tileNumNonCandidates(const area_t) const noexcept;
+        length_t tileNumNonCandidates(const area_t) const noexcept __attribute__((const));
         void setGenPath(const GenPath) noexcept;
 
         // Inline functions:
-        bool isClear(Tile const& t) const noexcept { return t.biasIndex == length; }
-        length_t getRow(const area_t index) const noexcept { return index / length; }
-        length_t getCol(const area_t index) const noexcept { return index % length; }
-        length_t getBlk(const area_t index) const noexcept { return getBlk(getRow(index), getCol(index)); }
-        length_t getBlk(const length_t row, const length_t col) const noexcept {
+        static bool isClear(Tile const& t) noexcept __attribute__((const)) { return t.biasIndex == length; }
+        static length_t getRow(const area_t index) noexcept __attribute__((const)) { return index / length; }
+        static length_t getCol(const area_t index) noexcept __attribute__((const)) { return index % length; }
+        static length_t getBlk(const area_t index) noexcept __attribute__((const)) { return getBlk(getRow(index), getCol(index)); }
+        static length_t getBlk(const length_t row, const length_t col) noexcept __attribute__((const)) {
             return ((row / order) * order) + (col / order);
         }
 

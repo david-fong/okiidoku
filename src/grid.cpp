@@ -20,7 +20,6 @@ template <Sudoku::Order O>
 Sudoku::Solver<O>::Solver(std::ostream& os):
     os          (os),
     isPretty    (&os == &std::cout),
-    statsWidth  ((0.5 * length) + 3),
     gridHSepString(createHSepString(order))
 {
     for (auto& rowBias : rowBiases) {
@@ -78,7 +77,7 @@ void Sudoku::Solver<O>::print(void) const {
 
 template <Sudoku::Order O>
 void Sudoku::Solver<O>::clear(void) {
-    std::for_each(grid.begin(), grid.end(), [this](Tile& t){ t.clear(length); });
+    std::for_each(grid.begin(), grid.end(), [this](Tile& t){ t.clear(); });
     rowSymbolOccMasks.fill(0);
     colSymbolOccMasks.fill(0);
     blkSymbolOccMasks.fill(0);
@@ -261,7 +260,7 @@ template <Sudoku::Order O>
 void Sudoku::Solver<O>::runMultiple(const unsigned long numTotalTrialsToDo) {
     static constexpr unsigned PRINT_COLS    = ((const unsigned[]){0,0,16,12,8,1})[order];
     static constexpr unsigned PRINT_ROW_BUF = ((const unsigned[]){0,0, 0, 0,4,1})[order];
-    static     const unsigned BAR_WIDTH     = statsWidth * PRINT_COLS + (isPretty ? 5 : 0);
+    static     const unsigned BAR_WIDTH     = statsWidth * PRINT_COLS + (isPretty ? 7 : 0);
 
     opcount_t numTotalTrials   = 0;
     opcount_t numSuccessTrials = 0;
@@ -275,7 +274,7 @@ void Sudoku::Solver<O>::runMultiple(const unsigned long numTotalTrialsToDo) {
     while (numTotalTrials < numTotalTrialsToDo) {
         if (numTotalTrials % PRINT_COLS == 0) {
             const unsigned pctDone = 100.0 * numTotalTrials / numTotalTrialsToDo;
-            std::cout << std::setw(2) << pctDone << "% |";
+            std::cout << "| " << std::setw(2) << pctDone << "% |";
         }
         clear();
         seed(false);
@@ -288,7 +287,7 @@ void Sudoku::Solver<O>::runMultiple(const unsigned long numTotalTrialsToDo) {
             os STATW_I << "---";
         } else {
             numSuccessTrials++;
-            numSolveOpsBins[numSolveOps * TRIALS_NUM_BINS / giveupThreshold]++;
+            numSolveOpsBins[(numSolveOps - 1) * TRIALS_NUM_BINS / giveupThreshold]++;
             os STATW_I << numSolveOps;
         }
         if (numTotalTrials % PRINT_COLS == 0) {
@@ -302,17 +301,18 @@ void Sudoku::Solver<O>::runMultiple(const unsigned long numTotalTrialsToDo) {
     if (numTotalTrials % PRINT_COLS != 0) { os << '\n'; }
 
     // Print stats:
+    printMessageBar("", BAR_WIDTH, '-');
     const double averageNumSolveOps = (numSuccessTrials == 0) ? 0.0
         : ((double)trialsNumSolveOps / numSuccessTrials);
-    printMessageBar("", BAR_WIDTH, '-');
     os << "num aborted trials: " STATW_I << (numTotalTrials - numSuccessTrials) << '\n';
     os << "avg num operations: " STATW_D << (averageNumSolveOps) << '\n';
     os << "sum processor time: " STATW_D << (totalClockTicks / CLOCKS_PER_SEC) << " sec" << '\n';
+
+    // Print bins (work distribution):
+    printMessageBar("", BAR_WIDTH, '-');
     for (unsigned i = 0; i < numSolveOpsBins.size(); i++) {
         #define binWidth giveupThreshold / numSolveOpsBins.size()
-        os << "bin #" << std::setw(2) << i << "[" \
-            << std::setw(10) << (int)((double)i * binWidth) \
-            << std::setw(10) << (int)((double)(i + 1) * binWidth) << "): " \
+        os << "..." STATW_I << (int)((double)(i + 1) * binWidth) << ": " \
             << std::setw(10) << numSolveOpsBins[i] << '\n';
     }
     printMessageBar("DONE x" + std::to_string(numTotalTrialsToDo), BAR_WIDTH);
