@@ -95,8 +95,7 @@ void Sudoku::Solver<O>::seed(const bool printInfo) {
 
 
 template <Sudoku::Order O>
-typename Sudoku::Solver<O>::opcount_t Sudoku::Solver<O>::generateSolution(void) {
-    static const opcount_t giveupThreshold = GIVEUP_THRESH_COEFF * (area * area * area);
+typename Sudoku::opcount_t Sudoku::Solver<O>::generateSolution(void) {
     opcount_t numOperations = 0;
     register area_t index = 0;
     while (index < area) {
@@ -224,7 +223,7 @@ bool Sudoku::Solver<O>::runCommand(std::string const& cmdLine) {
             break;
         case RUN_MULTIPLE:
             try {
-                runMultiple(std::stoi(cmdArgs));
+                runMultiple(std::stoul(cmdArgs));
             } catch (std::invalid_argument const& ia) {
                 std::cout << "could not convert " << cmdArgs << " to an integer." << std::endl;
             }
@@ -251,39 +250,49 @@ void Sudoku::Solver<O>::runNew(void) {
     const clock_t   clockFinish = std::clock();
     const double  processorTime = ((double)(clockFinish - clockStart)) / CLOCKS_PER_SEC;
 
-    os << "num operations: " STATW_I << numSolveOps << std::endl;
-    os << "processor time: " STATW_D << processorTime << " sec" << std::endl;
+    os << "num operations: " STATW_I << numSolveOps << '\n';
+    os << "processor time: " STATW_D << processorTime << " sec" << '\n';
     if (!isPretty) printMessageBar("", '-');
     print();
     printMessageBar((numSolveOps == 0) ? "ABORT" : "DONE");
 }
 
 template <Sudoku::Order O>
-void Sudoku::Solver<O>::runMultiple(const unsigned int numAttempts) {
-    static const unsigned PRINT_COLS    = ((unsigned[]){0,0,16,12,8,1})[order];
-    static const unsigned PRINT_ROW_BUF = ((unsigned[]){0,0, 0, 0,4,1})[order];
+void Sudoku::Solver<O>::runMultiple(const unsigned long numTotalTrialsToDo) {
+    static constexpr unsigned PRINT_COLS    = ((const unsigned[]){0,0,16,12,8,1})[order];
+    static constexpr unsigned PRINT_ROW_BUF = ((const unsigned[]){0,0, 0, 0,4,1})[order];
+    static     const unsigned BAR_WIDTH     = statsWidth * PRINT_COLS + (isPretty ? 5 : 0);
+
     opcount_t numTotalTrials   = 0;
     opcount_t numSuccessTrials = 0;
     double trialsNumSolveOps = 0.0;
     double totalClockTicks   = 0.0;
-    printMessageBar("START x" + std::to_string(numAttempts), (statsWidth * PRINT_COLS));
+    std::array<opcount_t, TRIALS_NUM_BINS> numSolveOpsBins;
+    numSolveOpsBins.fill(0);
 
-    for (unsigned int attemptNum = 0; attemptNum < numAttempts; attemptNum++) {
+    printMessageBar("START x" + std::to_string(numTotalTrialsToDo), BAR_WIDTH);
+
+    while (numTotalTrials < numTotalTrialsToDo) {
+        if (numTotalTrials % PRINT_COLS == 0) {
+            const unsigned pctDone = 100.0 * numTotalTrials / numTotalTrialsToDo;
+            std::cout << std::setw(2) << pctDone << "% |";
+        }
         clear();
         seed(false);
         const clock_t clockStart = std::clock();
         const opcount_t numSolveOps = generateSolution();
-        numTotalTrials++;
         totalClockTicks += (std::clock() - clockStart);
+        numTotalTrials++;
         trialsNumSolveOps += numSolveOps;
         if (numSolveOps == 0) {
             os STATW_I << "---";
         } else {
             numSuccessTrials++;
+            numSolveOpsBins[numSolveOps * TRIALS_NUM_BINS / giveupThreshold]++;
             os STATW_I << numSolveOps;
         }
         if (numTotalTrials % PRINT_COLS == 0) {
-            if (PRINT_ROW_BUF != 0 && (numTotalTrials / PRINT_COLS) % PRINT_ROW_BUF != 0) {
+            if (PRINT_ROW_BUF == 0 || ((numTotalTrials / PRINT_COLS) % PRINT_ROW_BUF) != 0) {
                 os << '\n'; // Runs are lightning fast.
             } else {
                 os << std::endl; // Runs are slower. Give updates more frequently.
@@ -295,11 +304,18 @@ void Sudoku::Solver<O>::runMultiple(const unsigned int numAttempts) {
     // Print stats:
     const double averageNumSolveOps = (numSuccessTrials == 0) ? 0.0
         : ((double)trialsNumSolveOps / numSuccessTrials);
-    printMessageBar("", (statsWidth * PRINT_COLS), '-');
-    os << "num aborted trials: " STATW_I << (numTotalTrials - numSuccessTrials) << std::endl;
-    os << "avg num operations: " STATW_D << (averageNumSolveOps) << std::endl;
-    os << "sum processor time: " STATW_D << (totalClockTicks / CLOCKS_PER_SEC) << " sec" << std::endl;
-    printMessageBar("DONE x" + std::to_string(numAttempts), (statsWidth * PRINT_COLS));
+    printMessageBar("", BAR_WIDTH, '-');
+    os << "num aborted trials: " STATW_I << (numTotalTrials - numSuccessTrials) << '\n';
+    os << "avg num operations: " STATW_D << (averageNumSolveOps) << '\n';
+    os << "sum processor time: " STATW_D << (totalClockTicks / CLOCKS_PER_SEC) << " sec" << '\n';
+    for (unsigned i = 0; i < numSolveOpsBins.size(); i++) {
+        #define binWidth giveupThreshold / numSolveOpsBins.size()
+        os << "bin #" << std::setw(2) << i << "[" \
+            << std::setw(10) << (int)((double)i * binWidth) \
+            << std::setw(10) << (int)((double)(i + 1) * binWidth) << "): " \
+            << std::setw(10) << numSolveOpsBins[i] << '\n';
+    }
+    printMessageBar("DONE x" + std::to_string(numTotalTrialsToDo), BAR_WIDTH);
 
     // Emit a beep sound if the trials took longer than ten seconds:
     if (totalClockTicks / CLOCKS_PER_SEC > 10.0) {

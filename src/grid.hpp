@@ -4,11 +4,6 @@
 #include <array>
 #include <map>
 
-
-#define GIVEUP_THRESH_COEFF 0.7
-// TODO ^consumer code assumes num operations is proportional to area^2. it that true?
-
-
 /**
  */
 namespace Sudoku {
@@ -78,6 +73,10 @@ namespace Sudoku {
     typedef enum { ORD_2 = 2, ORD_3 = 3, ORD_4 = 4, ORD_5 = 5, ORD_DEFAULT = ORD_4, } Order;
     const std::array<Order, 4> OrderVec = { ORD_2, ORD_3, ORD_4, ORD_5, };
 
+    // Very large number container.
+    typedef unsigned long long opcount_t;
+    constexpr unsigned int TRIALS_NUM_BINS = 20;
+
     /**
      * 
      */
@@ -120,9 +119,6 @@ namespace Sudoku {
         // uint range [0, order^2].
         typedef length_t value_t;
 
-        // very big.
-        typedef unsigned long long opcount_t;
-
     public:
         /**
          * When clear, biasIndex is the parent Solver's length and value
@@ -133,7 +129,6 @@ namespace Sudoku {
         public:
             void clear(const value_t rowLen) noexcept {
                 biasIndex = rowLen;
-                value = rowLen;
             }
             // std::enable_if_t<(O == ORD_5), std::string> toString();
             // std::enable_if_t<(O < ORD_5), std::string> toString();
@@ -144,15 +139,15 @@ namespace Sudoku {
 
 
     public:
-        const order_t   order   = O;
-        const length_t  length  = O * O;
-        const unsigned  area    = O * O * O * O;
+        static constexpr order_t    order   = O;
+        static constexpr length_t   length  = O * O;
+        static constexpr area_t     area    = O * O * O * O;
         explicit Solver(std::ostream&);
 
         // Return false if command is to exit the program:
         bool runCommand(const std::string& cmdLine);
         void runNew(void);
-        void runMultiple(const unsigned int);
+        void runMultiple(const unsigned long);
         void print(void) const;
         void printMessageBar(std::string const&, unsigned int, const char = '=') const;
         void printMessageBar(std::string const&, const char = '=') const;
@@ -165,6 +160,11 @@ namespace Sudoku {
         std::array<std::array<value_t, O*O+1>, O*O> rowBiases;
         std::array<area_t, O*O*O*O> traversalOrder;
         GenPath genPath;
+
+        /**
+         * https://www.desmos.com/calculator/8taqzelils
+         */
+        static constexpr opcount_t giveupThreshold = ((const opcount_t[]){0,2,26,5200,5000000,500000000})[O];
         unsigned long totalGenCount;
         unsigned long successfulGenCount;
 
@@ -178,7 +178,7 @@ namespace Sudoku {
         // Generates a random solution. Returns the number of operations or
         // zero if the give-up threshold was reached. Any previous seeds must
         // not make generating a solution impossible.
-        opcount_t generateSolution();
+        opcount_t generateSolution(void);
         // Returns the tile at index.
         Tile const& setNextValid(const area_t index);
         length_t tileNumNonCandidates(const area_t) const noexcept;
@@ -189,7 +189,9 @@ namespace Sudoku {
         length_t getRow(const area_t index) const noexcept { return index / length; }
         length_t getCol(const area_t index) const noexcept { return index % length; }
         length_t getBlk(const area_t index) const noexcept { return getBlk(getRow(index), getCol(index)); }
-        length_t getBlk(const length_t row, const length_t col) const noexcept { return ((row / order) * order) + (col / order); }
+        length_t getBlk(const length_t row, const length_t col) const noexcept {
+            return ((row / order) * order) + (col / order);
+        }
 
     private:
         static int myRandom (const int i) { return rand() % i; }
