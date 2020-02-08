@@ -180,22 +180,22 @@ namespace Sudoku {
         // zero if the give-up threshold was reached. Any previous seeds must
         // not make generating a solution impossible.
         opcount_t generateSolution(void);
-        // Returns the tile at index.
-        Tile const& setNextValid(const area_t index);
-        length_t tileNumNonCandidates(const area_t) const noexcept __attribute__((const));
+        // Returns the tile that was operated on.
+        Tile const& setNextValid(const area_t);
+        [[gnu::const]] length_t tileNumNonCandidates(const area_t) const noexcept;
         void setGenPath(const GenPath) noexcept;
 
         // Inline functions:
-        static bool isClear(Tile const& t) noexcept __attribute__((const)) { return t.biasIndex == length; }
-        static length_t getRow(const area_t index) noexcept __attribute__((const)) { return index / length; }
-        static length_t getCol(const area_t index) noexcept __attribute__((const)) { return index % length; }
-        static length_t getBlk(const area_t index) noexcept __attribute__((const)) { return getBlk(getRow(index), getCol(index)); }
-        static length_t getBlk(const length_t row, const length_t col) noexcept __attribute__((const)) {
+        [[gnu::const]] static bool isClear(Tile const& t) noexcept { return t.biasIndex == length; }
+        [[gnu::const]] static length_t getRow(const area_t index) noexcept { return index / length; }
+        [[gnu::const]] static length_t getCol(const area_t index) noexcept { return index % length; }
+        [[gnu::const]] static length_t getBlk(const area_t index) noexcept { return getBlk(getRow(index), getCol(index)); }
+        [[gnu::const]] static length_t getBlk(const length_t row, const length_t col) noexcept {
             return ((row / order) * order) + (col / order);
         }
 
     private:
-        static int myRandom (const int i) { return rand() % i; }
+        static int myRandom (const int i) { return std::rand() % i; }
         struct MyNumpunct : std::numpunct<char> {
             std::string do_grouping() const {
                 return "\03";

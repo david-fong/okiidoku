@@ -58,6 +58,6 @@ int main(const int argc, char const *const argv[]) {
     }
 
     // End of program:
-    std::cout << std::endl << "bye bye!" << std::endl;
+    std::cout << std::endl << "bye bye!\n" << std::endl;
     return 0;
 }

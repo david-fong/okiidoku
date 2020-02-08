@@ -6,7 +6,8 @@
 # Personal notes:
 # https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html
 set -e
-readonly CONTEXT="${BASH_SOURCE[1]}"
+readonly CONTEXT="$(dirname "${BASH_SOURCE[0]}")"
+#declare -rx GMON_PREFIX="${CONTEXT}/.profile" # this doesn't seem to be working...
 
 if [[ "$@" =~ '--clang' ]]
 then
@@ -17,12 +18,16 @@ else
 fi
 
 declare OPTS=''
-if [[ "$@" =~ '-d'|'--debug' ]]
+if [[ "$@" =~ '-p'|'--profile' ]]
 then
     echo -e '\nbuilding with profiling support.'
-    OPTS+="-pg -fprofile-generate=${CONTEXT}/.profile"
+    OPTS+=" -pg -fprofile-generate"
+elif [[ "$@" =~ '-P'|'--profile-use' ]]
+then
+    echo -e '\nusing last generated profiling data.'
+    OPTS+=" -fprofile-use"
 fi
 
 declare -r SHORTEN_STDLIB_PATH='s/C:\\mingw64\\x86_64-8.1.0-posix-seh\\lib\\gcc\\x86_64-w64-mingw32\\8.1.0\\include/\\STDLIB/g'
 
-${COMPILER} -Wall -O3 ${OPTS} main.cpp -o main.exe |& sed ${SHORTEN_STDLIB_PATH}
+${COMPILER} -Wall -O3 ${OPTS} -fprofile-dir="${CONTEXT}/.profile" main.cpp -o main.exe |& sed ${SHORTEN_STDLIB_PATH}

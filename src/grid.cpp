@@ -100,7 +100,7 @@ typename Sudoku::opcount_t Sudoku::Solver<O>::generateSolution(void) {
     while (index < area) {
         if (isClear(setNextValid(traversalOrder[index]))) {
             // Pop and step backward:
-            if (index == 0) {
+            if (__builtin_expect(index == 0, false)) {
                 // No solution could be found. Treat as if abort.
                 totalGenCount++;
                 return 0;
@@ -111,7 +111,7 @@ typename Sudoku::opcount_t Sudoku::Solver<O>::generateSolution(void) {
         }
         // Check if the giveup threshold has been exceeded:
         numOperations++;
-        if (numOperations > giveupThreshold) {
+        if (__builtin_expect(numOperations > giveupThreshold, false)) {
             totalGenCount++;
             return 0;
         }
