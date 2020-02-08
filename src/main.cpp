@@ -4,6 +4,8 @@
 #include "grid.cpp"
 
 
+#define DEFAULT_ORDER 4
+
 /**
  * ARGUMENTS
  * 0. executable name (fixed).
@@ -17,7 +19,7 @@ int main(const int argc, char const *const argv[]) {
     std::string     outFileName;    // 3
     std::ostream*   outStream;      // 3
 
-    userOrder = (argc > 1) ? std::stoi(argv[1]) : Sudoku::Order::ORD_DEFAULT;
+    userOrder = (argc > 1) ? std::stoi(argv[1]) : DEFAULT_ORDER;
     if (argc > 2 && !std::string(argv[2]).empty()) {
         srandKey = std::stoi(argv[2]);
     } else {
@@ -44,14 +46,14 @@ int main(const int argc, char const *const argv[]) {
     // (It will automatically enter its REPL).
     switch (static_cast<Sudoku::Order>(userOrder)) {
         using namespace Sudoku;
-        case ORD_2: { Solver<ORD_2> s(*outStream); break; }
-        case ORD_3: { Solver<ORD_3> s(*outStream); break; }
-        case ORD_4: { Solver<ORD_4> s(*outStream); break; }
-        case ORD_5: { Solver<ORD_5> s(*outStream); break; }
+        case 2: { Solver<2> s(*outStream); break; }
+        case 3: { Solver<3> s(*outStream); break; }
+        case 4: { Solver<4> s(*outStream); break; }
+        case 5: { Solver<5> s(*outStream); break; }
         default:
             std::cout << "\nFAILED:\norder must be one of: [ ";
-            for (Order o : OrderVec) {
-                std::cout << o << ", ";
+            for (int i = 2; i <= 5; i++) {
+                std::cout << i << ", ";
             }
             std::cout << "]" << std::endl;
             break;

@@ -88,7 +88,7 @@ void Sudoku::Solver<O>::seed(const bool printInfo) {
     // Scramble each row's value-guessing-order:
     // note: must keep the <length>'th entry as <length>.
     for (auto& rowBias : rowBiases) {
-        std::random_shuffle(rowBias.begin(), rowBias.end() - 1, myRandom);
+        std::random_shuffle(rowBias.begin(), rowBias.end() - 1, MY_RANDOM);
     }
 }
 
