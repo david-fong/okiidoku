@@ -9,7 +9,7 @@
 #include <string>       // string,
 
 
-// Mechanism to statically toggle alignment:
+// Mechanism to statically toggle printing alignment:
 #define STATW_I << std::setw(this->statsWidth)
 #define STATW_D << std::setw(this->statsWidth + 4)
 
@@ -25,7 +25,7 @@ Sudoku::Solver<O>::Solver(std::ostream& os):
     for (auto& rowBias : rowBiases) {
         std::iota(rowBias.begin(), rowBias.end(), 0);
     }
-    setGenPath(BLOCK_COLS);
+    setGenPath(DEFAULT_GENPATH);
     totalGenCount = 0;
     successfulGenCount = 0;
 
@@ -81,6 +81,7 @@ void Sudoku::Solver<O>::clear(void) {
     rowSymbolOccMasks.fill(0);
     colSymbolOccMasks.fill(0);
     blkSymbolOccMasks.fill(0);
+    if (doCountBacktracks) backtrackCounts.fill(0);
 }
 
 template <Sudoku::Order O>
@@ -105,13 +106,14 @@ typename Sudoku::opcount_t Sudoku::Solver<O>::generateSolution(void) {
                 totalGenCount++;
                 return 0;
             }
+            backtrackCounts[index]++;
             index--;
         } else {
             index++;
         }
         // Check if the giveup threshold has been exceeded:
         numOperations++;
-        if (__builtin_expect(numOperations > giveupThreshold, false)) {
+        if (__builtin_expect(numOperations > GIVEUP_THRESHOLD, false)) {
             totalGenCount++;
             return 0;
         }
@@ -253,6 +255,7 @@ void Sudoku::Solver<O>::runNew(void) {
     os << "processor time: " STATW_D << processorTime << " sec" << '\n';
     if (!isPretty) printMessageBar("", '-');
     print();
+    // TODO: print backTrackCounts
     printMessageBar((numSolveOps == 0) ? "ABORT" : "DONE");
 }
 
@@ -287,7 +290,7 @@ void Sudoku::Solver<O>::runMultiple(const unsigned long numTotalTrialsToDo) {
             os STATW_I << "---";
         } else {
             numSuccessTrials++;
-            numSolveOpsBins[(numSolveOps - 1) * TRIALS_NUM_BINS / giveupThreshold]++;
+            numSolveOpsBins[(numSolveOps - 1) * TRIALS_NUM_BINS / GIVEUP_THRESHOLD]++;
             os STATW_I << numSolveOps;
         }
         if (numTotalTrials % PRINT_COLS == 0) {
@@ -311,7 +314,7 @@ void Sudoku::Solver<O>::runMultiple(const unsigned long numTotalTrialsToDo) {
     // Print bins (work distribution):
     printMessageBar("", BAR_WIDTH, '-');
     for (unsigned i = 0; i < numSolveOpsBins.size(); i++) {
-        #define binWidth giveupThreshold / numSolveOpsBins.size()
+        constexpr double binWidth = (double)GIVEUP_THRESHOLD / numSolveOpsBins.size();
         os << "..." STATW_I << (int)((double)(i + 1) * binWidth) << ": " \
             << std::setw(10) << numSolveOpsBins[i] << '\n';
     }

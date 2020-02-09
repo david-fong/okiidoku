@@ -1,6 +1,8 @@
 
 # Things To Do
 
+[Try this?](https://codegolf.stackexchange.com/questions/190727/the-fastest-sudoku-solver)
+
 ## Higher Priority
 
 - Set a compilation flag for whether to track number of operations on a Tile per run.
