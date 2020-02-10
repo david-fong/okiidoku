@@ -45,6 +45,7 @@ Sudoku::Solver<O>::Solver(std::ostream& os):
     } while (runCommand(command));
 }
 
+
 template <Sudoku::Order O>
 void Sudoku::Solver<O>::print(void) const {
     os << std::setbase(16);
@@ -75,6 +76,7 @@ void Sudoku::Solver<O>::print(void) const {
     os << std::setbase(10) << std::endl;
 }
 
+
 template <Sudoku::Order O>
 void Sudoku::Solver<O>::clear(void) {
     std::for_each(grid.begin(), grid.end(), [this](Tile& t){ t.clear(); });
@@ -84,6 +86,7 @@ void Sudoku::Solver<O>::clear(void) {
     if (doCountBacktracks) backtrackCounts.fill(0);
 }
 
+
 template <Sudoku::Order O>
 void Sudoku::Solver<O>::seed(const bool printInfo) {
     // Scramble each row's value-guessing-order:
@@ -92,6 +95,8 @@ void Sudoku::Solver<O>::seed(const bool printInfo) {
         std::random_shuffle(rowBias.begin(), rowBias.end() - 1, MY_RANDOM);
     }
 }
+
+
 
 
 template <Sudoku::Order O>
@@ -122,6 +127,7 @@ typename Sudoku::opcount_t Sudoku::Solver<O>::generateSolution(void) {
     successfulGenCount++;
     return numOperations;
 }
+
 
 template <Sudoku::Order O>
 typename Sudoku::Solver<O>::Tile const& Sudoku::Solver<O>::setNextValid(const area_t index) {
@@ -160,6 +166,7 @@ typename Sudoku::Solver<O>::Tile const& Sudoku::Solver<O>::setNextValid(const ar
     return t;
 }
 
+
 template <Sudoku::Order O>
 typename Sudoku::Solver<O>::length_t Sudoku::Solver<O>::tileNumNonCandidates(const area_t index) const noexcept {
     return __builtin_popcount(
@@ -168,6 +175,7 @@ typename Sudoku::Solver<O>::length_t Sudoku::Solver<O>::tileNumNonCandidates(con
         | blkSymbolOccMasks[getBlk(index)]
     );
 }
+
 
 template <Sudoku::Order O>
 void Sudoku::Solver<O>::setGenPath(const GenPath newGenPath) noexcept {
@@ -188,6 +196,7 @@ void Sudoku::Solver<O>::setGenPath(const GenPath newGenPath) noexcept {
     }
     genPath = newGenPath;
 }
+
 
 
 
@@ -239,6 +248,7 @@ bool Sudoku::Solver<O>::runCommand(std::string const& cmdLine) {
     return true;
 }
 
+
 template <Sudoku::Order O>
 void Sudoku::Solver<O>::runNew(void) {
     printMessageBar("START " + std::to_string(totalGenCount));
@@ -258,6 +268,7 @@ void Sudoku::Solver<O>::runNew(void) {
     // TODO: print backTrackCounts
     printMessageBar((numSolveOps == 0) ? "ABORT" : "DONE");
 }
+
 
 template <Sudoku::Order O>
 void Sudoku::Solver<O>::runMultiple(const trials_t trialsToRun) {
@@ -355,6 +366,7 @@ void Sudoku::Solver<O>::runMultiple(const trials_t trialsToRun) {
 
 
 
+
 template <Sudoku::Order O>
 void Sudoku::Solver<O>::printMessageBar(
     std::string const& msg,
@@ -373,6 +385,7 @@ void Sudoku::Solver<O>::printMessageBar(
     os << bar << std::endl;
 }
 
+
 template <Sudoku::Order O>
 void Sudoku::Solver<O>::printMessageBar(std::string const& msg, const char fillChar) const {
     const unsigned int barLength = (isPretty)
@@ -380,6 +393,7 @@ void Sudoku::Solver<O>::printMessageBar(std::string const& msg, const char fillC
         : (length * 2);
     return printMessageBar(msg, barLength, fillChar);
 }
+
 
 static std::string createHSepString(unsigned int order) {
     std::string vbar = ' ' + std::string((((order * (order + 1)) + 1) * 2 - 1), '-');

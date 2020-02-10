@@ -3,11 +3,13 @@
 
 Sudoku is a favourite puzzle of mine. When I started programming in my first year of university, I wrote a solution generator in C. It was pretty terrible, but I was very happy with it. I [reworked it after learning Java](https://github.com/david-fong/Sudoku-J), then later made this, and next, I look to write [a hardware implementation in System Verilog](https://github.com/david-fong/Sudoku-SV).
 
-I'm quite proud of this version. It can dance circles around my earlier attempts written in C and Java (because I figured out some new tricks). You can find [sample benchmark statistics in the sample data](/sample_data) folder, or clone, build, and run it for yourself (I've set up a handy [REPL](https://wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop)). I was especially and delightfully surprised to find that it can occasionally generate 25x25 solutions within a matter of seconds, which I previously thought I would never have the pleasure of being able to say.
+I'm quite proud of this version. It can dance circles around my earlier attempts written in C and Java (because I figured out some new tricks). You can find [sample benchmark statistics in the sample data](/sample_data) folder, or clone, build, and run it for yourself (I've set up a handy [REPL](https://wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop)). I was especially and delightfully surprised to find that it can sometimes generate 25x25 solutions within a matter of seconds, which I previously thought I would never have the pleasure of being able to say.
 
-<img src="images/25x25_example.png" width="48%" align="left" />
+I could talk a lot about this, but I would actually rather you try it for yourself first rather than read anything I have to say about it. I think you would enjoy that anyway- by orders of magnitude. For my friends outside the field of computer engineering and science, I will prepare a demo / teaching video and link it here when it is finished.
 
-<img src="images/measured_average_num_operations.png" width="48%" align="right" />
+<img src="images/25x25_example.png" width="44%" align="left" />
+
+<img src="images/measured_average_num_operations.png" width="51%" align="right" />
 
 ## Table of Contents
 
