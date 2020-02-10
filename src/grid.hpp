@@ -152,15 +152,6 @@ namespace Sudoku {
         std::array<occmask_t, length> blkSymbolOccMasks;
         std::array<std::array<value_t, length+1>, length> rowBiases;
 
-        // Used for an experimental optimization: Skip some rowBias
-        // indices that are already used when _starting_ the search
-        // in setNextValid. Does not replace the search since it only
-        // accounts for conflicts within the row, and unless the size
-        // allocated for each content increases to `order^4+1` bits,
-        // this cannot easily handle wrapping, hence the emphasis on
-        // "starting".
-        std::array<unsigned long, length> rowBiasUnoccMasks;
-
         // Interesting! Smaller-order grids perform better with ROW_MAJOR as genPath.
         static constexpr GenPath DEFAULT_GENPATH = (O < 4) ? ROW_MAJOR : BLOCK_COLS;
         GenPath genPath;

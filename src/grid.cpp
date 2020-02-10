@@ -83,7 +83,6 @@ void Sudoku::Solver<O>::clear(void) {
     rowSymbolOccMasks.fill(0);
     colSymbolOccMasks.fill(0);
     blkSymbolOccMasks.fill(0);
-    rowBiasUnoccMasks.fill(~0L);
     if (doCountBacktracks) backtrackCounts.fill(0);
 }
 
@@ -143,20 +142,13 @@ typename Sudoku::Solver<O>::Tile const& Sudoku::Solver<O>::setNextValid(const ar
         rowBin &= eraseMask;
         colBin &= eraseMask;
         blkBin &= eraseMask;
-            rowBiasUnoccMasks[getRow(index)] |= (occmask_t)(0b1 << t.biasIndex);
     }
 
     const occmask_t invalidBin = rowBin | colBin | blkBin;
     // Note: The below line is the only push to make the size of the
     // biasIndex field fit the range [0,order^2+1], but the trick is
     // that this will autowrap to zero, which takes the mod as desired.
-    //value_t biasIndex = (t.biasIndex + 1) % (length + 1);
     value_t biasIndex = (t.biasIndex + 1) % (length + 1);
-    biasIndex = __builtin_ctzl(rowBiasUnoccMasks[getRow(index)] & ((~(occmask_t)0) << biasIndex));
-    if (biasIndex > length) {
-        std::cout << "uhoh" << std::endl;
-        std::terminate();
-    }
     //std::cout << biasIndex << std::endl;
     for (; biasIndex < length; biasIndex++) {
         const value_t value = rowBiases[getRow(index)][biasIndex];
@@ -166,7 +158,6 @@ typename Sudoku::Solver<O>::Tile const& Sudoku::Solver<O>::setNextValid(const ar
             rowBin |= valBit;
             colBin |= valBit;
             blkBin |= valBit;
-            rowBiasUnoccMasks[getRow(index)] &= (occmask_t)~(0b1 << biasIndex);
             t.value = value;
             break;
         }
