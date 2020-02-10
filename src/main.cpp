@@ -14,6 +14,9 @@
  * 3. output file name.
  */
 int main(const int argc, char const *const argv[]) {
+    // My implementation specifies this as safe:
+    std::ios_base::sync_with_stdio(false);
+
     unsigned int    userOrder;      // 1
     unsigned int    srandKey;       // 2
     std::string     outFileName;    // 3

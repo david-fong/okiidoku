@@ -5,6 +5,12 @@
 #include <map>
 
 /**
+ * 
+ * Note: My implementation does not use C-style IO, so it is safe for
+ * consumer code to make the following optimization:
+ * ```cplusplus
+ * std::ios_base::sync_with_stdio(false);
+ * ```
  */
 namespace Sudoku {
 
@@ -30,12 +36,13 @@ namespace Sudoku {
         "\n- trials <n>     generate <n> solutions."
         "\n- genpath        cycle generator traversal path."
         ;
-    const std::string REPL_PROMPT = "\n> ";
+    const std::string REPL_PROMPT = "\n$ ";
 
     // Container for a very large number.
     // See Solver::GIVEUP_THRESHOLD for more discussion on the average
     // number of operations taken to generate a solution by grid-order.
     typedef unsigned long long opcount_t;
+    typedef unsigned long trials_t;
     constexpr unsigned int TRIALS_NUM_BINS = 20;
 
     /**
@@ -131,12 +138,12 @@ namespace Sudoku {
         explicit Solver(std::ostream&);
 
         // Return false if command is to exit the program:
-        bool runCommand(std::string const& cmdLine);
-        void runNew(void);
-        void runMultiple(const unsigned long);
-        void print(void) const;
-        void printMessageBar(std::string const&, unsigned int, const char = '=') const;
-        void printMessageBar(std::string const&, const char = '=') const;
+        [[gnu::cold]] bool runCommand(std::string const& cmdLine);
+        [[gnu::cold]] void runNew(void);
+        [[gnu::cold]] void runMultiple(const unsigned long);
+        [[gnu::cold]] void print(void) const;
+        [[gnu::cold]] void printMessageBar(std::string const&, unsigned int, const char = '=') const;
+        [[gnu::cold]] void printMessageBar(std::string const&, const char = '=') const;
 
     private:
         std::array<Tile, area> grid;
@@ -163,19 +170,12 @@ namespace Sudoku {
          * - Order 2: No giveups.
          * - Order 3: No giveups.
          * - Order 4: Giveup ratio is less than 1%.
-         * - Order 5: More complicated: I ran 100 trials with a threshold
-         *   of 500M. The giveup ratio was ~53%, and the cheaper ~79% of
-         *   _successes_ took less than 225M. If I use that as the new
-         *   threshold, I should suffer a ~64% giveup ratio, but spend
-         *   fewer operations on generations that are likely to be given
-         *   up anyway. Say we approximate the giveup threshold to be
-         *   the average number of operations per trial (actual value
-         *   is less). Then the throughput/efficiency can be calculated
-         *   as the number of successes per trial over the number of
-         *   operations per trial. With thresh = 500M, efficiency =
-         *   9.4e-10, with 225M, 1.64e-9, and with 25M, 5.2e-9!
+         * - Order 5: More complicated: Maximize throughput in terms of
+         *   successful trials per operation. Adjusting this threshold
+         *   decreases the percentage of successful trials, but also
+         *   decreases the number of operations spent on given-up trials.
          */
-        static constexpr opcount_t GIVEUP_THRESHOLD = ((const opcount_t[]){0,1,25,2'500,5'000'000,25'000'000})[O];
+        static constexpr opcount_t GIVEUP_THRESHOLD = ((const opcount_t[]){0,1,25,2'500,5'000'000,27'000'000})[O];
         unsigned long totalGenCount;
         unsigned long successfulGenCount;
         bool doCountBacktracks;
@@ -183,7 +183,7 @@ namespace Sudoku {
 
         std::ostream& os;
         const bool isPretty;
-        static constexpr unsigned int statsWidth = (0.5 * length) + 3;
+        static constexpr unsigned int statsWidth = (0.4 * length) + 4;
         const std::string gridHSepString;
 
         void clear(void);
@@ -191,9 +191,9 @@ namespace Sudoku {
         // Generates a random solution. Returns the number of operations or
         // zero if the give-up threshold was reached or if any previous seeds
         // made generating a solution impossible.
-        opcount_t generateSolution(void);
+        [[gnu::hot]] opcount_t generateSolution(void);
         // Returns the tile that was operated on.
-        Tile const& setNextValid(const area_t);
+        [[gnu::hot]] Tile const& setNextValid(const area_t);
         [[gnu::const]] length_t tileNumNonCandidates(const area_t) const noexcept;
         void setGenPath(const GenPath) noexcept;
 

@@ -252,7 +252,7 @@ void Sudoku::Solver<O>::runNew(void) {
     const double  processorTime = ((double)(clockFinish - clockStart)) / CLOCKS_PER_SEC;
 
     os << "num operations: " STATW_I << numSolveOps << '\n';
-    os << "processor time: " STATW_D << processorTime << " sec" << '\n';
+    os << "processor time: " STATW_D << processorTime << " seconds" << '\n';
     if (!isPretty) printMessageBar("", '-');
     print();
     // TODO: print backTrackCounts
@@ -260,70 +260,97 @@ void Sudoku::Solver<O>::runNew(void) {
 }
 
 template <Sudoku::Order O>
-void Sudoku::Solver<O>::runMultiple(const unsigned long numTotalTrialsToDo) {
-    static constexpr unsigned PRINT_COLS    = ((const unsigned[]){0,0,16,12,8,1})[order];
-    static constexpr unsigned PRINT_ROW_BUF = ((const unsigned[]){0,0, 0, 0,4,1})[order];
+void Sudoku::Solver<O>::runMultiple(const trials_t trialsToRun) {
+    static constexpr unsigned PRINT_COLS    = ((const unsigned[]){0,0,24,16,8,2})[order];
+    static constexpr unsigned PRINT_ROW_BUF = ((const unsigned[]){0,0, 0, 0,6,1})[order];
     static     const unsigned BAR_WIDTH     = statsWidth * PRINT_COLS + (isPretty ? 7 : 0);
 
-    opcount_t numTotalTrials   = 0;
-    opcount_t numSuccessTrials = 0;
-    double trialsNumSolveOps = 0.0;
-    double totalClockTicks   = 0.0;
-    std::array<opcount_t, TRIALS_NUM_BINS> numSolveOpsBins;
-    numSolveOpsBins.fill(0);
+    // Don't do backtracking during trials runs.
+    const bool oldDoCountBacktracks = doCountBacktracks;
+    doCountBacktracks = false;
+    const bool isPretty = this->isPretty; // Will not change intermediately.
 
-    printMessageBar("START x" + std::to_string(numTotalTrialsToDo), BAR_WIDTH);
+    trials_t giveups = 0;
+    clock_t clockStart = std::clock();
+    std::array<trials_t, TRIALS_NUM_BINS> successfulTrialBins    = {0,};
+    std::array<double,   TRIALS_NUM_BINS> successfulSolveOpsBins = {0,};
 
-    while (numTotalTrials < numTotalTrialsToDo) {
+    printMessageBar("START x" + std::to_string(trialsToRun), BAR_WIDTH);
+
+    for (trials_t numTotalTrials = 0; numTotalTrials < trialsToRun;) {
         if (numTotalTrials % PRINT_COLS == 0) {
-            const unsigned pctDone = 100.0 * numTotalTrials / numTotalTrialsToDo;
+            const unsigned pctDone = 100.0 * numTotalTrials / trialsToRun;
             std::cout << "| " << std::setw(2) << pctDone << "% |";
         }
         clear();
         seed(false);
-        const clock_t clockStart = std::clock();
         const opcount_t numSolveOps = generateSolution();
-        totalClockTicks += (std::clock() - clockStart);
         numTotalTrials++;
-        trialsNumSolveOps += numSolveOps;
         if (numSolveOps == 0) {
+            giveups++;
             os STATW_I << "---";
         } else {
-            numSuccessTrials++;
-            numSolveOpsBins[(numSolveOps - 1) * TRIALS_NUM_BINS / GIVEUP_THRESHOLD]++;
+            const unsigned int bin = (numSolveOps - 1) * TRIALS_NUM_BINS / GIVEUP_THRESHOLD;
+            successfulTrialBins[bin]++;
+            successfulSolveOpsBins[bin] += numSolveOps;
             os STATW_I << numSolveOps;
         }
         if (numTotalTrials % PRINT_COLS == 0) {
-            if (PRINT_ROW_BUF == 0 || ((numTotalTrials / PRINT_COLS) % PRINT_ROW_BUF) != 0) {
-                os << '\n'; // Runs are lightning fast.
+            if (isPretty && PRINT_ROW_BUF && ((numTotalTrials / PRINT_COLS) % PRINT_ROW_BUF == 0)) {
+                // Runs are slower. Flush buffer more frequently.
+                os << std::endl;
             } else {
-                os << std::endl; // Runs are slower. Give updates more frequently.
+                os << '\n';
             }
         }
     }
-    if (numTotalTrials % PRINT_COLS != 0) { os << '\n'; }
+    if (trialsToRun % PRINT_COLS != 0) { os << '\n'; } // Last newline.
 
     // Print stats:
+    const double processorSeconds = ((double)(std::clock() - clockStart) / CLOCKS_PER_SEC);
     printMessageBar("", BAR_WIDTH, '-');
-    const double averageNumSolveOps = (numSuccessTrials == 0) ? 0.0
-        : ((double)trialsNumSolveOps / numSuccessTrials);
-    os << "num aborted trials: " STATW_I << (numTotalTrials - numSuccessTrials) << '\n';
-    os << "avg num operations: " STATW_D << (averageNumSolveOps) << '\n';
-    os << "sum processor time: " STATW_D << (totalClockTicks / CLOCKS_PER_SEC) << " sec" << '\n';
-
-    // Print bins (work distribution):
-    printMessageBar("", BAR_WIDTH, '-');
-    for (unsigned i = 0; i < numSolveOpsBins.size(); i++) {
-        constexpr double binWidth = (double)GIVEUP_THRESHOLD / numSolveOpsBins.size();
-        os << "..." STATW_I << (int)((double)(i + 1) * binWidth) << ": " \
-            << std::setw(10) << numSolveOpsBins[i] << '\n';
-    }
-    printMessageBar("DONE x" + std::to_string(numTotalTrialsToDo), BAR_WIDTH);
-
-    // Emit a beep sound if the trials took longer than ten seconds:
-    if (totalClockTicks / CLOCKS_PER_SEC > 10.0) {
+    os << "trials aborted: " STATW_I << giveups << '\n';
+    os << "processor time: " STATW_D << processorSeconds << " seconds (including I/O)" << '\n';
+    if (processorSeconds > 10.0) {
+        // Emit a beep sound if the trials took longer than ten processor seconds:
         std::cout << '\a' << std::flush;
     }
+
+    // Print bins (work distribution):
+    printMessageBar("", BAR_WIDTH, '-'); {
+        os << "|  bin top  |   hits   |  throughput* |\n";
+        os << "+-----------+----------+--------------+\n";
+        opcount_t successfulTrialsAccum = 0;
+        double  successfulSolveOpsAccum = 0.0;
+        constexpr double BIN_WIDTH = (double)GIVEUP_THRESHOLD / successfulTrialBins.size();
+        for (unsigned int i = 0; i < successfulTrialBins.size(); i++) {
+            successfulTrialsAccum   += successfulTrialBins[i];
+            successfulSolveOpsAccum += successfulSolveOpsBins[i];
+            const double binCeiling = ((double)(i + 1) * BIN_WIDTH);
+            const double throughput = successfulTrialsAccum / (successfulSolveOpsAccum
+                + ((trialsToRun - successfulTrialsAccum) * binCeiling));
+            if (order < 4) {
+                os << "|" << std::setw(9) << (int)binCeiling;
+            } else {
+                os << "|" << std::setw(8) << (int)(binCeiling / 1000) << 'K';
+            }
+            os << "  |" << std::setw(8)  << successfulTrialBins[i];
+            os << "  |" << std::setw(12) << std::scientific << throughput << std::fixed;
+            os << "  |" << '\n';
+        }
+        os << "+-----------+----------+--------------+\n";
+        if (isPretty) { std::cout \
+            << "  *Throughput is in \"successful trials per the average observed number of"
+            "\n   operations per trial.\" Tightening the threshold to that of a bin induces"
+            "\n   more giveups, but also cuts down on the number of operations they incur,"
+            "\n   which implies the existence of a sweet spot. Mathematically speaking,"
+            "\n   operations are proportional to time. I use operations instead of time for"
+            "\n   this statistic because they depend much less on the machine.\n"; }
+    }
+    printMessageBar("DONE x" + std::to_string(trialsToRun), BAR_WIDTH);
+
+    // Restore old setting for counting backtracks:
+    doCountBacktracks = oldDoCountBacktracks;
 }
 
 
