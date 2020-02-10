@@ -16,6 +16,7 @@
         "retval",
         "giveup",
         "occmask",
+        "unocc",
         "opcount",
         "statw",
 
