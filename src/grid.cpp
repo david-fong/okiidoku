@@ -36,7 +36,7 @@ Sudoku::Solver<O>::Solver(std::ostream& os):
     os.precision(3);
     os << std::fixed;
 
-    // Print help and start the REPL:
+    // Print help and start the REPL (read-execute-print-loop):
     std::cout << HELP_MESSAGE << std::endl;
     std::string command;
     do {
@@ -134,7 +134,6 @@ typename Sudoku::Solver<O>::Tile const& Sudoku::Solver<O>::setNextValid(const ar
     occmask_t& rowBin = rowSymbolOccMasks[getRow(index)];
     occmask_t& colBin = colSymbolOccMasks[getCol(index)];
     occmask_t& blkBin = blkSymbolOccMasks[getBlk(index)];
-    //__builtin_ffsl(0); // TODO: investigate ways to use this for performance gains.
 
     Tile& t = grid[index];
     if (!isClear(t)) {
