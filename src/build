@@ -30,4 +30,4 @@ fi
 
 declare -r SHORTEN_STDLIB_PATH='s/C:\\mingw64\\x86_64-8.1.0-posix-seh\\lib\\gcc\\x86_64-w64-mingw32\\8.1.0\\include/\\STDLIB/g'
 
-${COMPILER} -Wall -O3 ${OPTS} -fprofile-dir="${CONTEXT}/.profile" main.cpp -o main.exe |& sed ${SHORTEN_STDLIB_PATH}
+${COMPILER} -Wall -O3 ${OPTS} -time -fprofile-dir="${CONTEXT}/.profile" main.cpp -o main.exe |& sed ${SHORTEN_STDLIB_PATH}

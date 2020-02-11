@@ -12,6 +12,8 @@
   - Implementation / representation: Add back the separate seeds array as a function-scoped variable
 - Change `setNextValid` to return a boolean of whether it reached a conflict.
 - Look at ways to use `__builtin_prefetch`.
+- Change my C-style casts to C++-style casts.
+- Experiment with a different way of giving up: according to when some tile's backtrack counter exceeds some value.
 
 ## Lower Priority
 

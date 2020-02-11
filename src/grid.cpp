@@ -52,12 +52,12 @@ void Sudoku::Solver<O>::print(void) const {
     for (area_t i = 0; i < area; i++) {
         if ((i % length) == 0 && i != 0) {
             if (isPretty) os << " |";
-            os << "\n";
+            os << "\n"; // Line terminator.
         }
         if (isPretty && (i % (order * length) == 0)) {
-            os << gridHSepString << '\n';
+            os << gridHSepString;
         }
-        if (isPretty && (i % order) == 0) os << " |";
+        if (isPretty && (i % order) == 0) os << " |"; // blkcol separator.
         Tile const& t = grid.at(i);
         if (isClear(t)) {
             os << "  ";
@@ -101,6 +101,7 @@ void Sudoku::Solver<O>::seed(const bool printInfo) {
 
 template <Sudoku::Order O>
 typename Sudoku::opcount_t Sudoku::Solver<O>::generateSolution(void) {
+    const bool doCountBacktracks = this->doCountBacktracks;
     opcount_t numOperations = 0;
     register area_t index = 0;
     while (index < area) {
@@ -111,7 +112,7 @@ typename Sudoku::opcount_t Sudoku::Solver<O>::generateSolution(void) {
                 totalGenCount++;
                 return 0;
             }
-            backtrackCounts[index]++;
+            if (doCountBacktracks) backtrackCounts[index]++;
             index--;
         } else {
             index++;
@@ -271,45 +272,59 @@ void Sudoku::Solver<O>::runNew(void) {
     os << "processor time: " STATW_D << processorTime << " seconds" << '\n';
     if (!isPretty) printMessageBar("", '-');
     print();
-
-    if (doCountBacktracks) {
-        // Print backtracking counters:
-        os << std::setbase(16);
-        benchedLocale = os.imbue(benchedLocale);
-        printMessageBar("backtrack counters", '-');
-        for (area_t i = 0; i < area; i++) {
-            os << std::setw(0.55 * statsWidth);
-            if (backtrackCounts[i]) {
-                os << backtrackCounts[i];
-            } else {
-                os << '.';
-            }
-            if ((i + 1) % length == 0) {
-                os << "\n\n";
-                if (((i + 1) / length) % order == 0) {
-                    os << '\n';
-                }
-            }
-        }
-        // Print a summary of the worst count values:
-        printMessageBar("worst count values", length * int((0.55 * statsWidth)), '-');
-        std::sort(backtrackCounts.begin(), backtrackCounts.end());
-        for (area_t i = area - length; i < area; i++) {
-            os << std::setw(0.55 * statsWidth);
-            os << backtrackCounts[i];
-        }
-        os << '\n';
-        benchedLocale = os.imbue(benchedLocale);
-        os << std::setbase(10);
-    }
+    printBacktrackStats();
     printMessageBar((numSolveOps == 0) ? "ABORT" : "DONE");
 }
 
 
 template <Sudoku::Order O>
+void Sudoku::Solver<O>::printBacktrackStats(void) const {
+    static const std::array<std::string, 5> GREYSCALE_BLOCK_CHARS = {
+        " ", u8"\u2591", u8"\u2592", u8"\u2593", u8"\u2588",
+    };
+    if (!doCountBacktracks) {
+        return;
+    }
+    auto sortedCounts = backtrackCounts;
+    std::sort(sortedCounts.begin(), sortedCounts.end());
+
+    // Print backtracking counters:
+    printMessageBar("backtrack counters", '-');
+    for (area_t i = 0; i < area; i++) {
+        if ((i % length) == 0 && i != 0) {
+            if (isPretty) os << " |";
+            os << "\n"; // Line terminator.
+        }
+        if (isPretty && (i % (order * length) == 0)) {
+            os << gridHSepString;
+        }
+        if (isPretty && (i % order) == 0) os << " |"; // blkcol separator.
+
+        // TODO: find a way to make distribution more visible especially
+        // for medium-valued counts. Maybe use sqrt or log function.
+        const double relativeIntensity = (double)backtrackCounts[i]
+            * GREYSCALE_BLOCK_CHARS.size()
+            / (sortedCounts[area - 1] + 1);
+            // Note on above: `+ 1` to avoid edge case of getting array.size().
+        auto const& intensityChar = GREYSCALE_BLOCK_CHARS.at((unsigned)relativeIntensity);
+        os << intensityChar << intensityChar;
+    }
+    if (isPretty) {
+        os << " |\n" << gridHSepString;
+    }
+    // Print a summary of the worst count values:
+    printMessageBar("worst count values", '-');
+    for (area_t i = area - length; i < area; i++) {
+        os << std::setw(0.80 * statsWidth) << sortedCounts[i] << '\n';
+    }
+    os << '\n';
+}
+
+
+template <Sudoku::Order O>
 void Sudoku::Solver<O>::runMultiple(const trials_t trialsToRun) {
-    static constexpr unsigned PRINT_COLS    = ((const unsigned[]){0,0,32,24,16,4})[order];
-    static constexpr unsigned PRINT_ROW_BUF = ((const unsigned[]){0,0, 0, 0, 6,1})[order];
+    static constexpr unsigned PRINT_COLS    = ((const unsigned[]){0,64,32,24,16,4,1})[order];
+    static constexpr unsigned PRINT_ROW_BUF = ((const unsigned[]){0, 0, 0, 0, 6,1,1})[order];
     static     const unsigned BAR_WIDTH     = statsWidth * PRINT_COLS + (isPretty ? 7 : 0);
 
     // Don't do backtracking during trials runs.
@@ -431,7 +446,7 @@ void Sudoku::Solver<O>::printMessageBar(std::string const& msg, const char fillC
 
 
 static std::string createHSepString(unsigned int order) {
-    std::string vbar = ' ' + std::string((((order * (order + 1)) + 1) * 2 - 1), '-');
+    std::string vbar = ' ' + std::string((((order * (order + 1)) + 1) * 2 - 1), '-') + '\n';
     for (unsigned int i = 0; i <= order; i++) {
         // Insert crosses at vbar intersections.
         vbar[(2 * (order + 1) * i) + 1] = '+';

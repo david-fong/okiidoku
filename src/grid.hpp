@@ -151,6 +151,7 @@ namespace Sudoku {
         [[gnu::cold]] void runNew(void);
         [[gnu::cold]] void runMultiple(const unsigned long);
         [[gnu::cold]] void print(void) const;
+        [[gnu::cold]] void printBacktrackStats(void) const;
         [[gnu::cold]] void printMessageBar(std::string const&, unsigned int, const char = '=') const;
         [[gnu::cold]] void printMessageBar(std::string const&, const char = '=') const;
 
@@ -205,10 +206,9 @@ namespace Sudoku {
         // zero if the give-up threshold was reached or if any previous seeds
         // made generating a solution impossible.
         [[gnu::hot]] opcount_t generateSolution(void);
-        // Returns the tile that was operated on.
         [[gnu::hot]] TraversalDirection setNextValid(const area_t);
         [[gnu::const]] length_t tileNumNonCandidates(const area_t) const noexcept;
-        void setGenPath(const GenPath) noexcept;
+        [[gnu::cold]] void setGenPath(const GenPath) noexcept;
 
         // Inline functions:
         [[gnu::const]] static bool isClear(Tile const& t) noexcept { return t.biasIndex == length; }
@@ -219,6 +219,9 @@ namespace Sudoku {
             return ((row / order) * order) + (col / order);
         }
 
+    /**
+     * PRIVATE STATIC
+     */
     private:
         static int MY_RANDOM (const int i) { return std::rand() % i; }
         struct MyNumpunct : std::numpunct<char> {
