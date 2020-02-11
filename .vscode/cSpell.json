@@ -21,6 +21,7 @@
         "statw",
 
         "stoi",
+        "stoul",
         "cout"
     ]
 }

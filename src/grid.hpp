@@ -14,12 +14,7 @@
  */
 namespace Sudoku {
 
-    typedef enum { ROW_MAJOR, BLOCK_COLS, GenPath_MAX = BLOCK_COLS, } GenPath;
-    const std::array<std::string, 2> GenPath_Names = {
-        "rowmajor",
-        "blockcol",
-    };
-    typedef enum { HELP, QUIT, SOLVE, RUN_SINGLE, RUN_MULTIPLE, SET_GENPATH, } Command;
+    typedef enum { HELP, QUIT, SOLVE, RUN_SINGLE, RUN_MULTIPLE, SET_GENPATH, DO_BACKTRACK_COUNT, } Command;
     const std::map<std::string, Command> COMMAND_MAP = {
         { "help",       HELP },
         { "quit",       QUIT },
@@ -27,16 +22,24 @@ namespace Sudoku {
         { "",           RUN_SINGLE },
         { "trials",     RUN_MULTIPLE },
         { "genpath",    SET_GENPATH },
+        { "heatmap",    DO_BACKTRACK_COUNT },
     };
     const std::string HELP_MESSAGE = "\nCOMMAND MENU:"
-        "\n- help           print this help menu."
-        "\n- quit           terminate this program."
-        "\n- solve <file>   solve the puzzle in <file>."
-        "\n- {enter}        generate a single solution."
-        "\n- trials <n>     generate <n> solutions."
-        "\n- genpath        cycle generator traversal path."
+        "\n- help           print this help menu"
+        "\n- quit           terminate this program"
+        "\n- solve <file>   solve the puzzle in <file>"
+        "\n- {enter}        generate a single solution"
+        "\n- trials <n>     generate <n> solutions"
+        "\n- genpath        cycle generator traversal path"
+        "\n- heatmap        toggle backtrack monitoring"
         ;
     const std::string REPL_PROMPT = "\n$ ";
+
+    typedef enum { ROW_MAJOR, BLOCK_COLS, GenPath_MAX = BLOCK_COLS, } GenPath;
+    const std::array<std::string, 2> GenPath_Names = {
+        "rowmajor",
+        "blockcol",
+    };
 
     // Container for a very large number.
     // See Solver::GIVEUP_THRESHOLD for more discussion on the average
@@ -60,6 +63,10 @@ namespace Sudoku {
      */
     typedef uint8_t Order;
     constexpr Order MAX_REASONABLE_ORDER = 20;
+
+    enum TraversalDirection : bool {
+        BACK = false, FORWARD = true,
+    };
 
     /**
      * 
@@ -129,7 +136,9 @@ namespace Sudoku {
             value_t value; // undefined if clear.
         };
 
-
+    /**
+     * PUBLIC MEMBERS
+     */
     public:
         static constexpr order_t    order   = O;
         static constexpr length_t   length  = O*O;
@@ -145,6 +154,9 @@ namespace Sudoku {
         [[gnu::cold]] void printMessageBar(std::string const&, unsigned int, const char = '=') const;
         [[gnu::cold]] void printMessageBar(std::string const&, const char = '=') const;
 
+    /**
+     * PRIVATE MEMBERS
+     */
     private:
         std::array<Tile, area> grid;
         std::array<occmask_t, length> rowSymbolOccMasks;
@@ -175,14 +187,15 @@ namespace Sudoku {
          *   decreases the percentage of successful trials, but also
          *   decreases the number of operations spent on given-up trials.
          */
-        static constexpr opcount_t GIVEUP_THRESHOLD = ((const opcount_t[]){0,1,25,2'500,5'000'000,27'000'000})[O];
+        static constexpr opcount_t GIVEUP_THRESHOLD = ((const opcount_t[]){0,1,25,2'000,2'500'000,30'000'000})[O];
         unsigned long totalGenCount;
         unsigned long successfulGenCount;
-        bool doCountBacktracks;
+        bool doCountBacktracks = false;
         std::array<unsigned, area> backtrackCounts; // Ordered according to genPath.
 
         std::ostream& os;
         const bool isPretty;
+        std::locale benchedLocale;
         static constexpr unsigned int statsWidth = (0.4 * length) + 4;
         const std::string gridHSepString;
 
@@ -193,7 +206,7 @@ namespace Sudoku {
         // made generating a solution impossible.
         [[gnu::hot]] opcount_t generateSolution(void);
         // Returns the tile that was operated on.
-        [[gnu::hot]] Tile const& setNextValid(const area_t);
+        [[gnu::hot]] TraversalDirection setNextValid(const area_t);
         [[gnu::const]] length_t tileNumNonCandidates(const area_t) const noexcept;
         void setGenPath(const GenPath) noexcept;
 

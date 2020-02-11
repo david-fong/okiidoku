@@ -31,7 +31,7 @@ Sudoku::Solver<O>::Solver(std::ostream& os):
 
     // Output formatting:
     if (isPretty) {
-        os.imbue(std::locale(os.getloc(), new MyNumpunct()));
+        benchedLocale = os.imbue(std::locale(os.getloc(), new MyNumpunct()));
     }
     os.precision(3);
     os << std::fixed;
@@ -104,7 +104,7 @@ typename Sudoku::opcount_t Sudoku::Solver<O>::generateSolution(void) {
     opcount_t numOperations = 0;
     register area_t index = 0;
     while (index < area) {
-        if (isClear(setNextValid(traversalOrder[index]))) {
+        if (setNextValid(traversalOrder[index]) == TraversalDirection::BACK) {
             // Pop and step backward:
             if (__builtin_expect(index == 0, false)) {
                 // No solution could be found. Treat as if abort.
@@ -130,7 +130,7 @@ typename Sudoku::opcount_t Sudoku::Solver<O>::generateSolution(void) {
 
 
 template <Sudoku::Order O>
-typename Sudoku::Solver<O>::Tile const& Sudoku::Solver<O>::setNextValid(const area_t index) {
+typename Sudoku::TraversalDirection Sudoku::Solver<O>::setNextValid(const area_t index) {
     occmask_t& rowBin = rowSymbolOccMasks[getRow(index)];
     occmask_t& colBin = colSymbolOccMasks[getCol(index)];
     occmask_t& blkBin = blkSymbolOccMasks[getBlk(index)];
@@ -164,7 +164,7 @@ typename Sudoku::Solver<O>::Tile const& Sudoku::Solver<O>::setNextValid(const ar
     }
     // This must go outside the search-loop for backtracks:
     t.biasIndex = biasIndex;
-    return t;
+    return (isClear(t) ? BACK : FORWARD);
 }
 
 
@@ -243,6 +243,11 @@ bool Sudoku::Solver<O>::runCommand(std::string const& cmdLine) {
             setGenPath(static_cast<GenPath>((genPath + 1) % (GenPath_MAX + 1)));
             std::cout << "generator path is now set to: " << Sudoku::GenPath_Names[genPath] << std::endl;
             break;
+        case DO_BACKTRACK_COUNT:
+            doCountBacktracks = !doCountBacktracks;
+            std::cout << "backtracking activity monitoring is now: ";
+            std::cout << ((doCountBacktracks) ? "on" : "off") << std::endl;
+            break;
         default:
             break; // unreachable.
     }
@@ -266,15 +271,45 @@ void Sudoku::Solver<O>::runNew(void) {
     os << "processor time: " STATW_D << processorTime << " seconds" << '\n';
     if (!isPretty) printMessageBar("", '-');
     print();
-    // TODO: print backTrackCounts
+
+    if (doCountBacktracks) {
+        // Print backtracking counters:
+        os << std::setbase(16);
+        benchedLocale = os.imbue(benchedLocale);
+        printMessageBar("backtrack counters", '-');
+        for (area_t i = 0; i < area; i++) {
+            os << std::setw(0.55 * statsWidth);
+            if (backtrackCounts[i]) {
+                os << backtrackCounts[i];
+            } else {
+                os << '.';
+            }
+            if ((i + 1) % length == 0) {
+                os << "\n\n";
+                if (((i + 1) / length) % order == 0) {
+                    os << '\n';
+                }
+            }
+        }
+        // Print a summary of the worst count values:
+        printMessageBar("worst count values", length * int((0.55 * statsWidth)), '-');
+        std::sort(backtrackCounts.begin(), backtrackCounts.end());
+        for (area_t i = area - length; i < area; i++) {
+            os << std::setw(0.55 * statsWidth);
+            os << backtrackCounts[i];
+        }
+        os << '\n';
+        benchedLocale = os.imbue(benchedLocale);
+        os << std::setbase(10);
+    }
     printMessageBar((numSolveOps == 0) ? "ABORT" : "DONE");
 }
 
 
 template <Sudoku::Order O>
 void Sudoku::Solver<O>::runMultiple(const trials_t trialsToRun) {
-    static constexpr unsigned PRINT_COLS    = ((const unsigned[]){0,0,24,16,8,2})[order];
-    static constexpr unsigned PRINT_ROW_BUF = ((const unsigned[]){0,0, 0, 0,6,1})[order];
+    static constexpr unsigned PRINT_COLS    = ((const unsigned[]){0,0,32,24,16,4})[order];
+    static constexpr unsigned PRINT_ROW_BUF = ((const unsigned[]){0,0, 0, 0, 6,1})[order];
     static     const unsigned BAR_WIDTH     = statsWidth * PRINT_COLS + (isPretty ? 7 : 0);
 
     // Don't do backtracking during trials runs.
@@ -330,8 +365,8 @@ void Sudoku::Solver<O>::runMultiple(const trials_t trialsToRun) {
 
     // Print bins (work distribution):
     printMessageBar("", BAR_WIDTH, '-'); {
-        os << "|  bin top  |   hits   |  throughput* |\n";
-        os << "+-----------+----------+--------------+\n";
+        os << "|  bin top  |   hits   |  throughput  |\n";
+        os << "+-----------+----------+--------------+";
         opcount_t successfulTrialsAccum = 0;
         double  successfulSolveOpsAccum = 0.0;
         constexpr double BIN_WIDTH = (double)GIVEUP_THRESHOLD / successfulTrialBins.size();
@@ -342,22 +377,21 @@ void Sudoku::Solver<O>::runMultiple(const trials_t trialsToRun) {
             const double throughput = successfulTrialsAccum / (successfulSolveOpsAccum
                 + ((trialsToRun - successfulTrialsAccum) * binCeiling));
             if (order < 4) {
-                os << "|" << std::setw(9) << (int)binCeiling;
+                os << "\n|" << std::setw(9) << (int)binCeiling;
             } else {
-                os << "|" << std::setw(8) << (int)(binCeiling / 1000) << 'K';
+                os << "\n|" << std::setw(8) << (int)(binCeiling / 1000) << 'K';
             }
             os << "  |" << std::setw(8)  << successfulTrialBins[i];
             os << "  |" << std::setw(12) << std::scientific << throughput << std::fixed;
-            os << "  |" << '\n';
+            os << "  |";
         }
+        os << " <- current threshold\n";
         os << "+-----------+----------+--------------+\n";
         if (isPretty) { std::cout \
-            << "  *Throughput is in \"successful trials per the average observed number of"
-            "\n   operations per trial.\" Tightening the threshold to that of a bin induces"
-            "\n   more giveups, but also cuts down on the number of operations they incur,"
-            "\n   which implies the existence of a sweet spot. Mathematically speaking,"
-            "\n   operations are proportional to time. I use operations instead of time for"
-            "\n   this statistic because they depend much less on the machine.\n"; }
+            <<" * Throughput here is \"average successes per operation\". Tightening the"
+            "\n   threshold induces more giveups, but also reduces the operational cost"
+            "\n   giveups incur. Mathematically speaking, operations are proportional"
+            "\n   to time, where time depends on the machine, hence my choice of units.\n"; }
     }
     printMessageBar("DONE x" + std::to_string(trialsToRun), BAR_WIDTH);
 

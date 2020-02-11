@@ -11,6 +11,7 @@
   - Interface: reads a file as plaintext, solves (checking for multiple solutions), then asks to write solutions to a new file (user provides empty string to indicate choose suitable name based on input file name)
   - Implementation / representation: Add back the separate seeds array as a function-scoped variable
 - Change `setNextValid` to return a boolean of whether it reached a conflict.
+- Look at ways to use `__builtin_prefetch`.
 
 ## Lower Priority
 
