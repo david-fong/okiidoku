@@ -150,7 +150,6 @@ typename Sudoku::TraversalDirection Sudoku::Solver<O>::setNextValid(const area_t
     // biasIndex field fit the range [0,order^2+1], but the trick is
     // that this will autowrap to zero, which takes the mod as desired.
     value_t biasIndex = (t.biasIndex + 1) % (length + 1);
-    //std::cout << biasIndex << std::endl;
     for (; biasIndex < length; biasIndex++) {
         const value_t value = rowBiases[getRow(index)][biasIndex];
         const occmask_t valBit = 0b1 << value;
@@ -302,6 +301,7 @@ void Sudoku::Solver<O>::printBacktrackStats(void) const {
 
         // TODO: find a way to make distribution more visible especially
         // for medium-valued counts. Maybe use sqrt or log function.
+        // I know: use space char for zero, and start fading in at one.
         const double relativeIntensity = (double)backtrackCounts[i]
             * GREYSCALE_BLOCK_CHARS.size()
             / (sortedCounts[area - 1] + 1);
@@ -323,9 +323,10 @@ void Sudoku::Solver<O>::printBacktrackStats(void) const {
 
 template <Sudoku::Order O>
 void Sudoku::Solver<O>::runMultiple(const trials_t trialsToRun) {
-    static constexpr unsigned PRINT_COLS    = ((const unsigned[]){0,64,32,24,16,4,1})[order];
-    static constexpr unsigned PRINT_ROW_BUF = ((const unsigned[]){0, 0, 0, 0, 6,1,1})[order];
-    static     const unsigned BAR_WIDTH     = statsWidth * PRINT_COLS + (isPretty ? 7 : 0);
+    static constexpr unsigned DEFAULT_STATS_COLS = ((unsigned[]){0,64,32,24,16,4,1})[order];
+    static constexpr unsigned LINES_PER_FLUSH    = ((unsigned[]){0, 0, 0, 0, 6,1,1})[order];
+    const unsigned PRINT_COLS = (GET_TERMINAL_COLUMNS(DEFAULT_STATS_COLS) - (isPretty ? 7 : 0)) / statsWidth;
+    const unsigned BAR_WIDTH  = statsWidth * PRINT_COLS + (isPretty ? 7 : 0);
 
     // Don't do backtracking during trials runs.
     const bool oldDoCountBacktracks = doCountBacktracks;
@@ -358,7 +359,7 @@ void Sudoku::Solver<O>::runMultiple(const trials_t trialsToRun) {
             os STATW_I << numSolveOps;
         }
         if (numTotalTrials % PRINT_COLS == 0) {
-            if (isPretty && PRINT_ROW_BUF && ((numTotalTrials / PRINT_COLS) % PRINT_ROW_BUF == 0)) {
+            if (isPretty && LINES_PER_FLUSH && (numTotalTrials % (LINES_PER_FLUSH * PRINT_COLS) == 0)) {
                 // Runs are slower. Flush buffer more frequently.
                 os << std::endl;
             } else {
@@ -379,39 +380,48 @@ void Sudoku::Solver<O>::runMultiple(const trials_t trialsToRun) {
     }
 
     // Print bins (work distribution):
-    printMessageBar("", BAR_WIDTH, '-'); {
-        os << "|  bin top  |   hits   |  throughput  |\n";
-        os << "+-----------+----------+--------------+";
-        opcount_t successfulTrialsAccum = 0;
-        double  successfulSolveOpsAccum = 0.0;
-        constexpr double BIN_WIDTH = (double)GIVEUP_THRESHOLD / successfulTrialBins.size();
-        for (unsigned int i = 0; i < successfulTrialBins.size(); i++) {
-            successfulTrialsAccum   += successfulTrialBins[i];
-            successfulSolveOpsAccum += successfulSolveOpsBins[i];
-            const double binCeiling = ((double)(i + 1) * BIN_WIDTH);
-            const double throughput = successfulTrialsAccum / (successfulSolveOpsAccum
-                + ((trialsToRun - successfulTrialsAccum) * binCeiling));
-            if (order < 4) {
-                os << "\n|" << std::setw(9) << (int)binCeiling;
-            } else {
-                os << "\n|" << std::setw(8) << (int)(binCeiling / 1000) << 'K';
-            }
-            os << "  |" << std::setw(8)  << successfulTrialBins[i];
-            os << "  |" << std::setw(12) << std::scientific << throughput << std::fixed;
-            os << "  |";
-        }
-        os << " <- current threshold\n";
-        os << "+-----------+----------+--------------+\n";
-        if (isPretty) { std::cout \
-            <<" * Throughput here is \"average successes per operation\". Tightening the"
-            "\n   threshold induces more giveups, but also reduces the operational cost"
-            "\n   giveups incur. Mathematically speaking, operations are proportional"
-            "\n   to time, where time depends on the machine, hence my choice of units.\n"; }
-    }
+    printMessageBar("", BAR_WIDTH, '-');
+    printTrialsWorkDistribution(trialsToRun, successfulTrialBins, successfulSolveOpsBins);
     printMessageBar("DONE x" + std::to_string(trialsToRun), BAR_WIDTH);
 
     // Restore old setting for counting backtracks:
     doCountBacktracks = oldDoCountBacktracks;
+}
+
+template<Sudoku::Order O>
+void Sudoku::Solver<O>::printTrialsWorkDistribution(
+    const trials_t trialsToRun,
+    std::array<trials_t, TRIALS_NUM_BINS> const& successfulTrialBins,
+    std::array<double,   TRIALS_NUM_BINS> const& successfulSolveOpsBins
+) {
+    os << "|  bin top  |   hits   |  throughput  |\n";
+    os << "+-----------+----------+--------------+";
+    opcount_t successfulTrialsAccum = 0;
+    double  successfulSolveOpsAccum = 0.0;
+    constexpr double BIN_WIDTH = (double)GIVEUP_THRESHOLD / successfulTrialBins.size();
+    for (unsigned int i = 0; i < successfulTrialBins.size(); i++) {
+        successfulTrialsAccum   += successfulTrialBins[i];
+        successfulSolveOpsAccum += successfulSolveOpsBins[i];
+        const double binCeiling = ((double)(i + 1) * BIN_WIDTH);
+        const double throughput = successfulTrialsAccum / (successfulSolveOpsAccum
+            + ((trialsToRun - successfulTrialsAccum) * binCeiling));
+        if (order < 4) {
+            os << "\n|" << std::setw(9) << (int)binCeiling;
+        } else {
+            os << "\n|" << std::setw(8) << (int)(binCeiling / 1000) << 'K';
+        }
+        os << "  |" << std::setw(8)  << successfulTrialBins[i];
+        os << "  |" << std::setw(12) << std::scientific << throughput << std::fixed;
+        os << "  |";
+    }
+    os << " <- current threshold\n";
+    os << "+-----------+----------+--------------+\n";
+    if (isPretty) { os \
+        <<" * Throughput here is \"average successes per operation\". Tightening the"
+        "\n   threshold induces more giveups, but also reduces the operational cost"
+        "\n   giveups incur. Mathematically speaking, operations are proportional"
+        "\n   to time, except operations are machine independent unlike time.\n";
+    }
 }
 
 

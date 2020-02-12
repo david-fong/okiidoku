@@ -73,7 +73,7 @@ namespace Sudoku {
      */
     template <Order O>
     class Solver {
-        static_assert(1 < O && O <= MAX_REASONABLE_ORDER);
+        static_assert((1 < O) && (O <= MAX_REASONABLE_ORDER));
 
     /**
      * TYPEDEFS
@@ -149,9 +149,12 @@ namespace Sudoku {
         // Return false if command is to exit the program:
         [[gnu::cold]] bool runCommand(std::string const& cmdLine);
         [[gnu::cold]] void runNew(void);
-        [[gnu::cold]] void runMultiple(const unsigned long);
-        [[gnu::cold]] void print(void) const;
         [[gnu::cold]] void printBacktrackStats(void) const;
+        [[gnu::cold]] void runMultiple(const unsigned long);
+        [[gnu::cold]] void printTrialsWorkDistribution(const trials_t,
+            std::array<trials_t, TRIALS_NUM_BINS> const&,
+            std::array<double,   TRIALS_NUM_BINS> const&);
+        [[gnu::cold]] void print(void) const;
         [[gnu::cold]] void printMessageBar(std::string const&, unsigned int, const char = '=') const;
         [[gnu::cold]] void printMessageBar(std::string const&, const char = '=') const;
 
@@ -229,6 +232,14 @@ namespace Sudoku {
                 return "\03";
             }
         };
+        static unsigned int GET_TERMINAL_COLUMNS(const unsigned int fallback) noexcept {
+            char const*const envVar = std::getenv("COLUMNS");
+            return (envVar != NULL) ? std::stoul(envVar) : fallback;
+        }
+        static unsigned int GET_TERMINAL_LINES(const unsigned int fallback) noexcept {
+            char const*const envVar = std::getenv("LINES");
+            return (envVar != NULL) ? std::stoul(envVar) : fallback;
+        }
     };
 
 } // End of Sudoku namespace
