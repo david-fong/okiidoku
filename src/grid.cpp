@@ -278,8 +278,10 @@ void Sudoku::Solver<O>::runNew(void) {
 
 template <Sudoku::Order O>
 void Sudoku::Solver<O>::printBacktrackStats(void) const {
-    static const std::array<std::string, 5> GREYSCALE_BLOCK_CHARS = {
-        " ", u8"\u2591", u8"\u2592", u8"\u2593", u8"\u2588",
+    static const std::array<std::string, 4> GREYSCALE_BLOCK_CHARS = {
+        // NOTE: make sure that the initializer list size matches that
+        // of the corresponding template argument. Compilers won't warn.
+        u8"\u2591", u8"\u2592", u8"\u2593", u8"\u2588",
     };
     if (!doCountBacktracks) {
         return;
@@ -300,13 +302,11 @@ void Sudoku::Solver<O>::printBacktrackStats(void) const {
         if (isPretty && (i % order) == 0) os << " |"; // blkcol separator.
 
         // TODO: find a way to make distribution more visible especially
-        // for medium-valued counts. Maybe use sqrt or log function.
-        // I know: use space char for zero, and start fading in at one.
-        const double relativeIntensity = (double)backtrackCounts[i]
-            * GREYSCALE_BLOCK_CHARS.size()
-            / (sortedCounts[area - 1] + 1);
-            // Note on above: `+ 1` to avoid edge case of getting array.size().
-        auto const& intensityChar = GREYSCALE_BLOCK_CHARS.at((unsigned)relativeIntensity);
+        // for large-valued counts. Maybe use sqrt or log function.
+        const unsigned int relativeIntensity = (double)(backtrackCounts[i] - 1)
+            * GREYSCALE_BLOCK_CHARS.size() / sortedCounts[area - 1];
+        auto const& intensityChar = (backtrackCounts[i] != 0)
+            ? GREYSCALE_BLOCK_CHARS.at(relativeIntensity) : " ";
         os << intensityChar << intensityChar;
     }
     if (isPretty) {
