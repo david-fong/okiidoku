@@ -49,30 +49,26 @@ Sudoku::Solver<O>::Solver(std::ostream& os):
 template <Sudoku::Order O>
 void Sudoku::Solver<O>::print(void) const {
     os << std::setbase(16);
-    for (area_t i = 0; i < area; i++) {
-        if ((i % length) == 0 && i != 0) {
-            if (isPretty) os << " |";
-            os << "\n"; // Line terminator.
-        }
-        if (isPretty && (i % (order * length) == 0)) {
+
+    for (length_t row = 0; row < length; row++) {
+        if (isPretty && (row % order == 0)) {
             os << gridHSepString;
+            os << '\n';
         }
-        if (isPretty && (i % order) == 0) os << " |"; // blkcol separator.
-        Tile const& t = grid.at(i);
-        if (isClear(t)) {
-            os << "  ";
-        } else {
-            os << " ";
-            if (order < 5) {
-                os << (uint16_t)t.value;
-            } else {
-                os << (char)('a' + t.value);
-            }
+        for (length_t col = 0; col < length; col++) {
+            if (isPretty && (col % order) == 0) os << " |"; // blkcol separator.
+            Tile const& t = grid[row * length + col];
+            os << ' ' << t;
         }
+        if (isPretty) os << " |"; // blkcol separator.
+        os << '\n';
     }
     if (isPretty) {
-        os << " |\n" << gridHSepString;
+        os << gridHSepString;
+        os << '\n';
     }
+
+
     os << std::setbase(10) << std::endl;
 }
 
@@ -137,7 +133,7 @@ typename Sudoku::TraversalDirection Sudoku::Solver<O>::setNextValid(const area_t
     occmask_t& blkBin = blkSymbolOccMasks[getBlk(index)];
 
     Tile& t = grid[index];
-    if (!isClear(t)) {
+    if (!t.isClear()) {
         // If the tile is currently already set, clear it:
         const occmask_t eraseMask = ~(0b1 << t.value);
         rowBin &= eraseMask;
@@ -164,7 +160,7 @@ typename Sudoku::TraversalDirection Sudoku::Solver<O>::setNextValid(const area_t
     }
     // This must go outside the search-loop for backtracks:
     t.biasIndex = biasIndex;
-    return (isClear(t) ? BACK : FORWARD);
+    return (t.isClear() ? BACK : FORWARD);
 }
 
 
@@ -271,7 +267,7 @@ void Sudoku::Solver<O>::runNew(void) {
     os << "processor time: " STATW_D << processorTime << " seconds" << '\n';
     if (!isPretty) printMessageBar("", '-');
     print();
-    printBacktrackStats();
+    //printBacktrackStats();
     printMessageBar((numSolveOps == 0) ? "ABORT" : "DONE");
 }
 
@@ -290,16 +286,7 @@ void Sudoku::Solver<O>::printBacktrackStats(void) const {
     std::sort(sortedCounts.begin(), sortedCounts.end());
 
     // Print backtracking counters:
-    printMessageBar("backtrack counters", '-');
     for (area_t i = 0; i < area; i++) {
-        if ((i % length) == 0 && i != 0) {
-            if (isPretty) os << " |";
-            os << "\n"; // Line terminator.
-        }
-        if (isPretty && (i % (order * length) == 0)) {
-            os << gridHSepString;
-        }
-        if (isPretty && (i % order) == 0) os << " |"; // blkcol separator.
 
         // TODO: find a way to make distribution more visible especially
         // for large-valued counts. Maybe use sqrt or log function.
@@ -310,9 +297,11 @@ void Sudoku::Solver<O>::printBacktrackStats(void) const {
         os << intensityChar << intensityChar;
     }
     if (isPretty) {
-        os << " |\n" << gridHSepString;
+        os << " |\n" << gridHSepString << '\n';
     }
     // Print a summary of the worst count values:
+    // NOTE: if this statistic is removed, the above use of `sortedCounts`'
+    // last value should be changed to a constant found by std::max_entry.
     printMessageBar("worst count values", '-');
     for (area_t i = area - length; i < area; i++) {
         os << std::setw(0.80 * statsWidth) << sortedCounts[i] << '\n';
@@ -405,7 +394,7 @@ void Sudoku::Solver<O>::printTrialsWorkDistribution(
         const double binCeiling = ((double)(i + 1) * BIN_WIDTH);
         const double throughput = successfulTrialsAccum / (successfulSolveOpsAccum
             + ((trialsToRun - successfulTrialsAccum) * binCeiling));
-        if (order < 4) {
+        if constexpr (order < 4) {
             os << "\n|" << std::setw(9) << (int)binCeiling;
         } else {
             os << "\n|" << std::setw(8) << (int)(binCeiling / 1000) << 'K';
@@ -456,7 +445,7 @@ void Sudoku::Solver<O>::printMessageBar(std::string const& msg, const char fillC
 
 
 static std::string createHSepString(unsigned int order) {
-    std::string vbar = ' ' + std::string((((order * (order + 1)) + 1) * 2 - 1), '-') + '\n';
+    std::string vbar = ' ' + std::string((((order * (order + 1)) + 1) * 2 - 1), '-');
     for (unsigned int i = 0; i <= order; i++) {
         // Insert crosses at vbar intersections.
         vbar[(2 * (order + 1) * i) + 1] = '+';

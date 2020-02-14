@@ -129,8 +129,23 @@ namespace Sudoku {
                 biasIndex = length;
                 //value = length;
             }
+            [[gnu::const]] bool isClear(void) const noexcept {
+                return biasIndex == length;
+            }
             // std::enable_if_t<(O == ORD_5), std::string> toString();
             // std::enable_if_t<(O < ORD_5), std::string> toString();
+            // TODO: implement the << operator
+            friend std::ostream& operator<<(std::ostream& out, Tile const& t) {
+                if (t.isClear()) {
+                    return out << ' ';
+                } else {
+                    if constexpr (order < 5) {
+                        return out << (uint16_t)t.value;
+                    } else {
+                        return out << (char)('a' + t.value);
+                    }
+                }
+            }
         protected:
             value_t biasIndex;
             value_t value; // undefined if clear.
@@ -214,7 +229,6 @@ namespace Sudoku {
         [[gnu::cold]] void setGenPath(const GenPath) noexcept;
 
         // Inline functions:
-        [[gnu::const]] static bool isClear(Tile const& t) noexcept { return t.biasIndex == length; }
         [[gnu::const]] static length_t getRow(const area_t index) noexcept { return index / length; }
         [[gnu::const]] static length_t getCol(const area_t index) noexcept { return index % length; }
         [[gnu::const]] static length_t getBlk(const area_t index) noexcept { return getBlk(getRow(index), getCol(index)); }
