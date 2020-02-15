@@ -58,11 +58,11 @@ void Solver<O,CBT>::print(void) const {
     (void)idxMaxBacktracks;
     if constexpr (CBT) {
         idxMaxBacktracks = std::max_element(backtrackCounts.begin(), backtrackCounts.end());
-        const auto index = idxMaxBacktracks - backtrackCounts.begin();
+        const area_t index = idxMaxBacktracks - backtrackCounts.begin();
         os << "max backtracks: " STATW_I << *idxMaxBacktracks
             // Print zero-indexed x,y coordinates:
-            << " at (" << (getCol(index))
-            << ',' << (getRow(index)) << ')' << '\n';
+            << " at (" << static_cast<unsigned>(getCol(index))
+            << ',' << static_cast<unsigned>(getRow(index)) << ')' << '\n';
     }
 
     if constexpr (order == 4) os << std::setbase(16);

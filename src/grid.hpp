@@ -77,6 +77,12 @@ namespace Sudoku {
 
     /**
      * 
+     * 
+     * An important note when working with this class: When printing
+     * values of numeric types defined within this class, make sure to
+     * cast any non-area types upward where they may conditionally be
+     * a `uint8_t` for small grid-orders, or else it will be specially
+     * interpreted as a char (I've already been bitten twice by this).
      */
     template <Order O, bool CBT>
     class Solver {
