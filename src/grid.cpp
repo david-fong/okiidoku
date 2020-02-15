@@ -8,16 +8,23 @@
 #include <algorithm>    // random_shuffle,
 #include <string>       // string,
 
+static std::string createHSepString(unsigned int order);
+
+
+/**
+ * 
+ */
+namespace Sudoku {
+
+#define SOLVER_TEMPLATE_PARAM_LIST template <Order O, bool CBT>
 
 // Mechanism to statically toggle printing alignment:
 #define STATW_I << std::setw(this->statsWidth)
 #define STATW_D << std::setw(this->statsWidth + 4)
 
-static std::string createHSepString(unsigned int order);
 
-
-template <Sudoku::Order O>
-Sudoku::Solver<O>::Solver(std::ostream& os):
+SOLVER_TEMPLATE_PARAM_LIST
+Solver<O,CBT>::Solver(std::ostream& os):
     os          (os),
     isPretty    (&os == &std::cout),
     blkRowSepString(createHSepString(order))
@@ -47,8 +54,8 @@ Sudoku::Solver<O>::Solver(std::ostream& os):
 }
 
 
-template <Sudoku::Order O>
-void Sudoku::Solver<O>::print(void) const {
+SOLVER_TEMPLATE_PARAM_LIST
+void Solver<O,CBT>::print(void) const {
     const auto idxMaxBacktracks = std::max_element(backtrackCounts.begin(), backtrackCounts.end()); {
         const auto index = idxMaxBacktracks - backtrackCounts.begin();
         os << "max backtracks: " STATW_I << *idxMaxBacktracks
@@ -63,7 +70,7 @@ void Sudoku::Solver<O>::print(void) const {
         if (isPretty && (row % order == 0)) {
             // Print block-row separator string:
             os << blkRowSepString;
-            if (doCountBacktracks) os << GRID_SEP << blkRowSepString;
+            if constexpr (CBT) os << GRID_SEP << blkRowSepString;
             os << '\n';
         }
 
@@ -72,7 +79,7 @@ void Sudoku::Solver<O>::print(void) const {
             if (isPretty && (col % order) == 0) os << " |"; // blkcol separator.
             os << ' ' << grid[row * length + col];
         }
-        if (doCountBacktracks) {
+        if constexpr (CBT) {
             if (isPretty) os << " |";
             os << GRID_SEP;
             for (length_t col = 0; col < length; col++) {
@@ -85,7 +92,7 @@ void Sudoku::Solver<O>::print(void) const {
     }
     if (isPretty) {
         os << blkRowSepString;
-        if (doCountBacktracks) os << GRID_SEP << blkRowSepString;
+        if constexpr (CBT) os << GRID_SEP << blkRowSepString;
         os << '\n';
     }
     if constexpr (order == 4) os << std::setbase(10);
@@ -93,18 +100,18 @@ void Sudoku::Solver<O>::print(void) const {
 }
 
 
-template <Sudoku::Order O>
-void Sudoku::Solver<O>::clear(void) {
+SOLVER_TEMPLATE_PARAM_LIST
+void Solver<O,CBT>::clear(void) {
     std::for_each(grid.begin(), grid.end(), [this](Tile& t){ t.clear(); });
     rowSymbolOccMasks.fill(0);
     colSymbolOccMasks.fill(0);
     blkSymbolOccMasks.fill(0);
-    if (doCountBacktracks) backtrackCounts.fill(0);
+    if constexpr (CBT) backtrackCounts.fill(0);
 }
 
 
-template <Sudoku::Order O>
-void Sudoku::Solver<O>::seed(const bool printInfo) {
+SOLVER_TEMPLATE_PARAM_LIST
+void Solver<O,CBT>::seed(const bool printInfo) {
     // Scramble each row's value-guessing-order:
     // note: must keep the <length>'th entry as <length>.
     for (auto& rowBias : rowBiases) {
@@ -115,9 +122,9 @@ void Sudoku::Solver<O>::seed(const bool printInfo) {
 
 
 
-template <Sudoku::Order O>
-template <bool DO_COUNT_BACKTRACKS, bool USE_PUZZLE>
-typename Sudoku::opcount_t Sudoku::Solver<O>::generateSolution(void) {
+SOLVER_TEMPLATE_PARAM_LIST
+template <bool USE_PUZZLE>
+opcount_t Solver<O,CBT>::generateSolution(void) {
     opcount_t numOperations = 0;
     area_t tvsIndex = 0; // traversal index.
 
@@ -130,7 +137,7 @@ typename Sudoku::opcount_t Sudoku::Solver<O>::generateSolution(void) {
                 totalGenCount++;
                 return 0;
             }
-            if constexpr (DO_COUNT_BACKTRACKS) backtrackCounts[gridIndex]++;
+            if constexpr (CBT) backtrackCounts[gridIndex]++;
             tvsIndex--;
         } else {
             tvsIndex++;
@@ -148,8 +155,8 @@ typename Sudoku::opcount_t Sudoku::Solver<O>::generateSolution(void) {
 }
 
 
-template <Sudoku::Order O>
-typename Sudoku::TraversalDirection Sudoku::Solver<O>::setNextValid(const area_t index) {
+SOLVER_TEMPLATE_PARAM_LIST
+TraversalDirection Solver<O,CBT>::setNextValid(const area_t index) {
     occmask_t& rowBin = rowSymbolOccMasks[getRow(index)];
     occmask_t& colBin = colSymbolOccMasks[getCol(index)];
     occmask_t& blkBin = blkSymbolOccMasks[getBlk(index)];
@@ -186,8 +193,8 @@ typename Sudoku::TraversalDirection Sudoku::Solver<O>::setNextValid(const area_t
 }
 
 
-template <Sudoku::Order O>
-typename Sudoku::Solver<O>::length_t Sudoku::Solver<O>::tileNumNonCandidates(const area_t index) const noexcept {
+SOLVER_TEMPLATE_PARAM_LIST
+typename Solver<O,CBT>::length_t Solver<O,CBT>::tileNumNonCandidates(const area_t index) const noexcept {
     return __builtin_popcount(
           rowSymbolOccMasks[getRow(index)]
         | colSymbolOccMasks[getCol(index)]
@@ -196,8 +203,8 @@ typename Sudoku::Solver<O>::length_t Sudoku::Solver<O>::tileNumNonCandidates(con
 }
 
 
-template <Sudoku::Order O>
-void Sudoku::Solver<O>::setGenPath(const GenPath newGenPath) noexcept {
+SOLVER_TEMPLATE_PARAM_LIST
+void Solver<O,CBT>::setGenPath(const GenPath newGenPath) noexcept {
     switch (newGenPath) {
         case ROW_MAJOR:
             std::iota(traversalOrder.begin(), traversalOrder.end(), 0);
@@ -221,8 +228,8 @@ void Sudoku::Solver<O>::setGenPath(const GenPath newGenPath) noexcept {
 
 
 
-template <Sudoku::Order O>
-bool Sudoku::Solver<O>::runCommand(std::string const& cmdLine) {
+SOLVER_TEMPLATE_PARAM_LIST
+bool Solver<O,CBT>::runCommand(std::string const& cmdLine) {
     // Purposely use cout instead of this.os.
     size_t tokenPos;
     const std::string cmdName = cmdLine.substr(0, tokenPos = cmdLine.find(" "));
@@ -259,12 +266,7 @@ bool Sudoku::Solver<O>::runCommand(std::string const& cmdLine) {
             break;
         case CMD_SET_GENPATH:
             setGenPath(static_cast<GenPath>((genPath + 1) % (GenPath_MAX + 1)));
-            std::cout << "generator path is now set to: " << Sudoku::GenPath_Names[genPath] << std::endl;
-            break;
-        case CMD_DO_BACKTRACK_COUNT:
-            doCountBacktracks = !doCountBacktracks;
-            std::cout << "backtracking activity monitoring is now: ";
-            std::cout << ((doCountBacktracks) ? "on" : "off") << std::endl;
+            std::cout << "generator path is now set to: " << GenPath_Names[genPath] << std::endl;
             break;
         default:
             break; // unreachable.
@@ -273,31 +275,29 @@ bool Sudoku::Solver<O>::runCommand(std::string const& cmdLine) {
 }
 
 
-template <Sudoku::Order O>
-void Sudoku::Solver<O>::solvePuzzlesFromFile(std::ifstream& puzzlesFile) {
+SOLVER_TEMPLATE_PARAM_LIST
+void Solver<O,CBT>::solvePuzzlesFromFile(std::ifstream& puzzlesFile) {
     std::cout << "this has not yet been implemented yet" << std::endl;
 
     for (;;) {
         clear();
         // read a puzzle from the file
-        generateSolution<false,true>();
+        generateSolution<true>();
         // write the solution to an output file.
         break; // TODO: remove me
     }
 }
 
 
-template <Sudoku::Order O>
-void Sudoku::Solver<O>::runNew(void) {
+SOLVER_TEMPLATE_PARAM_LIST
+void Solver<O,CBT>::runNew(void) {
     printMessageBar("START " + std::to_string(totalGenCount));
     clear();
     seed(true);
 
     // Generate a new solution:
     const clock_t    clockStart = std::clock();
-    const opcount_t numSolveOps = (doCountBacktracks)
-        ? generateSolution<true, false>()
-        : generateSolution<false,false>();
+    const opcount_t numSolveOps = generateSolution<false>();
     const clock_t   clockFinish = std::clock();
     const double  processorTime = ((double)(clockFinish - clockStart)) / CLOCKS_PER_SEC;
 
@@ -309,8 +309,8 @@ void Sudoku::Solver<O>::runNew(void) {
 }
 
 
-template <Sudoku::Order O>
-void Sudoku::Solver<O>::printBacktrackStat(const area_t index, unsigned const& worstCount) const {
+SOLVER_TEMPLATE_PARAM_LIST
+void Solver<O,CBT>::printBacktrackStat(const area_t index, unsigned const& worstCount) const {
     static const std::array<std::string, 4> GREYSCALE_BLOCK_CHARS = {
         // NOTE: Make sure that the initializer list size matches that
         // of the corresponding template argument. Compilers won't warn.
@@ -332,8 +332,8 @@ void Sudoku::Solver<O>::printBacktrackStat(const area_t index, unsigned const& w
 }
 
 
-template <Sudoku::Order O>
-void Sudoku::Solver<O>::runMultiple(const trials_t trialsToRun) {
+SOLVER_TEMPLATE_PARAM_LIST
+void Solver<O,CBT>::runMultiple(const trials_t trialsToRun) {
     static constexpr unsigned DEFAULT_STATS_COLS = ((unsigned[]){0,64,32,24,16,4,1})[order];
     static constexpr unsigned LINES_PER_FLUSH    = ((unsigned[]){0, 0, 0, 0, 6,1,1})[order];
     const unsigned PRINT_COLS = (GET_TERMINAL_COLUMNS(DEFAULT_STATS_COLS) - (isPretty ? 7 : 0)) / statsWidth;
@@ -353,7 +353,7 @@ void Sudoku::Solver<O>::runMultiple(const trials_t trialsToRun) {
         }
         clear();
         seed(false);
-        const opcount_t numSolveOps = generateSolution<false,false>();
+        const opcount_t numSolveOps = generateSolution<false>();
         numTotalTrials++;
         if (numSolveOps == 0) {
             giveups++;
@@ -392,8 +392,9 @@ void Sudoku::Solver<O>::runMultiple(const trials_t trialsToRun) {
     os << std::flush;
 }
 
-template<Sudoku::Order O>
-void Sudoku::Solver<O>::printTrialsWorkDistribution(
+
+SOLVER_TEMPLATE_PARAM_LIST
+void Solver<O,CBT>::printTrialsWorkDistribution(
     const trials_t trialsToRun,
     std::array<trials_t, TRIALS_NUM_BINS> const& successfulTrialBins,
     std::array<double,   TRIALS_NUM_BINS> const& successfulSolveOpsBins
@@ -429,8 +430,8 @@ void Sudoku::Solver<O>::printTrialsWorkDistribution(
 
 
 
-template <Sudoku::Order O>
-void Sudoku::Solver<O>::printMessageBar(
+SOLVER_TEMPLATE_PARAM_LIST
+void Solver<O,CBT>::printMessageBar(
     std::string const& msg,
     unsigned int barLength,
     const char fillChar
@@ -448,17 +449,21 @@ void Sudoku::Solver<O>::printMessageBar(
 }
 
 
-template <Sudoku::Order O>
-void Sudoku::Solver<O>::printMessageBar(std::string const& msg, const char fillChar) const {
+SOLVER_TEMPLATE_PARAM_LIST
+void Solver<O,CBT>::printMessageBar(std::string const& msg, const char fillChar) const {
     // NOTE: If isPretty is change to be non-const, this cannot be static.
     static const unsigned int gridBarLength = (isPretty)
         ? ((length + order + 1) * 2)
         : (length * 2);
-    const unsigned int numGrids = 1 + int(doCountBacktracks);
+    constexpr unsigned int numGrids = 1 + int(CBT);
     unsigned int allBarLength = (numGrids * gridBarLength);
     if (numGrids > 1) allBarLength += (numGrids - 1) * GRID_SEP.length();
     return printMessageBar(msg, allBarLength + 1, fillChar);
 }
+
+} // End of Sudoku namespace.
+
+
 
 
 static std::string createHSepString(unsigned int order) {

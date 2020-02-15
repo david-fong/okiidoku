@@ -30,7 +30,6 @@ namespace Sudoku {
         { "",           CMD_RUN_SINGLE },
         { "trials",     CMD_RUN_MULTIPLE },
         { "genpath",    CMD_SET_GENPATH },
-        { "heatmap",    CMD_DO_BACKTRACK_COUNT },
     };
     const std::string HELP_MESSAGE = "\nCOMMAND MENU:"
         "\n- help           print this help menu"
@@ -39,7 +38,6 @@ namespace Sudoku {
         "\n- {enter}        generate a single solution"
         "\n- trials <n>     generate <n> solutions"
         "\n- genpath        cycle generator traversal path"
-        "\n- heatmap        toggle backtrack monitoring"
         ;
     const std::string REPL_PROMPT = "\n$ ";
     static const std::string GRID_SEP = "  ";
@@ -80,7 +78,7 @@ namespace Sudoku {
     /**
      * 
      */
-    template <Order O>
+    template <Order O, bool CBT>
     class Solver {
         static_assert((1 < O) && (O <= MAX_REASONABLE_ORDER));
 
@@ -210,10 +208,8 @@ namespace Sudoku {
         })[order];
         unsigned long totalGenCount;
         unsigned long successfulGenCount;
-
-        bool doCountBacktracks = true;
         std::array<unsigned, area> backtrackCounts; // Same ordering as this->grid.
-        [[gnu::cold]] void printBacktrackStat(const area_t index, unsigned const& worstCount) const;
+        void printBacktrackStat(const area_t index, unsigned const& worstCount) const;
 
         std::ostream& os;
         const bool isPretty;
@@ -226,7 +222,7 @@ namespace Sudoku {
         // Generates a random solution. Returns the number of operations or
         // zero if the give-up threshold was reached or if any previous seeds
         // made generating a solution impossible.
-        template <bool DO_COUNT_BACKTRACKS, bool USE_PUZZLE>
+        template <bool USE_PUZZLE>
         [[gnu::hot]] opcount_t generateSolution(void);
         [[gnu::hot]] TraversalDirection setNextValid(const area_t);
         [[gnu::const]] length_t tileNumNonCandidates(const area_t) const noexcept;

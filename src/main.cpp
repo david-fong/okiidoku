@@ -6,6 +6,9 @@
 
 #define DEFAULT_ORDER 4
 
+template<Sudoku::Order O>
+using Solver = Sudoku::Solver<O, true>;
+
 /**
  * ARGUMENTS
  * 0. executable name (fixed).
@@ -48,7 +51,6 @@ int main(const int argc, char const *const argv[]) {
     // Create a Solver of the specified order:
     // (It will automatically enter its REPL).
     switch (static_cast<Sudoku::Order>(userOrder)) {
-        using namespace Sudoku;
         case 2: { Solver<2> s(*outStream); break; }
         case 3: { Solver<3> s(*outStream); break; }
         case 4: { Solver<4> s(*outStream); break; }
