@@ -29,6 +29,10 @@ then
 fi
 
 # TODO: change this to use a more generic pattern matcher
-declare -r SHORTEN_STDLIB_PATH='s/C:\\mingw64\\x86_64-8.1.0-posix-seh\\lib\\gcc\\x86_64-w64-mingw32\\8.1.0\\include/\\STDLIB/g'
+declare -r SHORTEN_STDLIB_PATH='s/.:\/[^\n]+?\/include/STDLIB/g'
 
-${COMPILER} -Wall -O3 ${OPTS} -fprofile-dir="${CONTEXT}/.profile" main.cpp -o main.exe |& sed ${SHORTEN_STDLIB_PATH}
+${COMPILER}\
+    -Wall -O3 ${OPTS}\
+    -fprofile-dir="${CONTEXT}/.profile"\
+    main.cpp -o main.exe\
+    |& sed -E ${SHORTEN_STDLIB_PATH}
