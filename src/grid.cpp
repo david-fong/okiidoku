@@ -48,9 +48,12 @@ Sudoku::Solver<O>::Solver(std::ostream& os):
 
 template <Sudoku::Order O>
 void Sudoku::Solver<O>::print(void) const {
-    const auto idxMaxBacktracks = std::max_element(backtrackCounts.begin(), backtrackCounts.end());
-    os << "max backtracks: " STATW_I << *idxMaxBacktracks
-        << " at tile " << (idxMaxBacktracks - backtrackCounts.begin()) << '\n';
+    const auto idxMaxBacktracks = std::max_element(backtrackCounts.begin(), backtrackCounts.end()); {
+        const auto index = idxMaxBacktracks - backtrackCounts.begin();
+        os << "max backtracks: " STATW_I << *idxMaxBacktracks
+            << " at (" << (getCol(index)) // not sure if I want to print zero-indexed :/
+            << ',' << (getRow(index)) << ')' << '\n';
+    }
 
     if constexpr (order == 4) os << std::setbase(16);
 
@@ -123,19 +126,21 @@ template <Sudoku::Order O>
 typename Sudoku::opcount_t Sudoku::Solver<O>::generateSolution(void) {
     const bool doCountBacktracks = this->doCountBacktracks;
     opcount_t numOperations = 0;
-    area_t index = 0;
-    while (index < area) {
-        if (setNextValid(traversalOrder[index]) == TraversalDirection::BACK) {
+    area_t tvsIndex = 0; // traversal index.
+
+    while (tvsIndex < area) {
+        const auto gridIndex = traversalOrder[tvsIndex];
+        if (setNextValid(gridIndex) == TraversalDirection::BACK) {
             // Pop and step backward:
-            if (__builtin_expect(index == 0, false)) {
+            if (__builtin_expect(tvsIndex == 0, false)) {
                 // No solution could be found. Treat as if abort.
                 totalGenCount++;
                 return 0;
             }
-            if (doCountBacktracks) backtrackCounts[index]++;
-            index--;
+            if (doCountBacktracks) backtrackCounts[gridIndex]++;
+            tvsIndex--;
         } else {
-            index++;
+            tvsIndex++;
         }
         // Check if the giveup threshold has been exceeded:
         numOperations++;
@@ -247,7 +252,7 @@ bool Sudoku::Solver<O>::runCommand(std::string const& cmdLine) {
                 std::cout << "the specified file could not be opened for reading." << std::endl;
                 break;
             }
-            // TODO
+            // TODO implement solver method and call it here.
             break; }
         case RUN_SINGLE:
             runNew();

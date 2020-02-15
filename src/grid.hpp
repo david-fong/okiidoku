@@ -215,7 +215,7 @@ namespace Sudoku {
         unsigned long totalGenCount;
         unsigned long successfulGenCount;
         bool doCountBacktracks = true;
-        std::array<unsigned, area> backtrackCounts; // Ordered according to genPath.
+        std::array<unsigned, area> backtrackCounts; // Same ordering as this->grid.
 
         std::ostream& os;
         const bool isPretty;

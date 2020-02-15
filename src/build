@@ -1,7 +1,4 @@
 #!/bin/sh
-# I apologize for committing the platform-specific sed filter.
-# I want to keep this script in the repo so please bear with it
-# as a viewer and fellow programmer :)
 #
 # Personal notes:
 # https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html
@@ -28,7 +25,6 @@ then
     OPTS+=" -fprofile-use"
 fi
 
-# TODO: change this to use a more generic pattern matcher
 declare -r SHORTEN_STDLIB_PATH='s/.:\/[^\n]+?\/include/STDLIB/g'
 
 ${COMPILER}\
