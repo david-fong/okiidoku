@@ -34,6 +34,7 @@ namespace Sudoku {
         "\n- heatmap        toggle backtrack monitoring"
         ;
     const std::string REPL_PROMPT = "\n$ ";
+    static const std::string GRID_SEP = "  ";
 
     typedef enum { ROW_MAJOR, BLOCK_COLS, GenPath_MAX = BLOCK_COLS, } GenPath;
     const std::array<std::string, 2> GenPath_Names = {
@@ -164,7 +165,7 @@ namespace Sudoku {
         // Return false if command is to exit the program:
         [[gnu::cold]] bool runCommand(std::string const& cmdLine);
         [[gnu::cold]] void runNew(void);
-        [[gnu::cold]] void printBacktrackStats(void) const;
+        [[gnu::cold]] void printBacktrackStat(const area_t index, unsigned const& worstCount) const;
         [[gnu::cold]] void runMultiple(const unsigned long);
         [[gnu::cold]] void printTrialsWorkDistribution(const trials_t,
             std::array<trials_t, TRIALS_NUM_BINS> const&,
@@ -188,6 +189,10 @@ namespace Sudoku {
         GenPath genPath;
         std::array<area_t, area> traversalOrder;
 
+        // TODO: delete me
+        template <typename... T>
+        void learnVariadicTemplateParameterLists(T... t);
+
         /**
          * Give up if number of operations performed exceeds this value.
          * Measured stats: https://www.desmos.com/calculator/8taqzelils
@@ -209,14 +214,14 @@ namespace Sudoku {
         static constexpr opcount_t GIVEUP_THRESHOLD = ((const opcount_t[]){0,1,25,2'000,2'500'000,30'000'000})[O];
         unsigned long totalGenCount;
         unsigned long successfulGenCount;
-        bool doCountBacktracks = false;
+        bool doCountBacktracks = true;
         std::array<unsigned, area> backtrackCounts; // Ordered according to genPath.
 
         std::ostream& os;
         const bool isPretty;
         std::locale benchedLocale;
         static constexpr unsigned int statsWidth = (0.4 * length) + 4;
-        const std::string gridHSepString;
+        const std::string blkRowSepString;
 
         void clear(void);
         void seed(const bool printInfo);

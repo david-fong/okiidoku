@@ -17,7 +17,6 @@
 - Make non-prompt output text print to cout and to outStream (if outStream is not same as cout).
   - This includes the preamble of parameters that were parsed.
   - Investigate if it is simplest to do this with a macro :P.
-  - Try using [SFINAE](https://en.cppreference.com/w/cpp/language/sfinae) to define toString and fromString for Tile values (currently using if-else's in Solver::print).
 
 ## OK cool
 

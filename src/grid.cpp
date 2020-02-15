@@ -20,7 +20,7 @@ template <Sudoku::Order O>
 Sudoku::Solver<O>::Solver(std::ostream& os):
     os          (os),
     isPretty    (&os == &std::cout),
-    gridHSepString(createHSepString(order))
+    blkRowSepString(createHSepString(order))
 {
     for (auto& rowBias : rowBiases) {
         std::iota(rowBias.begin(), rowBias.end(), 0);
@@ -48,28 +48,52 @@ Sudoku::Solver<O>::Solver(std::ostream& os):
 
 template <Sudoku::Order O>
 void Sudoku::Solver<O>::print(void) const {
-    os << std::setbase(16);
+    const auto idxMaxBacktracks = std::max_element(backtrackCounts.begin(), backtrackCounts.end());
+    os << "max backtracks: " STATW_I << *idxMaxBacktracks
+        << " at tile " << (idxMaxBacktracks - backtrackCounts.begin()) << '\n';
+
+    if constexpr (order == 4) os << std::setbase(16);
 
     for (length_t row = 0; row < length; row++) {
         if (isPretty && (row % order == 0)) {
-            os << gridHSepString;
+            // Print block-row separator string:
+            os << blkRowSepString;
+            if (doCountBacktracks) os << GRID_SEP << blkRowSepString;
             os << '\n';
         }
+
+        // Tile content:
         for (length_t col = 0; col < length; col++) {
             if (isPretty && (col % order) == 0) os << " |"; // blkcol separator.
-            Tile const& t = grid[row * length + col];
-            os << ' ' << t;
+            os << ' ' << grid[row * length + col];
         }
-        if (isPretty) os << " |"; // blkcol separator.
+        if (doCountBacktracks) {
+            if (isPretty) os << " |";
+            os << GRID_SEP;
+            for (length_t col = 0; col < length; col++) {
+                if (isPretty && (col % order) == 0) os << " |"; // blkcol separator.
+                printBacktrackStat(row * length + col, *idxMaxBacktracks);
+            }
+        }
+        if (isPretty) os << " |";
         os << '\n';
     }
     if (isPretty) {
-        os << gridHSepString;
+        os << blkRowSepString;
+        if (doCountBacktracks) os << GRID_SEP << blkRowSepString;
         os << '\n';
     }
+    if constexpr (order == 4) os << std::setbase(10);
+    os << std::endl;
+}
 
 
-    os << std::setbase(10) << std::endl;
+// TODO: delete me
+template <Sudoku::Order O>
+template <typename... T>
+void Sudoku::Solver<O>::learnVariadicTemplateParameterLists(T... t) {
+    auto ts = { t... };
+    std::cout << "hello there!\n" << sizeof...(t);
 }
 
 
@@ -99,7 +123,7 @@ template <Sudoku::Order O>
 typename Sudoku::opcount_t Sudoku::Solver<O>::generateSolution(void) {
     const bool doCountBacktracks = this->doCountBacktracks;
     opcount_t numOperations = 0;
-    register area_t index = 0;
+    area_t index = 0;
     while (index < area) {
         if (setNextValid(traversalOrder[index]) == TraversalDirection::BACK) {
             // Pop and step backward:
@@ -267,46 +291,30 @@ void Sudoku::Solver<O>::runNew(void) {
     os << "processor time: " STATW_D << processorTime << " seconds" << '\n';
     if (!isPretty) printMessageBar("", '-');
     print();
-    //printBacktrackStats();
     printMessageBar((numSolveOps == 0) ? "ABORT" : "DONE");
 }
 
 
 template <Sudoku::Order O>
-void Sudoku::Solver<O>::printBacktrackStats(void) const {
+void Sudoku::Solver<O>::printBacktrackStat(const area_t index, unsigned const& worstCount) const {
     static const std::array<std::string, 4> GREYSCALE_BLOCK_CHARS = {
-        // NOTE: make sure that the initializer list size matches that
+        // NOTE: Make sure that the initializer list size matches that
         // of the corresponding template argument. Compilers won't warn.
+        // See https://cppreference.com/w/cpp/language/sizeof...#Example
+        // for an example utility function I can make to avoid this problem.
         u8"\u2591", u8"\u2592", u8"\u2593", u8"\u2588",
     };
-    if (!doCountBacktracks) {
-        return;
-    }
-    auto sortedCounts = backtrackCounts;
-    std::sort(sortedCounts.begin(), sortedCounts.end());
 
-    // Print backtracking counters:
-    for (area_t i = 0; i < area; i++) {
-
-        // TODO: find a way to make distribution more visible especially
-        // for large-valued counts. Maybe use sqrt or log function.
-        const unsigned int relativeIntensity = (double)(backtrackCounts[i] - 1)
-            * GREYSCALE_BLOCK_CHARS.size() / sortedCounts[area - 1];
-        auto const& intensityChar = (backtrackCounts[i] != 0)
-            ? GREYSCALE_BLOCK_CHARS.at(relativeIntensity) : " ";
-        os << intensityChar << intensityChar;
-    }
-    if (isPretty) {
-        os << " |\n" << gridHSepString << '\n';
-    }
-    // Print a summary of the worst count values:
-    // NOTE: if this statistic is removed, the above use of `sortedCounts`'
-    // last value should be changed to a constant found by std::max_entry.
-    printMessageBar("worst count values", '-');
-    for (area_t i = area - length; i < area; i++) {
-        os << std::setw(0.80 * statsWidth) << sortedCounts[i] << '\n';
-    }
-    os << '\n';
+    const unsigned int relativeIntensity
+        = (double)(backtrackCounts[index] - 1)
+        * GREYSCALE_BLOCK_CHARS.size()
+        / worstCount
+        ;
+    auto const& intensityChar
+        = (backtrackCounts[index] != 0)
+        ? GREYSCALE_BLOCK_CHARS[relativeIntensity]
+        : " ";
+    os << intensityChar << intensityChar;
 }
 
 
@@ -372,6 +380,7 @@ void Sudoku::Solver<O>::runMultiple(const trials_t trialsToRun) {
     printMessageBar("", BAR_WIDTH, '-');
     printTrialsWorkDistribution(trialsToRun, successfulTrialBins, successfulSolveOpsBins);
     printMessageBar("DONE x" + std::to_string(trialsToRun), BAR_WIDTH);
+    os << std::flush;
 
     // Restore old setting for counting backtracks:
     doCountBacktracks = oldDoCountBacktracks;
@@ -431,16 +440,20 @@ void Sudoku::Solver<O>::printMessageBar(
         bar.at(3) = ' ';
         bar.at(4 + msg.length()) = ' ';
     }
-    os << bar << std::endl;
+    os << bar << '\n';
 }
 
 
 template <Sudoku::Order O>
 void Sudoku::Solver<O>::printMessageBar(std::string const& msg, const char fillChar) const {
-    const unsigned int barLength = (isPretty)
-        ? ((length + order + 1) * 2 + 1)
+    // NOTE: If isPretty is change to be non-const, this cannot be static.
+    static const unsigned int gridBarLength = (isPretty)
+        ? ((length + order + 1) * 2)
         : (length * 2);
-    return printMessageBar(msg, barLength, fillChar);
+    const unsigned int numGrids = 1 + int(doCountBacktracks);
+    unsigned int allBarLength = (numGrids * gridBarLength);
+    if (numGrids > 1) allBarLength += (numGrids - 1) * GRID_SEP.length();
+    return printMessageBar(msg, allBarLength + 1, fillChar);
 }
 
 

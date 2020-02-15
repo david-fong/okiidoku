@@ -14,7 +14,7 @@ then
     readonly COMPILER='clang++ -target x86_64-w64-mingw64 -fcolor-diagnostics -fansi-escape-codes -ferror-limit=4'
 else
     # Use g++ by default.
-    readonly COMPILER='g++ -fdiagnostics-color=always -fmax-errors=4'
+    readonly COMPILER='g++ -std=c++17 -fdiagnostics-color=always -fmax-errors=4'
 fi
 
 declare OPTS=''
@@ -28,6 +28,7 @@ then
     OPTS+=" -fprofile-use"
 fi
 
+# TODO: change this to use a more generic pattern matcher
 declare -r SHORTEN_STDLIB_PATH='s/C:\\mingw64\\x86_64-8.1.0-posix-seh\\lib\\gcc\\x86_64-w64-mingw32\\8.1.0\\include/\\STDLIB/g'
 
-${COMPILER} -Wall -O3 ${OPTS} -time -fprofile-dir="${CONTEXT}/.profile" main.cpp -o main.exe |& sed ${SHORTEN_STDLIB_PATH}
+${COMPILER} -Wall -O3 ${OPTS} -fprofile-dir="${CONTEXT}/.profile" main.cpp -o main.exe |& sed ${SHORTEN_STDLIB_PATH}
