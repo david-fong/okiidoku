@@ -208,13 +208,13 @@ namespace Sudoku {
         })[order];
         unsigned long totalGenCount;
         unsigned long successfulGenCount;
-        std::array<unsigned, area> backtrackCounts; // Same ordering as this->grid.
+        std::array<unsigned, (CBT ? area : 1)> backtrackCounts; // Same ordering as this->grid.
         void printBacktrackStat(const area_t index, unsigned const& worstCount) const;
 
         std::ostream& os;
         const bool isPretty;
         std::locale benchedLocale; // Used to swap in-and-out the thousands-commas.
-        static constexpr unsigned int statsWidth = (0.4 * length) + 4;
+        static constexpr unsigned statsWidth = (0.4 * length) + 4;
         const std::string blkRowSepString;
 
         void clear(void);

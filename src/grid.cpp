@@ -16,14 +16,12 @@ static std::string createHSepString(unsigned int order);
  */
 namespace Sudoku {
 
-#define SOLVER_TEMPLATE_PARAM_LIST template <Order O, bool CBT>
-
 // Mechanism to statically toggle printing alignment:
 #define STATW_I << std::setw(this->statsWidth)
 #define STATW_D << std::setw(this->statsWidth + 4)
 
 
-SOLVER_TEMPLATE_PARAM_LIST
+template <Order O, bool CBT>
 Solver<O,CBT>::Solver(std::ostream& os):
     os          (os),
     isPretty    (&os == &std::cout),
@@ -54,9 +52,12 @@ Solver<O,CBT>::Solver(std::ostream& os):
 }
 
 
-SOLVER_TEMPLATE_PARAM_LIST
+template <Order O, bool CBT>
 void Solver<O,CBT>::print(void) const {
-    const auto idxMaxBacktracks = std::max_element(backtrackCounts.begin(), backtrackCounts.end()); {
+    typename std::array<unsigned,area>::const_iterator idxMaxBacktracks;
+    (void)idxMaxBacktracks;
+    if constexpr (CBT) {
+        idxMaxBacktracks = std::max_element(backtrackCounts.begin(), backtrackCounts.end());
         const auto index = idxMaxBacktracks - backtrackCounts.begin();
         os << "max backtracks: " STATW_I << *idxMaxBacktracks
             // Print zero-indexed x,y coordinates:
@@ -100,7 +101,7 @@ void Solver<O,CBT>::print(void) const {
 }
 
 
-SOLVER_TEMPLATE_PARAM_LIST
+template <Order O, bool CBT>
 void Solver<O,CBT>::clear(void) {
     std::for_each(grid.begin(), grid.end(), [this](Tile& t){ t.clear(); });
     rowSymbolOccMasks.fill(0);
@@ -110,7 +111,7 @@ void Solver<O,CBT>::clear(void) {
 }
 
 
-SOLVER_TEMPLATE_PARAM_LIST
+template <Order O, bool CBT>
 void Solver<O,CBT>::seed(const bool printInfo) {
     // Scramble each row's value-guessing-order:
     // note: must keep the <length>'th entry as <length>.
@@ -122,7 +123,7 @@ void Solver<O,CBT>::seed(const bool printInfo) {
 
 
 
-SOLVER_TEMPLATE_PARAM_LIST
+template <Order O, bool CBT>
 template <bool USE_PUZZLE>
 opcount_t Solver<O,CBT>::generateSolution(void) {
     opcount_t numOperations = 0;
@@ -155,7 +156,7 @@ opcount_t Solver<O,CBT>::generateSolution(void) {
 }
 
 
-SOLVER_TEMPLATE_PARAM_LIST
+template <Order O, bool CBT>
 TraversalDirection Solver<O,CBT>::setNextValid(const area_t index) {
     occmask_t& rowBin = rowSymbolOccMasks[getRow(index)];
     occmask_t& colBin = colSymbolOccMasks[getCol(index)];
@@ -193,7 +194,7 @@ TraversalDirection Solver<O,CBT>::setNextValid(const area_t index) {
 }
 
 
-SOLVER_TEMPLATE_PARAM_LIST
+template <Order O, bool CBT>
 typename Solver<O,CBT>::length_t Solver<O,CBT>::tileNumNonCandidates(const area_t index) const noexcept {
     return __builtin_popcount(
           rowSymbolOccMasks[getRow(index)]
@@ -203,7 +204,7 @@ typename Solver<O,CBT>::length_t Solver<O,CBT>::tileNumNonCandidates(const area_
 }
 
 
-SOLVER_TEMPLATE_PARAM_LIST
+template <Order O, bool CBT>
 void Solver<O,CBT>::setGenPath(const GenPath newGenPath) noexcept {
     switch (newGenPath) {
         case ROW_MAJOR:
@@ -228,7 +229,7 @@ void Solver<O,CBT>::setGenPath(const GenPath newGenPath) noexcept {
 
 
 
-SOLVER_TEMPLATE_PARAM_LIST
+template <Order O, bool CBT>
 bool Solver<O,CBT>::runCommand(std::string const& cmdLine) {
     // Purposely use cout instead of this.os.
     size_t tokenPos;
@@ -275,7 +276,7 @@ bool Solver<O,CBT>::runCommand(std::string const& cmdLine) {
 }
 
 
-SOLVER_TEMPLATE_PARAM_LIST
+template <Order O, bool CBT>
 void Solver<O,CBT>::solvePuzzlesFromFile(std::ifstream& puzzlesFile) {
     std::cout << "this has not yet been implemented yet" << std::endl;
 
@@ -289,7 +290,7 @@ void Solver<O,CBT>::solvePuzzlesFromFile(std::ifstream& puzzlesFile) {
 }
 
 
-SOLVER_TEMPLATE_PARAM_LIST
+template <Order O, bool CBT>
 void Solver<O,CBT>::runNew(void) {
     printMessageBar("START " + std::to_string(totalGenCount));
     clear();
@@ -309,7 +310,7 @@ void Solver<O,CBT>::runNew(void) {
 }
 
 
-SOLVER_TEMPLATE_PARAM_LIST
+template <Order O, bool CBT>
 void Solver<O,CBT>::printBacktrackStat(const area_t index, unsigned const& worstCount) const {
     static const std::array<std::string, 4> GREYSCALE_BLOCK_CHARS = {
         // NOTE: Make sure that the initializer list size matches that
@@ -319,20 +320,26 @@ void Solver<O,CBT>::printBacktrackStat(const area_t index, unsigned const& worst
         u8"\u2591", u8"\u2592", u8"\u2593", u8"\u2588",
     };
 
-    const unsigned int relativeIntensity
-        = (double)(backtrackCounts[index] - 1)
-        * GREYSCALE_BLOCK_CHARS.size()
-        / worstCount
-        ;
-    auto const& intensityChar
-        = (backtrackCounts[index] != 0)
-        ? GREYSCALE_BLOCK_CHARS[relativeIntensity]
-        : " ";
-    os << intensityChar << intensityChar;
+    if constexpr (CBT) {
+        const unsigned int relativeIntensity
+            = (double)(backtrackCounts[index] - 1)
+            * GREYSCALE_BLOCK_CHARS.size()
+            / worstCount
+            ;
+        auto const& intensityChar
+            = (backtrackCounts[index] != 0)
+            ? GREYSCALE_BLOCK_CHARS[relativeIntensity]
+            : " ";
+        os << intensityChar << intensityChar;
+    } else {
+        // This complains when the function is in a call path when
+        // backtrack-counting is off.
+        static_assert(CBT, "not avaliable when backtrack-counting is off.");
+    }
 }
 
 
-SOLVER_TEMPLATE_PARAM_LIST
+template <Order O, bool CBT>
 void Solver<O,CBT>::runMultiple(const trials_t trialsToRun) {
     static constexpr unsigned DEFAULT_STATS_COLS = ((unsigned[]){0,64,32,24,16,4,1})[order];
     static constexpr unsigned LINES_PER_FLUSH    = ((unsigned[]){0, 0, 0, 0, 6,1,1})[order];
@@ -393,7 +400,7 @@ void Solver<O,CBT>::runMultiple(const trials_t trialsToRun) {
 }
 
 
-SOLVER_TEMPLATE_PARAM_LIST
+template <Order O, bool CBT>
 void Solver<O,CBT>::printTrialsWorkDistribution(
     const trials_t trialsToRun,
     std::array<trials_t, TRIALS_NUM_BINS> const& successfulTrialBins,
@@ -430,7 +437,7 @@ void Solver<O,CBT>::printTrialsWorkDistribution(
 
 
 
-SOLVER_TEMPLATE_PARAM_LIST
+template <Order O, bool CBT>
 void Solver<O,CBT>::printMessageBar(
     std::string const& msg,
     unsigned int barLength,
@@ -449,7 +456,7 @@ void Solver<O,CBT>::printMessageBar(
 }
 
 
-SOLVER_TEMPLATE_PARAM_LIST
+template <Order O, bool CBT>
 void Solver<O,CBT>::printMessageBar(std::string const& msg, const char fillChar) const {
     // NOTE: If isPretty is change to be non-const, this cannot be static.
     static const unsigned int gridBarLength = (isPretty)

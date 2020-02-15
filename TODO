@@ -13,8 +13,6 @@
 - Experiment with a different way of giving up: according to when some tile's backtrack counter exceeds some value.
 - Make gen-path a compile-time constant.
   - Rationale: I allowed toggling for educational purposes, but I think doing so reduces chances for compiler optimization. This setting may only be of interest to keen viewers. For anyone else, what performs better is all that really matters.
-  - In the same vein, also make doCountBacktracks a non-togglable setting.
-    - I'm thinking of making this template argument for the whole class, since I may actually want to track it for trials, but not every time.
 
 ## Lower Priority
 

@@ -25,7 +25,7 @@ then
     OPTS+=" -fprofile-use"
 fi
 
-declare -r SHORTEN_STDLIB_PATH='s/.:\/[^\n]+?\/include/STDLIB/g'
+declare -r SHORTEN_STDLIB_PATH='s/.:\/[^\n]+?\/include/\[1;35mSTDLIB\[39m/g'
 
 ${COMPILER}\
     -Wall -O3 ${OPTS}\
