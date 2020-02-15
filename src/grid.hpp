@@ -14,15 +14,23 @@
  */
 namespace Sudoku {
 
-    typedef enum { HELP, QUIT, SOLVE, RUN_SINGLE, RUN_MULTIPLE, SET_GENPATH, DO_BACKTRACK_COUNT, } Command;
+    typedef enum {
+        CMD_HELP,
+        CMD_QUIT,
+        CMD_SOLVE,
+        CMD_RUN_SINGLE,
+        CMD_RUN_MULTIPLE,
+        CMD_SET_GENPATH,
+        CMD_DO_BACKTRACK_COUNT,
+    } Command;
     const std::map<std::string, Command> COMMAND_MAP = {
-        { "help",       HELP },
-        { "quit",       QUIT },
-        { "solve",      SOLVE },
-        { "",           RUN_SINGLE },
-        { "trials",     RUN_MULTIPLE },
-        { "genpath",    SET_GENPATH },
-        { "heatmap",    DO_BACKTRACK_COUNT },
+        { "help",       CMD_HELP },
+        { "quit",       CMD_QUIT },
+        { "solve",      CMD_SOLVE },
+        { "",           CMD_RUN_SINGLE },
+        { "trials",     CMD_RUN_MULTIPLE },
+        { "genpath",    CMD_SET_GENPATH },
+        { "heatmap",    CMD_DO_BACKTRACK_COUNT },
     };
     const std::string HELP_MESSAGE = "\nCOMMAND MENU:"
         "\n- help           print this help menu"
@@ -123,6 +131,8 @@ namespace Sudoku {
          * When clear, biasIndex is the parent Solver's length and value
          * is undefined.
          */
+        // TODO: can we just be lazy and say biasIndex is undefined if
+        // solving a puzzle and this tile's value is a given / hint?
         class Tile {
             friend Solver;
         public:
@@ -133,11 +143,8 @@ namespace Sudoku {
             [[gnu::const]] bool isClear(void) const noexcept {
                 return biasIndex == length;
             }
-            // std::enable_if_t<(O == ORD_5), std::string> toString();
-            // std::enable_if_t<(O < ORD_5), std::string> toString();
-            // TODO: implement the << operator
             friend std::ostream& operator<<(std::ostream& out, Tile const& t) {
-                if (t.isClear()) {
+                if (__builtin_expect(t.isClear(), false)) {
                     return out << ' ';
                 } else {
                     if constexpr (order < 5) {
@@ -163,16 +170,16 @@ namespace Sudoku {
         explicit Solver(std::ostream&);
 
         // Return false if command is to exit the program:
-        [[gnu::cold]] bool runCommand(std::string const& cmdLine);
-        [[gnu::cold]] void runNew(void);
-        [[gnu::cold]] void printBacktrackStat(const area_t index, unsigned const& worstCount) const;
-        [[gnu::cold]] void runMultiple(const unsigned long);
-        [[gnu::cold]] void printTrialsWorkDistribution(const trials_t,
+        bool runCommand(std::string const& cmdLine);
+        void solvePuzzlesFromFile(std::ifstream&);
+        void runNew(void);
+        void runMultiple(const unsigned long);
+        void printTrialsWorkDistribution(const trials_t,
             std::array<trials_t, TRIALS_NUM_BINS> const&,
             std::array<double,   TRIALS_NUM_BINS> const&);
-        [[gnu::cold]] void print(void) const;
-        [[gnu::cold]] void printMessageBar(std::string const&, unsigned int, const char = '=') const;
-        [[gnu::cold]] void printMessageBar(std::string const&, const char = '=') const;
+        void print(void) const;
+        void printMessageBar(std::string const&, unsigned int, const char = '=') const;
+        void printMessageBar(std::string const&, const char = '=') const;
 
     /**
      * PRIVATE MEMBERS
@@ -184,42 +191,33 @@ namespace Sudoku {
         std::array<occmask_t, length> blkSymbolOccMasks;
         std::array<std::array<value_t, length+1>, length> rowBiases;
 
-        // Interesting! Smaller-order grids perform better with ROW_MAJOR as genPath.
-        static constexpr GenPath DEFAULT_GENPATH = (O < 4) ? ROW_MAJOR : BLOCK_COLS;
+        /**
+         * (See Solver constructor) I've found that the choice of
+         * genPath can make around a 2x difference in processor time,
+         * and also a visible difference in the distribution of the
+         * number of operations.
+         */
         GenPath genPath;
         std::array<area_t, area> traversalOrder;
-
-        // TODO: delete me
-        template <typename... T>
-        void learnVariadicTemplateParameterLists(T... t);
+        [[gnu::cold]] void setGenPath(const GenPath) noexcept;
 
         /**
          * Give up if number of operations performed exceeds this value.
          * Measured stats: https://www.desmos.com/calculator/8taqzelils
-         * 
-         * (See Solver::DEFAULT_GENPATH) I've found that the choice of
-         * genPath can make around a 2x difference in processor time,
-         * and also a visible difference in the distribution of the
-         * number of operations.
-         * 
-         * How I chose these values (for each grid-order):
-         * - Order 2: No giveups.
-         * - Order 3: No giveups.
-         * - Order 4: Giveup ratio is less than 1%.
-         * - Order 5: More complicated: Maximize throughput in terms of
-         *   successful trials per operation. Adjusting this threshold
-         *   decreases the percentage of successful trials, but also
-         *   decreases the number of operations spent on given-up trials.
          */
-        static constexpr opcount_t GIVEUP_THRESHOLD = ((const opcount_t[]){0,1,25,2'000,2'500'000,30'000'000})[O];
+        static constexpr opcount_t GIVEUP_THRESHOLD = ((const opcount_t[]){
+            0, 1, 25, 2'000, 2'500'000, 30'000'000,
+        })[order];
         unsigned long totalGenCount;
         unsigned long successfulGenCount;
+
         bool doCountBacktracks = true;
         std::array<unsigned, area> backtrackCounts; // Same ordering as this->grid.
+        [[gnu::cold]] void printBacktrackStat(const area_t index, unsigned const& worstCount) const;
 
         std::ostream& os;
         const bool isPretty;
-        std::locale benchedLocale;
+        std::locale benchedLocale; // Used to swap in-and-out the thousands-commas.
         static constexpr unsigned int statsWidth = (0.4 * length) + 4;
         const std::string blkRowSepString;
 
@@ -228,10 +226,10 @@ namespace Sudoku {
         // Generates a random solution. Returns the number of operations or
         // zero if the give-up threshold was reached or if any previous seeds
         // made generating a solution impossible.
+        template <bool DO_COUNT_BACKTRACKS, bool USE_PUZZLE>
         [[gnu::hot]] opcount_t generateSolution(void);
         [[gnu::hot]] TraversalDirection setNextValid(const area_t);
         [[gnu::const]] length_t tileNumNonCandidates(const area_t) const noexcept;
-        [[gnu::cold]] void setGenPath(const GenPath) noexcept;
 
         // Inline functions:
         [[gnu::const]] static length_t getRow(const area_t index) noexcept { return index / length; }

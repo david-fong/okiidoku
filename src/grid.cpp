@@ -25,7 +25,8 @@ Sudoku::Solver<O>::Solver(std::ostream& os):
     for (auto& rowBias : rowBiases) {
         std::iota(rowBias.begin(), rowBias.end(), 0);
     }
-    setGenPath(DEFAULT_GENPATH);
+    // Interesting: Smaller-order grids perform better with ROW_MAJOR as genPath.
+    setGenPath((O < 4) ? ROW_MAJOR : BLOCK_COLS);
     totalGenCount = 0;
     successfulGenCount = 0;
 
@@ -51,7 +52,8 @@ void Sudoku::Solver<O>::print(void) const {
     const auto idxMaxBacktracks = std::max_element(backtrackCounts.begin(), backtrackCounts.end()); {
         const auto index = idxMaxBacktracks - backtrackCounts.begin();
         os << "max backtracks: " STATW_I << *idxMaxBacktracks
-            << " at (" << (getCol(index)) // not sure if I want to print zero-indexed :/
+            // Print zero-indexed x,y coordinates:
+            << " at (" << (getCol(index))
             << ',' << (getRow(index)) << ')' << '\n';
     }
 
@@ -91,15 +93,6 @@ void Sudoku::Solver<O>::print(void) const {
 }
 
 
-// TODO: delete me
-template <Sudoku::Order O>
-template <typename... T>
-void Sudoku::Solver<O>::learnVariadicTemplateParameterLists(T... t) {
-    auto ts = { t... };
-    std::cout << "hello there!\n" << sizeof...(t);
-}
-
-
 template <Sudoku::Order O>
 void Sudoku::Solver<O>::clear(void) {
     std::for_each(grid.begin(), grid.end(), [this](Tile& t){ t.clear(); });
@@ -123,8 +116,8 @@ void Sudoku::Solver<O>::seed(const bool printInfo) {
 
 
 template <Sudoku::Order O>
+template <bool DO_COUNT_BACKTRACKS, bool USE_PUZZLE>
 typename Sudoku::opcount_t Sudoku::Solver<O>::generateSolution(void) {
-    const bool doCountBacktracks = this->doCountBacktracks;
     opcount_t numOperations = 0;
     area_t tvsIndex = 0; // traversal index.
 
@@ -137,7 +130,7 @@ typename Sudoku::opcount_t Sudoku::Solver<O>::generateSolution(void) {
                 totalGenCount++;
                 return 0;
             }
-            if (doCountBacktracks) backtrackCounts[gridIndex]++;
+            if constexpr (DO_COUNT_BACKTRACKS) backtrackCounts[gridIndex]++;
             tvsIndex--;
         } else {
             tvsIndex++;
@@ -241,34 +234,34 @@ bool Sudoku::Solver<O>::runCommand(std::string const& cmdLine) {
         return true;
     }
     switch (it->second) {
-        case HELP:
+        case CMD_HELP:
             std::cout << HELP_MESSAGE << std::endl;
             break;
-        case QUIT:
+        case CMD_QUIT:
             return false;
-        case SOLVE: {
+        case CMD_SOLVE: {
             std::ifstream puzzleFile(cmdArgs);
             if (!puzzleFile.good()) {
                 std::cout << "the specified file could not be opened for reading." << std::endl;
-                break;
+            } else {
+                solvePuzzlesFromFile(puzzleFile);
             }
-            // TODO implement solver method and call it here.
             break; }
-        case RUN_SINGLE:
+        case CMD_RUN_SINGLE:
             runNew();
             break;
-        case RUN_MULTIPLE:
+        case CMD_RUN_MULTIPLE:
             try {
                 runMultiple(std::stoul(cmdArgs));
             } catch (std::invalid_argument const& ia) {
                 std::cout << "could not convert " << cmdArgs << " to an integer." << std::endl;
             }
             break;
-        case SET_GENPATH:
+        case CMD_SET_GENPATH:
             setGenPath(static_cast<GenPath>((genPath + 1) % (GenPath_MAX + 1)));
             std::cout << "generator path is now set to: " << Sudoku::GenPath_Names[genPath] << std::endl;
             break;
-        case DO_BACKTRACK_COUNT:
+        case CMD_DO_BACKTRACK_COUNT:
             doCountBacktracks = !doCountBacktracks;
             std::cout << "backtracking activity monitoring is now: ";
             std::cout << ((doCountBacktracks) ? "on" : "off") << std::endl;
@@ -281,6 +274,20 @@ bool Sudoku::Solver<O>::runCommand(std::string const& cmdLine) {
 
 
 template <Sudoku::Order O>
+void Sudoku::Solver<O>::solvePuzzlesFromFile(std::ifstream& puzzlesFile) {
+    std::cout << "this has not yet been implemented yet" << std::endl;
+
+    for (;;) {
+        clear();
+        // read a puzzle from the file
+        generateSolution<false,true>();
+        // write the solution to an output file.
+        break; // TODO: remove me
+    }
+}
+
+
+template <Sudoku::Order O>
 void Sudoku::Solver<O>::runNew(void) {
     printMessageBar("START " + std::to_string(totalGenCount));
     clear();
@@ -288,7 +295,9 @@ void Sudoku::Solver<O>::runNew(void) {
 
     // Generate a new solution:
     const clock_t    clockStart = std::clock();
-    const opcount_t numSolveOps = generateSolution();
+    const opcount_t numSolveOps = (doCountBacktracks)
+        ? generateSolution<true, false>()
+        : generateSolution<false,false>();
     const clock_t   clockFinish = std::clock();
     const double  processorTime = ((double)(clockFinish - clockStart)) / CLOCKS_PER_SEC;
 
@@ -330,11 +339,6 @@ void Sudoku::Solver<O>::runMultiple(const trials_t trialsToRun) {
     const unsigned PRINT_COLS = (GET_TERMINAL_COLUMNS(DEFAULT_STATS_COLS) - (isPretty ? 7 : 0)) / statsWidth;
     const unsigned BAR_WIDTH  = statsWidth * PRINT_COLS + (isPretty ? 7 : 0);
 
-    // Don't do backtracking during trials runs.
-    const bool oldDoCountBacktracks = doCountBacktracks;
-    doCountBacktracks = false;
-    const bool isPretty = this->isPretty; // Will not change intermediately.
-
     trials_t giveups = 0;
     clock_t clockStart = std::clock();
     std::array<trials_t, TRIALS_NUM_BINS> successfulTrialBins    = {0,};
@@ -349,7 +353,7 @@ void Sudoku::Solver<O>::runMultiple(const trials_t trialsToRun) {
         }
         clear();
         seed(false);
-        const opcount_t numSolveOps = generateSolution();
+        const opcount_t numSolveOps = generateSolution<false,false>();
         numTotalTrials++;
         if (numSolveOps == 0) {
             giveups++;
@@ -386,9 +390,6 @@ void Sudoku::Solver<O>::runMultiple(const trials_t trialsToRun) {
     printTrialsWorkDistribution(trialsToRun, successfulTrialBins, successfulSolveOpsBins);
     printMessageBar("DONE x" + std::to_string(trialsToRun), BAR_WIDTH);
     os << std::flush;
-
-    // Restore old setting for counting backtracks:
-    doCountBacktracks = oldDoCountBacktracks;
 }
 
 template<Sudoku::Order O>
@@ -419,12 +420,10 @@ void Sudoku::Solver<O>::printTrialsWorkDistribution(
     }
     os << " <- current threshold\n";
     os << "+-----------+----------+--------------+\n";
-    if (isPretty) { os \
-        <<" * Throughput here is \"average successes per operation\". Tightening the"
+    os << " * Throughput here is \"average successes per operation\". Tightening the"
         "\n   threshold induces more giveups, but also reduces the operational cost"
         "\n   giveups incur. Mathematically speaking, operations are proportional"
         "\n   to time, except operations are machine independent unlike time.\n";
-    }
 }
 
 
