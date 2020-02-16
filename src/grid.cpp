@@ -88,6 +88,18 @@ void Solver<O,CBT>::print(void) const {
                 printBacktrackStat(row * length + col, *idxMaxBacktracks);
             }
         }
+            // if (isPretty) os << " |";
+            // os << GRID_SEP;
+            // for (length_t col = 0; col < length; col++) {
+            //     if (isPretty && (col % order) == 0) os << " |"; // blkcol separator.
+            //     os << ' ' << grid[row * length + col].biasIndex;
+            // }
+            // if (isPretty) os << " |";
+            // os << GRID_SEP;
+            // for (length_t col = 0; col < length; col++) {
+            //     if (isPretty && (col % order) == 0) os << " |"; // blkcol separator.
+            //     os << ' ' << rowBiases[row][col];
+            // }
         if (isPretty) os << " |";
         os << '\n';
     }
@@ -160,33 +172,30 @@ TraversalDirection Solver<O,CBT>::setNextValid(const area_t index) {
     Tile& t = grid[index];
     if (!t.isClear()) {
         // If the tile is currently already set, clear it:
+        // NOTE: this is the same as "if backtracked to here".
         const occmask_t eraseMask = ~(0b1 << t.value);
         rowBin &= eraseMask;
         colBin &= eraseMask;
         blkBin &= eraseMask;
-        t.value = length;
     }
 
-    const occmask_t invalidBin = rowBin | colBin | blkBin;
-    // Note: The below line is the only push to make the size of the
-    // biasIndex field fit the range [0,order^2+1], but the trick is
-    // that this will autowrap to zero, which takes the mod as desired.
-    value_t biasIndex = (t.biasIndex + 1) % (length + 1);
-    for (; biasIndex < length; biasIndex++) {
+    const occmask_t invalidBin = (rowBin | colBin | blkBin);
+    for (value_t biasIndex = t.biasIndex; biasIndex < length; biasIndex++) {
         const value_t value = rowBiases[getRow(index)][biasIndex];
-        const occmask_t valBit = 0b1 << value;
-        if (!(invalidBin & valBit)) {
+        const occmask_t valueBit = 0b1 << value;
+        if (!(invalidBin & valueBit)) {
             // If a valid value is found for this tile:
-            rowBin |= valBit;
-            colBin |= valBit;
-            blkBin |= valBit;
+            rowBin |= valueBit;
+            colBin |= valueBit;
+            blkBin |= valueBit;
             t.value = value;
-            break;
+            t.biasIndex = (biasIndex + 1);
+            return FORWARD;
         }
     }
-    // This must go outside the search-loop for backtracks:
-    t.biasIndex = biasIndex;
-    return (t.isClear() ? BACK : FORWARD);
+    // Backtrack:
+        t.clear();
+    return BACK;
 }
 
 

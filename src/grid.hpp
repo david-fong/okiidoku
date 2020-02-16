@@ -132,8 +132,14 @@ namespace Sudoku {
      */
     public:
         /**
-         * When clear, biasIndex is the parent Solver's length and value
-         * is undefined.
+         * When clear, `this->value` is the grid's length.
+         * 
+         * `this->biasIndex` is the next biasIndex to try (such that
+         * valid outcomes are never skipped and the traversal never
+         * loops upon itself) if the biasIndex pointing to my current
+         * value fails. If there is nothing left to try, this is set
+         * to the grid's length, indicating that the next thing to try
+         * is via backtracking.
          */
         // TODO: can we just be lazy and say biasIndex is undefined if
         // solving a puzzle and this tile's value is a given / hint?
@@ -141,7 +147,7 @@ namespace Sudoku {
             friend Solver;
         public:
             void clear(void) noexcept {
-                biasIndex = length;
+                biasIndex = 0;
                 value = length;
             }
             [[gnu::const]] bool isClear(void) const noexcept {
