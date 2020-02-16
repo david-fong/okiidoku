@@ -8,7 +8,7 @@
 #include <algorithm>    // random_shuffle,
 #include <string>       // string,
 
-static std::string createHSepString(unsigned int order);
+[[gnu::const]] static std::string createHSepString(unsigned int order);
 
 
 /**
@@ -103,20 +103,15 @@ void Solver<O,CBT>::print(void) const {
 
 template <Order O, bool CBT>
 void Solver<O,CBT>::clear(void) {
-    std::for_each(grid.begin(), grid.end(), [this](Tile& t){ t.clear(); });
+    std::for_each(grid.begin(), grid.end(), [](Tile& t){ t.clear(); });
     rowSymbolOccMasks.fill(0);
     colSymbolOccMasks.fill(0);
     blkSymbolOccMasks.fill(0);
     if constexpr (CBT) backtrackCounts.fill(0);
-}
 
-
-template <Order O, bool CBT>
-void Solver<O,CBT>::seed(const bool printInfo) {
     // Scramble each row's value-guessing-order:
-    // note: must keep the <length>'th entry as <length>.
     for (auto& rowBias : rowBiases) {
-        std::random_shuffle(rowBias.begin(), rowBias.end() - 1, MY_RANDOM);
+        std::random_shuffle(rowBias.begin(), rowBias.end(), MY_RANDOM);
     }
 }
 
@@ -169,6 +164,7 @@ TraversalDirection Solver<O,CBT>::setNextValid(const area_t index) {
         rowBin &= eraseMask;
         colBin &= eraseMask;
         blkBin &= eraseMask;
+        t.value = length;
     }
 
     const occmask_t invalidBin = rowBin | colBin | blkBin;
@@ -294,7 +290,6 @@ template <Order O, bool CBT>
 void Solver<O,CBT>::runNew(void) {
     printMessageBar("START " + std::to_string(totalGenCount));
     clear();
-    seed(true);
 
     // Generate a new solution:
     const clock_t    clockStart = std::clock();
@@ -359,7 +354,6 @@ void Solver<O,CBT>::runMultiple(const trials_t trialsToRun) {
             std::cout << "| " << std::setw(2) << pctDone << "% |";
         }
         clear();
-        seed(false);
         const opcount_t numSolveOps = generateSolution<false>();
         numTotalTrials++;
         if (numSolveOps == 0) {

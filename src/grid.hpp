@@ -142,10 +142,10 @@ namespace Sudoku {
         public:
             void clear(void) noexcept {
                 biasIndex = length;
-                //value = length;
+                value = length;
             }
             [[gnu::const]] bool isClear(void) const noexcept {
-                return biasIndex == length;
+                return value == length;
             }
             friend std::ostream& operator<<(std::ostream& out, Tile const& t) {
                 if (__builtin_expect(t.isClear(), false)) {
@@ -178,12 +178,11 @@ namespace Sudoku {
         void solvePuzzlesFromFile(std::ifstream&);
         void runNew(void);
         void runMultiple(const unsigned long);
+
         void printTrialsWorkDistribution(const trials_t,
             std::array<trials_t, TRIALS_NUM_BINS> const&,
             std::array<double,   TRIALS_NUM_BINS> const&);
         void print(void) const;
-        void printMessageBar(std::string const&, unsigned int, const char = '=') const;
-        void printMessageBar(std::string const&, const char = '=') const;
 
     /**
      * PRIVATE MEMBERS
@@ -193,7 +192,7 @@ namespace Sudoku {
         std::array<occmask_t, length> rowSymbolOccMasks;
         std::array<occmask_t, length> colSymbolOccMasks;
         std::array<occmask_t, length> blkSymbolOccMasks;
-        std::array<std::array<value_t, length+1>, length> rowBiases;
+        std::array<std::array<value_t, length>, length> rowBiases;
 
         /**
          * (See Solver constructor) I've found that the choice of
@@ -223,15 +222,17 @@ namespace Sudoku {
         static constexpr unsigned statsWidth = (0.4 * length) + 4;
         const std::string blkRowSepString;
 
+        void printMessageBar(std::string const&, unsigned int, const char = '=') const;
+        void printMessageBar(std::string const&, const char = '=') const;
+
         void clear(void);
-        void seed(const bool printInfo);
         // Generates a random solution. Returns the number of operations or
         // zero if the give-up threshold was reached or if any previous seeds
         // made generating a solution impossible.
         template <bool USE_PUZZLE>
         [[gnu::hot]] opcount_t generateSolution(void);
         [[gnu::hot]] TraversalDirection setNextValid(const area_t);
-        [[gnu::const]] length_t tileNumNonCandidates(const area_t) const noexcept;
+        length_t tileNumNonCandidates(const area_t) const noexcept;
 
         // Inline functions:
         [[gnu::const]] static length_t getRow(const area_t index) noexcept { return index / length; }
@@ -253,10 +254,6 @@ namespace Sudoku {
         };
         static unsigned int GET_TERMINAL_COLUMNS(const unsigned int fallback) noexcept {
             char const*const envVar = std::getenv("COLUMNS");
-            return (envVar != NULL) ? std::stoul(envVar) : fallback;
-        }
-        static unsigned int GET_TERMINAL_LINES(const unsigned int fallback) noexcept {
-            char const*const envVar = std::getenv("LINES");
             return (envVar != NULL) ? std::stoul(envVar) : fallback;
         }
     };
