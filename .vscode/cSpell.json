@@ -13,15 +13,18 @@
     ],
     "words": [
         "sudoku",
-        "retval",
         "giveup",
         "occmask",
         "unocc",
         "opcount",
         "statw",
 
+        "retval",
+        "prefetch",
         "stoi",
         "stoul",
-        "cout"
+        "cout",
+        "popcount",
+        "builtin"
     ]
 }

@@ -16,6 +16,18 @@
 - Make gen-path a compile-time constant.
   - Rationale: I allowed toggling for educational purposes, but I think doing so reduces chances for compiler optimization. This setting may only be of interest to keen viewers. For anyone else, what performs better is all that really matters.
 
+## Brainstorming Optimizations for Solver::setNextValid
+
+- Change `biasIndex` to be: the next biasIndex that I know I can try (in a way that does not skip possible solutions/completions or go back to the state for a previously rejected traversal branch) if the biasIndex pointing to my current value fails. I'm not sure if this is trivial to do, but it opens up opportunities for optimizations in `Solver::setNextValid`.
+  - This would require a change to how I check whether a tile is clear.
+    - Make the condition for clearness be whether value is length,
+    - (The current contract says that value is undefined if biasIndex is length).
+- Use `__builtin_popcount(occmask)` or `__builtin_ctz(!occmask)` to have special case for when the occmask is full:
+  - In that case, just backtrack. Don't go through the search loop because we won't find anything in it.
+  - What about if length - popcount is 1?
+    - Then I could just set the value right away. This would need a c++ builtin for arbiting a bit.
+    - This change requires the above `biasIndex` change.
+
 ## Lower Priority
 
 - Make non-prompt output text print to cout and to outStream (if outStream is not same as cout).
