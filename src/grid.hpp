@@ -247,6 +247,24 @@ namespace Sudoku {
         [[gnu::const]] static length_t getBlk(const length_t row, const length_t col) noexcept {
             return ((row / order) * order) + (col / order);
         }
+        [[gnu::const]] static length_t occmask_popcount(occmask_t occmask) noexcept {
+            if constexpr (O < 6) {
+                return __builtin_popcount(occmask);
+            } else if constexpr (O < 9) {
+                return __builtin_popcountl(occmask);
+            } else {
+                return __builtin_popcountll(occmask);
+            }
+        }
+        [[gnu::const]] static length_t occmask_ctz(occmask_t occmask) noexcept {
+            if constexpr (O < 6) {
+                return __builtin_ctz(occmask);
+            } else if constexpr (O < 9) {
+                return __builtin_ctzl(occmask);
+            } else {
+                return __builtin_ctzll(occmask);
+            }
+        }
 
     /**
      * PRIVATE STATIC

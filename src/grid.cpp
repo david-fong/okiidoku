@@ -180,6 +180,23 @@ TraversalDirection Solver<O,CBT>::setNextValid(const area_t index) {
     }
 
     const occmask_t invalidBin = (rowBin | colBin | blkBin);
+    // NOTE: these do not improve time-scaling performance, but I wish they did.
+    /*
+    if (__builtin_expect(occmask_popcount(invalidBin) == length, false)) {
+        t.clear();
+        return BACK;
+    }
+    else if (occmask_popcount(invalidBin) == length - 1) {
+        const value_t value = occmask_ctz(!invalidBin);
+        const occmask_t valueBit = 0b1 << value;
+        rowBin |= valueBit;
+        colBin |= valueBit;
+        blkBin |= valueBit;
+        t.value = value;
+        t.biasIndex = length;
+        return FORWARD;
+    }
+    */
     for (value_t biasIndex = t.biasIndex; biasIndex < length; biasIndex++) {
         const value_t value = rowBiases[getRow(index)][biasIndex];
         const occmask_t valueBit = 0b1 << value;
@@ -194,7 +211,7 @@ TraversalDirection Solver<O,CBT>::setNextValid(const area_t index) {
         }
     }
     // Backtrack:
-        t.clear();
+    t.clear();
     return BACK;
 }
 

@@ -16,13 +16,6 @@
 - Make gen-path a compile-time constant.
   - Rationale: I allowed toggling for educational purposes, but I think doing so reduces chances for compiler optimization. This setting may only be of interest to keen viewers. For anyone else, what performs better is all that really matters.
 
-## Brainstorming Optimizations for Solver::setNextValid
-
-- Use `__builtin_popcount(occmask)` or `__builtin_ctz(!occmask)` to have special case for when the occmask is full:
-  - In that case, just backtrack. Don't go through the search loop because we won't find anything in it.
-  - What about if length - popcount is 1?
-    - Then I could just set the value right away. This would need a c++ builtin for arbiting a bit.
-
 ## Lower Priority
 
 - Make non-prompt output text print to cout and to outStream (if outStream is not same as cout).
@@ -35,14 +28,19 @@ An old TODO: Perform benchmarks comparing performance (time and number of operat
 
 For 16x16, running 1024 trials, using no seeds was much faster in terms of time, had less than half the number of aborted trials, and took about six times fewer operations. I am shocked. This is amazing (I used to think seeding resulted in slight performance improvements).
 
-## "Failed" Experiment
+## "Failed" Experiments
 
-This didn't end up working.
+These didn't end up doing the thing I wanted / thought might happen.
 
 - Try making traversal order not grid-row-major and see if it improves performance:
   - Hypothesis: Tiles with fewer candidates are like the solution space's dominant bottlenecks. If we were to leave them to the end, we may spend many long advances creating almost-complete solutions that cannot be complete because they violate the bottlenecks (and possibly often in similar ways). If we start with them first, we may be less likely to encounter that problem.
   - Need to give the Tile class an instance field for their og index since that's how we index their group-occupancy vectors and rowBias vectors.
   - Invariant: At the beginning of solution generation, we can filter for all un-seeded tiles and sort them in ascending order of number of remaining candidates. I haven't thought it out 100% yet, but I believe we cannot update this traversal order intermittently (even if we only sort those past the current traversal index) because it could make us miss some outputs or put us in an infinite loop of testing a cycle of outputs. I feel like that's a bit of a bummer, but at this point there are many things I'm not sure of yet, so I'll try to hold that feeling back.
+
+- Use `__builtin_popcount(occmask)` or `__builtin_ctz(!occmask)` to have special case for when the occmask is full:
+  - In that case, just backtrack. Don't go through the search loop because we won't find anything in it.
+  - What about if length - popcount is 1?
+    - Then I could just set the value right away. This would need a c++ builtin for arbiting a bit.
 
 ## Bookmarks
 

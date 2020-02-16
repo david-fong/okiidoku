@@ -21,10 +21,12 @@
 
         "retval",
         "prefetch",
+        "cout",
         "stoi",
         "stoul",
-        "cout",
+        "ctzll",
         "popcount",
+        "popcountll",
         "builtin"
     ]
 }
