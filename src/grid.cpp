@@ -32,8 +32,6 @@ Solver<O,CBT>::Solver(std::ostream& os):
     }
     // Interesting: Smaller-order grids perform better with ROW_MAJOR as genPath.
     setGenPath((O < 4) ? ROW_MAJOR : BLOCK_COLS);
-    totalGenCount = 0;
-    successfulGenCount = 0;
 
     // Output formatting:
     if (isPretty) {
@@ -42,7 +40,7 @@ Solver<O,CBT>::Solver(std::ostream& os):
     os.precision(3);
     os << std::fixed;
 
-    // Print help and start the REPL (read-execute-print-loop):
+    // Print help menu and then start the REPL (read-execute-print-loop):
     std::cout << HELP_MESSAGE << std::endl;
     std::string command;
     do {
@@ -54,17 +52,19 @@ Solver<O,CBT>::Solver(std::ostream& os):
 
 template <Order O, bool CBT>
 void Solver<O,CBT>::print(void) const {
-    typename std::array<unsigned,area>::const_iterator idxMaxBacktracks;
-    (void)idxMaxBacktracks;
-    if constexpr (CBT) {
-        idxMaxBacktracks = std::max_element(backtrackCounts.begin(), backtrackCounts.end());
-        const area_t index = idxMaxBacktracks - backtrackCounts.begin();
-        os << "max backtracks: " STATW_I << *idxMaxBacktracks
-            // Print zero-indexed x,y coordinates:
-            << " at (" << static_cast<unsigned>(getCol(index))
-            << ',' << static_cast<unsigned>(getRow(index)) << ')' << '\n';
-    }
+    #define PRINT_GRID0_TILE(PRINTER_STATEMENT) \
+        for (length_t col = 0; col < length; col++) {\
+            if (isPretty && (col % order) == 0) os << " |";\
+            PRINTER_STATEMENT;\
+        }
+    #define PRINT_GRID_TILE(PRINTER_STATEMENT) \
+        if (isPretty) os << " |";\
+        os << GRID_SEP;\
+        PRINT_GRID0_TILE(PRINTER_STATEMENT)
 
+    if constexpr (CBT) {
+        os << "max backtracks: " STATW_I << backtrackCounts[idxMaxBacktracks] << '\n';
+    }
     if constexpr (order == 4) os << std::setbase(16);
 
     for (length_t row = 0; row < length; row++) {
@@ -74,32 +74,13 @@ void Solver<O,CBT>::print(void) const {
             if constexpr (CBT) os << GRID_SEP << blkRowSepString;
             os << '\n';
         }
-
         // Tile content:
-        for (length_t col = 0; col < length; col++) {
-            if (isPretty && (col % order) == 0) os << " |"; // blkcol separator.
-            os << ' ' << grid[row * length + col];
-        }
+        PRINT_GRID0_TILE(os << ' ' << grid[row * length + col])
         if constexpr (CBT) {
-            if (isPretty) os << " |";
-            os << GRID_SEP;
-            for (length_t col = 0; col < length; col++) {
-                if (isPretty && (col % order) == 0) os << " |"; // blkcol separator.
-                printBacktrackStat(row * length + col, *idxMaxBacktracks);
-            }
+            PRINT_GRID_TILE(printBacktrackStat(backtrackCounts[row * length + col]))
         }
-            // if (isPretty) os << " |";
-            // os << GRID_SEP;
-            // for (length_t col = 0; col < length; col++) {
-            //     if (isPretty && (col % order) == 0) os << " |"; // blkcol separator.
-            //     os << ' ' << grid[row * length + col].biasIndex;
-            // }
-            // if (isPretty) os << " |";
-            // os << GRID_SEP;
-            // for (length_t col = 0; col < length; col++) {
-            //     if (isPretty && (col % order) == 0) os << " |"; // blkcol separator.
-            //     os << ' ' << rowBiases[row][col];
-            // }
+        // PRINT_GRID_TILE(os << std::setw(2) << grid[row * length + col].biasIndex)
+        // PRINT_GRID_TILE(os << ' ' << rowBiases[row][col])
         if (isPretty) os << " |";
         os << '\n';
     }
@@ -145,7 +126,11 @@ opcount_t Solver<O,CBT>::generateSolution(void) {
                 totalGenCount++;
                 return 0;
             }
-            if constexpr (CBT) backtrackCounts[gridIndex]++;
+            if constexpr (CBT) {
+                if (++backtrackCounts[gridIndex] > backtrackCounts[idxMaxBacktracks]) {
+                    idxMaxBacktracks = gridIndex;
+                }
+            }
             tvsIndex--;
         } else {
             tvsIndex++;
@@ -158,7 +143,6 @@ opcount_t Solver<O,CBT>::generateSolution(void) {
         }
     }
     totalGenCount++;
-    successfulGenCount++;
     return numOperations;
 }
 
@@ -213,16 +197,6 @@ TraversalDirection Solver<O,CBT>::setNextValid(const area_t index) {
     // Backtrack:
     t.clear();
     return BACK;
-}
-
-
-template <Order O, bool CBT>
-typename Solver<O,CBT>::length_t Solver<O,CBT>::tileNumNonCandidates(const area_t index) const noexcept {
-    return __builtin_popcount(
-          rowSymbolOccMasks[getRow(index)]
-        | colSymbolOccMasks[getCol(index)]
-        | blkSymbolOccMasks[getBlk(index)]
-    );
 }
 
 
@@ -332,7 +306,7 @@ void Solver<O,CBT>::runNew(void) {
 
 
 template <Order O, bool CBT>
-void Solver<O,CBT>::printBacktrackStat(const area_t index, unsigned const& worstCount) const {
+void Solver<O,CBT>::printBacktrackStat(const unsigned count) const {
     static const std::array<std::string, 4> GREYSCALE_BLOCK_CHARS = {
         // NOTE: Make sure that the initializer list size matches that
         // of the corresponding template argument. Compilers won't warn.
@@ -343,18 +317,16 @@ void Solver<O,CBT>::printBacktrackStat(const area_t index, unsigned const& worst
 
     if constexpr (CBT) {
         const unsigned int relativeIntensity
-            = (double)(backtrackCounts[index] - 1)
+            = (double)(count - 1)
             * GREYSCALE_BLOCK_CHARS.size()
-            / worstCount
-            ;
+            / backtrackCounts[idxMaxBacktracks];
         auto const& intensityChar
-            = (backtrackCounts[index] != 0)
+            = (count != 0)
             ? GREYSCALE_BLOCK_CHARS[relativeIntensity]
             : " ";
         os << intensityChar << intensityChar;
     } else {
-        // This complains when the function is in a call path when
-        // backtrack-counting is off.
+        // Complain if found in call-path when backtrack-counting is off:
         static_assert(CBT, "not avaliable when backtrack-counting is off.");
     }
 }
@@ -363,8 +335,8 @@ void Solver<O,CBT>::printBacktrackStat(const area_t index, unsigned const& worst
 template <Order O, bool CBT>
 void Solver<O,CBT>::runMultiple(const trials_t trialsToRun) {
     static constexpr unsigned DEFAULT_STATS_COLS = ((unsigned[]){0,64,32,24,16,4,1})[order];
-    static constexpr unsigned LINES_PER_FLUSH    = ((unsigned[]){0, 0, 0, 0, 6,1,1})[order];
-    const unsigned PRINT_COLS = (GET_TERMINAL_COLUMNS(DEFAULT_STATS_COLS) - (isPretty ? 7 : 0)) / statsWidth;
+    static constexpr unsigned LINES_PER_FLUSH    = ((unsigned[]){0, 0, 0, 0, 0,1,1})[order];
+    const unsigned PRINT_COLS = (GET_TERM_COLS(DEFAULT_STATS_COLS) - (isPretty ? 7 : 0)) / statsWidth;
     const unsigned BAR_WIDTH  = statsWidth * PRINT_COLS + (isPretty ? 7 : 0);
 
     trials_t giveups = 0;
@@ -392,12 +364,12 @@ void Solver<O,CBT>::runMultiple(const trials_t trialsToRun) {
             os STATW_I << numSolveOps;
         }
         if (numTotalTrials % PRINT_COLS == 0) {
-            if (isPretty && LINES_PER_FLUSH && (numTotalTrials % (LINES_PER_FLUSH * PRINT_COLS) == 0)) {
-                // Runs are slower. Flush buffer more frequently.
-                os << std::endl;
-            } else {
-                os << '\n';
-            }
+            if constexpr (LINES_PER_FLUSH) {
+                if (isPretty && (numTotalTrials % (LINES_PER_FLUSH * PRINT_COLS) == 0)) {
+                    // Runs are slower. Flush buffer more frequently.
+                    os << std::endl;
+                } else { os << '\n'; }
+            }     else { os << '\n'; }
         }
     }
     if (trialsToRun % PRINT_COLS != 0) { os << '\n'; } // Last newline.

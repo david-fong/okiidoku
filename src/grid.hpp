@@ -217,10 +217,10 @@ namespace Sudoku {
         static constexpr opcount_t GIVEUP_THRESHOLD = ((const opcount_t[]){
             0, 1, 25, 2'000, 2'500'000, 30'000'000,
         })[order];
-        unsigned long totalGenCount;
-        unsigned long successfulGenCount;
+        unsigned long long totalGenCount = 0;
+        area_t idxMaxBacktracks;
         std::array<unsigned, (CBT ? area : 1)> backtrackCounts; // Same ordering as this->grid.
-        void printBacktrackStat(const area_t index, unsigned const& worstCount) const;
+        void printBacktrackStat(const unsigned count) const;
 
         std::ostream& os;
         const bool isPretty;
@@ -238,7 +238,6 @@ namespace Sudoku {
         template <bool USE_PUZZLE>
         [[gnu::hot]] opcount_t generateSolution(void);
         [[gnu::hot]] TraversalDirection setNextValid(const area_t);
-        length_t tileNumNonCandidates(const area_t) const noexcept;
 
         // Inline functions:
         [[gnu::const]] static length_t getRow(const area_t index) noexcept { return index / length; }
@@ -265,22 +264,18 @@ namespace Sudoku {
                 return __builtin_ctzll(occmask);
             }
         }
+    };
 
-    /**
-     * PRIVATE STATIC
-     */
-    private:
-        static int MY_RANDOM (const int i) { return std::rand() % i; }
-        struct MyNumpunct : std::numpunct<char> {
-            std::string do_grouping() const {
-                return "\03";
-            }
-        };
-        static unsigned int GET_TERMINAL_COLUMNS(const unsigned int fallback) noexcept {
-            char const*const envVar = std::getenv("COLUMNS");
-            return (envVar != NULL) ? std::stoul(envVar) : fallback;
+    static int MY_RANDOM (const int i) { return std::rand() % i; }
+    struct MyNumpunct : std::numpunct<char> {
+        std::string do_grouping() const {
+            return "\03";
         }
     };
+    static unsigned int GET_TERM_COLS(const unsigned int fallback) noexcept {
+        char const*const envVar = std::getenv("COLUMNS");
+        return (envVar != NULL) ? std::stoul(envVar) : fallback;
+    }
 
 } // End of Sudoku namespace
 
