@@ -1,5 +1,6 @@
-#include <iostream>
-#include <fstream>
+#include <iostream>     // cout,
+#include <fstream>      // ofstream,
+#include <ctime>        // time,
 
 #include "grid.cpp"
 

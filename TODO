@@ -15,6 +15,7 @@
     - Reason: Look for a pattern / boundary point / transition range.
 - Make gen-path a compile-time constant.
   - Rationale: I allowed toggling for educational purposes, but I think doing so reduces chances for compiler optimization. This setting may only be of interest to keen viewers. For anyone else, what performs better is all that really matters.
+- Change `idxMaxBacktracks` to be the max value. I no longer print the index. I only use the value now.
 
 ## Lower Priority
 

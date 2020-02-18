@@ -2,7 +2,7 @@
 
 #include <iostream>     // cout,
 #include <iomanip>      // setbase, setw,
-#include <fstream>      // fistream,
+#include <fstream>      // ifstream,
 #include <ctime>        // clock,
 #include <numeric>      // iota,
 #include <algorithm>    // random_shuffle,
@@ -52,15 +52,15 @@ Solver<O,CBT>::Solver(std::ostream& os):
 
 template <Order O, bool CBT>
 void Solver<O,CBT>::print(void) const {
-    #define PRINT_GRID0_TILE(PRINTER_STATEMENT) \
+    #define PRINT_GRID0_TILE(PRINTER_STATEMENT) {\
         for (length_t col = 0; col < length; col++) {\
             if (isPretty && (col % order) == 0) os << " |";\
             PRINTER_STATEMENT;\
-        }
-    #define PRINT_GRID_TILE(PRINTER_STATEMENT) \
+        }}
+    #define PRINT_GRID_TILE(PRINTER_STATEMENT) {\
         if (isPretty) os << " |";\
         os << GRID_SEP;\
-        PRINT_GRID0_TILE(PRINTER_STATEMENT)
+        PRINT_GRID0_TILE(PRINTER_STATEMENT)}
 
     if constexpr (CBT) {
         os << "max backtracks: " STATW_I << backtrackCounts[idxMaxBacktracks] << '\n';
@@ -122,7 +122,7 @@ opcount_t Solver<O,CBT>::generateSolution(void) {
         if (setNextValid(gridIndex) == TraversalDirection::BACK) {
             // Pop and step backward:
             if (__builtin_expect(tvsIndex == 0, false)) {
-                // No solution could be found. Treat as if abort.
+                // No solution could be found. Treat as if giveup:
                 totalGenCount++;
                 return 0;
             }
@@ -131,13 +131,31 @@ opcount_t Solver<O,CBT>::generateSolution(void) {
                     idxMaxBacktracks = gridIndex;
                 }
             }
-            tvsIndex--;
+            if constexpr (!USE_PUZZLE) {
+                --tvsIndex;
+            } else {
+                // Backtrack, skipping over tiles containing given information:
+                while (__builtin_expect(isTileForGiven[traversalOrder[--tvsIndex]], false)) {
+                    if (__builtin_expect(tvsIndex == 0, false)) {
+                        // No solution could be found. Treat as if giveup:
+                        totalGenCount++;
+                        return 0;
+                    }
+                }
+            }
         } else {
-            tvsIndex++;
+            if constexpr (!USE_PUZZLE) {
+                ++tvsIndex;
+            } else {
+                while (__builtin_expect(
+                    (++tvsIndex < area) && isTileForGiven[traversalOrder[tvsIndex]],
+                false));
+            }
         }
-        // Check if the giveup threshold has been exceeded:
+
         numOperations++;
         if (__builtin_expect(numOperations > GIVEUP_THRESHOLD, false)) {
+            // Giveup threshold has been exceeded:
             totalGenCount++;
             return 0;
         }
@@ -279,6 +297,9 @@ void Solver<O,CBT>::solvePuzzlesFromFile(std::ifstream& puzzlesFile) {
     for (;;) {
         clear();
         // read a puzzle from the file
+        {
+            (void)isTileForGiven;
+        }
         generateSolution<true>();
         // write the solution to an output file.
         break; // TODO: remove me

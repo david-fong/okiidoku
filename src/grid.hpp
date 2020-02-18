@@ -140,9 +140,11 @@ namespace Sudoku {
          * value fails. If there is nothing left to try, this is set
          * to the grid's length, indicating that the next thing to try
          * is via backtracking.
+         * 
+         * If solving a puzzle and this tile is for given information,
+         * `biasIndex` should not be used, and `value` should not be
+         * modified.
          */
-        // TODO: can we just be lazy and say biasIndex is undefined if
-        // solving a puzzle and this tile's value is a given / hint?
         class Tile {
             friend Solver;
         public:
@@ -189,6 +191,8 @@ namespace Sudoku {
             std::array<trials_t, TRIALS_NUM_BINS> const&,
             std::array<double,   TRIALS_NUM_BINS> const&);
         void print(void) const;
+        void printMessageBar(std::string const&, unsigned int, const char = '=') const;
+        void printMessageBar(std::string const&, const char = '=') const;
 
     /**
      * PRIVATE MEMBERS
@@ -208,6 +212,7 @@ namespace Sudoku {
          */
         GenPath genPath;
         std::array<area_t, area> traversalOrder;
+        std::array<bool,   area> isTileForGiven;
         [[gnu::cold]] void setGenPath(const GenPath) noexcept;
 
         /**
@@ -215,8 +220,7 @@ namespace Sudoku {
          * Measured stats: https://www.desmos.com/calculator/8taqzelils
          */
         static constexpr opcount_t GIVEUP_THRESHOLD = ((const opcount_t[]){
-            0, 1, 25, 2'000, 2'500'000, 30'000'000,
-        })[order];
+            0, 1, 25, 2'000, 2'500'000, 30'000'000, })[order];
         unsigned long long totalGenCount = 0;
         area_t idxMaxBacktracks;
         std::array<unsigned, (CBT ? area : 1)> backtrackCounts; // Same ordering as this->grid.
@@ -227,9 +231,6 @@ namespace Sudoku {
         std::locale benchedLocale; // Used to swap in-and-out the thousands-commas.
         static constexpr unsigned statsWidth = (0.4 * length) + 4;
         const std::string blkRowSepString;
-
-        void printMessageBar(std::string const&, unsigned int, const char = '=') const;
-        void printMessageBar(std::string const&, const char = '=') const;
 
         void clear(void);
         // Generates a random solution. Returns the number of operations or
