@@ -63,7 +63,7 @@ void Solver<O,CBT>::print(void) const {
         PRINT_GRID0_TILE(PRINTER_STATEMENT)}
 
     if constexpr (CBT) {
-        os << "max backtracks: " STATW_I << backtrackCounts[idxMaxBacktracks] << '\n';
+        os << "max backtracks: " STATW_I << maxBacktrackCount << '\n';
     }
     if constexpr (order == 4) os << std::setbase(16);
 
@@ -127,8 +127,8 @@ opcount_t Solver<O,CBT>::generateSolution(void) {
                 return 0;
             }
             if constexpr (CBT) {
-                if (++backtrackCounts[gridIndex] > backtrackCounts[idxMaxBacktracks]) {
-                    idxMaxBacktracks = gridIndex;
+                if (++backtrackCounts[gridIndex] > maxBacktrackCount) {
+                    maxBacktrackCount = backtrackCounts[gridIndex];
                 }
             }
             if constexpr (!USE_PUZZLE) {
@@ -340,7 +340,7 @@ void Solver<O,CBT>::printBacktrackStat(const unsigned count) const {
         const unsigned int relativeIntensity
             = (double)(count - 1)
             * GREYSCALE_BLOCK_CHARS.size()
-            / backtrackCounts[idxMaxBacktracks];
+            / maxBacktrackCount;
         auto const& intensityChar
             = (count != 0)
             ? GREYSCALE_BLOCK_CHARS[relativeIntensity]

@@ -222,7 +222,7 @@ namespace Sudoku {
         static constexpr opcount_t GIVEUP_THRESHOLD = ((const opcount_t[]){
             0, 1, 25, 2'000, 2'500'000, 30'000'000, })[order];
         unsigned long long totalGenCount = 0;
-        area_t idxMaxBacktracks;
+        unsigned maxBacktrackCount; // 3billion is far greater than GIVEUP_THRESHOLD[5].
         std::array<unsigned, (CBT ? area : 1)> backtrackCounts; // Same ordering as this->grid.
         void printBacktrackStat(const unsigned count) const;
 
