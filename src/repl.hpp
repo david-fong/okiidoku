@@ -51,12 +51,15 @@ namespace Sudoku {
      * - Base<ARGS>::member
      */
     template <Order O, bool CBT>
-    class Repl : public Solver<O,CBT> {
+    class Repl {
     public:
         explicit Repl(std::ostream&);
         bool runCommand(std::string const& cmdLine);
 
     private:
+        Solver<O,CBT> solver;
+        std::ostream& os;
+
         // Return false if command is to exit the program:
         void solvePuzzlesFromFile(std::ifstream&);
         void runNew(void);

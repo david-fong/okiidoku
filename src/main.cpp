@@ -2,13 +2,18 @@
 #include <fstream>      // ofstream,
 #include <ctime>        // time,
 
+#include "grid.cpp"
 #include "repl.cpp"
 
 
 #define DEFAULT_ORDER 4
 
+/**
+ * Choose build flags for the Repl and Solver here.
+ */
 template<Sudoku::Order O>
 using Repl = Sudoku::Repl<O, true>;
+
 
 /**
  * ARGUMENTS

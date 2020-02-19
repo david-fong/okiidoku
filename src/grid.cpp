@@ -17,6 +17,7 @@
 namespace Sudoku {
 
 // Mechanism to statically toggle printing alignment:
+// (#undef-ed before the end of this namespace)
 #define STATW_I << std::setw(this->statsWidth)
 #define STATW_D << std::setw(this->statsWidth + 4)
 
@@ -39,14 +40,6 @@ Solver<O,CBT>::Solver(std::ostream& os):
     }
     os.precision(3);
     os << std::fixed;
-
-    // Print help menu and then start the REPL (read-execute-print-loop):
-    std::cout << HELP_MESSAGE << std::endl;
-    std::string command;
-    do {
-        std::cout << REPL_PROMPT;
-        std::getline(std::cin, command);
-    } while (runCommand(command));
 }
 
 
@@ -77,7 +70,7 @@ void Solver<O,CBT>::print(void) const {
         // Tile content:
         PRINT_GRID0_TILE(os << ' ' << grid[row * length + col])
         if constexpr (CBT) {
-            PRINT_GRID_TILE(printBacktrackStat(backtrackCounts[row * length + col]))
+            PRINT_GRID_TILE(printShadedBacktrackStat(backtrackCounts[row * length + col]))
         }
         // PRINT_GRID_TILE(os << std::setw(2) << grid[row * length + col].biasIndex)
         // PRINT_GRID_TILE(os << ' ' << rowBiases[row][col])
@@ -95,7 +88,7 @@ void Solver<O,CBT>::print(void) const {
 
 
 template <Order O, bool CBT>
-void Solver<O,CBT>::printBacktrackStat(const unsigned count) const {
+void Solver<O,CBT>::printShadedBacktrackStat(const unsigned count) const {
     static const std::array<std::string, 4> GREYSCALE_BLOCK_CHARS = {
         // NOTE: Make sure that the initializer list size matches that
         // of the corresponding template argument. Compilers won't warn.
@@ -133,6 +126,7 @@ void Solver<O,CBT>::clear(void) {
     for (auto& rowBias : rowBiases) {
         std::random_shuffle(rowBias.begin(), rowBias.end(), MY_RANDOM);
     }
+    // Do not clear seeds here. That can be done when reading in givens.
 }
 
 
@@ -302,6 +296,9 @@ void Solver<O,CBT>::printMessageBar(std::string const& msg, const char fillChar)
     if (numGrids > 1) allBarLength += (numGrids - 1) * GRID_SEP.length();
     return printMessageBar(msg, allBarLength + 1, fillChar);
 }
+
+#undef STATW_I
+#undef STATW_D
 
 } // End of Sudoku namespace.
 

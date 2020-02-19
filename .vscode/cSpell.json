@@ -14,6 +14,7 @@
     "words": [
         "sudoku",
         "giveup",
+        "givens",
         "occmask",
         "unocc",
         "opcount",

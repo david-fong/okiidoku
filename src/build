@@ -8,10 +8,10 @@ readonly CONTEXT="$(dirname "${BASH_SOURCE[0]}")"
 
 if [[ "$@" =~ '--clang' ]]
 then
-    readonly COMPILER='clang++ -target x86_64-w64-mingw64 -fcolor-diagnostics -fansi-escape-codes -ferror-limit=4'
+    readonly COMPILER='clang++ -target x86_64-w64-mingw64 -fcolor-diagnostics -fansi-escape-codes -ferror-limit=5'
 else
     # Use g++ by default.
-    readonly COMPILER='g++ -std=c++17 -fdiagnostics-color=always -fmax-errors=4'
+    readonly COMPILER='g++ -std=c++17 -fdiagnostics-color=always -fmax-errors=5'
 fi
 
 declare OPTS=''

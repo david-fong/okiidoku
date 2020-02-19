@@ -36,15 +36,11 @@ namespace Sudoku {
     typedef uint8_t Order;
     constexpr Order MAX_REASONABLE_ORDER = 20;
 
-    // TODO: do we need this?
-    // template<Order REPL_O, bool REPL_CBT>
-    // class Repl;
-
     const std::array<std::string, 2> GenPath_Names = {
         "rowmajor",
         "blockcol",
     };
-    typedef enum { ROW_MAJOR, BLOCK_COLS, GenPath_MAX = GenPath_Names.size(), } GenPath;
+    typedef enum { ROW_MAJOR, BLOCK_COLS, GenPath_MAX = GenPath_Names.size() - 1, } GenPath;
 
     enum TraversalDirection : bool {
         BACK = false, FORWARD = true,
@@ -160,6 +156,9 @@ namespace Sudoku {
         void printMessageBar(std::string const&, unsigned int, const char = '=') const;
         void printMessageBar(std::string const&, const char = '=') const;
 
+        [[gnu::cold]] GenPath getGenPath(void) const noexcept { return genPath; }
+        [[gnu::cold]] void setGenPath(const GenPath) noexcept;
+
     /**
      * PRIVATE MEMBERS
      */
@@ -179,8 +178,8 @@ namespace Sudoku {
         GenPath genPath;
         std::array<area_t, area> traversalOrder;
         std::array<bool,   area> isTileForGiven;
-        [[gnu::cold]] void setGenPath(const GenPath) noexcept;
 
+    public:
         /**
          * Give up if number of operations performed exceeds this value.
          * Measured stats: https://www.desmos.com/calculator/8taqzelils
@@ -189,15 +188,18 @@ namespace Sudoku {
             0, 1, 25, 2'000, 2'500'000, 30'000'000, })[order];
         unsigned long long totalGenCount = 0;
         unsigned maxBacktrackCount; // 3billion is far greater than GIVEUP_THRESHOLD[5].
+    private:
         std::array<unsigned, (CBT ? area : 1)> backtrackCounts; // Same ordering as this->grid.
-        void printBacktrackStat(const unsigned count) const;
+        void printShadedBacktrackStat(const unsigned count) const;
 
+    public:
         std::ostream& os;
         const bool isPretty;
         std::locale benchedLocale; // Used to swap in-and-out the thousands-commas.
         static constexpr unsigned statsWidth = (0.4 * length) + 4;
         const std::string blkRowSepString;
 
+    public:
         void clear(void);
         // Generates a random solution. Returns the number of operations or
         // zero if the give-up threshold was reached or if any previous seeds
@@ -206,6 +208,10 @@ namespace Sudoku {
         [[gnu::hot]] opcount_t generateSolution(void);
         [[gnu::hot]] TraversalDirection setNextValid(const area_t);
 
+    /**
+     * STATIC UTILITIES
+     */
+    public:
         // Inline functions:
         [[gnu::const]] static length_t getRow(const area_t index) noexcept { return index / length; }
         [[gnu::const]] static length_t getCol(const area_t index) noexcept { return index % length; }
@@ -231,16 +237,16 @@ namespace Sudoku {
                 return __builtin_ctzll(occmask);
             }
         }
-    };
+    }; // End of Solver class.
 
-    static const std::string GRID_SEP = "  ";
-    static int MY_RANDOM (const int i) { return std::rand() % i; }
+    const std::string GRID_SEP = "  ";
+    int MY_RANDOM(const int i) { return std::rand() % i; }
     struct MyNumpunct : std::numpunct<char> {
         std::string do_grouping() const {
             return "\03";
         }
     };
-    static unsigned int GET_TERM_COLS(const unsigned int fallback) noexcept {
+    unsigned int GET_TERM_COLS(const unsigned int fallback) noexcept {
         char const*const envVar = std::getenv("COLUMNS");
         return (envVar != NULL) ? std::stoul(envVar) : fallback;
     }
