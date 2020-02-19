@@ -2,13 +2,13 @@
 #include <fstream>      // ofstream,
 #include <ctime>        // time,
 
-#include "grid.cpp"
+#include "repl.cpp"
 
 
 #define DEFAULT_ORDER 4
 
 template<Sudoku::Order O>
-using Solver = Sudoku::Solver<O, true>;
+using Repl = Sudoku::Repl<O, true>;
 
 /**
  * ARGUMENTS
@@ -52,10 +52,10 @@ int main(const int argc, char const *const argv[]) {
     // Create a Solver of the specified order:
     // (It will automatically enter its REPL).
     switch (static_cast<Sudoku::Order>(userOrder)) {
-        case 2: { Solver<2> s(*outStream); break; }
-        case 3: { Solver<3> s(*outStream); break; }
-        case 4: { Solver<4> s(*outStream); break; }
-        case 5: { Solver<5> s(*outStream); break; }
+        case 2: { Repl<2> s(*outStream); break; }
+        case 3: { Repl<3> s(*outStream); break; }
+        case 4: { Repl<4> s(*outStream); break; }
+        case 5: { Repl<5> s(*outStream); break; }
         default:
             std::cout << "\nFAILED:\norder must be one of: [ ";
             for (int i = 2; i <= 5; i++) {

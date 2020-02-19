@@ -1,8 +1,7 @@
-#ifndef _GRID_H_
-#define _GRID_H_
+#ifndef HPP_SUDOKU_SOLVER
+#define HPP_SUDOKU_SOLVER
 
 #include <array>
-#include <map>
 
 /**
  * 
@@ -13,40 +12,6 @@
  * ```
  */
 namespace Sudoku {
-
-    typedef enum {
-        CMD_HELP,
-        CMD_QUIT,
-        CMD_SOLVE,
-        CMD_RUN_SINGLE,
-        CMD_RUN_MULTIPLE,
-        CMD_SET_GENPATH,
-        CMD_DO_BACKTRACK_COUNT,
-    } Command;
-    const std::map<std::string, Command> COMMAND_MAP = {
-        { "help",       CMD_HELP },
-        { "quit",       CMD_QUIT },
-        { "solve",      CMD_SOLVE },
-        { "",           CMD_RUN_SINGLE },
-        { "trials",     CMD_RUN_MULTIPLE },
-        { "genpath",    CMD_SET_GENPATH },
-    };
-    const std::string HELP_MESSAGE = "\nCOMMAND MENU:"
-        "\n- help           print this help menu"
-        "\n- quit           terminate this program"
-        "\n- solve <file>   solve the puzzle in <file>"
-        "\n- {enter}        generate a single solution"
-        "\n- trials <n>     generate <n> solutions"
-        "\n- genpath        cycle generator traversal path"
-        ;
-    const std::string REPL_PROMPT = "\n$ ";
-    static const std::string GRID_SEP = "  ";
-
-    typedef enum { ROW_MAJOR, BLOCK_COLS, GenPath_MAX = BLOCK_COLS, } GenPath;
-    const std::array<std::string, 2> GenPath_Names = {
-        "rowmajor",
-        "blockcol",
-    };
 
     // Container for a very large number.
     // See Solver::GIVEUP_THRESHOLD for more discussion on the average
@@ -70,6 +35,16 @@ namespace Sudoku {
      */
     typedef uint8_t Order;
     constexpr Order MAX_REASONABLE_ORDER = 20;
+
+    // TODO: do we need this?
+    // template<Order REPL_O, bool REPL_CBT>
+    // class Repl;
+
+    const std::array<std::string, 2> GenPath_Names = {
+        "rowmajor",
+        "blockcol",
+    };
+    typedef enum { ROW_MAJOR, BLOCK_COLS, GenPath_MAX = GenPath_Names.size(), } GenPath;
 
     enum TraversalDirection : bool {
         BACK = false, FORWARD = true,
@@ -146,7 +121,7 @@ namespace Sudoku {
          * modified.
          */
         class Tile {
-            friend Solver;
+            friend class Solver;
         public:
             void clear(void) noexcept {
                 biasIndex = 0;
@@ -181,15 +156,6 @@ namespace Sudoku {
 
         explicit Solver(std::ostream&);
 
-        // Return false if command is to exit the program:
-        bool runCommand(std::string const& cmdLine);
-        void solvePuzzlesFromFile(std::ifstream&);
-        void runNew(void);
-        void runMultiple(const unsigned long);
-
-        void printTrialsWorkDistribution(const trials_t,
-            std::array<trials_t, TRIALS_NUM_BINS> const&,
-            std::array<double,   TRIALS_NUM_BINS> const&);
         void print(void) const;
         void printMessageBar(std::string const&, unsigned int, const char = '=') const;
         void printMessageBar(std::string const&, const char = '=') const;
@@ -267,6 +233,7 @@ namespace Sudoku {
         }
     };
 
+    static const std::string GRID_SEP = "  ";
     static int MY_RANDOM (const int i) { return std::rand() % i; }
     struct MyNumpunct : std::numpunct<char> {
         std::string do_grouping() const {
