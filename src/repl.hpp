@@ -3,7 +3,7 @@
 
 #include <map>
 
-#include "grid.hpp"
+#include "solver.hpp"
 
 
 namespace Sudoku {

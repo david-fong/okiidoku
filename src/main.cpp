@@ -2,7 +2,7 @@
 #include <fstream>      // ofstream,
 #include <ctime>        // time,
 
-#include "grid.cpp"
+#include "solver.cpp"
 #include "repl.cpp"
 
 
