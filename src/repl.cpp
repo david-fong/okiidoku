@@ -78,17 +78,18 @@ bool Repl<O,CBT>::runCommand(std::string const& cmdLine) {
 
 template <Order O, bool CBT>
 void Repl<O,CBT>::solvePuzzlesFromFile(std::ifstream& puzzlesFile) {
-    std::cout << "this has not yet been implemented yet" << std::endl;
-
-    for (;;) {
+    // Put the string outside the loop
+    for () {
         solver.clear();
-        // read a puzzle from the file. Make this a method in Solver.
-        {
-            //(void)Solver<O,CBT>::isTileForGiven;
+        // Read a puzzle from the file:
+        if (!solver.template loadPuzzleFromString<>(puzzleString)) {
+            std::cout << "Could not use the input to read in a puzzle." << std::endl;
+            // Just go try something else:
+            continue;
         }
         solver.template generateSolution<true>();
-        // write the solution to an output file.
-        break; // TODO: remove me
+        // TODO: write the solution to an output file / print it out.
+        solver.print();
     }
 }
 
@@ -114,8 +115,8 @@ void Repl<O,CBT>::runNew(void) {
 
 template <Order O, bool CBT>
 void Repl<O,CBT>::runMultiple(const trials_t trialsToRun) {
-    static constexpr unsigned DEFAULT_STATS_COLS = ((unsigned[]){0,64,32,24,16,4,1})[solver.order];
-    static constexpr unsigned LINES_PER_FLUSH    = ((unsigned[]){0, 0, 0, 0, 0,1,1})[solver.order];
+    constexpr unsigned DEFAULT_STATS_COLS = ((unsigned[]){0,64,32,24,16,4,1})[solver.order];
+    constexpr unsigned LINES_PER_FLUSH    = ((unsigned[]){0, 0, 0, 0, 0,1,1})[solver.order];
     const unsigned PRINT_COLS = (GET_TERM_COLS(DEFAULT_STATS_COLS) - (solver.isPretty ? 7 : 0)) / solver.statsWidth;
     const unsigned BAR_WIDTH  = solver.statsWidth * PRINT_COLS + (solver.isPretty ? 7 : 0);
 

@@ -11,9 +11,6 @@
 [[gnu::const]] static std::string createHSepString(unsigned int order);
 
 
-/**
- * 
- */
 namespace Sudoku {
 
 // Mechanism to statically toggle printing alignment:
@@ -89,7 +86,7 @@ void Solver<O,CBT>::print(void) const {
 
 template <Order O, bool CBT>
 void Solver<O,CBT>::printShadedBacktrackStat(const unsigned count) const {
-    static const std::array<std::string, 4> GREYSCALE_BLOCK_CHARS = {
+    const std::array<std::string, 4> GREYSCALE_BLOCK_CHARS = {
         // NOTE: Make sure that the initializer list size matches that
         // of the corresponding template argument. Compilers won't warn.
         // See https://cppreference.com/w/cpp/language/sizeof...#Example
@@ -114,6 +111,8 @@ void Solver<O,CBT>::printShadedBacktrackStat(const unsigned count) const {
 }
 
 
+
+
 template <Order O, bool CBT>
 void Solver<O,CBT>::clear(void) {
     std::for_each(grid.begin(), grid.end(), [](Tile& t){ t.clear(); });
@@ -130,6 +129,50 @@ void Solver<O,CBT>::clear(void) {
 }
 
 
+template <Order O, bool CBT>
+bool loadPuzzleFromString(const std::string& puzzleString) {
+    // This length check will be done again later, but might as well
+    // do it now as a quick short-circuiter.
+    if (puzzleString.length() != area) return false;
+    const bool spaceMeansBlank = (puzzleString.find(' ') != std::string::npos);
+    if (spaceMeansBlank) {
+        // Interpret spaces as blanks:
+        return template loadPuzzleFromString<SPACE>(puzzleString);
+    } else {
+        // Interpret zeros as blanks:
+        return template loadPuzzleFromString<ZERO>(puzzleString);
+    }
+}
+
+
+template <Order O, bool CBT>
+template <PuzzleStrBlanksFmt BLANKS_FMT>
+bool Solver<O,CBT>::loadPuzzleFromString(const std::string& puzzleString) {
+    // Short circuit if the length of the string is incorrect:
+    if (puzzleString.length() != area) return false;
+
+    // Clear. Written outside the loop for brevity-over-performance.
+    isTileForGiven.fill(false);
+
+    for (area_t i = 0; i < area; i++) {
+        const char valueChar = puzzleString[i];
+        switch constexpr (BLANKS_FMT) {
+        case SPACE:
+            if (valueChar == ' ') {
+                isTileForGiven[i] = true;
+            } else {
+                grid[i].value = Tile::VALUE_FROM_CHAR(valueChar);
+            } break;
+        case ZERO:
+            if (valueChar == '0') {
+                isTileForGiven[i] = true;
+            } else {
+                grid[i].value = Tile::VALUE_FROM_CHAR(valueChar) - 1;
+            } break;
+        }
+    }
+    return true;
+}
 
 
 template <Order O, bool CBT>
@@ -262,10 +305,6 @@ void Solver<O,CBT>::setGenPath(const GenPath newGenPath) noexcept {
 
 
 
-
-
-
-
 template <Order O, bool CBT>
 void Solver<O,CBT>::printMessageBar(
     std::string const& msg,
@@ -287,8 +326,7 @@ void Solver<O,CBT>::printMessageBar(
 
 template <Order O, bool CBT>
 void Solver<O,CBT>::printMessageBar(std::string const& msg, const char fillChar) const {
-    // NOTE: If isPretty is change to be non-const, this cannot be static.
-    static const unsigned int gridBarLength = (isPretty)
+    const unsigned int gridBarLength = (isPretty)
         ? ((length + order + 1) * 2)
         : (length * 2);
     constexpr unsigned int numGrids = 1 + int(CBT);

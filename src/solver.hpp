@@ -17,8 +17,6 @@ namespace Sudoku {
     // See Solver::GIVEUP_THRESHOLD for more discussion on the average
     // number of operations taken to generate a solution by grid-order.
     typedef unsigned long long opcount_t;
-    typedef unsigned long trials_t;
-    constexpr unsigned int TRIALS_NUM_BINS = 20;
 
     /**
      * The primary goal of this added complexity is to make effective
@@ -44,6 +42,12 @@ namespace Sudoku {
 
     enum TraversalDirection : bool {
         BACK = false, FORWARD = true,
+    };
+
+    // What to interpret as a blank (non-given) in a puzzle string.
+    enum PuzzleStrBlanksFmt {
+        // TODO: implement LENGTH format detector and parser.
+        SPACE, ZERO, //LENGTH,
     };
 
     /**
@@ -137,6 +141,19 @@ namespace Sudoku {
                     }
                 }
             }
+            // Does not check the validity of inputs.
+            // Assumes that the puzzle-string blanks style uses spaces
+            // for blanks. Accepts 'G' for order == 4 as `length`.
+            // Case sensitive. Always only lowercase for order < 6.
+            static constexpr value_t VALUE_FROM_CHAR(const char valueChar) noexcept {
+                // TODO: decide how to handle translations for orders > 5.
+                static_assert(order <= 5);
+                if constexpr (order < 4) {
+                    return valueChar - '0';
+                } else {
+                    return (valueChar <= '9') ? (valueChar - '0') : (valueChar - 'a');
+                }
+            }
         protected:
             value_t biasIndex;
             value_t value; // undefined if clear.
@@ -201,6 +218,13 @@ namespace Sudoku {
 
     public:
         void clear(void);
+        // Returns whether the string could be loaded as a puzzle.
+        bool loadPuzzleFromString(const std::string&);
+        // A templated version of the above as an optimization when
+        // the format is known such as non-first file puzzles. If
+        // false, then zeros mean blank and the least symbol is one.
+        template <PuzzleStrBlanksFmt BLANKS_FMT>
+        bool loadPuzzleFromString(const std::string&);
         // Generates a random solution. Returns the number of operations or
         // zero if the give-up threshold was reached or if any previous seeds
         // made generating a solution impossible.

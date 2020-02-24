@@ -38,6 +38,9 @@ namespace Sudoku {
         ;
     const std::string REPL_PROMPT = "\n$ ";
 
+    typedef unsigned long trials_t;
+    constexpr unsigned int TRIALS_NUM_BINS = 20;
+
 
     /**
      * 
