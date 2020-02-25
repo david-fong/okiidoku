@@ -47,6 +47,13 @@ bool Repl<O,CBT>::runCommand(std::string const& cmdLine) {
         case CMD_QUIT:
             return false;
         case CMD_SOLVE: {
+            solver.clear();
+            if (solver.loadPuzzleFromString(cmdArgs)) {
+                // TODO: give better output if solver gives up. Maybe move to its own function.
+                solver.template generateSolution<true>();
+                solver.print();
+                break;
+            }
             std::ifstream puzzleFile(cmdArgs);
             if (!puzzleFile.good()) {
                 std::cout << "the specified file could not be opened for reading." << std::endl;
@@ -69,8 +76,6 @@ bool Repl<O,CBT>::runCommand(std::string const& cmdLine) {
             std::cout << "generator path is now set to: "
                 << GenPath_Names[solver.getGenPath()] << std::endl;
             break;
-        default:
-            break; // unreachable.
     }
     return true;
 }
@@ -78,17 +83,21 @@ bool Repl<O,CBT>::runCommand(std::string const& cmdLine) {
 
 template <Order O, bool CBT>
 void Repl<O,CBT>::solvePuzzlesFromFile(std::ifstream& puzzlesFile) {
-    // Put the string outside the loop
-    for () {
+    // Put the string outside the loop since the space allocation
+    // for proper input, should be all the same.
+    std::string puzzleString;
+    puzzleString.reserve(solver.area + 1);
+    while (std::getline(puzzlesFile, puzzleString)) {
         solver.clear();
         // Read a puzzle from the file:
-        if (!solver.template loadPuzzleFromString<>(puzzleString)) {
+        if (!solver.loadPuzzleFromString(puzzleString)) {
             std::cout << "Could not use the input to read in a puzzle." << std::endl;
             // Just go try something else:
             continue;
         }
         solver.template generateSolution<true>();
-        // TODO: write the solution to an output file / print it out.
+
+        // TODO Write the solution to an output file.
         solver.print();
     }
 }

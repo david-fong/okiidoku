@@ -63,18 +63,18 @@ namespace Sudoku {
     class Solver {
         static_assert((1 < O) && (O <= MAX_REASONABLE_ORDER));
 
-    /**
-     * TYPEDEFS
-     */
+    // ========================
+    // TYPEDEFS
+    // ========================
     public:
         // mask width `order^2` bits.
         // order:  2   3   4   5   6   7   8   9  10  11
         // width:  4   9  16  25  36  49  64  81 100 121
         // round:  8  16  16  32  64  64  64 128 128 128
         typedef
-            typename std::conditional_t<(O < 3), std::uint8_t,
-            typename std::conditional_t<(O < 5), std::uint16_t,
-            typename std::conditional_t<(O < 6), std::uint32_t,
+            typename std::conditional_t<(O < 3), std::uint_fast8_t,
+            typename std::conditional_t<(O < 5), std::uint_fast16_t,
+            typename std::conditional_t<(O < 6), std::uint_fast32_t,
             typename std::conditional_t<(O < 9), unsigned long,
             unsigned long long
         >>>> occmask_t;
@@ -84,9 +84,9 @@ namespace Sudoku {
 
         // uint range [0, order^2].
         typedef
-            typename std::conditional_t<(O <  4), std::uint8_t,
-            typename std::conditional_t<(O < 16), std::uint16_t,
-            std::uint32_t
+            typename std::conditional_t<(O <  4), std::uint_fast8_t,
+            typename std::conditional_t<(O < 16), std::uint_fast16_t,
+            std::uint_fast32_t
         >> length_t;
 
         // uint range [0, order^4].
@@ -102,9 +102,9 @@ namespace Sudoku {
         // uint range [0, order^2].
         typedef length_t value_t;
 
-    /**
-     * HELPER CLASS
-     */
+    // =======================
+    // HELPER CLASS
+    // =======================
     public:
         /**
          * When clear, `this->value` is the grid's length.
@@ -159,9 +159,9 @@ namespace Sudoku {
             value_t value; // undefined if clear.
         };
 
-    /**
-     * PUBLIC MEMBERS
-     */
+    // ========================
+    // PUBLIC MEMBERS
+    // ========================
     public:
         static constexpr order_t    order   = O;
         static constexpr length_t   length  = O*O;
@@ -176,9 +176,9 @@ namespace Sudoku {
         [[gnu::cold]] GenPath getGenPath(void) const noexcept { return genPath; }
         [[gnu::cold]] void setGenPath(const GenPath) noexcept;
 
-    /**
-     * PRIVATE MEMBERS
-     */
+    // ========================
+    // PRIVATE MEMBERS
+    // ========================
     private:
         std::array<Tile, area> grid;
         std::array<occmask_t, length> rowSymbolOccMasks;
@@ -219,12 +219,9 @@ namespace Sudoku {
     public:
         void clear(void);
         // Returns whether the string could be loaded as a puzzle.
+        // Does NOT check whether the givens follow the sudoku rules.
         bool loadPuzzleFromString(const std::string&);
-        // A templated version of the above as an optimization when
-        // the format is known such as non-first file puzzles. If
-        // false, then zeros mean blank and the least symbol is one.
-        template <PuzzleStrBlanksFmt BLANKS_FMT>
-        bool loadPuzzleFromString(const std::string&);
+        void registerGivenValue(const area_t index, const value_t value);
         // Generates a random solution. Returns the number of operations or
         // zero if the give-up threshold was reached or if any previous seeds
         // made generating a solution impossible.
@@ -232,9 +229,9 @@ namespace Sudoku {
         [[gnu::hot]] opcount_t generateSolution(void);
         [[gnu::hot]] TraversalDirection setNextValid(const area_t);
 
-    /**
-     * STATIC UTILITIES
-     */
+    // ========================
+    // STATIC UTILITIES
+    // ========================
     public:
         // Inline functions:
         [[gnu::const]] static length_t getRow(const area_t index) noexcept { return index / length; }

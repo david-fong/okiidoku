@@ -3,6 +3,8 @@
 
 [Try this?](https://codegolf.stackexchange.com/questions/190727/the-fastest-sudoku-solver)
 
+Ex. `000000010400000000020000000000050407008000300001090000300400200050100000000806000`
+
 ## Higher Priority
 
 - Try using `uintN_fast_t` and `uintN_least_t`.

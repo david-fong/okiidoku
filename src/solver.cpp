@@ -120,6 +120,7 @@ void Solver<O,CBT>::clear(void) {
     colSymbolOccMasks.fill(0);
     blkSymbolOccMasks.fill(0);
     if constexpr (CBT) backtrackCounts.fill(0);
+    maxBacktrackCount = 0;
 
     // Scramble each row's value-guessing-order:
     for (auto& rowBias : rowBiases) {
@@ -130,48 +131,42 @@ void Solver<O,CBT>::clear(void) {
 
 
 template <Order O, bool CBT>
-bool loadPuzzleFromString(const std::string& puzzleString) {
+bool Solver<O,CBT>::loadPuzzleFromString(const std::string& puzzleString) {
     // This length check will be done again later, but might as well
     // do it now as a quick short-circuiter.
-    if (puzzleString.length() != area) return false;
-    const bool spaceMeansBlank = (puzzleString.find(' ') != std::string::npos);
-    if (spaceMeansBlank) {
-        // Interpret spaces as blanks:
-        return template loadPuzzleFromString<SPACE>(puzzleString);
-    } else {
-        // Interpret zeros as blanks:
-        return template loadPuzzleFromString<ZERO>(puzzleString);
-    }
-}
-
-
-template <Order O, bool CBT>
-template <PuzzleStrBlanksFmt BLANKS_FMT>
-bool Solver<O,CBT>::loadPuzzleFromString(const std::string& puzzleString) {
-    // Short circuit if the length of the string is incorrect:
     if (puzzleString.length() != area) return false;
 
     // Clear. Written outside the loop for brevity-over-performance.
     isTileForGiven.fill(false);
 
+    const PuzzleStrBlanksFmt blanksFmt
+        = (puzzleString.find(' ') != std::string::npos)
+        ? SPACE
+        : ZERO;
     for (area_t i = 0; i < area; i++) {
         const char valueChar = puzzleString[i];
-        switch constexpr (BLANKS_FMT) {
+        switch (blanksFmt) {
         case SPACE:
-            if (valueChar == ' ') {
-                isTileForGiven[i] = true;
-            } else {
-                grid[i].value = Tile::VALUE_FROM_CHAR(valueChar);
+            if (valueChar != ' ') {
+                registerGivenValue(i, Tile::VALUE_FROM_CHAR(valueChar));
             } break;
         case ZERO:
-            if (valueChar == '0') {
-                isTileForGiven[i] = true;
-            } else {
-                grid[i].value = Tile::VALUE_FROM_CHAR(valueChar) - 1;
+            if (valueChar != '0') {
+                registerGivenValue(i, Tile::VALUE_FROM_CHAR(valueChar) - 1);
             } break;
         }
     }
     return true;
+}
+
+
+template <Order O, bool CBT>
+void Solver<O,CBT>::registerGivenValue(const area_t index, const value_t value) {
+    isTileForGiven[index] = true;
+    grid[index].value = value;
+    rowSymbolOccMasks[getRow(index)] |= 0b1 << value;
+    colSymbolOccMasks[getCol(index)] |= 0b1 << value;
+    blkSymbolOccMasks[getBlk(index)] |= 0b1 << value;
 }
 
 

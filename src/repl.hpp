@@ -15,7 +15,6 @@ namespace Sudoku {
         CMD_RUN_SINGLE,
         CMD_RUN_MULTIPLE,
         CMD_SET_GENPATH,
-        CMD_DO_BACKTRACK_COUNT,
     } Command;
 
     const std::map<std::string, Command> COMMAND_MAP = {
