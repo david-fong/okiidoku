@@ -13,6 +13,7 @@ namespace Sudoku {
         CMD_QUIT,
         CMD_SOLVE,
         CMD_RUN_SINGLE,
+        CMD_CONTINUE_PREV,
         CMD_RUN_MULTIPLE,
         CMD_SET_GENPATH,
     } Command;
@@ -22,6 +23,7 @@ namespace Sudoku {
         { "quit",       CMD_QUIT },
         { "solve",      CMD_SOLVE },
         { "",           CMD_RUN_SINGLE },
+        { "cont",       CMD_CONTINUE_PREV },
         { "trials",     CMD_RUN_MULTIPLE },
         { "genpath",    CMD_SET_GENPATH },
     };
@@ -68,8 +70,8 @@ namespace Sudoku {
         void runMultiple(const unsigned long);
 
         void printTrialsWorkDistribution(const trials_t,
-            std::array<trials_t, TRIALS_NUM_BINS> const&,
-            std::array<double,   TRIALS_NUM_BINS> const&);
+            std::array<trials_t, TRIALS_NUM_BINS+1> const&,
+            std::array<double,   TRIALS_NUM_BINS+1> const&);
     };
 
 }

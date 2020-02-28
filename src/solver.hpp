@@ -7,7 +7,7 @@
  * 
  * Note: My implementation does not use C-style IO, so it is safe for
  * consumer code to make the following optimization:
- * ```cplusplus
+ * ```cpp
  * std::ios_base::sync_with_stdio(false);
  * ```
  */
@@ -42,6 +42,9 @@ namespace Sudoku {
 
     enum TraversalDirection : bool {
         BACK = false, FORWARD = true,
+    };
+    enum SolverExitStatus {
+        IMPOSSIBLE, GIVEUP, SUCCESS,
     };
 
     // What to interpret as a blank (non-given) in a puzzle string.
@@ -208,6 +211,9 @@ namespace Sudoku {
     private:
         std::array<unsigned, (CBT ? area : 1)> backtrackCounts; // Same ordering as this->grid.
         void printShadedBacktrackStat(const unsigned count) const;
+        // these are used to continue the solution generator from where it left off.
+        TraversalDirection nextDirection;
+        SolverExitStatus lastExitStatus;
 
     public:
         std::ostream& os;
@@ -222,11 +228,12 @@ namespace Sudoku {
         // Does NOT check whether the givens follow the sudoku rules.
         bool loadPuzzleFromString(const std::string&);
         void registerGivenValue(const area_t index, const value_t value);
-        // Generates a random solution. Returns the number of operations or
-        // zero if the give-up threshold was reached or if any previous seeds
-        // made generating a solution impossible.
+        // Generates a random solution. Returns the number of operations
+        // performed. If exitStatus is not set to IMPOSSIBLE, then an
+        // immediate call to this method will continue the previous
+        // solution-generating-run from where it left off.
         template <bool USE_PUZZLE>
-        [[gnu::hot]] opcount_t generateSolution(void);
+        [[gnu::hot]] opcount_t generateSolution(SolverExitStatus& exitStatus);
         [[gnu::hot]] TraversalDirection setNextValid(const area_t);
 
     // ========================

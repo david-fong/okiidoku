@@ -7,13 +7,11 @@ Ex. `000000010400000000020000000000050407008000300001090000300400200050100000000
 
 ## Higher Priority
 
-- Try using `uintN_fast_t` and `uintN_least_t`.
-- Implement a solver
-  - Interface: reads a file as plaintext, solves (checking for multiple solutions), then asks to write solutions to a new file (user provides empty string to indicate choose suitable name based on input file name)
-  - Implementation / representation: Add back the separate seeds array (as a function-scoped variable?)
+- Write solver solutions to a new file (user provides empty string to indicate choose suitable name based on input file name)
 - Experiment with a different way of giving up: according to when some tile's backtrack counter exceeds some value.
   - Collect and print stats for trial runs of the maximum backtracking operations on any tile in each run before it succeeded or gave up. Print a comparison between those that give up and those that don't.
     - Reason: Look for a pattern / boundary point / transition range.
+  - TODO: make enum SolverCompletionStatus and pass by reference to generateSolution.
 - Make gen-path a compile-time constant.
   - Rationale: I allowed toggling for educational purposes, but I think doing so reduces chances for compiler optimization. This setting may only be of interest to keen viewers. For anyone else, what performs better is all that really matters.
 

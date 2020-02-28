@@ -50,7 +50,8 @@ bool Repl<O,CBT>::runCommand(std::string const& cmdLine) {
             solver.clear();
             if (solver.loadPuzzleFromString(cmdArgs)) {
                 // TODO: give better output if solver gives up. Maybe move to its own function.
-                solver.template generateSolution<true>();
+                SolverExitStatus exitStatus;
+                solver.template generateSolution<true>(exitStatus);
                 solver.print();
                 break;
             }
@@ -63,6 +64,9 @@ bool Repl<O,CBT>::runCommand(std::string const& cmdLine) {
             break; }
         case CMD_RUN_SINGLE:
             runNew();
+            break;
+        case CMD_CONTINUE_PREV:
+            // TODO: add toggling argument to generateSolution for this behaviour.
             break;
         case CMD_RUN_MULTIPLE:
             try {
@@ -95,7 +99,8 @@ void Repl<O,CBT>::solvePuzzlesFromFile(std::ifstream& puzzlesFile) {
             // Just go try something else:
             continue;
         }
-        solver.template generateSolution<true>();
+        SolverExitStatus exitStatus;
+        solver.template generateSolution<true>(exitStatus);
 
         // TODO Write the solution to an output file.
         solver.print();
@@ -109,8 +114,9 @@ void Repl<O,CBT>::runNew(void) {
     solver.clear();
 
     // Generate a new solution:
+    SolverExitStatus exitStatus;
     const clock_t    clockStart = std::clock();
-    const opcount_t numSolveOps = solver.template generateSolution<false>();
+    const opcount_t numSolveOps = solver.template generateSolution<false>(exitStatus);
     const clock_t   clockFinish = std::clock();
     const double  processorTime = ((double)(clockFinish - clockStart)) / CLOCKS_PER_SEC;
 
@@ -124,50 +130,56 @@ void Repl<O,CBT>::runNew(void) {
 
 template <Order O, bool CBT>
 void Repl<O,CBT>::runMultiple(const trials_t trialsToRun) {
-    constexpr unsigned DEFAULT_STATS_COLS = ((unsigned[]){0,64,32,24,16,4,1})[solver.order];
-    constexpr unsigned LINES_PER_FLUSH    = ((unsigned[]){0, 0, 0, 0, 0,1,1})[solver.order];
-    const unsigned PRINT_COLS = (GET_TERM_COLS(DEFAULT_STATS_COLS) - (solver.isPretty ? 7 : 0)) / solver.statsWidth;
-    const unsigned BAR_WIDTH  = solver.statsWidth * PRINT_COLS + (solver.isPretty ? 7 : 0);
+    constexpr unsigned DEFAULT_COLS     = ((unsigned[]){0,64,32,24,16,4,1})[solver.order];
+    constexpr unsigned LINES_PER_FLUSH  = ((unsigned[]){0, 0, 0, 0, 0,1,1})[solver.order];
+    const unsigned COLS = (solver.isPretty ? (GET_TERM_COLS(DEFAULT_COLS) - 7) : DEFAULT_COLS) / solver.statsWidth;
+    const unsigned BAR_WIDTH  = solver.statsWidth * COLS + (solver.isPretty ? 7 : 0);
 
-    trials_t giveups = 0;
-    clock_t clockStart = std::clock();
-    std::array<trials_t, TRIALS_NUM_BINS> successfulTrialBins    = {0,};
-    std::array<double,   TRIALS_NUM_BINS> successfulSolveOpsBins = {0,};
+    // The last bin is for trials that do not succeed.
+    std::array<trials_t, TRIALS_NUM_BINS+1> opsBinHitCounts = {0,};
+    std::array<double,   TRIALS_NUM_BINS+1> opsBinValTotals = {0,};
+    std::array<trials_t, TRIALS_NUM_BINS+1> mbtBinHitCounts = {0,}; // TODO: set these and pass to the printer.
+    std::array<double,   TRIALS_NUM_BINS+1> mbtBinValTotals = {0,};
 
     solver.printMessageBar("START x" + std::to_string(trialsToRun), BAR_WIDTH);
+    clock_t clockStart = std::clock();
 
     for (trials_t numTotalTrials = 0; numTotalTrials < trialsToRun;) {
-        if (numTotalTrials % PRINT_COLS == 0) {
+        if (numTotalTrials % COLS == 0) {
             const unsigned pctDone = 100.0 * numTotalTrials / trialsToRun;
             std::cout << "| " << std::setw(2) << pctDone << "% |";
         }
         solver.clear();
-        const opcount_t numSolveOps = solver.template generateSolution<false>();
+        SolverExitStatus exitStatus;
+        const opcount_t numSolveOps = solver.template generateSolution<false>(exitStatus);
         numTotalTrials++;
-        if (numSolveOps == 0) {
-            giveups++;
+
+        const unsigned opsBin = (numSolveOps - 1) * TRIALS_NUM_BINS / Solver<O,CBT>::GIVEUP_THRESHOLD;
+        opsBinHitCounts[opsBin]++;
+        opsBinValTotals[opsBin] += numSolveOps;
+
+        const unsigned mbtBin = solver.maxBacktrackCount * TRIALS_NUM_BINS / ; // TODO similar to above lines
+        if (exitStatus != SUCCESS) {
+            // TODO: pretty print this as the number with color?
             os STATW_I << "---";
         } else {
-            const unsigned int bin = (numSolveOps - 1) * TRIALS_NUM_BINS / Solver<O,CBT>::GIVEUP_THRESHOLD;
-            successfulTrialBins[bin]++;
-            successfulSolveOpsBins[bin] += numSolveOps;
             os STATW_I << numSolveOps;
         }
-        if (numTotalTrials % PRINT_COLS == 0) {
+        if (numTotalTrials % COLS == 0) {
             if constexpr (LINES_PER_FLUSH) {
-                if (solver.isPretty && (numTotalTrials % (LINES_PER_FLUSH * PRINT_COLS) == 0)) {
+                if (solver.isPretty && (numTotalTrials % (LINES_PER_FLUSH * COLS) == 0)) {
                     // Runs are slower. Flush buffer more frequently.
                     os << std::endl;
                 } else { os << '\n'; }
             }     else { os << '\n'; }
         }
     }
-    if (trialsToRun % PRINT_COLS != 0) { os << '\n'; } // Last newline.
+    if (trialsToRun % COLS != 0) { os << '\n'; } // Last newline.
 
     // Print stats:
     const double processorSeconds = ((double)(std::clock() - clockStart) / CLOCKS_PER_SEC);
     solver.printMessageBar("", BAR_WIDTH, '-');
-    os << "trials aborted: " STATW_I << giveups << '\n';
+    os << "trials aborted: " STATW_I << opsBinHitCounts[TRIALS_NUM_BINS] << '\n';
     os << "processor time: " STATW_D << processorSeconds << " seconds (including I/O)" << '\n';
     if (processorSeconds > 10.0) {
         // Emit a beep sound if the trials took longer than ten processor seconds:
@@ -176,7 +188,7 @@ void Repl<O,CBT>::runMultiple(const trials_t trialsToRun) {
 
     // Print bins (work distribution):
     solver.printMessageBar("", BAR_WIDTH, '-');
-    printTrialsWorkDistribution(trialsToRun, successfulTrialBins, successfulSolveOpsBins);
+    printTrialsWorkDistribution(trialsToRun, opsBinHitCounts, opsBinValTotals);
     solver.printMessageBar("DONE x" + std::to_string(trialsToRun), BAR_WIDTH);
     os << std::flush;
 }
@@ -185,30 +197,34 @@ void Repl<O,CBT>::runMultiple(const trials_t trialsToRun) {
 template <Order O, bool CBT>
 void Repl<O,CBT>::printTrialsWorkDistribution(
     const trials_t trialsToRun,
-    std::array<trials_t, TRIALS_NUM_BINS> const& successfulTrialBins,
-    std::array<double,   TRIALS_NUM_BINS> const& successfulSolveOpsBins
+    std::array<trials_t, TRIALS_NUM_BINS+1> const& opsBinHitCounts,
+    std::array<double,   TRIALS_NUM_BINS+1> const& opsBinValTotals
 ) {
-    os << "|  bin top  |   hits   |  throughput  |\n";
+    // TODO: do a preliminary loop that initializes accumulator arrays.
+    for (unsigned int i = 0; i < opsBinHitCounts.size(); i++) {
+        ;
+    }
+
+    os << "|  bin bot  |   hits   |  throughput  |\n";
     os << "+-----------+----------+--------------+";
     opcount_t successfulTrialsAccum = 0;
     double  successfulSolveOpsAccum = 0.0;
-    constexpr double BIN_WIDTH = (double)Solver<O,CBT>::GIVEUP_THRESHOLD / successfulTrialBins.size();
-    for (unsigned int i = 0; i < successfulTrialBins.size(); i++) {
-        successfulTrialsAccum   += successfulTrialBins[i];
-        successfulSolveOpsAccum += successfulSolveOpsBins[i];
-        const double binCeiling = ((double)(i + 1) * BIN_WIDTH);
+    for (unsigned int i = 0; i < opsBinHitCounts.size(); i++) {
+        successfulTrialsAccum   += opsBinHitCounts[i];
+        successfulSolveOpsAccum += opsBinValTotals[i];
+        const double binBottom  = (double)(i) * (double)Solver<O,CBT>::GIVEUP_THRESHOLD / TRIALS_NUM_BINS;
         const double throughput = successfulTrialsAccum / (successfulSolveOpsAccum
-            + ((trialsToRun - successfulTrialsAccum) * binCeiling));
+            + ((trialsToRun - successfulTrialsAccum) * binBottom));
         if constexpr (solver.order < 4) {
-            os << "\n|" << std::setw(9) << (int)binCeiling;
+            os << "\n|" << std::setw(9) << (int)(binBottom);
         } else {
-            os << "\n|" << std::setw(8) << (int)(binCeiling / 1000) << 'K';
+            os << "\n|" << std::setw(8) << (int)(binBottom / 1'000.0) << 'K';
         }
-        os << "  |" << std::setw(8)  << successfulTrialBins[i];
+        os << "  |" << std::setw(8)  << opsBinHitCounts[i];
         os << "  |" << std::setw(12) << std::scientific << throughput << std::fixed;
         os << "  |";
     }
-    os << " <- current threshold\n";
+    os << " <- current threshold (giveups)\n";
     os << "+-----------+----------+--------------+\n";
     os << " * Throughput here is \"average successes per operation\". Tightening the"
         "\n   threshold induces more giveups, but also reduces the operational cost"

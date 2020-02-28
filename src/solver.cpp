@@ -172,10 +172,16 @@ void Solver<O,CBT>::registerGivenValue(const area_t index, const value_t value) 
 
 template <Order O, bool CBT>
 template <bool USE_PUZZLE>
-opcount_t Solver<O,CBT>::generateSolution(void) {
+opcount_t Solver<O,CBT>::generateSolution(SolverExitStatus& exitStatus) {
     opcount_t numOperations = 0;
     area_t tvsIndex = 0; // traversal index.
 
+    // Skip leading givens if solving a puzzle:
+    if constexpr (USE_PUZZLE) {
+        while (__builtin_expect(
+            (++tvsIndex < area) && isTileForGiven[traversalOrder[tvsIndex]],
+        false));
+    }
     while (tvsIndex < area) {
         const auto gridIndex = traversalOrder[tvsIndex];
         if (setNextValid(gridIndex) == TraversalDirection::BACK) {
@@ -183,7 +189,8 @@ opcount_t Solver<O,CBT>::generateSolution(void) {
             if (__builtin_expect(tvsIndex == 0, false)) {
                 // No solution could be found. Treat as if giveup:
                 totalGenCount++;
-                return 0;
+                exitStatus = IMPOSSIBLE;
+                return numOperations;
             }
             if constexpr (CBT) {
                 if (++backtrackCounts[gridIndex] > maxBacktrackCount) {
@@ -198,7 +205,8 @@ opcount_t Solver<O,CBT>::generateSolution(void) {
                     if (__builtin_expect(tvsIndex == 0, false)) {
                         // No solution could be found. Treat as if giveup:
                         totalGenCount++;
-                        return 0;
+                        exitStatus = IMPOSSIBLE;
+                        return numOperations;
                     }
                 }
             }
@@ -216,10 +224,12 @@ opcount_t Solver<O,CBT>::generateSolution(void) {
         if (__builtin_expect(numOperations > GIVEUP_THRESHOLD, false)) {
             // Giveup threshold has been exceeded:
             totalGenCount++;
-            return 0;
+            exitStatus = GIVEUP;
+            return numOperations;
         }
     }
     totalGenCount++;
+    exitStatus = SUCCESS;
     return numOperations;
 }
 
