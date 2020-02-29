@@ -8,12 +8,12 @@ namespace Sudoku {
 
 // Mechanism to statically toggle printing alignment:
 // (#undef-ed before the end of this namespace)
-#define STATW_I << std::setw(this->solver.statsWidth)
-#define STATW_D << std::setw(this->solver.statsWidth + 4)
+#define STATW_I << std::setw(this->solver.STATS_WIDTH)
+#define STATW_D << std::setw(this->solver.STATS_WIDTH + 4)
 
 
-template <Order O, bool CBT>
-Repl<O,CBT>::Repl(std::ostream& os):
+template <Order O, bool CBT, GiveupMethod GUM>
+Repl<O,CBT,GUM>::Repl(std::ostream& os):
     solver  (os),
     os      (os)
 {
@@ -27,8 +27,8 @@ Repl<O,CBT>::Repl(std::ostream& os):
 };
 
 
-template <Order O, bool CBT>
-bool Repl<O,CBT>::runCommand(std::string const& cmdLine) {
+template <Order O, bool CBT, GiveupMethod GUM>
+bool Repl<O,CBT,GUM>::runCommand(std::string const& cmdLine) {
     size_t tokenPos;
     // Very simple parsing: Assumes no leading spaces, and does not
     // trim leading or trailing spaces from the arguments substring.
@@ -85,8 +85,8 @@ bool Repl<O,CBT>::runCommand(std::string const& cmdLine) {
 }
 
 
-template <Order O, bool CBT>
-void Repl<O,CBT>::solvePuzzlesFromFile(std::ifstream& puzzlesFile) {
+template <Order O, bool CBT, GiveupMethod GUM>
+void Repl<O,CBT,GUM>::solvePuzzlesFromFile(std::ifstream& puzzlesFile) {
     // Put the string outside the loop since the space allocation
     // for proper input, should be all the same.
     std::string puzzleString;
@@ -108,9 +108,9 @@ void Repl<O,CBT>::solvePuzzlesFromFile(std::ifstream& puzzlesFile) {
 }
 
 
-template <Order O, bool CBT>
-void Repl<O,CBT>::runNew(void) {
-    solver.printMessageBar("START " + std::to_string(solver.totalGenCount));
+template <Order O, bool CBT, GiveupMethod GUM>
+void Repl<O,CBT,GUM>::runNew(void) {
+    solver.printMessageBar("START " + std::to_string(solver.getTotalGenCount()));
     solver.clear();
 
     // Generate a new solution:
@@ -128,18 +128,16 @@ void Repl<O,CBT>::runNew(void) {
 }
 
 
-template <Order O, bool CBT>
-void Repl<O,CBT>::runMultiple(const trials_t trialsToRun) {
+template <Order O, bool CBT, GiveupMethod GUM>
+void Repl<O,CBT,GUM>::runMultiple(const trials_t trialsToRun) {
     constexpr unsigned DEFAULT_COLS     = ((unsigned[]){0,64,32,24,16,4,1})[solver.order];
     constexpr unsigned LINES_PER_FLUSH  = ((unsigned[]){0, 0, 0, 0, 0,1,1})[solver.order];
-    const unsigned COLS = (solver.isPretty ? (GET_TERM_COLS(DEFAULT_COLS) - 7) : DEFAULT_COLS) / solver.statsWidth;
-    const unsigned BAR_WIDTH  = solver.statsWidth * COLS + (solver.isPretty ? 7 : 0);
+    const unsigned COLS = (solver.isPretty ? (GET_TERM_COLS(DEFAULT_COLS)-7) : DEFAULT_COLS) / solver.STATS_WIDTH;
+    const unsigned BAR_WIDTH  = solver.STATS_WIDTH * COLS + (solver.isPretty ? 7 : 0);
 
     // The last bin is for trials that do not succeed.
-    std::array<trials_t, TRIALS_NUM_BINS+1> opsBinHitCounts = {0,};
-    std::array<double,   TRIALS_NUM_BINS+1> opsBinValTotals = {0,};
-    std::array<trials_t, TRIALS_NUM_BINS+1> mbtBinHitCounts = {0,}; // TODO: set these and pass to the printer.
-    std::array<double,   TRIALS_NUM_BINS+1> mbtBinValTotals = {0,};
+    std::array<trials_t, TRIALS_NUM_BINS+1> binHitCounts = {0,};
+    std::array<double,   TRIALS_NUM_BINS+1> binValTotals = {0,};
 
     solver.printMessageBar("START x" + std::to_string(trialsToRun), BAR_WIDTH);
     clock_t clockStart = std::clock();
@@ -154,11 +152,10 @@ void Repl<O,CBT>::runMultiple(const trials_t trialsToRun) {
         const opcount_t numSolveOps = solver.template generateSolution<false>(exitStatus);
         numTotalTrials++;
 
-        const unsigned opsBin = (numSolveOps - 1) * TRIALS_NUM_BINS / Solver<O,CBT>::GIVEUP_THRESHOLD;
-        opsBinHitCounts[opsBin]++;
-        opsBinValTotals[opsBin] += numSolveOps;
+        const unsigned binNum = (numSolveOps - 1) * TRIALS_NUM_BINS / Solver<O,CBT,GUM>::GIVEUP_THRESHOLD;
+        binHitCounts[binNum]++;
+        binValTotals[binNum] += numSolveOps;
 
-        const unsigned mbtBin = solver.maxBacktrackCount * TRIALS_NUM_BINS / ; // TODO similar to above lines
         if (exitStatus != SUCCESS) {
             // TODO: pretty print this as the number with color?
             os STATW_I << "---";
@@ -167,11 +164,11 @@ void Repl<O,CBT>::runMultiple(const trials_t trialsToRun) {
         }
         if (numTotalTrials % COLS == 0) {
             if constexpr (LINES_PER_FLUSH) {
-                if (solver.isPretty && (numTotalTrials % (LINES_PER_FLUSH * COLS) == 0)) {
-                    // Runs are slower. Flush buffer more frequently.
-                    os << std::endl;
-                } else { os << '\n'; }
-            }     else { os << '\n'; }
+            if (solver.isPretty && (numTotalTrials % (LINES_PER_FLUSH * COLS) == 0)) {
+                // Runs are slower. Flush buffer more frequently.
+                os << std::endl;
+            } else { os << '\n'; }
+            } else { os << '\n'; }
         }
     }
     if (trialsToRun % COLS != 0) { os << '\n'; } // Last newline.
@@ -179,7 +176,7 @@ void Repl<O,CBT>::runMultiple(const trials_t trialsToRun) {
     // Print stats:
     const double processorSeconds = ((double)(std::clock() - clockStart) / CLOCKS_PER_SEC);
     solver.printMessageBar("", BAR_WIDTH, '-');
-    os << "trials aborted: " STATW_I << opsBinHitCounts[TRIALS_NUM_BINS] << '\n';
+    os << "trials aborted: " STATW_I << binHitCounts[TRIALS_NUM_BINS] << '\n';
     os << "processor time: " STATW_D << processorSeconds << " seconds (including I/O)" << '\n';
     if (processorSeconds > 10.0) {
         // Emit a beep sound if the trials took longer than ten processor seconds:
@@ -188,14 +185,14 @@ void Repl<O,CBT>::runMultiple(const trials_t trialsToRun) {
 
     // Print bins (work distribution):
     solver.printMessageBar("", BAR_WIDTH, '-');
-    printTrialsWorkDistribution(trialsToRun, opsBinHitCounts, opsBinValTotals);
+    printTrialsWorkDistribution(trialsToRun, binHitCounts, binValTotals);
     solver.printMessageBar("DONE x" + std::to_string(trialsToRun), BAR_WIDTH);
     os << std::flush;
 }
 
 
-template <Order O, bool CBT>
-void Repl<O,CBT>::printTrialsWorkDistribution(
+template <Order O, bool CBT, GiveupMethod GUM>
+void Repl<O,CBT,GUM>::printTrialsWorkDistribution(
     const trials_t trialsToRun,
     std::array<trials_t, TRIALS_NUM_BINS+1> const& opsBinHitCounts,
     std::array<double,   TRIALS_NUM_BINS+1> const& opsBinValTotals
@@ -212,7 +209,7 @@ void Repl<O,CBT>::printTrialsWorkDistribution(
     for (unsigned int i = 0; i < opsBinHitCounts.size(); i++) {
         successfulTrialsAccum   += opsBinHitCounts[i];
         successfulSolveOpsAccum += opsBinValTotals[i];
-        const double binBottom  = (double)(i) * (double)Solver<O,CBT>::GIVEUP_THRESHOLD / TRIALS_NUM_BINS;
+        const double binBottom  = (double)(i) * (double)Solver<O,CBT,GUM>::GIVEUP_THRESHOLD / TRIALS_NUM_BINS;
         const double throughput = successfulTrialsAccum / (successfulSolveOpsAccum
             + ((trialsToRun - successfulTrialsAccum) * binBottom));
         if constexpr (solver.order < 4) {

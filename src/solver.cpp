@@ -15,12 +15,12 @@ namespace Sudoku {
 
 // Mechanism to statically toggle printing alignment:
 // (#undef-ed before the end of this namespace)
-#define STATW_I << std::setw(this->statsWidth)
-#define STATW_D << std::setw(this->statsWidth + 4)
+#define STATW_I << std::setw(this->STATS_WIDTH)
+#define STATW_D << std::setw(this->STATS_WIDTH + 4)
 
 
-template <Order O, bool CBT>
-Solver<O,CBT>::Solver(std::ostream& os):
+template <Order O, bool CBT, GiveupMethod GUM>
+Solver<O,CBT,GUM>::Solver(std::ostream& os):
     os          (os),
     isPretty    (&os == &std::cout),
     blkRowSepString(createHSepString(order))
@@ -40,8 +40,8 @@ Solver<O,CBT>::Solver(std::ostream& os):
 }
 
 
-template <Order O, bool CBT>
-void Solver<O,CBT>::print(void) const {
+template <Order O, bool CBT, GiveupMethod GUM>
+void Solver<O,CBT,GUM>::print(void) const {
     #define PRINT_GRID0_TILE(PRINTER_STATEMENT) {\
         for (length_t col = 0; col < length; col++) {\
             if (isPretty && (col % order) == 0) os << " |";\
@@ -84,8 +84,8 @@ void Solver<O,CBT>::print(void) const {
 }
 
 
-template <Order O, bool CBT>
-void Solver<O,CBT>::printShadedBacktrackStat(const unsigned count) const {
+template <Order O, bool CBT, GiveupMethod GUM>
+void Solver<O,CBT,GUM>::printShadedBacktrackStat(const unsigned count) const {
     const std::array<std::string, 4> GREYSCALE_BLOCK_CHARS = {
         // NOTE: Make sure that the initializer list size matches that
         // of the corresponding template argument. Compilers won't warn.
@@ -112,9 +112,8 @@ void Solver<O,CBT>::printShadedBacktrackStat(const unsigned count) const {
 
 
 
-
-template <Order O, bool CBT>
-void Solver<O,CBT>::clear(void) {
+template <Order O, bool CBT, GiveupMethod GUM>
+void Solver<O,CBT,GUM>::clear(void) {
     std::for_each(grid.begin(), grid.end(), [](Tile& t){ t.clear(); });
     rowSymbolOccMasks.fill(0);
     colSymbolOccMasks.fill(0);
@@ -130,8 +129,8 @@ void Solver<O,CBT>::clear(void) {
 }
 
 
-template <Order O, bool CBT>
-bool Solver<O,CBT>::loadPuzzleFromString(const std::string& puzzleString) {
+template <Order O, bool CBT, GiveupMethod GUM>
+bool Solver<O,CBT,GUM>::loadPuzzleFromString(const std::string& puzzleString) {
     // This length check will be done again later, but might as well
     // do it now as a quick short-circuiter.
     if (puzzleString.length() != area) return false;
@@ -160,8 +159,8 @@ bool Solver<O,CBT>::loadPuzzleFromString(const std::string& puzzleString) {
 }
 
 
-template <Order O, bool CBT>
-void Solver<O,CBT>::registerGivenValue(const area_t index, const value_t value) {
+template <Order O, bool CBT, GiveupMethod GUM>
+void Solver<O,CBT,GUM>::registerGivenValue(const area_t index, const value_t value) {
     isTileForGiven[index] = true;
     grid[index].value = value;
     rowSymbolOccMasks[getRow(index)] |= 0b1 << value;
@@ -170,9 +169,9 @@ void Solver<O,CBT>::registerGivenValue(const area_t index, const value_t value) 
 }
 
 
-template <Order O, bool CBT>
+template <Order O, bool CBT, GiveupMethod GUM>
 template <bool USE_PUZZLE>
-opcount_t Solver<O,CBT>::generateSolution(SolverExitStatus& exitStatus) {
+opcount_t Solver<O,CBT,GUM>::generateSolution(SolverExitStatus& exitStatus) {
     opcount_t numOperations = 0;
     area_t tvsIndex = 0; // traversal index.
 
@@ -221,11 +220,15 @@ opcount_t Solver<O,CBT>::generateSolution(SolverExitStatus& exitStatus) {
         }
 
         numOperations++;
-        if (__builtin_expect(numOperations > GIVEUP_THRESHOLD, false)) {
+        const opcount_t giveupCondVar
+        = (GUM == OPERATIONS) ? numOperations
+        : (GUM == BACKTRACKS) ? maxBacktrackCount
+        : ~0;
+        if (__builtin_expect(giveupCondVar > GIVEUP_THRESHOLD, false)) {
             // Giveup threshold has been exceeded:
             totalGenCount++;
             exitStatus = GIVEUP;
-            return numOperations;
+            return giveupCondVar;
         }
     }
     totalGenCount++;
@@ -234,8 +237,8 @@ opcount_t Solver<O,CBT>::generateSolution(SolverExitStatus& exitStatus) {
 }
 
 
-template <Order O, bool CBT>
-TraversalDirection Solver<O,CBT>::setNextValid(const area_t index) {
+template <Order O, bool CBT, GiveupMethod GUM>
+TraversalDirection Solver<O,CBT,GUM>::setNextValid(const area_t index) {
     occmask_t& rowBin = rowSymbolOccMasks[getRow(index)];
     occmask_t& colBin = colSymbolOccMasks[getCol(index)];
     occmask_t& blkBin = blkSymbolOccMasks[getBlk(index)];
@@ -287,8 +290,8 @@ TraversalDirection Solver<O,CBT>::setNextValid(const area_t index) {
 }
 
 
-template <Order O, bool CBT>
-void Solver<O,CBT>::setGenPath(const GenPath newGenPath) noexcept {
+template <Order O, bool CBT, GiveupMethod GUM>
+void Solver<O,CBT,GUM>::setGenPath(const GenPath newGenPath) noexcept {
     switch (newGenPath) {
         case ROW_MAJOR:
             std::iota(traversalOrder.begin(), traversalOrder.end(), 0);
@@ -310,8 +313,8 @@ void Solver<O,CBT>::setGenPath(const GenPath newGenPath) noexcept {
 
 
 
-template <Order O, bool CBT>
-void Solver<O,CBT>::printMessageBar(
+template <Order O, bool CBT, GiveupMethod GUM>
+void Solver<O,CBT,GUM>::printMessageBar(
     std::string const& msg,
     unsigned int barLength,
     const char fillChar
@@ -329,8 +332,8 @@ void Solver<O,CBT>::printMessageBar(
 }
 
 
-template <Order O, bool CBT>
-void Solver<O,CBT>::printMessageBar(std::string const& msg, const char fillChar) const {
+template <Order O, bool CBT, GiveupMethod GUM>
+void Solver<O,CBT,GUM>::printMessageBar(std::string const& msg, const char fillChar) const {
     const unsigned int gridBarLength = (isPretty)
         ? ((length + order + 1) * 2)
         : (length * 2);

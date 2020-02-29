@@ -34,6 +34,11 @@ namespace Sudoku {
     typedef uint8_t Order;
     constexpr Order MAX_REASONABLE_ORDER = 20;
 
+    enum GiveupMethod {
+        OPERATIONS, // Total times attempted to setNextValid.
+        BACKTRACKS, // Maximum count searched over all tiles.
+    };
+
     const std::array<std::string, 2> GenPath_Names = {
         "rowmajor",
         "blockcol",
@@ -43,6 +48,7 @@ namespace Sudoku {
     enum TraversalDirection : bool {
         BACK = false, FORWARD = true,
     };
+
     enum SolverExitStatus {
         IMPOSSIBLE, GIVEUP, SUCCESS,
     };
@@ -61,10 +67,14 @@ namespace Sudoku {
      * cast any non-area types upward where they may conditionally be
      * a `uint8_t` for small grid-orders, or else it will be specially
      * interpreted as a char (I've already been bitten twice by this).
+     * 
+     * @param CBT - Whether or not to count backtrack statistics
+     * @param GUM - Giveup method.
      */
-    template <Order O, bool CBT>
+    template <Order O, bool CBT, GiveupMethod GUM>
     class Solver {
         static_assert((1 < O) && (O <= MAX_REASONABLE_ORDER));
+        static_assert((GUM == BACKTRACKS) == CBT);
 
     // ========================
     // TYPEDEFS
@@ -93,14 +103,15 @@ namespace Sudoku {
         >> length_t;
 
         // uint range [0, order^4].
-        // order:   2    3    4    5     6     7
-        // area:   16   81  256  625  1296  2401
-        // bytes:   2    2    3    4     4     4
+        // order:   2    3    4    5     6     7     8     9     10
+        // area:   16   81  256  625  1296  2401  4096  6561  10000
+        // bits:    5    7    9    9    11    12    17    17     18
         typedef
-            typename std::conditional_t<(O < 4), std::uint8_t,
-            typename std::conditional_t<(O < 8), std::uint16_t,
-            std::uint32_t
-        >> area_t;
+            typename std::conditional_t<(O <   4), std::uint8_t,
+            typename std::conditional_t<(O <   8), std::uint16_t,
+            typename std::conditional_t<(O < 256), std::uint32_t,
+            unsigned long
+        >>> area_t;
 
         // uint range [0, order^2].
         typedef length_t value_t;
@@ -199,27 +210,36 @@ namespace Sudoku {
         std::array<area_t, area> traversalOrder;
         std::array<bool,   area> isTileForGiven;
 
+        // These fields are used to continue the solution generator from
+        // wherever it last left off.
+        TraversalDirection nextDirection;
+        SolverExitStatus   lastExitStatus;
+
+    private:
+        unsigned long long totalGenCount = 0;
     public:
+        unsigned long long getTotalGenCount(void) const noexcept { return totalGenCount; }
+
+    private:
+        std::array<unsigned, (CBT?area:1)> backtrackCounts;
+        opcount_t maxBacktrackCount;
+        void printShadedBacktrackStat(const unsigned count) const;
+    public:
+        getMaxBacktrackCount(void) const noexcept { return maxBacktrackCount; }
         /**
          * Give up if number of operations performed exceeds this value.
          * Measured stats: https://www.desmos.com/calculator/8taqzelils
          */
-        static constexpr opcount_t GIVEUP_THRESHOLD = ((const opcount_t[]){
-            0, 1, 25, 2'000, 2'500'000, 30'000'000, })[order];
-        unsigned long long totalGenCount = 0;
-        unsigned maxBacktrackCount; // 3billion is far greater than GIVEUP_THRESHOLD[5].
-    private:
-        std::array<unsigned, (CBT ? area : 1)> backtrackCounts; // Same ordering as this->grid.
-        void printShadedBacktrackStat(const unsigned count) const;
-        // these are used to continue the solution generator from where it left off.
-        TraversalDirection nextDirection;
-        SolverExitStatus lastExitStatus;
+        static constexpr opcount_t GIVEUP_THRESHOLD
+        = (GUM == OPERATIONS) ? ((const opcount_t[]){ 0, 1, 25, 2'000, 2'500'000, 30'000'000, })[order]
+        : (GUM == BACKTRACKS) ? ((const opcount_t[]){ 0, 1, 25, 2'000, 2'500'000, 30'000'000, })[order]
+        : 0;
 
     public:
         std::ostream& os;
         const bool isPretty;
         std::locale benchedLocale; // Used to swap in-and-out the thousands-commas.
-        static constexpr unsigned statsWidth = (0.4 * length) + 4;
+        static constexpr unsigned STATS_WIDTH = (0.4 * length) + 4;
         const std::string blkRowSepString;
 
     public:
@@ -227,7 +247,6 @@ namespace Sudoku {
         // Returns whether the string could be loaded as a puzzle.
         // Does NOT check whether the givens follow the sudoku rules.
         bool loadPuzzleFromString(const std::string&);
-        void registerGivenValue(const area_t index, const value_t value);
         // Generates a random solution. Returns the number of operations
         // performed. If exitStatus is not set to IMPOSSIBLE, then an
         // immediate call to this method will continue the previous
@@ -235,6 +254,8 @@ namespace Sudoku {
         template <bool USE_PUZZLE>
         [[gnu::hot]] opcount_t generateSolution(SolverExitStatus& exitStatus);
         [[gnu::hot]] TraversalDirection setNextValid(const area_t);
+    private:
+        void registerGivenValue(const area_t index, const value_t value);
 
     // ========================
     // STATIC UTILITIES
@@ -267,6 +288,7 @@ namespace Sudoku {
         }
     }; // End of Solver class.
 
+
     const std::string GRID_SEP = "  ";
     int MY_RANDOM(const int i) { return std::rand() % i; }
     struct MyNumpunct : std::numpunct<char> {
@@ -274,10 +296,6 @@ namespace Sudoku {
             return "\03";
         }
     };
-    unsigned int GET_TERM_COLS(const unsigned int fallback) noexcept {
-        char const*const envVar = std::getenv("COLUMNS");
-        return (envVar != NULL) ? std::stoul(envVar) : fallback;
-    }
 
 } // End of Sudoku namespace
 

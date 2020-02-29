@@ -42,6 +42,11 @@ namespace Sudoku {
     typedef unsigned long trials_t;
     constexpr unsigned int TRIALS_NUM_BINS = 20;
 
+    volatile unsigned int GET_TERM_COLS(const unsigned int fallback) noexcept {
+        char const*const envVar = std::getenv("COLUMNS");
+        return (envVar != NULL) ? std::stoul(envVar) : fallback;
+    }
+
 
     /**
      * 
@@ -54,14 +59,14 @@ namespace Sudoku {
      * - this->member
      * - Base<ARGS>::member
      */
-    template <Order O, bool CBT>
+    template <Order O, bool CBT, GiveupMethod GUM>
     class Repl {
     public:
         explicit Repl(std::ostream&);
         bool runCommand(std::string const& cmdLine);
 
     private:
-        Solver<O,CBT> solver;
+        Solver<O,CBT,GUM> solver;
         std::ostream& os;
 
         // Return false if command is to exit the program:
