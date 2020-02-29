@@ -8,7 +8,7 @@
 
 namespace Sudoku {
 
-    typedef enum {
+    enum Command {
         CMD_HELP,
         CMD_QUIT,
         CMD_SOLVE,
@@ -16,7 +16,7 @@ namespace Sudoku {
         CMD_CONTINUE_PREV,
         CMD_RUN_MULTIPLE,
         CMD_SET_GENPATH,
-    } Command;
+    };
 
     const std::map<std::string, Command> COMMAND_MAP = {
         { "help",       CMD_HELP },
@@ -34,6 +34,7 @@ namespace Sudoku {
         "\n- solve <file>       solve the puzzles in <file>"
         "\n- solve <puzzle>     no spaces; zeros mean empty"
         "\n- {enter}            generate a single solution"
+        "\n- cont               continue previous generation"
         "\n- trials <n>         generate <n> solutions"
         "\n- genpath            cycle generator traversal path"
         ;
@@ -71,7 +72,7 @@ namespace Sudoku {
 
         // Return false if command is to exit the program:
         void solvePuzzlesFromFile(std::ifstream&);
-        void runNew(void);
+        void runSingle(bool contPrev = false);
         void runMultiple(const unsigned long);
 
         void printTrialsWorkDistribution(const trials_t,

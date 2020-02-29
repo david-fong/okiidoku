@@ -113,14 +113,32 @@ void Solver<O,CBT,GUM>::printShadedBacktrackStat(const unsigned count) const {
 
 
 template <Order O, bool CBT, GiveupMethod GUM>
+template <bool USE_PUZZLE>
 void Solver<O,CBT,GUM>::clear(void) {
-    std::for_each(grid.begin(), grid.end(), [](Tile& t){ t.clear(); });
+    for (area_t i = 0; i < area; i++) {
+        // Clear all non-givens. Their values should already have been
+        // set by `loadPuzzleFromString`. Recall that biasIndex for
+        // givens must not be used (see Tile documentation).
+        if (USE_PUZZLE ? !isTileForGiven[i] : true) grid[i].clear();
+    }
     rowSymbolOccMasks.fill(0);
     colSymbolOccMasks.fill(0);
     blkSymbolOccMasks.fill(0);
-    if constexpr (CBT) backtrackCounts.fill(0);
-    maxBacktrackCount = 0;
-
+    if constexpr (USE_PUZZLE) {
+        // Fill back in the occmasks for givens:
+        for (area_t i = 0; i < area; i++) {
+            if (isTileForGiven[i]) {
+                const occmask_t turnOnBitMask = (occmask_t)(0b1) << grid[i].value;
+                rowSymbolOccMasks[getRow(i)] |= turnOnBitMask;
+                colSymbolOccMasks[getCol(i)] |= turnOnBitMask;
+                blkSymbolOccMasks[getBlk(i)] |= turnOnBitMask;
+            }
+        }
+    }
+    if constexpr (CBT) {
+        backtrackCounts.fill(0);
+        maxBacktrackCount = 0;
+    }
     // Scramble each row's value-guessing-order:
     for (auto& rowBias : rowBiases) {
         std::random_shuffle(rowBias.begin(), rowBias.end(), MY_RANDOM);
@@ -135,7 +153,7 @@ bool Solver<O,CBT,GUM>::loadPuzzleFromString(const std::string& puzzleString) {
     // do it now as a quick short-circuiter.
     if (puzzleString.length() != area) return false;
 
-    // Clear. Written outside the loop for brevity-over-performance.
+    // Clear any is-given=markers set for previous puzzles:
     isTileForGiven.fill(false);
 
     const PuzzleStrBlanksFmt blanksFmt
@@ -163,82 +181,89 @@ template <Order O, bool CBT, GiveupMethod GUM>
 void Solver<O,CBT,GUM>::registerGivenValue(const area_t index, const value_t value) {
     isTileForGiven[index] = true;
     grid[index].value = value;
-    rowSymbolOccMasks[getRow(index)] |= 0b1 << value;
-    colSymbolOccMasks[getCol(index)] |= 0b1 << value;
-    blkSymbolOccMasks[getBlk(index)] |= 0b1 << value;
 }
 
 
 template <Order O, bool CBT, GiveupMethod GUM>
 template <bool USE_PUZZLE>
-opcount_t Solver<O,CBT,GUM>::generateSolution(SolverExitStatus& exitStatus) {
+opcount_t Solver<O,CBT,GUM>::generateSolution(SolverExitStatus& exitStatus, const bool contPrev) {
     opcount_t numOperations = 0;
-    area_t tvsIndex = 0; // traversal index.
+    TvsDirection direction = FORWARD;
+    area_t tvsIndex = 0;
 
-    // Skip leading givens if solving a puzzle:
-    if constexpr (USE_PUZZLE) {
-        while (__builtin_expect(
-            (++tvsIndex < area) && isTileForGiven[traversalOrder[tvsIndex]],
-        false));
+    if (contPrev) {
+        if (prevGenTvsIndex == area) {
+            // Previously succeeded.
+            tvsIndex = area - 1;
+            direction = BACK;
+        } else if (prevGenTvsIndex == 0) {
+            // Previously realized nothing left to find.
+            exitStatus = IMPOSSIBLE;
+            return 0;
+        } else {
+            // Previously gave up.
+            direction = FORWARD;
+        }
+    } else {
+        // Not continuing. Do something entirely new!
+        this->template clear<USE_PUZZLE>();
     }
+
     while (tvsIndex < area) {
-        const auto gridIndex = traversalOrder[tvsIndex];
-        if (setNextValid(gridIndex) == TraversalDirection::BACK) {
+        const area_t gridIndex = traversalOrder[tvsIndex];
+        if constexpr (USE_PUZZLE) {
+            // Immediately pass over tiles containing givens:
+            if (__builtin_expect(isTileForGiven[gridIndex], false)) {
+                if (direction == TvsDirection::BACK) {
+                    if (tvsIndex == 0) break;
+                    else --tvsIndex;
+                } else {
+                    ++tvsIndex;
+                }
+                continue;
+            }
+        }
+        // Check whether the give-up-condition has been met:
+        const opcount_t giveupCondVar
+            = (GUM == OPERATIONS) ? numOperations
+            : (GUM == BACKTRACKS) ? maxBacktrackCount
+            : ~0;
+        if (__builtin_expect(giveupCondVar >= GIVEUP_THRESHOLD, false)) {
+            if (__builtin_expect(isTileForGiven[gridIndex], false)) {
+                if constexpr (USE_PUZZLE) continue;
+            } else break;
+        }
+        // Try something at the current tile:
+        direction = setNextValid(gridIndex);
+        numOperations++;
+        if (direction == TvsDirection::BACK) {
             // Pop and step backward:
             if (__builtin_expect(tvsIndex == 0, false)) {
-                // No solution could be found. Treat as if giveup:
-                totalGenCount++;
-                exitStatus = IMPOSSIBLE;
-                return numOperations;
+                if (__builtin_expect(isTileForGiven[gridIndex], false)) {
+                    if constexpr (USE_PUZZLE) continue;
+                } else break;
             }
             if constexpr (CBT) {
                 if (++backtrackCounts[gridIndex] > maxBacktrackCount) {
                     maxBacktrackCount = backtrackCounts[gridIndex];
                 }
             }
-            if constexpr (!USE_PUZZLE) {
-                --tvsIndex;
-            } else {
-                // Backtrack, skipping over tiles containing given information:
-                while (__builtin_expect(isTileForGiven[traversalOrder[--tvsIndex]], false)) {
-                    if (__builtin_expect(tvsIndex == 0, false)) {
-                        // No solution could be found. Treat as if giveup:
-                        totalGenCount++;
-                        exitStatus = IMPOSSIBLE;
-                        return numOperations;
-                    }
-                }
-            }
+            --tvsIndex;
         } else {
-            if constexpr (!USE_PUZZLE) {
-                ++tvsIndex;
-            } else {
-                while (__builtin_expect(
-                    (++tvsIndex < area) && isTileForGiven[traversalOrder[tvsIndex]],
-                false));
-            }
-        }
-
-        numOperations++;
-        const opcount_t giveupCondVar
-        = (GUM == OPERATIONS) ? numOperations
-        : (GUM == BACKTRACKS) ? maxBacktrackCount
-        : ~0;
-        if (__builtin_expect(giveupCondVar > GIVEUP_THRESHOLD, false)) {
-            // Giveup threshold has been exceeded:
-            totalGenCount++;
-            exitStatus = GIVEUP;
-            return giveupCondVar;
+            // (direction == TvsDirection::FORWARD)
+            ++tvsIndex;
         }
     }
+    // Return:
     totalGenCount++;
-    exitStatus = SUCCESS;
+    prevGenTvsIndex = tvsIndex;
+    exitStatus = (tvsIndex) ? (tvsIndex == area ? SUCCESS : GIVEUP) : IMPOSSIBLE;
     return numOperations;
 }
 
 
 template <Order O, bool CBT, GiveupMethod GUM>
-TraversalDirection Solver<O,CBT,GUM>::setNextValid(const area_t index) {
+TvsDirection Solver<O,CBT,GUM>::setNextValid(const area_t index) {
     occmask_t& rowBin = rowSymbolOccMasks[getRow(index)];
     occmask_t& colBin = colSymbolOccMasks[getCol(index)];
     occmask_t& blkBin = blkSymbolOccMasks[getBlk(index)];

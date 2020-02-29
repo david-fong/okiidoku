@@ -43,9 +43,9 @@ namespace Sudoku {
         "rowmajor",
         "blockcol",
     };
-    typedef enum { ROW_MAJOR, BLOCK_COLS, GenPath_MAX = GenPath_Names.size() - 1, } GenPath;
+    enum GenPath { ROW_MAJOR, BLOCK_COLS, GenPath_MAX = GenPath_Names.size() - 1, };
 
-    enum TraversalDirection : bool {
+    enum TvsDirection : bool {
         BACK = false, FORWARD = true,
     };
 
@@ -74,7 +74,7 @@ namespace Sudoku {
     template <Order O, bool CBT, GiveupMethod GUM>
     class Solver {
         static_assert((1 < O) && (O <= MAX_REASONABLE_ORDER));
-        static_assert((GUM == BACKTRACKS) == CBT);
+        static_assert((GUM == BACKTRACKS) ? CBT : true);
 
     // ========================
     // TYPEDEFS
@@ -121,8 +121,10 @@ namespace Sudoku {
     // =======================
     public:
         /**
+         * CLARITY:
          * When clear, `this->value` is the grid's length.
          * 
+         * BIASINDEX:
          * `this->biasIndex` is the next biasIndex to try (such that
          * valid outcomes are never skipped and the traversal never
          * loops upon itself) if the biasIndex pointing to my current
@@ -130,6 +132,7 @@ namespace Sudoku {
          * to the grid's length, indicating that the next thing to try
          * is via backtracking.
          * 
+         * GIVENS:
          * If solving a puzzle and this tile is for given information,
          * `biasIndex` should not be used, and `value` should not be
          * modified.
@@ -212,8 +215,7 @@ namespace Sudoku {
 
         // These fields are used to continue the solution generator from
         // wherever it last left off.
-        TraversalDirection nextDirection;
-        SolverExitStatus   lastExitStatus;
+        area_t prevGenTvsIndex;
 
     private:
         unsigned long long totalGenCount = 0;
@@ -225,15 +227,15 @@ namespace Sudoku {
         opcount_t maxBacktrackCount;
         void printShadedBacktrackStat(const unsigned count) const;
     public:
-        getMaxBacktrackCount(void) const noexcept { return maxBacktrackCount; }
+        opcount_t getMaxBacktrackCount(void) const noexcept { return maxBacktrackCount; }
         /**
-         * Give up if number of operations performed exceeds this value.
-         * Measured stats: https://www.desmos.com/calculator/8taqzelils
+         * Give up if the giveup condition variable meets this value.
+         * Measured stats for operations: https://www.desmos.com/calculator/8taqzelils
          */
         static constexpr opcount_t GIVEUP_THRESHOLD
-        = (GUM == OPERATIONS) ? ((const opcount_t[]){ 0, 1, 25, 2'000, 2'500'000, 30'000'000, })[order]
-        : (GUM == BACKTRACKS) ? ((const opcount_t[]){ 0, 1, 25, 2'000, 2'500'000, 30'000'000, })[order]
-        : 0;
+            = (GUM == OPERATIONS) ? ((const opcount_t[]){ 0, 1, 25, 2'000, 2'500'000, 30'000'000, })[order]
+            : (GUM == BACKTRACKS) ? ((const opcount_t[]){ 0, 0, 25, 2'000, 2'500'000, 30'000'000, })[order]
+            : 0; // TODO: update the above numbers.
 
     public:
         std::ostream& os;
@@ -243,7 +245,6 @@ namespace Sudoku {
         const std::string blkRowSepString;
 
     public:
-        void clear(void);
         // Returns whether the string could be loaded as a puzzle.
         // Does NOT check whether the givens follow the sudoku rules.
         bool loadPuzzleFromString(const std::string&);
@@ -251,11 +252,13 @@ namespace Sudoku {
         // performed. If exitStatus is not set to IMPOSSIBLE, then an
         // immediate call to this method will continue the previous
         // solution-generating-run from where it left off.
-        template <bool USE_PUZZLE>
-        [[gnu::hot]] opcount_t generateSolution(SolverExitStatus& exitStatus);
-        [[gnu::hot]] TraversalDirection setNextValid(const area_t);
+        template <bool USE_PUZZLE = false>
+        [[gnu::hot]] opcount_t generateSolution(SolverExitStatus& exitStatus, bool contPrev = false);
+        [[gnu::hot]] TvsDirection setNextValid(const area_t);
     private:
         void registerGivenValue(const area_t index, const value_t value);
+        template <bool USE_PUZZLE>
+        [[gnu::hot]] void clear(void);
 
     // ========================
     // STATIC UTILITIES
