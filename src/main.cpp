@@ -12,7 +12,7 @@
  * Choose build flags for the Repl and Solver here.
  */
 template<Sudoku::Order O>
-using Repl = Sudoku::Repl<O, true, Sudoku::OPERATIONS>;
+using Repl = Sudoku::Repl<O, false, Sudoku::OPERATIONS>;
 
 
 /**
@@ -57,7 +57,7 @@ int main(const int argc, char const *const argv[]) {
     // Create a Solver of the specified order:
     // (It will automatically enter its REPL).
     switch (static_cast<Sudoku::Order>(userOrder)) {
-        case 2: { Repl<2> s(*outStream); break; }
+        //case 2: { Repl<2> s(*outStream); break; }
         case 3: { Repl<3> s(*outStream); break; }
         case 4: { Repl<4> s(*outStream); break; }
         case 5: { Repl<5> s(*outStream); break; }

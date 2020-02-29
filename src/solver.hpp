@@ -187,11 +187,11 @@ namespace Sudoku {
         explicit Solver(std::ostream&);
 
         void print(void) const;
-        void printMessageBar(std::string const&, unsigned int, const char = '=') const;
-        void printMessageBar(std::string const&, const char = '=') const;
+        void printMessageBar(std::string const&, unsigned int, char = '=') const;
+        void printMessageBar(std::string const&, char = '=') const;
 
         [[gnu::cold]] GenPath getGenPath(void) const noexcept { return genPath; }
-        [[gnu::cold]] void setGenPath(const GenPath) noexcept;
+        [[gnu::cold]] void setGenPath(GenPath) noexcept;
 
     // ========================
     // PRIVATE MEMBERS
@@ -225,7 +225,7 @@ namespace Sudoku {
     private:
         std::array<unsigned, (CBT?area:1)> backtrackCounts;
         opcount_t maxBacktrackCount;
-        void printShadedBacktrackStat(const unsigned count) const;
+        void printShadedBacktrackStat(unsigned count) const;
     public:
         opcount_t getMaxBacktrackCount(void) const noexcept { return maxBacktrackCount; }
         /**
@@ -233,8 +233,8 @@ namespace Sudoku {
          * Measured stats for operations: https://www.desmos.com/calculator/8taqzelils
          */
         static constexpr opcount_t GIVEUP_THRESHOLD
-            = (GUM == OPERATIONS) ? ((const opcount_t[]){ 0, 1, 25, 2'000, 2'500'000, 30'000'000, })[order]
-            : (GUM == BACKTRACKS) ? ((const opcount_t[]){ 0, 0, 25, 2'000, 2'500'000, 30'000'000, })[order]
+            = (GUM == OPERATIONS) ? ((const opcount_t[]){ 1, 2, 26, 2'000, 100'000, 30'000'000, })[order]
+            : (GUM == BACKTRACKS) ? ((const opcount_t[]){ 1, 1,  3,   100, 100'000,  2'000'000, })[order]
             : 0; // TODO: update the above numbers.
 
     public:
@@ -247,7 +247,7 @@ namespace Sudoku {
     public:
         // Returns whether the string could be loaded as a puzzle.
         // Does NOT check whether the givens follow the sudoku rules.
-        bool loadPuzzleFromString(const std::string&);
+        bool loadPuzzleFromString(std::string const&);
         // Generates a random solution. Returns the number of operations
         // performed. If exitStatus is not set to IMPOSSIBLE, then an
         // immediate call to this method will continue the previous
@@ -256,7 +256,7 @@ namespace Sudoku {
         [[gnu::hot]] opcount_t generateSolution(SolverExitStatus& exitStatus, bool contPrev = false);
         [[gnu::hot]] TvsDirection setNextValid(const area_t);
     private:
-        void registerGivenValue(const area_t index, const value_t value);
+        void registerGivenValue(area_t index, value_t value);
         template <bool USE_PUZZLE>
         [[gnu::hot]] void clear(void);
 

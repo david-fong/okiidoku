@@ -42,8 +42,12 @@ namespace Sudoku {
 
     typedef unsigned long trials_t;
     constexpr unsigned int TRIALS_NUM_BINS = 20;
+    enum TrialsStopBy {
+        TOTAL_TRIALS,
+        TOTAL_SUCCESSES,
+    };
 
-    volatile unsigned int GET_TERM_COLS(const unsigned int fallback) noexcept {
+    volatile unsigned int GET_TERM_COLS(unsigned int fallback) noexcept {
         char const*const envVar = std::getenv("COLUMNS");
         return (envVar != NULL) ? std::stoul(envVar) : fallback;
     }
@@ -73,7 +77,7 @@ namespace Sudoku {
         // Return false if command is to exit the program:
         void solvePuzzlesFromFile(std::ifstream&);
         void runSingle(bool contPrev = false);
-        void runMultiple(const unsigned long);
+        void runMultiple(unsigned long numTrials, TrialsStopBy);
 
         void printTrialsWorkDistribution(const trials_t,
             std::array<trials_t, TRIALS_NUM_BINS+1> const&,

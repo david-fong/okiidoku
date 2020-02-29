@@ -80,7 +80,6 @@ void Solver<O,CBT,GUM>::print(void) const {
         os << '\n';
     }
     if constexpr (order == 4) os << std::setbase(10);
-    os << std::endl;
 }
 
 
@@ -119,7 +118,7 @@ void Solver<O,CBT,GUM>::clear(void) {
         // Clear all non-givens. Their values should already have been
         // set by `loadPuzzleFromString`. Recall that biasIndex for
         // givens must not be used (see Tile documentation).
-        if (USE_PUZZLE ? !isTileForGiven[i] : true) grid[i].clear();
+        if ((USE_PUZZLE) ? (!isTileForGiven[i]) : true) grid[i].clear();
     }
     rowSymbolOccMasks.fill(0);
     colSymbolOccMasks.fill(0);
