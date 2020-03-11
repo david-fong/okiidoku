@@ -65,7 +65,7 @@ bool Repl<O,CBT,GUM>::runCommand(std::string const& cmdLine) {
         case CMD_CONTINUE_PREV: runSingle(true); break;
         case CMD_RUN_MULTIPLE:
             try {
-                runMultiple(std::stoul(cmdArgs));
+                runMultiple(std::stoul(cmdArgs), TrialsStopBy::TOTAL_TRIALS);
             } catch (std::invalid_argument const& ia) {
                 std::cout << "could not convert " << cmdArgs << " to an integer." << std::endl;
             }
@@ -188,6 +188,7 @@ void Repl<O,CBT,GUM>::runMultiple(const trials_t trialsToRun, const TrialsStopBy
     const double processorSeconds = ((double)(std::clock() - clockStart) / CLOCKS_PER_SEC);
     solver.printMessageBar("", BAR_WIDTH, '-');
     os << "processor time: " STATW_D << processorSeconds << " seconds (including I/O)" << '\n';
+    os << "give-up method: " STATW_I << GIVEUP_METHOD_STRINGS[GUM] << '\n';
     if (processorSeconds > 10.0) {
         // Emit a beep sound if the trials took longer than ten processor seconds:
         std::cout << '\a' << std::flush;
@@ -203,38 +204,42 @@ void Repl<O,CBT,GUM>::runMultiple(const trials_t trialsToRun, const TrialsStopBy
 
 template <Order O, bool CBT, GiveupMethod GUM>
 void Repl<O,CBT,GUM>::printTrialsWorkDistribution(
-    const trials_t trialsToRun,
+    const trials_t trialsToRun, // sum of binHitCount
     std::array<trials_t, TRIALS_NUM_BINS+1> const& binHitCount,
     std::array<double,   TRIALS_NUM_BINS+1> const& binOpsTotal
 ) {
     const std::string TABLE_SEPARATOR = "+-----------+----------+--------------+";
 
-    // TODO: do a preliminary loop that initializes accumulator arrays.
-    for (unsigned int i = 0; i < binHitCount.size(); i++) {
-        ;
-    }
-
-    os << TABLE_SEPARATOR;
-    os << "|  bin bot  |   hits   |  throughput  |\n";
-    os << TABLE_SEPARATOR;
+    std::array<double, TRIALS_NUM_BINS+1> throughput; {
+    double averageBinOps = (double)binOpsTotal[0] / binHitCount[0];
     opcount_t successfulTrialsAccum = 0;
     double  successfulSolveOpsAccum = 0.0;
-    for (unsigned i = 0; i < binHitCount.size(); i++) {
+    for (unsigned i = 0; i < TRIALS_NUM_BINS; i++) {
         successfulTrialsAccum   += binHitCount[i];
         successfulSolveOpsAccum += binOpsTotal[i];
-        const double binBottom  = (double)(i) * solver.GIVEUP_THRESHOLD / TRIALS_NUM_BINS;
-        // TODO: update below for GUM==BACKTRACKS. No nice way to do it.
-        // If I want an exact thing, I would need to change generateSolution
-        // to also track the numOperations for some hypothetical, lower threshold,
-        // which would be for the previous bin. Otherwise, I would need to make
-        // some estimate based on averages of this bin and the next bin.
-        const double giveupOps  = (trialsToRun - successfulTrialsAccum) * binBottom;
-        const double throughput = (i == TRIALS_NUM_BINS) ? 0.0
+        // No nice way to do the below. If I want an exact thing, I would
+        // need to change generateSolution to also track the numOperations
+        // for some hypothetical, lower threshold, which would be for the
+        // previous bin. Otherwise, As a design decision, I'm making some
+        // estimate based on averages of this bin and the next bin.
+        const double averageNextBinOps = (double)binOpsTotal[i+1] / binHitCount[i+1];
+        const double giveupOps  = (trialsToRun - successfulTrialsAccum)
+            * 0.5 * (averageBinOps + averageNextBinOps);
+        averageBinOps = averageNextBinOps;
+        throughput[i] = (i == TRIALS_NUM_BINS) ? 0.0
             : successfulTrialsAccum / (successfulSolveOpsAccum + giveupOps);
+        ;
+    }}
+
+    os << TABLE_SEPARATOR;
+    os << "\n|  bin bot  |   hits   |  throughput  |\n";
+    os << TABLE_SEPARATOR;
+    for (unsigned i = 0; i < binHitCount.size(); i++) {
         if (i == TRIALS_NUM_BINS) {
             // Print a special separator for the giveups row:
-            os << TABLE_SEPARATOR;
+            os << '\n' << TABLE_SEPARATOR;
         }
+        const double binBottom  = (double)(i) * solver.GIVEUP_THRESHOLD / TRIALS_NUM_BINS;
         if constexpr (solver.order < 4) {
             os << "\n|" << std::setw(9) << (int)(binBottom);
         } else {
@@ -243,7 +248,7 @@ void Repl<O,CBT,GUM>::printTrialsWorkDistribution(
         os << "  |" << std::setw(8)  << binHitCount[i];
         os << "  |" << std::setw(12);
         if (i == TRIALS_NUM_BINS) { os << "unknown";
-        } else { os << std::scientific << throughput << std::fixed; }
+        } else { os << std::scientific << throughput[i] << std::fixed; }
         os << "  |";
     }
     os << " <- current threshold (giveups)\n";

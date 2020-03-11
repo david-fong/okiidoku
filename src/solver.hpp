@@ -37,6 +37,11 @@ namespace Sudoku {
     enum GiveupMethod {
         OPERATIONS, // Total times attempted to setNextValid.
         BACKTRACKS, // Maximum count searched over all tiles.
+        GiveupMethod__MAX = BACKTRACKS,
+    };
+    std::array<std::string, GiveupMethod__MAX + 1> GIVEUP_METHOD_STRINGS = {
+        "operations",
+        "backtracks",
     };
 
     const std::array<std::string, 2> GenPath_Names = {
@@ -234,7 +239,7 @@ namespace Sudoku {
          */
         static constexpr opcount_t GIVEUP_THRESHOLD
             = (GUM == OPERATIONS) ? ((const opcount_t[]){ 1, 2, 26, 2'000, 100'000, 30'000'000, })[order]
-            : (GUM == BACKTRACKS) ? ((const opcount_t[]){ 1, 1,  3,   100, 100'000,  2'000'000, })[order]
+            : (GUM == BACKTRACKS) ? ((const opcount_t[]){ 1, 1,  3,   100,  30'000,  2'000'000, })[order]
             : 0; // TODO: update the above numbers.
 
     public:

@@ -44,7 +44,7 @@ namespace Sudoku {
     constexpr unsigned int TRIALS_NUM_BINS = 20;
     enum TrialsStopBy {
         TOTAL_TRIALS,
-        TOTAL_SUCCESSES,
+        TOTAL_SUCCESSES, // TODO make a a command for this
     };
 
     volatile unsigned int GET_TERM_COLS(unsigned int fallback) noexcept {
