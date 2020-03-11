@@ -191,6 +191,9 @@ opcount_t Solver<O,CBT,GUM>::generateSolution(SolverExitStatus& exitStatus, cons
     area_t tvsIndex = 0;
 
     if (contPrev) {
+        if (backtrackCounts[traversalOrder[0]]) {
+            // See note at giveup-check
+        }
         if (prevGenTvsIndex == area) {
             // Previously succeeded.
             tvsIndex = area - 1;
@@ -211,7 +214,9 @@ opcount_t Solver<O,CBT,GUM>::generateSolution(SolverExitStatus& exitStatus, cons
     while (tvsIndex < area) {
         const area_t gridIndex = traversalOrder[tvsIndex];
         if constexpr (USE_PUZZLE) {
-            // Immediately pass over tiles containing givens:
+            // Immediately pass over consecutive tiles containing givens.
+            // This logic block ensures that this entire loop never exits
+            // at a non-boundary traversal-index over a given-Tile.
             if (__builtin_expect(isTileForGiven[gridIndex], false)) {
                 if (direction == TvsDirection::BACK) {
                     if (tvsIndex == 0) break;
@@ -222,41 +227,40 @@ opcount_t Solver<O,CBT,GUM>::generateSolution(SolverExitStatus& exitStatus, cons
                 continue;
             }
         }
-        // Check whether the give-up-condition has been met:
-        const opcount_t giveupCondVar
-            = (GUM == OPERATIONS) ? numOperations
-            : (GUM == BACKTRACKS) ? maxBacktrackCount
-            : ~0;
-        if (__builtin_expect(giveupCondVar >= GIVEUP_THRESHOLD, false)) {
-            if (__builtin_expect(isTileForGiven[gridIndex], false)) {
-                if constexpr (USE_PUZZLE) continue;
-            } else break;
-        }
         // Try something at the current tile:
         direction = setNextValid(gridIndex);
         numOperations++;
         if (direction == TvsDirection::BACK) {
             // Pop and step backward:
-            if (__builtin_expect(tvsIndex == 0, false)) {
-                if (__builtin_expect(isTileForGiven[gridIndex], false)) {
-                    if constexpr (USE_PUZZLE) continue;
-                } else break;
-            }
             if constexpr (CBT) {
                 if (++backtrackCounts[gridIndex] > maxBacktrackCount) {
                     maxBacktrackCount = backtrackCounts[gridIndex];
                 }
+            }
+            if (__builtin_expect(tvsIndex == 0, false)) {
+                break;
             }
             --tvsIndex;
         } else {
             // (direction == TvsDirection::FORWARD)
             ++tvsIndex;
         }
+        // Check whether the give-up-condition has been met:
+        const opcount_t giveupCondVar
+            = (GUM == OPERATIONS) ? numOperations
+            : (GUM == BACKTRACKS) ? maxBacktrackCount
+            : ~0;
+        if (__builtin_expect(giveupCondVar >= GIVEUP_THRESHOLD, false)) {
+            // TODO that it is possible to give up while the next traversal
+            // index to try is zero (and there is still more to try at zero).
+            // Find an elegant way to handle this edge-case.
+            break;
+        }
     }
     // Return:
     totalGenCount++;
     prevGenTvsIndex = tvsIndex;
-    exitStatus = (tvsIndex) ? (tvsIndex == area ? SUCCESS : GIVEUP) : IMPOSSIBLE;
+    exitStatus = (tvsIndex == 0) ? IMPOSSIBLE : (tvsIndex == area ? SUCCESS : GIVEUP);
     return numOperations;
 }
 
@@ -309,6 +313,8 @@ TvsDirection Solver<O,CBT,GUM>::setNextValid(const area_t index) {
         }
     }
     // Backtrack:
+    // - turning back: The above loop never entered the return-block.
+    // - continuing back: The above loop was completely skipped-over.
     t.clear();
     return BACK;
 }
