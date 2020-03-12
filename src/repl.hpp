@@ -14,18 +14,20 @@ namespace Sudoku {
         CMD_SOLVE,
         CMD_RUN_SINGLE,
         CMD_CONTINUE_PREV,
-        CMD_RUN_MULTIPLE,
+        CMD_RUN_TRIALS,
+        CMD_RUN_SUCCESSES,
         CMD_SET_GENPATH,
     };
 
     const std::map<std::string, Command> COMMAND_MAP = {
-        { "help",       CMD_HELP },
-        { "quit",       CMD_QUIT },
-        { "solve",      CMD_SOLVE },
-        { "",           CMD_RUN_SINGLE },
-        { "cont",       CMD_CONTINUE_PREV },
-        { "trials",     CMD_RUN_MULTIPLE },
-        { "genpath",    CMD_SET_GENPATH },
+        { "help",       CMD_HELP            },
+        { "quit",       CMD_QUIT            },
+        { "solve",      CMD_SOLVE           },
+        { "",           CMD_RUN_SINGLE      },
+        { "cont",       CMD_CONTINUE_PREV   },
+        { "trials",     CMD_RUN_TRIALS      },
+        { "strials",    CMD_RUN_SUCCESSES   },
+        { "genpath",    CMD_SET_GENPATH     },
     };
 
     const std::string HELP_MESSAGE = "\nCOMMAND MENU:"
@@ -35,7 +37,8 @@ namespace Sudoku {
         "\n- solve <puzzle>     no spaces; zeros mean empty"
         "\n- {enter}            generate a single solution"
         "\n- cont               continue previous generation"
-        "\n- trials <n>         generate <n> solutions"
+        "\n- trials <n>         attempt to generate <n> solutions"
+        "\n- strials <n>        successfully generate <n> solutions"
         "\n- genpath            cycle generator traversal path"
         ;
     const std::string REPL_PROMPT = "\n$ ";
@@ -47,7 +50,7 @@ namespace Sudoku {
         TOTAL_SUCCESSES, // TODO make a a command for this
     };
 
-    volatile unsigned int GET_TERM_COLS(unsigned int fallback) noexcept {
+    volatile unsigned int GET_TERM_COLS(const unsigned fallback) noexcept {
         char const*const envVar = std::getenv("COLUMNS");
         return (envVar != NULL) ? std::stoul(envVar) : fallback;
     }

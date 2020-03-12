@@ -57,13 +57,12 @@ int main(const int argc, char const *const argv[]) {
     // Create a Solver of the specified order:
     // (It will automatically enter its REPL).
     switch (static_cast<Sudoku::Order>(userOrder)) {
-        //case 2: { Repl<2> s(*outStream); break; }
         case 3: { Repl<3> s(*outStream); break; }
         case 4: { Repl<4> s(*outStream); break; }
         case 5: { Repl<5> s(*outStream); break; }
         default:
             std::cout << "\nFAILED:\norder must be one of: [ ";
-            for (int i = 2; i <= 5; i++) {
+            for (int i = 3; i <= 5; i++) {
                 std::cout << i << ", ";
             }
             std::cout << "]" << std::endl;

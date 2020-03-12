@@ -64,9 +64,14 @@ bool Repl<O,CBT,GUM>::runCommand(std::string const& cmdLine) {
             break; }
         case CMD_RUN_SINGLE:    runSingle();     break;
         case CMD_CONTINUE_PREV: runSingle(true); break;
-        case CMD_RUN_MULTIPLE:
+        case CMD_RUN_TRIALS:
+        case CMD_RUN_SUCCESSES:
             try {
-                runMultiple(std::stoul(cmdArgs), TrialsStopBy::TOTAL_TRIALS);
+                const TrialsStopBy stopBy
+                    = (it->second == CMD_RUN_TRIALS)    ? TOTAL_TRIALS
+                    : (it->second == CMD_RUN_SUCCESSES) ? TOTAL_SUCCESSES
+                    : (TrialsStopBy)~0;
+                runMultiple(std::stoul(cmdArgs), stopBy);
             } catch (std::invalid_argument const& ia) {
                 std::cout << "could not convert " << cmdArgs << " to an integer." << std::endl;
             }
@@ -123,7 +128,7 @@ void Repl<O,CBT,GUM>::runSingle(const bool contPrev) {
 
 
 template <Order O, bool CBT, GiveupMethod GUM>
-void Repl<O,CBT,GUM>::runMultiple(const trials_t trialsToRun, const TrialsStopBy stopAccordingTo) {
+void Repl<O,CBT,GUM>::runMultiple(const trials_t stopAfterValue, const TrialsStopBy stopAccordingTo) {
     constexpr unsigned DEFAULT_COLS     = ((unsigned[]){0,64,32,24,16,4,1})[solver.order];
     constexpr unsigned LINES_PER_FLUSH  = ((unsigned[]){0, 0, 0, 0, 0,1,1})[solver.order];
     const unsigned COLS = (solver.isPretty ? (GET_TERM_COLS(DEFAULT_COLS)-7) : DEFAULT_COLS) / solver.STATS_WIDTH;
@@ -133,18 +138,18 @@ void Repl<O,CBT,GUM>::runMultiple(const trials_t trialsToRun, const TrialsStopBy
     std::array<trials_t, TRIALS_NUM_BINS+1> binHitCount = {0,};
     std::array<double,   TRIALS_NUM_BINS+1> binOpsTotal = {0,};
 
-    solver.printMessageBar("START x" + std::to_string(trialsToRun), BAR_WIDTH);
+    solver.printMessageBar("START x" + std::to_string(stopAfterValue), BAR_WIDTH);
     auto wallClockStart = std::chrono::steady_clock::now();
     auto procClockStart = std::clock();
 
-    {
     trials_t numTotalTrials = 0;
+    {
+    trials_t doneTrialsCondVar = 0;
     trials_t numTotalSuccesses = 0;
-    bool moreTrialsToDo;
     do {
         // Print a progress indicator to stdout:
         if (numTotalTrials % COLS == 0) {
-            const unsigned pctDone = 100.0 * numTotalTrials / trialsToRun;
+            const unsigned pctDone = 100.0 * doneTrialsCondVar / stopAfterValue;
             std::cout << "| " << std::setw(2) << pctDone << "% |";
         }
         // Attempt to generate a single solution:
@@ -179,18 +184,20 @@ void Repl<O,CBT,GUM>::runMultiple(const trials_t trialsToRun, const TrialsStopBy
             } else { os << '\n'; }
         }
         switch (stopAccordingTo) {
-            case TOTAL_TRIALS:    moreTrialsToDo = numTotalTrials    < trialsToRun; break;
-            case TOTAL_SUCCESSES: moreTrialsToDo = numTotalSuccesses < trialsToRun; break;
+            case TOTAL_TRIALS:    doneTrialsCondVar = numTotalTrials;
+            case TOTAL_SUCCESSES: doneTrialsCondVar = numTotalSuccesses;
         }
-    } while (moreTrialsToDo);
+    } while (doneTrialsCondVar < stopAfterValue);
     }
-    if (trialsToRun % COLS != 0) { os << '\n'; } // Last newline.
+    if (stopAfterValue % COLS != 0) { os << '\n'; } // Last newline.
 
     // Print stats:
     const double procSeconds = ((double)(std::clock() - procClockStart) / CLOCKS_PER_SEC);
     const double wallSeconds = ((double)std::chrono::duration_cast<std::chrono::microseconds>(
         std::chrono::steady_clock::now() - wallClockStart).count() / 1'000'000);
     solver.printMessageBar("", BAR_WIDTH, '-');
+    os << "generator path: " STATW_I << GenPath_Names[solver.getGenPath()] << '\n';
+    os << "give-up method: " STATW_I << GiveupMethod_Names[GUM] << '\n';
     os << "processor time: " STATW_D << procSeconds << " seconds (with I/O)" << '\n';
     os << "real life time: " STATW_D << wallSeconds << " seconds (with I/O)" << '\n';
     os << "give-up method: " STATW_I << GIVEUP_METHOD_STRINGS[GUM] << '\n';
@@ -201,8 +208,8 @@ void Repl<O,CBT,GUM>::runMultiple(const trials_t trialsToRun, const TrialsStopBy
 
     // Print bins (work distribution):
     solver.printMessageBar("", BAR_WIDTH, '-');
-    printTrialsWorkDistribution(trialsToRun, binHitCount, binOpsTotal);
-    solver.printMessageBar("DONE x" + std::to_string(trialsToRun), BAR_WIDTH);
+    printTrialsWorkDistribution(numTotalTrials, binHitCount, binOpsTotal);
+    solver.printMessageBar("DONE x" + std::to_string(stopAfterValue), BAR_WIDTH);
     os << std::flush;
 }
 
