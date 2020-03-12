@@ -29,6 +29,7 @@
         "ctzll",
         "popcount",
         "popcountll",
-        "builtin"
+        "builtin",
+        "chrono"
     ]
 }

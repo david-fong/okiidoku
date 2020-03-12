@@ -29,7 +29,12 @@ Solver<O,CBT,GUM>::Solver(std::ostream& os):
         std::iota(rowBias.begin(), rowBias.end(), 0);
     }
     // Interesting: Smaller-order grids perform better with ROW_MAJOR as genPath.
-    setGenPath((O < 4) ? ROW_MAJOR : BLOCK_COLS);
+    setGenPath((O < 4) ? ROW_MAJOR : (GUM == BACKTRACKS) ? ROW_MAJOR : BLOCK_COLS);
+    if ((order < 4) || (order == 4 && GUM == BACKTRACKS)) {
+        setGenPath(ROW_MAJOR);
+    } else {
+        setGenPath(BLOCK_COLS);
+    }
 
     // Output formatting:
     if (isPretty) {
@@ -191,9 +196,6 @@ opcount_t Solver<O,CBT,GUM>::generateSolution(SolverExitStatus& exitStatus, cons
     area_t tvsIndex = 0;
 
     if (contPrev) {
-        if (backtrackCounts[traversalOrder[0]]) {
-            // See note at giveup-check
-        }
         if (prevGenTvsIndex == area) {
             // Previously succeeded.
             tvsIndex = area - 1;

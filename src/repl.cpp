@@ -2,6 +2,7 @@
 
 #include <iostream>     // cout, endl
 #include <iomanip>      // setw,
+#include <chrono>       // steady_clock::now, durationcast
 
 
 namespace Sudoku {
@@ -133,7 +134,8 @@ void Repl<O,CBT,GUM>::runMultiple(const trials_t trialsToRun, const TrialsStopBy
     std::array<double,   TRIALS_NUM_BINS+1> binOpsTotal = {0,};
 
     solver.printMessageBar("START x" + std::to_string(trialsToRun), BAR_WIDTH);
-    clock_t clockStart = std::clock();
+    auto wallClockStart = std::chrono::steady_clock::now();
+    auto procClockStart = std::clock();
 
     {
     trials_t numTotalTrials = 0;
@@ -185,11 +187,14 @@ void Repl<O,CBT,GUM>::runMultiple(const trials_t trialsToRun, const TrialsStopBy
     if (trialsToRun % COLS != 0) { os << '\n'; } // Last newline.
 
     // Print stats:
-    const double processorSeconds = ((double)(std::clock() - clockStart) / CLOCKS_PER_SEC);
+    const double procSeconds = ((double)(std::clock() - procClockStart) / CLOCKS_PER_SEC);
+    const double wallSeconds = ((double)std::chrono::duration_cast<std::chrono::microseconds>(
+        std::chrono::steady_clock::now() - wallClockStart).count() / 1'000'000);
     solver.printMessageBar("", BAR_WIDTH, '-');
-    os << "processor time: " STATW_D << processorSeconds << " seconds (including I/O)" << '\n';
+    os << "processor time: " STATW_D << procSeconds << " seconds (with I/O)" << '\n';
+    os << "real life time: " STATW_D << wallSeconds << " seconds (with I/O)" << '\n';
     os << "give-up method: " STATW_I << GIVEUP_METHOD_STRINGS[GUM] << '\n';
-    if (processorSeconds > 10.0) {
+    if (wallSeconds > 10.0) {
         // Emit a beep sound if the trials took longer than ten processor seconds:
         std::cout << '\a' << std::flush;
     }

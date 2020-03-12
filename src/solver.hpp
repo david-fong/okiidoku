@@ -239,7 +239,7 @@ namespace Sudoku {
          */
         static constexpr opcount_t GIVEUP_THRESHOLD
             = (GUM == OPERATIONS) ? ((const opcount_t[]){ 1, 2, 26, 2'000, 100'000, 30'000'000, })[order]
-            : (GUM == BACKTRACKS) ? ((const opcount_t[]){ 1, 1,  3,   100,  30'000,  2'000'000, })[order]
+            : (GUM == BACKTRACKS) ? ((const opcount_t[]){ 1, 1,  3,   100,  10'000,  2'200'000, })[order]
             : 0; // TODO: update the above numbers.
 
     public:
