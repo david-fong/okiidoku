@@ -1,8 +1,9 @@
 #include "repl.hpp"
 
-#include <iostream>     // cout, endl
+#include <iostream>     // cout, endl,
 #include <iomanip>      // setw,
-#include <chrono>       // steady_clock::now, durationcast
+#include <chrono>       // steady_clock::now, durationcast,
+#include <math.h>       // pow,
 
 
 namespace Sudoku {
@@ -200,7 +201,6 @@ void Repl<O,CBT,GUM>::runMultiple(const trials_t stopAfterValue, const TrialsSto
     os << "give-up method: " STATW_I << GiveupMethod_Names[GUM] << '\n';
     os << "processor time: " STATW_D << procSeconds << " seconds (with I/O)" << '\n';
     os << "real life time: " STATW_D << wallSeconds << " seconds (with I/O)" << '\n';
-    os << "give-up method: " STATW_I << GIVEUP_METHOD_STRINGS[GUM] << '\n';
     if (wallSeconds > 10.0) {
         // Emit a beep sound if the trials took longer than ten processor seconds:
         std::cout << '\a' << std::flush;
@@ -220,9 +220,11 @@ void Repl<O,CBT,GUM>::printTrialsWorkDistribution(
     std::array<trials_t, TRIALS_NUM_BINS+1> const& binHitCount,
     std::array<double,   TRIALS_NUM_BINS+1> const& binOpsTotal
 ) {
+    const std::string THROUGHPUT_BAR_STRING = "--------------------------------";
     const std::string TABLE_SEPARATOR = "+-----------+----------+--------------+";
 
-    std::array<double, TRIALS_NUM_BINS+1> throughput; {
+    std::array<double, TRIALS_NUM_BINS+1> throughput;
+    unsigned bestThroughputBin = 0; {
     double averageBinOps = (double)binOpsTotal[0] / binHitCount[0];
     opcount_t successfulTrialsAccum = 0;
     double  successfulSolveOpsAccum = 0.0;
@@ -233,14 +235,18 @@ void Repl<O,CBT,GUM>::printTrialsWorkDistribution(
         // need to change generateSolution to also track the numOperations
         // for some hypothetical, lower threshold, which would be for the
         // previous bin. Otherwise, As a design decision, I'm making some
-        // estimate based on averages of this bin and the next bin.
+        // estimate based on the averages for this bin and the next bin.
+        // TODO why am I getting `nan` with small data sets?
         const double averageNextBinOps = (double)binOpsTotal[i+1] / binHitCount[i+1];
         const double giveupOps  = (trialsToRun - successfulTrialsAccum)
             * 0.5 * (averageBinOps + averageNextBinOps);
         averageBinOps = averageNextBinOps;
-        throughput[i] = (i == TRIALS_NUM_BINS) ? 0.0
+        throughput[i] = (i == TRIALS_NUM_BINS)
+            ? 0.0 // The last bin is for giveups, which have unknown throughput.
             : successfulTrialsAccum / (successfulSolveOpsAccum + giveupOps);
-        ;
+        if (throughput[i] > throughput[bestThroughputBin]) {
+            bestThroughputBin = i;
+        }
     }}
 
     os << TABLE_SEPARATOR;
@@ -252,7 +258,7 @@ void Repl<O,CBT,GUM>::printTrialsWorkDistribution(
             os << '\n' << TABLE_SEPARATOR;
         }
         const double binBottom  = (double)(i) * solver.GIVEUP_THRESHOLD / TRIALS_NUM_BINS;
-        if constexpr (solver.order < 4) {
+        if constexpr (solver.order < 4 || (solver.order == 4 && GUM == GiveupMethod::BACKTRACKS)) {
             os << "\n|" << std::setw(9) << (int)(binBottom);
         } else {
             os << "\n|" << std::setw(8) << (int)(binBottom / 1'000.0) << 'K';
@@ -262,6 +268,15 @@ void Repl<O,CBT,GUM>::printTrialsWorkDistribution(
         if (i == TRIALS_NUM_BINS) { os << "unknown";
         } else { os << std::scientific << throughput[i] << std::fixed; }
         os << "  |";
+
+        {
+            // Print a bar to visualize throughput relative to tha
+            // of the best. Note visual exaggeration via exponents
+            // (the exponent value was chosen by taste / visual feel)
+            const unsigned barLength = THROUGHPUT_BAR_STRING.length()
+                * std::pow(throughput[i] / throughput[bestThroughputBin], 5);
+            os << ' ' << THROUGHPUT_BAR_STRING.substr(0, barLength);
+        }
     }
     os << " <- current threshold (giveups)\n";
     os << TABLE_SEPARATOR;
