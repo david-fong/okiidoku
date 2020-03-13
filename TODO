@@ -21,6 +21,7 @@ Ex. `000000010400000000020000000000050407008000300001090000300400200050100000000
 - Make non-prompt output text print to cout and to outStream (if outStream is not same as cout).
   - This includes the preamble of parameters that were parsed.
   - Investigate if it is simplest to do this with a macro :P.
+  - Or just do it explicitly in important places like `Solver::print`, and make them take `isPretty` as an argument.
 - Make gen-path a compile-time constant.
   - Rationale: I allowed toggling for educational purposes, but I think doing so reduces chances for compiler optimization. This setting may only be of interest to keen viewers. For anyone else, what performs better is all that really matters.
 

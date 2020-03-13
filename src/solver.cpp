@@ -49,11 +49,11 @@ template <Order O, bool CBT, GiveupMethod GUM>
 void Solver<O,CBT,GUM>::print(void) const {
     #define PRINT_GRID0_TILE(PRINTER_STATEMENT) {\
         for (length_t col = 0; col < length; col++) {\
-            if (isPretty && (col % order) == 0) os << " |";\
+            if (isPretty && (col % order) == 0) os << "\e[2m |\e[22m";\
             PRINTER_STATEMENT;\
         }}
     #define PRINT_GRID_TILE(PRINTER_STATEMENT) {\
-        if (isPretty) os << " |";\
+        if (isPretty) os << "\e[2m |\e[22m";\
         os << GRID_SEP;\
         PRINT_GRID0_TILE(PRINTER_STATEMENT)}
 
@@ -65,9 +65,10 @@ void Solver<O,CBT,GUM>::print(void) const {
     for (length_t row = 0; row < length; row++) {
         if (isPretty && (row % order == 0)) {
             // Print block-row separator string:
+            os << "\e[2m";
             os << blkRowSepString;
             if constexpr (CBT) os << GRID_SEP << blkRowSepString;
-            os << '\n';
+            os << "\n\e[22m";
         }
         // Tile content:
         PRINT_GRID0_TILE(os << ' ' << grid[row * length + col])
@@ -76,13 +77,14 @@ void Solver<O,CBT,GUM>::print(void) const {
         }
         // PRINT_GRID_TILE(os << std::setw(2) << grid[row * length + col].biasIndex)
         // PRINT_GRID_TILE(os << ' ' << rowBiases[row][col])
-        if (isPretty) os << " |";
+        if (isPretty) os << "\e[2m |\e[22m";
         os << '\n';
     }
     if (isPretty) {
-        os << blkRowSepString;
-        if constexpr (CBT) os << GRID_SEP << blkRowSepString;
-        os << '\n';
+            os << "\e[2m";
+            os << blkRowSepString;
+            if constexpr (CBT) os << GRID_SEP << blkRowSepString;
+            os << "\n\e[22m";
     }
     if constexpr (order == 4) os << std::setbase(10);
 }

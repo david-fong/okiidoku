@@ -169,8 +169,7 @@ void Repl<O,CBT,GUM>::runMultiple(const trials_t stopAfterValue, const TrialsSto
 
         // Print the number of operations taken:
         if (exitStatus != SUCCESS) {
-            // TODO: pretty print this as the number with color?
-            os STATW_I << "---";
+            os << "\e[2m" STATW_I << "---" << "\e[22m";
         } else {
             numTotalSuccesses++;
             os STATW_I << numOperations;
@@ -207,7 +206,6 @@ void Repl<O,CBT,GUM>::runMultiple(const trials_t stopAfterValue, const TrialsSto
     }
 
     // Print bins (work distribution):
-    solver.printMessageBar("", BAR_WIDTH, '-');
     printTrialsWorkDistribution(numTotalTrials, binHitCount, binOpsTotal);
     solver.printMessageBar("DONE x" + std::to_string(stopAfterValue), BAR_WIDTH);
     os << std::flush;
@@ -268,22 +266,24 @@ void Repl<O,CBT,GUM>::printTrialsWorkDistribution(
         if (i == TRIALS_NUM_BINS) { os << "unknown";
         } else { os << std::scientific << throughput[i] << std::fixed; }
         os << "  |";
-
         {
             // Print a bar to visualize throughput relative to tha
             // of the best. Note visual exaggeration via exponents
             // (the exponent value was chosen by taste / visual feel)
             const unsigned barLength = THROUGHPUT_BAR_STRING.length()
                 * std::pow(throughput[i] / throughput[bestThroughputBin], 5);
+            if (i != bestThroughputBin) os << "\e[2m";
             os << ' ' << THROUGHPUT_BAR_STRING.substr(0, barLength);
+            if (i != bestThroughputBin) os << "\e[22m";
         }
     }
     os << " <- current threshold (giveups)\n";
     os << TABLE_SEPARATOR;
-    os << "\n * Throughput here is \"average successes per operation\". Tightening the"
-        "\n   threshold induces more giveups, but also reduces the operational cost"
-        "\n   giveups incur. Mathematically speaking, operations are proportional"
-        "\n   to time, except operations are machine independent unlike time.\n";
+    os << "\n\e[2m * Throughput here is in \"average successes per operation\". Tightening the"
+        "\n   threshold induces more frequent giveups, but also reduces the operational"
+        "\n   cost that giveups incur. Operations are proportional to time, and machine"
+        "\n   independent. The visualization bars are purposely stretched to draw focus"
+        "\n   to the optimal bin.\n\e[22m ";
 }
 
 #undef STATW_I
