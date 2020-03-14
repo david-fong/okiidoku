@@ -1,6 +1,7 @@
 #ifndef HPP_SUDOKU_SOLVER
 #define HPP_SUDOKU_SOLVER
 
+#include "../util/ansi.hpp"
 #include "./enum.hpp"
 
 #include <locale>   // numpunct

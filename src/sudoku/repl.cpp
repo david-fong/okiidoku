@@ -12,13 +12,6 @@ namespace Sudoku {
 // (#undef-ed before the end of this namespace)
 #define STATW_I << std::setw(this->solver.STATS_WIDTH)
 #define STATW_D << std::setw(this->solver.STATS_WIDTH + 4)
-#if USE_ANSI_ESC
-#define ANSI_DIM_ON  << "\e[2m"
-#define ANSI_DIM_OFF << "\e[22m"
-#else
-#define ANSI_DIM_ON  << ""
-#define ANSI_DIM_OFF << ""
-#endif
 
 
 template <Order O, bool CBT, GUM::E GUM>
@@ -179,9 +172,9 @@ void Repl<O,CBT,GUM>::runMultiple(const trials_t stopAfterValue, const TrialsSto
         // Print the number of operations taken:
         if (exitStatus != SolverExitStatus::SUCCESS) {
             if (solver.isPretty) {
-                os ANSI_DIM_ON;
+                os << Ansi::DIM.ON;
                 os STATW_I << numOperations;
-                os ANSI_DIM_OFF;
+                os << Ansi::DIM.OFF;
             } else {
                 os STATW_I << "---";
             }
@@ -213,8 +206,8 @@ void Repl<O,CBT,GUM>::runMultiple(const trials_t stopAfterValue, const TrialsSto
     solver.printMessageBar("", BAR_WIDTH, '-');
     os << "give-up method: " STATW_I << GUM << '\n';
     os << "generator path: " STATW_I << solver.getGenPath() << '\n';
-    os << "processor time: " STATW_D << procSeconds << " seconds (with I/O)" << '\n';
-    os << "real-life time: " STATW_D << wallSeconds << " seconds (with I/O)" << '\n';
+    os << "processor time: " STATW_D << procSeconds << Ansi::DIM.ON << " seconds (with I/O)" << Ansi::DIM.OFF << '\n';
+    os << "real-life time: " STATW_D << wallSeconds << Ansi::DIM.ON << " seconds (with I/O)" << Ansi::DIM.OFF << '\n';
     if (wallSeconds > 10.0) {
         // Emit a beep sound if the trials took longer than ten processor seconds:
         std::cout << '\a' << std::flush;
@@ -290,24 +283,22 @@ void Repl<O,CBT,GUM>::printTrialsWorkDistribution(
             // (the exponent value was chosen by taste / visual feel)
             const unsigned barLength = THROUGHPUT_BAR_STRING.length()
                 * std::pow(throughput[i] / throughput[bestThroughputBin], 5);
-            if (solver.isPretty && i != bestThroughputBin) os ANSI_DIM_ON;
+            if (solver.isPretty && i != bestThroughputBin) os << Ansi::DIM.ON;
             os << ' ' << THROUGHPUT_BAR_STRING.substr(0, barLength);
-            if (solver.isPretty && i != bestThroughputBin) os ANSI_DIM_OFF;
+            if (solver.isPretty && i != bestThroughputBin) os << Ansi::DIM.OFF;
         }
     }
     os << " <- current giveup threshold\n";
     os << TABLE_SEPARATOR;
-    os ANSI_DIM_ON <<
+    os << Ansi::DIM.ON <<
         "\n * Throughput here is in \"average successes per operation\". Tightening the"
         "\n   threshold induces more frequent giveups, but also reduces the operational"
         "\n   cost that giveups incur. Operations are proportional to time, and machine"
         "\n   independent. The visualization bars are purposely stretched to draw focus"
-        "\n   to the optimal bin.\n" ANSI_DIM_OFF;
+        "\n   to the optimal bin.\n" << Ansi::DIM.OFF;
 }
 
 #undef STATW_I
 #undef STATW_D
-#undef ANSI_DIM_ON
-#undef ANSI_DIM_OFF
 
 } // End of Sudoku namespace.

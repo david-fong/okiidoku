@@ -6,9 +6,6 @@
 #include <array>
 
 
-/**
- * 
- */
 namespace Sudoku {
 
     /**
@@ -63,7 +60,6 @@ namespace Sudoku {
         // TODO: implement LENGTH format detector and parser.
         SPACE, ZERO, //LENGTH,
     };
-
 
 } // End of Sudoku namespace
 
