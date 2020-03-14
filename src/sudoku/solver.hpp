@@ -184,9 +184,9 @@ namespace Sudoku {
         void printMessageBar(std::string const&, char = '=') const;
 
         [[gnu::cold, gnu::pure]]
-        GenPath getGenPath(void) const noexcept { return genPath; }
-        [[gnu::cold]] GenPath setGenPath(GenPath, bool force = false) noexcept;
-        [[gnu::cold]] GenPath setGenPath(std::string const&) noexcept;
+        GenPath::E getGenPath(void) const noexcept { return genPath; }
+        [[gnu::cold]] GenPath::E setGenPath(GenPath::E, bool force = false) noexcept;
+        [[gnu::cold]] GenPath::E setGenPath(std::string const&) noexcept;
 
     // ========================
     // PRIVATE MEMBERS
@@ -204,7 +204,7 @@ namespace Sudoku {
          * and also a visible difference in the distribution of the
          * number of operations.
          */
-        GenPath genPath;
+        GenPath::E genPath;
         std::array<area_t, area> traversalOrder;
         std::array<bool,   area> isTileForGiven;
 

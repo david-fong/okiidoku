@@ -12,7 +12,9 @@
 namespace Sudoku {
 
     /**
-     * Give Up Method
+     * Give Up Method.
+     * 
+     * This is a compile-time argument specified via templating.
      */
     namespace GUM {
         enum class E {
@@ -25,28 +27,33 @@ namespace Sudoku {
             "operations",
             "backtracks",
         };
-        std::string nameOf(const E e) {
-            return NAMES[static_cast<unsigned>(e)];
+        std::ostream& operator<<(std::ostream& out, const E e) {
+            return out << NAMES[static_cast<unsigned>(e)];
         }
     }
 
-
-    enum class GenPath : unsigned {
-        ROW_MAJOR,
-        BLOCK_COLS,
-    };
-    // Indices of entries must match the literal values of their respective enums.
-    const std::array<std::string, 2> GENPATH_NAMES = {
-        "rowmajor",
-        "blockcol",
-    };
-    std::ostream& operator<<(std::ostream& out, const GenPath genPath) {
-        return out << GENPATH_NAMES[static_cast<unsigned>(genPath)];
+    namespace GenPath {
+        enum class E : unsigned {
+            ROW_MAJOR,
+            BLOCK_COLS,
+            GenPath__MAX = BLOCK_COLS,
+        };
+        constexpr size_t size = static_cast<size_t>(E::GenPath__MAX) + 1;
+        // Indices of entries must match the
+        // literal values of their respective enums.
+        const std::array<std::string, size> NAMES = {
+            "rowmajor",
+            "blockcol",
+        };
+        std::ostream& operator<<(std::ostream& out, const E genPath) {
+            return out << NAMES[static_cast<unsigned>(genPath)];
+        }
     }
 
     enum class TvsDirection : bool {
         BACK, FORWARD,
     };
+
     enum class SolverExitStatus {
         IMPOSSIBLE, GIVEUP, SUCCESS,
     };

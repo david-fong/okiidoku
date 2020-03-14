@@ -8,27 +8,26 @@
 
 namespace Sudoku {
 
-    // TODO Change to scoped enum and chop prefix "CMD"
-    enum Command {
-        CMD_HELP,
-        CMD_QUIT,
-        CMD_RUN_SINGLE,
-        CMD_CONTINUE_PREV,
-        CMD_RUN_TRIALS,
-        CMD_RUN_SUCCESSES,
-        CMD_SET_GENPATH,
-        CMD_SOLVE,
+    enum class Command {
+        HELP,
+        QUIT,
+        RUN_SINGLE,
+        CONTINUE_PREV,
+        RUN_TRIALS,
+        RUN_SUCCESSES,
+        SET_GENPATH,
+        SOLVE,
     };
 
     const std::map<std::string, Command> COMMAND_MAP = {
-        { "help",       CMD_HELP            },
-        { "quit",       CMD_QUIT            },
-        { "",           CMD_RUN_SINGLE      },
-        { "cont",       CMD_CONTINUE_PREV   }, // TODO Change this to "c"? (remember to change help string too)
-        { "trials",     CMD_RUN_TRIALS      },
-        { "strials",    CMD_RUN_SUCCESSES   },
-        { "genpath",    CMD_SET_GENPATH     },
-        { "solve",      CMD_SOLVE           },
+        { "help",       Command::HELP           },
+        { "quit",       Command::QUIT           },
+        { "",           Command::RUN_SINGLE     },
+        { "cont",       Command::CONTINUE_PREV  }, // TODO Change this to "c"? (remember to change help string too)
+        { "trials",     Command::RUN_TRIALS     },
+        { "strials",    Command::RUN_SUCCESSES  },
+        { "genpath",    Command::SET_GENPATH    },
+        { "solve",      Command::SOLVE          },
     };
     const std::string HELP_MESSAGE = "\nCOMMAND MENU:"
         "\n- help               print this help menu"

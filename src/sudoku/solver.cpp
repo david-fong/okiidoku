@@ -37,9 +37,9 @@ Solver<O,CBT,GUM>::Solver(std::ostream& os):
     }
     // Interesting: Smaller-order grids perform better with ROW_MAJOR as genPath.
     if ((order < 4) || (order == 4 && GUM == GUM::E::BACKTRACKS)) {
-        setGenPath(GenPath::ROW_MAJOR, true);
+        setGenPath(GenPath::E::ROW_MAJOR, true);
     } else {
-        setGenPath(GenPath::BLOCK_COLS, true);
+        setGenPath(GenPath::E::BLOCK_COLS, true);
     }
 
     // Output formatting:
@@ -333,16 +333,16 @@ TvsDirection Solver<O,CBT,GUM>::setNextValid(const area_t index) {
 
 
 template <Order O, bool CBT, GUM::E GUM>
-GenPath Solver<O,CBT,GUM>::setGenPath(const GenPath newGenPath, const bool force) noexcept {
+GenPath::E Solver<O,CBT,GUM>::setGenPath(const GenPath::E newGenPath, const bool force) noexcept {
     if (!force && newGenPath == getGenPath()) {
         // Short circuit:
         return getGenPath();
     }
     switch (newGenPath) {
-        case GenPath::ROW_MAJOR:
+        case GenPath::E::ROW_MAJOR:
             std::iota(traversalOrder.begin(), traversalOrder.end(), 0);
             break;
-        case GenPath::BLOCK_COLS: {
+        case GenPath::E::BLOCK_COLS: {
             area_t i = 0;
             for (order_t blkCol = 0; blkCol < order; blkCol++) {
                 for (length_t row = 0; row < length; row++) {
@@ -353,14 +353,14 @@ GenPath Solver<O,CBT,GUM>::setGenPath(const GenPath newGenPath, const bool force
             }
             break; }
     }
-    const GenPath oldGenPath = getGenPath();
+    const GenPath::E oldGenPath = getGenPath();
     genPath = newGenPath;
     return oldGenPath;
 }
 
 
 template <Order O, bool CBT, GUM::E GUM>
-GenPath Solver<O,CBT,GUM>::setGenPath(std::string const& newGenPathString) noexcept {
+GenPath::E Solver<O,CBT,GUM>::setGenPath(std::string const& newGenPathString) noexcept {
     // TODO: define a help menu of options and their meanings and print it here.
 
     // *NOTE: That's right. I'm using `goto` statements. This falls
@@ -371,13 +371,13 @@ GenPath Solver<O,CBT,GUM>::setGenPath(std::string const& newGenPathString) noexc
         std::cout << "currently set to: ";
         goto successful_return;
     }
-    for (unsigned i = 0; i < GENPATH_NAMES.size(); i++) {
-        if (newGenPathString.compare(GENPATH_NAMES[i]) == 0) {
-            if (static_cast<GenPath>(i) == getGenPath()) {
+    for (unsigned i = 0; i < GenPath::NAMES.size(); i++) {
+        if (newGenPathString.compare(GenPath::NAMES[i]) == 0) {
+            if (GenPath::E{i} == getGenPath()) {
                 std::cout << "already set to: ";
             } else {
                 std::cout << "now set to: ";
-                setGenPath(GenPath{i});
+                setGenPath(GenPath::E{i});
             }
             goto successful_return;
         }

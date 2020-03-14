@@ -51,29 +51,29 @@ bool Repl<O,CBT,GUM>::runCommand(std::string const& cmdLine) {
         return true;
     }
     switch (it->second) {
-        case CMD_HELP:
+        case Command::HELP:
             std::cout << HELP_MESSAGE << std::endl;
             break;
-        case CMD_QUIT:
+        case Command::QUIT:
             return false;
-        case CMD_RUN_SINGLE:    runSingle();     break;
-        case CMD_CONTINUE_PREV: runSingle(true); break;
-        case CMD_RUN_TRIALS:
-        case CMD_RUN_SUCCESSES:
+        case Command::RUN_SINGLE:    runSingle();     break;
+        case Command::CONTINUE_PREV: runSingle(true); break;
+        case Command::RUN_TRIALS:
+        case Command::RUN_SUCCESSES:
             try {
                 const TrialsStopBy stopBy
-                    = (it->second == CMD_RUN_TRIALS)    ? TOTAL_TRIALS
-                    : (it->second == CMD_RUN_SUCCESSES) ? TOTAL_SUCCESSES
+                    = (it->second == Command::RUN_TRIALS)    ? TOTAL_TRIALS
+                    : (it->second == Command::RUN_SUCCESSES) ? TOTAL_SUCCESSES
                     : [](){ throw "unhandled TSB case"; return (TrialsStopBy)~0; }();
                 runMultiple(std::stoul(cmdArgs), stopBy);
             } catch (std::invalid_argument const& ia) {
                 std::cout << "could not convert \"" << cmdArgs << "\" to an integer." << std::endl;
             }
             break;
-        case CMD_SET_GENPATH:
+        case Command::SET_GENPATH:
             solver.setGenPath(cmdArgs);
             break;
-        case CMD_SOLVE: {
+        case Command::SOLVE: {
             if (solver.loadPuzzleFromString(cmdArgs)) {
                 // TODO: give better output if solver gives up. Maybe move to its own function.
                 SolverExitStatus exitStatus;
@@ -109,7 +109,7 @@ void Repl<O,CBT,GUM>::solvePuzzlesFromFile(std::ifstream& puzzlesFile) {
         SolverExitStatus exitStatus;
         solver.template generateSolution<true>(exitStatus);
 
-        // TODO Write the solution to an output file.
+        // TODOWrite the solution to an output file.
         solver.print();
     }
 }
@@ -211,7 +211,7 @@ void Repl<O,CBT,GUM>::runMultiple(const trials_t stopAfterValue, const TrialsSto
     const double wallSeconds = ((double)std::chrono::duration_cast<std::chrono::microseconds>(
         std::chrono::steady_clock::now() - wallClockStart).count() / 1'000'000);
     solver.printMessageBar("", BAR_WIDTH, '-');
-    os << "give-up method: " STATW_I << GUM::nameOf(GUM) << '\n';
+    os << "give-up method: " STATW_I << GUM << '\n';
     os << "generator path: " STATW_I << solver.getGenPath() << '\n';
     os << "processor time: " STATW_D << procSeconds << " seconds (with I/O)" << '\n';
     os << "real-life time: " STATW_D << wallSeconds << " seconds (with I/O)" << '\n';
