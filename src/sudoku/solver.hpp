@@ -64,10 +64,10 @@ namespace Sudoku {
      * @param CBT - Whether or not to count backtrack statistics
      * @param GUM - Giveup method.
      */
-    template <Order O, bool CBT, GiveupMethod GUM>
+    template <Order O, bool CBT, GUM::E GUM>
     class Solver {
         static_assert((1 < O) && (O <= MAX_REASONABLE_ORDER));
-        static_assert((GUM == GiveupMethod::BACKTRACKS) ? CBT : true);
+        static_assert((GUM == GUM::E::BACKTRACKS) ? CBT : true);
 
     // ========================
     // TYPEDEFS
@@ -228,10 +228,10 @@ namespace Sudoku {
          * Measured stats for operations: https://www.desmos.com/calculator/8taqzelils
          */
         static constexpr opcount_t GIVEUP_THRESHOLD
-            = (GUM == GiveupMethod::OPERATIONS) ? ((const opcount_t[]){
+            = (GUM == GUM::E::OPERATIONS) ? ((const opcount_t[]){
                 1, 2, 26, 2'000, 100'000, 30'000'000, 120'000'000'000,
                 })[order]
-            : (GUM == GiveupMethod::BACKTRACKS) ? ((const opcount_t[]){
+            : (GUM == GUM::E::BACKTRACKS) ? ((const opcount_t[]){
                 1, 1,  3,   150,  10'000,  2'200'000,  10'000'000'000,
                 })[order]
             : [](){ throw "unhandled GUM case"; return ~0; }();

@@ -8,6 +8,7 @@
 
 namespace Sudoku {
 
+    // TODO Change to scoped enum and chop prefix "CMD"
     enum Command {
         CMD_HELP,
         CMD_QUIT,
@@ -23,7 +24,7 @@ namespace Sudoku {
         { "help",       CMD_HELP            },
         { "quit",       CMD_QUIT            },
         { "",           CMD_RUN_SINGLE      },
-        { "cont",       CMD_CONTINUE_PREV   },
+        { "cont",       CMD_CONTINUE_PREV   }, // TODO Change this to "c"? (remember to change help string too)
         { "trials",     CMD_RUN_TRIALS      },
         { "strials",    CMD_RUN_SUCCESSES   },
         { "genpath",    CMD_SET_GENPATH     },
@@ -67,7 +68,7 @@ namespace Sudoku {
      * - this->member
      * - Base<ARGS>::member
      */
-    template <Order O, bool CBT, GiveupMethod GUM>
+    template <Order O, bool CBT, GUM::E GUM>
     class Repl {
     public:
         explicit Repl(std::ostream&);

@@ -21,7 +21,7 @@ namespace Sudoku {
 #endif
 
 
-template <Order O, bool CBT, GiveupMethod GUM>
+template <Order O, bool CBT, GUM::E GUM>
 Repl<O,CBT,GUM>::Repl(std::ostream& os):
     solver  (os),
     os      (os)
@@ -36,7 +36,7 @@ Repl<O,CBT,GUM>::Repl(std::ostream& os):
 };
 
 
-template <Order O, bool CBT, GiveupMethod GUM>
+template <Order O, bool CBT, GUM::E GUM>
 bool Repl<O,CBT,GUM>::runCommand(std::string const& cmdLine) {
     size_t tokenPos;
     // Very simple parsing: Assumes no leading spaces, and does not
@@ -93,7 +93,7 @@ bool Repl<O,CBT,GUM>::runCommand(std::string const& cmdLine) {
 }
 
 
-template <Order O, bool CBT, GiveupMethod GUM>
+template <Order O, bool CBT, GUM::E GUM>
 void Repl<O,CBT,GUM>::solvePuzzlesFromFile(std::ifstream& puzzlesFile) {
     // Put the string outside the loop since the space allocation
     // for proper input, should be all the same.
@@ -115,7 +115,7 @@ void Repl<O,CBT,GUM>::solvePuzzlesFromFile(std::ifstream& puzzlesFile) {
 }
 
 
-template <Order O, bool CBT, GiveupMethod GUM>
+template <Order O, bool CBT, GUM::E GUM>
 void Repl<O,CBT,GUM>::runSingle(const bool contPrev) {
     solver.printMessageBar("START " + std::to_string(solver.getTotalGenCount()));
 
@@ -137,7 +137,7 @@ void Repl<O,CBT,GUM>::runSingle(const bool contPrev) {
 }
 
 
-template <Order O, bool CBT, GiveupMethod GUM>
+template <Order O, bool CBT, GUM::E GUM>
 void Repl<O,CBT,GUM>::runMultiple(const trials_t stopAfterValue, const TrialsStopBy stopAccordingTo) {
     constexpr unsigned DEFAULT_COLS     = ((unsigned[]){0,64,32,24,16,4,1})[solver.order];
     constexpr unsigned LINES_PER_FLUSH  = ((unsigned[]){0, 0, 0, 0, 0,1,1})[solver.order];
@@ -169,8 +169,8 @@ void Repl<O,CBT,GUM>::runMultiple(const trials_t stopAfterValue, const TrialsSto
 
         // Save some stats for later diagnostics-printing:
         const opcount_t giveupCondVar
-            = (GUM == GiveupMethod::OPERATIONS) ? numOperations
-            : (GUM == GiveupMethod::BACKTRACKS) ? solver.getMaxBacktrackCount()
+            = (GUM == GUM::E::OPERATIONS) ? numOperations
+            : (GUM == GUM::E::BACKTRACKS) ? solver.getMaxBacktrackCount()
             : [](){ throw "unhandled GUM case"; return ~0; }();
         const unsigned binNum = TRIALS_NUM_BINS * (giveupCondVar) / solver.GIVEUP_THRESHOLD;
         binHitCount[binNum]++;
@@ -211,7 +211,7 @@ void Repl<O,CBT,GUM>::runMultiple(const trials_t stopAfterValue, const TrialsSto
     const double wallSeconds = ((double)std::chrono::duration_cast<std::chrono::microseconds>(
         std::chrono::steady_clock::now() - wallClockStart).count() / 1'000'000);
     solver.printMessageBar("", BAR_WIDTH, '-');
-    os << "give-up method: " STATW_I << GiveupMethod_Names[static_cast<unsigned>(GUM)] << '\n';
+    os << "give-up method: " STATW_I << GUM::nameOf(GUM) << '\n';
     os << "generator path: " STATW_I << solver.getGenPath() << '\n';
     os << "processor time: " STATW_D << procSeconds << " seconds (with I/O)" << '\n';
     os << "real-life time: " STATW_D << wallSeconds << " seconds (with I/O)" << '\n';
@@ -227,7 +227,7 @@ void Repl<O,CBT,GUM>::runMultiple(const trials_t stopAfterValue, const TrialsSto
 }
 
 
-template <Order O, bool CBT, GiveupMethod GUM>
+template <Order O, bool CBT, GUM::E GUM>
 void Repl<O,CBT,GUM>::printTrialsWorkDistribution(
     const trials_t numTotalTrials, // sum of entries of binHitCount
     std::array<trials_t, TRIALS_NUM_BINS+1> const& binHitCount,
@@ -246,7 +246,7 @@ void Repl<O,CBT,GUM>::printTrialsWorkDistribution(
         successfulTrialsAccum   += binHitCount[i];
         successfulSolveOpsAccum += binOpsTotal[i];
         const double boundedGiveupOps
-            = (GUM == GiveupMethod::OPERATIONS) ? ((double)(i+1) * solver.GIVEUP_THRESHOLD / TRIALS_NUM_BINS)
+            = (GUM == GUM::E::OPERATIONS) ? ((double)(i+1) * solver.GIVEUP_THRESHOLD / TRIALS_NUM_BINS)
             // No nice way to do the below. If I want an exact thing, I would
             // need to change generateSolution to also track the numOperations
             // for some hypothetical, lower threshold, which would be for the
@@ -254,7 +254,7 @@ void Repl<O,CBT,GUM>::printTrialsWorkDistribution(
             // the `Solver` class. As a temporary, pessimistic band-aid, I will
             // use the values for the next bin. Note that this will give `nan`
             // (0.0/0.0) if there is no data for the next bin.
-            : (GUM == GiveupMethod::BACKTRACKS) ? ((double)binOpsTotal[i+1] / binHitCount[i+1])
+            : (GUM == GUM::E::BACKTRACKS) ? ((double)binOpsTotal[i+1] / binHitCount[i+1])
             : [](){ throw "unhandled GUM case"; return 0.0; }();
         const double boundedGiveupOpsTotal = (numTotalTrials - successfulTrialsAccum) * boundedGiveupOps;
         throughput[i] = (i == TRIALS_NUM_BINS)
@@ -274,7 +274,7 @@ void Repl<O,CBT,GUM>::printTrialsWorkDistribution(
             os << '\n' << TABLE_SEPARATOR;
         }
         const double binBottom  = (double)(i) * solver.GIVEUP_THRESHOLD / TRIALS_NUM_BINS;
-        if constexpr (solver.order < 4 || (solver.order == 4 && GUM == GiveupMethod::BACKTRACKS)) {
+        if constexpr (solver.order < 4 || (solver.order == 4 && GUM == GUM::E::BACKTRACKS)) {
             os << "\n|" << std::setw(9) << (int)(binBottom);
         } else {
             os << "\n|" << std::setw(8) << (int)(binBottom / 1'000.0) << 'K';

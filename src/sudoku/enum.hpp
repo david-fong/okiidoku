@@ -11,15 +11,25 @@
  */
 namespace Sudoku {
 
-    enum class GiveupMethod {
-        OPERATIONS, // Total times attempted to setNextValid.
-        BACKTRACKS, // Maximum count searched over all tiles.
-        GiveupMethod__MAX = BACKTRACKS, // TODO: alias this with a static field constexpr `size`.
-    };
-    std::array<std::string, (int)GiveupMethod::GiveupMethod__MAX+1> GiveupMethod_Names = {
-        "operations",
-        "backtracks",
-    }; // TODO: make this accessible from a static getter that takes the scoped enum and static_casts to index.
+    /**
+     * Give Up Method
+     */
+    namespace GUM {
+        enum class E {
+            OPERATIONS, // Total times attempted to setNextValid.
+            BACKTRACKS, // Maximum count searched over all tiles.
+            GiveupMethod__MAX = BACKTRACKS,
+        };
+        constexpr size_t size = static_cast<size_t>(E::GiveupMethod__MAX) + 1;
+        std::array<std::string, size> NAMES = {
+            "operations",
+            "backtracks",
+        };
+        std::string nameOf(const E e) {
+            return NAMES[static_cast<unsigned>(e)];
+        }
+    }
+
 
     enum class GenPath : unsigned {
         ROW_MAJOR,

@@ -14,7 +14,7 @@
  * Choose build flags for the Repl and Solver here.
  */
 template<Sudoku::Order O>
-using Repl = Sudoku::Repl<O, true, Sudoku::GiveupMethod::BACKTRACKS>;
+using Repl = Sudoku::Repl<O, true, Sudoku::GUM::E::BACKTRACKS>;
 
 
 /**

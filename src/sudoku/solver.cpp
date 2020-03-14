@@ -26,7 +26,7 @@ namespace Sudoku {
 #endif
 
 
-template <Order O, bool CBT, GiveupMethod GUM>
+template <Order O, bool CBT, GUM::E GUM>
 Solver<O,CBT,GUM>::Solver(std::ostream& os):
     os          (os),
     isPretty    (&os == &std::cout),
@@ -36,7 +36,7 @@ Solver<O,CBT,GUM>::Solver(std::ostream& os):
         std::iota(rowBias.begin(), rowBias.end(), 0);
     }
     // Interesting: Smaller-order grids perform better with ROW_MAJOR as genPath.
-    if ((order < 4) || (order == 4 && GUM == GiveupMethod::BACKTRACKS)) {
+    if ((order < 4) || (order == 4 && GUM == GUM::E::BACKTRACKS)) {
         setGenPath(GenPath::ROW_MAJOR, true);
     } else {
         setGenPath(GenPath::BLOCK_COLS, true);
@@ -51,7 +51,7 @@ Solver<O,CBT,GUM>::Solver(std::ostream& os):
 }
 
 
-template <Order O, bool CBT, GiveupMethod GUM>
+template <Order O, bool CBT, GUM::E GUM>
 void Solver<O,CBT,GUM>::print(void) const {
     #define PRINT_GRID0_TILE(PRINTER_STATEMENT) {\
         for (length_t col = 0; col < length; col++) {\
@@ -93,7 +93,7 @@ void Solver<O,CBT,GUM>::print(void) const {
 }
 
 
-template <Order O, bool CBT, GiveupMethod GUM>
+template <Order O, bool CBT, GUM::E GUM>
 void Solver<O,CBT,GUM>::printShadedBacktrackStat(const unsigned count) const {
     const std::array<std::string, 4> GREYSCALE_BLOCK_CHARS = {
         // NOTE: Make sure that the initializer list size matches that
@@ -121,7 +121,7 @@ void Solver<O,CBT,GUM>::printShadedBacktrackStat(const unsigned count) const {
 
 
 
-template <Order O, bool CBT, GiveupMethod GUM>
+template <Order O, bool CBT, GUM::E GUM>
 template <bool USE_PUZZLE>
 void Solver<O,CBT,GUM>::clear(void) {
     for (area_t i = 0; i < area; i++) {
@@ -156,7 +156,7 @@ void Solver<O,CBT,GUM>::clear(void) {
 }
 
 
-template <Order O, bool CBT, GiveupMethod GUM>
+template <Order O, bool CBT, GUM::E GUM>
 bool Solver<O,CBT,GUM>::loadPuzzleFromString(const std::string& puzzleString) {
     // This length check will be done again later, but might as well
     // do it now as a quick short-circuiter.
@@ -186,14 +186,14 @@ bool Solver<O,CBT,GUM>::loadPuzzleFromString(const std::string& puzzleString) {
 }
 
 
-template <Order O, bool CBT, GiveupMethod GUM>
+template <Order O, bool CBT, GUM::E GUM>
 void Solver<O,CBT,GUM>::registerGivenValue(const area_t index, const value_t value) {
     isTileForGiven[index] = true;
     grid[index].value = value;
 }
 
 
-template <Order O, bool CBT, GiveupMethod GUM>
+template <Order O, bool CBT, GUM::E GUM>
 template <bool USE_PUZZLE>
 opcount_t Solver<O,CBT,GUM>::generateSolution(SolverExitStatus& exitStatus, const bool contPrev) {
     opcount_t numOperations = 0;
@@ -254,8 +254,8 @@ opcount_t Solver<O,CBT,GUM>::generateSolution(SolverExitStatus& exitStatus, cons
         }
         // Check whether the give-up-condition has been met:
         const opcount_t giveupCondVar
-            = (GUM == GiveupMethod::OPERATIONS) ? numOperations
-            : (GUM == GiveupMethod::BACKTRACKS) ? maxBacktrackCount
+            = (GUM == GUM::E::OPERATIONS) ? numOperations
+            : (GUM == GUM::E::BACKTRACKS) ? maxBacktrackCount
             : [](){ throw "unhandled GUM case"; return ~0; }();
         if (__builtin_expect(giveupCondVar >= GIVEUP_THRESHOLD, false)) {
             // TODO it is possible to give up while the next traversal
@@ -277,7 +277,7 @@ opcount_t Solver<O,CBT,GUM>::generateSolution(SolverExitStatus& exitStatus, cons
 }
 
 
-template <Order O, bool CBT, GiveupMethod GUM>
+template <Order O, bool CBT, GUM::E GUM>
 TvsDirection Solver<O,CBT,GUM>::setNextValid(const area_t index) {
     occmask_t& rowBin = rowSymbolOccMasks[getRow(index)];
     occmask_t& colBin = colSymbolOccMasks[getCol(index)];
@@ -332,7 +332,7 @@ TvsDirection Solver<O,CBT,GUM>::setNextValid(const area_t index) {
 }
 
 
-template <Order O, bool CBT, GiveupMethod GUM>
+template <Order O, bool CBT, GUM::E GUM>
 GenPath Solver<O,CBT,GUM>::setGenPath(const GenPath newGenPath, const bool force) noexcept {
     if (!force && newGenPath == getGenPath()) {
         // Short circuit:
@@ -359,7 +359,7 @@ GenPath Solver<O,CBT,GUM>::setGenPath(const GenPath newGenPath, const bool force
 }
 
 
-template <Order O, bool CBT, GiveupMethod GUM>
+template <Order O, bool CBT, GUM::E GUM>
 GenPath Solver<O,CBT,GUM>::setGenPath(std::string const& newGenPathString) noexcept {
     // TODO: define a help menu of options and their meanings and print it here.
 
@@ -396,7 +396,7 @@ GenPath Solver<O,CBT,GUM>::setGenPath(std::string const& newGenPathString) noexc
 
 
 
-template <Order O, bool CBT, GiveupMethod GUM>
+template <Order O, bool CBT, GUM::E GUM>
 void Solver<O,CBT,GUM>::printMessageBar(
     std::string const& msg,
     unsigned int barLength,
@@ -415,7 +415,7 @@ void Solver<O,CBT,GUM>::printMessageBar(
 }
 
 
-template <Order O, bool CBT, GiveupMethod GUM>
+template <Order O, bool CBT, GUM::E GUM>
 void Solver<O,CBT,GUM>::printMessageBar(std::string const& msg, const char fillChar) const {
     const unsigned int gridBarLength = (isPretty)
         ? ((length + order + 1) * 2)
