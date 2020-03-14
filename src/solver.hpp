@@ -3,8 +3,17 @@
 
 #include <array>
 
+#line 1
+
 /**
  * 
+ * DIM:TEXT:
+ * If the macro `USE_ANSI_ESC` is set truthy before the first link to
+ * the implementation files for classes in this namespace, then some
+ * harsh, non-essential text will be printed with ansi escape codes to
+ * dim the color.
+ * 
+ * FAST:IO:
  * Note: My implementation does not use C-style IO, so it is safe for
  * consumer code to make the following optimization:
  * ```cpp
@@ -238,8 +247,10 @@ namespace Sudoku {
          * Measured stats for operations: https://www.desmos.com/calculator/8taqzelils
          */
         static constexpr opcount_t GIVEUP_THRESHOLD
-            = (GUM == OPERATIONS) ? ((const opcount_t[]){ 1, 2, 26, 2'000, 100'000, 30'000'000, 120'000'000'000, })[order]
-            : (GUM == BACKTRACKS) ? ((const opcount_t[]){ 1, 1,  3,   100,  10'000,  2'200'000,  10'000'000'000, })[order]
+            = (GUM == GiveupMethod::OPERATIONS) ? ((const opcount_t[]){
+                1, 2, 26, 2'000, 100'000, 30'000'000, 120'000'000'000, })[order]
+            : (GUM == GiveupMethod::BACKTRACKS) ? ((const opcount_t[]){
+                1, 1,  3,   150,  10'000,  2'200'000,  10'000'000'000, })[order]
             : 0; // TODO: update the above numbers. the current values for order-6 are just predictions.
 
     public:

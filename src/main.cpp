@@ -2,6 +2,7 @@
 #include <fstream>      // ofstream,
 #include <ctime>        // time,
 
+#define USE_ANSI_ESC true
 #include "solver.cpp"
 #include "repl.cpp"
 

@@ -17,6 +17,13 @@ namespace Sudoku {
 // (#undef-ed before the end of this namespace)
 #define STATW_I << std::setw(this->STATS_WIDTH)
 #define STATW_D << std::setw(this->STATS_WIDTH + 4)
+#if USE_ANSI_ESC
+#define ANSI_DIM_ON  << "\e[2m"
+#define ANSI_DIM_OFF << "\e[22m"
+#else
+#define ANSI_DIM_ON  << ""
+#define ANSI_DIM_OFF << ""
+#endif
 
 
 template <Order O, bool CBT, GiveupMethod GUM>
@@ -49,11 +56,11 @@ template <Order O, bool CBT, GiveupMethod GUM>
 void Solver<O,CBT,GUM>::print(void) const {
     #define PRINT_GRID0_TILE(PRINTER_STATEMENT) {\
         for (length_t col = 0; col < length; col++) {\
-            if (isPretty && (col % order) == 0) os << "\e[2m |\e[22m";\
+            if (isPretty && (col % order) == 0) os ANSI_DIM_ON << " |" ANSI_DIM_OFF;\
             PRINTER_STATEMENT;\
         }}
     #define PRINT_GRID_TILE(PRINTER_STATEMENT) {\
-        if (isPretty) os << "\e[2m |\e[22m";\
+        if (isPretty) os ANSI_DIM_ON << " |" ANSI_DIM_OFF;\
         os << GRID_SEP;\
         PRINT_GRID0_TILE(PRINTER_STATEMENT)}
 
@@ -65,10 +72,10 @@ void Solver<O,CBT,GUM>::print(void) const {
     for (length_t row = 0; row < length; row++) {
         if (isPretty && (row % order == 0)) {
             // Print block-row separator string:
-            os << "\e[2m";
+            os ANSI_DIM_ON;
             os << blkRowSepString;
             if constexpr (CBT) os << GRID_SEP << blkRowSepString;
-            os << "\n\e[22m";
+            os << "\n" ANSI_DIM_OFF;
         }
         // Tile content:
         PRINT_GRID0_TILE(os << ' ' << grid[row * length + col])
@@ -77,14 +84,14 @@ void Solver<O,CBT,GUM>::print(void) const {
         }
         // PRINT_GRID_TILE(os << std::setw(2) << grid[row * length + col].biasIndex)
         // PRINT_GRID_TILE(os << ' ' << rowBiases[row][col])
-        if (isPretty) os << "\e[2m |\e[22m";
+        if (isPretty) os ANSI_DIM_ON << " |" ANSI_DIM_OFF;
         os << '\n';
     }
     if (isPretty) {
-            os << "\e[2m";
+            os ANSI_DIM_ON;
             os << blkRowSepString;
             if constexpr (CBT) os << GRID_SEP << blkRowSepString;
-            os << "\n\e[22m";
+            os << "\n" ANSI_DIM_OFF;
     }
     if constexpr (order == 4) os << std::setbase(10);
 }
@@ -253,7 +260,7 @@ opcount_t Solver<O,CBT,GUM>::generateSolution(SolverExitStatus& exitStatus, cons
         const opcount_t giveupCondVar
             = (GUM == OPERATIONS) ? numOperations
             : (GUM == BACKTRACKS) ? maxBacktrackCount
-            : ~0;
+            : [](){throw "unhandled GUM case"; return ~0;}();
         if (__builtin_expect(giveupCondVar >= GIVEUP_THRESHOLD, false)) {
             // TODO that it is possible to give up while the next traversal
             // index to try is zero (and there is still more to try at zero).
@@ -379,6 +386,8 @@ void Solver<O,CBT,GUM>::printMessageBar(std::string const& msg, const char fillC
 
 #undef STATW_I
 #undef STATW_D
+#undef ANSI_DIM_ON
+#undef ANSI_DIM_OFF
 
 } // End of Sudoku namespace.
 

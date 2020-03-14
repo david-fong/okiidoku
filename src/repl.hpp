@@ -82,9 +82,9 @@ namespace Sudoku {
         void runSingle(bool contPrev = false);
         void runMultiple(unsigned long numTrials, TrialsStopBy);
 
-        void printTrialsWorkDistribution(const trials_t,
-            std::array<trials_t, TRIALS_NUM_BINS+1> const&,
-            std::array<double,   TRIALS_NUM_BINS+1> const&);
+        void printTrialsWorkDistribution(const trials_t numTotalTrials,
+            std::array<trials_t, TRIALS_NUM_BINS+1> const& binHitCount,
+            std::array<double,   TRIALS_NUM_BINS+1> const& binOpsTotal);
     };
 
 }

@@ -12,6 +12,13 @@ namespace Sudoku {
 // (#undef-ed before the end of this namespace)
 #define STATW_I << std::setw(this->solver.STATS_WIDTH)
 #define STATW_D << std::setw(this->solver.STATS_WIDTH + 4)
+#if USE_ANSI_ESC
+#define ANSI_DIM_ON  << "\e[2m"
+#define ANSI_DIM_OFF << "\e[22m"
+#else
+#define ANSI_DIM_ON  << ""
+#define ANSI_DIM_OFF << ""
+#endif
 
 
 template <Order O, bool CBT, GiveupMethod GUM>
@@ -74,7 +81,7 @@ bool Repl<O,CBT,GUM>::runCommand(std::string const& cmdLine) {
                     : (TrialsStopBy)~0;
                 runMultiple(std::stoul(cmdArgs), stopBy);
             } catch (std::invalid_argument const& ia) {
-                std::cout << "could not convert " << cmdArgs << " to an integer." << std::endl;
+                std::cout << "could not convert \"" << cmdArgs << "\" to an integer." << std::endl;
             }
             break;
         case CMD_SET_GENPATH:
@@ -162,14 +169,20 @@ void Repl<O,CBT,GUM>::runMultiple(const trials_t stopAfterValue, const TrialsSto
         const opcount_t giveupCondVar
             = (GUM == OPERATIONS) ? numOperations
             : (GUM == BACKTRACKS) ? solver.getMaxBacktrackCount()
-            : ~0;
+            : [](){throw "unhandled GUM case"; return ~0;}();
         const unsigned binNum = TRIALS_NUM_BINS * (giveupCondVar) / solver.GIVEUP_THRESHOLD;
         binHitCount[binNum]++;
         binOpsTotal[binNum] += numOperations;
 
         // Print the number of operations taken:
         if (exitStatus != SUCCESS) {
-            os << "\e[2m" STATW_I << "---" << "\e[22m";
+            if (solver.isPretty) {
+                os ANSI_DIM_ON;
+                os STATW_I << numOperations;
+                os ANSI_DIM_OFF;
+            } else {
+                os STATW_I << "---";
+            }
         } else {
             numTotalSuccesses++;
             os STATW_I << numOperations;
@@ -214,7 +227,7 @@ void Repl<O,CBT,GUM>::runMultiple(const trials_t stopAfterValue, const TrialsSto
 
 template <Order O, bool CBT, GiveupMethod GUM>
 void Repl<O,CBT,GUM>::printTrialsWorkDistribution(
-    const trials_t trialsToRun, // sum of binHitCount
+    const trials_t numTotalTrials, // sum of entries of binHitCount
     std::array<trials_t, TRIALS_NUM_BINS+1> const& binHitCount,
     std::array<double,   TRIALS_NUM_BINS+1> const& binOpsTotal
 ) {
@@ -223,25 +236,26 @@ void Repl<O,CBT,GUM>::printTrialsWorkDistribution(
 
     std::array<double, TRIALS_NUM_BINS+1> throughput;
     unsigned bestThroughputBin = 0; {
-    double averageBinOps = (double)binOpsTotal[0] / binHitCount[0];
     opcount_t successfulTrialsAccum = 0;
     double  successfulSolveOpsAccum = 0.0;
     for (unsigned i = 0; i < TRIALS_NUM_BINS; i++) {
         successfulTrialsAccum   += binHitCount[i];
         successfulSolveOpsAccum += binOpsTotal[i];
-        // No nice way to do the below. If I want an exact thing, I would
-        // need to change generateSolution to also track the numOperations
-        // for some hypothetical, lower threshold, which would be for the
-        // previous bin. Otherwise, As a design decision, I'm making some
-        // estimate based on the averages for this bin and the next bin.
-        // TODO why am I getting `nan` with small data sets?
-        const double averageNextBinOps = (double)binOpsTotal[i+1] / binHitCount[i+1];
-        const double giveupOps  = (trialsToRun - successfulTrialsAccum)
-            * 0.5 * (averageBinOps + averageNextBinOps);
-        averageBinOps = averageNextBinOps;
+        const double boundedGiveupOps
+            = (GUM == GiveupMethod::OPERATIONS) ? ((double)(i+1) * solver.GIVEUP_THRESHOLD / TRIALS_NUM_BINS)
+            // No nice way to do the below. If I want an exact thing, I would
+            // need to change generateSolution to also track the numOperations
+            // for some hypothetical, lower threshold, which would be for the
+            // bottom of this bin. I would need to expose `TRIALS_NUM_BINS` to
+            // the `Solver` class. As a temporary, pessimistic band-aid, I will
+            // use the values for the next bin. Note that this will give `nan`
+            // (0.0/0.0) if there is no data for the next bin.
+            : (GUM == GiveupMethod::BACKTRACKS) ? ((double)binOpsTotal[i+1] / binHitCount[i+1])
+            : [](){throw "unhandled GUM case"; return 0.0;}();
+        const double boundedGiveupOpsTotal = (numTotalTrials - successfulTrialsAccum) * boundedGiveupOps;
         throughput[i] = (i == TRIALS_NUM_BINS)
-            ? 0.0 // The last bin is for giveups, which have unknown throughput.
-            : successfulTrialsAccum / (successfulSolveOpsAccum + giveupOps);
+            ? 0.0 // The last bin is for giveups. Throughput unknown.
+            : successfulTrialsAccum / (successfulSolveOpsAccum + boundedGiveupOpsTotal);
         if (throughput[i] > throughput[bestThroughputBin]) {
             bestThroughputBin = i;
         }
@@ -272,21 +286,24 @@ void Repl<O,CBT,GUM>::printTrialsWorkDistribution(
             // (the exponent value was chosen by taste / visual feel)
             const unsigned barLength = THROUGHPUT_BAR_STRING.length()
                 * std::pow(throughput[i] / throughput[bestThroughputBin], 5);
-            if (i != bestThroughputBin) os << "\e[2m";
+            if (i != bestThroughputBin) os ANSI_DIM_ON;
             os << ' ' << THROUGHPUT_BAR_STRING.substr(0, barLength);
-            if (i != bestThroughputBin) os << "\e[22m";
+            if (i != bestThroughputBin) os ANSI_DIM_OFF;
         }
     }
-    os << " <- current threshold (giveups)\n";
+    os << " <- current giveup threshold\n";
     os << TABLE_SEPARATOR;
-    os << "\n\e[2m * Throughput here is in \"average successes per operation\". Tightening the"
+    os ANSI_DIM_ON <<
+        "\n * Throughput here is in \"average successes per operation\". Tightening the"
         "\n   threshold induces more frequent giveups, but also reduces the operational"
         "\n   cost that giveups incur. Operations are proportional to time, and machine"
         "\n   independent. The visualization bars are purposely stretched to draw focus"
-        "\n   to the optimal bin.\n\e[22m ";
+        "\n   to the optimal bin.\n" ANSI_DIM_OFF;
 }
 
 #undef STATW_I
 #undef STATW_D
+#undef ANSI_DIM_ON
+#undef ANSI_DIM_OFF
 
 } // End of Sudoku namespace.
