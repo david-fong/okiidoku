@@ -1,4 +1,4 @@
-#include "solver.hpp"
+#include "./solver.hpp"
 
 #include <iostream>     // cout, endl
 #include <iomanip>      // setbase, setw,

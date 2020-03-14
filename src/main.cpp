@@ -1,10 +1,11 @@
+
+#define USE_ANSI_ESC true
+#include "./sudoku/solver.cpp"
+#include "./sudoku/repl.cpp"
+
 #include <iostream>     // cout,
 #include <fstream>      // ofstream,
 #include <ctime>        // time,
-
-#define USE_ANSI_ESC true
-#include "solver.cpp"
-#include "repl.cpp"
 
 
 #define DEFAULT_ORDER 4

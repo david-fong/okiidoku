@@ -1,9 +1,9 @@
 #ifndef HPP_SUDOKU_REPL
 #define HPP_SUDOKU_REPL
 
-#include <map>
+#include "./solver.hpp"
 
-#include "solver.hpp"
+#include <map>
 
 
 namespace Sudoku {
