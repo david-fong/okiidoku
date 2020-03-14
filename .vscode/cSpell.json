@@ -21,6 +21,7 @@
         "opcount",
         "statw",
         "strials",
+        "speedup",
 
         "retval",
         "prefetch",

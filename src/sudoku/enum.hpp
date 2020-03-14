@@ -45,6 +45,10 @@ namespace Sudoku {
         std::ostream& operator<<(std::ostream& out, const E genPath) {
             return out << NAMES[static_cast<unsigned>(genPath)];
         }
+        const std::string OPTIONS_MENU = "OPTIONS:"
+            "\n- rowmajor   horizontal strips as wide as the grid one by one"
+            "\n- blockcol   rowmajor, but broken into columns one block wide"
+            "\n";
     }
 
     enum class TvsDirection : bool {

@@ -45,6 +45,7 @@ namespace Sudoku {
 
     typedef unsigned long trials_t;
     constexpr unsigned int TRIALS_NUM_BINS = 20;
+    // TODO [qol] Change to scoped enum
     enum TrialsStopBy {
         TOTAL_TRIALS,
         TOTAL_SUCCESSES,
@@ -81,6 +82,7 @@ namespace Sudoku {
         void solvePuzzlesFromFile(std::ifstream&);
         void runSingle(bool contPrev = false);
         void runMultiple(unsigned long numTrials, TrialsStopBy);
+        void runMultiple(std::string const&, TrialsStopBy);
 
         void printTrialsWorkDistribution(const trials_t numTotalTrials,
             std::array<trials_t, TRIALS_NUM_BINS+1> const& binHitCount,

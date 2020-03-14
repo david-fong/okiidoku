@@ -40,7 +40,8 @@ bool Repl<O,CBT,GUM>::runCommand(std::string const& cmdLine) {
     const auto it = COMMAND_MAP.find(cmdName);
     if (it == COMMAND_MAP.end()) {
         // No command name was matched.
-        std::cout << "command \"" << cmdLine << "\" not found. enter \"help\" for the help menu." << std::endl;
+        std::cout << "command \"" << cmdLine << "\" not found."
+            " enter \"help\" for the help menu." << std::endl;
         return true;
     }
     switch (it->second) {
@@ -51,18 +52,8 @@ bool Repl<O,CBT,GUM>::runCommand(std::string const& cmdLine) {
             return false;
         case Command::RUN_SINGLE:    runSingle();     break;
         case Command::CONTINUE_PREV: runSingle(true); break;
-        case Command::RUN_TRIALS:
-        case Command::RUN_SUCCESSES:
-            try {
-                const TrialsStopBy stopBy
-                    = (it->second == Command::RUN_TRIALS)    ? TOTAL_TRIALS
-                    : (it->second == Command::RUN_SUCCESSES) ? TOTAL_SUCCESSES
-                    : [](){ throw "unhandled TSB case"; return (TrialsStopBy)~0; }();
-                runMultiple(std::stoul(cmdArgs), stopBy);
-            } catch (std::invalid_argument const& ia) {
-                std::cout << "could not convert \"" << cmdArgs << "\" to an integer." << std::endl;
-            }
-            break;
+        case Command::RUN_TRIALS:    runMultiple(cmdArgs, TOTAL_TRIALS);    break;
+        case Command::RUN_SUCCESSES: runMultiple(cmdArgs, TOTAL_SUCCESSES); break;
         case Command::SET_GENPATH:
             solver.setGenPath(cmdArgs);
             break;
@@ -152,7 +143,7 @@ void Repl<O,CBT,GUM>::runMultiple(const trials_t stopAfterValue, const TrialsSto
     do {
         // Print a progress indicator to stdout:
         if (numTotalTrials % COLS == 0) {
-            const unsigned pctDone = 100.0 * doneTrialsCondVar / stopAfterValue;
+            const unsigned pctDone = 100.0 * (double)doneTrialsCondVar / stopAfterValue;
             std::cout << "| " << std::setw(2) << pctDone << "% |";
         }
         // Attempt to generate a single solution:
@@ -221,13 +212,26 @@ void Repl<O,CBT,GUM>::runMultiple(const trials_t stopAfterValue, const TrialsSto
 
 
 template <Order O, bool CBT, GUM::E GUM>
+void Repl<O,CBT,GUM>::runMultiple(std::string const& trialsString, const TrialsStopBy stopByMethod) {
+    long stopByValue;
+    try {
+        stopByValue = std::stol(trialsString);
+    } catch (std::invalid_argument const& ia) {
+        std::cout << "could not convert \"" << trialsString << "\" to an integer." << std::endl;
+        return;
+    }
+    runMultiple(static_cast<trials_t>(stopByValue), stopByMethod);
+}
+
+
+template <Order O, bool CBT, GUM::E GUM>
 void Repl<O,CBT,GUM>::printTrialsWorkDistribution(
     const trials_t numTotalTrials, // sum of entries of binHitCount
     std::array<trials_t, TRIALS_NUM_BINS+1> const& binHitCount,
     std::array<double,   TRIALS_NUM_BINS+1> const& binOpsTotal
 ) {
     const std::string THROUGHPUT_BAR_STRING = "--------------------------------";
-    const std::string TABLE_SEPARATOR = "+-----------+----------+--------------+";
+    const std::string TABLE_SEPARATOR = "+-----------+----------+-----------+";
 
     // Calculate all throughputs before printing:
     // (done in its own loop so we can later print comparisons against the optimal bin)
@@ -259,7 +263,7 @@ void Repl<O,CBT,GUM>::printTrialsWorkDistribution(
     }}
 
     os << TABLE_SEPARATOR;
-    os << "\n|  bin bot  |   hits   |  throughput  |\n";
+    os << "\n|  bin bot  |   hits   |  speedup  |\n";
     os << TABLE_SEPARATOR;
     for (unsigned i = 0; i < binHitCount.size(); i++) {
         if (i == TRIALS_NUM_BINS) {
@@ -273,9 +277,13 @@ void Repl<O,CBT,GUM>::printTrialsWorkDistribution(
             os << "\n|" << std::setw(8) << (int)(binBottom / 1'000.0) << 'K';
         }
         os << "  |" << std::setw(8)  << binHitCount[i];
-        os << "  |" << std::setw(12);
-        if (i == TRIALS_NUM_BINS) { os << "unknown";
-        } else { os << std::scientific << throughput[i] << std::fixed; }
+        os << "  |" << std::setw(9);
+        if (i == TRIALS_NUM_BINS) {
+            os << "unknown";
+        } else {
+            //os << std::scientific << (throughput[i]) << std::fixed;
+            os << 100.0 * (throughput[i] / throughput[TRIALS_NUM_BINS-1]);
+        }
         os << "  |";
         {
             // Print a bar to visualize throughput relative to tha
@@ -291,11 +299,12 @@ void Repl<O,CBT,GUM>::printTrialsWorkDistribution(
     os << " <- current giveup threshold\n";
     os << TABLE_SEPARATOR;
     os << Ansi::DIM.ON <<
-        "\n * Throughput here is in \"average successes per operation\". Tightening the"
-        "\n   threshold induces more frequent giveups, but also reduces the operational"
-        "\n   cost that giveups incur. Operations are proportional to time, and machine"
-        "\n   independent. The visualization bars are purposely stretched to draw focus"
-        "\n   to the optimal bin.\n" << Ansi::DIM.OFF;
+        "\n* Throughput here is in \"average successes per operation\". Tightening the"
+        "\n  threshold induces more frequent giveups, but also reduces the operational"
+        "\n  cost that giveups incur. Operations are proportional to time, and machine"
+        "\n  independent. The visualization bars are purposely stretched to draw focus"
+        "\n  to the optimal bin. Exercise prudence against stats from small datasets!"
+        "\n" << Ansi::DIM.OFF;
 }
 
 #undef STATW_I

@@ -350,12 +350,11 @@ GenPath::E Solver<O,CBT,GUM>::setGenPath(const GenPath::E newGenPath, const bool
 
 template <Order O, bool CBT, GUM::E GUM>
 GenPath::E Solver<O,CBT,GUM>::setGenPath(std::string const& newGenPathString) noexcept {
-    // TODO [qol] define a help menu of options and their meanings and print it here.
-
+    std::cout << '\n' << GenPath::OPTIONS_MENU;
     // *NOTE: That's right. I'm using `goto` statements. This falls
     // within my judgement of appropriate circumstance, it's my own
     // project, and if it irks you, that also puts a smile on my face :)
-    std::cout << "generator path is ";
+    std::cout << "\ngenerator path is ";
     if (newGenPathString.empty()) {
         std::cout << "currently set to: ";
         goto successful_return;
