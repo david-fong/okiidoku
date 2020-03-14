@@ -53,16 +53,23 @@ namespace Sudoku {
         "backtracks",
     };
 
-    const std::array<std::string, 2> GenPath_Names = {
+    enum class GenPath : unsigned {
+        ROW_MAJOR,
+        BLOCK_COLS,
+    };
+    // Indices of entries must match the literal values of their respective enums.
+    const std::array<std::string, 2> GENPATH_NAMES = {
         "rowmajor",
         "blockcol",
     };
-    enum GenPath { ROW_MAJOR, BLOCK_COLS, GenPath_MAX = GenPath_Names.size() - 1, };
+    std::ostream& operator<<(std::ostream& out, const GenPath genPath) {
+        return out << GENPATH_NAMES[static_cast<unsigned>(genPath)];
+    }
 
+    // TODO: change to scoped enum without type specifier.
     enum TvsDirection : bool {
         BACK = false, FORWARD = true,
     };
-
     enum SolverExitStatus {
         IMPOSSIBLE, GIVEUP, SUCCESS,
     };
@@ -158,7 +165,7 @@ namespace Sudoku {
                 biasIndex = 0;
                 value = length;
             }
-            [[gnu::const]] bool isClear(void) const noexcept {
+            [[gnu::pure]] bool isClear(void) const noexcept {
                 return value == length;
             }
             friend std::ostream& operator<<(std::ostream& out, Tile const& t) {
@@ -176,7 +183,7 @@ namespace Sudoku {
             // Assumes that the puzzle-string blanks style uses spaces
             // for blanks. Accepts 'G' for order == 4 as `length`.
             // Case sensitive. Always only lowercase for order < 6.
-            static constexpr value_t VALUE_FROM_CHAR(const char valueChar) noexcept {
+            [[gnu::const]] static constexpr value_t VALUE_FROM_CHAR(const char valueChar) noexcept {
                 // TODO: decide how to handle translations for orders > 5.
                 static_assert(order <= 5);
                 if constexpr (order < 4) {
@@ -204,8 +211,10 @@ namespace Sudoku {
         void printMessageBar(std::string const&, unsigned int, char = '=') const;
         void printMessageBar(std::string const&, char = '=') const;
 
-        [[gnu::cold]] GenPath getGenPath(void) const noexcept { return genPath; }
-        [[gnu::cold]] void setGenPath(GenPath) noexcept;
+        [[gnu::cold, gnu::pure]]
+        GenPath getGenPath(void) const noexcept { return genPath; }
+        [[gnu::cold]] GenPath setGenPath(GenPath, bool force = false) noexcept;
+        [[gnu::cold]] GenPath setGenPath(std::string const&) noexcept;
 
     // ========================
     // PRIVATE MEMBERS
@@ -241,17 +250,20 @@ namespace Sudoku {
         opcount_t maxBacktrackCount;
         void printShadedBacktrackStat(unsigned count) const;
     public:
-        opcount_t getMaxBacktrackCount(void) const noexcept { return maxBacktrackCount; }
+        [[gnu::cold]] opcount_t getMaxBacktrackCount(void) const noexcept { return maxBacktrackCount; }
         /**
          * Give up if the giveup condition variable meets this value.
          * Measured stats for operations: https://www.desmos.com/calculator/8taqzelils
          */
         static constexpr opcount_t GIVEUP_THRESHOLD
             = (GUM == GiveupMethod::OPERATIONS) ? ((const opcount_t[]){
-                1, 2, 26, 2'000, 100'000, 30'000'000, 120'000'000'000, })[order]
+                1, 2, 26, 2'000, 100'000, 30'000'000, 120'000'000'000,
+                })[order]
             : (GUM == GiveupMethod::BACKTRACKS) ? ((const opcount_t[]){
-                1, 1,  3,   150,  10'000,  2'200'000,  10'000'000'000, })[order]
-            : 0; // TODO: update the above numbers. the current values for order-6 are just predictions.
+                1, 1,  3,   150,  10'000,  2'200'000,  10'000'000'000,
+                })[order]
+            : [](){ throw "unhandled GUM case"; return ~0; }();
+            // TODO: update the above numbers. the current values for order-6 are just predictions.
 
     public:
         std::ostream& os;

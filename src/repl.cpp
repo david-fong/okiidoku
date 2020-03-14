@@ -42,10 +42,11 @@ bool Repl<O,CBT,GUM>::runCommand(std::string const& cmdLine) {
     // Very simple parsing: Assumes no leading spaces, and does not
     // trim leading or trailing spaces from the arguments substring.
     const std::string cmdName = cmdLine.substr(0, tokenPos = cmdLine.find(" "));
-    const std::string cmdArgs = cmdLine.substr(tokenPos + 1, std::string::npos);
+    const std::string cmdArgs = (tokenPos == std::string::npos)
+        ? "" : cmdLine.substr(tokenPos + 1, std::string::npos);
     const auto it = COMMAND_MAP.find(cmdName);
     if (it == COMMAND_MAP.end()) {
-        // No command name was matched
+        // No command name was matched.
         std::cout << "command \"" << cmdLine << "\" not found. enter \"help\" for the help menu." << std::endl;
         return true;
     }
@@ -55,6 +56,23 @@ bool Repl<O,CBT,GUM>::runCommand(std::string const& cmdLine) {
             break;
         case CMD_QUIT:
             return false;
+        case CMD_RUN_SINGLE:    runSingle();     break;
+        case CMD_CONTINUE_PREV: runSingle(true); break;
+        case CMD_RUN_TRIALS:
+        case CMD_RUN_SUCCESSES:
+            try {
+                const TrialsStopBy stopBy
+                    = (it->second == CMD_RUN_TRIALS)    ? TOTAL_TRIALS
+                    : (it->second == CMD_RUN_SUCCESSES) ? TOTAL_SUCCESSES
+                    : [](){ throw "unhandled TSB case"; return (TrialsStopBy)~0; }();
+                runMultiple(std::stoul(cmdArgs), stopBy);
+            } catch (std::invalid_argument const& ia) {
+                std::cout << "could not convert \"" << cmdArgs << "\" to an integer." << std::endl;
+            }
+            break;
+        case CMD_SET_GENPATH:
+            solver.setGenPath(cmdArgs);
+            break;
         case CMD_SOLVE: {
             if (solver.loadPuzzleFromString(cmdArgs)) {
                 // TODO: give better output if solver gives up. Maybe move to its own function.
@@ -70,25 +88,6 @@ bool Repl<O,CBT,GUM>::runCommand(std::string const& cmdLine) {
                 solvePuzzlesFromFile(puzzleFile);
             }
             break; }
-        case CMD_RUN_SINGLE:    runSingle();     break;
-        case CMD_CONTINUE_PREV: runSingle(true); break;
-        case CMD_RUN_TRIALS:
-        case CMD_RUN_SUCCESSES:
-            try {
-                const TrialsStopBy stopBy
-                    = (it->second == CMD_RUN_TRIALS)    ? TOTAL_TRIALS
-                    : (it->second == CMD_RUN_SUCCESSES) ? TOTAL_SUCCESSES
-                    : (TrialsStopBy)~0;
-                runMultiple(std::stoul(cmdArgs), stopBy);
-            } catch (std::invalid_argument const& ia) {
-                std::cout << "could not convert \"" << cmdArgs << "\" to an integer." << std::endl;
-            }
-            break;
-        case CMD_SET_GENPATH:
-            solver.setGenPath(static_cast<GenPath>((solver.getGenPath() + 1) % (GenPath_MAX + 1)));
-            std::cout << "generator path is now set to: "
-                << GenPath_Names[solver.getGenPath()] << std::endl;
-            break;
     }
     return true;
 }
@@ -127,8 +126,11 @@ void Repl<O,CBT,GUM>::runSingle(const bool contPrev) {
     const clock_t   clockFinish = std::clock();
     const double  processorTime = ((double)(clockFinish - clockStart)) / CLOCKS_PER_SEC;
 
-    os << "num operations: " STATW_I << numSolveOps << '\n';
     os << "processor time: " STATW_D << processorTime << " seconds" << '\n';
+    os << "num operations: " STATW_I << numSolveOps << '\n';
+    if constexpr (CBT) {
+        os << "max backtracks: " STATW_I << solver.getMaxBacktrackCount() << '\n';
+    }
     if (!solver.isPretty) solver.printMessageBar("", '-');
     solver.print();
     solver.printMessageBar((exitStatus == SUCCESS) ? "DONE" : "ABORT");
@@ -169,7 +171,7 @@ void Repl<O,CBT,GUM>::runMultiple(const trials_t stopAfterValue, const TrialsSto
         const opcount_t giveupCondVar
             = (GUM == OPERATIONS) ? numOperations
             : (GUM == BACKTRACKS) ? solver.getMaxBacktrackCount()
-            : [](){throw "unhandled GUM case"; return ~0;}();
+            : [](){ throw "unhandled GUM case"; return ~0; }();
         const unsigned binNum = TRIALS_NUM_BINS * (giveupCondVar) / solver.GIVEUP_THRESHOLD;
         binHitCount[binNum]++;
         binOpsTotal[binNum] += numOperations;
@@ -209,10 +211,10 @@ void Repl<O,CBT,GUM>::runMultiple(const trials_t stopAfterValue, const TrialsSto
     const double wallSeconds = ((double)std::chrono::duration_cast<std::chrono::microseconds>(
         std::chrono::steady_clock::now() - wallClockStart).count() / 1'000'000);
     solver.printMessageBar("", BAR_WIDTH, '-');
-    os << "generator path: " STATW_I << GenPath_Names[solver.getGenPath()] << '\n';
     os << "give-up method: " STATW_I << GiveupMethod_Names[GUM] << '\n';
+    os << "generator path: " STATW_I << solver.getGenPath() << '\n';
     os << "processor time: " STATW_D << procSeconds << " seconds (with I/O)" << '\n';
-    os << "real life time: " STATW_D << wallSeconds << " seconds (with I/O)" << '\n';
+    os << "real-life time: " STATW_D << wallSeconds << " seconds (with I/O)" << '\n';
     if (wallSeconds > 10.0) {
         // Emit a beep sound if the trials took longer than ten processor seconds:
         std::cout << '\a' << std::flush;
@@ -234,6 +236,8 @@ void Repl<O,CBT,GUM>::printTrialsWorkDistribution(
     const std::string THROUGHPUT_BAR_STRING = "--------------------------------";
     const std::string TABLE_SEPARATOR = "+-----------+----------+--------------+";
 
+    // Calculate all throughputs before printing:
+    // (done in its own loop so we can later print comparisons against the optimal bin)
     std::array<double, TRIALS_NUM_BINS+1> throughput;
     unsigned bestThroughputBin = 0; {
     opcount_t successfulTrialsAccum = 0;
@@ -251,7 +255,7 @@ void Repl<O,CBT,GUM>::printTrialsWorkDistribution(
             // use the values for the next bin. Note that this will give `nan`
             // (0.0/0.0) if there is no data for the next bin.
             : (GUM == GiveupMethod::BACKTRACKS) ? ((double)binOpsTotal[i+1] / binHitCount[i+1])
-            : [](){throw "unhandled GUM case"; return 0.0;}();
+            : [](){ throw "unhandled GUM case"; return 0.0; }();
         const double boundedGiveupOpsTotal = (numTotalTrials - successfulTrialsAccum) * boundedGiveupOps;
         throughput[i] = (i == TRIALS_NUM_BINS)
             ? 0.0 // The last bin is for giveups. Throughput unknown.
@@ -286,9 +290,9 @@ void Repl<O,CBT,GUM>::printTrialsWorkDistribution(
             // (the exponent value was chosen by taste / visual feel)
             const unsigned barLength = THROUGHPUT_BAR_STRING.length()
                 * std::pow(throughput[i] / throughput[bestThroughputBin], 5);
-            if (i != bestThroughputBin) os ANSI_DIM_ON;
+            if (solver.isPretty && i != bestThroughputBin) os ANSI_DIM_ON;
             os << ' ' << THROUGHPUT_BAR_STRING.substr(0, barLength);
-            if (i != bestThroughputBin) os ANSI_DIM_OFF;
+            if (solver.isPretty && i != bestThroughputBin) os ANSI_DIM_OFF;
         }
     }
     os << " <- current giveup threshold\n";

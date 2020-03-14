@@ -36,11 +36,10 @@ Solver<O,CBT,GUM>::Solver(std::ostream& os):
         std::iota(rowBias.begin(), rowBias.end(), 0);
     }
     // Interesting: Smaller-order grids perform better with ROW_MAJOR as genPath.
-    setGenPath((O < 4) ? ROW_MAJOR : (GUM == BACKTRACKS) ? ROW_MAJOR : BLOCK_COLS);
     if ((order < 4) || (order == 4 && GUM == BACKTRACKS)) {
-        setGenPath(ROW_MAJOR);
+        setGenPath(GenPath::ROW_MAJOR, true);
     } else {
-        setGenPath(BLOCK_COLS);
+        setGenPath(GenPath::BLOCK_COLS, true);
     }
 
     // Output formatting:
@@ -64,9 +63,6 @@ void Solver<O,CBT,GUM>::print(void) const {
         os << GRID_SEP;\
         PRINT_GRID0_TILE(PRINTER_STATEMENT)}
 
-    if constexpr (CBT) {
-        os << "max backtracks: " STATW_I << maxBacktrackCount << '\n';
-    }
     if constexpr (order == 4) os << std::setbase(16);
 
     for (length_t row = 0; row < length; row++) {
@@ -260,9 +256,9 @@ opcount_t Solver<O,CBT,GUM>::generateSolution(SolverExitStatus& exitStatus, cons
         const opcount_t giveupCondVar
             = (GUM == OPERATIONS) ? numOperations
             : (GUM == BACKTRACKS) ? maxBacktrackCount
-            : [](){throw "unhandled GUM case"; return ~0;}();
+            : [](){ throw "unhandled GUM case"; return ~0; }();
         if (__builtin_expect(giveupCondVar >= GIVEUP_THRESHOLD, false)) {
-            // TODO that it is possible to give up while the next traversal
+            // TODO it is possible to give up while the next traversal
             // index to try is zero (and there is still more to try at zero).
             // Find an elegant way to handle this edge-case.
             break;
@@ -332,12 +328,16 @@ TvsDirection Solver<O,CBT,GUM>::setNextValid(const area_t index) {
 
 
 template <Order O, bool CBT, GiveupMethod GUM>
-void Solver<O,CBT,GUM>::setGenPath(const GenPath newGenPath) noexcept {
+GenPath Solver<O,CBT,GUM>::setGenPath(const GenPath newGenPath, const bool force) noexcept {
+    if (!force && newGenPath == getGenPath()) {
+        // Short circuit:
+        return getGenPath();
+    }
     switch (newGenPath) {
-        case ROW_MAJOR:
+        case GenPath::ROW_MAJOR:
             std::iota(traversalOrder.begin(), traversalOrder.end(), 0);
             break;
-        case BLOCK_COLS: {
+        case GenPath::BLOCK_COLS: {
             area_t i = 0;
             for (order_t blkCol = 0; blkCol < order; blkCol++) {
                 for (length_t row = 0; row < length; row++) {
@@ -348,7 +348,44 @@ void Solver<O,CBT,GUM>::setGenPath(const GenPath newGenPath) noexcept {
             }
             break; }
     }
+    const GenPath oldGenPath = getGenPath();
     genPath = newGenPath;
+    return oldGenPath;
+}
+
+
+template <Order O, bool CBT, GiveupMethod GUM>
+GenPath Solver<O,CBT,GUM>::setGenPath(std::string const& newGenPathString) noexcept {
+    // TODO: define a help menu of options and their meanings and print it here.
+
+    // *NOTE: That's right. I'm using `goto` statements. This falls
+    // within my judgement of appropriate circumstance, it's my own
+    // project, and if it irks you, that also puts a smile on my face :)
+    std::cout << "generator path is ";
+    if (newGenPathString.empty()) {
+        std::cout << "currently set to: ";
+        goto successful_return;
+    }
+    for (unsigned i = 0; i < GENPATH_NAMES.size(); i++) {
+        if (newGenPathString.compare(GENPATH_NAMES[i]) == 0) {
+            if (static_cast<GenPath>(i) == getGenPath()) {
+                std::cout << "already set to: ";
+            } else {
+                std::cout << "now set to: ";
+                setGenPath(GenPath{i});
+            }
+            goto successful_return;
+        }
+    }
+    // unsuccessful return:
+    std::cout << getGenPath() << " (unchanged)\n\"" << newGenPathString
+        << "\" is not a valid generator path name" << std::endl;
+    return getGenPath();
+
+    successful_return:
+    std::cout << getGenPath() << std::endl;
+    return getGenPath();
+
 }
 
 

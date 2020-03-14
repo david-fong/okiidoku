@@ -11,43 +11,43 @@ namespace Sudoku {
     enum Command {
         CMD_HELP,
         CMD_QUIT,
-        CMD_SOLVE,
         CMD_RUN_SINGLE,
         CMD_CONTINUE_PREV,
         CMD_RUN_TRIALS,
         CMD_RUN_SUCCESSES,
         CMD_SET_GENPATH,
+        CMD_SOLVE,
     };
 
     const std::map<std::string, Command> COMMAND_MAP = {
         { "help",       CMD_HELP            },
         { "quit",       CMD_QUIT            },
-        { "solve",      CMD_SOLVE           },
         { "",           CMD_RUN_SINGLE      },
         { "cont",       CMD_CONTINUE_PREV   },
         { "trials",     CMD_RUN_TRIALS      },
         { "strials",    CMD_RUN_SUCCESSES   },
         { "genpath",    CMD_SET_GENPATH     },
+        { "solve",      CMD_SOLVE           },
     };
-
     const std::string HELP_MESSAGE = "\nCOMMAND MENU:"
         "\n- help               print this help menu"
         "\n- quit               terminate this program"
-        "\n- solve <file>       solve the puzzles in <file>"
-        "\n- solve <puzzle>     no spaces; zeros mean empty"
         "\n- {enter}            generate a single solution"
         "\n- cont               continue previous generation"
         "\n- trials <n>         attempt to generate <n> solutions"
         "\n- strials <n>        successfully generate <n> solutions"
-        "\n- genpath            cycle generator traversal path"
+        "\n- genpath [<path>]   get/set generator traversal path"
+        "\n- solve <file>       solve the puzzles in <file>"
+        "\n- solve <puzzle>     no spaces; zeros mean empty"
         ;
+
     const std::string REPL_PROMPT = "\n$ ";
 
     typedef unsigned long trials_t;
     constexpr unsigned int TRIALS_NUM_BINS = 20;
     enum TrialsStopBy {
         TOTAL_TRIALS,
-        TOTAL_SUCCESSES, // TODO make a a command for this
+        TOTAL_SUCCESSES,
     };
 
     volatile unsigned int GET_TERM_COLS(const unsigned fallback) noexcept {
@@ -75,7 +75,7 @@ namespace Sudoku {
 
     private:
         Solver<O,CBT,GUM> solver;
-        std::ostream& os;
+        std::ostream& os; // alias to this->solver.os;
 
         // Return false if command is to exit the program:
         void solvePuzzlesFromFile(std::ifstream&);
@@ -86,7 +86,6 @@ namespace Sudoku {
             std::array<trials_t, TRIALS_NUM_BINS+1> const& binHitCount,
             std::array<double,   TRIALS_NUM_BINS+1> const& binOpsTotal);
     };
-
 }
 
 #endif
