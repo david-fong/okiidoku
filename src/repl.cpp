@@ -133,7 +133,7 @@ void Repl<O,CBT,GUM>::runSingle(const bool contPrev) {
     }
     if (!solver.isPretty) solver.printMessageBar("", '-');
     solver.print();
-    solver.printMessageBar((exitStatus == SUCCESS) ? "DONE" : "ABORT");
+    solver.printMessageBar((exitStatus == SolverExitStatus::SUCCESS) ? "DONE" : "ABORT");
 }
 
 
@@ -169,15 +169,15 @@ void Repl<O,CBT,GUM>::runMultiple(const trials_t stopAfterValue, const TrialsSto
 
         // Save some stats for later diagnostics-printing:
         const opcount_t giveupCondVar
-            = (GUM == OPERATIONS) ? numOperations
-            : (GUM == BACKTRACKS) ? solver.getMaxBacktrackCount()
+            = (GUM == GiveupMethod::OPERATIONS) ? numOperations
+            : (GUM == GiveupMethod::BACKTRACKS) ? solver.getMaxBacktrackCount()
             : [](){ throw "unhandled GUM case"; return ~0; }();
         const unsigned binNum = TRIALS_NUM_BINS * (giveupCondVar) / solver.GIVEUP_THRESHOLD;
         binHitCount[binNum]++;
         binOpsTotal[binNum] += numOperations;
 
         // Print the number of operations taken:
-        if (exitStatus != SUCCESS) {
+        if (exitStatus != SolverExitStatus::SUCCESS) {
             if (solver.isPretty) {
                 os ANSI_DIM_ON;
                 os STATW_I << numOperations;
@@ -211,7 +211,7 @@ void Repl<O,CBT,GUM>::runMultiple(const trials_t stopAfterValue, const TrialsSto
     const double wallSeconds = ((double)std::chrono::duration_cast<std::chrono::microseconds>(
         std::chrono::steady_clock::now() - wallClockStart).count() / 1'000'000);
     solver.printMessageBar("", BAR_WIDTH, '-');
-    os << "give-up method: " STATW_I << GiveupMethod_Names[GUM] << '\n';
+    os << "give-up method: " STATW_I << GiveupMethod_Names[static_cast<unsigned>(GUM)] << '\n';
     os << "generator path: " STATW_I << solver.getGenPath() << '\n';
     os << "processor time: " STATW_D << procSeconds << " seconds (with I/O)" << '\n';
     os << "real-life time: " STATW_D << wallSeconds << " seconds (with I/O)" << '\n';

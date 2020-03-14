@@ -1,9 +1,10 @@
 #ifndef HPP_SUDOKU_SOLVER
 #define HPP_SUDOKU_SOLVER
 
+#include <locale>   // numpunct
+#include <iostream>
 #include <array>
 
-#line 1
 
 /**
  * 
@@ -39,19 +40,24 @@ namespace Sudoku {
      * Constructs I could have used in less favourable implementations
      * included: partial template specification, alias templating,
      * using an enum type for valid grid orders.
+     * 
+     * Note that there is another similar typedef named `order_t`,
+     * which is conditionally defined to be large enough for whatever
+     * value is passed as a template parameter of this type (Order)
+     * as a maximum value.
      */
     typedef uint8_t Order;
     constexpr Order MAX_REASONABLE_ORDER = 20;
 
-    enum GiveupMethod {
+    enum class GiveupMethod {
         OPERATIONS, // Total times attempted to setNextValid.
         BACKTRACKS, // Maximum count searched over all tiles.
-        GiveupMethod__MAX = BACKTRACKS,
+        GiveupMethod__MAX = BACKTRACKS, // TODO: alias this with a static field constexpr `size`.
     };
-    std::array<std::string, GiveupMethod__MAX + 1> GiveupMethod_Names = {
+    std::array<std::string, (int)GiveupMethod::GiveupMethod__MAX+1> GiveupMethod_Names = {
         "operations",
         "backtracks",
-    };
+    }; // TODO: make this accessible from a static getter that takes the scoped enum and static_casts to index.
 
     enum class GenPath : unsigned {
         ROW_MAJOR,
@@ -66,16 +72,15 @@ namespace Sudoku {
         return out << GENPATH_NAMES[static_cast<unsigned>(genPath)];
     }
 
-    // TODO: change to scoped enum without type specifier.
-    enum TvsDirection : bool {
-        BACK = false, FORWARD = true,
+    enum class TvsDirection : bool {
+        BACK, FORWARD,
     };
-    enum SolverExitStatus {
+    enum class SolverExitStatus {
         IMPOSSIBLE, GIVEUP, SUCCESS,
     };
 
     // What to interpret as a blank (non-given) in a puzzle string.
-    enum PuzzleStrBlanksFmt {
+    enum class PuzzleStrBlanksFmt {
         // TODO: implement LENGTH format detector and parser.
         SPACE, ZERO, //LENGTH,
     };
@@ -95,7 +100,7 @@ namespace Sudoku {
     template <Order O, bool CBT, GiveupMethod GUM>
     class Solver {
         static_assert((1 < O) && (O <= MAX_REASONABLE_ORDER));
-        static_assert((GUM == BACKTRACKS) ? CBT : true);
+        static_assert((GUM == GiveupMethod::BACKTRACKS) ? CBT : true);
 
     // ========================
     // TYPEDEFS

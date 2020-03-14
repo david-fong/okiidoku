@@ -36,7 +36,7 @@ Solver<O,CBT,GUM>::Solver(std::ostream& os):
         std::iota(rowBias.begin(), rowBias.end(), 0);
     }
     // Interesting: Smaller-order grids perform better with ROW_MAJOR as genPath.
-    if ((order < 4) || (order == 4 && GUM == BACKTRACKS)) {
+    if ((order < 4) || (order == 4 && GUM == GiveupMethod::BACKTRACKS)) {
         setGenPath(GenPath::ROW_MAJOR, true);
     } else {
         setGenPath(GenPath::BLOCK_COLS, true);
@@ -167,16 +167,16 @@ bool Solver<O,CBT,GUM>::loadPuzzleFromString(const std::string& puzzleString) {
 
     const PuzzleStrBlanksFmt blanksFmt
         = (puzzleString.find(' ') != std::string::npos)
-        ? SPACE
-        : ZERO;
+        ? PuzzleStrBlanksFmt::SPACE
+        : PuzzleStrBlanksFmt::ZERO;
     for (area_t i = 0; i < area; i++) {
         const char valueChar = puzzleString[i];
         switch (blanksFmt) {
-        case SPACE:
+        case PuzzleStrBlanksFmt::SPACE:
             if (valueChar != ' ') {
                 registerGivenValue(i, Tile::VALUE_FROM_CHAR(valueChar));
             } break;
-        case ZERO:
+        case PuzzleStrBlanksFmt::ZERO:
             if (valueChar != '0') {
                 registerGivenValue(i, Tile::VALUE_FROM_CHAR(valueChar) - 1);
             } break;
@@ -197,21 +197,21 @@ template <Order O, bool CBT, GiveupMethod GUM>
 template <bool USE_PUZZLE>
 opcount_t Solver<O,CBT,GUM>::generateSolution(SolverExitStatus& exitStatus, const bool contPrev) {
     opcount_t numOperations = 0;
-    TvsDirection direction = FORWARD;
+    TvsDirection direction = TvsDirection::FORWARD;
     area_t tvsIndex = 0;
 
     if (contPrev) {
         if (prevGenTvsIndex == area) {
             // Previously succeeded.
             tvsIndex = area - 1;
-            direction = BACK;
+            direction = TvsDirection::BACK;
         } else if (prevGenTvsIndex == 0) {
             // Previously realized nothing left to find.
-            exitStatus = IMPOSSIBLE;
+            exitStatus = SolverExitStatus::IMPOSSIBLE;
             return 0;
         } else {
             // Previously gave up.
-            direction = FORWARD;
+            direction = TvsDirection::FORWARD;
         }
     } else {
         // Not continuing. Do something entirely new!
@@ -254,8 +254,8 @@ opcount_t Solver<O,CBT,GUM>::generateSolution(SolverExitStatus& exitStatus, cons
         }
         // Check whether the give-up-condition has been met:
         const opcount_t giveupCondVar
-            = (GUM == OPERATIONS) ? numOperations
-            : (GUM == BACKTRACKS) ? maxBacktrackCount
+            = (GUM == GiveupMethod::OPERATIONS) ? numOperations
+            : (GUM == GiveupMethod::BACKTRACKS) ? maxBacktrackCount
             : [](){ throw "unhandled GUM case"; return ~0; }();
         if (__builtin_expect(giveupCondVar >= GIVEUP_THRESHOLD, false)) {
             // TODO it is possible to give up while the next traversal
@@ -267,7 +267,12 @@ opcount_t Solver<O,CBT,GUM>::generateSolution(SolverExitStatus& exitStatus, cons
     // Return:
     totalGenCount++;
     prevGenTvsIndex = tvsIndex;
-    exitStatus = (tvsIndex == 0) ? IMPOSSIBLE : (tvsIndex == area ? SUCCESS : GIVEUP);
+    exitStatus = (tvsIndex == 0)
+        ? SolverExitStatus::IMPOSSIBLE
+        : ((tvsIndex == area)
+            ? SolverExitStatus::SUCCESS
+            : SolverExitStatus::GIVEUP
+        );
     return numOperations;
 }
 
@@ -316,14 +321,14 @@ TvsDirection Solver<O,CBT,GUM>::setNextValid(const area_t index) {
             blkBin |= valueBit;
             t.value = value;
             t.biasIndex = (biasIndex + 1);
-            return FORWARD;
+            return TvsDirection::FORWARD;
         }
     }
     // Backtrack:
     // - turning back: The above loop never entered the return-block.
     // - continuing back: The above loop was completely skipped-over.
     t.clear();
-    return BACK;
+    return TvsDirection::BACK;
 }
 
 

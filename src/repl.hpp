@@ -85,7 +85,9 @@ namespace Sudoku {
         void printTrialsWorkDistribution(const trials_t numTotalTrials,
             std::array<trials_t, TRIALS_NUM_BINS+1> const& binHitCount,
             std::array<double,   TRIALS_NUM_BINS+1> const& binOpsTotal);
-    };
-}
+
+    }; // End of Repl class
+
+} // End of Sudoku namespace
 
 #endif

@@ -7,7 +7,6 @@ Ex. `000000010400000000020000000000050407008000300001090000300400200050100000000
 
 ## Higher Priority
 
-- Change all (or most) enums to classed enums.
 - Write solver solutions to a new file (user provides empty string to indicate choose suitable name based on input file name)
 - Experiment with a different way of giving up: according to when some tile's backtrack counter exceeds some value.
   - Collect and print stats for trial runs of the maximum backtracking operations on any tile in each run before it succeeded or gave up. Print a comparison between those that give up and those that don't.
