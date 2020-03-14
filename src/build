@@ -29,7 +29,7 @@ fi
 declare -r SHORTEN_STDLIB_PATH='s/.:\/[^\n]+?\/include/\[1;35mSTDLIB\[39m/g'
 
 ${COMPILER}\
-    -Wall -O3 ${OPTS}\
+    -Wall -Wimplicit-fallthrough=5 -O3 ${OPTS}\
     -fprofile-dir="${CONTEXT}/.profile"\
     main.cpp -o main.exe\
     |& sed -E ${SHORTEN_STDLIB_PATH}

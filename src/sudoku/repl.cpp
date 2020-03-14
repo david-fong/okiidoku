@@ -183,8 +183,8 @@ void Repl<O,CBT,GUM>::runMultiple(const trials_t stopAfterValue, const TrialsSto
             } else { os << '\n'; }
         }
         switch (stopAccordingTo) {
-            case TOTAL_TRIALS:    doneTrialsCondVar = numTotalTrials;
-            case TOTAL_SUCCESSES: doneTrialsCondVar = numTotalSuccesses;
+            case TOTAL_TRIALS:    doneTrialsCondVar = numTotalTrials; break;
+            case TOTAL_SUCCESSES: doneTrialsCondVar = numTotalSuccesses; break;
         }
     } while (doneTrialsCondVar < stopAfterValue);
     }
@@ -216,6 +216,10 @@ void Repl<O,CBT,GUM>::runMultiple(std::string const& trialsString, const TrialsS
     long stopByValue;
     try {
         stopByValue = std::stol(trialsString);
+        if (stopByValue <= 0) {
+            std::cout << "please provide a non-zero, positive integer." << std::endl;
+            return;
+        }
     } catch (std::invalid_argument const& ia) {
         std::cout << "could not convert \"" << trialsString << "\" to an integer." << std::endl;
         return;
