@@ -142,27 +142,40 @@ namespace Sudoku {
                 return value == length;
             }
             friend std::ostream& operator<<(std::ostream& out, Tile const& t) {
+                // TODO [bug] Handle different blank formats.
+                static_assert(order <= 6, "I haven't yet decided how to translate for orders > 6.");
                 if (__builtin_expect(t.isClear(), false)) {
                     return out << ' ';
                 } else {
-                    if constexpr (order < 5) {
-                        return out << (uint16_t)t.value;
+                    if constexpr (order < 4) {
+                        return out << (int)t.value;
+                    } else if constexpr (order == 5) {
+                        return out << static_cast<char>('a' + t.value);
                     } else {
-                        return out << (char)('a' + t.value);
+                        return (t.value < 10)
+                            ? out << t.value
+                            : out << static_cast<char>('a' + t.value - 10);
                     }
                 }
+                std::terminate();
             }
             // Does not check the validity of inputs.
-            // Assumes that the puzzle-string blanks style uses spaces
-            // for blanks. Accepts 'G' for order == 4 as `length`.
-            // Case sensitive. Always only lowercase for order < 6.
+            // Assumes that the puzzle-string blanks style uses <length>
+            // for blanks. Accepts 'G' for order == 4 as `length`, and
+            // 'A' for order == 6. Case sensitive. Always lowercase first
+            // for order <= 6.
             [[gnu::const]] static constexpr value_t VALUE_FROM_CHAR(const char valueChar) noexcept {
-                // TODO: decide how to handle translations for orders > 5.
-                static_assert(order <= 5);
+                static_assert(order <= 6, "I haven't yet decided how to translate for orders > 6.");
                 if constexpr (order < 4) {
                     return valueChar - '0';
+                } else if constexpr (order == 5) {
+                    return valueChar - 'a';
                 } else {
-                    return (valueChar <= '9') ? (valueChar - '0') : (valueChar - 'a');
+                    if constexpr (order == 6)
+                        if (valueChar == 'A') return 36;
+                    return (valueChar <= '9')
+                        ?  (valueChar  - '0')
+                        :  (valueChar  - 'a' + 10);
                 }
             }
         protected:
@@ -236,7 +249,7 @@ namespace Sudoku {
                 1, 1,  3,   150,  10'000,  2'200'000,  10'000'000'000,
                 })[order]
             : [](){ throw "unhandled GUM case"; return ~0; }();
-            // TODO: update the above numbers. the current values for order-6 are just predictions.
+            // TODO [tune] update the above numbers. the current values for order-6 are just predictions.
 
     public:
         std::ostream& os;

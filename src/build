@@ -25,7 +25,7 @@ then
     OPTS+=" -fprofile-use"
 fi
 
-# TODO This only designed for windows. Make it work on linux too?
+# TODO [feat] This only designed for windows. Make it work on linux too?
 declare -r SHORTEN_STDLIB_PATH='s/.:\/[^\n]+?\/include/\[1;35mSTDLIB\[39m/g'
 
 ${COMPILER}\

@@ -102,7 +102,7 @@ void Repl<O,CBT,GUM>::solvePuzzlesFromFile(std::ifstream& puzzlesFile) {
         SolverExitStatus exitStatus;
         solver.template generateSolution<true>(exitStatus);
 
-        // TODOWrite the solution to an output file.
+        // TODO [feat] Write the solution to an output file.
         solver.print();
     }
 }

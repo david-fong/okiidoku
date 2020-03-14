@@ -40,7 +40,7 @@ int main(const int argc, char const *const argv[]) {
         srandKey = std::time(NULL);
     }
     if (argc > 3) {
-        // TODO: handle if file already exists: prompt user for whether to overwrite.
+        // TODO [feat] Handle if file already exists: prompt user for whether to overwrite.
         outFileName = argv[3];
         outStream = new std::ofstream(outFileName);
     } else {

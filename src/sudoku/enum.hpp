@@ -57,7 +57,7 @@ namespace Sudoku {
 
     // What to interpret as a blank (non-given) in a puzzle string.
     enum class PuzzleStrBlanksFmt {
-        // TODO: implement LENGTH format detector and parser.
+        // TODO [feat] Implement LENGTH format detector and parser.
         SPACE, ZERO, //LENGTH,
     };
 

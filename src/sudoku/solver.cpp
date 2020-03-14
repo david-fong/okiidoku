@@ -56,8 +56,6 @@ void Solver<O,CBT,GUM>::print(void) const {
         os << GRID_SEP;\
         PRINT_GRID0_TILE(PRINTER_STATEMENT)}
 
-    if constexpr (order == 4) os << std::setbase(16);
-
     for (length_t row = 0; row < length; row++) {
         if (isPretty && (row % order == 0)) {
             // Print block-row separator string:
@@ -77,12 +75,11 @@ void Solver<O,CBT,GUM>::print(void) const {
         os << '\n';
     }
     if (isPretty) {
-            os << Ansi::DIM.ON;
-            os << blkRowSepString;
-            if constexpr (CBT) os << GRID_SEP << blkRowSepString;
-            os << "\n" << Ansi::DIM.OFF;
+        os << Ansi::DIM.ON;
+        os << blkRowSepString;
+        if constexpr (CBT) os << GRID_SEP << blkRowSepString;
+        os << "\n" << Ansi::DIM.OFF;
     }
-    if constexpr (order == 4) os << std::setbase(10);
 }
 
 
@@ -251,7 +248,7 @@ opcount_t Solver<O,CBT,GUM>::generateSolution(SolverExitStatus& exitStatus, cons
             : (GUM == GUM::E::BACKTRACKS) ? maxBacktrackCount
             : [](){ throw "unhandled GUM case"; return ~0; }();
         if (__builtin_expect(giveupCondVar >= GIVEUP_THRESHOLD, false)) {
-            // TODO it is possible to give up while the next traversal
+            // TODO [bug] it is possible to give up while the next traversal
             // index to try is zero (and there is still more to try at zero).
             // Find an elegant way to handle this edge-case.
             break;
@@ -292,8 +289,7 @@ TvsDirection Solver<O,CBT,GUM>::setNextValid(const area_t index) {
     if (__builtin_expect(occmask_popcount(invalidBin) == length, false)) {
         t.clear();
         return BACK;
-    }
-    else if (occmask_popcount(invalidBin) == length - 1) {
+    } else if (occmask_popcount(invalidBin) == length - 1) {
         const value_t value = occmask_ctz(!invalidBin);
         const occmask_t valueBit = 0b1 << value;
         rowBin |= valueBit;
@@ -354,7 +350,7 @@ GenPath::E Solver<O,CBT,GUM>::setGenPath(const GenPath::E newGenPath, const bool
 
 template <Order O, bool CBT, GUM::E GUM>
 GenPath::E Solver<O,CBT,GUM>::setGenPath(std::string const& newGenPathString) noexcept {
-    // TODO: define a help menu of options and their meanings and print it here.
+    // TODO [qol] define a help menu of options and their meanings and print it here.
 
     // *NOTE: That's right. I'm using `goto` statements. This falls
     // within my judgement of appropriate circumstance, it's my own
