@@ -139,9 +139,14 @@ void Solver<O,CBT,GUM>::clear(void) {
         maxBacktrackCount = 0;
     }
     // Scramble each row's value-guessing-order:
+    STD_RAND_MUTEX.lock();
     for (auto& rowBias : rowBiases) {
-        std::random_shuffle(rowBias.begin(), rowBias.end(), MY_RANDOM);
+        std::random_shuffle(
+            rowBias.begin(), rowBias.end(),
+            [](const unsigned i){ return std::rand() % i; }
+        );
     }
+    STD_RAND_MUTEX.unlock();
     // Do not clear seeds here. That can be done when reading in givens.
 }
 
@@ -378,7 +383,6 @@ GenPath::E Solver<O,CBT,GUM>::setGenPath(std::string const& newGenPathString) no
     successful_return:
     std::cout << getGenPath() << std::endl;
     return getGenPath();
-
 }
 
 

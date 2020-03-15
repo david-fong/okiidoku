@@ -6,6 +6,7 @@
 
 #include <locale>   // numpunct
 #include <iostream>
+#include <mutex>
 #include <array>
 
 
@@ -25,6 +26,10 @@
  * ```
  */
 namespace Sudoku {
+
+    // Guards calls to std::rand(), which is not guaranteed to be thread
+    // safe. I currently only use this when shuffling generator biases.
+    std::mutex STD_RAND_MUTEX;
 
     // Container for a very large number.
     // See Solver::GIVEUP_THRESHOLD for more discussion on the average
@@ -227,7 +232,7 @@ namespace Sudoku {
         area_t prevGenTvsIndex;
 
     private:
-        unsigned long long totalGenCount = 0;
+        unsigned long long totalGenCount = 0; // TODO [qol] Delete this. It serves no function.
         std::array<unsigned, (CBT?area:1)> backtrackCounts;
         opcount_t maxBacktrackCount;
         void printShadedBacktrackStat(unsigned count) const;
@@ -278,10 +283,10 @@ namespace Sudoku {
     // ========================
     public:
         // Inline functions:
-        [[gnu::const]] static length_t getRow(const area_t index) noexcept { return index / length; }
-        [[gnu::const]] static length_t getCol(const area_t index) noexcept { return index % length; }
-        [[gnu::const]] static length_t getBlk(const area_t index) noexcept { return getBlk(getRow(index), getCol(index)); }
-        [[gnu::const]] static length_t getBlk(const length_t row, const length_t col) noexcept {
+        [[gnu::const]] static constexpr length_t getRow(const area_t index) noexcept { return index / length; }
+        [[gnu::const]] static constexpr length_t getCol(const area_t index) noexcept { return index % length; }
+        [[gnu::const]] static constexpr length_t getBlk(const area_t index) noexcept { return getBlk(getRow(index), getCol(index)); }
+        [[gnu::const]] static constexpr length_t getBlk(const length_t row, const length_t col) noexcept {
             return ((row / order) * order) + (col / order);
         }
         [[gnu::const]] static length_t occmask_popcount(occmask_t occmask) noexcept {
@@ -306,7 +311,6 @@ namespace Sudoku {
 
 
     const std::string GRID_SEP = "  ";
-    int MY_RANDOM(const int i) { return std::rand() % i; }
     struct MyNumpunct : std::numpunct<char> {
         std::string do_grouping() const {
             return "\03";

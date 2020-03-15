@@ -49,6 +49,7 @@ namespace Sudoku {
         TOTAL_TRIALS,
         TOTAL_SUCCESSES,
     };
+    constexpr unsigned TRIALS_ABSOLUTE_MAX_THREADS = 8;
 
     volatile unsigned int GET_TERM_COLS(const unsigned fallback) noexcept {
         char const*const envVar = std::getenv("COLUMNS");
