@@ -190,7 +190,7 @@ opcount_t Solver<O,CBT,GUM>::generateSolution(SolverExitStatus& exitStatus, cons
     TvsDirection direction = TvsDirection::FORWARD;
     area_t tvsIndex = 0;
 
-    if (contPrev) {
+    if (__builtin_expect(contPrev, false)) {
         if (prevGenTvsIndex == area) {
             // Previously succeeded.
             tvsIndex = area - 1;
@@ -359,7 +359,7 @@ GenPath::E Solver<O,CBT,GUM>::setGenPath(std::string const& newGenPathString) no
         std::cout << "currently set to: ";
         goto successful_return;
     }
-    for (unsigned i = 0; i < GenPath::NAMES.size(); i++) {
+    for (unsigned i = 0; i < GenPath::size; i++) {
         if (newGenPathString.compare(GenPath::NAMES[i]) == 0) {
             if (GenPath::E{i} == getGenPath()) {
                 std::cout << "already set to: ";
@@ -371,8 +371,8 @@ GenPath::E Solver<O,CBT,GUM>::setGenPath(std::string const& newGenPathString) no
         }
     }
     // unsuccessful return:
-    std::cout << getGenPath() << " (unchanged)\n\"" << newGenPathString
-        << "\" is not a valid generator path name" << std::endl;
+    std::cout << getGenPath() << " (unchanged).\n\"" << newGenPathString
+        << "\" is not a valid generator path name." << std::endl;
     return getGenPath();
 
     successful_return:

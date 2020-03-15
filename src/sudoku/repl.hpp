@@ -45,8 +45,7 @@ namespace Sudoku {
 
     typedef unsigned long trials_t;
     constexpr unsigned int TRIALS_NUM_BINS = 20;
-    // TODO [qol] Change to scoped enum
-    enum TrialsStopBy {
+    enum class TrialsStopBy {
         TOTAL_TRIALS,
         TOTAL_SUCCESSES,
     };

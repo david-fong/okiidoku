@@ -228,15 +228,14 @@ namespace Sudoku {
 
     private:
         unsigned long long totalGenCount = 0;
-    public:
-        unsigned long long getTotalGenCount(void) const noexcept { return totalGenCount; }
-
-    private:
         std::array<unsigned, (CBT?area:1)> backtrackCounts;
         opcount_t maxBacktrackCount;
         void printShadedBacktrackStat(unsigned count) const;
     public:
+        [[gnu::cold]] unsigned long long getTotalGenCount(void) const noexcept { return totalGenCount; }
         [[gnu::cold]] opcount_t getMaxBacktrackCount(void) const noexcept { return maxBacktrackCount; }
+
+    public:
         /**
          * Give up if the giveup condition variable meets this value.
          * Measured stats for operations: https://www.desmos.com/calculator/8taqzelils
@@ -268,11 +267,11 @@ namespace Sudoku {
         // solution-generating-run from where it left off.
         template <bool USE_PUZZLE = false>
         [[gnu::hot]] opcount_t generateSolution(SolverExitStatus& exitStatus, bool contPrev = false);
-        [[gnu::hot]] TvsDirection setNextValid(const area_t);
     private:
         void registerGivenValue(area_t index, value_t value);
         template <bool USE_PUZZLE>
         [[gnu::hot]] void clear(void);
+        [[gnu::hot]] TvsDirection setNextValid(const area_t);
 
     // ========================
     // STATIC UTILITIES

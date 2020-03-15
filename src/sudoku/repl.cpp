@@ -52,8 +52,8 @@ bool Repl<O,CBT,GUM>::runCommand(std::string const& cmdLine) {
             return false;
         case Command::RUN_SINGLE:    runSingle();     break;
         case Command::CONTINUE_PREV: runSingle(true); break;
-        case Command::RUN_TRIALS:    runMultiple(cmdArgs, TOTAL_TRIALS);    break;
-        case Command::RUN_SUCCESSES: runMultiple(cmdArgs, TOTAL_SUCCESSES); break;
+        case Command::RUN_TRIALS:    runMultiple(cmdArgs, TrialsStopBy::TOTAL_TRIALS);    break;
+        case Command::RUN_SUCCESSES: runMultiple(cmdArgs, TrialsStopBy::TOTAL_SUCCESSES); break;
         case Command::SET_GENPATH:
             solver.setGenPath(cmdArgs);
             break;
@@ -183,8 +183,8 @@ void Repl<O,CBT,GUM>::runMultiple(const trials_t stopAfterValue, const TrialsSto
             } else { os << '\n'; }
         }
         switch (stopAccordingTo) {
-            case TOTAL_TRIALS:    doneTrialsCondVar = numTotalTrials; break;
-            case TOTAL_SUCCESSES: doneTrialsCondVar = numTotalSuccesses; break;
+            case TrialsStopBy::TOTAL_TRIALS:    doneTrialsCondVar = numTotalTrials;    break;
+            case TrialsStopBy::TOTAL_SUCCESSES: doneTrialsCondVar = numTotalSuccesses; break;
         }
     } while (doneTrialsCondVar < stopAfterValue);
     }
