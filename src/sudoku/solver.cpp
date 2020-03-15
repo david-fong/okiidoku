@@ -38,6 +38,10 @@ Solver<O,CBT,GUM>::Solver(std::ostream& os):
     }
     os.precision(3);
     os << std::fixed;
+
+    // Print diagnostics about member size:
+    std::cout << "\nsizeof solver:   " << sizeof(*this) << std::endl;
+    std::cout << "sizeof givens[]: " << sizeof(isTileForGiven) << std::endl;
 }
 
 
@@ -155,7 +159,7 @@ bool Solver<O,CBT,GUM>::loadPuzzleFromString(const std::string& puzzleString) {
     if (puzzleString.length() != area) return false;
 
     // Clear any is-given=markers set for previous puzzles:
-    isTileForGiven.fill(false);
+    isTileForGiven.reset();
 
     const PuzzleStrBlanksFmt blanksFmt
         = (puzzleString.find(' ') != std::string::npos)

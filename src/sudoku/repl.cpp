@@ -27,7 +27,6 @@ Repl<O,CBT,GUM>::Repl(std::ostream& os):
     solver  (os),
     os      (os)
 {
-    std::cout << sizeof(solver) << std::endl;
     // Print help menu and then start the REPL (read-execute-print-loop):
     std::cout << HELP_MESSAGE << std::endl;
     std::string command;
