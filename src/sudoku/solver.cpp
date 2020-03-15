@@ -8,8 +8,6 @@
 #include <algorithm>    // random_shuffle,
 #include <string>       // string,
 
-[[gnu::const]] static std::string createHSepString(unsigned int order);
-
 
 namespace Sudoku {
 
@@ -22,8 +20,7 @@ namespace Sudoku {
 template <Order O, bool CBT, GUM::E GUM>
 Solver<O,CBT,GUM>::Solver(std::ostream& os):
     os          (os),
-    isPretty    (&os == &std::cout),
-    blkRowSepString(createHSepString(order))
+    isPretty    (&os == &std::cout)
 {
     for (auto& rowBias : rowBiases) {
         std::iota(rowBias.begin(), rowBias.end(), 0);
@@ -37,7 +34,7 @@ Solver<O,CBT,GUM>::Solver(std::ostream& os):
 
     // Output formatting:
     if (isPretty) {
-        benchedLocale = os.imbue(std::locale(os.getloc(), new MyNumpunct()));
+        os.imbue(std::locale(os.getloc(), new MyNumpunct()));
     }
     os.precision(3);
     os << std::fixed;
@@ -260,7 +257,6 @@ opcount_t Solver<O,CBT,GUM>::generateSolution(SolverExitStatus& exitStatus, cons
         }
     }
     // Return:
-    totalGenCount++;
     prevGenTvsIndex = tvsIndex;
     exitStatus = (tvsIndex == 0)
         ? SolverExitStatus::IMPOSSIBLE
@@ -421,16 +417,17 @@ void Solver<O,CBT,GUM>::printMessageBar(std::string const& msg, const char fillC
 #undef STATW_I
 #undef STATW_D
 
-} // End of Sudoku namespace.
 
+template <Order O, bool CBT, GUM::E GUM>
+const std::string Solver<O,CBT,GUM>::blkRowSepString = createHSepString(order);
 
-
-
-static std::string createHSepString(unsigned int order) {
+const std::string createHSepString(const unsigned order) {
     std::string vbar = ' ' + std::string((((order * (order + 1)) + 1) * 2 - 1), '-');
-    for (unsigned int i = 0; i <= order; i++) {
+    for (unsigned i = 0; i <= order; i++) {
         // Insert crosses at vbar intersections.
         vbar[(2 * (order + 1) * i) + 1] = '+';
     }
-    return std::move(vbar);
+    return vbar;
 }
+
+} // End of Sudoku namespace.

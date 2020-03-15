@@ -19,15 +19,15 @@ namespace Sudoku {
 
 template <Order O, bool CBT, GUM::E GUM>
 Repl<O,CBT,GUM>::Repl(std::ostream& os):
-    numThreads([](){
-        constexpr unsigned EXTRA_THREADS = ((unsigned[]){0, 0, 0, 0, 0, 2, 3})[O];
+    numExtraThreads([](){
         const unsigned HWC = std::thread::hardware_concurrency();
         // HWC is specified to be zero if unknown.
-        return HWC ? std::min(EXTRA_THREADS, HWC) : 0;
+        return HWC ? std::min(MAX_EXTRA_THREADS, HWC) : 0;
     }()),
     solver  (os),
     os      (os)
 {
+    std::cout << sizeof(solver) << std::endl;
     // Print help menu and then start the REPL (read-execute-print-loop):
     std::cout << HELP_MESSAGE << std::endl;
     std::string command;
@@ -110,7 +110,7 @@ void Repl<O,CBT,GUM>::solvePuzzlesFromFile(std::ifstream& puzzlesFile) {
 
 template <Order O, bool CBT, GUM::E GUM>
 void Repl<O,CBT,GUM>::runSingle(const bool contPrev) {
-    solver.printMessageBar("START " + std::to_string(solver.getTotalGenCount()));
+    solver.printMessageBar("START");
 
     // Generate a new solution:
     SolverExitStatus exitStatus;
@@ -157,12 +157,7 @@ void Repl<O,CBT,GUM>::runMultiple(
     trials_t numTotalSuccesses = 0;
     std::mutex sharedStateMutex;
     std::cout << "| " << std::setw(2) << 0u << "% |";
-    const auto runTrialsFunc = [&](void) {
-        Solver<O,CBT,GUM> threadSolver(solver.os);
-        threadSolver.setGenPath(solver.getGenPath());
-        // shadow-out external `solver` to prevent accidental usage
-        // of it instead of this thread's version, `threadSolver`:
-        void const*const solver = nullptr; (void)solver;
+    const auto runTrialsFunc = [&](Solver<O,CBT,GUM>& solver) {
         sharedStateMutex.lock();
         do {
             // Call dibs on the `numTotalTrials`th trial.
@@ -176,9 +171,9 @@ void Repl<O,CBT,GUM>::runMultiple(
                 // This function call is the only section unguarded by the mutex.
                 // That's fine. This covers the overwhelming majority of the work,
                 // and everything else requires mutual exclusion to access shared
-                // state and print outputs. 
+                // state and print outputs.
                 SolverExitStatus exitStatus;
-                const opcount_t numOperations = threadSolver.generateSolution(exitStatus);
+                const opcount_t numOperations = solver.generateSolution(exitStatus);
             sharedStateMutex.lock();
 
             // Print the number of operations taken:
@@ -192,7 +187,7 @@ void Repl<O,CBT,GUM>::runMultiple(
                 numTotalSuccesses++;
                 os STATW_I << numOperations;
             } else {
-                if (threadSolver.isPretty) {
+                if (solver.isPretty) {
                     os << Ansi::DIM.ON STATW_I << numOperations << Ansi::DIM.OFF;
                 } else {
                     os STATW_I << "---";
@@ -212,9 +207,9 @@ void Repl<O,CBT,GUM>::runMultiple(
             // Save some stats for later diagnostics-printing:
             const opcount_t giveupCondVar
                 = (GUM == GUM::E::OPERATIONS) ? numOperations
-                : (GUM == GUM::E::BACKTRACKS) ? threadSolver.getMaxBacktrackCount()
+                : (GUM == GUM::E::BACKTRACKS) ? solver.getMaxBacktrackCount()
                 : [](){ throw "unhandled GUM case"; return ~0; }();
-            const unsigned binNum = TRIALS_NUM_BINS * (giveupCondVar) / threadSolver.GIVEUP_THRESHOLD;
+            const unsigned binNum = TRIALS_NUM_BINS * (giveupCondVar) / solver.GIVEUP_THRESHOLD;
             binHitCount[binNum]++;
             binOpsTotal[binNum] += numOperations;
         } while (true);
@@ -240,7 +235,7 @@ void Repl<O,CBT,GUM>::runMultiple(
     solver.printMessageBar("", BAR_WIDTH, '-');
     os << "give-up method: " STATW_I << GUM << '\n';
     os << "generator path: " STATW_I << solver.getGenPath() << '\n';
-    os << "helper threads: " STATW_I << numThreads << '\n';
+    os << "helper threads: " STATW_I << numExtraThreads << '\n';
     os << "processor time: " STATW_D << procSeconds << Ansi::DIM.ON << " seconds (with I/O)" << Ansi::DIM.OFF << '\n';
     os << "real-life time: " STATW_D << wallSeconds << Ansi::DIM.ON << " seconds (with I/O)" << Ansi::DIM.OFF << '\n';
     if (wallSeconds > 10.0) {

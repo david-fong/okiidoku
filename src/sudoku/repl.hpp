@@ -49,7 +49,6 @@ namespace Sudoku {
         TRIALS,
         SUCCESSES,
     };
-    constexpr unsigned MAX_THREADS = 8;
 
     volatile unsigned int GET_TERM_COLS(const unsigned fallback) noexcept {
         char const*const envVar = std::getenv("COLUMNS");
@@ -73,7 +72,11 @@ namespace Sudoku {
     public:
         explicit Repl(std::ostream&);
         bool runCommand(std::string const& cmdLine);
-        const unsigned numThreads;
+
+        static constexpr unsigned MAX_EXTRA_THREADS = ((const unsigned[]){0, 0, 0, 0, 0, 2, 3})[O];
+        // This is equal to `MAX_EXTRA_THREADS` floored by how many
+        // concurrent threads the host processor can support at a time.
+        const unsigned numExtraThreads;
 
     private:
         Solver<O,CBT,GUM> solver;

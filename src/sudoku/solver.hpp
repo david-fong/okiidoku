@@ -57,6 +57,8 @@ namespace Sudoku {
     typedef uint8_t Order;
     constexpr Order MAX_REASONABLE_ORDER = 20;
 
+    [[gnu::const]] const std::string createHSepString(unsigned int order);
+
 
     /**
      * 
@@ -233,12 +235,10 @@ namespace Sudoku {
         area_t prevGenTvsIndex;
 
     private:
-        unsigned long long totalGenCount = 0; // TODO [qol] Delete this. It serves no function.
         std::array<unsigned, (CBT?area:1)> backtrackCounts;
         opcount_t maxBacktrackCount;
         void printShadedBacktrackStat(unsigned count) const;
     public:
-        [[gnu::cold]] unsigned long long getTotalGenCount(void) const noexcept { return totalGenCount; }
         [[gnu::cold]] opcount_t getMaxBacktrackCount(void) const noexcept { return maxBacktrackCount; }
 
     public:
@@ -259,9 +259,8 @@ namespace Sudoku {
     public:
         std::ostream& os;
         const bool isPretty;
-        std::locale benchedLocale; // Used to swap in-and-out the thousands-commas.
         static constexpr unsigned STATS_WIDTH = (0.4 * length) + 4;
-        const std::string blkRowSepString;
+        static const std::string blkRowSepString;
 
     public:
         // Returns whether the string could be loaded as a puzzle.
