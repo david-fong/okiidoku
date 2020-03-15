@@ -73,7 +73,7 @@ namespace Sudoku {
         explicit Repl(std::ostream&);
         bool runCommand(std::string const& cmdLine);
 
-        static constexpr unsigned MAX_EXTRA_THREADS = ((const unsigned[]){0, 0, 0, 0, 0, 2, 3})[O];
+        static constexpr unsigned MAX_EXTRA_THREADS = ((const unsigned[]){0, 0, 0, 0, 1, 3, 3})[O];
         // This is equal to `MAX_EXTRA_THREADS` floored by how many
         // concurrent threads the host processor can support at a time.
         const unsigned numExtraThreads;

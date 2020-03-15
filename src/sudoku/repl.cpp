@@ -7,6 +7,7 @@
 
 #include <functional>   // reference_wrapper, ref,
 #include <thread>       // 
+#include <vector>
 
 
 namespace Sudoku {
@@ -27,6 +28,9 @@ Repl<O,CBT,GUM>::Repl(std::ostream& os):
     solver  (os),
     os      (os)
 {
+    // Print diagnostics about Solver member size:
+    std::cout << "\nsizeof solver: " << sizeof(solver) << std::endl;
+
     // Print help menu and then start the REPL (read-execute-print-loop):
     std::cout << HELP_MESSAGE << std::endl;
     std::string command;
@@ -155,13 +159,19 @@ void Repl<O,CBT,GUM>::runMultiple(
     {
     trials_t numTotalSuccesses = 0;
     std::mutex sharedStateMutex;
-    std::cout << "| " << std::setw(2) << 0u << "% |";
+    std::cout << "| " << std::setw(2) << 0u << "% |" << std::flush;
     const auto runTrialsFunc = [&](Solver<O,CBT,GUM>& solver) {
         sharedStateMutex.lock();
-        do {
-            // Call dibs on the `numTotalTrials`th trial.
+        while (true) {
+            // Check break conditions:
             if ( trialsStopMethod == TrialsStopBy::TRIALS
-                && numTotalTrials == trialsStopThreshold) break;
+                && numTotalTrials == trialsStopThreshold) {
+                break;
+            } else if (trialsStopMethod == TrialsStopBy::SUCCESSES
+                &&    numTotalSuccesses >= trialsStopThreshold) {
+                break;
+            }
+            // Call dibs on the `numTotalTrials`th trial.
             numTotalTrials++;
 
             // Attempt to generate a single solution:
@@ -177,12 +187,6 @@ void Repl<O,CBT,GUM>::runMultiple(
 
             // Print the number of operations taken:
             if (exitStatus == SolverExitStatus::SUCCESS) {
-                // Check break condition. Unlike stopping by total trials,
-                // we can't know ahead of time if a trial will succeed, so
-                // we can only break after running it (unless we decide to
-                // embed finer-grained checks within `generateSolution`).
-                if (trialsStopMethod == TrialsStopBy::SUCCESSES
-                && numTotalSuccesses == trialsStopThreshold) break;
                 numTotalSuccesses++;
                 os STATW_I << numOperations;
             } else {
@@ -192,6 +196,7 @@ void Repl<O,CBT,GUM>::runMultiple(
                     os STATW_I << "---";
                 }
             }
+            if constexpr (solver.order > 4) os << std::flush;
             // Print a progress indicator to stdout:
             if (numTotalTrials % COLS == 0) {
                 trials_t trialsStopCurVal;
@@ -211,17 +216,25 @@ void Repl<O,CBT,GUM>::runMultiple(
             const unsigned binNum = TRIALS_NUM_BINS * (giveupCondVar) / solver.GIVEUP_THRESHOLD;
             binHitCount[binNum]++;
             binOpsTotal[binNum] += numOperations;
-        } while (true);
+        }
         sharedStateMutex.unlock();
     }; // End of thread lambda.
 
     // Start the threads:
-    std::thread extraThreads[MAX_THREADS];
-    for (unsigned i = 0; i < numThreads; i++) {
-        extraThreads[i] = std::thread(runTrialsFunc);
+    // Make sure that nothing gets resized or moved under the feet of std::ref.
+    std::vector<Solver<O,CBT,GUM>> extraSolvers;
+    std::array<std::thread, MAX_EXTRA_THREADS> extraThreads;
+    extraSolvers.reserve(numExtraThreads);
+    for (unsigned i = 0; i < numExtraThreads; i++) {
+        extraSolvers.emplace_back(solver.os);
+        extraSolvers[i].setGenPath(solver.getGenPath());
     }
-    // TODO
-    for (unsigned i = 0; i < numThreads; i++) {
+    extraSolvers.shrink_to_fit();
+    for (unsigned i = 0; i < numExtraThreads; i++) {
+        extraThreads[i] = std::thread(runTrialsFunc, std::ref(extraSolvers[i]));
+    }
+    //runTrialsFunc(solver);
+    for (unsigned i = 0; i < numExtraThreads; i++) {
         extraThreads[i].join();
     }
     }

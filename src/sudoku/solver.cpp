@@ -11,6 +11,11 @@
 
 namespace Sudoku {
 
+
+std::string MyNumpunct::do_grouping(void) const {
+    return "\03";
+}
+
 // Mechanism to statically toggle printing alignment:
 // (#undef-ed before the end of this namespace)
 #define STATW_I << std::setw(this->STATS_WIDTH)
@@ -38,10 +43,7 @@ Solver<O,CBT,GUM>::Solver(std::ostream& os):
     }
     os.precision(3);
     os << std::fixed;
-
-    // Print diagnostics about member size:
-    std::cout << "\nsizeof solver:   " << sizeof(*this) << std::endl;
-    std::cout << "sizeof givens[]: " << sizeof(isTileForGiven) << std::endl;
+    //std::cout << "hello from Solver ctor!" << std::endl;
 }
 
 

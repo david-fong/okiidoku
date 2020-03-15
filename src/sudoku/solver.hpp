@@ -5,7 +5,6 @@
 #include "./enum.hpp"
 #include "./size.hpp"
 
-#include <locale>   // numpunct
 #include <iostream>
 #include <mutex>
 #include <array>
@@ -257,9 +256,7 @@ namespace Sudoku {
 
     const std::string GRID_SEP = "  ";
     struct MyNumpunct : std::numpunct<char> {
-        std::string do_grouping() const {
-            return "\03";
-        }
+        std::string do_grouping(void) const;
     };
 
 } // End of Sudoku namespace
