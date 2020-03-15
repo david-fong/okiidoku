@@ -196,6 +196,7 @@ namespace Sudoku {
         static constexpr length_t   length  = O*O;
         static constexpr area_t     area    = O*O*O*O;
 
+        Solver(void) = delete;
         explicit Solver(std::ostream&);
 
         void print(void) const;

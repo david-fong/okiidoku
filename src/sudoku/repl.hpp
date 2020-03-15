@@ -46,10 +46,10 @@ namespace Sudoku {
     typedef unsigned long trials_t;
     constexpr unsigned int TRIALS_NUM_BINS = 20;
     enum class TrialsStopBy {
-        TOTAL_TRIALS,
-        TOTAL_SUCCESSES,
+        TRIALS,
+        SUCCESSES,
     };
-    constexpr unsigned TRIALS_ABSOLUTE_MAX_THREADS = 8;
+    constexpr unsigned MAX_THREADS = 8;
 
     volatile unsigned int GET_TERM_COLS(const unsigned fallback) noexcept {
         char const*const envVar = std::getenv("COLUMNS");
@@ -73,6 +73,7 @@ namespace Sudoku {
     public:
         explicit Repl(std::ostream&);
         bool runCommand(std::string const& cmdLine);
+        const unsigned numThreads;
 
     private:
         Solver<O,CBT,GUM> solver;

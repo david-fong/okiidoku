@@ -19,6 +19,12 @@ namespace Sudoku {
 
 template <Order O, bool CBT, GUM::E GUM>
 Repl<O,CBT,GUM>::Repl(std::ostream& os):
+    numThreads([](){
+        constexpr unsigned EXTRA_THREADS = ((unsigned[]){0, 0, 0, 0, 0, 2, 3})[O];
+        const unsigned HWC = std::thread::hardware_concurrency();
+        // HWC is specified to be zero if unknown.
+        return HWC ? std::min(EXTRA_THREADS, HWC) : 0;
+    }()),
     solver  (os),
     os      (os)
 {
@@ -55,8 +61,8 @@ bool Repl<O,CBT,GUM>::runCommand(std::string const& cmdLine) {
             return false;
         case Command::RUN_SINGLE:    runSingle();     break;
         case Command::CONTINUE_PREV: runSingle(true); break;
-        case Command::RUN_TRIALS:    runMultiple(cmdArgs, TrialsStopBy::TOTAL_TRIALS);    break;
-        case Command::RUN_SUCCESSES: runMultiple(cmdArgs, TrialsStopBy::TOTAL_SUCCESSES); break;
+        case Command::RUN_TRIALS:    runMultiple(cmdArgs, TrialsStopBy::TRIALS);    break;
+        case Command::RUN_SUCCESSES: runMultiple(cmdArgs, TrialsStopBy::SUCCESSES); break;
         case Command::SET_GENPATH:
             solver.setGenPath(cmdArgs);
             break;
@@ -125,53 +131,84 @@ void Repl<O,CBT,GUM>::runSingle(const bool contPrev) {
 
 
 template <Order O, bool CBT, GUM::E GUM>
-void Repl<O,CBT,GUM>::runMultiple(const trials_t stopAfterValue, const TrialsStopBy stopAccordingTo) {
+void Repl<O,CBT,GUM>::runMultiple(
+    const trials_t     trialsStopThreshold,
+    const TrialsStopBy trialsStopMethod
+) {
     // I sincerely apologize for this absolute-unit of a function; I
     // haven't thought of a holistically nicer way to do this: I hoped
-    // there would be a way to carve out the thread-lambda, but it's
-    // capture group is necessarily quite large, and I feel that moving
-    // the shared state to class members would cost too much pollution.
-    constexpr unsigned DEFAULT_COLS     = ((unsigned[]){0,64,32,24,16, 4, 1})[O];
-    constexpr unsigned LINES_PER_FLUSH  = ((unsigned[]){0, 0, 0, 0, 0, 1, 1})[O];
-    constexpr unsigned EXTRA_THREADS    = ((unsigned[]){0, 0, 0, 0, 0, 2, 3})[O];
-    const unsigned COLS = (solver.isPretty ? (GET_TERM_COLS(DEFAULT_COLS)-7) : DEFAULT_COLS) / solver.STATS_WIDTH;
-    const unsigned BAR_WIDTH  = solver.STATS_WIDTH * COLS + (solver.isPretty ? 7 : 0);
+    // there would be a way to externalize the thread-lambda, but its
+    // capture group is necessarily quite large, and I feel that saving
+    // the shared state in class members would cost too much pollution.
+    constexpr unsigned COLS_DFLT = ((unsigned[]){0,64,32,24,16,4,1})[O];
+    const unsigned COLS = (solver.isPretty ? (GET_TERM_COLS(COLS_DFLT)-7) : COLS_DFLT) / solver.STATS_WIDTH;
+    const unsigned BAR_WIDTH = solver.STATS_WIDTH * COLS + (solver.isPretty ? 7 : 0);
 
     // NOTE: The last bin is for trials that do not succeed.
     std::array<trials_t, TRIALS_NUM_BINS+1> binHitCount = {0,};
     std::array<double,   TRIALS_NUM_BINS+1> binOpsTotal = {0,};
 
-    solver.printMessageBar("START x" + std::to_string(stopAfterValue), BAR_WIDTH);
+    solver.printMessageBar("START x" + std::to_string(trialsStopThreshold), BAR_WIDTH);
     auto wallClockStart = std::chrono::steady_clock::now();
     auto procClockStart = std::clock();
 
     trials_t numTotalTrials = 0;
     {
-    trials_t doneTrialsCondVar = 0;
     trials_t numTotalSuccesses = 0;
     std::mutex sharedStateMutex;
+    std::cout << "| " << std::setw(2) << 0u << "% |";
     const auto runTrialsFunc = [&](void) {
         Solver<O,CBT,GUM> threadSolver(solver.os);
         threadSolver.setGenPath(solver.getGenPath());
-        const nullptr_t solver;
+        // shadow-out external `solver` to prevent accidental usage
+        // of it instead of this thread's version, `threadSolver`:
+        void const*const solver = nullptr; (void)solver;
+        sharedStateMutex.lock();
         do {
-            sharedStateMutex.lock();
-            // Print a progress indicator to stdout:
-            if (numTotalTrials % COLS == 0) {
-                const unsigned pctDone = 100.0 * doneTrialsCondVar / stopAfterValue;
-                std::cout << "| " << std::setw(2) << pctDone << "% |";
-            }
-            // Attempt to generate a single solution:
-            sharedStateMutex.unlock();
-
-            // CRITICAL SECTION:
-            // This function call is the only place unguarded by the mutex.
-            SolverExitStatus exitStatus;
-            const opcount_t numOperations = threadSolver.generateSolution(exitStatus);
-
-            sharedStateMutex.lock();
+            // Call dibs on the `numTotalTrials`th trial.
+            if ( trialsStopMethod == TrialsStopBy::TRIALS
+                && numTotalTrials == trialsStopThreshold) break;
             numTotalTrials++;
 
+            // Attempt to generate a single solution:
+            sharedStateMutex.unlock();
+                // CRITICAL SECTION:
+                // This function call is the only section unguarded by the mutex.
+                // That's fine. This covers the overwhelming majority of the work,
+                // and everything else requires mutual exclusion to access shared
+                // state and print outputs. 
+                SolverExitStatus exitStatus;
+                const opcount_t numOperations = threadSolver.generateSolution(exitStatus);
+            sharedStateMutex.lock();
+
+            // Print the number of operations taken:
+            if (exitStatus == SolverExitStatus::SUCCESS) {
+                // Check break condition. Unlike stopping by total trials,
+                // we can't know ahead of time if a trial will succeed, so
+                // we can only break after running it (unless we decide to
+                // embed finer-grained checks within `generateSolution`).
+                if (trialsStopMethod == TrialsStopBy::SUCCESSES
+                && numTotalSuccesses == trialsStopThreshold) break;
+                numTotalSuccesses++;
+                os STATW_I << numOperations;
+            } else {
+                if (threadSolver.isPretty) {
+                    os << Ansi::DIM.ON STATW_I << numOperations << Ansi::DIM.OFF;
+                } else {
+                    os STATW_I << "---";
+                }
+            }
+            // Print a progress indicator to stdout:
+            if (numTotalTrials % COLS == 0) {
+                trials_t trialsStopCurVal;
+                switch (trialsStopMethod) {
+                case TrialsStopBy::TRIALS:    trialsStopCurVal = numTotalTrials; break;
+                case TrialsStopBy::SUCCESSES: trialsStopCurVal = numTotalSuccesses; break;
+                default: trialsStopCurVal = 0; throw "unhandled enum case";
+                }
+                const unsigned pctDone = 100.0 * trialsStopCurVal / trialsStopThreshold;
+                std::cout << "\n| " << std::setw(2) << pctDone << "% |";
+            }
             // Save some stats for later diagnostics-printing:
             const opcount_t giveupCondVar
                 = (GUM == GUM::E::OPERATIONS) ? numOperations
@@ -180,49 +217,21 @@ void Repl<O,CBT,GUM>::runMultiple(const trials_t stopAfterValue, const TrialsSto
             const unsigned binNum = TRIALS_NUM_BINS * (giveupCondVar) / threadSolver.GIVEUP_THRESHOLD;
             binHitCount[binNum]++;
             binOpsTotal[binNum] += numOperations;
-
-            // Print the number of operations taken:
-            if (exitStatus != SolverExitStatus::SUCCESS) {
-                if (threadSolver.isPretty) {
-                    os << Ansi::DIM.ON;
-                    os STATW_I << numOperations;
-                    os << Ansi::DIM.OFF;
-                } else {
-                    os STATW_I << "---";
-                }
-            } else {
-                numTotalSuccesses++;
-                os STATW_I << numOperations;
-            }
-            // Newline-printing logic:
-            if (numTotalTrials % COLS == 0) {
-                if constexpr (LINES_PER_FLUSH) {
-                if (threadSolver.isPretty && (numTotalTrials % (LINES_PER_FLUSH * COLS) == 0)) {
-                    // Runs are slower. Flush buffer more frequently.
-                    os << std::endl;
-                } else { os << '\n'; }
-                } else { os << '\n'; }
-            }
-            switch (stopAccordingTo) {
-                case TrialsStopBy::TOTAL_TRIALS:    doneTrialsCondVar = numTotalTrials;    break;
-                case TrialsStopBy::TOTAL_SUCCESSES: doneTrialsCondVar = numTotalSuccesses; break;
-            }
-            sharedStateMutex.unlock();
-        } while (doneTrialsCondVar < stopAfterValue);
+        } while (true);
+        sharedStateMutex.unlock();
     }; // End of thread lambda.
 
     // Start the threads:
-    // HWC is specified to be zero if unknown.
-    const unsigned HWC = std::thread::hardware_concurrency();
-    const unsigned actualExtraThreads = HWC ? std::min(EXTRA_THREADS, HWC) : 0;
-    std::array<std::thread, TRIALS_ABSOLUTE_MAX_THREADS> extraThreads;
-    for (unsigned i = 0; i < actualExtraThreads; i++) {
-        extraThreads[i] = {runTrialsFunc};
-        // TODO
+    std::thread extraThreads[MAX_THREADS];
+    for (unsigned i = 0; i < numThreads; i++) {
+        extraThreads[i] = std::thread(runTrialsFunc);
     }
     // TODO
+    for (unsigned i = 0; i < numThreads; i++) {
+        extraThreads[i].join();
     }
-    if (stopAfterValue % COLS != 0) { os << '\n'; } // Last newline.
+    }
+    if (trialsStopThreshold % COLS != 0) { os << '\n'; } // Last newline.
 
     // Print stats:
     const double procSeconds = ((double)(std::clock() - procClockStart) / CLOCKS_PER_SEC);
@@ -231,6 +240,7 @@ void Repl<O,CBT,GUM>::runMultiple(const trials_t stopAfterValue, const TrialsSto
     solver.printMessageBar("", BAR_WIDTH, '-');
     os << "give-up method: " STATW_I << GUM << '\n';
     os << "generator path: " STATW_I << solver.getGenPath() << '\n';
+    os << "helper threads: " STATW_I << numThreads << '\n';
     os << "processor time: " STATW_D << procSeconds << Ansi::DIM.ON << " seconds (with I/O)" << Ansi::DIM.OFF << '\n';
     os << "real-life time: " STATW_D << wallSeconds << Ansi::DIM.ON << " seconds (with I/O)" << Ansi::DIM.OFF << '\n';
     if (wallSeconds > 10.0) {
@@ -240,7 +250,7 @@ void Repl<O,CBT,GUM>::runMultiple(const trials_t stopAfterValue, const TrialsSto
 
     // Print bins (work distribution):
     printTrialsWorkDistribution(numTotalTrials, binHitCount, binOpsTotal);
-    solver.printMessageBar("DONE x" + std::to_string(stopAfterValue), BAR_WIDTH);
+    solver.printMessageBar("DONE x" + std::to_string(trialsStopThreshold), BAR_WIDTH);
     os << std::flush;
 }
 
