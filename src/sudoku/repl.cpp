@@ -1,4 +1,5 @@
 #include "./repl.hpp"
+#include "./trials.cpp"
 
 #include <iostream>     // cout, endl,
 #include <iomanip>      // setw,
@@ -71,8 +72,8 @@ bool Repl<O,CBT,GUM>::runCommand(std::string const& cmdLine) {
             return false;
         case Command::RUN_SINGLE:    runSingle();     break;
         case Command::CONTINUE_PREV: runSingle(true); break;
-        case Command::RUN_TRIALS:    runMultiple(cmdArgs, TrialsStopBy::TRIALS);    break;
-        case Command::RUN_SUCCESSES: runMultiple(cmdArgs, TrialsStopBy::SUCCESSES); break;
+        case Command::RUN_TRIALS:    runMultiple(cmdArgs, Trials::StopBy::TRIALS);    break;
+        case Command::RUN_SUCCESSES: runMultiple(cmdArgs, Trials::StopBy::SUCCESSES); break;
         case Command::SET_GENPATH:
             solver.setGenPath(cmdArgs);
             break;
@@ -142,122 +143,42 @@ void Repl<O,CBT,GUM>::runSingle(const bool contPrev) {
 
 template <Order O, bool CBT, GUM::E GUM>
 void Repl<O,CBT,GUM>::runMultiple(
-    const trials_t     trialsStopThreshold,
-    const TrialsStopBy trialsStopMethod
+    const trials_t trialsStopThreshold,
+    const Trials::StopBy trialsStopMethod
 ) {
-    // I sincerely apologize for this absolute-unit of a function; I
-    // haven't thought of a holistically nicer way to do this: I hoped
-    // there would be a way to externalize the thread-lambda, but its
-    // capture group is necessarily quite large, and I feel that saving
-    // the shared state in class members would cost too much pollution.
     constexpr unsigned COLS_DFLT = ((unsigned[]){0,64,32,24,16,4,1})[O];
     const unsigned COLS = (solver.isPretty ? (GET_TERM_COLS(COLS_DFLT)-7) : COLS_DFLT) / solver.STATS_WIDTH;
     const unsigned BAR_WIDTH = solver.STATS_WIDTH * COLS + (solver.isPretty ? 7 : 0);
 
     // NOTE: The last bin is for trials that do not succeed.
-    std::array<trials_t, TRIALS_NUM_BINS+1> binHitCount = {0,};
-    std::array<double,   TRIALS_NUM_BINS+1> binOpsTotal = {0,};
+    std::array<trials_t, Trials::NUM_BINS+1> binHitCount = {0,};
+    std::array<double,   Trials::NUM_BINS+1> binOpsTotal = {0,};
 
     solver.printMessageBar("START x" + std::to_string(trialsStopThreshold), BAR_WIDTH);
     auto wallClockStart = std::chrono::steady_clock::now();
     auto procClockStart = std::clock();
 
-    trials_t numTotalTrials = 0;
+    trials_t totalTrials = 0;
     {
-    trials_t numTotalSuccesses = 0;
-    std::mutex sharedStateMutex;
-    const auto runTrialsFunc = [
-        trialsStopMethod,   trialsStopThreshold,
-        &numTotalTrials,    &numTotalSuccesses,
-        COLS,               &sharedStateMutex,
-        &binHitCount,       &binOpsTotal
-    ](solver_t* solver, const unsigned threadNum) {
-        solver_t::VALUE_RNG.seed(std::random_device()());
-        sharedStateMutex.lock();
-        if (threadNum != 0) {
-            solver_t *const oldSolver = solver;
-            solver = new solver_t(oldSolver->os);
-            solver->setGenPath(oldSolver->getGenPath());
+        trials_t totalSuccesses = 0;
+        std::mutex sharedStateMutex;
+
+        // Start the threads:
+        std::array<std::thread, MAX_EXTRA_THREADS> extraThreads;
+        Trials::SharedState sharedState {
+            sharedStateMutex, COLS, trialsStopMethod, trialsStopThreshold,
+            totalTrials, totalSuccesses, binHitCount, binOpsTotal,
+        };
+        for (unsigned i = 0; i < numExtraThreads; i++) {
+            auto threadFunc = Trials::ThreadFunc<O,CBT,GUM>(sharedState);
+            extraThreads[i] = std::thread(std::move(threadFunc), &solver, i+1);
+        } {
+            auto threadFunc = Trials::ThreadFunc<O,CBT,GUM>(sharedState);
+            threadFunc(&solver, 0);
         }
-        while (true) {
-            // Attempt to generate a single solution:
-            sharedStateMutex.unlock();
-                // CRITICAL SECTION:
-                // This function call is the only section unguarded by the mutex.
-                // That's fine. This covers the overwhelming majority of the work,
-                // and everything else requires mutual exclusion to access shared
-                // state and print outputs.
-                SolverExitStatus exitStatus;
-                const opcount_t numOperations = solver->generateSolution(exitStatus);
-            sharedStateMutex.lock();
-
-            // Check break conditions:
-            // Note that doing this _after_ attempting a trial (instead of before)
-            // results in a tiny bit of wasted effort for the last [numThreads] or
-            // so trials. I'm doing this because it makes the numOperations printing
-            // nicer (otherwise there will be occasional visual gaps).
-            if ( trialsStopMethod == TrialsStopBy::TRIALS
-                && numTotalTrials == trialsStopThreshold) {
-                break;
-            } else if (trialsStopMethod == TrialsStopBy::SUCCESSES
-                &&    numTotalSuccesses >= trialsStopThreshold) {
-                break;
-            }
-
-            // Print a progress indicator to stdout:
-            if (numTotalTrials % COLS == 0) {
-                trials_t trialsStopCurVal;
-                switch (trialsStopMethod) {
-                case TrialsStopBy::TRIALS:    trialsStopCurVal = numTotalTrials; break;
-                case TrialsStopBy::SUCCESSES: trialsStopCurVal = numTotalSuccesses; break;
-                default: trialsStopCurVal = 0; throw "unhandled enum case";
-                }
-                const unsigned pctDone = 100.0 * trialsStopCurVal / trialsStopThreshold;
-                std::cout << "\n| " << std::setw(2) << pctDone << "% |";
-            }
-            numTotalTrials++;
-
-            // Print the number of operations taken:
-            if (exitStatus == SolverExitStatus::SUCCESS) {
-                numTotalSuccesses++;
-                solver->os << std::setw(solver->STATS_WIDTH) << numOperations;
-            } else {
-                if (solver->isPretty) {
-                    solver->os << Ansi::DIM.ON << std::setw(solver->STATS_WIDTH) << numOperations << Ansi::DIM.OFF;
-                } else {
-                    solver->os << std::setw(solver->STATS_WIDTH) << "---";
-                }
-            } //solver->os << '~' << threadNum;
-            if constexpr (solver->order > 4) solver->os << std::flush;
-
-            // Save some stats for later diagnostics-printing:
-            const opcount_t giveupCondVar
-                = (GUM == GUM::E::OPERATIONS) ? numOperations
-                : (GUM == GUM::E::BACKTRACKS) ? solver->getMaxBacktrackCount()
-                : [](){ throw "unhandled GUM case"; return ~0; }();
-            const unsigned binNum = TRIALS_NUM_BINS * (giveupCondVar) / solver->GIVEUP_THRESHOLD;
-            binHitCount[binNum]++;
-            binOpsTotal[binNum] += numOperations;
+        for (unsigned i = 0; i < numExtraThreads; i++) {
+            extraThreads[i].join();
         }
-        sharedStateMutex.unlock();
-        if (threadNum != 0) delete solver;
-    }; // End of thread lambda.
-
-    // Start the threads:
-    // Make sure that nothing gets resized or moved under the feet of std::ref.
-    std::vector<solver_t> extraSolvers;
-    extraSolvers.reserve(numExtraThreads);
-    for (unsigned i = 0; i < numExtraThreads; i++) {
-    }
-    extraSolvers.shrink_to_fit();
-    std::array<std::thread, MAX_EXTRA_THREADS> extraThreads;
-    for (unsigned i = 0; i < numExtraThreads; i++) {
-        extraThreads[i] = std::thread(runTrialsFunc, &solver, i+1);
-    }
-    runTrialsFunc(&solver, 0);
-    for (unsigned i = 0; i < numExtraThreads; i++) {
-        extraThreads[i].join();
-    }
     }
     if (trialsStopThreshold % COLS != 0) { os << '\n'; } // Last newline.
 
@@ -277,14 +198,17 @@ void Repl<O,CBT,GUM>::runMultiple(
     }
 
     // Print bins (work distribution):
-    printTrialsWorkDistribution(numTotalTrials, binHitCount, binOpsTotal);
+    printTrialsWorkDistribution(totalTrials, binHitCount, binOpsTotal);
     solver.printMessageBar("DONE x" + std::to_string(trialsStopThreshold), BAR_WIDTH);
     os << std::flush;
 }
 
 
 template <Order O, bool CBT, GUM::E GUM>
-void Repl<O,CBT,GUM>::runMultiple(std::string const& trialsString, const TrialsStopBy stopByMethod) {
+void Repl<O,CBT,GUM>::runMultiple(
+    std::string const& trialsString,
+    const Trials::StopBy stopByMethod
+) {
     long stopByValue;
     try {
         stopByValue = std::stol(trialsString);
@@ -302,35 +226,35 @@ void Repl<O,CBT,GUM>::runMultiple(std::string const& trialsString, const TrialsS
 
 template <Order O, bool CBT, GUM::E GUM>
 void Repl<O,CBT,GUM>::printTrialsWorkDistribution(
-    const trials_t numTotalTrials, // sum of entries of binHitCount
-    std::array<trials_t, TRIALS_NUM_BINS+1> const& binHitCount,
-    std::array<double,   TRIALS_NUM_BINS+1> const& binOpsTotal
+    const trials_t totalTrials, // sum of entries of binHitCount
+    std::array<trials_t, Trials::NUM_BINS+1> const& binHitCount,
+    std::array<double,   Trials::NUM_BINS+1> const& binOpsTotal
 ) {
     const std::string THROUGHPUT_BAR_STRING = "--------------------------------";
     const std::string TABLE_SEPARATOR = "+-----------+----------+-----------+";
 
     // Calculate all throughputs before printing:
     // (done in its own loop so we can later print comparisons against the optimal bin)
-    std::array<double, TRIALS_NUM_BINS+1> throughput;
+    std::array<double, Trials::NUM_BINS+1> throughput;
     unsigned bestThroughputBin = 0; {
     opcount_t successfulTrialsAccum = 0;
     double  successfulSolveOpsAccum = 0.0;
-    for (unsigned i = 0; i < TRIALS_NUM_BINS; i++) {
+    for (unsigned i = 0; i < Trials::NUM_BINS; i++) {
         successfulTrialsAccum   += binHitCount[i];
         successfulSolveOpsAccum += binOpsTotal[i];
         const double boundedGiveupOps
-            = (GUM == GUM::E::OPERATIONS) ? ((double)(i+1) * solver.GIVEUP_THRESHOLD / TRIALS_NUM_BINS)
+            = (GUM == GUM::E::OPERATIONS) ? ((double)(i+1) * solver.GIVEUP_THRESHOLD / Trials::NUM_BINS)
             // No nice way to do the below. If I want an exact thing, I would
             // need to change generateSolution to also track the numOperations
             // for some hypothetical, lower threshold, which would be for the
-            // bottom of this bin. I would need to expose `TRIALS_NUM_BINS` to
+            // bottom of this bin. I would need to expose `Trials::NUM_BINS` to
             // the `Solver` class. As a temporary, pessimistic band-aid, I will
             // use the values for the next bin. Note that this will give `nan`
             // (0.0/0.0) if there is no data for the next bin.
             : (GUM == GUM::E::BACKTRACKS) ? ((double)binOpsTotal[i+1] / binHitCount[i+1])
             : [](){ throw "unhandled GUM case"; return 0.0; }();
-        const double boundedGiveupOpsTotal = (numTotalTrials - successfulTrialsAccum) * boundedGiveupOps;
-        throughput[i] = (i == TRIALS_NUM_BINS)
+        const double boundedGiveupOpsTotal = (totalTrials - successfulTrialsAccum) * boundedGiveupOps;
+        throughput[i] = (i == Trials::NUM_BINS)
             ? 0.0 // The last bin is for giveups. Throughput unknown.
             : successfulTrialsAccum / (successfulSolveOpsAccum + boundedGiveupOpsTotal);
         if (throughput[i] > throughput[bestThroughputBin]) {
@@ -342,11 +266,11 @@ void Repl<O,CBT,GUM>::printTrialsWorkDistribution(
     os << "\n|  bin bot  |   hits   |  speedup  |\n";
     os << TABLE_SEPARATOR;
     for (unsigned i = 0; i < binHitCount.size(); i++) {
-        if (i == TRIALS_NUM_BINS) {
+        if (i == Trials::NUM_BINS) {
             // Print a special separator for the giveups row:
             os << '\n' << TABLE_SEPARATOR;
         }
-        const double binBottom  = (double)(i) * solver.GIVEUP_THRESHOLD / TRIALS_NUM_BINS;
+        const double binBottom  = (double)(i) * solver.GIVEUP_THRESHOLD / Trials::NUM_BINS;
         if constexpr (solver.order < 4 || (solver.order == 4 && GUM == GUM::E::BACKTRACKS)) {
             os << "\n|" << std::setw(9) << (int)(binBottom);
         } else {
@@ -354,11 +278,11 @@ void Repl<O,CBT,GUM>::printTrialsWorkDistribution(
         }
         os << "  |" << std::setw(8)  << binHitCount[i];
         os << "  |" << std::setw(9);
-        if (i == TRIALS_NUM_BINS) {
+        if (i == Trials::NUM_BINS) {
             os << "unknown";
         } else {
             //os << std::scientific << (throughput[i]) << std::fixed;
-            os << 100.0 * (throughput[i] / throughput[TRIALS_NUM_BINS-1]);
+            os << 100.0 * (throughput[i] / throughput[Trials::NUM_BINS-1]);
         }
         os << "  |";
         {
