@@ -434,10 +434,4 @@ const std::string createHSepString(const unsigned order) {
     return vbar;
 }
 
-template <Order O>
-std::mutex Solver<O>::RANDOM_MUTEX;
-
-template <Order O>
-std::mt19937 Solver<O>::VALUE_RNG;
-
 } // End of Sudoku namespace.

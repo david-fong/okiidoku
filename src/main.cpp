@@ -51,15 +51,16 @@ int main(const int argc, char const *const argv[]) {
 
     // Scramble the random number generator (std::rand is no longer used):
     // std::srand(srandKey);
+    Sudoku::VALUE_RNG.seed(srandKey);
 
     // Create a Solver of the specified order:
     // (It will automatically enter its REPL).
     // TODO [test] See if allocating on heap can cut down on executable
     // size without visibly impacting performance.
     switch (static_cast<Sudoku::Order>(userOrder)) {
-        case 3: { Repl<3>::SEED(srandKey); Repl<3> s(*outStream); break; }
-        case 4: { Repl<4>::SEED(srandKey); Repl<4> s(*outStream); break; }
-        case 5: { Repl<5>::SEED(srandKey); Repl<5> s(*outStream); break; }
+        case 3: { Repl<3> s(*outStream); break; }
+        case 4: { Repl<4> s(*outStream); break; }
+        case 5: { Repl<5> s(*outStream); break; }
         default:
             std::cout << "\nFAILED:\norder must be one of: [ ";
             for (int i = 3; i <= 5; i++) {

@@ -42,12 +42,6 @@ Repl<O>::Repl(std::ostream& os):
 
 
 template <Order O>
-void Repl<O>::SEED(const unsigned seedValue) {
-    solver_t::VALUE_RNG.seed(seedValue);
-}
-
-
-template <Order O>
 bool Repl<O>::runCommand(std::string const& cmdLine) {
     size_t tokenPos;
     // Very simple parsing: Assumes no leading spaces, and does not

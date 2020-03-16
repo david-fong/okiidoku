@@ -35,6 +35,11 @@ namespace Sudoku {
         std::string do_grouping(void) const;
     };
 
+    // Guards accesses to RMG. I currently only
+    // use this when shuffling generator biases.
+    std::mutex RANDOM_MUTEX;
+    std::mt19937 VALUE_RNG;
+
 
     /**
      * 
@@ -55,12 +60,12 @@ namespace Sudoku {
         static constexpr GUM::E GUM = BUILDFLAG_GUM;
         static_assert((1 < O) && (O <= MAX_REASONABLE_ORDER));
         static_assert((GUM == GUM::E::BACKTRACKS) ? CBT : true);
-        using occmask_t = typename Size<O>::occmask_t;
-        using order_t   = typename Size<O>::order_t;
-        using length_t  = typename Size<O>::length_t;
-        using area_t    = typename Size<O>::area_t;
-        using value_t   = typename Size<O>::value_t;
-        using backtrack_t = typename Size<O>::backtrack_t;
+        using occmask_t     = typename Size<O>::occmask_t   ;
+        using order_t       = typename Size<O>::order_t     ;
+        using length_t      = typename Size<O>::length_t    ;
+        using area_t        = typename Size<O>::area_t      ;
+        using value_t       = typename Size<O>::value_t     ;
+        using backtrack_t   = typename Size<O>::backtrack_t ;
 
     // =======================
     // HELPER CLASS
@@ -149,6 +154,8 @@ namespace Sudoku {
         void printMessageBar(std::string const&, unsigned int, char = '=') const;
         void printMessageBar(std::string const&, char = '=') const;
 
+        static constexpr opcount_t GIVEUP_THRESHOLD = Sudoku::Size<O>::template GIVEUP_THRESHOLD<GUM>;
+
         [[gnu::cold, gnu::pure]]
         GenPath::E getGenPath(void) const noexcept { return genPath; }
         [[gnu::cold]] GenPath::E setGenPath(GenPath::E, bool force = false) noexcept;
@@ -183,15 +190,6 @@ namespace Sudoku {
         std::array<backtrack_t, (CBT?area:1)> backtrackCounts; // TODO Try to cut down size?
         backtrack_t maxBacktrackCount;
         void printShadedBacktrackStat(unsigned count) const;
-
-        // Guards accesses to RMG. I currently only
-        // use this when shuffling generator biases.
-        // TODO [bug] Make this and the RNG globals under Sudoku::
-        static std::mutex RANDOM_MUTEX;
-
-    public:
-        static std::mt19937 VALUE_RNG;
-        static constexpr opcount_t GIVEUP_THRESHOLD = Sudoku::Size<O>::template GIVEUP_THRESHOLD<GUM>;
 
     public:
         std::ostream& os;
