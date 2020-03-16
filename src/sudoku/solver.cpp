@@ -9,6 +9,53 @@
 #include <string>       // string,
 
 
+template <Sudoku::Order O>
+std::ostream& operator<<(std::ostream& os, Sudoku::Solver<O> const& s) {
+    using namespace Sudoku;
+    using length_t = typename Sudoku::Solver<O>::length_t;
+    #define PRINT_GRID0_TILE(PRINTER_STATEMENT) {\
+        for (length_t col = 0; col < s.length; col++) {\
+            if (isPretty && (col % s.order) == 0) os << Ansi::DIM.ON << " |" << Ansi::DIM.OFF;\
+            PRINTER_STATEMENT;\
+        }}
+    #define PRINT_GRID_TILE(PRINTER_STATEMENT) {\
+        if (isPretty) os << Ansi::DIM.ON << " |" << Ansi::DIM.OFF;\
+        os << GRID_SEP;\
+        PRINT_GRID0_TILE(PRINTER_STATEMENT)}
+
+    const bool isPretty = &os == &std::cout;
+    for (length_t row = 0; row < s.length; row++) {
+        if (isPretty && (row % s.order == 0)) {
+            // Print block-row separator string:
+            os << Ansi::DIM.ON;
+            os << s.blkRowSepString;
+            if constexpr (s.CBT) os << GRID_SEP << s.blkRowSepString;
+            os << "\n" << Ansi::DIM.OFF;
+        }
+        // Tile content:
+        #define index (row * s.length + col)
+        PRINT_GRID0_TILE(os << ' ' << s.grid[index])
+        if constexpr (s.CBT) {
+            PRINT_GRID_TILE(s.printShadedBacktrackStat(s.backtrackCounts[index]))
+        }
+        // PRINT_GRID_TILE(os << std::setw(2) << grid[index].biasIndex)
+        // PRINT_GRID_TILE(os << ' ' << rowBiases[row][col])
+        #undef index
+        if (isPretty) os << Ansi::DIM.ON << " |" << Ansi::DIM.OFF;
+        os << '\n';
+    }
+    if (isPretty) {
+        os << Ansi::DIM.ON;
+        os << s.blkRowSepString;
+        if constexpr (s.CBT) os << GRID_SEP << s.blkRowSepString;
+        os << "\n" << Ansi::DIM.OFF;
+    }
+    #undef PRINT_GRID_TILE
+    #undef PRINT_GRID0_TILE
+    return os;
+}
+
+
 namespace Sudoku {
 
 
@@ -45,45 +92,12 @@ Solver<O>::Solver(std::ostream& os):
 }
 
 
-// TODO [qol] change this to just be the << operator, and make it
-// internally decide whether to pretty-print based on whether the
-// output stream is equal to std::cout
 template <Order O>
 void Solver<O>::print(void) const {
-    #define PRINT_GRID0_TILE(PRINTER_STATEMENT) {\
-        for (length_t col = 0; col < length; col++) {\
-            if (isPretty && (col % order) == 0) os << Ansi::DIM.ON << " |" << Ansi::DIM.OFF;\
-            PRINTER_STATEMENT;\
-        }}
-    #define PRINT_GRID_TILE(PRINTER_STATEMENT) {\
-        if (isPretty) os << Ansi::DIM.ON << " |" << Ansi::DIM.OFF;\
-        os << GRID_SEP;\
-        PRINT_GRID0_TILE(PRINTER_STATEMENT)}
-
-    for (length_t row = 0; row < length; row++) {
-        if (isPretty && (row % order == 0)) {
-            // Print block-row separator string:
-            os << Ansi::DIM.ON;
-            os << blkRowSepString;
-            if constexpr (CBT) os << GRID_SEP << blkRowSepString;
-            os << "\n" << Ansi::DIM.OFF;
-        }
-        // Tile content:
-        PRINT_GRID0_TILE(os << ' ' << grid[row * length + col])
-        if constexpr (CBT) {
-            PRINT_GRID_TILE(printShadedBacktrackStat(backtrackCounts[row * length + col]))
-        }
-        // PRINT_GRID_TILE(os << std::setw(2) << grid[row * length + col].biasIndex)
-        // PRINT_GRID_TILE(os << ' ' << rowBiases[row][col])
-        if (isPretty) os << Ansi::DIM.ON << " |" << Ansi::DIM.OFF;
-        os << '\n';
+    if (&os != &std::cout) {
+        std::cout << *this;
     }
-    if (isPretty) {
-        os << Ansi::DIM.ON;
-        os << blkRowSepString;
-        if constexpr (CBT) os << GRID_SEP << blkRowSepString;
-        os << "\n" << Ansi::DIM.OFF;
-    }
+    os << *this;
 }
 
 
@@ -112,7 +126,6 @@ void Solver<O>::printShadedBacktrackStat(const unsigned count) const {
         static_assert(CBT, "not avaliable when backtrack-counting is off.");
     }
 }
-
 
 
 template <Order O>
@@ -425,6 +438,7 @@ void Solver<O>::printMessageBar(std::string const& msg, const char fillChar) con
 template <Order O>
 const std::string Solver<O>::blkRowSepString = createHSepString(order);
 
+// TODO: try just changing this to a lambda and joining with above?
 const std::string createHSepString(const unsigned order) {
     std::string vbar = ' ' + std::string((((order * (order + 1)) + 1) * 2 - 1), '-');
     for (unsigned i = 0; i <= order; i++) {

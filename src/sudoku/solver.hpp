@@ -12,6 +12,9 @@
 #include <bitset>
 
 
+namespace Sudoku { template <Sudoku::Order O> class Solver; }
+template <Sudoku::Order O> std::ostream& operator<<(std::ostream&, Sudoku::Solver<O> const&);
+
 /**
  * 
  * DIM:TEXT:
@@ -150,7 +153,13 @@ namespace Sudoku {
         Solver(void) = delete;
         explicit Solver(std::ostream&);
 
+        // Prints to std::cout and the output file if it exists.
         void print(void) const;
+        // This took me so long to find out even what the problem was called.
+        // My understanding is that all this line does is expose private members
+        // to the non-member operator at the top-level namespace.
+        // https://en.cppreference.com/w/cpp/language/friend#Template_friend_operators
+        friend std::ostream& operator<< <O>(std::ostream&, Solver const& s);
         void printMessageBar(std::string const&, unsigned int, char = '=') const;
         void printMessageBar(std::string const&, char = '=') const;
 
@@ -187,7 +196,7 @@ namespace Sudoku {
         // wherever it last left off.
         area_t prevGenTvsIndex;
 
-        std::array<backtrack_t, (CBT?area:1)> backtrackCounts; // TODO Try to cut down size?
+        std::array<backtrack_t, (CBT?area:1)> backtrackCounts;
         backtrack_t maxBacktrackCount;
         void printShadedBacktrackStat(unsigned count) const;
 
