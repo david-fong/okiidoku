@@ -43,7 +43,6 @@ Solver<O,CBT,GUM>::Solver(std::ostream& os):
     }
     os.precision(3);
     os << std::fixed;
-    //std::cout << "hello from Solver ctor!" << std::endl;
 }
 
 
@@ -142,14 +141,11 @@ void Solver<O,CBT,GUM>::clear(void) {
         maxBacktrackCount = 0;
     }
     // Scramble each row's value-guessing-order:
-    STD_RAND_MUTEX.lock();
+    RANDOM_MUTEX.lock();
     for (auto& rowBias : rowBiases) {
-        std::random_shuffle(
-            rowBias.begin(), rowBias.end(),
-            [](const unsigned i){ return std::rand() % i; }
-        );
+        std::shuffle(rowBias.begin(), rowBias.end(), VALUE_RNG);
     }
-    STD_RAND_MUTEX.unlock();
+    RANDOM_MUTEX.unlock();
     // Do not clear seeds here. That can be done when reading in givens.
 }
 
@@ -435,5 +431,11 @@ const std::string createHSepString(const unsigned order) {
     }
     return vbar;
 }
+
+template <Order O, bool CBT, GUM::E GUM>
+std::mutex Solver<O,CBT,GUM>::RANDOM_MUTEX;
+
+template <Order O, bool CBT, GUM::E GUM>
+std::mt19937 Solver<O,CBT,GUM>::VALUE_RNG;
 
 } // End of Sudoku namespace.

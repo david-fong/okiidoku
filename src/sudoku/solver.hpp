@@ -6,6 +6,7 @@
 #include "./size.hpp"
 
 #include <iostream>
+#include <random>
 #include <mutex>
 #include <array>
 #include <bitset>
@@ -28,16 +29,16 @@
  */
 namespace Sudoku {
 
-    // Guards calls to std::rand(), which is not guaranteed to be thread
-    // safe. I currently only use this when shuffling generator biases.
-    std::mutex STD_RAND_MUTEX;
-
     // Container for a very large number.
     // See Solver::GIVEUP_THRESHOLD for more discussion on the average
     // number of operations taken to generate a solution by grid-order.
     typedef unsigned long long opcount_t;
 
     [[gnu::const]] const std::string createHSepString(unsigned int order);
+
+    struct MyNumpunct : std::numpunct<char> {
+        std::string do_grouping(void) const;
+    };
 
 
     /**
@@ -154,6 +155,8 @@ namespace Sudoku {
         [[gnu::cold]] GenPath::E setGenPath(GenPath::E, bool force = false) noexcept;
         [[gnu::cold]] GenPath::E setGenPath(std::string const&) noexcept;
 
+        [[gnu::cold]] opcount_t getMaxBacktrackCount(void) const noexcept { return maxBacktrackCount; }
+
     // ========================
     // PRIVATE MEMBERS
     // ========================
@@ -178,14 +181,16 @@ namespace Sudoku {
         // wherever it last left off.
         area_t prevGenTvsIndex;
 
-    private:
         std::array<unsigned, (CBT?area:1)> backtrackCounts;
         opcount_t maxBacktrackCount;
         void printShadedBacktrackStat(unsigned count) const;
-    public:
-        [[gnu::cold]] opcount_t getMaxBacktrackCount(void) const noexcept { return maxBacktrackCount; }
+
+        // Guards accesses to RMG. I currently only
+        // use this when shuffling generator biases.
+        static std::mutex RANDOM_MUTEX;
 
     public:
+        static std::mt19937 VALUE_RNG;
         /**
          * Give up if the giveup condition variable meets this value.
          * Measured stats for operations: https://www.desmos.com/calculator/8taqzelils
@@ -255,9 +260,6 @@ namespace Sudoku {
 
 
     const std::string GRID_SEP = "  ";
-    struct MyNumpunct : std::numpunct<char> {
-        std::string do_grouping(void) const;
-    };
 
 } // End of Sudoku namespace
 

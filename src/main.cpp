@@ -5,7 +5,7 @@
 
 #include <iostream>     // cout,
 #include <fstream>      // ofstream,
-#include <ctime>        // time,
+#include <random>       // random_device,
 
 
 #define DEFAULT_ORDER 4
@@ -37,7 +37,7 @@ int main(const int argc, char const *const argv[]) {
     if (argc > 2 && !std::string(argv[2]).empty()) {
         srandKey = std::stoi(argv[2]);
     } else {
-        srandKey = std::time(NULL);
+        srandKey = std::random_device()();
     }
     if (argc > 3) {
         // TODO [feat] Handle if file already exists: prompt user for whether to overwrite.
@@ -53,15 +53,15 @@ int main(const int argc, char const *const argv[]) {
     std::cout << "- ARG 2 [[ srand key   ]] : " << srandKey    << std::endl;
     std::cout << "- ARG 3 [[ output file ]] : " << outFileName << std::endl;
 
-    // Scramble the random number generator:
-    std::srand(srandKey);
+    // Scramble the random number generator (std::rand is no longer used):
+    // std::srand(srandKey);
 
     // Create a Solver of the specified order:
     // (It will automatically enter its REPL).
     switch (static_cast<Sudoku::Order>(userOrder)) {
-        case 3: { Repl<3> s(*outStream); break; }
-        case 4: { Repl<4> s(*outStream); break; }
-        case 5: { Repl<5> s(*outStream); break; }
+        case 3: { Repl<3>::SEED(srandKey); Repl<3> s(*outStream); break; }
+        case 4: { Repl<4>::SEED(srandKey); Repl<4> s(*outStream); break; }
+        case 5: { Repl<5>::SEED(srandKey); Repl<5> s(*outStream); break; }
         default:
             std::cout << "\nFAILED:\norder must be one of: [ ";
             for (int i = 3; i <= 5; i++) {

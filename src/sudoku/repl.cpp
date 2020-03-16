@@ -6,7 +6,8 @@
 #include <math.h>       // pow,
 
 #include <functional>   // reference_wrapper, ref,
-#include <thread>       // 
+#include <thread>
+#include <mutex>
 #include <vector>
 
 
@@ -39,6 +40,12 @@ Repl<O,CBT,GUM>::Repl(std::ostream& os):
         std::getline(std::cin, command);
     } while (runCommand(command));
 };
+
+
+template <Order O, bool CBT, GUM::E GUM>
+void Repl<O,CBT,GUM>::SEED(const unsigned seedValue) {
+    solver_t::VALUE_RNG.seed(seedValue);
+}
 
 
 template <Order O, bool CBT, GUM::E GUM>
@@ -160,7 +167,13 @@ void Repl<O,CBT,GUM>::runMultiple(
     trials_t numTotalSuccesses = 0;
     std::mutex sharedStateMutex;
     std::cout << "| " << std::setw(2) << 0u << "% |" << std::flush;
-    const auto runTrialsFunc = [&](Solver<O,CBT,GUM>& solver) {
+    const auto runTrialsFunc = [
+        trialsStopMethod,   trialsStopThreshold,
+        &numTotalTrials,    &numTotalSuccesses,
+        COLS,               &sharedStateMutex,
+        &binHitCount,       &binOpsTotal
+    ](solver_t& solver, const unsigned threadNum) {
+        solver_t::VALUE_RNG.seed(std::random_device()());
         sharedStateMutex.lock();
         while (true) {
             // Check break conditions:
@@ -188,15 +201,16 @@ void Repl<O,CBT,GUM>::runMultiple(
             // Print the number of operations taken:
             if (exitStatus == SolverExitStatus::SUCCESS) {
                 numTotalSuccesses++;
-                os STATW_I << numOperations;
+                solver.os << std::setw(solver.STATS_WIDTH) << numOperations;
             } else {
                 if (solver.isPretty) {
-                    os << Ansi::DIM.ON STATW_I << numOperations << Ansi::DIM.OFF;
+                    solver.os << Ansi::DIM.ON << std::setw(solver.STATS_WIDTH) << numOperations << Ansi::DIM.OFF;
                 } else {
-                    os STATW_I << "---";
+                    solver.os << std::setw(solver.STATS_WIDTH) << "---";
                 }
             }
-            if constexpr (solver.order > 4) os << std::flush;
+            solver.os << '~' << threadNum;
+            if constexpr (solver.order > 4) solver.os << std::flush;
             // Print a progress indicator to stdout:
             if (numTotalTrials % COLS == 0) {
                 trials_t trialsStopCurVal;
@@ -222,18 +236,18 @@ void Repl<O,CBT,GUM>::runMultiple(
 
     // Start the threads:
     // Make sure that nothing gets resized or moved under the feet of std::ref.
-    std::vector<Solver<O,CBT,GUM>> extraSolvers;
-    std::array<std::thread, MAX_EXTRA_THREADS> extraThreads;
+    std::vector<solver_t> extraSolvers;
     extraSolvers.reserve(numExtraThreads);
     for (unsigned i = 0; i < numExtraThreads; i++) {
         extraSolvers.emplace_back(solver.os);
         extraSolvers[i].setGenPath(solver.getGenPath());
     }
     extraSolvers.shrink_to_fit();
+    std::array<std::thread, MAX_EXTRA_THREADS> extraThreads;
     for (unsigned i = 0; i < numExtraThreads; i++) {
-        extraThreads[i] = std::thread(runTrialsFunc, std::ref(extraSolvers[i]));
+        extraThreads[i] = std::thread(runTrialsFunc, std::ref(extraSolvers[i]), i+1);
     }
-    //runTrialsFunc(solver);
+    runTrialsFunc(solver, 0); // TODO Uncomment this when the bugs are figured out.
     for (unsigned i = 0; i < numExtraThreads; i++) {
         extraThreads[i].join();
     }
