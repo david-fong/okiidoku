@@ -53,9 +53,10 @@ namespace Sudoku {
      * @param CBT - Whether or not to count backtrack statistics
      * @param GUM - Giveup method.
      */
-    template <Order O, bool CBT>
+    template <Order O>
     class Solver {
     public:
+        static constexpr bool   CBT = BUILDFLAG_CBT;
         static constexpr GUM::E GUM = BUILDFLAG_GUM;
         static_assert((1 < O) && (O <= MAX_REASONABLE_ORDER));
         static_assert((GUM == GUM::E::BACKTRACKS) ? CBT : true);

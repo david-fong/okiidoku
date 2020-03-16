@@ -11,10 +11,7 @@
 #include <fstream>      // ofstream,
 #include <random>       // random_device,
 
-
-template<Sudoku::Order O>
-using Repl = Sudoku::Repl<O, true>;
-
+using Sudoku::Repl;
 
 /**
  * ARGUMENTS

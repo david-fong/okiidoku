@@ -32,14 +32,13 @@ namespace Trials {
      * Note: Since it is only ever used there, the include guards are not
      * absolutely necessary, but it doesn't hurt to add them anyway.
      */
-    template <Order O, bool CBT>
+    template <Order O>
     class ThreadFunc : protected SharedState {
     public:
-        using Solver = class Solver<O,CBT>;
+        using Solver = class Solver<O>;
         ThreadFunc(void) = delete;
         ThreadFunc(SharedState s) : SharedState(s) {};
         inline void operator()(Solver* solver, unsigned threadNum);
-        static constexpr GUM::E GUM = Sudoku::Solver<O,CBT>::GUM;
     };
 
 } // End of Trials namespace

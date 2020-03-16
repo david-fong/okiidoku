@@ -7,8 +7,8 @@
 
 namespace Sudoku::Trials {
 
-template <Order O, bool CBT>
-void ThreadFunc<O,CBT>::operator()(Solver* solver, const unsigned threadNum) {
+template <Order O>
+void ThreadFunc<O>::operator()(Solver* solver, const unsigned threadNum) {
     mutex.lock();
     if (threadNum != 0) {
         Solver *const oldSolver = solver;
@@ -68,8 +68,8 @@ void ThreadFunc<O,CBT>::operator()(Solver* solver, const unsigned threadNum) {
 
         // Save some stats for later diagnostics-printing:
         const opcount_t giveupCondVar
-            = (GUM == GUM::E::OPERATIONS) ? numOperations
-            : (GUM == GUM::E::BACKTRACKS) ? solver->getMaxBacktrackCount()
+            = (solver->GUM == GUM::E::OPERATIONS) ? numOperations
+            : (solver->GUM == GUM::E::BACKTRACKS) ? solver->getMaxBacktrackCount()
             : [](){ throw "unhandled GUM case"; return ~0; }();
         const unsigned binNum = NUM_BINS * (giveupCondVar) / solver->GIVEUP_THRESHOLD;
         binHitCount[binNum]++;
