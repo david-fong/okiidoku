@@ -65,10 +65,10 @@ namespace Sudoku {
     class Repl {
     public:
         using opcount_t = Solver::opcount_t;
+        using solver_t = class Sudoku::Solver::Solver<O>;
+
         Repl(void) = delete;
         explicit Repl(std::ostream&);
-
-        using solver_t = class Solver::Solver<O>;
         bool runCommand(std::string const& cmdLine);
 
         // This is equal to `MAX_EXTRA_THREADS` floored by how many

@@ -18,6 +18,13 @@ template <Sudoku::Order O> std::ostream& operator<<(std::ostream&, Sudoku::Solve
 
 namespace Sudoku::Solver {
 
+    // Note: These are #undef-ed at the end of this file.
+    #if SOLVER_THREADS_SHARE_GENPATH
+    #define GENPATH_STORAGE_MOD static
+    #else
+    #define GENPATH_STORAGE_MOD
+    #endif
+
     /**
      * 
      */
@@ -128,9 +135,10 @@ namespace Sudoku::Solver {
         void printMessageBar(std::string const&, char = '=') const;
 
         [[gnu::cold, gnu::pure]]
-        GenPath::E getGenPath(void) const noexcept { return genPath; }
-        [[gnu::cold]] GenPath::E setGenPath(GenPath::E, bool force = false) noexcept;
-        [[gnu::cold]] GenPath::E setGenPath(std::string const&) noexcept;
+        GENPATH_STORAGE_MOD GenPath::E getGenPath(void) noexcept { return genPath; }
+        // Setters return the old value of the generator path.
+        [[gnu::cold]] GENPATH_STORAGE_MOD GenPath::E setGenPath(GenPath::E, bool force = false) noexcept;
+        [[gnu::cold]] GENPATH_STORAGE_MOD GenPath::E setGenPath(std::string const&) noexcept;
 
         [[gnu::cold]] backtrack_t getMaxBacktrackCount(void) const noexcept { return maxBacktrackCount; }
 
@@ -150,8 +158,9 @@ namespace Sudoku::Solver {
          * and also a visible difference in the distribution of the
          * number of operations.
          */
-        GenPath::E genPath;
-        std::array<area_t, area> traversalOrder;
+        [[gnu::cold]] GENPATH_STORAGE_MOD GenPath::E initializeGenPath(void) noexcept;
+        GENPATH_STORAGE_MOD GenPath::E genPath;
+        GENPATH_STORAGE_MOD std::array<area_t, area> traversalOrder;
         std::bitset<area> isTileForGiven;
 
         // These fields are used to continue the solution generator from
@@ -177,7 +186,7 @@ namespace Sudoku::Solver {
         // immediate call to this method will continue the previous
         // solution-generating-run from where it left off.
         template <bool USE_PUZZLE = false>
-        [[gnu::hot]] opcount_t generateSolution(SolverExitStatus& exitStatus, bool contPrev = false);
+        [[gnu::hot]] opcount_t generateSolution(ExitStatus& exitStatus, bool contPrev = false);
     private:
         void registerGivenValue(area_t index, value_t value);
         template <bool USE_PUZZLE>
@@ -217,6 +226,8 @@ namespace Sudoku::Solver {
 
 
     const std::string GRID_SEP = "  ";
+
+    #undef GENPATH_STORAGE_MOD
 
 } // End of Sudoku::Solver namespace
 

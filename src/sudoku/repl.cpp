@@ -29,7 +29,8 @@ Repl<O>::Repl(std::ostream& os):
     os      (os)
 {
     // Print diagnostics about Solver member size:
-    std::cout << "\nsize of solver: " << sizeof(solver) << " bytes" << std::endl;
+    std::cout << "\nsize of solver:  " << sizeof(solver) << " bytes";
+    std::cout << "\ndefault genpath: " << solver.getGenPath() << std::endl;
 
     // Print help menu and then start the REPL (read-execute-print-loop):
     std::cout << HELP_MESSAGE << std::endl;
@@ -58,7 +59,7 @@ bool Repl<O>::runCommand(std::string const& cmdLine) {
     }
     switch (it->second) {
         case Command::HELP:
-            std::cout << HELP_MESSAGE << std::endl;
+            std::cout << HELP_MESSAGE << '\n' << Solver::GenPath::OPTIONS_MENU << std::endl;
             break;
         case Command::QUIT:
             return false;
@@ -72,7 +73,7 @@ bool Repl<O>::runCommand(std::string const& cmdLine) {
         case Command::SOLVE: {
             if (solver.loadPuzzleFromString(cmdArgs)) {
                 // TODO: give better output if solver gives up. Maybe move to its own function.
-                Solver::SolverExitStatus exitStatus;
+                Solver::ExitStatus exitStatus;
                 solver.template generateSolution<true>(exitStatus);
                 solver.print();
                 break;
@@ -102,7 +103,7 @@ void Repl<O>::solvePuzzlesFromFile(std::ifstream& puzzlesFile) {
             // Just go try something else:
             continue;
         }
-        Solver::SolverExitStatus exitStatus;
+        Solver::ExitStatus exitStatus;
         solver.template generateSolution<true>(exitStatus);
 
         // TODO [feat] Write the solution to an output file.
@@ -116,7 +117,7 @@ void Repl<O>::runSingle(const bool contPrev) {
     solver.printMessageBar("START");
 
     // Generate a new solution:
-    Solver::SolverExitStatus exitStatus;
+    Solver::ExitStatus exitStatus;
     const clock_t    clockStart = std::clock();
     const opcount_t numSolveOps = solver.generateSolution(exitStatus, contPrev);
     const clock_t   clockFinish = std::clock();
@@ -129,7 +130,7 @@ void Repl<O>::runSingle(const bool contPrev) {
     }
     if (!solver.isPretty) solver.printMessageBar("", '-');
     solver.print();
-    solver.printMessageBar((exitStatus == Solver::SolverExitStatus::SUCCESS) ? "DONE" : "ABORT");
+    solver.printMessageBar((exitStatus == Solver::ExitStatus::SUCCESS) ? "DONE" : "ABORT");
 }
 
 
@@ -234,7 +235,6 @@ void Repl<O>::printTrialsWorkDistribution(
     for (unsigned i = 0; i < Trials::NUM_BINS; i++) {
         successfulTrialsAccum   += binHitCount[i];
         successfulSolveOpsAccum += binOpsTotal[i];
-        using namespace Sudoku::Solver;
         const double boundedGiveupOps = [&](){
             using namespace Sudoku::Solver; return
               (gum == GUM::E::OPERATIONS) ? ((double)(i+1) * solver.GIVEUP_THRESHOLD / Trials::NUM_BINS)

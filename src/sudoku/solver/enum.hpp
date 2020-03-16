@@ -45,17 +45,16 @@ namespace Sudoku::Solver {
         std::ostream& operator<<(std::ostream& out, const E genPath) {
             return out << NAMES[static_cast<unsigned>(genPath)];
         }
-        const std::string OPTIONS_MENU = "OPTIONS:"
+        const std::string OPTIONS_MENU = "\nGEN-PATH OPTIONS:"
             "\n- rowmajor   horizontal strips as wide as the grid one by one"
-            "\n- blockcol   rowmajor, but broken into columns one block wide"
-            "\n";
+            "\n- blockcol   rowmajor, but broken into columns one block wide";
     }
 
     enum class TvsDirection : bool {
         BACK, FORWARD,
     };
 
-    enum class SolverExitStatus {
+    enum class ExitStatus {
         IMPOSSIBLE, GIVEUP, SUCCESS,
     };
 

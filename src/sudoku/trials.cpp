@@ -23,7 +23,7 @@ void ThreadFunc<O>::operator()(solver_t* solver, const unsigned threadNum) {
             // That's fine. This covers the overwhelming majority of the work,
             // and everything else requires mutual exclusion to access shared
             // state and print outputs.
-            Solver::SolverExitStatus exitStatus;
+            Solver::ExitStatus exitStatus;
             const Solver::opcount_t numOperations = solver->generateSolution(exitStatus);
         mutex.lock();
 
@@ -54,7 +54,7 @@ void ThreadFunc<O>::operator()(solver_t* solver, const unsigned threadNum) {
         totalTrials++;
 
         // Print the number of operations taken:
-        if (exitStatus == Solver::SolverExitStatus::SUCCESS) {
+        if (exitStatus == Solver::ExitStatus::SUCCESS) {
             totalSuccesses++;
             solver->os << std::setw(solver->STATS_WIDTH) << numOperations;
         } else {

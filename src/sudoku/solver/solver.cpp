@@ -69,10 +69,19 @@ struct MyNumpunct : std::numpunct<char> {
     }
 };
 
+#if SOLVER_THREADS_SHARE_GENPATH
+template <Order O>
+GenPath::E Solver<O>::genPath = initializeGenPath();
+template <Order O>
+std::array<typename Solver<O>::area_t, Solver<O>::area> Solver<O>::traversalOrder;
+#endif
+
+
 // Mechanism to statically toggle printing alignment:
 // (#undef-ed before the end of this namespace)
 #define STATW_I << std::setw(this->STATS_WIDTH)
 #define STATW_D << std::setw(this->STATS_WIDTH + 4)
+
 
 template <Order O>
 Solver<O>::Solver(std::ostream& os):
@@ -82,12 +91,9 @@ Solver<O>::Solver(std::ostream& os):
     for (auto& rowBias : rowBiases) {
         std::iota(rowBias.begin(), rowBias.end(), 0);
     }
-    // Interesting: Smaller-order grids perform better with ROW_MAJOR as genPath.
-    if ((order < 4) || (order == 4 && gum == GUM::E::BACKTRACKS)) {
-        setGenPath(GenPath::E::ROW_MAJOR, true);
-    } else {
-        setGenPath(GenPath::E::BLOCK_COLS, true);
-    }
+    #if !SOLVER_THREADS_SHARE_GENPATH
+    initializeGenPath();
+    #endif
 
     // Output formatting:
     if (isPretty) {
@@ -210,7 +216,7 @@ void Solver<O>::registerGivenValue(const area_t index, const value_t value) {
 
 template <Order O>
 template <bool USE_PUZZLE>
-opcount_t Solver<O>::generateSolution(SolverExitStatus& exitStatus, const bool contPrev) {
+opcount_t Solver<O>::generateSolution(ExitStatus& exitStatus, const bool contPrev) {
     opcount_t numOperations = 0;
     TvsDirection direction = TvsDirection::FORWARD;
     area_t tvsIndex = 0;
@@ -222,7 +228,7 @@ opcount_t Solver<O>::generateSolution(SolverExitStatus& exitStatus, const bool c
             direction = TvsDirection::BACK;
         } else if (prevGenTvsIndex == 0) {
             // Previously realized nothing left to find.
-            exitStatus = SolverExitStatus::IMPOSSIBLE;
+            exitStatus = ExitStatus::IMPOSSIBLE;
             return 0;
         } else {
             // Previously gave up.
@@ -282,10 +288,10 @@ opcount_t Solver<O>::generateSolution(SolverExitStatus& exitStatus, const bool c
     // Return:
     prevGenTvsIndex = tvsIndex;
     exitStatus = (tvsIndex == 0)
-        ? SolverExitStatus::IMPOSSIBLE
+        ? ExitStatus::IMPOSSIBLE
         : ((tvsIndex == area)
-            ? SolverExitStatus::SUCCESS
-            : SolverExitStatus::GIVEUP
+            ? ExitStatus::SUCCESS
+            : ExitStatus::GIVEUP
         );
     return numOperations;
 }
@@ -374,14 +380,10 @@ GenPath::E Solver<O>::setGenPath(const GenPath::E newGenPath, const bool force) 
 
 template <Order O>
 GenPath::E Solver<O>::setGenPath(std::string const& newGenPathString) noexcept {
-    std::cout << '\n' << GenPath::OPTIONS_MENU;
-    // *NOTE: That's right. I'm using `goto` statements. This falls
-    // within my judgement of appropriate circumstance, it's my own
-    // project, and if it irks you, that also puts a smile on my face :)
     std::cout << "\ngenerator path is ";
     if (newGenPathString.empty()) {
-        std::cout << "currently set to: ";
-        goto successful_return;
+        std::cout << "currently set to: " << getGenPath() << std::endl;
+        return getGenPath();
     }
     for (unsigned i = 0; i < GenPath::size; i++) {
         if (newGenPathString.compare(GenPath::NAMES[i]) == 0) {
@@ -391,17 +393,30 @@ GenPath::E Solver<O>::setGenPath(std::string const& newGenPathString) noexcept {
                 std::cout << "now set to: ";
                 setGenPath(GenPath::E{i});
             }
-            goto successful_return;
+            std::cout << getGenPath() << std::endl;
+            return getGenPath();
         }
     }
     // unsuccessful return:
+    // TODO [qol] Highlight this text in red please!
     std::cout << getGenPath() << " (unchanged).\n\"" << newGenPathString
         << "\" is not a valid generator path name." << std::endl;
+    std::cout << GenPath::OPTIONS_MENU << std::endl;
     return getGenPath();
+}
 
-    successful_return:
-    std::cout << getGenPath() << std::endl;
-    return getGenPath();
+
+template <Order O>
+GenPath::E Solver<O>::initializeGenPath(void) noexcept {
+    GenPath::E defaultGenPath;
+    // Interesting: Smaller-order grids perform better with ROW_MAJOR as genPath.
+    if ((order < 4) || (order == 4 && gum == GUM::E::BACKTRACKS)) {
+        defaultGenPath = GenPath::E::ROW_MAJOR;
+    } else {
+        defaultGenPath = GenPath::E::BLOCK_COLS;
+    }
+    setGenPath(defaultGenPath, true);
+    return defaultGenPath;
 }
 
 
