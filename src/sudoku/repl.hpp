@@ -32,7 +32,7 @@ namespace Sudoku {
     };
     const std::string HELP_MESSAGE = "\nCOMMAND MENU:"
         "\n- help               print this help menu"
-        "\n- quit               terminate this program"
+        "\n- quit               cleanly exit this program"
         "\n- {enter}            generate a single solution"
         "\n- cont               continue previous generation"
         "\n- trials <n>         attempt to generate <n> solutions"
@@ -64,13 +64,12 @@ namespace Sudoku {
     template <Order O>
     class Repl {
     public:
+        Repl(void) = delete;
         explicit Repl(std::ostream&);
-        static void SEED(unsigned);
 
-        typedef class Solver<O> solver_t;
+        using solver_t = class Sudoku::Solver<O>;
         bool runCommand(std::string const& cmdLine);
 
-        static constexpr unsigned MAX_EXTRA_THREADS = ((const unsigned[]){0,0,0,0,1,2,3})[O];
         // This is equal to `MAX_EXTRA_THREADS` floored by how many
         // concurrent threads the host processor can support at a time.
         const unsigned numExtraThreads;
@@ -79,6 +78,7 @@ namespace Sudoku {
         solver_t solver;
         std::ostream& os; // alias to this->solver.os;
         static constexpr GUM::E GUM = Solver<O>::GUM;
+        static constexpr unsigned MAX_EXTRA_THREADS = ((const unsigned[]){0,0,0,0,1,2,3})[O];
 
         // Return false if command is to exit the program:
         void solvePuzzlesFromFile(std::ifstream&);

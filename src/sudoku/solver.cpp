@@ -58,10 +58,16 @@ std::ostream& operator<<(std::ostream& os, Sudoku::Solver<O> const& s) {
 
 namespace Sudoku {
 
+// Guards accesses to RMG. I currently only
+// use this when shuffling generator biases.
+std::mutex RANDOM_MUTEX;
+std::mt19937 VALUE_RNG;
 
-std::string MyNumpunct::do_grouping(void) const {
-    return "\03";
-}
+struct MyNumpunct : std::numpunct<char> {
+    std::string do_grouping(void) const {
+        return "\03";
+    }
+};
 
 // Mechanism to statically toggle printing alignment:
 // (#undef-ed before the end of this namespace)
@@ -436,16 +442,13 @@ void Solver<O>::printMessageBar(std::string const& msg, const char fillChar) con
 
 
 template <Order O>
-const std::string Solver<O>::blkRowSepString = createHSepString(order);
-
-// TODO: try just changing this to a lambda and joining with above?
-const std::string createHSepString(const unsigned order) {
+const std::string Solver<O>::blkRowSepString = [](const unsigned order) {
     std::string vbar = ' ' + std::string((((order * (order + 1)) + 1) * 2 - 1), '-');
     for (unsigned i = 0; i <= order; i++) {
         // Insert crosses at vbar intersections.
         vbar[(2 * (order + 1) * i) + 1] = '+';
     }
     return vbar;
-}
+}(O);
 
 } // End of Sudoku namespace.

@@ -15,46 +15,11 @@
 namespace Sudoku { template <Sudoku::Order O> class Solver; }
 template <Sudoku::Order O> std::ostream& operator<<(std::ostream&, Sudoku::Solver<O> const&);
 
-/**
- * 
- * DIM:TEXT:
- * If the macro `USE_ANSI_ESC` is set truthy before the first link to
- * the implementation files for classes in this namespace, then some
- * harsh, non-essential text will be printed with ansi escape codes to
- * dim the color.
- * 
- * FAST:IO:
- * Note: My implementation does not use C-style IO, so it is safe for
- * consumer code to make the following optimization:
- * ```cpp
- * std::ios_base::sync_with_stdio(false);
- * ```
- */
+
 namespace Sudoku {
-
-    [[gnu::const]] const std::string createHSepString(unsigned int order);
-
-    struct MyNumpunct : std::numpunct<char> {
-        std::string do_grouping(void) const;
-    };
-
-    // Guards accesses to RMG. I currently only
-    // use this when shuffling generator biases.
-    std::mutex RANDOM_MUTEX;
-    std::mt19937 VALUE_RNG;
-
 
     /**
      * 
-     * 
-     * An important note when working with this class: When printing
-     * values of numeric types defined within this class, make sure to
-     * cast any non-area types upward where they may conditionally be
-     * a `uint8_t` for small grid-orders, or else it will be specially
-     * interpreted as a char (I've already been bitten twice by this).
-     * 
-     * @param CBT - Whether or not to count backtrack statistics
-     * @param GUM - Giveup method.
      */
     template <Order O>
     class Solver {
