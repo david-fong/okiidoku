@@ -61,13 +61,13 @@ namespace Sudoku {
      * - this->member
      * - Base<ARGS>::member
      */
-    template <Order O, bool CBT, GUM::E GUM>
+    template <Order O, bool CBT>
     class Repl {
     public:
         explicit Repl(std::ostream&);
         static void SEED(unsigned);
 
-        typedef class Solver<O,CBT,GUM> solver_t;
+        typedef class Solver<O,CBT> solver_t;
         bool runCommand(std::string const& cmdLine);
 
         static constexpr unsigned MAX_EXTRA_THREADS = ((const unsigned[]){0,0,0,0,1,2,3})[O];
@@ -78,6 +78,7 @@ namespace Sudoku {
     private:
         solver_t solver;
         std::ostream& os; // alias to this->solver.os;
+        static constexpr GUM::E GUM = Solver<O,CBT>::GUM;
 
         // Return false if command is to exit the program:
         void solvePuzzlesFromFile(std::ifstream&);

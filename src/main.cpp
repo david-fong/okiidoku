@@ -1,5 +1,9 @@
 
-#define USE_ANSI_ESC true
+/**
+ * Choose build flags for the Repl and Solver here.
+ */
+#include "./buildflag.hpp"
+
 #include "./sudoku/solver.cpp"
 #include "./sudoku/repl.cpp"
 
@@ -8,13 +12,8 @@
 #include <random>       // random_device,
 
 
-#define DEFAULT_ORDER 4
-
-/**
- * Choose build flags for the Repl and Solver here.
- */
 template<Sudoku::Order O>
-using Repl = Sudoku::Repl<O, true, Sudoku::GUM::E::BACKTRACKS>;
+using Repl = Sudoku::Repl<O, true>;
 
 
 /**
@@ -58,6 +57,8 @@ int main(const int argc, char const *const argv[]) {
 
     // Create a Solver of the specified order:
     // (It will automatically enter its REPL).
+    // TODO [test] See if allocating on heap can cut down on executable
+    // size without visibly impacting performance.
     switch (static_cast<Sudoku::Order>(userOrder)) {
         case 3: { Repl<3>::SEED(srandKey); Repl<3> s(*outStream); break; }
         case 4: { Repl<4>::SEED(srandKey); Repl<4> s(*outStream); break; }

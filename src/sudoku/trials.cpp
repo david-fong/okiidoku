@@ -1,10 +1,14 @@
 #include "./trials.hpp"
 
+#include "../util/ansi.hpp"
+
+#include <iostream>
+#include <iomanip>
+
 namespace Sudoku::Trials {
 
-template <Order O, bool CBT, GUM::E GUM>
-void ThreadFunc<O,CBT,GUM>::operator()(Solver* solver, const unsigned threadNum) {
-    //Solver::VALUE_RNG.seed(std::random_device()()); // TODO Is this needed?
+template <Order O, bool CBT>
+void ThreadFunc<O,CBT>::operator()(Solver* solver, const unsigned threadNum) {
     mutex.lock();
     if (threadNum != 0) {
         Solver *const oldSolver = solver;

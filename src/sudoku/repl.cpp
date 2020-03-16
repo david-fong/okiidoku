@@ -6,10 +6,8 @@
 #include <chrono>       // steady_clock::now, durationcast,
 #include <math.h>       // pow,
 
-#include <functional>   // reference_wrapper, ref,
 #include <thread>
 #include <mutex>
-#include <vector>
 
 
 namespace Sudoku {
@@ -20,8 +18,8 @@ namespace Sudoku {
 #define STATW_D << std::setw(this->solver.STATS_WIDTH + 4)
 
 
-template <Order O, bool CBT, GUM::E GUM>
-Repl<O,CBT,GUM>::Repl(std::ostream& os):
+template <Order O, bool CBT>
+Repl<O,CBT>::Repl(std::ostream& os):
     numExtraThreads([](){
         const unsigned HWC = std::thread::hardware_concurrency();
         // HWC is specified to be zero if unknown.
@@ -31,7 +29,7 @@ Repl<O,CBT,GUM>::Repl(std::ostream& os):
     os      (os)
 {
     // Print diagnostics about Solver member size:
-    std::cout << "\nsizeof solver: " << sizeof(solver) << std::endl;
+    std::cout << "\nsize of solver: " << sizeof(solver) << " bytes" << std::endl;
 
     // Print help menu and then start the REPL (read-execute-print-loop):
     std::cout << HELP_MESSAGE << std::endl;
@@ -43,14 +41,14 @@ Repl<O,CBT,GUM>::Repl(std::ostream& os):
 };
 
 
-template <Order O, bool CBT, GUM::E GUM>
-void Repl<O,CBT,GUM>::SEED(const unsigned seedValue) {
+template <Order O, bool CBT>
+void Repl<O,CBT>::SEED(const unsigned seedValue) {
     solver_t::VALUE_RNG.seed(seedValue);
 }
 
 
-template <Order O, bool CBT, GUM::E GUM>
-bool Repl<O,CBT,GUM>::runCommand(std::string const& cmdLine) {
+template <Order O, bool CBT>
+bool Repl<O,CBT>::runCommand(std::string const& cmdLine) {
     size_t tokenPos;
     // Very simple parsing: Assumes no leading spaces, and does not
     // trim leading or trailing spaces from the arguments substring.
@@ -97,8 +95,8 @@ bool Repl<O,CBT,GUM>::runCommand(std::string const& cmdLine) {
 }
 
 
-template <Order O, bool CBT, GUM::E GUM>
-void Repl<O,CBT,GUM>::solvePuzzlesFromFile(std::ifstream& puzzlesFile) {
+template <Order O, bool CBT>
+void Repl<O,CBT>::solvePuzzlesFromFile(std::ifstream& puzzlesFile) {
     // Put the string outside the loop since the space allocation
     // for proper input, should be all the same.
     std::string puzzleString;
@@ -119,8 +117,8 @@ void Repl<O,CBT,GUM>::solvePuzzlesFromFile(std::ifstream& puzzlesFile) {
 }
 
 
-template <Order O, bool CBT, GUM::E GUM>
-void Repl<O,CBT,GUM>::runSingle(const bool contPrev) {
+template <Order O, bool CBT>
+void Repl<O,CBT>::runSingle(const bool contPrev) {
     solver.printMessageBar("START");
 
     // Generate a new solution:
@@ -141,8 +139,8 @@ void Repl<O,CBT,GUM>::runSingle(const bool contPrev) {
 }
 
 
-template <Order O, bool CBT, GUM::E GUM>
-void Repl<O,CBT,GUM>::runMultiple(
+template <Order O, bool CBT>
+void Repl<O,CBT>::runMultiple(
     const trials_t trialsStopThreshold,
     const Trials::StopBy trialsStopMethod
 ) {
@@ -162,19 +160,19 @@ void Repl<O,CBT,GUM>::runMultiple(
     {
         trials_t totalSuccesses = 0;
         std::mutex sharedStateMutex;
-
-        // Start the threads:
-        std::array<std::thread, MAX_EXTRA_THREADS> extraThreads;
         Trials::SharedState sharedState {
             sharedStateMutex, COLS, trialsStopMethod, trialsStopThreshold,
             totalTrials, totalSuccesses, binHitCount, binOpsTotal,
         };
+
+        // Start the threads:
+        std::array<std::thread, MAX_EXTRA_THREADS> extraThreads;
         for (unsigned i = 0; i < numExtraThreads; i++) {
-            auto threadFunc = Trials::ThreadFunc<O,CBT,GUM>(sharedState);
+            auto threadFunc = Trials::ThreadFunc<O,CBT>(sharedState);
             extraThreads[i] = std::thread(std::move(threadFunc), &solver, i+1);
         } {
-            auto threadFunc = Trials::ThreadFunc<O,CBT,GUM>(sharedState);
-            threadFunc(&solver, 0);
+            auto thisThreadFunc = Trials::ThreadFunc<O,CBT>(sharedState);
+            thisThreadFunc(&solver, 0);
         }
         for (unsigned i = 0; i < numExtraThreads; i++) {
             extraThreads[i].join();
@@ -204,8 +202,8 @@ void Repl<O,CBT,GUM>::runMultiple(
 }
 
 
-template <Order O, bool CBT, GUM::E GUM>
-void Repl<O,CBT,GUM>::runMultiple(
+template <Order O, bool CBT>
+void Repl<O,CBT>::runMultiple(
     std::string const& trialsString,
     const Trials::StopBy stopByMethod
 ) {
@@ -224,8 +222,8 @@ void Repl<O,CBT,GUM>::runMultiple(
 }
 
 
-template <Order O, bool CBT, GUM::E GUM>
-void Repl<O,CBT,GUM>::printTrialsWorkDistribution(
+template <Order O, bool CBT>
+void Repl<O,CBT>::printTrialsWorkDistribution(
     const trials_t totalTrials, // sum of entries of binHitCount
     std::array<trials_t, Trials::NUM_BINS+1> const& binHitCount,
     std::array<double,   Trials::NUM_BINS+1> const& binOpsTotal

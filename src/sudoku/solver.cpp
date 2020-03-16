@@ -21,9 +21,8 @@ std::string MyNumpunct::do_grouping(void) const {
 #define STATW_I << std::setw(this->STATS_WIDTH)
 #define STATW_D << std::setw(this->STATS_WIDTH + 4)
 
-
-template <Order O, bool CBT, GUM::E GUM>
-Solver<O,CBT,GUM>::Solver(std::ostream& os):
+template <Order O, bool CBT>
+Solver<O,CBT>::Solver(std::ostream& os):
     os          (os),
     isPretty    (&os == &std::cout)
 {
@@ -46,8 +45,8 @@ Solver<O,CBT,GUM>::Solver(std::ostream& os):
 }
 
 
-template <Order O, bool CBT, GUM::E GUM>
-void Solver<O,CBT,GUM>::print(void) const {
+template <Order O, bool CBT>
+void Solver<O,CBT>::print(void) const {
     #define PRINT_GRID0_TILE(PRINTER_STATEMENT) {\
         for (length_t col = 0; col < length; col++) {\
             if (isPretty && (col % order) == 0) os << Ansi::DIM.ON << " |" << Ansi::DIM.OFF;\
@@ -85,8 +84,8 @@ void Solver<O,CBT,GUM>::print(void) const {
 }
 
 
-template <Order O, bool CBT, GUM::E GUM>
-void Solver<O,CBT,GUM>::printShadedBacktrackStat(const unsigned count) const {
+template <Order O, bool CBT>
+void Solver<O,CBT>::printShadedBacktrackStat(const unsigned count) const {
     const std::array<std::string, 4> GREYSCALE_BLOCK_CHARS = {
         // NOTE: Make sure that the initializer list size matches that
         // of the corresponding template argument. Compilers won't warn.
@@ -113,9 +112,9 @@ void Solver<O,CBT,GUM>::printShadedBacktrackStat(const unsigned count) const {
 
 
 
-template <Order O, bool CBT, GUM::E GUM>
+template <Order O, bool CBT>
 template <bool USE_PUZZLE>
-void Solver<O,CBT,GUM>::clear(void) {
+void Solver<O,CBT>::clear(void) {
     for (area_t i = 0; i < area; i++) {
         // Clear all non-givens. Their values should already have been
         // set by `loadPuzzleFromString`. Recall that biasIndex for
@@ -150,8 +149,8 @@ void Solver<O,CBT,GUM>::clear(void) {
 }
 
 
-template <Order O, bool CBT, GUM::E GUM>
-bool Solver<O,CBT,GUM>::loadPuzzleFromString(const std::string& puzzleString) {
+template <Order O, bool CBT>
+bool Solver<O,CBT>::loadPuzzleFromString(const std::string& puzzleString) {
     // This length check will be done again later, but might as well
     // do it now as a quick short-circuiter.
     if (puzzleString.length() != area) return false;
@@ -180,16 +179,16 @@ bool Solver<O,CBT,GUM>::loadPuzzleFromString(const std::string& puzzleString) {
 }
 
 
-template <Order O, bool CBT, GUM::E GUM>
-void Solver<O,CBT,GUM>::registerGivenValue(const area_t index, const value_t value) {
+template <Order O, bool CBT>
+void Solver<O,CBT>::registerGivenValue(const area_t index, const value_t value) {
     isTileForGiven[index] = true;
     grid[index].value = value;
 }
 
 
-template <Order O, bool CBT, GUM::E GUM>
+template <Order O, bool CBT>
 template <bool USE_PUZZLE>
-opcount_t Solver<O,CBT,GUM>::generateSolution(SolverExitStatus& exitStatus, const bool contPrev) {
+opcount_t Solver<O,CBT>::generateSolution(SolverExitStatus& exitStatus, const bool contPrev) {
     opcount_t numOperations = 0;
     TvsDirection direction = TvsDirection::FORWARD;
     area_t tvsIndex = 0;
@@ -270,8 +269,8 @@ opcount_t Solver<O,CBT,GUM>::generateSolution(SolverExitStatus& exitStatus, cons
 }
 
 
-template <Order O, bool CBT, GUM::E GUM>
-TvsDirection Solver<O,CBT,GUM>::setNextValid(const area_t index) {
+template <Order O, bool CBT>
+TvsDirection Solver<O,CBT>::setNextValid(const area_t index) {
     occmask_t& rowBin = rowSymbolOccMasks[getRow(index)];
     occmask_t& colBin = colSymbolOccMasks[getCol(index)];
     occmask_t& blkBin = blkSymbolOccMasks[getBlk(index)];
@@ -324,8 +323,8 @@ TvsDirection Solver<O,CBT,GUM>::setNextValid(const area_t index) {
 }
 
 
-template <Order O, bool CBT, GUM::E GUM>
-GenPath::E Solver<O,CBT,GUM>::setGenPath(const GenPath::E newGenPath, const bool force) noexcept {
+template <Order O, bool CBT>
+GenPath::E Solver<O,CBT>::setGenPath(const GenPath::E newGenPath, const bool force) noexcept {
     if (!force && newGenPath == getGenPath()) {
         // Short circuit:
         return getGenPath();
@@ -351,8 +350,8 @@ GenPath::E Solver<O,CBT,GUM>::setGenPath(const GenPath::E newGenPath, const bool
 }
 
 
-template <Order O, bool CBT, GUM::E GUM>
-GenPath::E Solver<O,CBT,GUM>::setGenPath(std::string const& newGenPathString) noexcept {
+template <Order O, bool CBT>
+GenPath::E Solver<O,CBT>::setGenPath(std::string const& newGenPathString) noexcept {
     std::cout << '\n' << GenPath::OPTIONS_MENU;
     // *NOTE: That's right. I'm using `goto` statements. This falls
     // within my judgement of appropriate circumstance, it's my own
@@ -386,8 +385,8 @@ GenPath::E Solver<O,CBT,GUM>::setGenPath(std::string const& newGenPathString) no
 
 
 
-template <Order O, bool CBT, GUM::E GUM>
-void Solver<O,CBT,GUM>::printMessageBar(
+template <Order O, bool CBT>
+void Solver<O,CBT>::printMessageBar(
     std::string const& msg,
     unsigned int barLength,
     const char fillChar
@@ -405,8 +404,8 @@ void Solver<O,CBT,GUM>::printMessageBar(
 }
 
 
-template <Order O, bool CBT, GUM::E GUM>
-void Solver<O,CBT,GUM>::printMessageBar(std::string const& msg, const char fillChar) const {
+template <Order O, bool CBT>
+void Solver<O,CBT>::printMessageBar(std::string const& msg, const char fillChar) const {
     const unsigned int gridBarLength = (isPretty)
         ? ((length + order + 1) * 2)
         : (length * 2);
@@ -420,8 +419,8 @@ void Solver<O,CBT,GUM>::printMessageBar(std::string const& msg, const char fillC
 #undef STATW_D
 
 
-template <Order O, bool CBT, GUM::E GUM>
-const std::string Solver<O,CBT,GUM>::blkRowSepString = createHSepString(order);
+template <Order O, bool CBT>
+const std::string Solver<O,CBT>::blkRowSepString = createHSepString(order);
 
 const std::string createHSepString(const unsigned order) {
     std::string vbar = ' ' + std::string((((order * (order + 1)) + 1) * 2 - 1), '-');
@@ -432,10 +431,10 @@ const std::string createHSepString(const unsigned order) {
     return vbar;
 }
 
-template <Order O, bool CBT, GUM::E GUM>
-std::mutex Solver<O,CBT,GUM>::RANDOM_MUTEX;
+template <Order O, bool CBT>
+std::mutex Solver<O,CBT>::RANDOM_MUTEX;
 
-template <Order O, bool CBT, GUM::E GUM>
-std::mt19937 Solver<O,CBT,GUM>::VALUE_RNG;
+template <Order O, bool CBT>
+std::mt19937 Solver<O,CBT>::VALUE_RNG;
 
 } // End of Sudoku namespace.
