@@ -1,7 +1,7 @@
 #ifndef HPP_SUDOKU_REPL
 #define HPP_SUDOKU_REPL
 
-#include "./solver.hpp"
+#include "./solver/solver.hpp"
 #include "./trials.hpp"
 
 #include <map>
@@ -64,10 +64,11 @@ namespace Sudoku {
     template <Order O>
     class Repl {
     public:
+        using opcount_t = Solver::opcount_t;
         Repl(void) = delete;
         explicit Repl(std::ostream&);
 
-        using solver_t = class Sudoku::Solver<O>;
+        using solver_t = class Solver::Solver<O>;
         bool runCommand(std::string const& cmdLine);
 
         // This is equal to `MAX_EXTRA_THREADS` floored by how many
@@ -77,7 +78,6 @@ namespace Sudoku {
     private:
         solver_t solver;
         std::ostream& os; // alias to this->solver.os;
-        static constexpr GUM::E GUM = Solver<O>::GUM;
         static constexpr unsigned MAX_EXTRA_THREADS = ((const unsigned[]){0,0,0,0,1,2,3})[O];
 
         // Return false if command is to exit the program:

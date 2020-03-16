@@ -30,6 +30,6 @@
 /**
  * Giveup method.
  */
-#define BUILDFLAG_GUM Sudoku::GUM::E::BACKTRACKS
+#define BUILDFLAG_GUM Sudoku::Solver::GUM::E::BACKTRACKS
 
 #endif

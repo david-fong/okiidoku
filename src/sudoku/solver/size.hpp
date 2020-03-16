@@ -1,30 +1,38 @@
-#ifndef HPP_SUDOKU_SIZE
-#define HPP_SUDOKU_SIZE
+#ifndef HPP_SUDOKU_SOLVER_SIZE
+#define HPP_SUDOKU_SOLVER_SIZE
 
+// This file is a helper for `./solver.hpp`.
+
+#include "../../buildflag.hpp"
 #include "./enum.hpp"
 
 namespace Sudoku {
+    /**
+     * The primary goal of this added complexity is to make effective
+     * use of space, which should help improve cache performance.
+     * 
+     * As I explored my implementation options, I set these goals:
+     * 1. Grid order template parameter is bounded within reason.
+     * 2. Caller code can choose which template expansions to compile.
+     * 3. Conditional sizing typedefs are kept internal.
+     * 
+     * Constructs I could have used in less favourable implementations
+     * included: partial template specification, alias templating,
+     * using an enum type for valid grid orders.
+     * 
+     * Note that there is another similar typedef named `order_t`,
+     * which is conditionally defined to be large enough for whatever
+     * value is passed as a template parameter of this type (Order)
+     * as a maximum value.
+     */
+    typedef uint8_t Order;
+    constexpr Order MAX_REASONABLE_ORDER = 20u;
+}
 
-/**
- * The primary goal of this added complexity is to make effective
- * use of space, which should help improve cache performance.
- * 
- * As I explored my implementation options, I set these goals:
- * 1. Grid order template parameter is bounded within reason.
- * 2. Caller code can choose which template expansions to compile.
- * 3. Conditional sizing typedefs are kept internal.
- * 
- * Constructs I could have used in less favourable implementations
- * included: partial template specification, alias templating,
- * using an enum type for valid grid orders.
- * 
- * Note that there is another similar typedef named `order_t`,
- * which is conditionally defined to be large enough for whatever
- * value is passed as a template parameter of this type (Order)
- * as a maximum value.
- */
-typedef uint8_t Order;
-constexpr Order MAX_REASONABLE_ORDER = 20;
+namespace Sudoku::Solver {
+
+constexpr bool   cbt = BUILDFLAG_CBT;
+constexpr GUM::E gum = BUILDFLAG_GUM;
 
 // Container for a very large number.
 // See Solver::GIVEUP_THRESHOLD for more discussion on the average
@@ -94,12 +102,11 @@ public:
      * Give up if the giveup condition variable meets this value.
      * Measured stats for operations: https://www.desmos.com/calculator/8taqzelils
      */
-    template <GUM::E GUM>
     static constexpr opcount_t GIVEUP_THRESHOLD
-    = (GUM == GUM::E::OPERATIONS) ? ((const opcount_t[]){
+    = (gum == GUM::E::OPERATIONS) ? ((const opcount_t[]){
         1, 2, 26, 2'000, 100'000, 30'000'000, 120'000'000'000,
         })[O]
-    : (GUM == GUM::E::BACKTRACKS) ? ((const opcount_t[]){
+    : (gum == GUM::E::BACKTRACKS) ? ((const opcount_t[]){
         // Note: Make sure entries of `backtrackCounts` can fit these.
         0, 1,  3,   150,  10'000,  2'200'000,  10'000'000'000,
         })[O]
@@ -107,6 +114,6 @@ public:
     // TODO [tune] The current values for order-6 are just predictions.
 };
 
-} // End of Sudoku namespace
+} // End of Sudoku::Solver namespace
 
 #endif

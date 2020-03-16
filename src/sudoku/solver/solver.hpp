@@ -1,7 +1,7 @@
 #ifndef HPP_SUDOKU_SOLVER
 #define HPP_SUDOKU_SOLVER
 
-#include "../util/ansi.hpp"
+#include "../../util/ansi.hpp"
 #include "./enum.hpp"
 #include "./size.hpp"
 
@@ -12,11 +12,11 @@
 #include <bitset>
 
 
-namespace Sudoku { template <Sudoku::Order O> class Solver; }
-template <Sudoku::Order O> std::ostream& operator<<(std::ostream&, Sudoku::Solver<O> const&);
+namespace Sudoku::Solver { template <Sudoku::Order O> class Solver; }
+template <Sudoku::Order O> std::ostream& operator<<(std::ostream&, Sudoku::Solver::Solver<O> const&);
 
 
-namespace Sudoku {
+namespace Sudoku::Solver {
 
     /**
      * 
@@ -24,16 +24,15 @@ namespace Sudoku {
     template <Order O>
     class Solver {
     public:
-        static constexpr bool   CBT = BUILDFLAG_CBT;
-        static constexpr GUM::E GUM = BUILDFLAG_GUM;
         static_assert((1 < O) && (O <= MAX_REASONABLE_ORDER));
-        static_assert((GUM == GUM::E::BACKTRACKS) ? CBT : true);
+        static_assert((gum == GUM::E::BACKTRACKS) ? cbt : true);
         using occmask_t     = typename Size<O>::occmask_t   ;
         using order_t       = typename Size<O>::order_t     ;
         using length_t      = typename Size<O>::length_t    ;
         using area_t        = typename Size<O>::area_t      ;
         using value_t       = typename Size<O>::value_t     ;
         using backtrack_t   = typename Size<O>::backtrack_t ;
+        static constexpr opcount_t GIVEUP_THRESHOLD = Size<O>::GIVEUP_THRESHOLD;
 
     // =======================
     // HELPER CLASS
@@ -128,8 +127,6 @@ namespace Sudoku {
         void printMessageBar(std::string const&, unsigned int, char = '=') const;
         void printMessageBar(std::string const&, char = '=') const;
 
-        static constexpr opcount_t GIVEUP_THRESHOLD = Sudoku::Size<O>::template GIVEUP_THRESHOLD<GUM>;
-
         [[gnu::cold, gnu::pure]]
         GenPath::E getGenPath(void) const noexcept { return genPath; }
         [[gnu::cold]] GenPath::E setGenPath(GenPath::E, bool force = false) noexcept;
@@ -161,9 +158,9 @@ namespace Sudoku {
         // wherever it last left off.
         area_t prevGenTvsIndex;
 
-        std::array<backtrack_t, (CBT?area:1)> backtrackCounts;
+        std::array<backtrack_t, (cbt?area:1)> backtrackCounts;
         backtrack_t maxBacktrackCount;
-        void printShadedBacktrackStat(unsigned count) const;
+        void printShadedBacktrackStat(backtrack_t) const;
 
     public:
         std::ostream& os;
@@ -221,6 +218,6 @@ namespace Sudoku {
 
     const std::string GRID_SEP = "  ";
 
-} // End of Sudoku namespace
+} // End of Sudoku::Solver namespace
 
 #endif

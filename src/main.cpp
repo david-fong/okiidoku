@@ -4,7 +4,7 @@
  */
 #include "./buildflag.hpp"
 
-#include "./sudoku/solver.cpp"
+#include "./sudoku/solver/solver.cpp"
 #include "./sudoku/repl.cpp"
 
 #include <iostream>     // cout,
@@ -51,7 +51,7 @@ int main(const int argc, char const *const argv[]) {
 
     // Scramble the random number generator (std::rand is no longer used):
     // std::srand(srandKey);
-    Sudoku::VALUE_RNG.seed(srandKey);
+    Sudoku::Solver::VALUE_RNG.seed(srandKey);
 
     // Create a Solver of the specified order:
     // (It will automatically enter its REPL).

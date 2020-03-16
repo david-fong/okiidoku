@@ -1,12 +1,12 @@
+#ifndef HPP_SUDOKU_SOLVER_ENUM
+#define HPP_SUDOKU_SOLVER_ENUM
 
-#ifndef HPP_SUDOKU_ENUM
-#define HPP_SUDOKU_ENUM
+// This file is a helper for `./solver.hpp`.
 
 #include <iostream>
 #include <array>
 
-
-namespace Sudoku {
+namespace Sudoku::Solver {
 
     /**
      * Give Up Method.
@@ -14,7 +14,7 @@ namespace Sudoku {
      * This is a compile-time argument specified via templating.
      */
     namespace GUM {
-        enum class E {
+        enum class E : unsigned {
             OPERATIONS, // Total times attempted to setNextValid.
             BACKTRACKS, // Maximum count searched over all tiles.
             GiveupMethod__MAX = BACKTRACKS,
@@ -65,6 +65,6 @@ namespace Sudoku {
         SPACE, ZERO, //LENGTH,
     };
 
-} // End of Sudoku namespace
+} // End of Sudoku::Solver namespace
 
 #endif

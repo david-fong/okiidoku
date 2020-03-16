@@ -8,11 +8,11 @@
 namespace Sudoku::Trials {
 
 template <Order O>
-void ThreadFunc<O>::operator()(Solver* solver, const unsigned threadNum) {
+void ThreadFunc<O>::operator()(solver_t* solver, const unsigned threadNum) {
     mutex.lock();
     if (threadNum != 0) {
-        Solver *const oldSolver = solver;
-        solver = new Solver(oldSolver->os);
+        solver_t *const oldSolver = solver;
+        solver = new solver_t(oldSolver->os);
         solver->setGenPath(oldSolver->getGenPath());
     }
     while (true) {
@@ -23,8 +23,8 @@ void ThreadFunc<O>::operator()(Solver* solver, const unsigned threadNum) {
             // That's fine. This covers the overwhelming majority of the work,
             // and everything else requires mutual exclusion to access shared
             // state and print outputs.
-            SolverExitStatus exitStatus;
-            const opcount_t numOperations = solver->generateSolution(exitStatus);
+            Solver::SolverExitStatus exitStatus;
+            const Solver::opcount_t numOperations = solver->generateSolution(exitStatus);
         mutex.lock();
 
         // Check break conditions:
@@ -54,7 +54,7 @@ void ThreadFunc<O>::operator()(Solver* solver, const unsigned threadNum) {
         totalTrials++;
 
         // Print the number of operations taken:
-        if (exitStatus == SolverExitStatus::SUCCESS) {
+        if (exitStatus == Solver::SolverExitStatus::SUCCESS) {
             totalSuccesses++;
             solver->os << std::setw(solver->STATS_WIDTH) << numOperations;
         } else {
@@ -67,9 +67,9 @@ void ThreadFunc<O>::operator()(Solver* solver, const unsigned threadNum) {
         if constexpr (solver->order > 4) solver->os << std::flush;
 
         // Save some stats for later diagnostics-printing:
-        const opcount_t giveupCondVar
-            = (solver->GUM == GUM::E::OPERATIONS) ? numOperations
-            : (solver->GUM == GUM::E::BACKTRACKS) ? solver->getMaxBacktrackCount()
+        const Solver::opcount_t giveupCondVar
+            = (Solver::gum == Solver::GUM::E::OPERATIONS) ? numOperations
+            : (Solver::gum == Solver::GUM::E::BACKTRACKS) ? solver->getMaxBacktrackCount()
             : [](){ throw "unhandled GUM case"; return ~0; }();
         const unsigned binNum = NUM_BINS * (giveupCondVar) / solver->GIVEUP_THRESHOLD;
         binHitCount[binNum]++;

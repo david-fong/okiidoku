@@ -10,9 +10,9 @@
 
 
 template <Sudoku::Order O>
-std::ostream& operator<<(std::ostream& os, Sudoku::Solver<O> const& s) {
-    using namespace Sudoku;
-    using length_t = typename Sudoku::Solver<O>::length_t;
+std::ostream& operator<<(std::ostream& os, Sudoku::Solver::Solver<O> const& s) {
+    using namespace Sudoku::Solver;
+    using length_t = typename Sudoku::Solver::Solver<O>::length_t;
     #define PRINT_GRID0_TILE(PRINTER_STATEMENT) {\
         for (length_t col = 0; col < s.length; col++) {\
             if (isPretty && (col % s.order) == 0) os << Ansi::DIM.ON << " |" << Ansi::DIM.OFF;\
@@ -29,13 +29,13 @@ std::ostream& operator<<(std::ostream& os, Sudoku::Solver<O> const& s) {
             // Print block-row separator string:
             os << Ansi::DIM.ON;
             os << s.blkRowSepString;
-            if constexpr (s.CBT) os << GRID_SEP << s.blkRowSepString;
+            if constexpr (cbt) os << GRID_SEP << s.blkRowSepString;
             os << "\n" << Ansi::DIM.OFF;
         }
         // Tile content:
         #define index (row * s.length + col)
         PRINT_GRID0_TILE(os << ' ' << s.grid[index])
-        if constexpr (s.CBT) {
+        if constexpr (cbt) {
             PRINT_GRID_TILE(s.printShadedBacktrackStat(s.backtrackCounts[index]))
         }
         // PRINT_GRID_TILE(os << std::setw(2) << grid[index].biasIndex)
@@ -47,7 +47,7 @@ std::ostream& operator<<(std::ostream& os, Sudoku::Solver<O> const& s) {
     if (isPretty) {
         os << Ansi::DIM.ON;
         os << s.blkRowSepString;
-        if constexpr (s.CBT) os << GRID_SEP << s.blkRowSepString;
+        if constexpr (cbt) os << GRID_SEP << s.blkRowSepString;
         os << "\n" << Ansi::DIM.OFF;
     }
     #undef PRINT_GRID_TILE
@@ -56,7 +56,7 @@ std::ostream& operator<<(std::ostream& os, Sudoku::Solver<O> const& s) {
 }
 
 
-namespace Sudoku {
+namespace Sudoku::Solver {
 
 // Guards accesses to RMG. I currently only
 // use this when shuffling generator biases.
@@ -83,7 +83,7 @@ Solver<O>::Solver(std::ostream& os):
         std::iota(rowBias.begin(), rowBias.end(), 0);
     }
     // Interesting: Smaller-order grids perform better with ROW_MAJOR as genPath.
-    if ((order < 4) || (order == 4 && GUM == GUM::E::BACKTRACKS)) {
+    if ((order < 4) || (order == 4 && gum == GUM::E::BACKTRACKS)) {
         setGenPath(GenPath::E::ROW_MAJOR, true);
     } else {
         setGenPath(GenPath::E::BLOCK_COLS, true);
@@ -108,7 +108,7 @@ void Solver<O>::print(void) const {
 
 
 template <Order O>
-void Solver<O>::printShadedBacktrackStat(const unsigned count) const {
+void Solver<O>::printShadedBacktrackStat(const backtrack_t count) const {
     const std::array<std::string, 4> GREYSCALE_BLOCK_CHARS = {
         // NOTE: Make sure that the initializer list size matches that
         // of the corresponding template argument. Compilers won't warn.
@@ -117,7 +117,7 @@ void Solver<O>::printShadedBacktrackStat(const unsigned count) const {
         u8"\u2591", u8"\u2592", u8"\u2593", u8"\u2588",
     };
 
-    if constexpr (CBT) {
+    if constexpr (cbt) {
         const unsigned int relativeIntensity
             = (double)(count - 1)
             * GREYSCALE_BLOCK_CHARS.size()
@@ -129,7 +129,7 @@ void Solver<O>::printShadedBacktrackStat(const unsigned count) const {
         os << intensityChar << intensityChar;
     } else {
         // Complain if found in call-path when backtrack-counting is off:
-        static_assert(CBT, "not avaliable when backtrack-counting is off.");
+        static_assert(cbt, "not avaliable when backtrack-counting is off.");
     }
 }
 
@@ -157,7 +157,7 @@ void Solver<O>::clear(void) {
             }
         }
     }
-    if constexpr (CBT) {
+    if constexpr (cbt) {
         backtrackCounts.fill(0);
         maxBacktrackCount = 0;
     }
@@ -254,7 +254,7 @@ opcount_t Solver<O>::generateSolution(SolverExitStatus& exitStatus, const bool c
         numOperations++;
         if (direction == TvsDirection::BACK) {
             // Pop and step backward:
-            if constexpr (CBT) {
+            if constexpr (cbt) {
                 if (++backtrackCounts[gridIndex] > maxBacktrackCount) {
                     maxBacktrackCount = backtrackCounts[gridIndex];
                 }
@@ -269,8 +269,8 @@ opcount_t Solver<O>::generateSolution(SolverExitStatus& exitStatus, const bool c
         }
         // Check whether the give-up-condition has been met:
         const opcount_t giveupCondVar
-            = (GUM == GUM::E::OPERATIONS) ? numOperations
-            : (GUM == GUM::E::BACKTRACKS) ? maxBacktrackCount
+            = (gum == GUM::E::OPERATIONS) ? numOperations
+            : (gum == GUM::E::BACKTRACKS) ? maxBacktrackCount
             : [](){ throw "unhandled GUM case"; return ~0; }();
         if (__builtin_expect(giveupCondVar >= GIVEUP_THRESHOLD, false)) {
             // TODO [bug] it is possible to give up while the next traversal
@@ -431,7 +431,7 @@ void Solver<O>::printMessageBar(std::string const& msg, const char fillChar) con
     const unsigned int gridBarLength = (isPretty)
         ? ((length + order + 1) * 2)
         : (length * 2);
-    constexpr unsigned int numGrids = 1 + int(CBT);
+    constexpr unsigned int numGrids = 1 + int(cbt);
     unsigned int allBarLength = (numGrids * gridBarLength);
     if (numGrids > 1) allBarLength += (numGrids - 1) * GRID_SEP.length();
     return printMessageBar(msg, allBarLength + 1, fillChar);

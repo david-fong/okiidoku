@@ -72,7 +72,7 @@ bool Repl<O>::runCommand(std::string const& cmdLine) {
         case Command::SOLVE: {
             if (solver.loadPuzzleFromString(cmdArgs)) {
                 // TODO: give better output if solver gives up. Maybe move to its own function.
-                SolverExitStatus exitStatus;
+                Solver::SolverExitStatus exitStatus;
                 solver.template generateSolution<true>(exitStatus);
                 solver.print();
                 break;
@@ -102,7 +102,7 @@ void Repl<O>::solvePuzzlesFromFile(std::ifstream& puzzlesFile) {
             // Just go try something else:
             continue;
         }
-        SolverExitStatus exitStatus;
+        Solver::SolverExitStatus exitStatus;
         solver.template generateSolution<true>(exitStatus);
 
         // TODO [feat] Write the solution to an output file.
@@ -116,7 +116,7 @@ void Repl<O>::runSingle(const bool contPrev) {
     solver.printMessageBar("START");
 
     // Generate a new solution:
-    SolverExitStatus exitStatus;
+    Solver::SolverExitStatus exitStatus;
     const clock_t    clockStart = std::clock();
     const opcount_t numSolveOps = solver.generateSolution(exitStatus, contPrev);
     const clock_t   clockFinish = std::clock();
@@ -124,12 +124,12 @@ void Repl<O>::runSingle(const bool contPrev) {
 
     os << "processor time: " STATW_D << processorTime << " seconds" << '\n';
     os << "num operations: " STATW_I << numSolveOps << '\n';
-    if constexpr (solver.CBT) {
+    if constexpr (Solver::cbt) {
         os << "max backtracks: " STATW_I << solver.getMaxBacktrackCount() << '\n';
     }
     if (!solver.isPretty) solver.printMessageBar("", '-');
     solver.print();
-    solver.printMessageBar((exitStatus == SolverExitStatus::SUCCESS) ? "DONE" : "ABORT");
+    solver.printMessageBar((exitStatus == Solver::SolverExitStatus::SUCCESS) ? "DONE" : "ABORT");
 }
 
 
@@ -180,7 +180,7 @@ void Repl<O>::runMultiple(
         std::chrono::steady_clock::now() - wallClockStart).count() / 1'000'000);
     solver.printMessageBar("", BAR_WIDTH, '-');
     os << "helper threads: " STATW_I << numExtraThreads << '\n';
-    os << "give-up method: " STATW_I << GUM << '\n';
+    os << "give-up method: " STATW_I << Solver::gum << '\n';
     os << "generator path: " STATW_I << solver.getGenPath() << '\n';
     os << "processor time: " STATW_D << procSeconds << Ansi::DIM.ON << " seconds (with I/O)" << Ansi::DIM.OFF << '\n';
     os << "real-life time: " STATW_D << wallSeconds << Ansi::DIM.ON << " seconds (with I/O)" << Ansi::DIM.OFF << '\n';
@@ -234,8 +234,10 @@ void Repl<O>::printTrialsWorkDistribution(
     for (unsigned i = 0; i < Trials::NUM_BINS; i++) {
         successfulTrialsAccum   += binHitCount[i];
         successfulSolveOpsAccum += binOpsTotal[i];
-        const double boundedGiveupOps
-            = (GUM == GUM::E::OPERATIONS) ? ((double)(i+1) * solver.GIVEUP_THRESHOLD / Trials::NUM_BINS)
+        using namespace Sudoku::Solver;
+        const double boundedGiveupOps = [&](){
+            using namespace Sudoku::Solver; return
+              (gum == GUM::E::OPERATIONS) ? ((double)(i+1) * solver.GIVEUP_THRESHOLD / Trials::NUM_BINS)
             // No nice way to do the below. If I want an exact thing, I would
             // need to change generateSolution to also track the numOperations
             // for some hypothetical, lower threshold, which would be for the
@@ -243,8 +245,9 @@ void Repl<O>::printTrialsWorkDistribution(
             // the `Solver` class. As a temporary, pessimistic band-aid, I will
             // use the values for the next bin. Note that this will give `nan`
             // (0.0/0.0) if there is no data for the next bin.
-            : (GUM == GUM::E::BACKTRACKS) ? ((double)binOpsTotal[i+1] / binHitCount[i+1])
+            : (gum == GUM::E::BACKTRACKS) ? ((double)binOpsTotal[i+1] / binHitCount[i+1])
             : [](){ throw "unhandled GUM case"; return 0.0; }();
+        }();
         const double boundedGiveupOpsTotal = (totalTrials - successfulTrialsAccum) * boundedGiveupOps;
         throughput[i] = (i == Trials::NUM_BINS)
             ? 0.0 // The last bin is for giveups. Throughput unknown.
@@ -263,7 +266,7 @@ void Repl<O>::printTrialsWorkDistribution(
             os << '\n' << TABLE_SEPARATOR;
         }
         const double binBottom  = (double)(i) * solver.GIVEUP_THRESHOLD / Trials::NUM_BINS;
-        if constexpr (solver.order < 4 || (solver.order == 4 && GUM == GUM::E::BACKTRACKS)) {
+        if constexpr (O < 4 || (O == 4 && Solver::gum == Solver::GUM::E::BACKTRACKS)) {
             os << "\n|" << std::setw(9) << (int)(binBottom);
         } else {
             os << "\n|" << std::setw(8) << (int)(binBottom / 1'000.0) << 'K';
