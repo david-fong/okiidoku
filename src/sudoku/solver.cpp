@@ -45,6 +45,9 @@ Solver<O>::Solver(std::ostream& os):
 }
 
 
+// TODO [qol] change this to just be the << operator, and make it
+// internally decide whether to pretty-print based on whether the
+// output stream is equal to std::cout
 template <Order O>
 void Solver<O>::print(void) const {
     #define PRINT_GRID0_TILE(PRINTER_STATEMENT) {\

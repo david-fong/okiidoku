@@ -29,11 +29,6 @@
  */
 namespace Sudoku {
 
-    // Container for a very large number.
-    // See Solver::GIVEUP_THRESHOLD for more discussion on the average
-    // number of operations taken to generate a solution by grid-order.
-    typedef unsigned long long opcount_t;
-
     [[gnu::const]] const std::string createHSepString(unsigned int order);
 
     struct MyNumpunct : std::numpunct<char> {
@@ -65,6 +60,7 @@ namespace Sudoku {
         using length_t  = typename Size<O>::length_t;
         using area_t    = typename Size<O>::area_t;
         using value_t   = typename Size<O>::value_t;
+        using backtrack_t = typename Size<O>::backtrack_t;
 
     // =======================
     // HELPER CLASS
@@ -158,7 +154,7 @@ namespace Sudoku {
         [[gnu::cold]] GenPath::E setGenPath(GenPath::E, bool force = false) noexcept;
         [[gnu::cold]] GenPath::E setGenPath(std::string const&) noexcept;
 
-        [[gnu::cold]] opcount_t getMaxBacktrackCount(void) const noexcept { return maxBacktrackCount; }
+        [[gnu::cold]] backtrack_t getMaxBacktrackCount(void) const noexcept { return maxBacktrackCount; }
 
     // ========================
     // PRIVATE MEMBERS
@@ -184,29 +180,18 @@ namespace Sudoku {
         // wherever it last left off.
         area_t prevGenTvsIndex;
 
-        std::array<unsigned, (CBT?area:1)> backtrackCounts;
-        opcount_t maxBacktrackCount;
+        std::array<backtrack_t, (CBT?area:1)> backtrackCounts; // TODO Try to cut down size?
+        backtrack_t maxBacktrackCount;
         void printShadedBacktrackStat(unsigned count) const;
 
         // Guards accesses to RMG. I currently only
         // use this when shuffling generator biases.
+        // TODO [bug] Make this and the RNG globals under Sudoku::
         static std::mutex RANDOM_MUTEX;
 
     public:
         static std::mt19937 VALUE_RNG;
-        /**
-         * Give up if the giveup condition variable meets this value.
-         * Measured stats for operations: https://www.desmos.com/calculator/8taqzelils
-         */
-        static constexpr opcount_t GIVEUP_THRESHOLD
-            = (GUM == GUM::E::OPERATIONS) ? ((const opcount_t[]){
-                1, 2, 26, 2'000, 100'000, 30'000'000, 120'000'000'000,
-                })[order]
-            : (GUM == GUM::E::BACKTRACKS) ? ((const opcount_t[]){
-                1, 1,  3,   150,  10'000,  2'200'000,  10'000'000'000,
-                })[order]
-            : [](){ throw "unhandled GUM case"; return ~0; }();
-            // TODO [tune] update the above numbers. the current values for order-6 are just predictions.
+        static constexpr opcount_t GIVEUP_THRESHOLD = Sudoku::Size<O>::template GIVEUP_THRESHOLD<GUM>;
 
     public:
         std::ostream& os;

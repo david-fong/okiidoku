@@ -7,11 +7,7 @@ Ex. `000000010400000000020000000000050407008000300001090000300400200050100000000
 
 ## Higher Priority
 
-- Use multi-threading when single trials start taking significant time (above order 5?).
 - Write solver solutions to a new file (user provides empty string to indicate choose suitable name based on input file name)
-- Experiment with a different way of giving up: according to when some tile's backtrack counter exceeds some value.
-  - Collect and print stats for trial runs of the maximum backtracking operations on any tile in each run before it succeeded or gave up. Print a comparison between those that give up and those that don't.
-    - Reason: Look for a pattern / boundary point / transition range.
 - Update readme to talk about the four problems in Sudoku:
   - solution (verification, reconstruction, compression, generation)
   - (reconstruction is better known as puzzle solving, and compression as puzzle generation).
@@ -23,14 +19,6 @@ Ex. `000000010400000000020000000000050407008000300001090000300400200050100000000
   - This includes the preamble of parameters that were parsed.
   - Investigate if it is simplest to do this with a macro :P.
   - Or just do it explicitly in important places like `Solver::print`, and make them take `isPretty` as an argument.
-- Make gen-path a compile-time constant.
-  - Rationale: I allowed toggling for educational purposes, but I think doing so reduces chances for compiler optimization. This setting may only be of interest to keen viewers. For anyone else, what performs better is all that really matters.
-
-## OK cool
-
-An old TODO: Perform benchmarks comparing performance (time and number of operations) with and without seeds.
-
-For 16x16, running 1024 trials, using no seeds was much faster in terms of time, had less than half the number of aborted trials, and took about six times fewer operations. I am shocked. This is amazing (I used to think seeding resulted in slight performance improvements).
 
 ## "Failed" Experiments
 

@@ -24,7 +24,7 @@ namespace Sudoku {
         { "help",       Command::HELP           },
         { "quit",       Command::QUIT           },
         { "",           Command::RUN_SINGLE     },
-        { "cont",       Command::CONTINUE_PREV  }, // TODO Change this to "c"? (remember to change help string too)
+        { "cont",       Command::CONTINUE_PREV  }, // TODO [qol] Change this to "c"? (remember to change help string too)
         { "trials",     Command::RUN_TRIALS     },
         { "strials",    Command::RUN_SUCCESSES  },
         { "genpath",    Command::SET_GENPATH    },

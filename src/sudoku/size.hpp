@@ -1,6 +1,7 @@
 #ifndef HPP_SUDOKU_SIZE
 #define HPP_SUDOKU_SIZE
 
+#include "./enum.hpp"
 
 namespace Sudoku {
 
@@ -24,6 +25,11 @@ namespace Sudoku {
  */
 typedef uint8_t Order;
 constexpr Order MAX_REASONABLE_ORDER = 20;
+
+// Container for a very large number.
+// See Solver::GIVEUP_THRESHOLD for more discussion on the average
+// number of operations taken to generate a solution by grid-order.
+typedef unsigned long long opcount_t;
 
 
 /**
@@ -70,6 +76,31 @@ public:
 
     // uint range [0, order^2].
     typedef length_t value_t;
+
+    // Note that this should always be smaller than opcount_t.
+    typedef
+        // Make sure this can fit `GIVEUP_THRESHOLD<BACKTRACKS>`.
+        //typename std::conditional_t<(O < 4), std::uint_fast8_t,
+        typename std::conditional_t<(O < 5), std::uint_fast16_t,
+        typename std::conditional_t<(O < 6), std::uint_fast32_t,
+        unsigned long
+    >> backtrack_t;
+
+    /**
+     * Give up if the giveup condition variable meets this value.
+     * Measured stats for operations: https://www.desmos.com/calculator/8taqzelils
+     */
+    template <GUM::E GUM>
+    static constexpr opcount_t GIVEUP_THRESHOLD
+    = (GUM == GUM::E::OPERATIONS) ? ((const opcount_t[]){
+        1, 2, 26, 2'000, 100'000, 30'000'000, 120'000'000'000,
+        })[O]
+    : (GUM == GUM::E::BACKTRACKS) ? ((const opcount_t[]){
+        // Note: Make sure entries of `backtrackCounts` can fit these.
+        0, 1,  3,   150,  10'000,  2'200'000,  10'000'000'000,
+        })[O]
+    : [](){ throw "unhandled GUM case"; return ~0; }();
+    // TODO [tune] The current values for order-6 are just predictions.
 };
 
 } // End of Sudoku namespace

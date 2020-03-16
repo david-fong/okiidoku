@@ -185,9 +185,9 @@ void Repl<O>::runMultiple(
     const double wallSeconds = ((double)std::chrono::duration_cast<std::chrono::microseconds>(
         std::chrono::steady_clock::now() - wallClockStart).count() / 1'000'000);
     solver.printMessageBar("", BAR_WIDTH, '-');
+    os << "helper threads: " STATW_I << numExtraThreads << '\n';
     os << "give-up method: " STATW_I << GUM << '\n';
     os << "generator path: " STATW_I << solver.getGenPath() << '\n';
-    os << "helper threads: " STATW_I << numExtraThreads << '\n';
     os << "processor time: " STATW_D << procSeconds << Ansi::DIM.ON << " seconds (with I/O)" << Ansi::DIM.OFF << '\n';
     os << "real-life time: " STATW_D << wallSeconds << Ansi::DIM.ON << " seconds (with I/O)" << Ansi::DIM.OFF << '\n';
     if (wallSeconds > 10.0) {
