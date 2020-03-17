@@ -191,6 +191,7 @@ void Repl<O>::runMultiple(
     << "\nhelper threads: " STATW_I << numExtraThreads
     << "\ngive-up method: " STATW_I << Solver::gum
     << "\ngenerator path: " STATW_I << solver.getGenPath()
+    // TODO [stats] For total successes and total trieals.
     << "\nprocessor time: " STATW_D << procSeconds << secondsUnits
     << "\nreal-life time: " STATW_D << wallSeconds << secondsUnits;
     ;
@@ -236,18 +237,20 @@ void Repl<O>::printTrialsWorkDistribution(
     std::array<double,   Trials::NUM_BINS+1> const& binOpsTotal
 ) {
     const std::string THROUGHPUT_BAR_STRING = "--------------------------------";
-    const std::string TABLE_SEPARATOR = "\n+-----------+----------+----------------+-----------+";
-    const std::string TABLE_HEADER    = "\n|  bin bot  |   hits   |   operations   |  speedup  |";
+    const std::string TABLE_SEPARATOR = "\n+-----------+----------+----------------+-----------+-----------+";
+    const std::string TABLE_HEADER    = "\n|  bin bot  |   hits   |   operations   |  giveup%  |  speedup  |";
 
     // Calculate all throughputs before printing:
     // (done in its own loop so we can later print comparisons against the optimal bin)
     std::array<double, Trials::NUM_BINS+1> throughput;
+    std::array<double, Trials::NUM_BINS+1> successfulTrialsAccumArr;
     unsigned  bestThroughputBin     = 0u; {
     opcount_t successfulTrialsAccum = 0u;
     double  successfulSolveOpsAccum = 0.0;
     for (unsigned i = 0; i < Trials::NUM_BINS; i++) {
         successfulTrialsAccum   += binHitCount[i];
         successfulSolveOpsAccum += binOpsTotal[i];
+        successfulTrialsAccumArr[i] = successfulTrialsAccum;
         const double boundedGiveupOps = [&](){
             using namespace Sudoku::Solver; return
               (gum == GUM::E::OPERATIONS) ? ((double)(i+1) * solver.GIVEUP_THRESHOLD / Trials::NUM_BINS)
@@ -262,13 +265,13 @@ void Repl<O>::printTrialsWorkDistribution(
             : [](){ throw "unhandled GUM case"; return 0.0; }();
         }();
         const double boundedGiveupOpsTotal = (totalTrials - successfulTrialsAccum) * boundedGiveupOps;
-        throughput[i] = (i == Trials::NUM_BINS)
-            ? 0.0 // The last bin is for giveups. Throughput unknown.
-            : successfulTrialsAccum / (successfulSolveOpsAccum + boundedGiveupOpsTotal);
+        throughput[i] = successfulTrialsAccum / (successfulSolveOpsAccum + boundedGiveupOpsTotal);
         if (throughput[i] > throughput[bestThroughputBin]) {
             bestThroughputBin = i;
         }
     }}
+    throughput[Trials::NUM_BINS] = 0.0; // unknown.
+    successfulTrialsAccumArr[Trials::NUM_BINS] = 0.0;
 
     os << TABLE_SEPARATOR;
     os << TABLE_HEADER;
@@ -297,6 +300,10 @@ void Repl<O>::printTrialsWorkDistribution(
         os << std::setw(13) << unsigned(binOpsTotal[i] / ((O<5)?1:1000));
         os << ((O<5)?' ':'K');
         if (binOpsTotal[i] == 0) os << DIM_OFF;
+
+        // Giveup Percentage column:
+        os << "  |";
+        os << std::setw(9) << (100.0 * (totalTrials - successfulTrialsAccumArr[i]) / totalTrials);
 
         // Speedup Column
         os << "  |" << std::setw(9);
