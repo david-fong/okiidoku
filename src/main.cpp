@@ -27,7 +27,7 @@ int main(const int argc, char const *const argv[]) {
     unsigned int    userOrder;      // 1
     unsigned int    srandKey;       // 2
     std::string     outFileName;    // 3
-    std::ostream*   outStream;      // 3
+    std::ostream*   os;             // 3
 
     userOrder = (argc > 1) ? std::stoi(argv[1]) : DEFAULT_ORDER;
     if (argc > 2 && !std::string(argv[2]).empty()) {
@@ -38,16 +38,17 @@ int main(const int argc, char const *const argv[]) {
     if (argc > 3) {
         // TODO [feat] Handle if file already exists: prompt user for whether to overwrite.
         outFileName = argv[3];
-        outStream = new std::ofstream(outFileName);
+        os = new std::ofstream(outFileName);
     } else {
         outFileName = "std::cout";
-        outStream = &std::cout;
+        os = &std::cout;
     }
 
-    std::cout << std::endl << "PARSED ARGUMENTS:" << std::endl;
-    std::cout << "- ARG 1 [[ grid order  ]] : " << (uint16_t)userOrder << std::endl;
-    std::cout << "- ARG 2 [[ srand key   ]] : " << srandKey    << std::endl;
-    std::cout << "- ARG 3 [[ output file ]] : " << outFileName << std::endl;
+    std::cout << "\nPARSED ARGUMENTS:"
+    << "\n- ARG 1 [[ grid order  ]] : " << userOrder
+    << "\n- ARG 2 [[ srand key   ]] : " << srandKey
+    << "\n- ARG 3 [[ output file ]] : " << outFileName
+    << std::endl;
 
     // Scramble the random number generator (std::rand is no longer used):
     // std::srand(srandKey);
@@ -58,15 +59,16 @@ int main(const int argc, char const *const argv[]) {
     // TODO [test] See if allocating on heap can cut down on executable
     // size without visibly impacting performance.
     switch (static_cast<Sudoku::Order>(userOrder)) {
-        case 3: { Repl<3> s(*outStream); break; }
-        case 4: { Repl<4> s(*outStream); break; }
-        case 5: { Repl<5> s(*outStream); break; }
+        case 3: { Repl<3> s(*os); break; }
+        case 4: { Repl<4> s(*os); break; }
+        case 5: { Repl<5> s(*os); break; }
+        case 6: { Repl<6> s(*os); break; }
         default:
-            std::cout << "\nFAILED:\norder must be one of: [ ";
-            for (int i = 3; i <= 5; i++) {
+            std::cout << Ansi::RED.ON << "\nILLEGAL ARGUMENT:\n  order must be one of: { ";
+            for (int i = 3; i <= 6; i++) {
                 std::cout << i << ", ";
             }
-            std::cout << "]" << std::endl;
+            std::cout << "}" << Ansi::RED.OFF << std::endl;
             break;
     }
 

@@ -108,7 +108,7 @@ public:
         })[O]
     : (gum == GUM::E::BACKTRACKS) ? ((const opcount_t[]){
         // Note: Make sure entries of `backtrackCounts` can fit these.
-        0, 1,  3,   150,  10'000,  2'200'000,  10'000'000'000,
+        0, 1,  3,   150,  10'000,  2'200'000, 100'000'000,//10'000'000'000,
         })[O]
     : [](){ throw "unhandled GUM case"; return ~0; }();
     // TODO [tune] The current values for order-6 are just predictions.

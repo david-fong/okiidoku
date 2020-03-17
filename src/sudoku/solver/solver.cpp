@@ -24,14 +24,18 @@ std::ostream& operator<<(std::ostream& os, Sudoku::Solver::Solver<O> const& s) {
         PRINT_GRID0_TILE(PRINTER_STATEMENT)}
 
     const bool isPretty = &os == &std::cout;
+    const auto printBlkRowSepString = [&](){
+        if (!isPretty) return;
+        os << '\n' << Ansi::DIM.ON;
+        os << s.blkRowSepString;
+        if constexpr (cbt) os << GRID_SEP << s.blkRowSepString;
+        os << Ansi::DIM.OFF;
+    };
     for (length_t row = 0; row < s.length; row++) {
-        if (isPretty && (row % s.order == 0)) {
-            // Print block-row separator string:
-            os << Ansi::DIM.ON;
-            os << s.blkRowSepString;
-            if constexpr (cbt) os << GRID_SEP << s.blkRowSepString;
-            os << "\n" << Ansi::DIM.OFF;
+        if (row % s.order == 0) {
+            printBlkRowSepString();
         }
+        os << '\n';
         // Tile content:
         #define index (row * s.length + col)
         PRINT_GRID0_TILE(os << ' ' << s.grid[index])
@@ -42,14 +46,8 @@ std::ostream& operator<<(std::ostream& os, Sudoku::Solver::Solver<O> const& s) {
         // PRINT_GRID_TILE(os << ' ' << rowBiases[row][col])
         #undef index
         if (isPretty) os << Ansi::DIM.ON << " |" << Ansi::DIM.OFF;
-        os << '\n';
     }
-    if (isPretty) {
-        os << Ansi::DIM.ON;
-        os << s.blkRowSepString;
-        if constexpr (cbt) os << GRID_SEP << s.blkRowSepString;
-        os << "\n" << Ansi::DIM.OFF;
-    }
+    printBlkRowSepString();
     #undef PRINT_GRID_TILE
     #undef PRINT_GRID0_TILE
     return os;
@@ -164,8 +162,8 @@ void Solver<O>::clear(void) {
         }
     }
     if constexpr (cbt) {
-        backtrackCounts.fill(0);
-        maxBacktrackCount = 0;
+        backtrackCounts.fill(0u);
+        maxBacktrackCount = 0u;
     }
     // Scramble each row's value-guessing-order:
     RANDOM_MUTEX.lock();
@@ -217,9 +215,9 @@ void Solver<O>::registerGivenValue(const area_t index, const value_t value) {
 template <Order O>
 template <bool USE_PUZZLE>
 opcount_t Solver<O>::generateSolution(ExitStatus& exitStatus, const bool contPrev) {
-    opcount_t numOperations = 0;
+    opcount_t numOperations = 0u;
     TvsDirection direction = TvsDirection::FORWARD;
-    area_t tvsIndex = 0;
+    area_t tvsIndex = 0u;
 
     if (__builtin_expect(contPrev, false)) {
         if (prevGenTvsIndex == area) {
@@ -229,7 +227,7 @@ opcount_t Solver<O>::generateSolution(ExitStatus& exitStatus, const bool contPre
         } else if (prevGenTvsIndex == 0) {
             // Previously realized nothing left to find.
             exitStatus = ExitStatus::IMPOSSIBLE;
-            return 0;
+            return 0u;
         } else {
             // Previously gave up.
             direction = TvsDirection::FORWARD;
@@ -424,7 +422,7 @@ GenPath::E Solver<O>::initializeGenPath(void) noexcept {
 template <Order O>
 void Solver<O>::printMessageBar(
     std::string const& msg,
-    unsigned int barLength,
+    unsigned barLength,
     const char fillChar
 ) const {
     if (barLength < msg.length() + 8) {
@@ -436,17 +434,17 @@ void Solver<O>::printMessageBar(
         bar.at(3) = ' ';
         bar.at(4 + msg.length()) = ' ';
     }
-    os << bar << '\n';
+    os << '\n' <<bar;
 }
 
 
 template <Order O>
 void Solver<O>::printMessageBar(std::string const& msg, const char fillChar) const {
-    const unsigned int gridBarLength = (isPretty)
+    const unsigned gridBarLength = (isPretty)
         ? ((length + order + 1) * 2)
         : (length * 2);
-    constexpr unsigned int numGrids = 1 + int(cbt);
-    unsigned int allBarLength = (numGrids * gridBarLength);
+    constexpr unsigned numGrids = 1 + unsigned(cbt);
+    unsigned allBarLength = (numGrids * gridBarLength);
     if (numGrids > 1) allBarLength += (numGrids - 1) * GRID_SEP.length();
     return printMessageBar(msg, allBarLength + 1, fillChar);
 }
@@ -457,7 +455,7 @@ void Solver<O>::printMessageBar(std::string const& msg, const char fillChar) con
 
 template <Order O>
 const std::string Solver<O>::blkRowSepString = [](const unsigned order) {
-    std::string vbar = ' ' + std::string((((order * (order + 1)) + 1) * 2 - 1), '-');
+    std::string vbar = " " + std::string((((order * (order + 1)) + 1) * 2 - 1), '-');
     for (unsigned i = 0; i <= order; i++) {
         // Insert crosses at vbar intersections.
         vbar[(2 * (order + 1) * i) + 1] = '+';

@@ -66,7 +66,7 @@ namespace Sudoku::Solver {
             friend class Solver;
         public:
             void clear(void) noexcept {
-                biasIndex = 0;
+                biasIndex = 0u;
                 value = length;
             }
             [[gnu::pure]] bool isClear(void) const noexcept {

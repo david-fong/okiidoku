@@ -130,14 +130,15 @@ void Repl<O>::runSingle(const bool contPrev) {
     const clock_t   clockFinish = std::clock();
     const double  processorTime = ((double)(clockFinish - clockStart)) / CLOCKS_PER_SEC;
 
-    os << "processor time: " STATW_D << processorTime << " seconds" << '\n';
-    os << "num operations: " STATW_I << numSolveOps << '\n';
+    os << "\nprocessor time: " STATW_D << processorTime << " seconds";
+    os << "\nnum operations: " STATW_I << numSolveOps;
     if constexpr (Solver::cbt) {
-        os << "max backtracks: " STATW_I << solver.getMaxBacktrackCount() << '\n';
+        os << "\nmax backtracks: " STATW_I << solver.getMaxBacktrackCount();
     }
     if (!solver.isPretty) solver.printMessageBar("", '-');
     solver.print();
     solver.printMessageBar((exitStatus == Solver::ExitStatus::SUCCESS) ? "DONE" : "ABORT");
+    os << std::endl;
 }
 
 
@@ -180,18 +181,22 @@ void Repl<O>::runMultiple(
             extraThreads[i].join();
         }
     }
-    if (trialsStopThreshold % COLS != 0) { os << '\n'; } // Last newline.
 
     // Print stats:
     const double procSeconds = ((double)(std::clock() - procClockStart) / CLOCKS_PER_SEC);
     const double wallSeconds = ((double)std::chrono::duration_cast<std::chrono::microseconds>(
         std::chrono::steady_clock::now() - wallClockStart).count() / 1'000'000);
+    const auto printSecondsUnits = [this](){
+        if (solver.isPretty) os << Ansi::DIM.ON;
+        os << " seconds (with I/O)";
+        if (solver.isPretty) os << Ansi::DIM.OFF;
+    };
     solver.printMessageBar("", BAR_WIDTH, '-');
-    os << "helper threads: " STATW_I << numExtraThreads << '\n';
-    os << "give-up method: " STATW_I << Solver::gum << '\n';
-    os << "generator path: " STATW_I << solver.getGenPath() << '\n';
-    os << "processor time: " STATW_D << procSeconds << Ansi::DIM.ON << " seconds (with I/O)" << Ansi::DIM.OFF << '\n';
-    os << "real-life time: " STATW_D << wallSeconds << Ansi::DIM.ON << " seconds (with I/O)" << Ansi::DIM.OFF << '\n';
+    os << "\nhelper threads: " STATW_I << numExtraThreads;
+    os << "\ngive-up method: " STATW_I << Solver::gum;
+    os << "\ngenerator path: " STATW_I << solver.getGenPath();
+    os << "\nprocessor time: " STATW_D << procSeconds; printSecondsUnits();
+    os << "\nreal-life time: " STATW_D << wallSeconds; printSecondsUnits();
     if (wallSeconds > 10.0) {
         // Emit a beep sound if the trials took longer than ten processor seconds:
         std::cout << '\a' << std::flush;
@@ -200,7 +205,7 @@ void Repl<O>::runMultiple(
     // Print bins (work distribution):
     printTrialsWorkDistribution(totalTrials, binHitCount, binOpsTotal);
     solver.printMessageBar("DONE x" + std::to_string(trialsStopThreshold), BAR_WIDTH);
-    os << std::flush;
+    os << std::endl;
 }
 
 
@@ -236,12 +241,14 @@ void Repl<O>::printTrialsWorkDistribution(
     std::array<double,   Trials::NUM_BINS+1> const& binOpsTotal
 ) {
     const std::string THROUGHPUT_BAR_STRING = "--------------------------------";
-    const std::string TABLE_SEPARATOR = "+-----------+----------+-----------+";
+    const std::string TABLE_SEPARATOR = "\n+-----------+----------+-----------+";
+    const std::string DIM_ON  = (solver.isPretty ? Ansi::DIM.ON  : "");
+    const std::string DIM_OFF = (solver.isPretty ? Ansi::DIM.OFF : "");
 
     // Calculate all throughputs before printing:
     // (done in its own loop so we can later print comparisons against the optimal bin)
     std::array<double, Trials::NUM_BINS+1> throughput;
-    unsigned bestThroughputBin = 0; {
+    unsigned bestThroughputBin = 0u; {
     opcount_t successfulTrialsAccum = 0;
     double  successfulSolveOpsAccum = 0.0;
     for (unsigned i = 0; i < Trials::NUM_BINS; i++) {
@@ -270,12 +277,12 @@ void Repl<O>::printTrialsWorkDistribution(
     }}
 
     os << TABLE_SEPARATOR;
-    os << "\n|  bin bot  |   hits   |  speedup  |\n";
+    os << "\n|  bin bot  |   hits   |  speedup  |";
     os << TABLE_SEPARATOR;
     for (unsigned i = 0; i < binHitCount.size(); i++) {
         if (i == Trials::NUM_BINS) {
             // Print a special separator for the giveups row:
-            os << '\n' << TABLE_SEPARATOR;
+            os << TABLE_SEPARATOR;
         }
         // Bin Bottom column:
         const double binBottom  = (double)(i) * solver.GIVEUP_THRESHOLD / Trials::NUM_BINS;
@@ -286,9 +293,9 @@ void Repl<O>::printTrialsWorkDistribution(
         }
         // Bin Hit Count column:
         os << "  |";
-        if (binHitCount[i] == 0) os << Ansi::DIM.ON;
+        if (binHitCount[i] == 0) os << DIM_ON;
         os << std::setw(8) << binHitCount[i];
-        if (binHitCount[i] == 0) os << Ansi::DIM.OFF;
+        if (binHitCount[i] == 0) os << DIM_OFF;
 
         // Speedup Column
         os << "  |" << std::setw(9);
@@ -306,20 +313,20 @@ void Repl<O>::printTrialsWorkDistribution(
             // (the exponent value was chosen by taste / visual feel)
             const unsigned barLength = THROUGHPUT_BAR_STRING.length()
                 * std::pow(throughput[i] / throughput[bestThroughputBin], 5);
-            if (solver.isPretty && i != bestThroughputBin) os << Ansi::DIM.ON;
+            if (i != bestThroughputBin) os << DIM_ON;
             os << ' ' << THROUGHPUT_BAR_STRING.substr(0, barLength);
-            if (solver.isPretty && i != bestThroughputBin) os << Ansi::DIM.OFF;
+            if (i != bestThroughputBin) os << DIM_OFF;
         }
     }
-    os << " <- current giveup threshold\n";
+    os << " <- current giveup threshold";
     os << TABLE_SEPARATOR;
-    os << Ansi::DIM.ON <<
+    os << DIM_ON <<
         "\n* Throughput here is in \"average successes per operation\". Tightening the"
         "\n  threshold induces more frequent giveups, but also reduces the operational"
         "\n  cost that giveups incur. Operations are proportional to time, and machine"
         "\n  independent. The visualization bars are purposely stretched to draw focus"
         "\n  to the optimal bin. Exercise prudence against stats from small datasets!"
-        "\n" << Ansi::DIM.OFF;
+        << DIM_OFF;
 }
 
 #undef STATW_I
