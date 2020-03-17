@@ -60,7 +60,8 @@ namespace Sudoku::Solver {
          * GIVENS:
          * If solving a puzzle and this tile is for given information,
          * `biasIndex` should not be used, and `value` should not be
-         * modified.
+         * modified. `biasIndex` will be set to `length` to resolve an
+         * edge case when deciding how to continue generation.
          */
         class Tile {
             friend class Solver;

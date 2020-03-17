@@ -60,6 +60,8 @@ void ThreadFunc<O>::operator()(solver_t* solver, const unsigned threadNum) {
         totalTrials++;
 
         // Print the number of operations taken:
+        // TODO [stats] actually, it's more important to output the solution-grid
+        // than it is to output the number operations for each trial.
         if (exitStatus == Solver::ExitStatus::SUCCESS) {
             totalSuccesses++;
             solver->os << std::setw(solver->STATS_WIDTH) << numOperations;

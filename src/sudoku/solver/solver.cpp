@@ -224,7 +224,9 @@ opcount_t Solver<O>::generateSolution(ExitStatus& exitStatus, const bool contPre
             // Previously succeeded.
             tvsIndex = area - 1;
             direction = TvsDirection::BACK;
-        } else if (prevGenTvsIndex == 0) {
+        } else if (prevGenTvsIndex == 0
+            && (grid[traversalOrder[0]].biasIndex == length)) {
+            // TODO [test] This.
             // Previously realized nothing left to find.
             exitStatus = ExitStatus::IMPOSSIBLE;
             return 0u;
@@ -277,9 +279,6 @@ opcount_t Solver<O>::generateSolution(ExitStatus& exitStatus, const bool contPre
             : (gum == GUM::E::BACKTRACKS) ? maxBacktrackCount
             : [](){ throw "unhandled GUM case"; return ~0; }();
         if (__builtin_expect(giveupCondVar >= GIVEUP_THRESHOLD, false)) {
-            // TODO [bug] it is possible to give up while the next traversal
-            // index to try is zero (and there is still more to try at zero).
-            // Find an elegant way to handle this edge-case.
             break;
         }
     }

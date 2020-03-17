@@ -192,7 +192,7 @@ void Repl<O>::runMultiple(
     << "\ngive-up method: " STATW_I << Solver::gum
     << "\ngenerator path: " STATW_I << solver.getGenPath()
     << "\nprocessor time: " STATW_D << procSeconds << secondsUnits
-    << "\nreal-life time: " STATW_D << wallSeconds << secondsUnits
+    << "\nreal-life time: " STATW_D << wallSeconds << secondsUnits;
     ;
     if (wallSeconds > 10.0) {
         // Emit a beep sound if the trials took longer than ten processor seconds:
@@ -229,7 +229,6 @@ void Repl<O>::runMultiple(
 }
 
 
-// TODO [qol] Add a column for operations
 template <Order O>
 void Repl<O>::printTrialsWorkDistribution(
     const trials_t totalTrials, // sum of entries of binHitCount
@@ -237,8 +236,8 @@ void Repl<O>::printTrialsWorkDistribution(
     std::array<double,   Trials::NUM_BINS+1> const& binOpsTotal
 ) {
     const std::string THROUGHPUT_BAR_STRING = "--------------------------------";
-    const std::string TABLE_SEPARATOR = "\n+-----------+----------+-----------+";
-    const std::string TABLE_HEADER    = "\n|  bin bot  |   hits   |  speedup  |";
+    const std::string TABLE_SEPARATOR = "\n+-----------+----------+----------------+-----------+";
+    const std::string TABLE_HEADER    = "\n|  bin bot  |   hits   |   operations   |  speedup  |";
 
     // Calculate all throughputs before printing:
     // (done in its own loop so we can later print comparisons against the optimal bin)
@@ -291,6 +290,13 @@ void Repl<O>::printTrialsWorkDistribution(
         if (binHitCount[i] == 0) os << DIM_ON;
         os << std::setw(8) << binHitCount[i];
         if (binHitCount[i] == 0) os << DIM_OFF;
+
+        // Operation Count column:
+        os << "  |";
+        if (binHitCount[i] == 0) os << DIM_ON;
+        os << std::setw(13) << unsigned(binOpsTotal[i] / ((O<5)?1:1000));
+        os << ((O<5)?' ':'K');
+        if (binOpsTotal[i] == 0) os << DIM_OFF;
 
         // Speedup Column
         os << "  |" << std::setw(9);
