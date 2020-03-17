@@ -65,7 +65,7 @@ namespace Sudoku {
     class Repl {
     public:
         using opcount_t = Solver::opcount_t;
-        using solver_t = class Sudoku::Solver::Solver<O>;
+        using  solver_t = class Sudoku::Solver::Solver<O>;
 
         Repl(void) = delete;
         explicit Repl(std::ostream&);
@@ -78,7 +78,10 @@ namespace Sudoku {
     private:
         solver_t solver;
         std::ostream& os; // alias to this->solver.os;
+
         static constexpr unsigned MAX_EXTRA_THREADS = ((const unsigned[]){0,0,0,0,1,2,3})[O];
+        const std::string DIM_ON  = (solver.isPretty ? Ansi::DIM.ON  : "");
+        const std::string DIM_OFF = (solver.isPretty ? Ansi::DIM.OFF : "");
 
         // Return false if command is to exit the program:
         void solvePuzzlesFromFile(std::ifstream&);

@@ -70,9 +70,7 @@ bool Repl<O>::runCommand(std::string const& cmdLine) {
         case Command::CONTINUE_PREV: runSingle(true); break;
         case Command::RUN_TRIALS:    runMultiple(cmdArgs, Trials::StopBy::TRIALS);    break;
         case Command::RUN_SUCCESSES: runMultiple(cmdArgs, Trials::StopBy::SUCCESSES); break;
-        case Command::SET_GENPATH:
-            solver.setGenPath(cmdArgs);
-            break;
+        case Command::SET_GENPATH:   solver.setGenPath(cmdArgs); break;
         case Command::SOLVE: {
             if (solver.loadPuzzleFromString(cmdArgs)) {
                 // TODO: give better output if solver gives up. Maybe move to its own function.
@@ -184,24 +182,22 @@ void Repl<O>::runMultiple(
 
     // Print stats:
     const double procSeconds = ((double)(std::clock() - procClockStart) / CLOCKS_PER_SEC);
-    const double wallSeconds = ((double)std::chrono::duration_cast<std::chrono::microseconds>(
-        std::chrono::steady_clock::now() - wallClockStart).count() / 1'000'000);
-    const auto printSecondsUnits = [this](){
-        if (solver.isPretty) os << Ansi::DIM.ON;
-        os << " seconds (with I/O)";
-        if (solver.isPretty) os << Ansi::DIM.OFF;
-    };
-    solver.printMessageBar("", BAR_WIDTH, '-');
-    os << "\nhelper threads: " STATW_I << numExtraThreads;
-    os << "\ngive-up method: " STATW_I << Solver::gum;
-    os << "\ngenerator path: " STATW_I << solver.getGenPath();
-    os << "\nprocessor time: " STATW_D << procSeconds; printSecondsUnits();
-    os << "\nreal-life time: " STATW_D << wallSeconds; printSecondsUnits();
+    const double wallSeconds = ((double)[wallClockStart](){
+        using namespace std::chrono;
+        return duration_cast<microseconds>(steady_clock::now() - wallClockStart);
+    }().count() / 1'000'000);
+    const std::string secondsUnits = DIM_ON + " seconds (with I/O)" + DIM_OFF;
+    solver.printMessageBar("", BAR_WIDTH, '-'); os
+    << "\nhelper threads: " STATW_I << numExtraThreads
+    << "\ngive-up method: " STATW_I << Solver::gum
+    << "\ngenerator path: " STATW_I << solver.getGenPath()
+    << "\nprocessor time: " STATW_D << procSeconds << secondsUnits
+    << "\nreal-life time: " STATW_D << wallSeconds << secondsUnits
+    ;
     if (wallSeconds > 10.0) {
         // Emit a beep sound if the trials took longer than ten processor seconds:
         std::cout << '\a' << std::flush;
     }
-
     // Print bins (work distribution):
     printTrialsWorkDistribution(totalTrials, binHitCount, binOpsTotal);
     solver.printMessageBar("DONE x" + std::to_string(trialsStopThreshold), BAR_WIDTH);
@@ -242,14 +238,13 @@ void Repl<O>::printTrialsWorkDistribution(
 ) {
     const std::string THROUGHPUT_BAR_STRING = "--------------------------------";
     const std::string TABLE_SEPARATOR = "\n+-----------+----------+-----------+";
-    const std::string DIM_ON  = (solver.isPretty ? Ansi::DIM.ON  : "");
-    const std::string DIM_OFF = (solver.isPretty ? Ansi::DIM.OFF : "");
+    const std::string TABLE_HEADER    = "\n|  bin bot  |   hits   |  speedup  |";
 
     // Calculate all throughputs before printing:
     // (done in its own loop so we can later print comparisons against the optimal bin)
     std::array<double, Trials::NUM_BINS+1> throughput;
-    unsigned bestThroughputBin = 0u; {
-    opcount_t successfulTrialsAccum = 0;
+    unsigned  bestThroughputBin     = 0u; {
+    opcount_t successfulTrialsAccum = 0u;
     double  successfulSolveOpsAccum = 0.0;
     for (unsigned i = 0; i < Trials::NUM_BINS; i++) {
         successfulTrialsAccum   += binHitCount[i];
@@ -277,7 +272,7 @@ void Repl<O>::printTrialsWorkDistribution(
     }}
 
     os << TABLE_SEPARATOR;
-    os << "\n|  bin bot  |   hits   |  speedup  |";
+    os << TABLE_HEADER;
     os << TABLE_SEPARATOR;
     for (unsigned i = 0; i < binHitCount.size(); i++) {
         if (i == Trials::NUM_BINS) {
@@ -320,13 +315,7 @@ void Repl<O>::printTrialsWorkDistribution(
     }
     os << " <- current giveup threshold";
     os << TABLE_SEPARATOR;
-    os << DIM_ON <<
-        "\n* Throughput here is in \"average successes per operation\". Tightening the"
-        "\n  threshold induces more frequent giveups, but also reduces the operational"
-        "\n  cost that giveups incur. Operations are proportional to time, and machine"
-        "\n  independent. The visualization bars are purposely stretched to draw focus"
-        "\n  to the optimal bin. Exercise prudence against stats from small datasets!"
-        << DIM_OFF;
+    os << DIM_ON << Trials::THROUGHPUT_COMMENTARY << DIM_OFF;
 }
 
 #undef STATW_I

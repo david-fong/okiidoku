@@ -7,6 +7,14 @@
 
 namespace Sudoku::Trials {
 
+const std::string THROUGHPUT_COMMENTARY =
+    "\n* Throughput here is in \"average successes per operation\". Tightening the"
+    "\n  threshold induces more frequent giveups, but also reduces the operational"
+    "\n  cost that giveups incur. Operations are proportional to time, and machine"
+    "\n  independent. The visualization bars are purposely stretched to draw focus"
+    "\n  to the optimal bin. Exercise prudence against stats from small datasets!";
+
+
 template <Order O>
 void ThreadFunc<O>::operator()(solver_t* solver, const unsigned threadNum) {
     mutex.lock();
@@ -19,10 +27,9 @@ void ThreadFunc<O>::operator()(solver_t* solver, const unsigned threadNum) {
         // Attempt to generate a single solution:
         mutex.unlock();
             // CRITICAL SECTION:
-            // This function call is the only section unguarded by the mutex.
-            // That's fine. This covers the overwhelming majority of the work,
-            // and everything else requires mutual exclusion to access shared
-            // state and print outputs.
+            // This is the only section unguarded by the mutex. That's fine
+            // because it covers the overwhelming majority of the work, and
+            // everything else actually accesses shared state and resources.
             Solver::ExitStatus exitStatus;
             const Solver::opcount_t numOperations = solver->generateSolution(exitStatus);
         mutex.lock();
@@ -30,8 +37,7 @@ void ThreadFunc<O>::operator()(solver_t* solver, const unsigned threadNum) {
         // Check break conditions:
         // Note that doing this _after_ attempting a trial (instead of before)
         // results in a tiny bit of wasted effort for the last [numThreads] or
-        // so trials. I'm doing this because it makes the numOperations printing
-        // nicer (otherwise there will be occasional visual gaps).
+        // so trials. I'm doing this to prevent some visual printing gaps).
         if (trialsStopMethod == StopBy::TRIALS
             && totalTrials == trialsStopThreshold) {
             break;
