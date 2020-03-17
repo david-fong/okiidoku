@@ -53,13 +53,16 @@ bool Repl<O>::runCommand(std::string const& cmdLine) {
     const auto it = COMMAND_MAP.find(cmdName);
     if (it == COMMAND_MAP.end()) {
         // No command name was matched.
+        std::cout << Ansi::RED.ON;
         std::cout << "command \"" << cmdLine << "\" not found."
-            " enter \"help\" for the help menu." << std::endl;
+            " enter \"help\" for the help menu.";
+        std::cout << Ansi::RED.OFF << std::endl;
         return true;
     }
     switch (it->second) {
         case Command::HELP:
-            std::cout << HELP_MESSAGE << '\n' << Solver::GenPath::OPTIONS_MENU << std::endl;
+            std::cout << HELP_MESSAGE << '\n' << Ansi::DIM.ON
+            << Solver::GenPath::OPTIONS_MENU << Ansi::DIM.OFF << std::endl;
             break;
         case Command::QUIT:
             return false;
@@ -80,7 +83,9 @@ bool Repl<O>::runCommand(std::string const& cmdLine) {
             }
             std::ifstream puzzleFile(cmdArgs);
             if (!puzzleFile.good()) {
-                std::cout << "the specified file could not be opened for reading." << std::endl;
+                std::cout << Ansi::RED.ON;
+                std::cout << "the specified file could not be opened for reading.";
+                std::cout << Ansi::RED.OFF << std::endl;
             } else {
                 solvePuzzlesFromFile(puzzleFile);
             }
@@ -99,7 +104,9 @@ void Repl<O>::solvePuzzlesFromFile(std::ifstream& puzzlesFile) {
     while (std::getline(puzzlesFile, puzzleString)) {
         // Read a puzzle from the file:
         if (!solver.loadPuzzleFromString(puzzleString)) {
-            std::cout << "Could not use the input to read in a puzzle." << std::endl;
+            std::cout << Ansi::RED.ON;
+            std::cout << "Could not use the input to read in a puzzle.";
+            std::cout << Ansi::RED.OFF << std::endl;
             // Just go try something else:
             continue;
         }
@@ -206,17 +213,22 @@ void Repl<O>::runMultiple(
     try {
         stopByValue = std::stol(trialsString);
         if (stopByValue <= 0) {
-            std::cout << "please provide a non-zero, positive integer." << std::endl;
+            std::cout << Ansi::RED.ON;
+            std::cout << "please provide a non-zero, positive integer.";
+            std::cout << Ansi::RED.OFF << std::endl;
             return;
         }
     } catch (std::invalid_argument const& ia) {
-        std::cout << "could not convert \"" << trialsString << "\" to an integer." << std::endl;
+        std::cout << Ansi::RED.ON;
+        std::cout << "could not convert \"" << trialsString << "\" to an integer.";
+        std::cout << Ansi::RED.OFF << std::endl;
         return;
     }
     runMultiple(static_cast<trials_t>(stopByValue), stopByMethod);
 }
 
 
+// TODO [qol] Add a column for operations
 template <Order O>
 void Repl<O>::printTrialsWorkDistribution(
     const trials_t totalTrials, // sum of entries of binHitCount
@@ -265,13 +277,20 @@ void Repl<O>::printTrialsWorkDistribution(
             // Print a special separator for the giveups row:
             os << '\n' << TABLE_SEPARATOR;
         }
+        // Bin Bottom column:
         const double binBottom  = (double)(i) * solver.GIVEUP_THRESHOLD / Trials::NUM_BINS;
         if constexpr (O < 4 || (O == 4 && Solver::gum == Solver::GUM::E::BACKTRACKS)) {
             os << "\n|" << std::setw(9) << (int)(binBottom);
         } else {
             os << "\n|" << std::setw(8) << (int)(binBottom / 1'000.0) << 'K';
         }
-        os << "  |" << std::setw(8)  << binHitCount[i];
+        // Bin Hit Count column:
+        os << "  |";
+        if (binHitCount[i] == 0) os << Ansi::DIM.ON;
+        os << std::setw(8) << binHitCount[i];
+        if (binHitCount[i] == 0) os << Ansi::DIM.OFF;
+
+        // Speedup Column
         os << "  |" << std::setw(9);
         if (i == Trials::NUM_BINS) {
             os << "unknown";
@@ -279,6 +298,7 @@ void Repl<O>::printTrialsWorkDistribution(
             //os << std::scientific << (throughput[i]) << std::fixed;
             os << 100.0 * (throughput[i] / throughput[Trials::NUM_BINS-1]);
         }
+        // Closing right-edge:
         os << "  |";
         {
             // Print a bar to visualize throughput relative to tha
