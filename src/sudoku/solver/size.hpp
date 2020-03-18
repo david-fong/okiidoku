@@ -58,7 +58,7 @@ public:
         typename std::conditional_t<(O < 3), std::uint_fast8_t,
         typename std::conditional_t<(O < 5), std::uint_fast16_t,
         typename std::conditional_t<(O < 6), std::uint_fast32_t,
-        typename std::conditional_t<(O < 9), unsigned long,
+        typename std::conditional_t<(O < 9), std::uint_fast64_t,
         unsigned long long
     >>>> occmask_t;
 
@@ -83,7 +83,7 @@ public:
         typename std::conditional_t<(O <   4), std::uint8_t,
         typename std::conditional_t<(O <   8), std::uint16_t,
         typename std::conditional_t<(O < 256), std::uint32_t,
-        unsigned long
+        std::uint64_t
     >>> area_t;
 
     // uint range [0, order^2].
@@ -95,7 +95,7 @@ public:
         //typename std::conditional_t<(O < 4), std::uint_fast8_t,
         typename std::conditional_t<(O < 5), std::uint_fast16_t,
         typename std::conditional_t<(O < 6), std::uint_fast32_t,
-        unsigned long
+        std::uint64_t
     >> backtrack_t;
 
     /**

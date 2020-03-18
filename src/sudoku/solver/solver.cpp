@@ -89,6 +89,8 @@ Solver<O>::Solver(std::ostream& os):
     for (auto& rowBias : rowBiases) {
         std::iota(rowBias.begin(), rowBias.end(), 0);
     }
+    // Note: This #if must be done here and not in `initializeGenPath`
+    // because that method is still needed for static initialization.
     #if !SOLVER_THREADS_SHARE_GENPATH
     initializeGenPath();
     #endif
@@ -173,7 +175,7 @@ void Solver<O>::clear(void) {
         // Fill back in the occmasks for givens:
         for (area_t i = 0; i < area; i++) {
             if (isTileForGiven[i]) {
-                const occmask_t turnOnBitMask = (occmask_t)(0b1) << grid[i].value;
+                const occmask_t turnOnBitMask = occmask_t(0b1u) << grid[i].value;
                 rowSymbolOccMasks[getRow(i)] |= turnOnBitMask;
                 colSymbolOccMasks[getCol(i)] |= turnOnBitMask;
                 blkSymbolOccMasks[getBlk(i)] |= turnOnBitMask;
@@ -228,14 +230,16 @@ template <Order O>
 void Solver<O>::registerGivenValue(const area_t index, const value_t value) {
     isTileForGiven[index] = true;
     grid[index].value = value;
+    // Note: The occupancy masks are populated for these givens during
+    // clearing, which always happens right before generating a solution.
 }
 
 
 template <Order O>
 template <bool USE_PUZZLE>
 void Solver<O>::generateSolution(const bool contPrev) {
-    opcount_t    opCount   = 0u;
     TvsDirection direction = TvsDirection::FORWARD;
+    opcount_t    opCount   = 0u;
     area_t       tvsIndex  = 0u;
 
     if (__builtin_expect(contPrev, false)) {
@@ -263,7 +267,7 @@ void Solver<O>::generateSolution(const bool contPrev) {
             // never exits at a (non-boundary) traversal-index over a given.
             if (__builtin_expect(isTileForGiven[gridIndex], false)) {
                 if (direction == TvsDirection::BACK) {
-                    if (__builtin_expect(tvsIndex == 0, false)) {
+                    if (__builtin_expect(tvsIndex == 0u, false)) {
                         prevGen.exitStatus = ExitStatus::IMPOSSIBLE;
                         break;
                     } else --tvsIndex;
@@ -283,7 +287,7 @@ void Solver<O>::generateSolution(const bool contPrev) {
                     maxBacktrackCount = backtrackCounts[gridIndex];
                 }
             }
-            if (__builtin_expect(tvsIndex == 0, false)) {
+            if (__builtin_expect(tvsIndex == 0u, false)) {
                 prevGen.exitStatus = ExitStatus::IMPOSSIBLE;
                 break;
             }
@@ -296,7 +300,7 @@ void Solver<O>::generateSolution(const bool contPrev) {
         const opcount_t giveupCondVar
             = (gum == GUM::E::OPERATIONS) ? opCount
             : (gum == GUM::E::BACKTRACKS) ? maxBacktrackCount
-            : [](){ throw "unhandled GUM case"; return ~0; }();
+            : [](){ throw "unhandled GUM case"; return ~0u; }();
         if (__builtin_expect(giveupCondVar >= GIVEUP_THRESHOLD, false)) {
             prevGen.exitStatus = ExitStatus::GIVEUP;
             break;
@@ -317,7 +321,7 @@ TvsDirection Solver<O>::setNextValid(const area_t index) {
     if (!t.isClear()) {
         // If the tile is currently already set, clear it:
         // NOTE: this is the same as "if backtracked to here".
-        const occmask_t eraseMask = ~(0b1 << t.value);
+        const occmask_t eraseMask = ~(occmask_t(0b1u) << t.value);
         rowBin &= eraseMask;
         colBin &= eraseMask;
         blkBin &= eraseMask;
@@ -342,14 +346,14 @@ TvsDirection Solver<O>::setNextValid(const area_t index) {
     */
     for (value_t biasIndex = t.biasIndex; biasIndex < length; biasIndex++) {
         const value_t value = rowBiases[getRow(index)][biasIndex];
-        const occmask_t valueBit = 0b1 << value;
+        const occmask_t valueBit = occmask_t(0b1u) << value;
         if (!(invalidBin & valueBit)) {
             // If a valid value is found for this tile:
             rowBin |= valueBit;
             colBin |= valueBit;
             blkBin |= valueBit;
             t.value = value;
-            t.biasIndex = (biasIndex + 1);
+            t.biasIndex = (biasIndex + 1u);
             return TvsDirection::FORWARD;
         }
     }
@@ -426,7 +430,7 @@ GenPath::E Solver<O>::initializeGenPath(void) noexcept {
         defaultGenPath = GenPath::E::BLOCK_COLS;
     }
     setGenPath(defaultGenPath, true);
-    return defaultGenPath;
+    return getGenPath();
 }
 
 
