@@ -17,6 +17,9 @@ namespace Sudoku::Repl {
 #define STATW_I << std::setw(this->solver.STATS_WIDTH)
 #define STATW_D << std::setw(this->solver.STATS_WIDTH + 4)
 
+const std::string TERMINAL_WRAP_TEXT_SUGGESTION =
+"\nNote: You can run `tput rmam` in your shell to disable text wrapping.";
+
 
 template <Order O>
 Repl<O>::Repl(std::ostream& os):
@@ -31,8 +34,13 @@ Repl<O>::Repl(std::ostream& os):
     setOutputLvl(OutputLvl::E::EMIT_ALL);
 
     // Print diagnostics about Solver member size:
-    std::cout << "\nsize of solver:  " << sizeof(solver) << " bytes";
-    std::cout << "\ndefault genpath: " << solver.getGenPath() << std::endl;
+    std::cout
+    << "\nsolver obj size: " << sizeof(solver) << " bytes"
+    << "\ndefault genpath: " << solver.getGenPath();
+    if constexpr (O > 3) {
+        std::cout << '\n' << Ansi::DIM.ON << TERMINAL_WRAP_TEXT_SUGGESTION << Ansi::DIM.OFF;
+    }
+    std::cout << std::endl;
 
     // Print help menu and then start the REPL (read-execute-print-loop):
     std::cout << Command::HELP_MESSAGE << std::endl;
@@ -51,7 +59,7 @@ bool Repl<O>::runCommand(std::string const& cmdLine) {
     // trim leading or trailing spaces from the arguments substring.
     const std::string cmdName = cmdLine.substr(0, tokenPos = cmdLine.find(" "));
     const std::string cmdArgs = (tokenPos == std::string::npos)
-        ? "" : cmdLine.substr(tokenPos + 1, std::string::npos);
+        ? "" :  cmdLine.substr(tokenPos + 1, std::string::npos);
     const auto it = Command::MAP.find(cmdName);
     if (it == Command::MAP.end()) {
         // No command name was matched.
@@ -64,14 +72,15 @@ bool Repl<O>::runCommand(std::string const& cmdLine) {
     switch (it->second) {
         using Command::E;
         case E::HELP:
-            std::cout << Command::HELP_MESSAGE << Ansi::DIM.ON
+            std::cout
+            << Command::HELP_MESSAGE << Ansi::DIM.ON
             << '\n' <<       OutputLvl::OPTIONS_MENU
             << '\n' << Solver::GenPath::OPTIONS_MENU
             << Ansi::DIM.OFF << std::endl;
             break;
         case E::QUIT:
             return false;
-        case E::SET_OUTPUT_LVL:setOutputLvl(cmdArgs); break;
+        case E::OUTPUT_LEVEL:setOutputLvl(cmdArgs); break;
         case E::SET_GENPATH:   solver.setGenPath(cmdArgs); break;
         case E::RUN_SINGLE:    runSingle();     break;
         case E::CONTINUE_PREV: runSingle(true); break;
@@ -201,12 +210,17 @@ void Repl<O>::runMultiple(
 
     trials_t totalTrials = 0;
     {
-        trials_t totalSuccesses = 0;
+        trials_t totalSuccesses = 0u;
+        unsigned percentDone    = 0u;
         std::mutex sharedStateMutex;
         Trials::SharedState sharedState {
-            sharedStateMutex, COLS, trialsStopMethod, trialsStopThreshold,
+            sharedStateMutex, COLS, getOutputLvl(),
+            trialsStopMethod, trialsStopThreshold, percentDone,
             totalTrials, totalSuccesses, binHitCount, binOpsTotal,
         };
+        if (getOutputLvl() == OutputLvl::E::SILENT) {
+            std::cout << '\n';
+        }
 
         // Start the threads:
         std::array<std::thread, MAX_EXTRA_THREADS> extraThreads;
@@ -279,8 +293,6 @@ void Repl<O>::printTrialsWorkDistribution(
     std::array<double,   Trials::NUM_BINS+1> const& binOpsTotal
 ) {
     const std::string THROUGHPUT_BAR_STRING = "--------------------------------";
-    const std::string TABLE_SEPARATOR = "\n+-----------+----------+----------------+-----------+-----------+";
-    const std::string TABLE_HEADER    = "\n|  bin bot  |   hits   |   operations   |  giveup%  |  speedup  |";
 
     // Calculate all throughputs before printing:
     // (done in its own loop so we can later print comparisons against the optimal bin)
@@ -315,13 +327,13 @@ void Repl<O>::printTrialsWorkDistribution(
     throughput[Trials::NUM_BINS] = 0.0; // unknown.
     successfulTrialsAccumArr[Trials::NUM_BINS] = 0.0;
 
-    os << TABLE_SEPARATOR;
-    os << TABLE_HEADER;
-    os << TABLE_SEPARATOR;
+    os << Trials::TABLE_SEPARATOR;
+    os << Trials::TABLE_HEADER;
+    os << Trials::TABLE_SEPARATOR;
     for (unsigned i = 0; i < binHitCount.size(); i++) {
         if (i == Trials::NUM_BINS) {
             // Print a special separator for the giveups row:
-            os << TABLE_SEPARATOR;
+            os << Trials::TABLE_SEPARATOR;
         }
         // Bin Bottom column:
         const double binBottom  = (double)(i) * solver.GIVEUP_THRESHOLD / Trials::NUM_BINS;
@@ -357,19 +369,18 @@ void Repl<O>::printTrialsWorkDistribution(
         }
         // Closing right-edge:
         os << "  |";
-        {
-            // Print a bar to visualize throughput relative to tha
-            // of the best. Note visual exaggeration via exponents
-            // (the exponent value was chosen by taste / visual feel)
-            const unsigned barLength = THROUGHPUT_BAR_STRING.length()
-                * std::pow(throughput[i] / throughput[bestThroughputBin], 5);
-            if (i != bestThroughputBin) os << DIM_ON;
-            os << ' ' << THROUGHPUT_BAR_STRING.substr(0, barLength);
-            if (i != bestThroughputBin) os << DIM_OFF;
-        }
+
+        // Print a bar to visualize throughput relative to tha
+        // of the best. Note visual exaggeration via exponents
+        // (the exponent value was chosen by taste / visual feel)
+        const unsigned barLength = THROUGHPUT_BAR_STRING.length()
+            * std::pow(throughput[i] / throughput[bestThroughputBin], 5);
+        if (i != bestThroughputBin) os << DIM_ON;
+        os << ' ' << THROUGHPUT_BAR_STRING.substr(0, barLength);
+        if (i != bestThroughputBin) os << DIM_OFF;
     }
     os << " <- current giveup threshold";
-    os << TABLE_SEPARATOR;
+    os << Trials::TABLE_SEPARATOR;
     os << DIM_ON << Trials::THROUGHPUT_COMMENTARY << DIM_OFF;
 }
 

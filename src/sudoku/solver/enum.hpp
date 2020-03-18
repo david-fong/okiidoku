@@ -66,4 +66,35 @@ namespace Sudoku::Solver {
 
 } // End of Sudoku::Solver namespace
 
+
+namespace Sudoku::Repl {
+
+    // TODO [feat] Use this setting to change printing behaviour.
+    namespace OutputLvl {
+        enum class E : unsigned {
+            EMIT_ALL,
+            SUPPRESS_GIVEUPS,
+            SILENT,
+            OutputLvl__MAX = SILENT,
+        };
+        constexpr size_t size = static_cast<size_t>(E::OutputLvl__MAX) + 1;
+        // Indices of entries must match the
+        // literal values of their respective enums.
+        const std::array<std::string, size> NAMES = {
+            "emitall",
+            "nogiveups",
+            "silent",
+        };
+        std::ostream& operator<<(std::ostream& out, const E outputLvl) {
+            return out << NAMES[static_cast<unsigned>(outputLvl)];
+        }
+        const std::string OPTIONS_MENU =
+            "\nOUTPUT-LVL OPTIONS:"
+            "\n- emitall    emit all output"
+            "\n- nogiveups  suppress giveups"
+            "\n- silent     emit statistics only";
+    } // End of OutputLvl namespace
+
+} // End of Sudoku::Repl namespace
+
 #endif

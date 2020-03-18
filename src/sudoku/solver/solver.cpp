@@ -140,22 +140,14 @@ void Solver<O>::printSimple(void) const {
 
 template <Order O>
 void Solver<O>::printShadedBacktrackStat(const backtrack_t count) const {
-    const std::array<std::string, 4> GREYSCALE_BLOCK_CHARS = {
-        // NOTE: Make sure that the initializer list size matches that
-        // of the corresponding template argument. Compilers won't warn.
-        // See https://cppreference.com/w/cpp/language/sizeof...#Example
-        // for an example utility function I can make to avoid this problem.
-        u8"\u2591", u8"\u2592", u8"\u2593", u8"\u2588",
-    };
-
     if constexpr (cbt) {
         const unsigned int relativeIntensity
             = (double)(count - 1)
-            * GREYSCALE_BLOCK_CHARS.size()
+            * Ansi::GREYSCALE_BLOCK_CHARS.size()
             / maxBacktrackCount;
         auto const& intensityChar
             = (count != 0)
-            ? GREYSCALE_BLOCK_CHARS[relativeIntensity]
+            ? Ansi::GREYSCALE_BLOCK_CHARS[relativeIntensity]
             : " ";
         os << intensityChar << intensityChar;
     } else {

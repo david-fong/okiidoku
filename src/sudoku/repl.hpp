@@ -4,6 +4,8 @@
 #include "./solver/solver.hpp"
 #include "./trials.hpp"
 
+#include "./solver/enum.hpp"
+
 #include <map>
 
 
@@ -15,7 +17,7 @@ namespace Sudoku::Repl {
         enum class E : unsigned {
             HELP,
             QUIT,
-            SET_OUTPUT_LVL,
+            OUTPUT_LEVEL,
             SET_GENPATH,
             RUN_SINGLE,
             CONTINUE_PREV,
@@ -26,7 +28,7 @@ namespace Sudoku::Repl {
         const std::map<std::string, Command::E> MAP = {
             { "help",       E::HELP           },
             { "quit",       E::QUIT           },
-            { "outputlvl",  E::SET_OUTPUT_LVL },
+            { "output",     E::OUTPUT_LEVEL   },
             { "genpath",    E::SET_GENPATH    },
             { "",           E::RUN_SINGLE     },
             { "cont",       E::CONTINUE_PREV  }, // TODO [qol] Change this to "c"? (remember to change help string too)
@@ -37,7 +39,7 @@ namespace Sudoku::Repl {
         const std::string HELP_MESSAGE = "\nCOMMAND MENU:"
             "\n- help               print this help menu"
             "\n- quit               cleanly exit this program"
-            "\n- outputlvl [<lvl>]  get / set output level"
+            "\n- output [<level>]   get / set output level"
             "\n- genpath [<path>]   get / set generator traversal path"
             "\n- {enter}            generate a single solution"
             "\n- cont               continue previous generation"
@@ -46,31 +48,6 @@ namespace Sudoku::Repl {
             "\n- solve <file>       solve the puzzles in <file>"
             "\n- solve <puzzle>     no spaces; zeros mean empty";
     } // End of Command namespace
-
-    namespace OutputLvl {
-        enum class E : unsigned {
-            EMIT_ALL,
-            SUPPRESS_GIVEUPS,
-            SILENT,
-            OutputLvl__MAX = SILENT,
-        };
-        constexpr size_t size = static_cast<size_t>(E::OutputLvl__MAX) + 1;
-        // Indices of entries must match the
-        // literal values of their respective enums.
-        const std::array<std::string, size> NAMES = {
-            "emitall",
-            "sup-gus",
-            "silent",
-        };
-        std::ostream& operator<<(std::ostream& out, const E outputLvl) {
-            return out << NAMES[static_cast<unsigned>(outputLvl)];
-        }
-        const std::string OPTIONS_MENU =
-            "\nOUTPUT-LVL OPTIONS:"
-            "\n- emitall    emit all output"
-            "\n- sup-gus    suppress giveups"
-            "\n- silent     emit statistics only";
-    } // End of OutputLvl namespace
 
     // Returns zero on error.
     unsigned GET_TERM_COLS(void) noexcept {

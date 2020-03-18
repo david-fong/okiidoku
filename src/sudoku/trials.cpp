@@ -32,43 +32,52 @@ void ThreadFunc<O>::operator()(solver_t* solver, const unsigned threadNum) {
             // because it covers the overwhelming majority of the work, and
             // everything else actually accesses shared state and resources.
             solver->generateSolution();
-            const Solver::opcount_t opCount = solver->prevGen.getOpCount();
         mutex.lock();
 
         // Check break conditions:
         // Note that doing this _after_ attempting a trial (instead of before)
         // results in a tiny bit of wasted effort for the last [numThreads] or
         // so trials. I'm doing this to prevent some visual printing gaps).
-        if (trialsStopMethod == StopBy::TRIALS
-            && totalTrials == trialsStopThreshold) {
-            break;
-        } else if (trialsStopMethod == StopBy::SUCCESSES
-            && totalSuccesses >= trialsStopThreshold) {
+        if (trialsStopCurVal() >= trialsStopThreshold) {
             break;
         }
 
-        // Print a progress indicator to stdout:
+        // Print a progress indicator to std::cout:
+        {
+        using Solver::ExitStatus;
+        ExitStatus exitStatus = solver->prevGen.getExitStatus();
+        const bool doOutputLine =
+            (outputLvl == OutputLvl::EMIT_ALL) ||
+            (outputLvl == OutputLvl::SUPPRESS_GIVEUPS && exitStatus == ExitStatus::SUCCESS);
         if (totalTrials % COLS == 0) {
-            trials_t trialsStopCurVal;
-            switch (trialsStopMethod) {
-            case StopBy::TRIALS:    trialsStopCurVal = totalTrials; break;
-            case StopBy::SUCCESSES: trialsStopCurVal = totalSuccesses; break;
-            default: trialsStopCurVal = 0; throw "unhandled enum case";
+            const unsigned newPercentDone = 100u * trialsStopCurVal() / trialsStopThreshold;
+            if (doOutputLine) {
+                std::cout << "\n| " << std::setw(2) << newPercentDone << "% |";
+            } else if (outputLvl == OutputLvl::SILENT) {
+                const int charDiff =
+                    (newPercentDone * TABLE_SEPARATOR.size() / 100u)
+                     - (percentDone * TABLE_SEPARATOR.size() / 100u);
+                for (int i = 0; i < charDiff; i++) {
+                    std::cout << Ansi::GREYSCALE_BLOCK_CHARS.back() << std::flush;
+                }
             }
-            const unsigned pctDone = 100.0 * trialsStopCurVal / trialsStopThreshold;
-            std::cout << "\n| " << std::setw(2) << pctDone << "% |";
+            percentDone = newPercentDone;
         }
         totalTrials++;
-        if (solver->prevGen.getExitStatus() == Solver::ExitStatus::SUCCESS) {
+        if (exitStatus == ExitStatus::SUCCESS) {
             totalSuccesses++;
         }
         // Print the generated solution:
-        // solver->os << '(' << threadNum << ')';
-        solver->os << (solver->isPretty ? ' ' : '\n');
-        solver->printSimple();
-        if constexpr (solver->order > 4) solver->os << std::flush;
+        if (doOutputLine) {
+            // solver->os << '(' << threadNum << ')';
+            solver->os << (solver->isPretty ? ' ' : '\n');
+            solver->printSimple();
+            if constexpr (solver->order > 4) solver->os << std::flush;
+        }
+        }
 
         // Save some stats for later diagnostics-printing:
+        const Solver::opcount_t opCount = solver->prevGen.getOpCount();
         const Solver::opcount_t giveupCondVar
             = (Solver::gum == Solver::GUM::E::OPERATIONS) ? opCount
             : (Solver::gum == Solver::GUM::E::BACKTRACKS) ? solver->getMaxBacktrackCount()
