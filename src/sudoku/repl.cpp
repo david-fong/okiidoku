@@ -74,8 +74,7 @@ bool Repl<O>::runCommand(std::string const& cmdLine) {
         case Command::SOLVE: {
             if (solver.loadPuzzleFromString(cmdArgs)) {
                 // TODO: give better output if solver gives up. Maybe move to its own function.
-                Solver::ExitStatus exitStatus;
-                solver.template generateSolution<true>(exitStatus);
+                solver.template generateSolution<true>();
                 solver.print();
                 break;
             }
@@ -108,8 +107,7 @@ void Repl<O>::solvePuzzlesFromFile(std::ifstream& puzzlesFile) {
             // Just go try something else:
             continue;
         }
-        Solver::ExitStatus exitStatus;
-        solver.template generateSolution<true>(exitStatus);
+        solver.template generateSolution<true>();
 
         // TODO [feat] Write the solution to an output file.
         solver.print();
@@ -122,20 +120,18 @@ void Repl<O>::runSingle(const bool contPrev) {
     solver.printMessageBar("START");
 
     // Generate a new solution:
-    Solver::ExitStatus exitStatus;
-    const clock_t    clockStart = std::clock();
-    const opcount_t numSolveOps = solver.generateSolution(exitStatus, contPrev);
-    const clock_t   clockFinish = std::clock();
-    const double  processorTime = ((double)(clockFinish - clockStart)) / CLOCKS_PER_SEC;
+    const clock_t clockStart = std::clock();
+    solver.generateSolution(contPrev);
+    const double  processorTime = ((double)(std::clock() - clockStart)) / CLOCKS_PER_SEC;
 
     os << "\nprocessor time: " STATW_D << processorTime << " seconds";
-    os << "\nnum operations: " STATW_I << numSolveOps;
+    os << "\nnum operations: " STATW_I << solver.prevGen.getOpCount();
     if constexpr (Solver::cbt) {
         os << "\nmax backtracks: " STATW_I << solver.getMaxBacktrackCount();
     }
     if (!solver.isPretty) solver.printMessageBar("", '-');
     solver.print();
-    solver.printMessageBar((exitStatus == Solver::ExitStatus::SUCCESS) ? "DONE" : "ABORT");
+    solver.printMessageBar((solver.prevGen.getExitStatus() == Solver::ExitStatus::SUCCESS) ? "DONE" : "ABORT");
     os << std::endl;
 }
 
@@ -145,9 +141,13 @@ void Repl<O>::runMultiple(
     const trials_t trialsStopThreshold,
     const Trials::StopBy trialsStopMethod
 ) {
-    constexpr unsigned COLS_DFLT = ((unsigned[]){0,64,32,24,16,4,1})[O];
-    const unsigned COLS = (solver.isPretty ? (GET_TERM_COLS(COLS_DFLT)-7) : COLS_DFLT) / solver.STATS_WIDTH;
-    const unsigned BAR_WIDTH = solver.STATS_WIDTH * COLS + (solver.isPretty ? 7 : 0);
+    const unsigned COLS = [this](){ // Never zero. Not used when writing to file.
+        const unsigned termCols = GET_TERM_COLS();
+        const unsigned cols = (termCols-7)/(solver.area+1);
+        return termCols ? (cols ? cols : 1) : ((unsigned[]){0,64,5,2,1,1,1})[O];
+    }();
+    const unsigned BAR_WIDTH = (solver.area+1) * COLS + (solver.isPretty ? 7 : 0);
+    // Note at above: the magic number `7` is the length of the progress indicator.
 
     // NOTE: The last bin is for trials that do not succeed.
     std::array<trials_t, Trials::NUM_BINS+1> binHitCount = {0,};

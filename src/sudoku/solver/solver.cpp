@@ -103,11 +103,38 @@ Solver<O>::Solver(std::ostream& os):
 
 
 template <Order O>
+void Solver<O>::copySettingsFrom(Solver const& other) {
+    #if !SOLVER_THREADS_SHARE_GENPATH
+    setGenPath(other.getGenPath());
+    #endif
+}
+
+
+template <Order O>
 void Solver<O>::print(void) const {
     if (&os != &std::cout) {
         std::cout << *this;
     }
     os << *this;
+}
+
+
+template <Order O>
+void Solver<O>::printSimple(void) const {
+    auto const helper = [this](std::ostream& os, const bool isPretty){
+        const bool doDim = isPretty && (prevGen.getExitStatus() != ExitStatus::SUCCESS);
+        if (doDim) os << Ansi::DIM.ON;
+        for (auto const& t : grid) {
+            os << t;
+        }
+        if (doDim) os << Ansi::DIM.OFF;
+    };
+    if (&os == &std::cout) {
+        helper(std::cout, true);
+    } else {
+        helper(std::cout, true);
+        helper(os, false);
+    }
 }
 
 
@@ -214,41 +241,40 @@ void Solver<O>::registerGivenValue(const area_t index, const value_t value) {
 
 template <Order O>
 template <bool USE_PUZZLE>
-opcount_t Solver<O>::generateSolution(ExitStatus& exitStatus, const bool contPrev) {
-    opcount_t numOperations = 0u;
+void Solver<O>::generateSolution(const bool contPrev) {
+    opcount_t    opCount   = 0u;
     TvsDirection direction = TvsDirection::FORWARD;
-    area_t tvsIndex = 0u;
+    area_t       tvsIndex  = 0u;
 
     if (__builtin_expect(contPrev, false)) {
-        if (prevGenTvsIndex == area) {
+        switch (prevGen.getExitStatus()) {
+          case ExitStatus::SUCCESS:
             // Previously succeeded.
-            tvsIndex = area - 1;
+            tvsIndex  = area - 1u;
             direction = TvsDirection::BACK;
-        } else if (prevGenTvsIndex == 0
-            && (grid[traversalOrder[0]].biasIndex == length)) {
-            // TODO [test] This.
-            // Previously realized nothing left to find.
-            exitStatus = ExitStatus::IMPOSSIBLE;
-            return 0u;
-        } else {
-            // Previously gave up.
-            direction = TvsDirection::FORWARD;
+            break;
+          case ExitStatus::IMPOSSIBLE:
+            return;
+          default: break;
         }
     } else {
         // Not continuing. Do something entirely new!
         this->template clear<USE_PUZZLE>();
     }
+    prevGen.exitStatus = ExitStatus::SUCCESS; // default value;
 
     while (tvsIndex < area) {
         const area_t gridIndex = traversalOrder[tvsIndex];
         if constexpr (USE_PUZZLE) {
             // Immediately pass over consecutive tiles containing givens.
-            // This logic block ensures that this entire loop never exits
-            // at a non-boundary traversal-index over a given-Tile.
+            // The position of this logic block ensures that this entire loop
+            // never exits at a (non-boundary) traversal-index over a given.
             if (__builtin_expect(isTileForGiven[gridIndex], false)) {
                 if (direction == TvsDirection::BACK) {
-                    if (tvsIndex == 0) break;
-                    else --tvsIndex;
+                    if (__builtin_expect(tvsIndex == 0, false)) {
+                        prevGen.exitStatus = ExitStatus::IMPOSSIBLE;
+                        break;
+                    } else --tvsIndex;
                 } else {
                     ++tvsIndex;
                 }
@@ -257,7 +283,7 @@ opcount_t Solver<O>::generateSolution(ExitStatus& exitStatus, const bool contPre
         }
         // Try something at the current tile:
         direction = setNextValid(gridIndex);
-        numOperations++;
+        opCount++;
         if (direction == TvsDirection::BACK) {
             // Pop and step backward:
             if constexpr (cbt) {
@@ -266,6 +292,7 @@ opcount_t Solver<O>::generateSolution(ExitStatus& exitStatus, const bool contPre
                 }
             }
             if (__builtin_expect(tvsIndex == 0, false)) {
+                prevGen.exitStatus = ExitStatus::IMPOSSIBLE;
                 break;
             }
             --tvsIndex;
@@ -275,22 +302,16 @@ opcount_t Solver<O>::generateSolution(ExitStatus& exitStatus, const bool contPre
         }
         // Check whether the give-up-condition has been met:
         const opcount_t giveupCondVar
-            = (gum == GUM::E::OPERATIONS) ? numOperations
+            = (gum == GUM::E::OPERATIONS) ? opCount
             : (gum == GUM::E::BACKTRACKS) ? maxBacktrackCount
             : [](){ throw "unhandled GUM case"; return ~0; }();
         if (__builtin_expect(giveupCondVar >= GIVEUP_THRESHOLD, false)) {
+            prevGen.exitStatus = ExitStatus::GIVEUP;
             break;
         }
     }
-    // Return:
-    prevGenTvsIndex = tvsIndex;
-    exitStatus = (tvsIndex == 0)
-        ? ExitStatus::IMPOSSIBLE
-        : ((tvsIndex == area)
-            ? ExitStatus::SUCCESS
-            : ExitStatus::GIVEUP
-        );
-    return numOperations;
+    prevGen.tvsIndex = tvsIndex;
+    prevGen.opCount  = opCount;
 }
 
 

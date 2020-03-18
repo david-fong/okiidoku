@@ -12,6 +12,8 @@
 #include <bitset>
 
 
+// https://en.cppreference.com/w/cpp/language/friend#Template_friend_operators
+// https://web.mst.edu/~nmjxv3/articles/templates.html
 namespace Sudoku::Solver { template <Sudoku::Order O> class Solver; }
 template <Sudoku::Order O> std::ostream& operator<<(std::ostream&, Sudoku::Solver::Solver<O> const&);
 
@@ -30,9 +32,10 @@ namespace Sudoku::Solver {
      */
     template <Order O>
     class Solver {
-    public:
-        static_assert((1 < O) && (O <= MAX_REASONABLE_ORDER));
-        static_assert((gum == GUM::E::BACKTRACKS) ? cbt : true);
+      friend std::ostream&  operator<< <O>(std::ostream&, Solver const& s);
+      static_assert((1 < O) && (O <= MAX_REASONABLE_ORDER));
+      static_assert((gum == GUM::E::BACKTRACKS) ? cbt : true);
+      public:
         using occmask_t     = typename Size<O>::occmask_t   ;
         using order_t       = typename Size<O>::order_t     ;
         using length_t      = typename Size<O>::length_t    ;
@@ -41,10 +44,10 @@ namespace Sudoku::Solver {
         using backtrack_t   = typename Size<O>::backtrack_t ;
         static constexpr opcount_t GIVEUP_THRESHOLD = Size<O>::GIVEUP_THRESHOLD;
 
-    // =======================
-    // HELPER CLASS
-    // =======================
-    public:
+      // =======================
+      // HELPER CLASS
+      // =======================
+      public:
         /**
          * CLARITY:
          * When clear, `this->value` is the grid's length.
@@ -60,12 +63,11 @@ namespace Sudoku::Solver {
          * GIVENS:
          * If solving a puzzle and this tile is for given information,
          * `biasIndex` should not be used, and `value` should not be
-         * modified. `biasIndex` will be set to `length` to resolve an
-         * edge case when deciding how to continue generation.
+         * modified.
          */
         class Tile {
-            friend class Solver;
-        public:
+          friend class Solver<O>;
+          public:
             void clear(void) noexcept {
                 biasIndex = 0u;
                 value = length;
@@ -109,29 +111,26 @@ namespace Sudoku::Solver {
                         :  (valueChar  - 'a' + 10);
                 }
             }
-        protected:
+          protected:
             value_t biasIndex;
             value_t value; // undefined if clear.
         };
 
-    // ========================
-    // PUBLIC MEMBERS
-    // ========================
-    public:
+      // ========================
+      // PUBLIC MEMBERS
+      // ========================
+      public:
         static constexpr order_t    order   = O;
         static constexpr length_t   length  = O*O;
         static constexpr area_t     area    = O*O*O*O;
 
         Solver(void) = delete;
         explicit Solver(std::ostream&);
+        [[gnu::cold]] void copySettingsFrom(Solver const&);
 
         // Prints to std::cout and the output file if it exists.
         void print(void) const;
-        // This took me so long to find out even what the problem was called.
-        // My understanding is that all this line does is expose private members
-        // to the non-member operator at the top-level namespace.
-        // https://en.cppreference.com/w/cpp/language/friend#Template_friend_operators
-        friend std::ostream& operator<< <O>(std::ostream&, Solver const& s);
+        void printSimple(void) const; // No newlines included.
         void printMessageBar(std::string const&, unsigned int, char = '=') const;
         void printMessageBar(std::string const&, char = '=') const;
 
@@ -143,10 +142,10 @@ namespace Sudoku::Solver {
 
         [[gnu::cold]] backtrack_t getMaxBacktrackCount(void) const noexcept { return maxBacktrackCount; }
 
-    // ========================
-    // PRIVATE MEMBERS
-    // ========================
-    private:
+      // ========================
+      // PRIVATE MEMBERS
+      // ========================
+      private:
         std::array<Tile, area> grid;
         std::array<occmask_t, length> rowSymbolOccMasks;
         std::array<occmask_t, length> colSymbolOccMasks;
@@ -164,21 +163,17 @@ namespace Sudoku::Solver {
         GENPATH_STORAGE_MOD std::array<area_t, area> traversalOrder;
         std::bitset<area> isTileForGiven;
 
-        // These fields are used to continue the solution generator from
-        // wherever it last left off.
-        area_t prevGenTvsIndex;
-
         std::array<backtrack_t, (cbt?area:1)> backtrackCounts;
         backtrack_t maxBacktrackCount;
         void printShadedBacktrackStat(backtrack_t) const;
 
-    public:
+      public:
         std::ostream& os;
         const bool isPretty;
         static constexpr unsigned STATS_WIDTH = (0.4 * length) + 4;
         static const std::string blkRowSepString;
 
-    public:
+      public:
         // Returns whether the string could be loaded as a puzzle.
         // Does NOT check whether the givens follow the sudoku rules.
         bool loadPuzzleFromString(std::string const&);
@@ -187,17 +182,27 @@ namespace Sudoku::Solver {
         // immediate call to this method will continue the previous
         // solution-generating-run from where it left off.
         template <bool USE_PUZZLE = false>
-        [[gnu::hot]] opcount_t generateSolution(ExitStatus& exitStatus, bool contPrev = false);
-    private:
+        [[gnu::hot]] void generateSolution(bool contPrev = false);
+        struct PrevGen final {
+          friend class Solver;
+          private:
+            ExitStatus exitStatus = ExitStatus::IMPOSSIBLE;
+            area_t     tvsIndex   = 0;
+            opcount_t  opCount    = 0;
+          public:
+            ExitStatus getExitStatus(void) const { return exitStatus; }
+            opcount_t     getOpCount(void) const { return opCount; }
+        }; PrevGen prevGen;
+      private:
         void registerGivenValue(area_t index, value_t value);
         template <bool USE_PUZZLE>
         [[gnu::hot]] void clear(void);
         [[gnu::hot]] TvsDirection setNextValid(const area_t);
 
-    // ========================
-    // STATIC UTILITIES
-    // ========================
-    public:
+      // ========================
+      // STATIC UTILITIES
+      // ========================
+      public:
         // Inline functions:
         [[gnu::const]] static constexpr length_t getRow(const area_t index) noexcept { return index / length; }
         [[gnu::const]] static constexpr length_t getCol(const area_t index) noexcept { return index % length; }

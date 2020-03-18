@@ -17,12 +17,13 @@ const std::string THROUGHPUT_COMMENTARY =
 
 template <Order O>
 void ThreadFunc<O>::operator()(solver_t* solver, const unsigned threadNum) {
-    mutex.lock();
     if (threadNum != 0) {
+        // TODO [bug] oldSolver can technically finish before we get here.
         solver_t *const oldSolver = solver;
         solver = new solver_t(oldSolver->os);
-        solver->setGenPath(oldSolver->getGenPath());
+        solver->copySettingsFrom(*oldSolver);
     }
+    mutex.lock();
     while (true) {
         // Attempt to generate a single solution:
         mutex.unlock();
@@ -30,8 +31,8 @@ void ThreadFunc<O>::operator()(solver_t* solver, const unsigned threadNum) {
             // This is the only section unguarded by the mutex. That's fine
             // because it covers the overwhelming majority of the work, and
             // everything else actually accesses shared state and resources.
-            Solver::ExitStatus exitStatus;
-            const Solver::opcount_t numOperations = solver->generateSolution(exitStatus);
+            solver->generateSolution();
+            const Solver::opcount_t opCount = solver->prevGen.getOpCount();
         mutex.lock();
 
         // Check break conditions:
@@ -58,30 +59,23 @@ void ThreadFunc<O>::operator()(solver_t* solver, const unsigned threadNum) {
             std::cout << "\n| " << std::setw(2) << pctDone << "% |";
         }
         totalTrials++;
-
-        // Print the number of operations taken:
-        // TODO [stats] actually, it's more important to output the solution-grid
-        // than it is to output the number operations for each trial.
-        if (exitStatus == Solver::ExitStatus::SUCCESS) {
+        if (solver->prevGen.getExitStatus() == Solver::ExitStatus::SUCCESS) {
             totalSuccesses++;
-            solver->os << std::setw(solver->STATS_WIDTH) << numOperations;
-        } else {
-            if (solver->isPretty) {
-                solver->os << Ansi::DIM.ON << std::setw(solver->STATS_WIDTH) << numOperations << Ansi::DIM.OFF;
-            } else {
-                solver->os << std::setw(solver->STATS_WIDTH) << "---";
-            }
-        } //solver->os << '~' << threadNum;
+        }
+        // Print the generated solution:
+        // solver->os << '(' << threadNum << ')';
+        solver->os << (solver->isPretty ? ' ' : '\n');
+        solver->printSimple();
         if constexpr (solver->order > 4) solver->os << std::flush;
 
         // Save some stats for later diagnostics-printing:
         const Solver::opcount_t giveupCondVar
-            = (Solver::gum == Solver::GUM::E::OPERATIONS) ? numOperations
+            = (Solver::gum == Solver::GUM::E::OPERATIONS) ? opCount
             : (Solver::gum == Solver::GUM::E::BACKTRACKS) ? solver->getMaxBacktrackCount()
             : [](){ throw "unhandled GUM case"; return ~0; }();
         const unsigned binNum = NUM_BINS * (giveupCondVar) / solver->GIVEUP_THRESHOLD;
         binHitCount[binNum]++;
-        binOpsTotal[binNum] += numOperations;
+        binOpsTotal[binNum] += opCount;
     }
     mutex.unlock();
     if (threadNum != 0) delete solver;

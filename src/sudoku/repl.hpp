@@ -44,9 +44,10 @@ namespace Sudoku {
 
     const std::string REPL_PROMPT = "\n$ ";
 
-    unsigned int GET_TERM_COLS(const unsigned fallback) noexcept {
+    // Returns zero on error.
+    unsigned GET_TERM_COLS(void) noexcept {
         char const*const envVar = std::getenv("COLUMNS");
-        return (envVar != NULL) ? std::stoul(envVar) : fallback;
+        return (envVar != NULL) ? std::stoul(envVar) : 0u;
     }
 
 
