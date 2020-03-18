@@ -68,7 +68,7 @@ namespace Sudoku::Repl {
      * - Base<ARGS>::member
      */
     template <Order O>
-    class Repl {
+    class Repl final {
       public:
         using opcount_t = Solver::opcount_t;
         using  solver_t = class Sudoku::Solver::Solver<O>;
@@ -86,7 +86,7 @@ namespace Sudoku::Repl {
         std::ostream& os; // alias to this->solver.os;
         OutputLvl::E outputLvl;
 
-        static constexpr unsigned MAX_EXTRA_THREADS = ((const unsigned[]){0,0,0,0,1,2,3})[O];
+        static constexpr unsigned MAX_EXTRA_THREADS = ((const unsigned[]){0,0,0,0,1,2,2,2})[O];
         const std::string DIM_ON  = (solver.isPretty ? Ansi::DIM.ON  : "");
         const std::string DIM_OFF = (solver.isPretty ? Ansi::DIM.OFF : "");
 

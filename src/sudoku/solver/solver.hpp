@@ -31,7 +31,7 @@ namespace Sudoku::Solver {
      * 
      */
     template <Order O>
-    class Solver {
+    class Solver final {
       friend std::ostream&  operator<< <O>(std::ostream&, Solver const& s);
       static_assert((1 < O) && (O <= MAX_REASONABLE_ORDER));
       static_assert((gum == GUM::E::BACKTRACKS) ? cbt : true);
@@ -65,7 +65,7 @@ namespace Sudoku::Solver {
          * `biasIndex` should not be used, and `value` should not be
          * modified.
          */
-        class Tile {
+        class Tile final {
           friend class Solver<O>;
           public:
             void clear(void) noexcept {

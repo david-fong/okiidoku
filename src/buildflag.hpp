@@ -24,6 +24,7 @@
 
 /**
  * Whether or not to count backtrack statistics.
+ * Must be `true` if `BUILDFLAG_GUM` is `BACKTRACKS`.
  */
 #define BUILDFLAG_CBT true
 

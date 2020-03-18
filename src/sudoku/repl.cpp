@@ -17,8 +17,9 @@ namespace Sudoku::Repl {
 #define STATW_I << std::setw(this->solver.STATS_WIDTH)
 #define STATW_D << std::setw(this->solver.STATS_WIDTH + 4)
 
-const std::string TERMINAL_WRAP_TEXT_SUGGESTION =
-"\nNote: You can run `tput rmam` in your shell to disable text wrapping.";
+const std::string TERMINAL_TEXT_FORMATTING_NOTES =
+"\nNote: You can run `tput rmam` in your shell to disable text wrapping."
+"\nAlso, scrolling may be slower if the build flag `USE_ANSI_ESC is` on.";
 
 
 template <Order O>
@@ -38,7 +39,7 @@ Repl<O>::Repl(std::ostream& os):
     << "\nsolver obj size: " << sizeof(solver) << " bytes"
     << "\ndefault genpath: " << solver.getGenPath();
     if constexpr (O > 3) {
-        std::cout << '\n' << Ansi::DIM.ON << TERMINAL_WRAP_TEXT_SUGGESTION << Ansi::DIM.OFF;
+        std::cout << '\n' << Ansi::DIM.ON << TERMINAL_TEXT_FORMATTING_NOTES << Ansi::DIM.OFF;
     }
     std::cout << std::endl;
 
