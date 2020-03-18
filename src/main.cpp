@@ -11,7 +11,7 @@
 #include <fstream>      // ofstream,
 #include <random>       // random_device,
 
-using Sudoku::Repl;
+using Sudoku::Repl::Repl;
 
 /**
  * ARGUMENTS

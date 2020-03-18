@@ -10,7 +10,7 @@
 #include <mutex>
 
 
-namespace Sudoku {
+namespace Sudoku::Repl {
 
 // Mechanism to statically toggle printing alignment:
 // (#undef-ed before the end of this namespace)
@@ -28,15 +28,17 @@ Repl<O>::Repl(std::ostream& os):
     solver  (os),
     os      (os)
 {
+    setOutputLvl(OutputLvl::E::EMIT_ALL);
+
     // Print diagnostics about Solver member size:
     std::cout << "\nsize of solver:  " << sizeof(solver) << " bytes";
     std::cout << "\ndefault genpath: " << solver.getGenPath() << std::endl;
 
     // Print help menu and then start the REPL (read-execute-print-loop):
-    std::cout << HELP_MESSAGE << std::endl;
+    std::cout << Command::HELP_MESSAGE << std::endl;
     std::string command;
     do {
-        std::cout << REPL_PROMPT;
+        std::cout << PROMPT;
         std::getline(std::cin, command);
     } while (runCommand(command));
 };
@@ -50,8 +52,8 @@ bool Repl<O>::runCommand(std::string const& cmdLine) {
     const std::string cmdName = cmdLine.substr(0, tokenPos = cmdLine.find(" "));
     const std::string cmdArgs = (tokenPos == std::string::npos)
         ? "" : cmdLine.substr(tokenPos + 1, std::string::npos);
-    const auto it = COMMAND_MAP.find(cmdName);
-    if (it == COMMAND_MAP.end()) {
+    const auto it = Command::MAP.find(cmdName);
+    if (it == Command::MAP.end()) {
         // No command name was matched.
         std::cout << Ansi::RED.ON;
         std::cout << "command \"" << cmdLine << "\" not found."
@@ -60,18 +62,22 @@ bool Repl<O>::runCommand(std::string const& cmdLine) {
         return true;
     }
     switch (it->second) {
-        case Command::HELP:
-            std::cout << HELP_MESSAGE << '\n' << Ansi::DIM.ON
-            << Solver::GenPath::OPTIONS_MENU << Ansi::DIM.OFF << std::endl;
+        using Command::E;
+        case E::HELP:
+            std::cout << Command::HELP_MESSAGE << Ansi::DIM.ON
+            << '\n' <<       OutputLvl::OPTIONS_MENU
+            << '\n' << Solver::GenPath::OPTIONS_MENU
+            << Ansi::DIM.OFF << std::endl;
             break;
-        case Command::QUIT:
+        case E::QUIT:
             return false;
-        case Command::RUN_SINGLE:    runSingle();     break;
-        case Command::CONTINUE_PREV: runSingle(true); break;
-        case Command::RUN_TRIALS:    runMultiple(cmdArgs, Trials::StopBy::TRIALS);    break;
-        case Command::RUN_SUCCESSES: runMultiple(cmdArgs, Trials::StopBy::SUCCESSES); break;
-        case Command::SET_GENPATH:   solver.setGenPath(cmdArgs); break;
-        case Command::SOLVE: {
+        case E::SET_OUTPUT_LVL:setOutputLvl(cmdArgs); break;
+        case E::SET_GENPATH:   solver.setGenPath(cmdArgs); break;
+        case E::RUN_SINGLE:    runSingle();     break;
+        case E::CONTINUE_PREV: runSingle(true); break;
+        case E::RUN_TRIALS:    runMultiple(cmdArgs, Trials::StopBy::TRIALS);    break;
+        case E::RUN_SUCCESSES: runMultiple(cmdArgs, Trials::StopBy::SUCCESSES); break;
+        case E::SOLVE: {
             if (solver.loadPuzzleFromString(cmdArgs)) {
                 // TODO: give better output if solver gives up. Maybe move to its own function.
                 solver.template generateSolution<true>();
@@ -89,6 +95,42 @@ bool Repl<O>::runCommand(std::string const& cmdLine) {
             break; }
     }
     return true;
+}
+
+
+template <Order O>
+OutputLvl::E Repl<O>::setOutputLvl(OutputLvl::E newOutputLvl) {
+    const OutputLvl::E oldOutputLvl = this->outputLvl;
+    this->outputLvl = newOutputLvl;
+    return oldOutputLvl;
+}
+
+
+template <Order O>
+OutputLvl::E Repl<O>::setOutputLvl(std::string const& newOutputLvlString) {
+    std::cout << "\noutput level is ";
+    if (newOutputLvlString.empty()) {
+        std::cout << "currently set to: " << getOutputLvl() << std::endl;
+        return getOutputLvl();
+    }
+    for (unsigned i = 0; i < OutputLvl::size; i++) {
+        if (newOutputLvlString.compare(OutputLvl::NAMES[i]) == 0) {
+            if (OutputLvl::E{i} == getOutputLvl()) {
+                std::cout << "already set to: ";
+            } else {
+                std::cout << "now set to: ";
+                setOutputLvl(OutputLvl::E{i});
+            }
+            std::cout << getOutputLvl() << std::endl;
+            return getOutputLvl();
+        }
+    }
+    // unsuccessful return:
+    std::cout << getOutputLvl() << " (unchanged).\n"
+        << Ansi::RED.ON << '"' << newOutputLvlString
+        << "\" is not a valid output level name.\n"
+        << OutputLvl::OPTIONS_MENU << Ansi::RED.OFF << std::endl;
+    return getOutputLvl();
 }
 
 

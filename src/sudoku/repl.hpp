@@ -7,42 +7,70 @@
 #include <map>
 
 
-namespace Sudoku {
+namespace Sudoku::Repl {
 
-    enum class Command {
-        HELP,
-        QUIT,
-        RUN_SINGLE,
-        CONTINUE_PREV,
-        RUN_TRIALS,
-        RUN_SUCCESSES,
-        SET_GENPATH,
-        SOLVE,
-    };
+    const std::string PROMPT = "\n$ ";
 
-    const std::map<std::string, Command> COMMAND_MAP = {
-        { "help",       Command::HELP           },
-        { "quit",       Command::QUIT           },
-        { "",           Command::RUN_SINGLE     },
-        { "cont",       Command::CONTINUE_PREV  }, // TODO [qol] Change this to "c"? (remember to change help string too)
-        { "trials",     Command::RUN_TRIALS     },
-        { "strials",    Command::RUN_SUCCESSES  },
-        { "genpath",    Command::SET_GENPATH    },
-        { "solve",      Command::SOLVE          },
-    };
-    const std::string HELP_MESSAGE = "\nCOMMAND MENU:"
-        "\n- help               print this help menu"
-        "\n- quit               cleanly exit this program"
-        "\n- {enter}            generate a single solution"
-        "\n- cont               continue previous generation"
-        "\n- trials <n>         attempt to generate <n> solutions"
-        "\n- strials <n>        successfully generate <n> solutions"
-        "\n- genpath [<path>]   get/set generator traversal path"
-        "\n- solve <file>       solve the puzzles in <file>"
-        "\n- solve <puzzle>     no spaces; zeros mean empty"
-        ;
+    namespace Command {
+        enum class E : unsigned {
+            HELP,
+            QUIT,
+            SET_OUTPUT_LVL,
+            SET_GENPATH,
+            RUN_SINGLE,
+            CONTINUE_PREV,
+            RUN_TRIALS,
+            RUN_SUCCESSES,
+            SOLVE,
+        };
+        const std::map<std::string, Command::E> MAP = {
+            { "help",       E::HELP           },
+            { "quit",       E::QUIT           },
+            { "outputlvl",  E::SET_OUTPUT_LVL },
+            { "genpath",    E::SET_GENPATH    },
+            { "",           E::RUN_SINGLE     },
+            { "cont",       E::CONTINUE_PREV  }, // TODO [qol] Change this to "c"? (remember to change help string too)
+            { "trials",     E::RUN_TRIALS     },
+            { "strials",    E::RUN_SUCCESSES  },
+            { "solve",      E::SOLVE          },
+        };
+        const std::string HELP_MESSAGE = "\nCOMMAND MENU:"
+            "\n- help               print this help menu"
+            "\n- quit               cleanly exit this program"
+            "\n- outputlvl [<lvl>]  get / set output level"
+            "\n- genpath [<path>]   get / set generator traversal path"
+            "\n- {enter}            generate a single solution"
+            "\n- cont               continue previous generation"
+            "\n- trials <n>         attempt to generate <n> solutions"
+            "\n- strials <n>        successfully generate <n> solutions"
+            "\n- solve <file>       solve the puzzles in <file>"
+            "\n- solve <puzzle>     no spaces; zeros mean empty";
+    } // End of Command namespace
 
-    const std::string REPL_PROMPT = "\n$ ";
+    namespace OutputLvl {
+        enum class E : unsigned {
+            EMIT_ALL,
+            SUPPRESS_GIVEUPS,
+            SILENT,
+            OutputLvl__MAX = SILENT,
+        };
+        constexpr size_t size = static_cast<size_t>(E::OutputLvl__MAX) + 1;
+        // Indices of entries must match the
+        // literal values of their respective enums.
+        const std::array<std::string, size> NAMES = {
+            "emitall",
+            "sup-gus",
+            "silent",
+        };
+        std::ostream& operator<<(std::ostream& out, const E outputLvl) {
+            return out << NAMES[static_cast<unsigned>(outputLvl)];
+        }
+        const std::string OPTIONS_MENU =
+            "\nOUTPUT-LVL OPTIONS:"
+            "\n- emitall    emit all output"
+            "\n- sup-gus    suppress giveups"
+            "\n- silent     emit statistics only";
+    } // End of OutputLvl namespace
 
     // Returns zero on error.
     unsigned GET_TERM_COLS(void) noexcept {
@@ -64,7 +92,7 @@ namespace Sudoku {
      */
     template <Order O>
     class Repl {
-    public:
+      public:
         using opcount_t = Solver::opcount_t;
         using  solver_t = class Sudoku::Solver::Solver<O>;
 
@@ -76,9 +104,10 @@ namespace Sudoku {
         // concurrent threads the host processor can support at a time.
         const unsigned numExtraThreads;
 
-    private:
+      private:
         solver_t solver;
         std::ostream& os; // alias to this->solver.os;
+        OutputLvl::E outputLvl;
 
         static constexpr unsigned MAX_EXTRA_THREADS = ((const unsigned[]){0,0,0,0,1,2,3})[O];
         const std::string DIM_ON  = (solver.isPretty ? Ansi::DIM.ON  : "");
@@ -94,8 +123,13 @@ namespace Sudoku {
             std::array<trials_t, Trials::NUM_BINS+1> const& binHitCount,
             std::array<double,   Trials::NUM_BINS+1> const& binOpsTotal);
 
+      public:
+        [[gnu::cold]] OutputLvl::E getOutputLvl(void) const noexcept { return outputLvl; };
+        [[gnu::cold]] OutputLvl::E setOutputLvl(OutputLvl::E);
+        [[gnu::cold]] OutputLvl::E setOutputLvl(std::string const&);
+
     }; // End of Repl class
 
-} // End of Sudoku namespace
+} // End of Sudoku::Repl namespace
 
 #endif

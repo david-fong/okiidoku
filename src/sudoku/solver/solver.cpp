@@ -416,9 +416,10 @@ GenPath::E Solver<O>::setGenPath(std::string const& newGenPathString) noexcept {
         }
     }
     // unsuccessful return:
-    std::cout << getGenPath() << " (unchanged).\n" << Ansi::RED.ON << '"' << newGenPathString
-        << "\" is not a valid generator path name." << Ansi::RED.OFF << std::endl;
-    std::cout << GenPath::OPTIONS_MENU << std::endl;
+    std::cout << getGenPath() << " (unchanged).\n"
+        << Ansi::RED.ON << '"' << newGenPathString
+        << "\" is not a valid generator path name.\n"
+        << GenPath::OPTIONS_MENU << Ansi::RED.OFF << std::endl;
     return getGenPath();
 }
 
