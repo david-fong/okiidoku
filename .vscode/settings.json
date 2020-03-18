@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "TODO": "markdown",
+        "**/gcc/**": "cpp",
+    },
+    "C_Cpp.autoAddFileAssociations": false,
+}
