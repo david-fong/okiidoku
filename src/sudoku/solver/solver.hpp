@@ -34,7 +34,6 @@ namespace Sudoku::Solver {
     class Solver final {
       friend std::ostream&  operator<< <O>(std::ostream&, Solver const& s);
       static_assert((1 < O) && (O <= MAX_REASONABLE_ORDER));
-      static_assert((gum == GUM::E::BACKTRACKS) ? cbt : true);
       public:
         using occmask_t     = typename Size<O>::occmask_t   ;
         using order_t       = typename Size<O>::order_t     ;
@@ -163,7 +162,7 @@ namespace Sudoku::Solver {
         GENPATH_STORAGE_MOD std::array<area_t, area> traversalOrder;
         std::bitset<area> isTileForGiven;
 
-        std::array<backtrack_t, (cbt?area:1)> backtrackCounts;
+        std::array<backtrack_t, area> backtrackCounts;
         backtrack_t maxBacktrackCount;
         void printShadedBacktrackStat(backtrack_t) const;
 

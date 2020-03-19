@@ -23,17 +23,6 @@
 #define USE_ANSI_ESC  true
 
 /**
- * Whether or not to count backtrack statistics.
- * Must be `true` if `BUILDFLAG_GUM` is `BACKTRACKS`.
- */
-#define BUILDFLAG_CBT true
-
-/**
- * Giveup method.
- */
-#define BUILDFLAG_GUM Sudoku::Solver::GUM::E::BACKTRACKS
-
-/**
  * Turning this on allows Solver::traversalOrder to be shared accross
  * Solver instances (ie. a static member). This has huge implications
  * to cache usage. Make sure to turn this off if you write a program

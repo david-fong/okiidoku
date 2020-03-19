@@ -58,7 +58,7 @@ void ThreadFunc<O>::operator()(solver_t* solver, const unsigned threadNum) {
                     (newPercentDone * TABLE_SEPARATOR.size() / 100u)
                      - (percentDone * TABLE_SEPARATOR.size() / 100u);
                 for (int i = 0; i < charDiff; i++) {
-                    std::cout << Ansi::GREYSCALE_BLOCK_CHARS.back() << std::flush;
+                    std::cout << Ansi::GREYSCALE_BLOCK_CHARS[2] << std::flush;
                 }
             }
             percentDone = newPercentDone;
@@ -77,14 +77,9 @@ void ThreadFunc<O>::operator()(solver_t* solver, const unsigned threadNum) {
         }
 
         // Save some stats for later diagnostics-printing:
-        const Solver::opcount_t opCount = solver->prevGen.getOpCount();
-        const Solver::opcount_t giveupCondVar
-            = (Solver::gum == Solver::GUM::E::OPERATIONS) ? opCount
-            : (Solver::gum == Solver::GUM::E::BACKTRACKS) ? solver->getMaxBacktrackCount()
-            : [](){ throw "unhandled GUM case"; return ~0; }();
-        const unsigned binNum = NUM_BINS * (giveupCondVar) / solver->GIVEUP_THRESHOLD;
+        const unsigned binNum = NUM_BINS * (solver->getMaxBacktrackCount()) / solver->GIVEUP_THRESHOLD;
         binHitCount[binNum]++;
-        binOpsTotal[binNum] += opCount;
+        binOpsTotal[binNum] += solver->prevGen.getOpCount();
     }
     mutex.unlock();
     if (threadNum != 0) delete solver;

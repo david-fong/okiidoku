@@ -178,9 +178,7 @@ void Repl<O>::runSingle(const bool contPrev) {
 
     os << "\nprocessor time: " STATW_D << processorTime << " seconds";
     os << "\nnum operations: " STATW_I << solver.prevGen.getOpCount();
-    if constexpr (Solver::cbt) {
-        os << "\nmax backtracks: " STATW_I << solver.getMaxBacktrackCount();
-    }
+    os << "\nmax backtracks: " STATW_I << solver.getMaxBacktrackCount();
     if (!solver.isPretty) solver.printMessageBar("", '-');
     solver.print();
     solver.printMessageBar((solver.prevGen.getExitStatus() == Solver::ExitStatus::SUCCESS) ? "DONE" : "ABORT");
@@ -246,7 +244,6 @@ void Repl<O>::runMultiple(
     const std::string secondsUnits = DIM_ON + " seconds (with I/O)" + DIM_OFF;
     solver.printMessageBar("", BAR_WIDTH, '-'); os
     << "\nhelper threads: " STATW_I << numExtraThreads
-    << "\ngive-up method: " STATW_I << Solver::gum
     << "\ngenerator path: " STATW_I << solver.getGenPath()
     // TODO [stats] For total successes and total trieals.
     << "\nprocessor time: " STATW_D << procSeconds << secondsUnits
@@ -306,19 +303,14 @@ void Repl<O>::printTrialsWorkDistribution(
         successfulTrialsAccum   += binHitCount[i];
         successfulSolveOpsAccum += binOpsTotal[i];
         successfulTrialsAccumArr[i] = successfulTrialsAccum;
-        const double boundedGiveupOps = [&](){
-            using namespace Sudoku::Solver; return
-              (gum == GUM::E::OPERATIONS) ? ((double)(i+1) * solver.GIVEUP_THRESHOLD / Trials::NUM_BINS)
-            // No nice way to do the below. If I want an exact thing, I would
+        const double boundedGiveupOps = ((double)binOpsTotal[i+1] / binHitCount[i+1]);
+            // No nice way to do the above. If I want an exact thing, I would
             // need to change generateSolution to also track the numOperations
             // for some hypothetical, lower threshold, which would be for the
             // bottom of this bin. I would need to expose `Trials::NUM_BINS` to
             // the `Solver` class. As a temporary, pessimistic band-aid, I will
             // use the values for the next bin. Note that this will give `nan`
             // (0.0/0.0) if there is no data for the next bin.
-            : (gum == GUM::E::BACKTRACKS) ? ((double)binOpsTotal[i+1] / binHitCount[i+1])
-            : [](){ throw "unhandled GUM case"; return 0.0; }();
-        }();
         const double boundedGiveupOpsTotal = (totalTrials - successfulTrialsAccum) * boundedGiveupOps;
         throughput[i] = successfulTrialsAccum / (successfulSolveOpsAccum + boundedGiveupOpsTotal);
         if (throughput[i] > throughput[bestThroughputBin]) {
@@ -338,7 +330,7 @@ void Repl<O>::printTrialsWorkDistribution(
         }
         // Bin Bottom column:
         const double binBottom  = (double)(i) * solver.GIVEUP_THRESHOLD / Trials::NUM_BINS;
-        if constexpr (O < 4 || (O == 4 && Solver::gum == Solver::GUM::E::BACKTRACKS)) {
+        if constexpr (O <= 4) {
             os << "\n|" << std::setw(9) << (int)(binBottom);
         } else {
             os << "\n|" << std::setw(8) << (int)(binBottom / 1'000.0) << 'K';

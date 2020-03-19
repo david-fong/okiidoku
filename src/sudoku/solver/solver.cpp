@@ -28,7 +28,7 @@ std::ostream& operator<<(std::ostream& os, Sudoku::Solver::Solver<O> const& s) {
         if (!isPretty) return;
         os << '\n' << Ansi::DIM.ON;
         os << s.blkRowSepString;
-        if constexpr (cbt) os << GRID_SEP << s.blkRowSepString;
+        os << GRID_SEP << s.blkRowSepString;
         os << Ansi::DIM.OFF;
     };
     for (length_t row = 0; row < s.length; row++) {
@@ -39,9 +39,7 @@ std::ostream& operator<<(std::ostream& os, Sudoku::Solver::Solver<O> const& s) {
         // Tile content:
         #define index (row * s.length + col)
         PRINT_GRID0_TILE(os << ' ' << s.grid[index])
-        if constexpr (cbt) {
-            PRINT_GRID_TILE(s.printShadedBacktrackStat(s.backtrackCounts[index]))
-        }
+        PRINT_GRID_TILE(s.printShadedBacktrackStat(s.backtrackCounts[index]))
         // PRINT_GRID_TILE(os << std::setw(2) << grid[index].biasIndex)
         // PRINT_GRID_TILE(os << ' ' << rowBiases[row][col])
         #undef index
@@ -142,20 +140,15 @@ void Solver<O>::printSimple(void) const {
 
 template <Order O>
 void Solver<O>::printShadedBacktrackStat(const backtrack_t count) const {
-    if constexpr (cbt) {
-        const unsigned int relativeIntensity
-            = (double)(count - 1)
-            * Ansi::GREYSCALE_BLOCK_CHARS.size()
-            / maxBacktrackCount;
-        auto const& intensityChar
-            = (count != 0)
-            ? Ansi::GREYSCALE_BLOCK_CHARS[relativeIntensity]
-            : " ";
-        os << intensityChar << intensityChar;
-    } else {
-        // Complain if found in call-path when backtrack-counting is off:
-        static_assert(cbt, "not avaliable when backtrack-counting is off.");
-    }
+    const unsigned int relativeIntensity
+        = (double)(count - 1)
+        * Ansi::GREYSCALE_BLOCK_CHARS.size()
+        / maxBacktrackCount;
+    auto const& intensityChar
+        = (count != 0)
+        ? Ansi::GREYSCALE_BLOCK_CHARS[relativeIntensity]
+        : " ";
+    os << intensityChar << intensityChar;
 }
 
 
@@ -182,10 +175,9 @@ void Solver<O>::clear(void) {
             }
         }
     }
-    if constexpr (cbt) {
-        backtrackCounts.fill(0u);
-        maxBacktrackCount = 0u;
-    }
+    backtrackCounts.fill(0u);
+    maxBacktrackCount = 0u;
+
     // Scramble each row's value-guessing-order:
     RANDOM_MUTEX.lock();
     for (auto& rowBias : rowBiases) {
@@ -282,10 +274,8 @@ void Solver<O>::generateSolution(const bool contPrev) {
         opCount++;
         if (direction == TvsDirection::BACK) {
             // Pop and step backward:
-            if constexpr (cbt) {
-                if (++backtrackCounts[gridIndex] > maxBacktrackCount) {
-                    maxBacktrackCount = backtrackCounts[gridIndex];
-                }
+            if (++backtrackCounts[gridIndex] > maxBacktrackCount) {
+                maxBacktrackCount = backtrackCounts[gridIndex];
             }
             if (__builtin_expect(tvsIndex == 0u, false)) {
                 prevGen.exitStatus = ExitStatus::IMPOSSIBLE;
@@ -297,11 +287,7 @@ void Solver<O>::generateSolution(const bool contPrev) {
             ++tvsIndex;
         }
         // Check whether the give-up-condition has been met:
-        const opcount_t giveupCondVar
-            = (gum == GUM::E::OPERATIONS) ? opCount
-            : (gum == GUM::E::BACKTRACKS) ? maxBacktrackCount
-            : [](){ throw "unhandled GUM case"; return ~0u; }();
-        if (__builtin_expect(giveupCondVar >= GIVEUP_THRESHOLD, false)) {
+        if (__builtin_expect(maxBacktrackCount >= GIVEUP_THRESHOLD, false)) {
             prevGen.exitStatus = ExitStatus::GIVEUP;
             break;
         }
@@ -424,7 +410,7 @@ template <Order O>
 GenPath::E Solver<O>::initializeGenPath(void) noexcept {
     GenPath::E defaultGenPath;
     // Interesting: Smaller-order grids perform better with ROW_MAJOR as genPath.
-    if ((order < 4) || (order == 4 && gum == GUM::E::BACKTRACKS)) {
+    if (order <= 4) {
         defaultGenPath = GenPath::E::ROW_MAJOR;
     } else {
         defaultGenPath = GenPath::E::BLOCK_COLS;
@@ -460,7 +446,7 @@ void Solver<O>::printMessageBar(std::string const& msg, const char fillChar) con
     const unsigned gridBarLength = (isPretty)
         ? ((length + order + 1) * 2)
         : (length * 2);
-    constexpr unsigned numGrids = 1 + unsigned(cbt);
+    constexpr unsigned numGrids = 2u;
     unsigned allBarLength = (numGrids * gridBarLength);
     if (numGrids > 1) allBarLength += (numGrids - 1) * GRID_SEP.length();
     return printMessageBar(msg, allBarLength + 1, fillChar);
