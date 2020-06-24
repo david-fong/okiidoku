@@ -21,11 +21,11 @@ Upon starting the program, you will enter the REPL and be greeted with informati
 
 Below is a screenshot of what you might see after running `./main 5` and running a couple generation attempts. The solver is tuned to give up in a way that optimizes throughput when generating batches of solutions, so you may notice many attempts giving up for size 5 before getting one that works.
 
-<img src="images/25x25_example.png" width="100%" align="center />
+![](images/25x25_example.png)
 
 Below is a screenshot of what you might see after running `./main 4`, then `output nogiveups` to suppress output for given-up trials, then `strials 10000` to generate solutions until 10000 have completed successfully.
 
-<img src="images/strials_example.png" width="100%" align="center />
+![](images/strials_example.png)
 
 ## The Code
 
