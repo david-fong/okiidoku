@@ -305,8 +305,8 @@ TvsDirection Solver<O>::setNextValid(const area_t index) {
 
     Tile& t = grid[index];
     if (!t.isClear()) {
-        // If the tile is currently already set, clear it:
-        // NOTE: this is the same as "if backtracked to here".
+        // If the tile is currently already set, clear its
+        // previous value:
         const occmask_t eraseMask = ~(occmask_t(0b1u) << t.value);
         rowBin &= eraseMask;
         colBin &= eraseMask;

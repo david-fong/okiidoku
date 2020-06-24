@@ -28,6 +28,9 @@ namespace Ansi {
     #undef SGR
 
 
+    // Do not attempt to create filled-strings using entries from this
+    // array. The result will not be as expected, which may have to do
+    // with the use of utf-8 strings...
     const std::array<std::string, 4> GREYSCALE_BLOCK_CHARS = {
         #if USE_ANSI_ESC
         // NOTE: Make sure that the initializer list size matches that
