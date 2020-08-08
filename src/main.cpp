@@ -2,7 +2,6 @@
 /**
  * Choose build flags for the Repl and Solver here.
  */
-#include "./buildflag.hpp"
 
 #include "./sudoku/solver/solver.cpp"
 #include "./sudoku/repl.cpp"

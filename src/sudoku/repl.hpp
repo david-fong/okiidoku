@@ -23,7 +23,6 @@ namespace Sudoku::Repl {
          CONTINUE_PREV,
          RUN_TRIALS,
          RUN_SUCCESSES,
-         SOLVE,
       };
       const std::map<std::string, Command::E> MAP = {
          { "help",       E::HELP           },
@@ -34,7 +33,6 @@ namespace Sudoku::Repl {
          { "cont",       E::CONTINUE_PREV  }, // TODO [qol] Change this to "c"? (remember to change help string too)
          { "trials",     E::RUN_TRIALS     },
          { "strials",    E::RUN_SUCCESSES  },
-         { "solve",      E::SOLVE          },
       };
       const std::string HELP_MESSAGE = "\nCOMMAND MENU:"
          "\n- help               print this help menu"
@@ -44,9 +42,7 @@ namespace Sudoku::Repl {
          "\n- {enter}            generate a single solution"
          "\n- cont               continue previous generation"
          "\n- trials <n>         attempt to generate <n> solutions"
-         "\n- strials <n>        successfully generate <n> solutions"
-         "\n- solve <file>       solve the puzzles in <file>"
-         "\n- solve <puzzle>     no spaces; zeros mean empty";
+         "\n- strials <n>        successfully generate <n> solutions";
    } // End of Command namespace
 
    // Returns zero on error.
@@ -91,7 +87,6 @@ namespace Sudoku::Repl {
       const std::string DIM_OFF = (solver.isPretty ? Ansi::DIM.OFF : "");
 
       // Return false if command is to exit the program:
-      void solvePuzzlesFromFile(std::ifstream&);
       void runSingle(bool contPrev = false);
 
       void runMultiple(trials_t numTrials, Trials::StopBy);

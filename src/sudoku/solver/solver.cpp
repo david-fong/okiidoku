@@ -82,7 +82,7 @@ std::array<typename Solver<O>::area_t, Solver<O>::area> Solver<O>::traversalOrde
 template <Order O>
 Solver<O>::Solver(std::ostream& os):
    os        (os),
-   isPretty   (&os == &std::cout)
+   isPretty  (&os == &std::cout)
 {
    for (auto& rowBias : rowBiases) {
       std::iota(rowBias.begin(), rowBias.end(), 0);
@@ -153,28 +153,14 @@ void Solver<O>::printShadedBacktrackStat(const backtrack_t count) const {
 
 
 template <Order O>
-template <bool USE_PUZZLE>
 void Solver<O>::clear(void) {
    for (area_t i = 0; i < area; i++) {
-      // Clear all non-givens. Their values should already have been
-      // set by `loadPuzzleFromString`. Recall that biasIndex for
-      // givens must not be used (see Tile documentation).
-      if ((USE_PUZZLE) ? (!isTileForGiven[i]) : true) grid[i].clear();
+      // Clear all non-givens.
+      grid[i].clear();
    }
    rowSymbolOccMasks.fill(0);
    colSymbolOccMasks.fill(0);
    blkSymbolOccMasks.fill(0);
-   if constexpr (USE_PUZZLE) {
-      // Fill back in the occmasks for givens:
-      for (area_t i = 0; i < area; i++) {
-         if (isTileForGiven[i]) {
-            const occmask_t turnOnBitMask = occmask_t(0b1u) << grid[i].value;
-            rowSymbolOccMasks[getRow(i)] |= turnOnBitMask;
-            colSymbolOccMasks[getCol(i)] |= turnOnBitMask;
-            blkSymbolOccMasks[getBlk(i)] |= turnOnBitMask;
-         }
-      }
-   }
    backtrackCounts.fill(0u);
    maxBacktrackCount = 0u;
 
@@ -189,50 +175,10 @@ void Solver<O>::clear(void) {
 
 
 template <Order O>
-bool Solver<O>::loadPuzzleFromString(const std::string& puzzleString) {
-   // This length check will be done again later, but might as well
-   // do it now as a quick short-circuiter.
-   if (puzzleString.length() != area) return false;
-
-   // Clear any is-given=markers set for previous puzzles:
-   isTileForGiven.reset();
-
-   const PuzzleStrBlanksFmt blanksFmt
-      = (puzzleString.find(' ') != std::string::npos)
-      ? PuzzleStrBlanksFmt::SPACE
-      : PuzzleStrBlanksFmt::ZERO;
-   for (area_t i = 0; i < area; i++) {
-      const char valueChar = puzzleString[i];
-      switch (blanksFmt) {
-      case PuzzleStrBlanksFmt::SPACE:
-         if (valueChar != ' ') {
-            registerGivenValue(i, Tile::VALUE_FROM_CHAR(valueChar));
-         } break;
-      case PuzzleStrBlanksFmt::ZERO:
-         if (valueChar != '0') {
-            registerGivenValue(i, Tile::VALUE_FROM_CHAR(valueChar) - 1);
-         } break;
-      }
-   }
-   return true;
-}
-
-
-template <Order O>
-void Solver<O>::registerGivenValue(const area_t index, const value_t value) {
-   isTileForGiven[index] = true;
-   grid[index].value = value;
-   // Note: The occupancy masks are populated for these givens during
-   // clearing, which always happens right before generating a solution.
-}
-
-
-template <Order O>
-template <bool USE_PUZZLE>
 void Solver<O>::generateSolution(const bool contPrev) {
    TvsDirection direction = TvsDirection::FORWARD;
-   opcount_t   opCount   = 0u;
-   area_t      tvsIndex  = 0u;
+   opcount_t    opCount   = 0u;
+   area_t       tvsIndex  = 0u;
 
    if (__builtin_expect(contPrev, false)) {
       switch (prevGen.getExitStatus()) {
@@ -247,28 +193,12 @@ void Solver<O>::generateSolution(const bool contPrev) {
       }
    } else {
       // Not continuing. Do something entirely new!
-      this->template clear<USE_PUZZLE>();
+      this->clear();
    }
    prevGen.exitStatus = ExitStatus::SUCCESS; // default value;
 
    while (tvsIndex < area) {
       const area_t gridIndex = traversalOrder[tvsIndex];
-      if constexpr (USE_PUZZLE) {
-         // Immediately pass over consecutive tiles containing givens.
-         // The position of this logic block ensures that this entire loop
-         // never exits at a (non-boundary) traversal-index over a given.
-         if (__builtin_expect(isTileForGiven[gridIndex], false)) {
-            if (direction == TvsDirection::BACK) {
-               if (__builtin_expect(tvsIndex == 0u, false)) {
-                  prevGen.exitStatus = ExitStatus::IMPOSSIBLE;
-                  break;
-               } else --tvsIndex;
-            } else {
-               ++tvsIndex;
-            }
-            continue;
-         }
-      }
       // Try something at the current tile:
       direction = setNextValid(gridIndex);
       opCount++;

@@ -29,13 +29,16 @@ namespace Ansi {
    #undef SGR
 
 
-   // Do not attempt to create filled-strings using entries from this
-   // array. The result will not be as expected, which may have to do
-   // with the use of utf-8 strings...
-   // NOTE: Make sure that the initializer list size matches that
-   // of the corresponding template argument. Compilers won't warn.
-   // See https://cppreference.com/w/cpp/language/sizeof...#Example
-   // for an example utility function I can make to avoid this problem.
+   /**
+    * Do not attempt to fill-initialize strings using entries from this
+    * array. The result will not be as expected, which may have to do
+    * with the use of utf-8 strings...
+    *
+    * NOTE: Make sure that the initializer list size matches that
+    * of the corresponding template argument. Compilers won't warn.
+    * See https://cppreference.com/w/cpp/language/sizeof...#Example
+    * for an example utility function I can make to avoid this problem.
+    */
    const std::array<std::string, 4> BLOCK_CHARS = {
       #if USE_ANSI_ESC
       u8"\u2591", u8"\u2592", u8"\u2593", u8"\u2588",

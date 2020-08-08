@@ -19,7 +19,8 @@ namespace Sudoku::Repl {
 
 const std::string TERMINAL_OUTPUT_TIPS =
 "\nNote: You can run `tput rmam` in your shell to disable text wrapping."
-"\nAlso, scrolling may be slower if the build flag `USE_ANSI_ESC is` on.";
+"\nAlso, scrolling may be slower if the build flag `USE_ANSI_ESC is` on."
+"\nIf UTF-8 characters are garbled on Windows, run `chcp.com 65001`.";
 
 
 template <Order O>
@@ -39,7 +40,7 @@ Repl<O>::Repl(std::ostream& os):
    << "\nsolver obj size: " << sizeof(solver) << " bytes"
    << "\ndefault genpath: " << solver.getGenPath();
    if constexpr (O > 3) {
-      std::cout << '\n' << Ansi::DIM.ON << TERMINAL_TEXT_FORMATTING_NOTES << Ansi::DIM.OFF;
+      std::cout << '\n' << Ansi::DIM.ON << TERMINAL_OUTPUT_TIPS << Ansi::DIM.OFF;
    }
    std::cout << std::endl;
 
@@ -75,7 +76,7 @@ bool Repl<O>::runCommand(std::string const& cmdLine) {
       case E::HELP:
          std::cout
          << Command::HELP_MESSAGE << Ansi::DIM.ON
-         << '\n' <<      OutputLvl::OPTIONS_MENU
+         << '\n' <<       OutputLvl::OPTIONS_MENU
          << '\n' << Solver::GenPath::OPTIONS_MENU
          << Ansi::DIM.OFF << std::endl;
          break;
@@ -83,26 +84,10 @@ bool Repl<O>::runCommand(std::string const& cmdLine) {
          return false;
       case E::OUTPUT_LEVEL:setOutputLvl(cmdArgs); break;
       case E::SET_GENPATH:   solver.setGenPath(cmdArgs); break;
-      case E::RUN_SINGLE:   runSingle();    break;
+      case E::RUN_SINGLE:    runSingle();    break;
       case E::CONTINUE_PREV: runSingle(true); break;
-      case E::RUN_TRIALS:   runMultiple(cmdArgs, Trials::StopBy::TRIALS);   break;
+      case E::RUN_TRIALS:    runMultiple(cmdArgs, Trials::StopBy::TRIALS);   break;
       case E::RUN_SUCCESSES: runMultiple(cmdArgs, Trials::StopBy::SUCCESSES); break;
-      case E::SOLVE: {
-         if (solver.loadPuzzleFromString(cmdArgs)) {
-            // TODO: give better output if solver gives up. Maybe move to its own function.
-            solver.template generateSolution<true>();
-            solver.print();
-            break;
-         }
-         std::ifstream puzzleFile(cmdArgs);
-         if (!puzzleFile.good()) {
-            std::cout << Ansi::RED.ON;
-            std::cout << "the specified file could not be opened for reading.";
-            std::cout << Ansi::RED.OFF << std::endl;
-         } else {
-            solvePuzzlesFromFile(puzzleFile);
-         }
-         break; }
    }
    return true;
 }
@@ -141,29 +126,6 @@ OutputLvl::E Repl<O>::setOutputLvl(std::string const& newOutputLvlString) {
       << "\" is not a valid output level name.\n"
       << OutputLvl::OPTIONS_MENU << Ansi::RED.OFF << std::endl;
    return getOutputLvl();
-}
-
-
-template <Order O>
-void Repl<O>::solvePuzzlesFromFile(std::ifstream& puzzlesFile) {
-   // Put the string outside the loop since the space allocation
-   // for proper input, should be all the same.
-   std::string puzzleString;
-   puzzleString.reserve(solver.area + 1);
-   while (std::getline(puzzlesFile, puzzleString)) {
-      // Read a puzzle from the file:
-      if (!solver.loadPuzzleFromString(puzzleString)) {
-         std::cout << Ansi::RED.ON;
-         std::cout << "Could not use the input to read in a puzzle.";
-         std::cout << Ansi::RED.OFF << std::endl;
-         // Just go try something else:
-         continue;
-      }
-      solver.template generateSolution<true>();
-
-      // TODO [feat] Write the solution to an output file.
-      solver.print();
-   }
 }
 
 

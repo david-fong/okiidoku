@@ -57,12 +57,6 @@ namespace Sudoku::Solver {
       IMPOSSIBLE, GIVEUP, SUCCESS,
    };
 
-   // What to interpret as a blank (non-given) in a puzzle string.
-   enum class PuzzleStrBlanksFmt {
-      // TODO [feat] Implement LENGTH format detector and parser.
-      SPACE, ZERO, //LENGTH,
-   };
-
 } // End of Sudoku::Solver namespace
 
 

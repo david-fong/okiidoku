@@ -58,11 +58,6 @@ namespace Sudoku::Solver {
        * value fails. If there is nothing left to try, this is set
        * to the grid's length, indicating that the next thing to try
        * is via backtracking.
-       *
-       * GIVENS:
-       * If solving a puzzle and this tile is for given information,
-       * `biasIndex` should not be used, and `value` should not be
-       * modified.
        */
       class Tile final {
         friend class Solver<O>;
@@ -89,25 +84,6 @@ namespace Sudoku::Solver {
                      ? out << static_cast<unsigned>(t.value)
                      : out << static_cast<char>('a' + t.value - 10);
                }
-            }
-         }
-         // Does not check the validity of inputs.
-         // Assumes that the puzzle-string blanks style uses <length>
-         // for blanks. Accepts 'G' for order == 4 as `length`, and
-         // 'A' for order == 6. Case sensitive. Always lowercase first
-         // for order <= 6.
-         [[gnu::const]] static constexpr value_t VALUE_FROM_CHAR(const char valueChar) noexcept {
-            static_assert(order <= 6, "I haven't yet decided how to translate for orders > 6.");
-            if constexpr (order < 4) {
-               return valueChar - '0';
-            } else if constexpr (order == 5) {
-               return valueChar - 'a';
-            } else {
-               if constexpr (order == 6)
-                  if (valueChar == 'A') return 36;
-               return (valueChar <= '9')
-                  ?  (valueChar  - '0')
-                  :  (valueChar  - 'a' + 10);
             }
          }
         protected:
@@ -160,7 +136,6 @@ namespace Sudoku::Solver {
       [[gnu::cold]] GENPATH_STORAGE_MOD GenPath::E initializeGenPath(void) noexcept;
       GENPATH_STORAGE_MOD GenPath::E genPath;
       GENPATH_STORAGE_MOD std::array<area_t, area> traversalOrder;
-      std::bitset<area> isTileForGiven;
 
       std::array<backtrack_t, area> backtrackCounts;
       backtrack_t maxBacktrackCount;
@@ -173,14 +148,10 @@ namespace Sudoku::Solver {
       static const std::string blkRowSepString;
 
      public:
-      // Returns whether the string could be loaded as a puzzle.
-      // Does NOT check whether the givens follow the sudoku rules.
-      bool loadPuzzleFromString(std::string const&);
       // Generates a random solution. Returns the number of operations
       // performed. If exitStatus is not set to IMPOSSIBLE, then an
       // immediate call to this method will continue the previous
       // solution-generating-run from where it left off.
-      template <bool USE_PUZZLE = false>
       [[gnu::hot]] void generateSolution(bool contPrev = false);
       struct PrevGen final {
         friend class Solver;
@@ -190,11 +161,9 @@ namespace Sudoku::Solver {
          opcount_t  opCount    = 0;
         public:
          ExitStatus getExitStatus(void) const { return exitStatus; }
-         opcount_t     getOpCount(void) const { return opCount; }
+         opcount_t  getOpCount(void) const { return opCount; }
       }; PrevGen prevGen;
      private:
-      void registerGivenValue(area_t index, value_t value);
-      template <bool USE_PUZZLE>
       [[gnu::hot]] void clear(void);
       [[gnu::hot]] TvsDirection setNextValid(const area_t);
 
