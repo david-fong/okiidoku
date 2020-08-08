@@ -2,7 +2,7 @@
 #define HPP_BUILDFLAG
 
 /**
- * 
+ *
  * FAST:IO:
  * Note: My implementation does not use C-style IO, so it is safe for
  * consumer code to make the following optimization:
