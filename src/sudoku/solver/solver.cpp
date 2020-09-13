@@ -291,7 +291,18 @@ GenPath::E Solver<O>::setGenPath(const GenPath::E newGenPath, const bool force) 
       case GenPath::E::ROW_MAJOR:
          std::iota(traversalOrder.begin(), traversalOrder.end(), 0);
          break;
-      case GenPath::E::BLOCK_COLS: {
+      case GenPath::E::DEAL_RWMJ: {
+         area_t i = 0;
+         for (order_t bRow = 0; bRow < order; bRow++) {
+            for (order_t bCol = 0; bCol < order; bCol++) {
+               for (length_t blk = 0; blk < length; blk++) {
+                  area_t blkaddr = ((blk % order) * order) + (blk / order * order * length);
+                  traversalOrder[i++] = blkaddr + (bRow * length) + bCol;
+               }
+            }
+         }
+         break; }
+      case GenPath::E::BLOCK_COL: {
          area_t i = 0;
          for (order_t blkCol = 0; blkCol < order; blkCol++) {
             for (length_t row = 0; row < length; row++) {
@@ -343,7 +354,7 @@ GenPath::E Solver<O>::initializeGenPath(void) noexcept {
    if (order <= 4) {
       defaultGenPath = GenPath::E::ROW_MAJOR;
    } else {
-      defaultGenPath = GenPath::E::BLOCK_COLS;
+      defaultGenPath = GenPath::E::BLOCK_COL;
    }
    setGenPath(defaultGenPath, true);
    return getGenPath();

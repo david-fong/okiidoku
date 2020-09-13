@@ -7,9 +7,8 @@ Ex. `000000010400000000020000000000050407008000300001090000300400200050100000000
 
 ## Higher Priority
 
+- Make giveup thresholds settable via CLI, and allow setting to "default".
 - give a red message when trying to continue and nothing is left to be found.
-- Create a `verify` command that takes a solution string and prints it out prettily, highlighting any tiles where the conflict rules were violated.
-- Write solver solutions to a new file (user provides empty string to indicate choose suitable name based on input file name)
 - Update readme to talk about the four problems in Sudoku:
   - solution (verification, reconstruction, compression, generation)
   - (reconstruction is better known as puzzle solving, and compression as puzzle generation).

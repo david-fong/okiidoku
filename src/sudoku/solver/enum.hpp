@@ -31,14 +31,16 @@ namespace Sudoku::Solver {
    namespace GenPath {
       enum class E : unsigned {
          ROW_MAJOR,
-         BLOCK_COLS,
-         GenPath__MAX = BLOCK_COLS,
+         DEAL_RWMJ,
+         BLOCK_COL,
+         GenPath__MAX = BLOCK_COL,
       };
       constexpr size_t size = static_cast<size_t>(E::GenPath__MAX) + 1;
       // Indices of entries must match the
       // literal values of their respective enums.
       const std::array<std::string, size> NAMES = {
          "rowmajor",
+         "dealrwmj",
          "blockcol",
       };
       std::ostream& operator<<(std::ostream& out, const E genPath) {
@@ -46,6 +48,7 @@ namespace Sudoku::Solver {
       }
       const std::string OPTIONS_MENU = "\nGEN-PATH OPTIONS:"
          "\n- rowmajor   horizontal strips as wide as the grid one by one"
+         "\n- dealrwmj   like dealing cards to each block using row-major"
          "\n- blockcol   rowmajor, but broken into columns one block wide";
    }
 
