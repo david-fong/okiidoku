@@ -3,7 +3,7 @@
 #include <iostream>    // cout, endl
 #include <iomanip>     // setbase, setw,
 #include <fstream>     // ifstream,
-#include <ctime>      // clock,
+#include <ctime>       // clock,
 #include <numeric>     // iota,
 #include <algorithm>   // random_shuffle,
 #include <string>      // string,
@@ -19,9 +19,11 @@ std::ostream& operator<<(std::ostream& os, Sudoku::Solver::Solver<O> const& s) {
          PRINTER_STATEMENT;\
       }}
    #define PRINT_GRID_TILE(PRINTER_STATEMENT) {\
-      if (isPretty) os << Ansi::DIM.ON << " |" << Ansi::DIM.OFF;\
-      os << GRID_SEP;\
-      PRINT_GRID0_TILE(PRINTER_STATEMENT)}
+      if (isPretty) {\
+         os << Ansi::DIM.ON << " |" /* << Ansi::DIM.OFF */;\
+         os << GRID_SEP;\
+         PRINT_GRID0_TILE(PRINTER_STATEMENT)}\
+      }
 
    const bool isPretty = &os == &std::cout;
    const auto printBlkRowSepString = [&](){
