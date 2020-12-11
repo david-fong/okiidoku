@@ -6,10 +6,10 @@
             "intelliSenseMode": "gcc-x86",
             "compilerPath": "${MINGW64_HOME}/bin/g++"
         },
-        {
-            "name": "CLang x86_64",
-            "intelliSenseMode": "clang-x86",
-            "compilerPath": "C:/LLVM/bin/clang++"
-        }
+        // {
+        //     "name": "CLang x86_64",
+        //     "intelliSenseMode": "clang-x86",
+        //     "compilerPath": "C:/LLVM/bin/clang++"
+        // }
     ]
 }

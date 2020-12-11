@@ -6,11 +6,14 @@
 #include "./sudoku/solver/solver.cpp"
 #include "./sudoku/repl.cpp"
 
+#include <windows.h>    //
 #include <iostream>     // cout,
 #include <fstream>      // ofstream,
 #include <random>       // random_device,
 
 using Sudoku::Repl::Repl;
+
+#define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
 
 /**
  * ARGUMENTS
@@ -20,6 +23,11 @@ using Sudoku::Repl::Repl;
  * 3. output file name.
  */
 int main(const int argc, char const *const argv[]) {
+   DWORD mode;
+   GetConsoleMode(GetStdHandle(STD_OUTPUT_HANDLE), &mode);
+   mode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+   SetConsoleMode(GetStdHandle(STD_OUTPUT_HANDLE), mode);
+
    // My implementation specifies this as safe:
    std::ios_base::sync_with_stdio(false);
 
