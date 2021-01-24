@@ -66,10 +66,11 @@ int main(const int argc, char const *const argv[]) {
       case 3: { Repl<3> s(*os); break; }
       case 4: { Repl<4> s(*os); break; }
       case 5: { Repl<5> s(*os); break; }
+      case 6: { Repl<6> s(*os); break; }
       //case 6: { Repl<6> s(*os); break; }
       default:
          std::cout << Ansi::RED.ON << "\nILLEGAL ARGUMENT:\n  order must be one of: { ";
-         for (unsigned i = 3; i <= 5; i++) {
+         for (unsigned i = 3; i <= 6; i++) {
             std::cout << i << ", ";
          }
          std::cout << "}" << Ansi::RED.OFF << std::endl;

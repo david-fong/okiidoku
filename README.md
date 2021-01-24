@@ -9,13 +9,11 @@ For my hardware-implementation project, go to [**Sudoku-SV**](https://github.com
 
 ## How to Run It
 
-Make sure you have g++ installed.
-
-Note: If your terminal doesn't support ANSI escape codes for coloured text, set [`USE_ANS_ESC` in `buildflag.hpp`](src/buildflag.hpp) to `false`.
+Make sure you have mingw-w64 installed.
 
 ```shell
 cd src
-./build
+./build.sh
 ./main
 ```
 

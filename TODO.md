@@ -1,12 +1,11 @@
 
 # Things To Do
 
-[Try this?](https://codegolf.stackexchange.com/questions/190727/the-fastest-sudoku-solver)
-
-Ex. `000000010400000000020000000000050407008000300001090000300400200050100000000806000`
-
 ## Higher Priority
 
+- Design some smarter backtracking:
+  - Problem statement: For higher order grids, "choke-points" are much more apparent. The choke points do not have a strict pattern to where they appear.
+  - Goal: Dynamically detect choke-points and implement smart "leaps" backward. Can be like http where each consecutive leap backward from the current choke-point goes further back.
 - Make giveup thresholds settable via CLI, and allow setting to "default".
 - give a red message when trying to continue and nothing is left to be found.
 - Update readme to talk about the four problems in Sudoku:

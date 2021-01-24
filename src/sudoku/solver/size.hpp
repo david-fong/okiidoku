@@ -100,7 +100,7 @@ public:
     */
    static constexpr opcount_t GIVEUP_THRESHOLD = ((const opcount_t[]){
       // Note: Make sure entries of `backtrackCounts` can fit these.
-      0, 1,  3,   150,  10'000,  2'200'000, 100'000'000,
+      0,  1,  3,  150,  1'125,  560'000,  1'000'000'000,
    })[O];
    // TODO [tune] The current values for order-6 are just predictions.
 };

@@ -329,7 +329,7 @@ void Repl<O>::printTrialsWorkDistribution(
       // of the best. Note visual exaggeration via exponents
       // (the exponent value was chosen by taste / visual feel)
       const unsigned barLength = THROUGHPUT_BAR_STRING.length()
-         * std::pow(throughput[i] / throughput[bestThroughputBin], 5);
+         * std::pow(throughput[i] / throughput[bestThroughputBin], static_cast<int>(20.0/O));
       if (i != bestThroughputBin) os << DIM_ON;
       os << ' ' << THROUGHPUT_BAR_STRING.substr(0, barLength);
       if (i != bestThroughputBin) os << DIM_OFF;
