@@ -9,7 +9,7 @@ For my hardware-implementation project, go to [**Sudoku-SV**](https://github.com
 
 ## How to Run It
 
-Make sure you have mingw-w64 installed.
+Note: If building for windows, make sure you have mingw-w64 installed, and set the [`WINDOWS_ANSI`](./src/buildflag.hpp) build flag to true. This project was originally developed using mingw-w64. Pull requests are appreciated to fix any issues encountered when building for other systems.
 
 ```shell
 cd src
