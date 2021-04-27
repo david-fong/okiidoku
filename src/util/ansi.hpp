@@ -3,6 +3,7 @@
 
 #include "../buildflag.hpp"
 #include <array>
+#include <string>
 
 /**
  * Yes, I could get some library for this, or I could write a whole
