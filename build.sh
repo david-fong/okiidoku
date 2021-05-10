@@ -31,5 +31,5 @@ declare -r SHORTEN_STDLIB_PATH='s/.:\/[^\n]+?\/include/\[1;35mSTDLIB\[39m/g'
 ${COMPILER}\
     -Wall -Wimplicit-fallthrough=5 -O3 ${OPTS}\
     -fprofile-dir="${CONTEXT}/.profile"\
-    main.cpp -o main.exe\
+    src/main.cpp -o sudoku.exe\
     |& sed -E ${SHORTEN_STDLIB_PATH}

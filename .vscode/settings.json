@@ -3,6 +3,7 @@
         "TODO": "markdown",
         "**/gcc/**": "cpp",
     },
+    "explorer.sortOrder": "default",
     "C_Cpp.autoAddFileAssociations": false,
 
     "trailing-spaces.trimOnSave": true,
@@ -18,4 +19,9 @@
         "TODO.build" ,
         "TODO",
     ],
+
+    "[cpp]": {
+        "editor.insertSpaces": false,
+        "editor.tabSize": 3,
+    },
 }

@@ -14,7 +14,7 @@
 
 # Compilation
 /build/
-*.exe
+/sudoku.exe
 .profile/
 gmon.out
 
