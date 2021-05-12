@@ -1,6 +1,7 @@
 #ifndef HPP_SUDOKU_SOLVER
 #define HPP_SUDOKU_SOLVER
 
+#include "./grid.hpp"
 #include "../util/ansi.hpp"
 #include "./enum.hpp"
 #include "./size.hpp"
@@ -28,25 +29,25 @@ namespace Sudoku::Solver {
 	#endif
 
 	/**
-	 *
 	 */
 	template <Order O>
-	class Solver final {
-	  friend std::ostream&  operator<< <O>(std::ostream&, Solver const& s);
-	  static_assert((1 < O) && (O <= MAX_REASONABLE_ORDER));
-	  public:
-		using occmask_t     = typename Size<O>::occmask_t   ;
-		using order_t       = typename Size<O>::order_t     ;
-		using length_t      = typename Size<O>::length_t    ;
-		using area_t        = typename Size<O>::area_t      ;
-		using value_t       = typename Size<O>::value_t     ;
-		using backtrack_t   = typename Size<O>::backtrack_t ;
-		static constexpr opcount_t GIVEUP_THRESHOLD = Size<O>::GIVEUP_THRESHOLD;
+	class Solver final : public Sudoku::Grid::Grid<O> {
+		friend std::ostream& operator<< <O>(std::ostream&, Solver const& s);
+	public:
+		using backtrack_t = typename SolverSize<O>::backtrack_t;
+		using occmask_t = typename Size<O>::occmask_t;
+		using order_t  = typename Size<O>::order_t;
+		using length_t = typename Size<O>::length_t;
+		using area_t   = typename Size<O>::area_t;
+		using value_t  = typename Size<O>::value_t;
 
-	  // =======================
-	  // HELPER CLASS
-	  // =======================
-	  public:
+	public:
+		static constexpr opcount_t GIVEUP_THRESHOLD = SolverSize<O>::GIVEUP_THRESHOLD;
+
+	// =======================
+	// HELPER CLASS
+	// =======================
+	public:
 		/**
 		 * CLARITY:
 		 * When clear, `this->value` is the grid's length.
@@ -60,8 +61,8 @@ namespace Sudoku::Solver {
 		 * is via backtracking.
 		 */
 		class Tile final {
-		  friend class Solver<O>;
-		  public:
+			friend class Solver<O>;
+		public:
 			void clear(void) noexcept {
 				biasIndex = 0u;
 				value = length;
@@ -86,19 +87,18 @@ namespace Sudoku::Solver {
 					}
 				}
 			}
-		  protected:
+		protected:
 			value_t biasIndex;
 			value_t value; // undefined if clear.
 		};
 
-	  // ========================
-	  // PUBLIC MEMBERS
-	  // ========================
-	  public:
-		static constexpr order_t    order   = O;
-		static constexpr length_t   length  = O*O;
-		static constexpr area_t     area    = O*O*O*O;
-
+	// ========================
+	// PUBLIC MEMBERS
+	// ========================
+	public:
+		static constexpr order_t  order  = O;
+		static constexpr length_t length = O*O;
+		static constexpr area_t   area   = O*O*O*O;
 		Solver(void) = delete;
 		explicit Solver(std::ostream&);
 		[[gnu::cold]] void copySettingsFrom(Solver const&);
@@ -117,10 +117,10 @@ namespace Sudoku::Solver {
 
 		[[gnu::cold]] backtrack_t getMaxBacktrackCount(void) const noexcept { return maxBacktrackCount; }
 
-	  // ========================
-	  // PRIVATE MEMBERS
-	  // ========================
-	  private:
+	// ========================
+	// PRIVATE MEMBERS
+	// ========================
+	private:
 		std::array<Tile, area> grid;
 		std::array<occmask_t, length> rowSymbolOccMasks;
 		std::array<occmask_t, length> colSymbolOccMasks;
@@ -141,13 +141,13 @@ namespace Sudoku::Solver {
 		backtrack_t maxBacktrackCount;
 		void printShadedBacktrackStat(backtrack_t) const;
 
-	  public:
+	public:
 		std::ostream& os;
 		const bool isPretty;
 		static constexpr unsigned STATS_WIDTH = (0.4 * length) + 4;
 		static const std::string blkRowSepString;
 
-	  public:
+	public:
 		// Generates a random solution. Returns the number of operations
 		// performed. If exitStatus is not set to IMPOSSIBLE, then an
 		// immediate call to this method will continue the previous
@@ -163,46 +163,16 @@ namespace Sudoku::Solver {
 			ExitStatus getExitStatus(void) const { return exitStatus; }
 			opcount_t  getOpCount(void) const { return opCount; }
 		}; PrevGen prevGen;
-	  private:
-		[[gnu::hot]] void clear(void);
+	private:
+		void clear(void);
 		[[gnu::hot]] TvsDirection setNextValid(const area_t);
-
-	  // ========================
-	  // STATIC UTILITIES
-	  // ========================
-	  public:
-		// Inline functions:
-		[[gnu::const]] static constexpr length_t getRow(const area_t index) noexcept { return index / length; }
-		[[gnu::const]] static constexpr length_t getCol(const area_t index) noexcept { return index % length; }
-		[[gnu::const]] static constexpr length_t getBlk(const area_t index) noexcept { return getBlk(getRow(index), getCol(index)); }
-		[[gnu::const]] static constexpr length_t getBlk(const length_t row, const length_t col) noexcept {
-			return ((row / order) * order) + (col / order);
-		}
-		[[gnu::const]] static length_t occmask_popcount(occmask_t occmask) noexcept {
-			if constexpr (O < 6) {
-				return __builtin_popcount(occmask);
-			} else if constexpr (O < 9) {
-				return __builtin_popcountl(occmask);
-			} else {
-				return __builtin_popcountll(occmask);
-			}
-		}
-		[[gnu::const]] static length_t occmask_ctz(occmask_t occmask) noexcept {
-			if constexpr (O < 6) {
-				return __builtin_ctz(occmask);
-			} else if constexpr (O < 9) {
-				return __builtin_ctzl(occmask);
-			} else {
-				return __builtin_ctzll(occmask);
-			}
-		}
-	}; // End of Solver class.
+	}; // class Solver
 
 
 	const std::string GRID_SEP = "  ";
 
 	#undef GENPATH_STORAGE_MOD
 
-} // End of Sudoku::Solver namespace
+} // namespace Sudoku::Solver
 
 #endif

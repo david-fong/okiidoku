@@ -56,7 +56,7 @@ namespace Trials {
 		}
 	};
 
-} // End of Trials namespace
-} // End of Sudoku namespace
+} // namespace Trials
+} // namespace Sudoku
 
 #endif

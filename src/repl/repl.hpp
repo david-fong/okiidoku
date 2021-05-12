@@ -100,8 +100,8 @@ namespace Sudoku::Repl {
 		[[gnu::cold]] OutputLvl::E setOutputLvl(OutputLvl::E);
 		[[gnu::cold]] OutputLvl::E setOutputLvl(std::string const&);
 
-	}; // End of Repl class
+	}; // class Repl
 
-} // End of Sudoku::Repl namespace
+} // namespace Sudoku::Repl
 
 #endif

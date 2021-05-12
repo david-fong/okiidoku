@@ -1,11 +1,11 @@
 
 # Sudoku Solution Generation & Equivalence Checker with C++
 
-While most existing programming work related to Sudoku tackles the problem of _solving_ puzzles, this one looks at _generating_ the solutions that are then turned into puzzles. The goal is to answer the question, "How can we generate a highly random Sudoku solution (a full and valid Sudoku grid) out of nothing, and do so within a short timeframe for largeish grid sizes (ie. not just 9x9)?" The statement is not incredibly precise, but that's because there isn't a lot of other work to benchmark against.
+While most existing programming work related to Sudoku tackles the problem of _solving_ puzzles, this one looks at _generating_ the solutions that are then turned into puzzles. The goal is to answer the question, "How can we generate a highly random Sudoku solution (a full and valid Sudoku grid) out of nothing, and do so within a short timeframe for relatively large grid sizes (ie. not just 9x9)?".
 
-I have made a simple, web-based visualizer of the algorithm at work in a sister repo, [**Sudoku-JS**](https://david-fong.github.io/Sudoku-JS/), which I highly encourage you to take a look at.
+I have made a simple web-based visualizer of the algorithm at work in a sister repo, [**Sudoku-JS**](https://david-fong.github.io/Sudoku-JS/).
 
-This project also includes an equivalence checker.
+This project also includes an equivalence checker. I describe the algorithm [here](./src/logic/readme.md#equivalence-checking)
 
 For my hardware-implementation project, go to [**Sudoku-SV**](https://github.com/david-fong/Sudoku-SV).
 

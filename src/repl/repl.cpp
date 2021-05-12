@@ -342,4 +342,4 @@ void Repl<O>::printTrialsWorkDistribution(
 #undef STATW_I
 #undef STATW_D
 
-} // End of Sudoku namespace.
+} // namespace Sudoku::Repl

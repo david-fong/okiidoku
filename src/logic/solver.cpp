@@ -71,7 +71,7 @@ struct MyNumpunct : std::numpunct<char> {
 template <Order O>
 GenPath::E Solver<O>::genPath = initializeGenPath();
 template <Order O>
-std::array<typename Solver<O>::area_t, Solver<O>::area> Solver<O>::traversalOrder;
+std::array<typename Sudoku::Size<O>::area_t, Solver<O>::area> Solver<O>::traversalOrder;
 #endif
 
 
@@ -231,9 +231,9 @@ void Solver<O>::generateSolution(const bool contPrev) {
 
 template <Order O>
 TvsDirection Solver<O>::setNextValid(const area_t index) {
-	occmask_t& rowBin = rowSymbolOccMasks[getRow(index)];
-	occmask_t& colBin = colSymbolOccMasks[getCol(index)];
-	occmask_t& blkBin = blkSymbolOccMasks[getBlk(index)];
+	occmask_t& rowBin = rowSymbolOccMasks[this->getRow(index)];
+	occmask_t& colBin = colSymbolOccMasks[this->getCol(index)];
+	occmask_t& blkBin = blkSymbolOccMasks[this->getBlk(index)];
 
 	Tile& t = grid[index];
 	if (!t.isClear()) {
@@ -263,7 +263,7 @@ TvsDirection Solver<O>::setNextValid(const area_t index) {
 	}
 	*/
 	for (value_t biasIndex = t.biasIndex; biasIndex < length; biasIndex++) {
-		const value_t value = rowBiases[getRow(index)][biasIndex];
+		const value_t value = rowBiases[this->getRow(index)][biasIndex];
 		const occmask_t valueBit = occmask_t(0b1u) << value;
 		if (!(invalidBin & valueBit)) {
 			// If a valid value is found for this tile:

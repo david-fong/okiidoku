@@ -60,7 +60,7 @@ namespace Sudoku::Solver {
 		IMPOSSIBLE, GIVEUP, SUCCESS,
 	};
 
-} // End of Sudoku::Solver namespace
+} // namespace Sudoku::Solver
 
 
 namespace Sudoku::Repl {
@@ -89,8 +89,8 @@ namespace Sudoku::Repl {
 			"\n- emitall    emit all output"
 			"\n- nogiveups  suppress giveups"
 			"\n- silent     emit statistics only";
-	} // End of OutputLvl namespace
+	} // namespace OutputLvl
 
-} // End of Sudoku::Repl namespace
+} // namespace Sudoku::Repl
 
 #endif
