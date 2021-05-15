@@ -2,8 +2,9 @@
 #define HPP_SUDOKU_SOLVER_ENUM
 // This file is a helper for `./solver.hpp`.
 
-#include <iostream>
 #include <array>
+#include <string>
+#include <iostream>
 
 namespace Sudoku::Solver {
 

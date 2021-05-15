@@ -3,13 +3,21 @@
     "configurations": [
         {
             "name": "Linux g++",
-            "compilerPath": "/usr/bin/g++"
+            "compilerPath": "/usr/bin/g++",
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "includePath": [],
+            "intelliSenseMode": "gcc-x64",
+            "browse": {
+                "path": [],
+                "limitSymbolsToIncludedHeaders": true
+            }
         },
         {
             "name": "MinGW x86_64",
             "intelliSenseMode": "gcc-x86",
             "compilerPath": "${MINGW64_HOME}/bin/g++"
-        },
+        }
         // {
         //     "name": "CLang x86_64",
         //     "intelliSenseMode": "clang-x86",

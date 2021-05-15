@@ -1,10 +1,12 @@
 #include "./solver.hpp"
 
+#include <mutex>
 #include <iostream>    // cout, endl
 #include <iomanip>     // setbase, setw,
 #include <fstream>     // ifstream,
 #include <ctime>       // clock,
 #include <numeric>     // iota,
+#include <random>
 #include <algorithm>   // random_shuffle,
 #include <string>      // string,
 

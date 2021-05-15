@@ -13,15 +13,11 @@ namespace Sudoku::Grid {
 		static_assert((1 < O) && (O <= MAX_REASONABLE_ORDER));
 	public:
 		using occmask_t = typename Size<O>::occmask_t;
-		using order_t  = typename Size<O>::order_t;
-		using length_t = typename Size<O>::length_t;
-		using area_t   = typename Size<O>::area_t;
-		using value_t  = typename Size<O>::value_t;
+		using order_t   = typename Size<O>::order_t;
+		using length_t  = typename Size<O>::length_t;
+		using area_t    = typename Size<O>::area_t;
+		using value_t   = typename Size<O>::value_t;
 
-	// ========================
-	// PUBLIC MEMBERS
-	// ========================
-	public:
 		static constexpr order_t  order  = O;
 		static constexpr length_t length = O*O;
 		static constexpr area_t   area   = O*O*O*O;
@@ -29,8 +25,6 @@ namespace Sudoku::Grid {
 	protected:
 		void clear(void);
 
-	// ========================
-	// STATIC UTILITIES
 	// ========================
 	public:
 		// Inline functions:

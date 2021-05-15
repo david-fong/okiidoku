@@ -1,5 +1,4 @@
 #include "./trials.hpp"
-
 #include "../util/ansi.hpp"
 
 #include <iostream>

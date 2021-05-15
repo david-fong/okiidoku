@@ -11,7 +11,7 @@ Other people have also written about this topic, but focusing mainly on _countin
 - [pi.math.cornell.edu](https://pi.math.cornell.edu/~mec/Summer2009/Mahmood/Symmetry.html).
 - [handwiki.org](https://handwiki.org/wiki/Mathematics_of_Sudoku#Sudokus_of_other_sizes)
 
-There are relatively fewer discussions/implementations concerning checking for equivalence:
+There isn't an abundance of community discussion on the topic of equivalence checking:
 
 - [this math stack exchange post](https://math.stackexchange.com/questions/1903186/determining-if-two-sudoku-boards-are-in-the-same-equivalence-class/4135784#4135784)
 - [this math stack exchange post](https://math.stackexchange.com/questions/2791524/group-theory-and-sudoko)

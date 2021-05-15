@@ -1,16 +1,12 @@
 #ifndef HPP_SUDOKU_SOLVER
 #define HPP_SUDOKU_SOLVER
 
-#include "./grid.hpp"
 #include "../util/ansi.hpp"
 #include "./enum.hpp"
 #include "./size.hpp"
+#include "./grid.hpp"
 
-#include <iostream>
-#include <random>
-#include <mutex>
 #include <array>
-#include <bitset>
 
 
 // https://en.cppreference.com/w/cpp/language/friend#Template_friend_operators
@@ -36,18 +32,17 @@ namespace Sudoku::Solver {
 	public:
 		using backtrack_t = typename SolverSize<O>::backtrack_t;
 		using occmask_t = typename Size<O>::occmask_t;
-		using order_t  = typename Size<O>::order_t;
-		using length_t = typename Size<O>::length_t;
-		using area_t   = typename Size<O>::area_t;
-		using value_t  = typename Size<O>::value_t;
+		using order_t   = typename Size<O>::order_t;
+		using length_t  = typename Size<O>::length_t;
+		using area_t    = typename Size<O>::area_t;
+		using value_t   = typename Size<O>::value_t;
 
-	public:
+		static constexpr order_t  order  = O;
+		static constexpr length_t length = O*O;
+		static constexpr area_t   area   = O*O*O*O;
+
 		static constexpr opcount_t GIVEUP_THRESHOLD = SolverSize<O>::GIVEUP_THRESHOLD;
 
-	// =======================
-	// HELPER CLASS
-	// =======================
-	public:
 		/**
 		 * CLARITY:
 		 * When clear, `this->value` is the grid's length.
@@ -93,12 +88,7 @@ namespace Sudoku::Solver {
 		};
 
 	// ========================
-	// PUBLIC MEMBERS
-	// ========================
 	public:
-		static constexpr order_t  order  = O;
-		static constexpr length_t length = O*O;
-		static constexpr area_t   area   = O*O*O*O;
 		Solver(void) = delete;
 		explicit Solver(std::ostream&);
 		[[gnu::cold]] void copySettingsFrom(Solver const&);
@@ -117,8 +107,6 @@ namespace Sudoku::Solver {
 
 		[[gnu::cold]] backtrack_t getMaxBacktrackCount(void) const noexcept { return maxBacktrackCount; }
 
-	// ========================
-	// PRIVATE MEMBERS
 	// ========================
 	private:
 		std::array<Tile, area> grid;
@@ -154,12 +142,12 @@ namespace Sudoku::Solver {
 		// solution-generating-run from where it left off.
 		[[gnu::hot]] void generateSolution(bool contPrev = false);
 		struct PrevGen final {
-		  friend class Solver;
-		  private:
+		friend class Solver;
+		private:
 			ExitStatus exitStatus = ExitStatus::IMPOSSIBLE;
 			area_t     tvsIndex   = 0;
 			opcount_t  opCount    = 0;
-		  public:
+		public:
 			ExitStatus getExitStatus(void) const { return exitStatus; }
 			opcount_t  getOpCount(void) const { return opCount; }
 		}; PrevGen prevGen;

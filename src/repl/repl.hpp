@@ -2,10 +2,12 @@
 #define HPP_SUDOKU_REPL
 
 #include "../logic/solver.hpp"
+#include "../logic/equiv.hpp"
 #include "./trials.hpp"
-
 #include "../logic/enum.hpp"
 
+#include <array>
+#include <string>
 #include <map>
 
 
@@ -53,7 +55,6 @@ namespace Sudoku::Repl {
 
 
 	/**
-	 *
 	 *
 	 * Notes for me as I learn how to write inheritance in C++:
 	 * I can specify base-class members like:

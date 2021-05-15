@@ -1,5 +1,5 @@
-#ifndef HPP_SUDOKU_SOLVER_SIZE
-#define HPP_SUDOKU_SOLVER_SIZE
+#ifndef HPP_SUDOKU_SIZE
+#define HPP_SUDOKU_SIZE
 // This file is a helper for `./solver.hpp`.
 
 #include "../buildflag.hpp"

@@ -3,6 +3,10 @@
 
 #include "../logic/solver.hpp"
 
+#include <array>
+#include <string>
+#include <mutex>
+
 namespace Sudoku {
 
 typedef unsigned long trials_t;
@@ -39,14 +43,14 @@ namespace Trials {
 	 */
 	template <Sudoku::Order O>
 	class ThreadFunc final : private SharedState {
-	  public:
+	public:
 		using solver_t  = class Sudoku::Solver::Solver<O>;
 		using OutputLvl = Repl::OutputLvl::E;
-	  public:
+	public:
 		ThreadFunc(void) = delete;
 		explicit ThreadFunc(SharedState s) : SharedState(s) {};
 		inline void operator()(solver_t* solver, unsigned threadNum);
-	  private:
+	private:
 		trials_t trialsStopCurVal(void) const {
 			switch (trialsStopMethod) {
 				case StopBy::TRIALS:    return totalTrials;

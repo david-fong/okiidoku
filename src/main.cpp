@@ -10,6 +10,7 @@
 #include <windows.h>    //
 #endif
 
+#include <string>
 #include <iostream>     // cout,
 #include <fstream>      // ofstream,
 #include <random>       // random_device,

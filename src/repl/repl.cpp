@@ -4,7 +4,7 @@
 #include <iostream>    // cout, endl,
 #include <iomanip>     // setw,
 #include <chrono>      // steady_clock::now, durationcast,
-#include <math.h>      // pow,
+#include <cmath>      // pow,
 
 #include <thread>
 #include <mutex>
