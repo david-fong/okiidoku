@@ -7,13 +7,13 @@
 #include "./repl/repl.cpp"
 
 #if WINDOWS_ANSI
-#include <windows.h>    //
+#include <windows.h> //
 #endif
 
 #include <string>
-#include <iostream>     // cout,
-#include <fstream>      // ofstream,
-#include <random>       // random_device,
+#include <iostream> 	// cout,
+#include <fstream>  	// ofstream,
+#include <random>   	// random_device,
 
 using Sudoku::Repl::Repl;
 

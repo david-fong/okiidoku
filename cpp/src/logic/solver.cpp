@@ -159,7 +159,6 @@ void Solver<O>::printShadedBacktrackStat(const backtrack_t count) const {
 template <Order O>
 void Solver<O>::clear(void) {
 	for (area_t i = 0; i < area; i++) {
-		// Clear all non-givens.
 		grid[i].clear();
 	}
 	rowSymbolOccMasks.fill(0);
@@ -174,7 +173,6 @@ void Solver<O>::clear(void) {
 		std::shuffle(rowBias.begin(), rowBias.end(), VALUE_RNG);
 	}
 	RANDOM_MUTEX.unlock();
-	// Do not clear seeds here. That can be done when reading in givens.
 }
 
 

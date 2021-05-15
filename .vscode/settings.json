@@ -1,27 +1,32 @@
 {
-    "files.associations": {
-        "TODO": "markdown",
-        "**/gcc/**": "cpp",
-    },
-    "explorer.sortOrder": "default",
-    "C_Cpp.autoAddFileAssociations": false,
+	"files.associations": {
+		"**/gcc/**": "cpp",
+	},
+	"explorer.sortOrder": "default",
+	"C_Cpp.autoAddFileAssociations": false,
 
-    "trailing-spaces.trimOnSave": true,
+	"trailing-spaces.trimOnSave": true,
 
-    "todo-tree.filtering.useBuiltInExcludes": "file excludes",
-    "todo-tree.general.statusBar": "total",
-    "todo-tree.general.tags": [
-        "TODO.learn" ,
-        "TODO.design",
-        "TODO.doc"   ,
-        "TODO.impl"  ,
-        "TODO.test"  ,
-        "TODO.build" ,
-        "TODO",
-    ],
+	"todo-tree.filtering.useBuiltInExcludes": "file excludes",
+	"todo-tree.general.statusBar": "total",
+	"todo-tree.general.tags": [
+		"TODO.learn" ,
+		"TODO.design",
+		"TODO.doc"   ,
+		"TODO.impl"  ,
+		"TODO.test"  ,
+		"TODO.build" ,
+		"TODO",
+	],
 
-    "[cpp]": {
-        "editor.insertSpaces": false,
-        "editor.tabSize": 3,
-    },
+	"editor.tabSize": 3,
+	"[cpp]": {
+		"editor.insertSpaces": false,
+	},
+	"[rust]": {
+		"editor.insertSpaces": false,
+	},
+	"[json]": {
+		"editor.insertSpaces": false,
+	}
 }

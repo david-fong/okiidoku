@@ -1,37 +1,33 @@
 {
-    "name": "sudoku C++",
-    "description": "",
-    "language": "en-GB",
-    "enabledLanguageIds": [
-        "c",
-        "cpp",
-        "markdown",
-        "plaintext",
-        "text",
-        "json",
-        "jsonc"
-    ],
-    "words": [
-        "sudoku",
-        "giveup",
-        "givens",
-        "occmask",
-        "occmasks",
-        "unocc",
-        "opcount",
-        "statw",
-        "strials",
-        "speedup",
+	"name": "sudoku C++",
+	"description": "",
+	"language": "en-GB",
+	"enabledLanguageIds": [
+		"c",
+		"cpp",
+		"markdown",
+		"plaintext",
+		"text",
+		"json",
+		"jsonc"
+	],
+	"words": [
+		"sudoku",
+		"giveup",
+		"occmask",
+		"occmasks",
+		"opcount",
+		"strials",
+		"speedup",
 
-        "retval",
-        "prefetch",
-        "cout",
-        "stoi",
-        "stoul",
-        "ctzll",
-        "popcount",
-        "popcountll",
-        "builtin",
-        "chrono"
-    ]
+		"prefetch",
+		"cout",
+		"stoi",
+		"stoul",
+		"ctzll",
+		"popcount",
+		"popcountll",
+		"builtin",
+		"chrono"
+	]
 }

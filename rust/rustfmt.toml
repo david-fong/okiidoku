@@ -1,0 +1,2 @@
+# https://github.com/rust-lang/rustfmt/blob/master/Configurations.md
+hard_tabs = true

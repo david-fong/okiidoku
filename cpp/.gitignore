@@ -1,0 +1,6 @@
+
+# Build
+/sudoku.exe
+.profile/
+gmon.out
+

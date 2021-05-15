@@ -1,9 +1,5 @@
 
 # General
-*~
-*.swp
-*.swo
-*Session.vim
 
 # Visual Studio
 /.vs/
@@ -11,10 +7,3 @@
 /x64/
 *.sln
 *.vcxproj*
-
-# Compilation
-/build/
-/sudoku.exe
-.profile/
-gmon.out
-
