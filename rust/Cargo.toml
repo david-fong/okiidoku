@@ -10,14 +10,13 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [lib]
-name = "lib"
-path = "src/lib.rs"
 
 [[bin]]
-name = "cli"
+name = "solvent"
 path = "src/main.rs"
 
 [dependencies]
+num = "0.4"
 
 [features]
 
