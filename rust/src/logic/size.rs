@@ -1,5 +1,5 @@
 use std::default::Default;
-pub trait Prim: num::PrimInt {}
+pub trait Prim: num::PrimInt + Default + From<usize> {}
 
 // TODO when associated const functions become stable, replace these with implementations
 // on the primitive types.

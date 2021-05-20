@@ -51,8 +51,8 @@ impl<
 > GenericGenerator<OrdCount, LenCount, AreCount, LenField, ORD, LEN, ARE, PATH>
 	// where [AreCount; ARE]: Default
 {
-	pub fn new() -> GenericGenerator<OrdCount, LenCount, AreCount, LenField, ORD, LEN, ARE, PATH> {
-		GenericGenerator::<OrdCount, LenCount, AreCount, LenField, ORD, LEN, ARE, PATH> {
+	pub fn new() -> Self {
+		Self {
 			_phantom_data: std::marker::PhantomData::<OrdCount>,
 			try_order: [[LenCount::zero(); LEN]; LEN],
 

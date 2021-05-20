@@ -23,8 +23,6 @@ impl<
 	}
 }
 
-static MAP<const O: num::PrimInt>: [u8; O] = [0u8; O];
-
 impl<
 	OrdCount: Prim,
 	LenCount: Prim,
@@ -36,7 +34,7 @@ impl<
 > GenericGenerator<OrdCount, LenCount, AreCount, LenField, ORD, LEN, ARE, {Path::CardDeal as usize}> {
 	const MAP: [AreCount; ARE] = Self::INIT_MAP();
 	const fn INIT_MAP() -> [AreCount; ARE] {
-		let map: [AreCount; ARE] = [num::zero::<AreCount>(); ARE];
+		let mut map: [AreCount; ARE] = [<AreCount as From<usize>>::from(0); ARE];
 		let i: usize = 0;
 		/* for b_row in 0..ORD {
 			for b_col in 0..ORD {
@@ -50,7 +48,7 @@ impl<
 			let mut b_col = 0usize; while b_col < ORD {
 				let mut blk = 0usize; while blk < LEN {
 					let blk_addr = ((blk % ORD) * ORD) + (blk / ORD * ORD * LEN);
-					map[i] = num::cast(blk_addr + (b_row * LEN) + b_col).unwrap();
+					map[i] = <AreCount as From<usize>>::from(blk_addr + (b_row * LEN) + b_col);
 					blk += 1;
 				}
 				b_col += 1;
@@ -75,7 +73,7 @@ impl<
 > GenericGenerator<OrdCount, LenCount, AreCount, LenField, ORD, LEN, ARE, {Path::BlockCol as usize}> {
 	const MAP: [AreCount; ARE] = Self::INIT_MAP();
 	const fn INIT_MAP() -> [AreCount; ARE] {
-		let map: [AreCount; ARE];
+		let mut map: [AreCount; ARE];
 		let i: usize = 0;
 		/* for blk_col in 0..ORD {
 			for row in 0..LEN {
