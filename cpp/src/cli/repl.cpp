@@ -10,7 +10,7 @@
 #include <mutex>
 
 
-namespace Sudoku::Repl {
+namespace solvent::cli {
 
 // Mechanism to statically toggle printing alignment:
 // (#undef-ed before the end of this namespace)
@@ -30,15 +30,15 @@ Repl<O>::Repl(std::ostream& os):
 		// HWC is specified to be zero if unknown.
 		return HWC ? std::min(MAX_EXTRA_THREADS, HWC) : 0;
 	}()),
-	solver (os),
+	gen (os),
 	os     (os)
 {
-	setOutputLvl(OutputLvl::E::EMIT_ALL);
+	setOutputLvl(OutputLvl::E::All);
 
 	// Print diagnostics about Solver member size:
 	std::cout
-	<< "\nsolver obj size: " << sizeof(solver) << " bytes"
-	<< "\ndefault genpath: " << solver.getGenPath();
+	<< "\nsolver obj size: " << sizeof(gen) << " bytes"
+	<< "\ndefault genpath: " << gen.getGenPath();
 	if constexpr (O > 3) {
 		std::cout << '\n' << Ansi::DIM.ON << TERMINAL_OUTPUT_TIPS << Ansi::DIM.OFF;
 	}
@@ -73,21 +73,21 @@ bool Repl<O>::runCommand(std::string const& cmdLine) {
 	}
 	switch (it->second) {
 		using Command::E;
-		case E::HELP:
+		case E::Help:
 			std::cout
 			<< Command::HELP_MESSAGE << Ansi::DIM.ON
 			<< '\n' <<       OutputLvl::OPTIONS_MENU
 			<< '\n' << Solver::GenPath::OPTIONS_MENU
 			<< Ansi::DIM.OFF << std::endl;
 			break;
-		case E::QUIT:
+		case E::Quit:
 			return false;
-		case E::OUTPUT_LEVEL:setOutputLvl(cmdArgs); break;
-		case E::SET_GENPATH:   solver.setGenPath(cmdArgs); break;
-		case E::RUN_SINGLE:    runSingle();    break;
-		case E::CONTINUE_PREV: runSingle(true); break;
-		case E::RUN_TRIALS:    runMultiple(cmdArgs, Trials::StopBy::TRIALS);   break;
-		case E::RUN_SUCCESSES: runMultiple(cmdArgs, Trials::StopBy::SUCCESSES); break;
+		case E::OutputLevel:setOutputLvl(cmdArgs); break;
+		case E::SetGenPath:   gen.setGenPath(cmdArgs); break;
+		case E::RunSingle:    runSingle();    break;
+		case E::ContinuePrev: runSingle(true); break;
+		case E::RunMultiple:    runMultiple(cmdArgs, trials::StopBy::TRIALS);   break;
+		case E::RunMultipleOk: runMultiple(cmdArgs, trials::StopBy::SUCCESSES); break;
 	}
 	return true;
 }
@@ -131,19 +131,19 @@ OutputLvl::E Repl<O>::setOutputLvl(std::string const& newOutputLvlString) {
 
 template <Order O>
 void Repl<O>::runSingle(const bool contPrev) {
-	solver.printMessageBar("START");
+	gen.printMessageBar("START");
 
 	// Generate a new solution:
 	const clock_t clockStart = std::clock();
-	solver.generateSolution(contPrev);
+	gen.generateSolution(contPrev);
 	const double  processorTime = ((double)(std::clock() - clockStart)) / CLOCKS_PER_SEC;
 
 	os << "\nprocessor time: " STATW_D << processorTime << " seconds";
-	os << "\nnum operations: " STATW_I << solver.prevGen.getOpCount();
-	os << "\nmax backtracks: " STATW_I << solver.getMaxBacktrackCount();
-	if (!solver.isPretty) solver.printMessageBar("", '-');
-	solver.print();
-	solver.printMessageBar((solver.prevGen.getExitStatus() == Solver::ExitStatus::SUCCESS) ? "DONE" : "ABORT");
+	os << "\nnum operations: " STATW_I << gen.prev_gen.getOpCount();
+	os << "\nmax backtracks: " STATW_I << gen.getMaxBacktrackCount();
+	if (!gen.isPretty) gen.printMessageBar("", '-');
+	gen.print();
+	gen.printMessageBar((gen.prev_gen.getExitStatus() == Solver::ExitStatus::Ok) ? "DONE" : "ABORT");
 	os << std::endl;
 }
 
@@ -151,21 +151,21 @@ void Repl<O>::runSingle(const bool contPrev) {
 template <Order O>
 void Repl<O>::runMultiple(
 	const trials_t trialsStopThreshold,
-	const Trials::StopBy trialsStopMethod
+	const trials::StopBy trialsStopMethod
 ) {
 	const unsigned COLS = [this](){ // Never zero. Not used when writing to file.
 		const unsigned termCols = GET_TERM_COLS();
-		const unsigned cols = (termCols-7)/(solver.area+1);
+		const unsigned cols = (termCols-7)/(gen.O4+1);
 		return termCols ? (cols ? cols : 1) : ((unsigned[]){0,64,5,2,1,1,1})[O];
 	}();
-	const unsigned BAR_WIDTH = (solver.area+1) * COLS + (solver.isPretty ? 7 : 0);
+	const unsigned BAR_WIDTH = (gen.O4+1) * COLS + (gen.isPretty ? 7 : 0);
 	// Note at above: the magic number `7` is the length of the progress indicator.
 
 	// NOTE: The last bin is for trials that do not succeed.
-	std::array<trials_t, Trials::NUM_BINS+1> binHitCount = {0,};
-	std::array<double,   Trials::NUM_BINS+1> binOpsTotal = {0,};
+	std::array<trials_t, trials::NUM_BINS+1> binHitCount = {0,};
+	std::array<double,   trials::NUM_BINS+1> binOpsTotal = {0,};
 
-	solver.printMessageBar("START x" + std::to_string(trialsStopThreshold), BAR_WIDTH);
+	gen.printMessageBar("START x" + std::to_string(trialsStopThreshold), BAR_WIDTH);
 	auto wallClockStart = std::chrono::steady_clock::now();
 	auto procClockStart = std::clock();
 
@@ -174,23 +174,23 @@ void Repl<O>::runMultiple(
 		trials_t totalSuccesses = 0u;
 		unsigned percentDone   = 0u;
 		std::mutex sharedStateMutex;
-		Trials::SharedState sharedState {
+		trials::SharedState sharedState {
 			sharedStateMutex, COLS, getOutputLvl(),
 			trialsStopMethod, trialsStopThreshold, percentDone,
 			totalTrials, totalSuccesses, binHitCount, binOpsTotal,
 		};
-		if (getOutputLvl() == OutputLvl::E::SILENT) {
+		if (getOutputLvl() == OutputLvl::E::Silent) {
 			std::cout << '\n';
 		}
 
 		// Start the threads:
 		std::array<std::thread, MAX_EXTRA_THREADS> extraThreads;
 		for (unsigned i = 0; i < numExtraThreads; i++) {
-			auto threadFunc = Trials::ThreadFunc<O>(sharedState);
-			extraThreads[i] = std::thread(std::move(threadFunc), &solver, i+1);
+			auto threadFunc = trials::ThreadFunc<O>(sharedState);
+			extraThreads[i] = std::thread(std::move(threadFunc), &gen, i+1);
 		} {
-			auto thisThreadFunc = Trials::ThreadFunc<O>(sharedState);
-			thisThreadFunc(&solver, 0);
+			auto thisThreadFunc = trials::ThreadFunc<O>(sharedState);
+			thisThreadFunc(&gen, 0);
 		}
 		for (unsigned i = 0; i < numExtraThreads; i++) {
 			extraThreads[i].join();
@@ -204,9 +204,9 @@ void Repl<O>::runMultiple(
 		return duration_cast<microseconds>(steady_clock::now() - wallClockStart);
 	}().count() / 1'000'000);
 	const std::string secondsUnits = DIM_ON + " seconds (with I/O)" + DIM_OFF;
-	solver.printMessageBar("", BAR_WIDTH, '-'); os
+	gen.printMessageBar("", BAR_WIDTH, '-'); os
 	<< "\nhelper threads: " STATW_I << numExtraThreads
-	<< "\ngenerator path: " STATW_I << solver.getGenPath()
+	<< "\ngenerator path: " STATW_I << gen.getGenPath()
 	// TODO [stats] For total successes and total trieals.
 	<< "\nprocessor time: " STATW_D << procSeconds << secondsUnits
 	<< "\nreal-life time: " STATW_D << wallSeconds << secondsUnits;
@@ -217,7 +217,7 @@ void Repl<O>::runMultiple(
 	}
 	// Print bins (work distribution):
 	printTrialsWorkDistribution(totalTrials, binHitCount, binOpsTotal);
-	solver.printMessageBar("DONE x" + std::to_string(trialsStopThreshold), BAR_WIDTH);
+	gen.printMessageBar("DONE x" + std::to_string(trialsStopThreshold), BAR_WIDTH);
 	os << std::endl;
 }
 
@@ -225,7 +225,7 @@ void Repl<O>::runMultiple(
 template <Order O>
 void Repl<O>::runMultiple(
 	std::string const& trialsString,
-	const Trials::StopBy stopByMethod
+	const trials::StopBy stopByMethod
 ) {
 	long stopByValue;
 	try {
@@ -249,19 +249,19 @@ void Repl<O>::runMultiple(
 template <Order O>
 void Repl<O>::printTrialsWorkDistribution(
 	const trials_t totalTrials, // sum of entries of binHitCount
-	std::array<trials_t, Trials::NUM_BINS+1> const& binHitCount,
-	std::array<double,   Trials::NUM_BINS+1> const& binOpsTotal
+	std::array<trials_t, trials::NUM_BINS+1> const& binHitCount,
+	std::array<double,   trials::NUM_BINS+1> const& binOpsTotal
 ) {
 	const std::string THROUGHPUT_BAR_STRING = "--------------------------------";
 
 	// Calculate all throughputs before printing:
 	// (done in its own loop so we can later print comparisons against the optimal bin)
-	std::array<double, Trials::NUM_BINS+1> throughput;
-	std::array<double, Trials::NUM_BINS+1> successfulTrialsAccumArr;
+	std::array<double, trials::NUM_BINS+1> throughput;
+	std::array<double, trials::NUM_BINS+1> successfulTrialsAccumArr;
 	unsigned  bestThroughputBin    = 0u; {
 	opcount_t successfulTrialsAccum = 0u;
 	double  successfulSolveOpsAccum = 0.0;
-	for (unsigned i = 0; i < Trials::NUM_BINS; i++) {
+	for (unsigned i = 0; i < trials::NUM_BINS; i++) {
 		successfulTrialsAccum   += binHitCount[i];
 		successfulSolveOpsAccum += binOpsTotal[i];
 		successfulTrialsAccumArr[i] = successfulTrialsAccum;
@@ -269,7 +269,7 @@ void Repl<O>::printTrialsWorkDistribution(
 			// No nice way to do the above. If I want an exact thing, I would
 			// need to change generateSolution to also track the numOperations
 			// for some hypothetical, lower threshold, which would be for the
-			// bottom of this bin. I would need to expose `Trials::NUM_BINS` to
+			// bottom of this bin. I would need to expose `trials::NUM_BINS` to
 			// the `Solver` class. As a temporary, pessimistic band-aid, I will
 			// use the values for the next bin. Note that this will give `nan`
 			// (0.0/0.0) if there is no data for the next bin.
@@ -279,19 +279,19 @@ void Repl<O>::printTrialsWorkDistribution(
 			bestThroughputBin = i;
 		}
 	}}
-	throughput[Trials::NUM_BINS] = 0.0; // unknown.
-	successfulTrialsAccumArr[Trials::NUM_BINS] = 0.0;
+	throughput[trials::NUM_BINS] = 0.0; // unknown.
+	successfulTrialsAccumArr[trials::NUM_BINS] = 0.0;
 
-	os << Trials::TABLE_SEPARATOR;
-	os << Trials::TABLE_HEADER;
-	os << Trials::TABLE_SEPARATOR;
+	os << trials::TABLE_SEPARATOR;
+	os << trials::TABLE_HEADER;
+	os << trials::TABLE_SEPARATOR;
 	for (unsigned i = 0; i < binHitCount.size(); i++) {
-		if (i == Trials::NUM_BINS) {
+		if (i == trials::NUM_BINS) {
 			// Print a special separator for the giveups row:
-			os << Trials::TABLE_SEPARATOR;
+			os << trials::TABLE_SEPARATOR;
 		}
 		// Bin Bottom column:
-		const double binBottom  = (double)(i) * solver.GIVEUP_THRESHOLD / Trials::NUM_BINS;
+		const double binBottom  = (double)(i) * gen.GIVEUP_THRESHOLD / trials::NUM_BINS;
 		if constexpr (O <= 4) {
 			os << "\n|" << std::setw(9) << (int)(binBottom);
 		} else {
@@ -316,11 +316,11 @@ void Repl<O>::printTrialsWorkDistribution(
 
 		// Speedup Column
 		os << "  |" << std::setw(9);
-		if (i == Trials::NUM_BINS) {
+		if (i == trials::NUM_BINS) {
 			os << "unknown";
 		} else {
 			//os << std::scientific << (throughput[i]) << std::fixed;
-			os << 100.0 * (throughput[i] / throughput[Trials::NUM_BINS-1]);
+			os << 100.0 * (throughput[i] / throughput[trials::NUM_BINS-1]);
 		}
 		// Closing right-edge:
 		os << "  |";
@@ -335,11 +335,11 @@ void Repl<O>::printTrialsWorkDistribution(
 		if (i != bestThroughputBin) os << DIM_OFF;
 	}
 	os << " <- current giveup threshold";
-	os << Trials::TABLE_SEPARATOR;
-	os << DIM_ON << Trials::THROUGHPUT_COMMENTARY << DIM_OFF;
+	os << trials::TABLE_SEPARATOR;
+	os << DIM_ON << trials::THROUGHPUT_COMMENTARY << DIM_OFF;
 }
 
 #undef STATW_I
 #undef STATW_D
 
-} // namespace Sudoku::Repl
+}

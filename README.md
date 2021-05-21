@@ -5,7 +5,7 @@ The project currently provides two utilities: a solution generator, and a canoni
 
 For usage instructions, see the readmes in the [cpp](./cpp/readme.md) and [rust](./rust/readme.md) directories.
 
-I work on this project for fun. My goal is to do my best with my own mind only. In other words, I do it for the same reason I used to like solving sudoku puzzles. I am not at all an experienced C++ or rust programmer, so I'm also using this project as a way to learn those languages.
+I work on this project for fun. I want to come up with things without referencing other peoples' work. I am not at all an experienced C++ or rust programmer; I'm learning as I go. Feedback and suggestions on how to improve my usage of C++ and Rust are very welcome (but please be gentle if you can).
 
 ## But y u no solve tho
 

@@ -1,5 +1,3 @@
-#cargo-features = ["edition2021"]
-
 [package]
 name = "solvent"
 description = "A simple, fast, multi-threaded, variable-size sudoku solution generator and canonicalizer. Not a solver."

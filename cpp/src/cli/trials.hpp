@@ -1,17 +1,17 @@
-#ifndef HPP_SUDOKU_TRIALS
-#define HPP_SUDOKU_TRIALS
+#ifndef HPP_SOLVENT_CLI_TRIALS
+#define HPP_SOLVENT_CLI_TRIALS
 
-#include "../logic/solver.hpp"
+#include "../lib/gen/mod.hpp"
 
 #include <array>
 #include <string>
 #include <mutex>
 
-namespace Sudoku {
+namespace solvent::cli {
 
 typedef unsigned long trials_t;
 
-namespace Trials {
+namespace trials {
 
 	constexpr unsigned NUM_BINS = 20u;
 	enum class StopBy : unsigned {
@@ -25,7 +25,7 @@ namespace Trials {
 	struct SharedState {
 		std::mutex&     mutex;
 		const unsigned  COLS;
-		const Repl::OutputLvl::E outputLvl;
+		const cli::OutputLvl::E outputLvl;
 		const StopBy    trialsStopMethod;
 		const trials_t  trialsStopThreshold;
 		unsigned&       percentDone;
@@ -41,15 +41,15 @@ namespace Trials {
 	 * Note: Since it is only ever used there, the include guards are not
 	 * absolutely necessary, but it doesn't hurt to add them anyway.
 	 */
-	template <Sudoku::Order O>
+	template <Order O>
 	class ThreadFunc final : private SharedState {
 	public:
-		using solver_t  = class Sudoku::Solver::Solver<O>;
+		using generator_t  = class lib::gen::Generator<O>;
 		using OutputLvl = Repl::OutputLvl::E;
 	public:
 		ThreadFunc(void) = delete;
 		explicit ThreadFunc(SharedState s) : SharedState(s) {};
-		inline void operator()(solver_t* solver, unsigned threadNum);
+		inline void operator()(generator_t* gen, unsigned threadNum);
 	private:
 		trials_t trialsStopCurVal(void) const {
 			switch (trialsStopMethod) {
@@ -60,7 +60,7 @@ namespace Trials {
 		}
 	};
 
-} // namespace Trials
-} // namespace Sudoku
+}
+}
 
 #endif

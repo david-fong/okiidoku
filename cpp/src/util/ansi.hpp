@@ -1,5 +1,5 @@
-#ifndef HPP_UTIL_ANSI
-#define HPP_UTIL_ANSI
+#ifndef HPP_SOLVENT_UTIL_ANSI
+#define HPP_SOLVENT_UTIL_ANSI
 
 #include "../buildflag.hpp"
 #include <array>
@@ -42,7 +42,7 @@ namespace Ansi {
 	 */
 	const std::array<std::string, 4> BLOCK_CHARS = {
 		#if USE_ANSI_ESC
-		u8"\u2591", u8"\u2592", u8"\u2593", u8"\u2588",
+		"\u2591", "\u2592", "\u2593", "\u2588",
 		#else
 		"-", "*", "X", "#",
 		#endif

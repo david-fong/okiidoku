@@ -1,40 +1,40 @@
-#ifndef HPP_SUDOKU_REPL
-#define HPP_SUDOKU_REPL
+#ifndef HPP_SOLVENT_CLI_REPL
+#define HPP_SOLVENT_CLI_REPL
 
-#include "../logic/solver.hpp"
-#include "../logic/equiv.hpp"
+#include "./enum.hpp"
+#include "../lib/gen/mod.hpp"
+#include "../lib/canon/mod.hpp"
 #include "./trials.hpp"
-#include "../logic/enum.hpp"
 
 #include <array>
 #include <string>
 #include <map>
 
 
-namespace Sudoku::Repl {
+namespace solvent::cli {
 
 	const std::string PROMPT = "\n$ ";
 
 	namespace Command {
 		enum class E : unsigned {
-			HELP,
-			QUIT,
-			OUTPUT_LEVEL,
-			SET_GENPATH,
-			RUN_SINGLE,
-			CONTINUE_PREV,
-			RUN_TRIALS,
-			RUN_SUCCESSES,
+			Help,
+			Quit,
+			OutputLevel,
+			SetGenPath,
+			RunSingle,
+			ContinuePrev,
+			RunMultiple,
+			RunMultipleOk,
 		};
 		const std::map<std::string, Command::E> MAP = {
-			{ "help",       E::HELP           },
-			{ "quit",       E::QUIT           },
-			{ "output",     E::OUTPUT_LEVEL   },
-			{ "genpath",    E::SET_GENPATH    },
-			{ "",           E::RUN_SINGLE     },
-			{ "cont",       E::CONTINUE_PREV  }, // TODO [qol] Change this to "c"? (remember to change help string too)
-			{ "trials",     E::RUN_TRIALS     },
-			{ "strials",    E::RUN_SUCCESSES  },
+			{ "help",       E::Help           },
+			{ "quit",       E::Quit           },
+			{ "output",     E::OutputLevel    },
+			{ "genpath",    E::SetGenPath     },
+			{ "",           E::RunSingle      },
+			{ "cont",       E::ContinuePrev   }, // TODO [qol] Change this to "c"? (remember to change help string too)
+			{ "trials",     E::RunMultiple    },
+			{ "strials",    E::RunMultipleOk  },
 		};
 		const std::string HELP_MESSAGE = "\nCOMMAND MENU:"
 			"\n- help               print this help menu"
@@ -68,7 +68,7 @@ namespace Sudoku::Repl {
 	class Repl final {
 	  public:
 		using opcount_t = Solver::opcount_t;
-		using  solver_t = class Sudoku::Solver::Solver<O>;
+		using generator_t = class solvent::lib::gen::Generator<O>;
 
 		Repl(void) = delete;
 		explicit Repl(std::ostream&);
@@ -79,13 +79,13 @@ namespace Sudoku::Repl {
 		const unsigned numExtraThreads;
 
 	  private:
-		solver_t solver;
-		std::ostream& os; // alias to this->solver.os;
+		generator_t gen;
+		std::ostream& os; // alias to this->gen.os;
 		OutputLvl::E outputLvl;
 
 		static constexpr unsigned MAX_EXTRA_THREADS = ((const unsigned[]){0,0,0,0,1,4,2,2})[O];
-		const std::string DIM_ON  = (solver.isPretty ? Ansi::DIM.ON  : "");
-		const std::string DIM_OFF = (solver.isPretty ? Ansi::DIM.OFF : "");
+		const std::string DIM_ON  = (gen.isPretty ? Ansi::DIM.ON  : "");
+		const std::string DIM_OFF = (gen.isPretty ? Ansi::DIM.OFF : "");
 
 		// Return false if command is to exit the program:
 		void runSingle(bool contPrev = false);
@@ -101,8 +101,8 @@ namespace Sudoku::Repl {
 		[[gnu::cold]] OutputLvl::E setOutputLvl(OutputLvl::E);
 		[[gnu::cold]] OutputLvl::E setOutputLvl(std::string const&);
 
-	}; // class Repl
+	};
 
-} // namespace Sudoku::Repl
+}
 
 #endif

@@ -1,11 +1,10 @@
-#ifndef HPP_SUDOKU_SIZE
-#define HPP_SUDOKU_SIZE
+#ifndef HPP_SOLVENT_LIB_SIZE
+#define HPP_SOLVENT_LIB_SIZE
 // This file is a helper for `./solver.hpp`.
 
 #include "../buildflag.hpp"
-#include "./enum.hpp"
 
-namespace Sudoku {
+namespace solvent {
 	/**
 	 * The primary goal of this added complexity is to make effective
 	 * use of space, which should help improve cache performance.
@@ -31,7 +30,7 @@ namespace Sudoku {
 	 * Note: when printing, make sure to cast uint8_t to int.
 	 */
 	template <Order O>
-	class Size {
+	struct size {
 	public:
 		// mask width `order^2` bits.
 		// order:  2   3   4   5   6   7   8   9  10  11
@@ -72,41 +71,40 @@ namespace Sudoku {
 		// uint range [0, order^2].
 		typedef length_t value_t;
 	};
-} // namespace Sudoku
 
-namespace Sudoku::Solver {
 
-	// Container for a very large number.
-	// See Solver::GIVEUP_THRESHOLD for more discussion on the average
-	// number of operations taken to generate a solution by grid-order.
-	typedef unsigned long long opcount_t;
-
-	/**
-	 * Note: when printing, make sure to cast uint8_t to int.
-	 */
-	template <Order O>
-	class SolverSize {
-	public:
-		// Note that this should always be smaller than opcount_t.
-		typedef
-			// Make sure this can fit `GIVEUP_THRESHOLD<BACKTRACKS>`.
-			//typename std::conditional_t<(O < 4), std::uint_fast8_t,
-			typename std::conditional_t<(O < 5), std::uint_fast16_t,
-			typename std::conditional_t<(O < 6), std::uint_fast32_t,
-			std::uint64_t
-		>> backtrack_t;
+	namespace lib::gen {
+		// Container for a very large number.
+		// See Solver::GIVEUP_THRESHOLD for more discussion on the average
+		// number of operations taken to generate a solution by grid-order.
+		typedef unsigned long long opcount_t;
 
 		/**
-		 * Give up if the giveup condition variable meets this value.
-		 * Measured stats for operations: https://www.desmos.com/calculator/8taqzelils
+		 * Note: when printing, make sure to cast uint8_t to int.
 		 */
-		static constexpr opcount_t GIVEUP_THRESHOLD = ((const opcount_t[]){
-			// Note: Make sure entries of `backtrackCounts` can fit these.
-			0,  1,  3,  150,  1'125,  560'000,  1'000'000'000,
-		})[O];
-		// TODO [tune] The current values for order-6 are just predictions.
-	};
+		template <Order O>
+		struct gen_size {
+		public:
+			// Note that this should always be smaller than opcount_t.
+			typedef
+				// Make sure this can fit `GIVEUP_THRESHOLD<Backtracks>`.
+				//typename std::conditional_t<(O < 4), std::uint_fast8_t,
+				typename std::conditional_t<(O < 5), std::uint_fast16_t,
+				typename std::conditional_t<(O < 6), std::uint_fast32_t,
+				std::uint64_t
+			>> backtrack_t;
 
-} // namespace Sudoku::Solver
+			/**
+			 * Give up if the giveup condition variable meets this value.
+			 * Measured stats for operations: https://www.desmos.com/calculator/8taqzelils
+			 */
+			static constexpr opcount_t GIVEUP_THRESHOLD = ((const opcount_t[]){
+				// Note: Make sure entries of `backtrackCounts` can fit these.
+				0,  1,  3,  150,  1'125,  560'000,  1'000'000'000,
+			})[O];
+			// TODO [tune] The current values for order-6 are just predictions.
+		};
+	}
+}
 
 #endif

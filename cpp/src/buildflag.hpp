@@ -2,11 +2,6 @@
 #define HPP_BUILDFLAG
 
 /**
- * What grid order to use if one is not specified via commandline arg.
- */
-#define DEFAULT_ORDER 4
-
-/**
  * Whether or not ansi-escape sequences should be emitted within output
  * to dim out harsh, non-essential text.
  */
@@ -23,6 +18,6 @@
  * to cache usage. Make sure to turn this off if you write a program
  * that requires coexisting Solvers to have different generator paths.
  */
-#define SOLVER_THREADS_SHARE_GENPATH true
+#define SOLVER_THREADS_SHARE_GENPATH false
 
 #endif

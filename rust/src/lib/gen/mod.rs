@@ -20,7 +20,7 @@ struct GenericGenerator<
 	try_order: [[LenCount; LEN]; LEN],
 
 	/// Indexed by progress- not by coordinate (for better cache usage)
-	buf: [LenCount; ARE],
+	val: [LenCount; ARE],
 	row_has: [LenField; LEN],
 	col_has: [LenField; LEN],
 	blk_has: [LenField; LEN],
@@ -57,7 +57,7 @@ impl<
 			try_order: [[LenCount::zero(); LEN]; LEN],
 
 			/// Indexed by progress- not by coordinate (for better cache usage)
-			buf: [LenCount::zero(); ARE],
+			val: [LenCount::zero(); ARE],
 			row_has: [LenField::zero(); LEN],
 			col_has: [LenField::zero(); LEN],
 			blk_has: [LenField::zero(); LEN],

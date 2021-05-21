@@ -2,7 +2,7 @@
 	"files.associations": {
 		"**/gcc/**": "cpp",
 	},
-	"explorer.sortOrder": "default",
+	// "explorer.sortOrder": "default",
 	"C_Cpp.autoAddFileAssociations": false,
 
 	"trailing-spaces.trimOnSave": true,

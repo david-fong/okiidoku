@@ -1,4 +1,4 @@
-#include "./solver.hpp"
+#include "./mod.hpp"
 
 #include <mutex>
 #include <iostream>    // cout, endl
@@ -11,13 +11,13 @@
 #include <string>      // string,
 
 
-template <Sudoku::Order O>
-std::ostream& operator<<(std::ostream& os, Sudoku::Solver::Solver<O> const& s) {
-	using namespace Sudoku::Solver;
-	using length_t = typename Sudoku::Solver::Solver<O>::length_t;
+template <solvent::Order O>
+std::ostream& operator<<(std::ostream& os, solvent::lib::gen::Generator<O> const& s) {
+	using namespace solvent::lib::gen;
+	using length_t = typename solvent::size<O>::length_t;
 	#define PRINT_GRID0_TILE(PRINTER_STATEMENT) {\
-		for (length_t col = 0; col < s.length; col++) {\
-			if (isPretty && (col % s.order) == 0) os << Ansi::DIM.ON << " |" << Ansi::DIM.OFF;\
+		for (length_t col = 0; col < s.O2; col++) {\
+			if (isPretty && (col % s.O1) == 0) os << Ansi::DIM.ON << " |" << Ansi::DIM.OFF;\
 			PRINTER_STATEMENT;\
 		}}
 	#define PRINT_GRID_TILE(PRINTER_STATEMENT) {\
@@ -35,8 +35,8 @@ std::ostream& operator<<(std::ostream& os, Sudoku::Solver::Solver<O> const& s) {
 		os << GRID_SEP << s.blkRowSepString;
 		os << Ansi::DIM.OFF;
 	};
-	for (length_t row = 0; row < s.length; row++) {
-		if (row % s.order == 0) {
+	for (length_t row = 0; row < s.O2; row++) {
+		if (row % s.O1 == 0) {
 			printBlkRowSepString();
 		}
 		os << '\n';
@@ -56,7 +56,7 @@ std::ostream& operator<<(std::ostream& os, Sudoku::Solver::Solver<O> const& s) {
 }
 
 
-namespace Sudoku::Solver {
+namespace solvent::lib::gen {
 
 // Guards accesses to RMG. I currently only
 // use this when shuffling generator biases.
@@ -71,9 +71,9 @@ struct MyNumpunct : std::numpunct<char> {
 
 #if SOLVER_THREADS_SHARE_GENPATH
 template <Order O>
-GenPath::E Solver<O>::genPath = initializeGenPath();
+Path::E Generator<O>::genPath = initializePath();
 template <Order O>
-std::array<typename Sudoku::Size<O>::area_t, Solver<O>::area> Solver<O>::traversalOrder;
+std::array<typename size<O>::area_t, Generator<O>::O4> Generator<O>::traversalOrder;
 #endif
 
 
@@ -84,17 +84,17 @@ std::array<typename Sudoku::Size<O>::area_t, Solver<O>::area> Solver<O>::travers
 
 
 template <Order O>
-Solver<O>::Solver(std::ostream& os):
+Generator<O>::Generator(std::ostream& os):
 	os        (os),
 	isPretty  (&os == &std::cout)
 {
 	for (auto& rowBias : rowBiases) {
 		std::iota(rowBias.begin(), rowBias.end(), 0);
 	}
-	// Note: This #if must be done here and not in `initializeGenPath`
+	// Note: This #if must be done here and not in `initializePath`
 	// because that method is still needed for static initialization.
 	#if !SOLVER_THREADS_SHARE_GENPATH
-	initializeGenPath();
+	initializePath();
 	#endif
 
 	// Output formatting:
@@ -107,15 +107,15 @@ Solver<O>::Solver(std::ostream& os):
 
 
 template <Order O>
-void Solver<O>::copySettingsFrom(Solver const& other) {
+void Generator<O>::copy_settings_from(Generator const& other) {
 	#if !SOLVER_THREADS_SHARE_GENPATH
-	setGenPath(other.getGenPath());
+	setPath(other.getPath());
 	#endif
 }
 
 
 template <Order O>
-void Solver<O>::print(void) const {
+void Generator<O>::print(void) const {
 	if (&os != &std::cout) {
 		std::cout << *this;
 	}
@@ -124,9 +124,9 @@ void Solver<O>::print(void) const {
 
 
 template <Order O>
-void Solver<O>::printSimple(void) const {
+void Generator<O>::printSimple(void) const {
 	auto const helper = [this](std::ostream& os, const bool isPretty){
-		const bool doDim = isPretty && (prevGen.getExitStatus() != ExitStatus::SUCCESS);
+		const bool doDim = isPretty && (prev_gen.getExitStatus() != ExitStatus::Ok);
 		if (doDim) os << Ansi::DIM.ON;
 		for (auto const& t : grid) {
 			os << t;
@@ -143,11 +143,11 @@ void Solver<O>::printSimple(void) const {
 
 
 template <Order O>
-void Solver<O>::printShadedBacktrackStat(const backtrack_t count) const {
+void Generator<O>::printShadedBacktrackStat(const backtrack_t count) const {
 	const unsigned int relativeIntensity
 		= (double)(count - 1)
 		* Ansi::BLOCK_CHARS.size()
-		/ maxBacktrackCount;
+		/ max_backtracks;
 	auto const& intensityChar
 		= (count != 0)
 		? Ansi::BLOCK_CHARS[relativeIntensity]
@@ -157,17 +157,17 @@ void Solver<O>::printShadedBacktrackStat(const backtrack_t count) const {
 
 
 template <Order O>
-void Solver<O>::clear(void) {
-	for (area_t i = 0; i < area; i++) {
+void Generator<O>::clear(void) {
+	for (area_t i = 0; i < O4; i++) {
 		grid[i].clear();
 	}
 	rowSymbolOccMasks.fill(0);
 	colSymbolOccMasks.fill(0);
 	blkSymbolOccMasks.fill(0);
 	backtrackCounts.fill(0u);
-	maxBacktrackCount = 0u;
+	max_backtracks = 0u;
 
-	// Scramble each row's value-guessing-order:
+	// Scramble each row's value-guessing-O1:
 	RANDOM_MUTEX.lock();
 	for (auto& rowBias : rowBiases) {
 		std::shuffle(rowBias.begin(), rowBias.end(), VALUE_RNG);
@@ -177,19 +177,19 @@ void Solver<O>::clear(void) {
 
 
 template <Order O>
-void Solver<O>::generateSolution(const bool contPrev) {
-	TvsDirection direction = TvsDirection::FORWARD;
+void Generator<O>::generateSolution(const bool contPrev) {
+	PathDirection direction = PathDirection::Forward;
 	opcount_t    opCount   = 0u;
 	area_t       tvsIndex  = 0u;
 
 	if (__builtin_expect(contPrev, false)) {
-		switch (prevGen.getExitStatus()) {
-			case ExitStatus::SUCCESS:
+		switch (prev_gen.getExitStatus()) {
+			case ExitStatus::Ok:
 				// Previously succeeded.
-				tvsIndex  = area - 1u;
-				direction = TvsDirection::BACK;
+				tvsIndex  = O4 - 1u;
+				direction = PathDirection::Back;
 				break;
-			case ExitStatus::IMPOSSIBLE:
+			case ExitStatus::Exhausted:
 				return;
 			default: break;
 		}
@@ -197,40 +197,40 @@ void Solver<O>::generateSolution(const bool contPrev) {
 		// Not continuing. Do something entirely new!
 		this->clear();
 	}
-	prevGen.exitStatus = ExitStatus::SUCCESS; // default value;
+	prev_gen.exitStatus = ExitStatus::Ok; // default value;
 
-	while (tvsIndex < area) {
+	while (tvsIndex < O4) {
 		const area_t gridIndex = traversalOrder[tvsIndex];
 		// Try something at the current tile:
 		direction = setNextValid(gridIndex);
 		opCount++;
-		if (direction == TvsDirection::BACK) {
+		if (direction == PathDirection::Back) {
 			// Pop and step backward:
-			if (++backtrackCounts[gridIndex] > maxBacktrackCount) {
-				maxBacktrackCount = backtrackCounts[gridIndex];
+			if (++backtrackCounts[gridIndex] > max_backtracks) {
+				max_backtracks = backtrackCounts[gridIndex];
 			}
 			if (__builtin_expect(tvsIndex == 0u, false)) {
-				prevGen.exitStatus = ExitStatus::IMPOSSIBLE;
+				prev_gen.exitStatus = ExitStatus::Exhausted;
 				break;
 			}
 			--tvsIndex;
 		} else {
-			// (direction == TvsDirection::FORWARD)
+			// (direction == PathDirection::Forward)
 			++tvsIndex;
 		}
 		// Check whether the give-up-condition has been met:
-		if (__builtin_expect(maxBacktrackCount >= GIVEUP_THRESHOLD, false)) {
-			prevGen.exitStatus = ExitStatus::GIVEUP;
+		if (__builtin_expect(max_backtracks >= GIVEUP_THRESHOLD, false)) {
+			prev_gen.exitStatus = ExitStatus::Abort;
 			break;
 		}
 	}
-	prevGen.tvsIndex = tvsIndex;
-	prevGen.opCount  = opCount;
+	prev_gen.tvsIndex = tvsIndex;
+	prev_gen.opCount  = opCount;
 }
 
 
 template <Order O>
-TvsDirection Solver<O>::setNextValid(const area_t index) {
+PathDirection Generator<O>::setNextValid(const area_t index) {
 	occmask_t& rowBin = rowSymbolOccMasks[this->getRow(index)];
 	occmask_t& colBin = colSymbolOccMasks[this->getCol(index)];
 	occmask_t& blkBin = blkSymbolOccMasks[this->getBlk(index)];
@@ -248,21 +248,21 @@ TvsDirection Solver<O>::setNextValid(const area_t index) {
 	const occmask_t invalidBin = (rowBin | colBin | blkBin);
 	// NOTE: these do not improve time-scaling performance, but I wish they did.
 	/*
-	if (__builtin_expect(occmask_popcount(invalidBin) == length, false)) {
+	if (__builtin_expect(occmask_popcount(invalidBin) == O2, false)) {
 		t.clear();
-		return BACK;
-	} else if (occmask_popcount(invalidBin) == length - 1) {
+		return Back;
+	} else if (occmask_popcount(invalidBin) == O2 - 1) {
 		const value_t value = occmask_ctz(!invalidBin);
 		const occmask_t valueBit = 0b1 << value;
 		rowBin |= valueBit;
 		colBin |= valueBit;
 		blkBin |= valueBit;
 		t.value = value;
-		t.biasIndex = length;
-		return FORWARD;
+		t.biasIndex = O2;
+		return Forward;
 	}
 	*/
-	for (value_t biasIndex = t.biasIndex; biasIndex < length; biasIndex++) {
+	for (value_t biasIndex = t.biasIndex; biasIndex < O2; biasIndex++) {
 		const value_t value = rowBiases[this->getRow(index)][biasIndex];
 		const occmask_t valueBit = occmask_t(0b1u) << value;
 		if (!(invalidBin & valueBit)) {
@@ -272,123 +272,123 @@ TvsDirection Solver<O>::setNextValid(const area_t index) {
 			blkBin |= valueBit;
 			t.value = value;
 			t.biasIndex = (biasIndex + 1u);
-			return TvsDirection::FORWARD;
+			return PathDirection::Forward;
 		}
 	}
 	// Backtrack:
 	// - turning back: The above loop never entered the return-block.
 	// - continuing back: The above loop was completely skipped-over.
 	t.clear();
-	return TvsDirection::BACK;
+	return PathDirection::Back;
 }
 
 
 template <Order O>
-GenPath::E Solver<O>::setGenPath(const GenPath::E newGenPath, const bool force) noexcept {
-	if (!force && newGenPath == getGenPath()) {
+Path::E Generator<O>::setPath(const Path::E newPath, const bool force) noexcept {
+	if (!force && newPath == getPath()) {
 		// Short circuit:
-		return getGenPath();
+		return getPath();
 	}
-	switch (newGenPath) {
-		case GenPath::E::ROW_MAJOR:
+	switch (newPath) {
+		case Path::E::RowMajor:
 			std::iota(traversalOrder.begin(), traversalOrder.end(), 0);
 			break;
-		case GenPath::E::DEAL_RWMJ: {
+		case Path::E::DealRwMj: {
 			area_t i = 0;
-			for (order_t bRow = 0; bRow < order; bRow++) {
-				for (order_t bCol = 0; bCol < order; bCol++) {
-					for (length_t blk = 0; blk < length; blk++) {
-						area_t blkaddr = ((blk % order) * order) + (blk / order * order * length);
-						traversalOrder[i++] = blkaddr + (bRow * length) + bCol;
+			for (order_t bRow = 0; bRow < O1; bRow++) {
+				for (order_t bCol = 0; bCol < O1; bCol++) {
+					for (length_t blk = 0; blk < O2; blk++) {
+						area_t blkaddr = ((blk % O1) * O1) + (blk / O1 * O1 * O2);
+						traversalOrder[i++] = blkaddr + (bRow * O2) + bCol;
 					}
 				}
 			}
 			break; }
-		case GenPath::E::BLOCK_COL: {
+		case Path::E::BlockCol: {
 			area_t i = 0;
-			for (order_t blkCol = 0; blkCol < order; blkCol++) {
-				for (length_t row = 0; row < length; row++) {
-					for (order_t bCol = 0; bCol < order; bCol++) {
-						traversalOrder[i++] = (blkCol * order) + (row * length) + (bCol);
+			for (order_t blkCol = 0; blkCol < O1; blkCol++) {
+				for (length_t row = 0; row < O2; row++) {
+					for (order_t bCol = 0; bCol < O1; bCol++) {
+						traversalOrder[i++] = (blkCol * O1) + (row * O2) + (bCol);
 					}
 				}
 			}
 			break; }
 	}
-	const GenPath::E oldGenPath = getGenPath();
-	genPath = newGenPath;
-	return oldGenPath;
+	const Path::E oldPath = getPath();
+	genPath = newPath;
+	return oldPath;
 }
 
 
 template <Order O>
-GenPath::E Solver<O>::setGenPath(std::string const& newGenPathString) noexcept {
+Path::E Generator<O>::setPath(std::string const& newPathString) noexcept {
 	std::cout << "\ngenerator path is ";
-	if (newGenPathString.empty()) {
-		std::cout << "currently set to: " << getGenPath() << std::endl;
-		return getGenPath();
+	if (newPathString.empty()) {
+		std::cout << "currently set to: " << getPath() << std::endl;
+		return getPath();
 	}
-	for (unsigned i = 0; i < GenPath::size; i++) {
-		if (newGenPathString.compare(GenPath::NAMES[i]) == 0) {
-			if (GenPath::E{i} == getGenPath()) {
+	for (unsigned i = 0; i < Path::size; i++) {
+		if (newPathString.compare(Path::NAMES[i]) == 0) {
+			if (Path::E{i} == getPath()) {
 				std::cout << "already set to: ";
 			} else {
 				std::cout << "now set to: ";
-				setGenPath(GenPath::E{i});
+				setPath(Path::E{i});
 			}
-			std::cout << getGenPath() << std::endl;
-			return getGenPath();
+			std::cout << getPath() << std::endl;
+			return getPath();
 		}
 	}
 	// unsuccessful return:
-	std::cout << getGenPath() << " (unchanged).\n"
-		<< Ansi::RED.ON << '"' << newGenPathString
+	std::cout << getPath() << " (unchanged).\n"
+		<< Ansi::RED.ON << '"' << newPathString
 		<< "\" is not a valid generator path name.\n"
-		<< GenPath::OPTIONS_MENU << Ansi::RED.OFF << std::endl;
-	return getGenPath();
+		<< Path::OPTIONS_MENU << Ansi::RED.OFF << std::endl;
+	return getPath();
 }
 
 
 template <Order O>
-GenPath::E Solver<O>::initializeGenPath(void) noexcept {
-	GenPath::E defaultGenPath;
-	// Interesting: Smaller-order grids perform better with ROW_MAJOR as genPath.
-	if (order <= 4) {
-		defaultGenPath = GenPath::E::ROW_MAJOR;
+Path::E Generator<O>::initializePath(void) noexcept {
+	Path::E defaultPath;
+	// Interesting: Smaller-O1 grids perform better with RowMajor as genPath.
+	if (O1 <= 4) {
+		defaultPath = Path::E::RowMajor;
 	} else {
-		defaultGenPath = GenPath::E::BLOCK_COL;
+		defaultPath = Path::E::BlockCol;
 	}
-	setGenPath(defaultGenPath, true);
-	return getGenPath();
+	setPath(defaultPath, true);
+	return getPath();
 }
 
 
 
 
 template <Order O>
-void Solver<O>::printMessageBar(
+void Generator<O>::printMessageBar(
 	std::string const& msg,
 	unsigned barLength,
 	const char fillChar
 ) const {
-	if (barLength < msg.length() + 8) {
-		barLength = msg.length() + 8;
+	if (barLength < msg.O2() + 8) {
+		barLength = msg.O2() + 8;
 	}
 	std::string bar(barLength, fillChar);
 	if (!msg.empty()) {
-		bar.replace(4, msg.length(), msg);
+		bar.replace(4, msg.O2(), msg);
 		bar.at(3) = ' ';
-		bar.at(4 + msg.length()) = ' ';
+		bar.at(4 + msg.O2()) = ' ';
 	}
 	os << '\n' <<bar;
 }
 
 
 template <Order O>
-void Solver<O>::printMessageBar(std::string const& msg, const char fillChar) const {
+void Generator<O>::printMessageBar(std::string const& msg, const char fillChar) const {
 	const unsigned gridBarLength = (isPretty)
-		? ((length + order + 1) * 2)
-		: (length * 2);
+		? ((O2 + O1 + 1) * 2)
+		: (O2 * 2);
 	constexpr unsigned numGrids = 2u;
 	unsigned allBarLength = (numGrids * gridBarLength);
 	if (numGrids > 1) allBarLength += (numGrids - 1) * GRID_SEP.length();
@@ -400,7 +400,7 @@ void Solver<O>::printMessageBar(std::string const& msg, const char fillChar) con
 
 
 template <Order O>
-const std::string Solver<O>::blkRowSepString = [](const unsigned order) {
+const std::string Generator<O>::blkRowSepString = [](const unsigned order) {
 	std::string vbar = " " + std::string((((order * (order + 1)) + 1) * 2 - 1), '-');
 	for (unsigned i = 0; i <= order; i++) {
 		// Insert crosses at vbar intersections.
@@ -409,4 +409,4 @@ const std::string Solver<O>::blkRowSepString = [](const unsigned order) {
 	return vbar;
 }(O);
 
-} // End of Sudoku namespace.
+}
