@@ -24,8 +24,8 @@ namespace solvent::cli {
 			"nogiveups",
 			"silent",
 		};
-		std::ostream& operator<<(std::ostream& out, const E outputLvl) {
-			return out << NAMES[static_cast<unsigned>(outputLvl)];
+		std::ostream& operator<<(std::ostream& out, const E output_level) {
+			return out << NAMES[static_cast<unsigned>(output_level)];
 		}
 		const std::string OPTIONS_MENU =
 			"\nOUTPUT-LVL OPTIONS:"

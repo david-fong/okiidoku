@@ -15,8 +15,8 @@ namespace trials {
 
 	constexpr unsigned NUM_BINS = 20u;
 	enum class StopBy : unsigned {
-		TRIALS,
-		SUCCESSES,
+		Trials,
+		Successes,
 	};
 
 	const std::string TABLE_SEPARATOR = "\n+-----------+----------+----------------+-----------+-----------+";
@@ -25,18 +25,18 @@ namespace trials {
 	struct SharedState {
 		std::mutex&     mutex;
 		const unsigned  COLS;
-		const cli::OutputLvl::E outputLvl;
-		const StopBy    trialsStopMethod;
-		const trials_t  trialsStopThreshold;
-		unsigned&       percentDone;
-		trials_t&       totalTrials;
-		trials_t&       totalSuccesses;
-		std::array<trials_t, NUM_BINS+1>& binHitCount;
-		std::array<double,   NUM_BINS+1>& binOpsTotal;
+		const cli::OutputLvl::E output_level;
+		const StopBy    trials_stop_method;
+		const trials_t  trials_stop_threshold;
+		unsigned&       pct_done;
+		trials_t&       total_trials;
+		trials_t&       total_successes;
+		std::array<trials_t, NUM_BINS+1>& bin_hit_count;
+		std::array<double,   NUM_BINS+1>& bin_ops_total;
 	};
 
 	/**
-	 * A helper for `Repl::runMultiple`.
+	 * A helper for `Repl::run_multiple`.
 	 *
 	 * Note: Since it is only ever used there, the include guards are not
 	 * absolutely necessary, but it doesn't hurt to add them anyway.
@@ -44,17 +44,17 @@ namespace trials {
 	template <Order O>
 	class ThreadFunc final : private SharedState {
 	public:
-		using generator_t  = class lib::gen::Generator<O>;
-		using OutputLvl = Repl::OutputLvl::E;
+		using generator_t = class lib::gen::Generator<O>;
+		using OutputLvl = OutputLvl::E;
 	public:
 		ThreadFunc(void) = delete;
 		explicit ThreadFunc(SharedState s) : SharedState(s) {};
-		inline void operator()(generator_t* gen, unsigned threadNum);
+		inline void operator()(generator_t* gen, unsigned thread_num);
 	private:
-		trials_t trialsStopCurVal(void) const {
-			switch (trialsStopMethod) {
-				case StopBy::TRIALS:    return totalTrials;
-				case StopBy::SUCCESSES: return totalSuccesses;
+		trials_t trials_stop_cur_val(void) const {
+			switch (trials_stop_method) {
+				case StopBy::Trials:    return total_trials;
+				case StopBy::Successes: return total_successes;
 				default: throw "unhandled enum case";
 			}
 		}

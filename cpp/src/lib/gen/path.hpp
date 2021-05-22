@@ -22,8 +22,8 @@ namespace solvent::lib::gen {
 			"dealrwmj",
 			"blockcol",
 		};
-		std::ostream& operator<<(std::ostream& out, const E genPath) {
-			return out << NAMES[static_cast<unsigned>(genPath)];
+		std::ostream& operator<<(std::ostream& out, const E path_kind) {
+			return out << NAMES[static_cast<unsigned>(path_kind)];
 		}
 		const std::string OPTIONS_MENU = "\nGEN-PATH OPTIONS:"
 			"\n- rowmajor   horizontal strips as wide as the grid one by one"

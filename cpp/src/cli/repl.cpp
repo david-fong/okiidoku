@@ -1,10 +1,10 @@
 #include "./repl.hpp"
 #include "./trials.cpp"
 
-#include <iostream>    // cout, endl,
-#include <iomanip>     // setw,
-#include <chrono>      // steady_clock::now, durationcast,
-#include <cmath>      // pow,
+#include <iostream> // cout, endl,
+#include <iomanip>  // setw,
+#include <chrono>   // steady_clock::now, durationcast,
+#include <cmath>    // pow,
 
 #include <thread>
 #include <mutex>
@@ -14,8 +14,8 @@ namespace solvent::cli {
 
 // Mechanism to statically toggle printing alignment:
 // (#undef-ed before the end of this namespace)
-#define STATW_I << std::setw(this->solver.STATS_WIDTH)
-#define STATW_D << std::setw(this->solver.STATS_WIDTH + 4)
+#define STATW_I << std::setw(this->gen.STATS_WIDTH)
+#define STATW_D << std::setw(this->gen.STATS_WIDTH + 4)
 
 const std::string TERMINAL_OUTPUT_TIPS =
 "\nNote: You can run `tput rmam` in your shell to disable text wrapping."
@@ -25,48 +25,48 @@ const std::string TERMINAL_OUTPUT_TIPS =
 
 template <Order O>
 Repl<O>::Repl(std::ostream& os):
-	numExtraThreads([](){
+	num_extra_threads([](){
 		const unsigned HWC = std::thread::hardware_concurrency();
 		// HWC is specified to be zero if unknown.
 		return HWC ? std::min(MAX_EXTRA_THREADS, HWC) : 0;
 	}()),
-	gen (os),
-	os     (os)
+	gen(os),
+	os(os)
 {
-	setOutputLvl(OutputLvl::E::All);
+	set_output_level(OutputLvl::E::All);
 
-	// Print diagnostics about Solver member size:
+	// Print diagnostics about Generator member size:
 	std::cout
 	<< "\nsolver obj size: " << sizeof(gen) << " bytes"
-	<< "\ndefault genpath: " << gen.getGenPath();
+	<< "\ndefault genpath: " << gen.get_path_kind();
 	if constexpr (O > 3) {
 		std::cout << '\n' << Ansi::DIM.ON << TERMINAL_OUTPUT_TIPS << Ansi::DIM.OFF;
 	}
 	std::cout << std::endl;
 
 	// Print help menu and then start the REPL (read-execute-print-loop):
-	std::cout << Command::HELP_MESSAGE << std::endl;
+	std::cout << Command::HelpMessage << std::endl;
 	std::string command;
 	do {
 		std::cout << PROMPT;
 		std::getline(std::cin, command);
-	} while (runCommand(command));
+	} while (run_command(command));
 };
 
 
 template <Order O>
-bool Repl<O>::runCommand(std::string const& cmdLine) {
-	size_t tokenPos;
+bool Repl<O>::run_command(std::string const& cmd_line) {
+	size_t token_pos;
 	// Very simple parsing: Assumes no leading spaces, and does not
 	// trim leading or trailing spaces from the arguments substring.
-	const std::string cmdName = cmdLine.substr(0, tokenPos = cmdLine.find(" "));
-	const std::string cmdArgs = (tokenPos == std::string::npos)
-		? "" :  cmdLine.substr(tokenPos + 1, std::string::npos);
-	const auto it = Command::MAP.find(cmdName);
-	if (it == Command::MAP.end()) {
+	const std::string cmd_name = cmd_line.substr(0, token_pos = cmd_line.find(" "));
+	const std::string cmd_args = (token_pos == std::string::npos)
+		? "" :  cmd_line.substr(token_pos + 1, std::string::npos);
+	const auto it = Command::Str2Enum.find(cmd_name);
+	if (it == Command::Str2Enum.end()) {
 		// No command name was matched.
 		std::cout << Ansi::RED.ON;
-		std::cout << "command \"" << cmdLine << "\" not found."
+		std::cout << "command \"" << cmd_line << "\" not found."
 			" enter \"help\" for the help menu.";
 		std::cout << Ansi::RED.OFF << std::endl;
 		return true;
@@ -75,161 +75,161 @@ bool Repl<O>::runCommand(std::string const& cmdLine) {
 		using Command::E;
 		case E::Help:
 			std::cout
-			<< Command::HELP_MESSAGE << Ansi::DIM.ON
-			<< '\n' <<       OutputLvl::OPTIONS_MENU
-			<< '\n' << Solver::GenPath::OPTIONS_MENU
+			<< Command::HelpMessage << Ansi::DIM.ON
+			<< '\n' << OutputLvl::OPTIONS_MENU
+			<< '\n' << lib::gen::Path::OPTIONS_MENU
 			<< Ansi::DIM.OFF << std::endl;
 			break;
 		case E::Quit:
 			return false;
-		case E::OutputLevel:setOutputLvl(cmdArgs); break;
-		case E::SetGenPath:   gen.setGenPath(cmdArgs); break;
-		case E::RunSingle:    runSingle();    break;
-		case E::ContinuePrev: runSingle(true); break;
-		case E::RunMultiple:    runMultiple(cmdArgs, trials::StopBy::TRIALS);   break;
-		case E::RunMultipleOk: runMultiple(cmdArgs, trials::StopBy::SUCCESSES); break;
+		case E::OutputLevel:   set_output_level(cmd_args); break;
+		case E::SetGenPath:    gen.set_path_kind(cmd_args); break;
+		case E::RunSingle:     run_single();     break;
+		case E::ContinuePrev:  run_single(true); break;
+		case E::RunMultiple:   run_multiple(cmd_args, trials::StopBy::Trials);    break;
+		case E::RunMultipleOk: run_multiple(cmd_args, trials::StopBy::Successes); break;
 	}
 	return true;
 }
 
 
 template <Order O>
-OutputLvl::E Repl<O>::setOutputLvl(OutputLvl::E newOutputLvl) {
-	const OutputLvl::E oldOutputLvl = this->outputLvl;
-	this->outputLvl = newOutputLvl;
-	return oldOutputLvl;
+OutputLvl::E Repl<O>::set_output_level(OutputLvl::E new_output_level) {
+	const OutputLvl::E old_output_level = this->output_level;
+	this->output_level = new_output_level;
+	return old_output_level;
 }
 
 
 template <Order O>
-OutputLvl::E Repl<O>::setOutputLvl(std::string const& newOutputLvlString) {
+OutputLvl::E Repl<O>::set_output_level(std::string const& new_output_level_str) {
 	std::cout << "\noutput level is ";
-	if (newOutputLvlString.empty()) {
-		std::cout << "currently set to: " << getOutputLvl() << std::endl;
-		return getOutputLvl();
+	if (new_output_level_str.empty()) {
+		std::cout << "currently set to: " << get_output_level() << std::endl;
+		return get_output_level();
 	}
 	for (unsigned i = 0; i < OutputLvl::size; i++) {
-		if (newOutputLvlString.compare(OutputLvl::NAMES[i]) == 0) {
-			if (OutputLvl::E{i} == getOutputLvl()) {
+		if (new_output_level_str.compare(OutputLvl::NAMES[i]) == 0) {
+			if (OutputLvl::E{i} == get_output_level()) {
 				std::cout << "already set to: ";
 			} else {
 				std::cout << "now set to: ";
-				setOutputLvl(OutputLvl::E{i});
+				set_output_level(OutputLvl::E{i});
 			}
-			std::cout << getOutputLvl() << std::endl;
-			return getOutputLvl();
+			std::cout << get_output_level() << std::endl;
+			return get_output_level();
 		}
 	}
 	// unsuccessful return:
-	std::cout << getOutputLvl() << " (unchanged).\n"
-		<< Ansi::RED.ON << '"' << newOutputLvlString
+	std::cout << get_output_level() << " (unchanged).\n"
+		<< Ansi::RED.ON << '"' << new_output_level_str
 		<< "\" is not a valid output level name.\n"
 		<< OutputLvl::OPTIONS_MENU << Ansi::RED.OFF << std::endl;
-	return getOutputLvl();
+	return get_output_level();
 }
 
 
 template <Order O>
-void Repl<O>::runSingle(const bool contPrev) {
-	gen.printMessageBar("START");
+void Repl<O>::run_single(const bool cont_prev) {
+	gen.print_msg_bar("START");
 
 	// Generate a new solution:
-	const clock_t clockStart = std::clock();
-	gen.generateSolution(contPrev);
-	const double  processorTime = ((double)(std::clock() - clockStart)) / CLOCKS_PER_SEC;
+	const clock_t clock_start = std::clock();
+	gen.generate(cont_prev);
+	const double processor_time = ((double)(std::clock() - clock_start)) / CLOCKS_PER_SEC;
 
-	os << "\nprocessor time: " STATW_D << processorTime << " seconds";
-	os << "\nnum operations: " STATW_I << gen.prev_gen.getOpCount();
-	os << "\nmax backtracks: " STATW_I << gen.getMaxBacktrackCount();
-	if (!gen.isPretty) gen.printMessageBar("", '-');
+	os << "\nprocessor time: " STATW_D << processor_time << " seconds";
+	os << "\nnum operations: " STATW_I << gen.prev_gen.get_op_count();
+	os << "\nmax backtracks: " STATW_I << gen.get_most_backtracks();
+	if (!gen.is_pretty) gen.print_msg_bar("", '-');
 	gen.print();
-	gen.printMessageBar((gen.prev_gen.getExitStatus() == Solver::ExitStatus::Ok) ? "DONE" : "ABORT");
+	gen.print_msg_bar((gen.prev_gen.get_exist_status() == lib::gen::ExitStatus::Ok) ? "DONE" : "ABORT");
 	os << std::endl;
 }
 
 
 template <Order O>
-void Repl<O>::runMultiple(
-	const trials_t trialsStopThreshold,
-	const trials::StopBy trialsStopMethod
+void Repl<O>::run_multiple(
+	const trials_t trials_stop_threshold,
+	const trials::StopBy trials_stop_method
 ) {
 	const unsigned COLS = [this](){ // Never zero. Not used when writing to file.
-		const unsigned termCols = GET_TERM_COLS();
-		const unsigned cols = (termCols-7)/(gen.O4+1);
-		return termCols ? (cols ? cols : 1) : ((unsigned[]){0,64,5,2,1,1,1})[O];
+		const unsigned term_cols = GET_TERM_COLS();
+		const unsigned cols = (term_cols-7)/(gen.O4+1);
+		return term_cols ? (cols ? cols : 1) : ((unsigned[]){0,64,5,2,1,1,1})[O];
 	}();
-	const unsigned BAR_WIDTH = (gen.O4+1) * COLS + (gen.isPretty ? 7 : 0);
+	const unsigned BAR_WIDTH = (gen.O4+1) * COLS + (gen.is_pretty ? 7 : 0);
 	// Note at above: the magic number `7` is the length of the progress indicator.
 
 	// NOTE: The last bin is for trials that do not succeed.
-	std::array<trials_t, trials::NUM_BINS+1> binHitCount = {0,};
-	std::array<double,   trials::NUM_BINS+1> binOpsTotal = {0,};
+	std::array<trials_t, trials::NUM_BINS+1> bin_hit_count = {0,};
+	std::array<double,   trials::NUM_BINS+1> bin_ops_total = {0,};
 
-	gen.printMessageBar("START x" + std::to_string(trialsStopThreshold), BAR_WIDTH);
-	auto wallClockStart = std::chrono::steady_clock::now();
-	auto procClockStart = std::clock();
+	gen.print_msg_bar("START x" + std::to_string(trials_stop_threshold), BAR_WIDTH);
+	auto wall_clock_start = std::chrono::steady_clock::now();
+	auto proc_clock_start = std::clock();
 
-	trials_t totalTrials = 0;
+	trials_t total_trials = 0;
 	{
-		trials_t totalSuccesses = 0u;
-		unsigned percentDone   = 0u;
-		std::mutex sharedStateMutex;
-		trials::SharedState sharedState {
-			sharedStateMutex, COLS, getOutputLvl(),
-			trialsStopMethod, trialsStopThreshold, percentDone,
-			totalTrials, totalSuccesses, binHitCount, binOpsTotal,
+		trials_t total_successes = 0u;
+		unsigned percent_done = 0u;
+		std::mutex shared_state_mutex;
+		trials::SharedState shared_state {
+			shared_state_mutex, COLS, get_output_level(),
+			trials_stop_method, trials_stop_threshold, percent_done,
+			total_trials, total_successes, bin_hit_count, bin_ops_total,
 		};
-		if (getOutputLvl() == OutputLvl::E::Silent) {
+		if (get_output_level() == OutputLvl::E::Silent) {
 			std::cout << '\n';
 		}
 
 		// Start the threads:
 		std::array<std::thread, MAX_EXTRA_THREADS> extraThreads;
-		for (unsigned i = 0; i < numExtraThreads; i++) {
-			auto threadFunc = trials::ThreadFunc<O>(sharedState);
+		for (unsigned i = 0; i < num_extra_threads; i++) {
+			auto threadFunc = trials::ThreadFunc<O>(shared_state);
 			extraThreads[i] = std::thread(std::move(threadFunc), &gen, i+1);
 		} {
-			auto thisThreadFunc = trials::ThreadFunc<O>(sharedState);
+			auto thisThreadFunc = trials::ThreadFunc<O>(shared_state);
 			thisThreadFunc(&gen, 0);
 		}
-		for (unsigned i = 0; i < numExtraThreads; i++) {
+		for (unsigned i = 0; i < num_extra_threads; i++) {
 			extraThreads[i].join();
 		}
 	}
 
 	// Print stats:
-	const double procSeconds = ((double)(std::clock() - procClockStart) / CLOCKS_PER_SEC);
-	const double wallSeconds = ((double)[wallClockStart](){
+	const double proc_seconds = ((double)(std::clock() - proc_clock_start) / CLOCKS_PER_SEC);
+	const double wall_seconds = ((double)[wall_clock_start](){
 		using namespace std::chrono;
-		return duration_cast<microseconds>(steady_clock::now() - wallClockStart);
+		return duration_cast<microseconds>(steady_clock::now() - wall_clock_start);
 	}().count() / 1'000'000);
-	const std::string secondsUnits = DIM_ON + " seconds (with I/O)" + DIM_OFF;
-	gen.printMessageBar("", BAR_WIDTH, '-'); os
-	<< "\nhelper threads: " STATW_I << numExtraThreads
-	<< "\ngenerator path: " STATW_I << gen.getGenPath()
+	const std::string seconds_units = DIM_ON + " seconds (with I/O)" + DIM_OFF;
+	gen.print_msg_bar("", BAR_WIDTH, '-'); os
+	<< "\nhelper threads: " STATW_I << num_extra_threads
+	<< "\ngenerator path: " STATW_I << gen.get_path_kind()
 	// TODO [stats] For total successes and total trieals.
-	<< "\nprocessor time: " STATW_D << procSeconds << secondsUnits
-	<< "\nreal-life time: " STATW_D << wallSeconds << secondsUnits;
+	<< "\nprocessor time: " STATW_D << proc_seconds << seconds_units
+	<< "\nreal-life time: " STATW_D << wall_seconds << seconds_units;
 	;
-	if (wallSeconds > 10.0) {
+	if (wall_seconds > 10.0) {
 		// Emit a beep sound if the trials took longer than ten processor seconds:
 		std::cout << '\a' << std::flush;
 	}
 	// Print bins (work distribution):
-	printTrialsWorkDistribution(totalTrials, binHitCount, binOpsTotal);
-	gen.printMessageBar("DONE x" + std::to_string(trialsStopThreshold), BAR_WIDTH);
+	print_trials_work_distribution(total_trials, bin_hit_count, bin_ops_total);
+	gen.print_msg_bar("DONE x" + std::to_string(trials_stop_threshold), BAR_WIDTH);
 	os << std::endl;
 }
 
 
 template <Order O>
-void Repl<O>::runMultiple(
-	std::string const& trialsString,
-	const trials::StopBy stopByMethod
+void Repl<O>::run_multiple(
+	std::string const& trials_string,
+	const trials::StopBy stop_by_method
 ) {
 	long stopByValue;
 	try {
-		stopByValue = std::stol(trialsString);
+		stopByValue = std::stol(trials_string);
 		if (stopByValue <= 0) {
 			std::cout << Ansi::RED.ON;
 			std::cout << "please provide a non-zero, positive integer.";
@@ -238,81 +238,81 @@ void Repl<O>::runMultiple(
 		}
 	} catch (std::invalid_argument const& ia) {
 		std::cout << Ansi::RED.ON;
-		std::cout << "could not convert \"" << trialsString << "\" to an integer.";
+		std::cout << "could not convert \"" << trials_string << "\" to an integer.";
 		std::cout << Ansi::RED.OFF << std::endl;
 		return;
 	}
-	runMultiple(static_cast<trials_t>(stopByValue), stopByMethod);
+	run_multiple(static_cast<trials_t>(stopByValue), stop_by_method);
 }
 
 
 template <Order O>
-void Repl<O>::printTrialsWorkDistribution(
-	const trials_t totalTrials, // sum of entries of binHitCount
-	std::array<trials_t, trials::NUM_BINS+1> const& binHitCount,
-	std::array<double,   trials::NUM_BINS+1> const& binOpsTotal
+void Repl<O>::print_trials_work_distribution(
+	const trials_t total_trials, // sum of entries of bin_hit_count
+	std::array<trials_t, trials::NUM_BINS+1> const& bin_hit_count,
+	std::array<double,   trials::NUM_BINS+1> const& bin_ops_total
 ) {
 	const std::string THROUGHPUT_BAR_STRING = "--------------------------------";
 
 	// Calculate all throughputs before printing:
 	// (done in its own loop so we can later print comparisons against the optimal bin)
 	std::array<double, trials::NUM_BINS+1> throughput;
-	std::array<double, trials::NUM_BINS+1> successfulTrialsAccumArr;
-	unsigned  bestThroughputBin    = 0u; {
-	opcount_t successfulTrialsAccum = 0u;
-	double  successfulSolveOpsAccum = 0.0;
+	std::array<double, trials::NUM_BINS+1> successful_trials_accum_arr;
+	unsigned  best_throughput_bin    = 0u; {
+	opcount_t successful_trials_accum = 0u;
+	double  successful_solve_ops_accum = 0.0;
 	for (unsigned i = 0; i < trials::NUM_BINS; i++) {
-		successfulTrialsAccum   += binHitCount[i];
-		successfulSolveOpsAccum += binOpsTotal[i];
-		successfulTrialsAccumArr[i] = successfulTrialsAccum;
-		const double boundedGiveupOps = ((double)binOpsTotal[i+1] / binHitCount[i+1]);
+		successful_trials_accum   += bin_hit_count[i];
+		successful_solve_ops_accum += bin_ops_total[i];
+		successful_trials_accum_arr[i] = successful_trials_accum;
+		const double bounded_giveup_ops = ((double)bin_ops_total[i+1] / bin_hit_count[i+1]);
 			// No nice way to do the above. If I want an exact thing, I would
-			// need to change generateSolution to also track the numOperations
+			// need to change generate to also track the numOperations
 			// for some hypothetical, lower threshold, which would be for the
 			// bottom of this bin. I would need to expose `trials::NUM_BINS` to
-			// the `Solver` class. As a temporary, pessimistic band-aid, I will
+			// the `Generator` class. As a temporary, pessimistic band-aid, I will
 			// use the values for the next bin. Note that this will give `nan`
 			// (0.0/0.0) if there is no data for the next bin.
-		const double boundedGiveupOpsTotal = (totalTrials - successfulTrialsAccum) * boundedGiveupOps;
-		throughput[i] = successfulTrialsAccum / (successfulSolveOpsAccum + boundedGiveupOpsTotal);
-		if (throughput[i] > throughput[bestThroughputBin]) {
-			bestThroughputBin = i;
+		const double bounded_giveup_ops_total = (total_trials - successful_trials_accum) * bounded_giveup_ops;
+		throughput[i] = successful_trials_accum / (successful_solve_ops_accum + bounded_giveup_ops_total);
+		if (throughput[i] > throughput[best_throughput_bin]) {
+			best_throughput_bin = i;
 		}
 	}}
 	throughput[trials::NUM_BINS] = 0.0; // unknown.
-	successfulTrialsAccumArr[trials::NUM_BINS] = 0.0;
+	successful_trials_accum_arr[trials::NUM_BINS] = 0.0;
 
 	os << trials::TABLE_SEPARATOR;
 	os << trials::TABLE_HEADER;
 	os << trials::TABLE_SEPARATOR;
-	for (unsigned i = 0; i < binHitCount.size(); i++) {
+	for (unsigned i = 0; i < bin_hit_count.size(); i++) {
 		if (i == trials::NUM_BINS) {
 			// Print a special separator for the giveups row:
 			os << trials::TABLE_SEPARATOR;
 		}
 		// Bin Bottom column:
-		const double binBottom  = (double)(i) * gen.GIVEUP_THRESHOLD / trials::NUM_BINS;
+		const double bin_bottom  = (double)(i) * gen.GIVEUP_THRESHOLD / trials::NUM_BINS;
 		if constexpr (O <= 4) {
-			os << "\n|" << std::setw(9) << (int)(binBottom);
+			os << "\n|" << std::setw(9) << (int)(bin_bottom);
 		} else {
-			os << "\n|" << std::setw(8) << (int)(binBottom / 1'000.0) << 'K';
+			os << "\n|" << std::setw(8) << (int)(bin_bottom / 1'000.0) << 'K';
 		}
 		// Bin Hit Count column:
 		os << "  |";
-		if (binHitCount[i] == 0) os << DIM_ON;
-		os << std::setw(8) << binHitCount[i];
-		if (binHitCount[i] == 0) os << DIM_OFF;
+		if (bin_hit_count[i] == 0) os << DIM_ON;
+		os << std::setw(8) << bin_hit_count[i];
+		if (bin_hit_count[i] == 0) os << DIM_OFF;
 
 		// Operation Count column:
 		os << "  |";
-		if (binHitCount[i] == 0) os << DIM_ON;
-		os << std::setw(13) << unsigned(binOpsTotal[i] / ((O<5)?1:1000));
+		if (bin_hit_count[i] == 0) os << DIM_ON;
+		os << std::setw(13) << unsigned(bin_ops_total[i] / ((O<5)?1:1000));
 		os << ((O<5)?' ':'K');
-		if (binOpsTotal[i] == 0) os << DIM_OFF;
+		if (bin_ops_total[i] == 0) os << DIM_OFF;
 
 		// Giveup Percentage column:
 		os << "  |";
-		os << std::setw(9) << (100.0 * (totalTrials - successfulTrialsAccumArr[i]) / totalTrials);
+		os << std::setw(9) << (100.0 * (total_trials - successful_trials_accum_arr[i]) / total_trials);
 
 		// Speedup Column
 		os << "  |" << std::setw(9);
@@ -328,11 +328,11 @@ void Repl<O>::printTrialsWorkDistribution(
 		// Print a bar to visualize throughput relative to tha
 		// of the best. Note visual exaggeration via exponents
 		// (the exponent value was chosen by taste / visual feel)
-		const unsigned barLength = THROUGHPUT_BAR_STRING.length()
-			* std::pow(throughput[i] / throughput[bestThroughputBin], static_cast<int>(20.0/O));
-		if (i != bestThroughputBin) os << DIM_ON;
-		os << ' ' << THROUGHPUT_BAR_STRING.substr(0, barLength);
-		if (i != bestThroughputBin) os << DIM_OFF;
+		const unsigned bar_length = THROUGHPUT_BAR_STRING.length()
+			* std::pow(throughput[i] / throughput[best_throughput_bin], static_cast<int>(20.0/O));
+		if (i != best_throughput_bin) os << DIM_ON;
+		os << ' ' << THROUGHPUT_BAR_STRING.substr(0, bar_length);
+		if (i != best_throughput_bin) os << DIM_OFF;
 	}
 	os << " <- current giveup threshold";
 	os << trials::TABLE_SEPARATOR;

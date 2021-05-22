@@ -7,27 +7,27 @@ pub trait Generator {
 
 ///
 struct GenericGenerator<
-	OrdCount: Prim,
-	LenCount: Prim,
-	AreCount: Prim,
-	LenField: Prim,
-	const ORD: usize,
-	const LEN: usize,
-	const ARE: usize,
+	Ord1: Prim,
+	Ord2: Prim,
+	Ord4: Prim,
+	OccMask: Prim,
+	const O1: usize,
+	const O2: usize,
+	const O4: usize,
 	const PATH: usize,
-> /* where [AreCount; ARE]: Default */ {
-	_phantom_data: std::marker::PhantomData<OrdCount>,
-	try_order: [[LenCount; LEN]; LEN],
+> {
+	_phantom_data: std::marker::PhantomData<Ord1>,
+	try_order: [[Ord2; O2]; O2],
 
 	/// Indexed by progress- not by coordinate (for better cache usage)
-	val: [LenCount; ARE],
-	row_has: [LenField; LEN],
-	col_has: [LenField; LEN],
-	blk_has: [LenField; LEN],
+	val: [Ord2; O4],
+	row_has: [Ord2; O2],
+	col_has: [Ord2; O2],
+	blk_has: [OccMask; O2],
 
-	progress: AreCount,
+	progress: Ord4,
 	/// Indexed by progress- not by coordinate (for better cache usage).
-	try_progress: [LenCount; ARE],
+	try_progress: [Ord2; O4],
 
 	/// The generator is "stuck" at a tile T when since the last time it was not
 	/// stuck, symbols generated up to T left T with no valid choice of symbol.
@@ -35,48 +35,38 @@ struct GenericGenerator<
 	/// This field is used to backtrack within the AOE of a placed symbol. It is
 	/// effectively nil when progress advances past it, or when any advancement
 	/// behind it touches a tile ouside its AOE.
-	stuck_progress: AreCount,
+	stuck_progress: Ord4,
 }
 
 
 impl<
-	OrdCount: Prim,
-	LenCount: Prim,
-	AreCount: Prim,
-	LenField: Prim,
-	const ORD: usize,
-	const LEN: usize,
-	const ARE: usize,
+	Ord1: Prim,
+	Ord2: Prim,
+	Ord4: Prim,
+	OccMask: Prim,
+	const O1: usize,
+	const O2: usize,
+	const O4: usize,
 	const PATH: usize,
-> GenericGenerator<OrdCount, LenCount, AreCount, LenField, ORD, LEN, ARE, PATH>
-	// where [AreCount; ARE]: Default
+> GenericGenerator<Ord1, Ord2, Ord4, OccMask, O1, O2, O4, PATH>
 {
 	pub fn new() -> Self {
 		Self {
-			_phantom_data: std::marker::PhantomData::<OrdCount>,
-			try_order: [[LenCount::zero(); LEN]; LEN],
+			_phantom_data: std::marker::PhantomData::<Ord1>,
+			try_order: [[LenCount::zero(); O2]; O2],
 
-			/// Indexed by progress- not by coordinate (for better cache usage)
-			val: [LenCount::zero(); ARE],
-			row_has: [LenField::zero(); LEN],
-			col_has: [LenField::zero(); LEN],
-			blk_has: [LenField::zero(); LEN],
+			val: [Ord2::zero(); O4],
+			row_has: [Ord2::zero(); O2],
+			col_has: [Ord2::zero(); O2],
+			blk_has: [Ord2::zero(); O2],
 
-			progress: AreCount::zero(),
-			/// Indexed by progress- not by coordinate (for better cache usage).
-			try_progress: [LenCount::zero(); ARE],
-
-			/// The generator is "stuck" at a tile T when since the last time it was not
-			/// stuck, symbols generated up to T left T with no valid choice of symbol.
-			///
-			/// This field is used to backtrack within the AOE of a placed symbol. It is
-			/// effectively nil when progress advances past it, or when any advancement
-			/// behind it touches a tile ouside its AOE.
-			stuck_progress: AreCount::zero(),
+			progress: Ord4::zero(),
+			try_progress: [Ord2::zero(); O4],
+			stuck_progress: Ord2::zero(),
 		}
 	}
 	pub fn generate(&mut self) {
-		self.buf[0] = num::cast(1).unwrap();
+		self.val[0] = num::cast(1).unwrap();
 		0;
 	}
 }

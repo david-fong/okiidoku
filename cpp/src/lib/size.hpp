@@ -18,7 +18,7 @@ namespace solvent {
 	 * included: partial template specification, alias templating,
 	 * using an enum type for valid grid orders.
 	 *
-	 * Note that there is another similar typedef named `order_t`,
+	 * Note that there is another similar typedef named `ord1_t`,
 	 * which is conditionally defined to be large enough for whatever
 	 * value is passed as a template parameter of this type (Order)
 	 * as a maximum value.
@@ -46,7 +46,7 @@ namespace solvent {
 
 		// uint range [0, order].
 		// not used in any critical code, so it doesn't need to be fast type.
-		typedef std::uint8_t order_t;
+		typedef std::uint8_t ord1_t;
 
 		// uint range [0, order^2].
 		// order:   2    3    4    5    6    7    8    9   10   11   12   13   14   15   16
@@ -55,7 +55,7 @@ namespace solvent {
 		typedef
 			typename std::conditional_t<(O < 16), std::uint_fast8_t,
 			std::uint_fast16_t
-		> length_t;
+		> ord2_t;
 
 		// uint range [0, order^4].
 		// order:   2    3    4    5     6     7     8     9     10
@@ -66,10 +66,10 @@ namespace solvent {
 			typename std::conditional_t<(O <   8), std::uint16_t,
 			typename std::conditional_t<(O < 256), std::uint32_t,
 			std::uint64_t
-		>>> area_t;
+		>>> ord4_t;
 
 		// uint range [0, order^2].
-		typedef length_t value_t;
+		typedef ord2_t value_t;
 	};
 
 
@@ -99,7 +99,7 @@ namespace solvent {
 			 * Measured stats for operations: https://www.desmos.com/calculator/8taqzelils
 			 */
 			static constexpr opcount_t GIVEUP_THRESHOLD = ((const opcount_t[]){
-				// Note: Make sure entries of `backtrackCounts` can fit these.
+				// Note: Make sure entries of `backtrack_counts` can fit these.
 				0,  1,  3,  150,  1'125,  560'000,  1'000'000'000,
 			})[O];
 			// TODO [tune] The current values for order-6 are just predictions.

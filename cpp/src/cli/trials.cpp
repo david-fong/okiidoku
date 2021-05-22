@@ -1,5 +1,6 @@
 #include "./trials.hpp"
 #include "../util/ansi.hpp"
+#include "./enum.hpp"
 
 #include <iostream>
 #include <iomanip>
@@ -15,12 +16,12 @@ const std::string THROUGHPUT_COMMENTARY =
 
 
 template <Order O>
-void ThreadFunc<O>::operator()(generator_t* gen, const unsigned threadNum) {
-	if (threadNum != 0) {
-		// TODO [bug] oldSolver can technically finish before we get here.
-		generator_t const*const oldSolver = gen;
-		gen = new generator_t(oldSolver->os);
-		gen->copy_settings_from(*oldSolver);
+void ThreadFunc<O>::operator()(generator_t* gen, const unsigned thread_num) {
+	if (thread_num != 0) {
+		// TODO [bug] old_generator can technically finish before we get here.
+		generator_t const*const old_generator = gen;
+		gen = new generator_t(old_generator->os);
+		gen->copy_settings_from(*old_generator);
 	}
 	mutex.lock();
 	while (true) {
@@ -30,58 +31,58 @@ void ThreadFunc<O>::operator()(generator_t* gen, const unsigned threadNum) {
 			// This is the only section unguarded by the mutex. That's fine
 			// because it covers the overwhelming majority of the work, and
 			// everything else actually accesses shared state and resources.
-			gen->generateSolution();
+			gen->generate();
 		mutex.lock();
 
 		// Check break conditions:
 		// Note that doing this _after_ attempting a trial (instead of before)
 		// results in a tiny bit of wasted effort for the last [numThreads] or
 		// so trials. I'm doing this to prevent some visual printing gaps).
-		if (trialsStopCurVal() >= trialsStopThreshold) {
+		if (trials_stop_cur_val() >= trials_stop_threshold) {
 			break;
 		}
 
 		// Print a progress indicator to std::cout:
 		{
 			using lib::gen::ExitStatus;
-			ExitStatus exitStatus = gen->prev_gen.getExitStatus();
-			const bool doOutputLine =
-				(outputLvl == OutputLvl::E::All) ||
-				(outputLvl == OutputLvl::E::NoGiveups && exitStatus == ExitStatus::Ok);
-			if (totalTrials % COLS == 0) {
-				const unsigned newPercentDone = 100u * trialsStopCurVal() / trialsStopThreshold;
-				if (doOutputLine) {
-					std::cout << "\n| " << std::setw(2) << newPercentDone << "% |";
-				} else if (outputLvl == OutputLvl::E::Silent) {
+			ExitStatus exit_status = gen->prev_gen.get_exist_status();
+			const bool do_output_line =
+				(output_level == OutputLvl::All) ||
+				(output_level == OutputLvl::NoGiveups && exit_status == ExitStatus::Ok);
+			if (total_trials % COLS == 0) {
+				const unsigned new_pct_done = 100u * trials_stop_cur_val() / trials_stop_threshold;
+				if (do_output_line) {
+					std::cout << "\n| " << std::setw(2) << new_pct_done << "% |";
+				} else if (output_level == OutputLvl::Silent) {
 					const int charDiff =
-						(newPercentDone * TABLE_SEPARATOR.size() / 100u)
-						- (percentDone * TABLE_SEPARATOR.size() / 100u);
+						(new_pct_done * TABLE_SEPARATOR.size() / 100u)
+						- (pct_done * TABLE_SEPARATOR.size() / 100u);
 					for (int i = 0; i < charDiff; i++) {
 						std::cout << Ansi::BLOCK_CHARS[2] << std::flush;
 					}
 				}
-				percentDone = newPercentDone;
+				pct_done = new_pct_done;
 			}
-			totalTrials++;
-			if (exitStatus == ExitStatus::Ok) {
-				totalSuccesses++;
+			total_trials++;
+			if (exit_status == ExitStatus::Ok) {
+				total_successes++;
 			}
 			// Print the generated solution:
-			if (doOutputLine) {
-				// gen->os << '(' << threadNum << ')';
-				gen->os << (gen->isPretty ? ' ' : '\n');
-				gen->printSimple();
+			if (do_output_line) {
+				// gen->os << '(' << thread_num << ')';
+				gen->os << (gen->is_pretty ? ' ' : '\n');
+				gen->print_simple();
 				if constexpr (gen->O1 > 4) gen->os << std::flush;
 			}
 		}
 
 		// Save some stats for later diagnostics-printing:
-		const unsigned binNum = NUM_BINS * (gen->getMaxBacktrackCount()) / gen->GIVEUP_THRESHOLD;
-		binHitCount[binNum]++;
-		binOpsTotal[binNum] += gen->prev_gen.getOpCount();
+		const unsigned binNum = NUM_BINS * (gen->get_most_backtracks()) / gen->GIVEUP_THRESHOLD;
+		bin_hit_count[binNum]++;
+		bin_ops_total[binNum] += gen->prev_gen.get_op_count();
 	}
 	mutex.unlock();
-	if (threadNum != 0) delete gen;
+	if (thread_num != 0) delete gen;
 }
 
 }

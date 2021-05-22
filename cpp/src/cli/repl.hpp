@@ -26,7 +26,7 @@ namespace solvent::cli {
 			RunMultiple,
 			RunMultipleOk,
 		};
-		const std::map<std::string, Command::E> MAP = {
+		const std::map<std::string, Command::E> Str2Enum = {
 			{ "help",       E::Help           },
 			{ "quit",       E::Quit           },
 			{ "output",     E::OutputLevel    },
@@ -36,7 +36,7 @@ namespace solvent::cli {
 			{ "trials",     E::RunMultiple    },
 			{ "strials",    E::RunMultipleOk  },
 		};
-		const std::string HELP_MESSAGE = "\nCOMMAND MENU:"
+		const std::string HelpMessage = "\nCOMMAND MENU:"
 			"\n- help               print this help menu"
 			"\n- quit               cleanly exit this program"
 			"\n- output [<level>]   get / set output level"
@@ -66,40 +66,40 @@ namespace solvent::cli {
 	 */
 	template <Order O>
 	class Repl final {
-	  public:
-		using opcount_t = Solver::opcount_t;
-		using generator_t = class solvent::lib::gen::Generator<O>;
+	public:
+		using opcount_t = lib::gen::opcount_t;
+		using generator_t = class lib::gen::Generator<O>;
 
 		Repl(void) = delete;
 		explicit Repl(std::ostream&);
-		bool runCommand(std::string const& cmdLine);
+		bool run_command(std::string const& cmd_line);
 
 		// This is equal to `MAX_EXTRA_THREADS` floored by how many
 		// concurrent threads the host processor can support at a time.
-		const unsigned numExtraThreads;
+		const unsigned num_extra_threads;
 
-	  private:
+	private:
 		generator_t gen;
 		std::ostream& os; // alias to this->gen.os;
-		OutputLvl::E outputLvl;
+		OutputLvl::E output_level;
 
 		static constexpr unsigned MAX_EXTRA_THREADS = ((const unsigned[]){0,0,0,0,1,4,2,2})[O];
-		const std::string DIM_ON  = (gen.isPretty ? Ansi::DIM.ON  : "");
-		const std::string DIM_OFF = (gen.isPretty ? Ansi::DIM.OFF : "");
+		const std::string DIM_ON  = (gen.is_pretty ? Ansi::DIM.ON  : "");
+		const std::string DIM_OFF = (gen.is_pretty ? Ansi::DIM.OFF : "");
 
 		// Return false if command is to exit the program:
-		void runSingle(bool contPrev = false);
+		void run_single(bool contPrev = false);
 
-		void runMultiple(trials_t numTrials, Trials::StopBy);
-		void runMultiple(std::string const&, Trials::StopBy);
-		void printTrialsWorkDistribution(trials_t numTotalTrials,
-			std::array<trials_t, Trials::NUM_BINS+1> const& binHitCount,
-			std::array<double,   Trials::NUM_BINS+1> const& binOpsTotal);
+		void run_multiple(trials_t num_trials, trials::StopBy);
+		void run_multiple(std::string const&, trials::StopBy);
+		void print_trials_work_distribution(trials_t num_total_trials,
+			std::array<trials_t, trials::NUM_BINS+1> const& bin_hit_count,
+			std::array<double,   trials::NUM_BINS+1> const& bin_ops_total);
 
-	  public:
-		[[gnu::cold]] OutputLvl::E getOutputLvl(void) const noexcept { return outputLvl; };
-		[[gnu::cold]] OutputLvl::E setOutputLvl(OutputLvl::E);
-		[[gnu::cold]] OutputLvl::E setOutputLvl(std::string const&);
+	public:
+		[[gnu::cold]] OutputLvl::E get_output_level(void) const noexcept { return output_level; };
+		[[gnu::cold]] OutputLvl::E set_output_level(OutputLvl::E);
+		[[gnu::cold]] OutputLvl::E set_output_level(std::string const&);
 
 	};
 

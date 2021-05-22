@@ -12,44 +12,44 @@
 
 
 template <solvent::Order O>
-std::ostream& operator<<(std::ostream& os, solvent::lib::gen::Generator<O> const& s) {
+std::ostream& operator<<(std::ostream& os, solvent::lib::gen::Generator<O> const& g) {
 	using namespace solvent::lib::gen;
-	using length_t = typename solvent::size<O>::length_t;
+	using ord2_t = typename solvent::size<O>::ord2_t;
 	#define PRINT_GRID0_TILE(PRINTER_STATEMENT) {\
-		for (length_t col = 0; col < s.O2; col++) {\
-			if (isPretty && (col % s.O1) == 0) os << Ansi::DIM.ON << " |" << Ansi::DIM.OFF;\
+		for (ord2_t col = 0; col < g.O2; col++) {\
+			if (is_pretty && (col % g.O1) == 0) os << Ansi::DIM.ON << " |" << Ansi::DIM.OFF;\
 			PRINTER_STATEMENT;\
 		}}
 	#define PRINT_GRID_TILE(PRINTER_STATEMENT) {\
-		if (isPretty) {\
+		if (is_pretty) {\
 			os << Ansi::DIM.ON << " |" /* << Ansi::DIM.OFF */;\
 			os << GRID_SEP;\
 			PRINT_GRID0_TILE(PRINTER_STATEMENT)}\
 		}
 
-	const bool isPretty = &os == &std::cout;
-	const auto printBlkRowSepString = [&](){
-		if (!isPretty) return;
+	const bool is_pretty = &os == &std::cout;
+	const auto print_blk_row_sep_str = [&](){
+		if (!is_pretty) return;
 		os << '\n' << Ansi::DIM.ON;
-		os << s.blkRowSepString;
-		os << GRID_SEP << s.blkRowSepString;
+		os << g.blk_row_sep_str;
+		os << GRID_SEP << g.blk_row_sep_str;
 		os << Ansi::DIM.OFF;
 	};
-	for (length_t row = 0; row < s.O2; row++) {
-		if (row % s.O1 == 0) {
-			printBlkRowSepString();
+	for (ord2_t row = 0; row < g.O2; row++) {
+		if (row % g.O1 == 0) {
+			print_blk_row_sep_str();
 		}
 		os << '\n';
 		// Tile content:
-		#define index (row * s.length + col)
-		PRINT_GRID0_TILE(os << ' ' << s.grid[index])
-		PRINT_GRID_TILE(s.printShadedBacktrackStat(s.backtrackCounts[index]))
-		// PRINT_GRID_TILE(os << std::setw(2) << grid[index].biasIndex)
-		// PRINT_GRID_TILE(os << ' ' << rowBiases[row][col])
+		#define index ((row * g.O2) + col)
+		PRINT_GRID0_TILE(os << ' ' << g.grid[index])
+		PRINT_GRID_TILE(g.print_shaded_backtrack_stat(g.backtrack_counts[index]))
+		// PRINT_GRID_TILE(os << std::setw(2) << grid[index].try_progress)
+		// PRINT_GRID_TILE(os << ' ' << val_try_order[row][col])
 		#undef index
-		if (isPretty) os << Ansi::DIM.ON << " |" << Ansi::DIM.OFF;
+		if (is_pretty) os << Ansi::DIM.ON << " |" << Ansi::DIM.OFF;
 	}
-	printBlkRowSepString();
+	print_blk_row_sep_str();
 	#undef PRINT_GRID_TILE
 	#undef PRINT_GRID0_TILE
 	return os;
@@ -71,9 +71,9 @@ struct MyNumpunct : std::numpunct<char> {
 
 #if SOLVER_THREADS_SHARE_GENPATH
 template <Order O>
-Path::E Generator<O>::genPath = initializePath();
+Path::E Generator<O>::path_kind = initialize_path();
 template <Order O>
-std::array<typename size<O>::area_t, Generator<O>::O4> Generator<O>::traversalOrder;
+std::array<typename size<O>::ord4_t, Generator<O>::O4> Generator<O>::path;
 #endif
 
 
@@ -86,19 +86,19 @@ std::array<typename size<O>::area_t, Generator<O>::O4> Generator<O>::traversalOr
 template <Order O>
 Generator<O>::Generator(std::ostream& os):
 	os        (os),
-	isPretty  (&os == &std::cout)
+	is_pretty  (&os == &std::cout)
 {
-	for (auto& rowBias : rowBiases) {
+	for (auto& rowBias : val_try_order) {
 		std::iota(rowBias.begin(), rowBias.end(), 0);
 	}
-	// Note: This #if must be done here and not in `initializePath`
+	// Note: This #if must be done here and not in `initialize_path`
 	// because that method is still needed for static initialization.
 	#if !SOLVER_THREADS_SHARE_GENPATH
-	initializePath();
+	initialize_path();
 	#endif
 
 	// Output formatting:
-	if (isPretty) {
+	if (is_pretty) {
 		os.imbue(std::locale(os.getloc(), new MyNumpunct()));
 	}
 	os.precision(3);
@@ -109,7 +109,7 @@ Generator<O>::Generator(std::ostream& os):
 template <Order O>
 void Generator<O>::copy_settings_from(Generator const& other) {
 	#if !SOLVER_THREADS_SHARE_GENPATH
-	setPath(other.getPath());
+	set_path_kind(other.get_path_kind());
 	#endif
 }
 
@@ -124,9 +124,9 @@ void Generator<O>::print(void) const {
 
 
 template <Order O>
-void Generator<O>::printSimple(void) const {
-	auto const helper = [this](std::ostream& os, const bool isPretty){
-		const bool doDim = isPretty && (prev_gen.getExitStatus() != ExitStatus::Ok);
+void Generator<O>::print_simple(void) const {
+	auto const helper = [this](std::ostream& os, const bool is_pretty){
+		const bool doDim = is_pretty && (prev_gen.get_exist_status() != ExitStatus::Ok);
 		if (doDim) os << Ansi::DIM.ON;
 		for (auto const& t : grid) {
 			os << t;
@@ -143,11 +143,11 @@ void Generator<O>::printSimple(void) const {
 
 
 template <Order O>
-void Generator<O>::printShadedBacktrackStat(const backtrack_t count) const {
+void Generator<O>::print_shaded_backtrack_stat(const backtrack_t count) const {
 	const unsigned int relativeIntensity
 		= (double)(count - 1)
 		* Ansi::BLOCK_CHARS.size()
-		/ max_backtracks;
+		/ most_backtracks;
 	auto const& intensityChar
 		= (count != 0)
 		? Ansi::BLOCK_CHARS[relativeIntensity]
@@ -158,18 +158,18 @@ void Generator<O>::printShadedBacktrackStat(const backtrack_t count) const {
 
 template <Order O>
 void Generator<O>::clear(void) {
-	for (area_t i = 0; i < O4; i++) {
+	for (ord4_t i = 0; i < O4; i++) {
 		grid[i].clear();
 	}
-	rowSymbolOccMasks.fill(0);
-	colSymbolOccMasks.fill(0);
-	blkSymbolOccMasks.fill(0);
-	backtrackCounts.fill(0u);
-	max_backtracks = 0u;
+	row_has.fill(0);
+	col_has.fill(0);
+	blk_has.fill(0);
+	backtrack_counts.fill(0u);
+	most_backtracks = 0u;
 
 	// Scramble each row's value-guessing-O1:
 	RANDOM_MUTEX.lock();
-	for (auto& rowBias : rowBiases) {
+	for (auto& rowBias : val_try_order) {
 		std::shuffle(rowBias.begin(), rowBias.end(), VALUE_RNG);
 	}
 	RANDOM_MUTEX.unlock();
@@ -177,16 +177,16 @@ void Generator<O>::clear(void) {
 
 
 template <Order O>
-void Generator<O>::generateSolution(const bool contPrev) {
+void Generator<O>::generate(const bool _continue) {
 	PathDirection direction = PathDirection::Forward;
-	opcount_t    opCount   = 0u;
-	area_t       tvsIndex  = 0u;
+	opcount_t    op_count   = 0u;
+	ord4_t       progress   = 0u;
 
-	if (__builtin_expect(contPrev, false)) {
-		switch (prev_gen.getExitStatus()) {
+	if (__builtin_expect(_continue, false)) {
+		switch (prev_gen.get_exist_status()) {
 			case ExitStatus::Ok:
 				// Previously succeeded.
-				tvsIndex  = O4 - 1u;
+				progress  = O4 - 1u;
 				direction = PathDirection::Back;
 				break;
 			case ExitStatus::Exhausted:
@@ -197,52 +197,52 @@ void Generator<O>::generateSolution(const bool contPrev) {
 		// Not continuing. Do something entirely new!
 		this->clear();
 	}
-	prev_gen.exitStatus = ExitStatus::Ok; // default value;
+	prev_gen.exit_status = ExitStatus::Ok; // default value;
 
-	while (tvsIndex < O4) {
-		const area_t gridIndex = traversalOrder[tvsIndex];
+	while (progress < O4) {
+		const ord4_t gridIndex = path[progress];
 		// Try something at the current tile:
-		direction = setNextValid(gridIndex);
-		opCount++;
+		direction = set_next_valid(gridIndex);
+		op_count++;
 		if (direction == PathDirection::Back) {
 			// Pop and step backward:
-			if (++backtrackCounts[gridIndex] > max_backtracks) {
-				max_backtracks = backtrackCounts[gridIndex];
+			if (++backtrack_counts[gridIndex] > most_backtracks) {
+				most_backtracks = backtrack_counts[gridIndex];
 			}
-			if (__builtin_expect(tvsIndex == 0u, false)) {
-				prev_gen.exitStatus = ExitStatus::Exhausted;
+			if (__builtin_expect(progress == 0u, false)) {
+				prev_gen.exit_status = ExitStatus::Exhausted;
 				break;
 			}
-			--tvsIndex;
+			--progress;
 		} else {
 			// (direction == PathDirection::Forward)
-			++tvsIndex;
+			++progress;
 		}
 		// Check whether the give-up-condition has been met:
-		if (__builtin_expect(max_backtracks >= GIVEUP_THRESHOLD, false)) {
-			prev_gen.exitStatus = ExitStatus::Abort;
+		if (__builtin_expect(most_backtracks >= GIVEUP_THRESHOLD, false)) {
+			prev_gen.exit_status = ExitStatus::Abort;
 			break;
 		}
 	}
-	prev_gen.tvsIndex = tvsIndex;
-	prev_gen.opCount  = opCount;
+	prev_gen.progress = progress;
+	prev_gen.op_count  = op_count;
 }
 
 
 template <Order O>
-PathDirection Generator<O>::setNextValid(const area_t index) {
-	occmask_t& rowBin = rowSymbolOccMasks[this->getRow(index)];
-	occmask_t& colBin = colSymbolOccMasks[this->getCol(index)];
-	occmask_t& blkBin = blkSymbolOccMasks[this->getBlk(index)];
+PathDirection Generator<O>::set_next_valid(const ord4_t index) {
+	occmask_t& rowBin = row_has[this->get_row(index)];
+	occmask_t& colBin = col_has[this->get_col(index)];
+	occmask_t& blkBin = blk_has[this->get_blk(index)];
 
 	Tile& t = grid[index];
-	if (!t.isClear()) {
+	if (!t.is_clear()) {
 		// If the tile is currently already set, clear its
 		// previous value:
-		const occmask_t eraseMask = ~(occmask_t(0b1u) << t.value);
-		rowBin &= eraseMask;
-		colBin &= eraseMask;
-		blkBin &= eraseMask;
+		const occmask_t erase_mask = ~(occmask_t(0b1u) << t.value);
+		rowBin &= erase_mask;
+		colBin &= erase_mask;
+		blkBin &= erase_mask;
 	}
 
 	const occmask_t invalidBin = (rowBin | colBin | blkBin);
@@ -253,25 +253,25 @@ PathDirection Generator<O>::setNextValid(const area_t index) {
 		return Back;
 	} else if (occmask_popcount(invalidBin) == O2 - 1) {
 		const value_t value = occmask_ctz(!invalidBin);
-		const occmask_t valueBit = 0b1 << value;
-		rowBin |= valueBit;
-		colBin |= valueBit;
-		blkBin |= valueBit;
+		const occmask_t value_bit = 0b1 << value;
+		rowBin |= value_bit;
+		colBin |= value_bit;
+		blkBin |= value_bit;
 		t.value = value;
-		t.biasIndex = O2;
+		t.try_progress = O2;
 		return Forward;
 	}
 	*/
-	for (value_t biasIndex = t.biasIndex; biasIndex < O2; biasIndex++) {
-		const value_t value = rowBiases[this->getRow(index)][biasIndex];
-		const occmask_t valueBit = occmask_t(0b1u) << value;
-		if (!(invalidBin & valueBit)) {
+	for (value_t try_progress = t.try_progress; try_progress < O2; try_progress++) {
+		const value_t value = val_try_order[this->get_row(index)][try_progress];
+		const occmask_t value_bit = occmask_t(0b1u) << value;
+		if (!(invalidBin & value_bit)) {
 			// If a valid value is found for this tile:
-			rowBin |= valueBit;
-			colBin |= valueBit;
-			blkBin |= valueBit;
+			rowBin |= value_bit;
+			colBin |= value_bit;
+			blkBin |= value_bit;
 			t.value = value;
-			t.biasIndex = (biasIndex + 1u);
+			t.try_progress = (try_progress + 1u);
 			return PathDirection::Forward;
 		}
 	}
@@ -284,115 +284,115 @@ PathDirection Generator<O>::setNextValid(const area_t index) {
 
 
 template <Order O>
-Path::E Generator<O>::setPath(const Path::E newPath, const bool force) noexcept {
-	if (!force && newPath == getPath()) {
+Path::E Generator<O>::set_path_kind(const Path::E newPath, const bool force) noexcept {
+	if (!force && newPath == get_path_kind()) {
 		// Short circuit:
-		return getPath();
+		return get_path_kind();
 	}
 	switch (newPath) {
 		case Path::E::RowMajor:
-			std::iota(traversalOrder.begin(), traversalOrder.end(), 0);
+			std::iota(path.begin(), path.end(), 0);
 			break;
 		case Path::E::DealRwMj: {
-			area_t i = 0;
-			for (order_t bRow = 0; bRow < O1; bRow++) {
-				for (order_t bCol = 0; bCol < O1; bCol++) {
-					for (length_t blk = 0; blk < O2; blk++) {
-						area_t blkaddr = ((blk % O1) * O1) + (blk / O1 * O1 * O2);
-						traversalOrder[i++] = blkaddr + (bRow * O2) + bCol;
+			ord4_t i = 0;
+			for (ord1_t b_row = 0; b_row < O1; b_row++) {
+				for (ord1_t b_col = 0; b_col < O1; b_col++) {
+					for (ord2_t blk = 0; blk < O2; blk++) {
+						ord4_t blkaddr = ((blk % O1) * O1) + (blk / O1 * O1 * O2);
+						path[i++] = blkaddr + (b_row * O2) + b_col;
 					}
 				}
 			}
 			break; }
 		case Path::E::BlockCol: {
-			area_t i = 0;
-			for (order_t blkCol = 0; blkCol < O1; blkCol++) {
-				for (length_t row = 0; row < O2; row++) {
-					for (order_t bCol = 0; bCol < O1; bCol++) {
-						traversalOrder[i++] = (blkCol * O1) + (row * O2) + (bCol);
+			ord4_t i = 0;
+			for (ord1_t blkCol = 0; blkCol < O1; blkCol++) {
+				for (ord2_t row = 0; row < O2; row++) {
+					for (ord1_t b_col = 0; b_col < O1; b_col++) {
+						path[i++] = (blkCol * O1) + (row * O2) + (b_col);
 					}
 				}
 			}
 			break; }
 	}
-	const Path::E oldPath = getPath();
-	genPath = newPath;
+	const Path::E oldPath = get_path_kind();
+	path_kind = newPath;
 	return oldPath;
 }
 
 
 template <Order O>
-Path::E Generator<O>::setPath(std::string const& newPathString) noexcept {
+Path::E Generator<O>::set_path_kind(std::string const& newPathString) noexcept {
 	std::cout << "\ngenerator path is ";
 	if (newPathString.empty()) {
-		std::cout << "currently set to: " << getPath() << std::endl;
-		return getPath();
+		std::cout << "currently set to: " << get_path_kind() << std::endl;
+		return get_path_kind();
 	}
 	for (unsigned i = 0; i < Path::size; i++) {
 		if (newPathString.compare(Path::NAMES[i]) == 0) {
-			if (Path::E{i} == getPath()) {
+			if (Path::E{i} == get_path_kind()) {
 				std::cout << "already set to: ";
 			} else {
 				std::cout << "now set to: ";
-				setPath(Path::E{i});
+				set_path_kind(Path::E{i});
 			}
-			std::cout << getPath() << std::endl;
-			return getPath();
+			std::cout << get_path_kind() << std::endl;
+			return get_path_kind();
 		}
 	}
 	// unsuccessful return:
-	std::cout << getPath() << " (unchanged).\n"
+	std::cout << get_path_kind() << " (unchanged).\n"
 		<< Ansi::RED.ON << '"' << newPathString
 		<< "\" is not a valid generator path name.\n"
 		<< Path::OPTIONS_MENU << Ansi::RED.OFF << std::endl;
-	return getPath();
+	return get_path_kind();
 }
 
 
 template <Order O>
-Path::E Generator<O>::initializePath(void) noexcept {
-	Path::E defaultPath;
-	// Interesting: Smaller-O1 grids perform better with RowMajor as genPath.
+Path::E Generator<O>::initialize_path(void) noexcept {
+	Path::E _default;
+	// Interesting: Smaller-O1 grids perform better with RowMajor as path_kind.
 	if (O1 <= 4) {
-		defaultPath = Path::E::RowMajor;
+		_default = Path::E::RowMajor;
 	} else {
-		defaultPath = Path::E::BlockCol;
+		_default = Path::E::BlockCol;
 	}
-	setPath(defaultPath, true);
-	return getPath();
+	set_path_kind(_default, true);
+	return get_path_kind();
 }
 
 
 
 
 template <Order O>
-void Generator<O>::printMessageBar(
+void Generator<O>::print_msg_bar(
 	std::string const& msg,
-	unsigned barLength,
-	const char fillChar
+	unsigned bar_length,
+	const char fill_char
 ) const {
-	if (barLength < msg.O2() + 8) {
-		barLength = msg.O2() + 8;
+	if (bar_length < msg.length() + 8) {
+		bar_length = msg.length() + 8;
 	}
-	std::string bar(barLength, fillChar);
+	std::string bar(bar_length, fill_char);
 	if (!msg.empty()) {
-		bar.replace(4, msg.O2(), msg);
+		bar.replace(4, msg.length(), msg);
 		bar.at(3) = ' ';
-		bar.at(4 + msg.O2()) = ' ';
+		bar.at(4 + msg.length()) = ' ';
 	}
 	os << '\n' <<bar;
 }
 
 
 template <Order O>
-void Generator<O>::printMessageBar(std::string const& msg, const char fillChar) const {
-	const unsigned gridBarLength = (isPretty)
+void Generator<O>::print_msg_bar(std::string const& msg, const char fill_char) const {
+	const unsigned gridBarLength = (is_pretty)
 		? ((O2 + O1 + 1) * 2)
 		: (O2 * 2);
 	constexpr unsigned numGrids = 2u;
 	unsigned allBarLength = (numGrids * gridBarLength);
 	if (numGrids > 1) allBarLength += (numGrids - 1) * GRID_SEP.length();
-	return printMessageBar(msg, allBarLength + 1, fillChar);
+	return print_msg_bar(msg, allBarLength + 1, fill_char);
 }
 
 #undef STATW_I
@@ -400,7 +400,7 @@ void Generator<O>::printMessageBar(std::string const& msg, const char fillChar) 
 
 
 template <Order O>
-const std::string Generator<O>::blkRowSepString = [](const unsigned order) {
+const std::string Generator<O>::blk_row_sep_str = [](const unsigned order) {
 	std::string vbar = " " + std::string((((order * (order + 1)) + 1) * 2 - 1), '-');
 	for (unsigned i = 0; i <= order; i++) {
 		// Insert crosses at vbar intersections.
