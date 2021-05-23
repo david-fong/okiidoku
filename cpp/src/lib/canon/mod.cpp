@@ -2,7 +2,7 @@
 
 namespace solvent::lib::canon {
 
-template <Order O>
+template<Order O>
 void Canonicalizer<O>::handle_relabeling(void) {
 	// A coordinate contains the number of horizontal and vertical atoms
 	// where the x and y coordinates are values that coexist in an atom.
@@ -43,7 +43,7 @@ void Canonicalizer<O>::handle_relabeling(void) {
 		relabelling[i].orig_i = i;
 		const sum = 0;
 		for (ord2_t j; j < O2; j++) {
-			sum += grid[O2 * i + j];
+			sum += buf[O2 * i + j];
 		}
 	}
 }

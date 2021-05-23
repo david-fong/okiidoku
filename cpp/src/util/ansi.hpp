@@ -40,14 +40,14 @@ namespace Ansi {
 	 * See https://cppreference.com/w/cpp/language/sizeof...#Example
 	 * for an example utility function I can make to avoid this problem.
 	 */
-	const std::array<std::string, 4> BLOCK_CHARS = {
+	const std::array<std::u8string, 4> BLOCK_CHARS = {
 		#if USE_ANSI_ESC
-		"\u2591", "\u2592", "\u2593", "\u2588",
+		u8"\u2591", u8"\u2592", u8"\u2593", u8"\u2588",
 		#else
-		"-", "*", "X", "#",
+		u8"-", u8"*", u8"X", u8"#",
 		#endif
 	};
 
-}; // End of Ansi namespace.
+};
 
 #endif

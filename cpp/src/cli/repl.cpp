@@ -19,11 +19,10 @@ namespace solvent::cli {
 
 const std::string TERMINAL_OUTPUT_TIPS =
 "\nNote: You can run `tput rmam` in your shell to disable text wrapping."
-"\nAlso, scrolling may be slower if the build flag `USE_ANSI_ESC is` on."
 "\nIf UTF-8 characters are garbled on Windows, run `chcp.com 65001`.";
 
 
-template <Order O>
+template<Order O>
 Repl<O>::Repl(std::ostream& os):
 	num_extra_threads([](){
 		const unsigned HWC = std::thread::hardware_concurrency();
@@ -54,7 +53,7 @@ Repl<O>::Repl(std::ostream& os):
 };
 
 
-template <Order O>
+template<Order O>
 bool Repl<O>::run_command(std::string const& cmd_line) {
 	size_t token_pos;
 	// Very simple parsing: Assumes no leading spaces, and does not
@@ -93,7 +92,7 @@ bool Repl<O>::run_command(std::string const& cmd_line) {
 }
 
 
-template <Order O>
+template<Order O>
 OutputLvl::E Repl<O>::set_output_level(OutputLvl::E new_output_level) {
 	const OutputLvl::E old_output_level = this->output_level;
 	this->output_level = new_output_level;
@@ -101,7 +100,7 @@ OutputLvl::E Repl<O>::set_output_level(OutputLvl::E new_output_level) {
 }
 
 
-template <Order O>
+template<Order O>
 OutputLvl::E Repl<O>::set_output_level(std::string const& new_output_level_str) {
 	std::cout << "\noutput level is ";
 	if (new_output_level_str.empty()) {
@@ -129,7 +128,65 @@ OutputLvl::E Repl<O>::set_output_level(std::string const& new_output_level_str) 
 }
 
 
-template <Order O>
+template<Order O>
+Path::E Repl<O>::set_path_kind(const Path::E new_path_kind) noexcept {
+	if (new_path_kind == get_path_kind()) {
+		// Short circuit:
+		return get_path_kind();
+	}
+	const Path::E prev_path_kind = get_path_kind();
+	path_kind = new_path_kind;
+	return prev_path_kind;
+}
+
+
+template<Order O>
+Path::E Repl<O>::set_path_kind(std::string const& new_path_kind_str) noexcept {
+	std::cout << "\ngenerator path is ";
+	if (new_path_kind_str.empty()) {
+		std::cout << "currently set to: " << get_path_kind() << std::endl;
+		return get_path_kind();
+	}
+	for (unsigned i = 0; i < Path::E_SIZE; i++) {
+		if (new_path_kind_str.compare(Path::NAMES[i]) == 0) {
+			if (Path::E{i} == get_path_kind()) {
+				std::cout << "already set to: ";
+			} else {
+				std::cout << "now set to: ";
+				set_path_kind(Path::E{i});
+			}
+			std::cout << get_path_kind() << std::endl;
+			return get_path_kind();
+		}
+	}
+	// unsuccessful return:
+	std::cout << get_path_kind() << " (unchanged).\n"
+		<< Ansi::RED.ON << '"' << new_path_kind_str
+		<< "\" is not a valid generator path name.\n"
+		<< Path::OPTIONS_MENU << Ansi::RED.OFF << std::endl;
+	return get_path_kind();
+}
+
+template<Order O>
+void Repl<O>::print_msg_bar(
+	std::string const& msg,
+	unsigned bar_length,
+	const char fill_char
+) const {
+	if (bar_length < msg.length() + 8) {
+		bar_length = msg.length() + 8;
+	}
+	std::string bar(bar_length, fill_char);
+	if (!msg.empty()) {
+		bar.replace(4, msg.length(), msg);
+		bar.at(3) = ' ';
+		bar.at(4 + msg.length()) = ' ';
+	}
+	os << '\n' <<bar;
+}
+
+
+template<Order O>
 void Repl<O>::run_single(const bool cont_prev) {
 	gen.print_msg_bar("START");
 
@@ -139,16 +196,17 @@ void Repl<O>::run_single(const bool cont_prev) {
 	const double processor_time = ((double)(std::clock() - clock_start)) / CLOCKS_PER_SEC;
 
 	os << "\nprocessor time: " STATW_D << processor_time << " seconds";
-	os << "\nnum operations: " STATW_I << gen.prev_gen.get_op_count();
+	os << "\nnum operations: " STATW_I << gen.generate_result.get_op_count();
 	os << "\nmax backtracks: " STATW_I << gen.get_most_backtracks();
 	if (!gen.is_pretty) gen.print_msg_bar("", '-');
 	gen.print();
-	gen.print_msg_bar((gen.prev_gen.get_exist_status() == lib::gen::ExitStatus::Ok) ? "DONE" : "ABORT");
+	gen.print_msg_bar((gen.generate_result.get_exit_status() == lib::gen::ExitStatus::Ok) ? "DONE" : "ABORT");
+	gen.generate_result = lib::gen::GenResult { exit_status: 1 }
 	os << std::endl;
 }
 
 
-template <Order O>
+template<Order O>
 void Repl<O>::run_multiple(
 	const trials_t trials_stop_threshold,
 	const trials::StopBy trials_stop_method
@@ -184,16 +242,16 @@ void Repl<O>::run_multiple(
 		}
 
 		// Start the threads:
-		std::array<std::thread, MAX_EXTRA_THREADS> extraThreads;
+		std::array<std::thread, MAX_EXTRA_THREADS> extra_threads;
 		for (unsigned i = 0; i < num_extra_threads; i++) {
-			auto threadFunc = trials::ThreadFunc<O>(shared_state);
-			extraThreads[i] = std::thread(std::move(threadFunc), &gen, i+1);
+			auto thread_func = trials::ThreadFunc<O>(shared_state);
+			extra_threads[i] = std::thread(std::move(thread_func), &gen, i+1);
 		} {
-			auto thisThreadFunc = trials::ThreadFunc<O>(shared_state);
-			thisThreadFunc(&gen, 0);
+			auto this_thread_func = trials::ThreadFunc<O>(shared_state);
+			this_thread_func(&gen, 0);
 		}
 		for (unsigned i = 0; i < num_extra_threads; i++) {
-			extraThreads[i].join();
+			extra_threads[i].join();
 		}
 	}
 
@@ -222,7 +280,7 @@ void Repl<O>::run_multiple(
 }
 
 
-template <Order O>
+template<Order O>
 void Repl<O>::run_multiple(
 	std::string const& trials_string,
 	const trials::StopBy stop_by_method
@@ -246,7 +304,7 @@ void Repl<O>::run_multiple(
 }
 
 
-template <Order O>
+template<Order O>
 void Repl<O>::print_trials_work_distribution(
 	const trials_t total_trials, // sum of entries of bin_hit_count
 	std::array<trials_t, trials::NUM_BINS+1> const& bin_hit_count,

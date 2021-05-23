@@ -3,7 +3,21 @@
 
 ## Higher Priority
 
-- Design some smarter backtracking:
+- Take out all stream related things from gen.
+- Move things from gen to grid.
+- Make genpath non-settable.
+  - Either make it a constexpr function set intenally at construction,
+  - OR Make the generate function templated on it.
+- Decide what interfaces to support:
+  - ncurses? readline? web? plain std::getline?
+- Design some smarter backtracking.
+- Scrap and rewrite the run-multiple info printing.
+- Move the run-multiple business logic to the lib folder.
+- C++20
+  - `typename` doesn't need to be specified as much.
+  - `using enum`. Might want to wait for CLANG to support?
+  - Use `<bit>` to get ctlz and such.
+  - see what stringy things can now use constexpr strings.
 - CLI
   - implement `-h` and `--help` CLI argument.
   - Make giveup thresholds settable via CLI, and allow setting to "default".

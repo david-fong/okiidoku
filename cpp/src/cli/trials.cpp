@@ -15,7 +15,7 @@ const std::string THROUGHPUT_COMMENTARY =
 	"\n  to the optimal bin. Exercise prudence against stats from small datasets!";
 
 
-template <Order O>
+template<Order O>
 void ThreadFunc<O>::operator()(generator_t* gen, const unsigned thread_num) {
 	if (thread_num != 0) {
 		// TODO [bug] old_generator can technically finish before we get here.
@@ -45,7 +45,7 @@ void ThreadFunc<O>::operator()(generator_t* gen, const unsigned thread_num) {
 		// Print a progress indicator to std::cout:
 		{
 			using lib::gen::ExitStatus;
-			ExitStatus exit_status = gen->prev_gen.get_exist_status();
+			ExitStatus exit_status = gen->generate_result.get_exist_status();
 			const bool do_output_line =
 				(output_level == OutputLvl::All) ||
 				(output_level == OutputLvl::NoGiveups && exit_status == ExitStatus::Ok);
@@ -62,7 +62,7 @@ void ThreadFunc<O>::operator()(generator_t* gen, const unsigned thread_num) {
 					}
 				}
 				pct_done = new_pct_done;
-			}
+			}:
 			total_trials++;
 			if (exit_status == ExitStatus::Ok) {
 				total_successes++;
@@ -79,7 +79,7 @@ void ThreadFunc<O>::operator()(generator_t* gen, const unsigned thread_num) {
 		// Save some stats for later diagnostics-printing:
 		const unsigned binNum = NUM_BINS * (gen->get_most_backtracks()) / gen->GIVEUP_THRESHOLD;
 		bin_hit_count[binNum]++;
-		bin_ops_total[binNum] += gen->prev_gen.get_op_count();
+		bin_ops_total[binNum] += gen->generate_result.get_op_count();
 	}
 	mutex.unlock();
 	if (thread_num != 0) delete gen;

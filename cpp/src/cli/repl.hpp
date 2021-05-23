@@ -1,9 +1,10 @@
 #ifndef HPP_SOLVENT_CLI_REPL
 #define HPP_SOLVENT_CLI_REPL
 
-#include "./enum.hpp"
+#include "../lib/size.hpp"
 #include "../lib/gen/mod.hpp"
 #include "../lib/canon/mod.hpp"
+#include "./enum.hpp"
 #include "./trials.hpp"
 
 #include <array>
@@ -64,11 +65,12 @@ namespace solvent::cli {
 	 * - this->member
 	 * - Base<ARGS>::member
 	 */
-	template <Order O>
+	template<Order O>
 	class Repl final {
-	public:
+	 public:
 		using opcount_t = lib::gen::opcount_t;
 		using generator_t = class lib::gen::Generator<O>;
+		using path_t = lib::gen::PathKind;
 
 		Repl(void) = delete;
 		explicit Repl(std::ostream&);
@@ -78,10 +80,16 @@ namespace solvent::cli {
 		// concurrent threads the host processor can support at a time.
 		const unsigned num_extra_threads;
 
-	private:
+		[[gnu::cold, gnu::pure]] PathKind::E get_path_kind(void) const noexcept { return path_kind; }
+		// Setters return the old value of the generator path.
+		[[gnu::cold]] PathKind::E set_path_kind(PathKind::E) noexcept;
+		[[gnu::cold]] PathKind::E set_path_kind(std::string const&) noexcept;
+
+	 private:
 		generator_t gen;
 		std::ostream& os; // alias to this->gen.os;
 		OutputLvl::E output_level;
+		PathKind::E path_kind;
 
 		static constexpr unsigned MAX_EXTRA_THREADS = ((const unsigned[]){0,0,0,0,1,4,2,2})[O];
 		const std::string DIM_ON  = (gen.is_pretty ? Ansi::DIM.ON  : "");
@@ -96,13 +104,11 @@ namespace solvent::cli {
 			std::array<trials_t, trials::NUM_BINS+1> const& bin_hit_count,
 			std::array<double,   trials::NUM_BINS+1> const& bin_ops_total);
 
-	public:
+	 public:
 		[[gnu::cold]] OutputLvl::E get_output_level(void) const noexcept { return output_level; };
 		[[gnu::cold]] OutputLvl::E set_output_level(OutputLvl::E);
 		[[gnu::cold]] OutputLvl::E set_output_level(std::string const&);
-
 	};
-
 }
 
 #endif

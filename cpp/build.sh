@@ -8,7 +8,7 @@ set -e
 # 	readonly COMPILER='clang++ -target x86_64-w64-mingw64 -fcolor-diagnostics -fansi-escape-codes -ferror-limit=5'
 # else
 	# Use g++ by default.
-	readonly COMPILER='g++ -std=c++17 -pthread -fdiagnostics-color=always -fmax-errors=5'
+	readonly COMPILER='g++ -std=c++20 -pthread -fdiagnostics-color=always -fmax-errors=5'
 # fi
 
 ${COMPILER}\

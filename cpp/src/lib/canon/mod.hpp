@@ -8,9 +8,9 @@
 
 namespace solvent::lib::canon {
 
-	template <Order O>
+	template<Order O>
 	class Canonicalizer final : public solvent::lib::Grid<O> {
-	public:
+	 public:
 		using occmask_t = typename size<O>::occmask_t;
 		using ord1_t  = typename size<O>::ord1_t;
 		using ord2_t  = typename size<O>::ord2_t;
@@ -21,7 +21,7 @@ namespace solvent::lib::canon {
 		static constexpr ord2_t O2 = O*O;
 		static constexpr ord4_t O4 = O*O*O*O;
 
-	private:
+	 private:
 		const std::array<value_t, O4> buf;
 
 		void handle_relabeling(void);

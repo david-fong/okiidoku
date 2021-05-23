@@ -20,14 +20,14 @@ struct GenericGenerator<
 	try_order: [[Ord2; O2]; O2],
 
 	/// Indexed by progress- not by coordinate (for better cache usage)
-	val: [Ord2; O4],
-	row_has: [Ord2; O2],
-	col_has: [Ord2; O2],
-	blk_has: [OccMask; O2],
+	path_val: [Ord2; O4],
+	rows_has: [Ord2; O2],
+	cols_has: [Ord2; O2],
+	blks_has: [OccMask; O2],
 
 	progress: Ord4,
 	/// Indexed by progress- not by coordinate (for better cache usage).
-	try_progress: [Ord2; O4],
+	path_try_index: [Ord2; O4],
 
 	/// The generator is "stuck" at a tile T when since the last time it was not
 	/// stuck, symbols generated up to T left T with no valid choice of symbol.
@@ -35,7 +35,7 @@ struct GenericGenerator<
 	/// This field is used to backtrack within the AOE of a placed symbol. It is
 	/// effectively nil when progress advances past it, or when any advancement
 	/// behind it touches a tile ouside its AOE.
-	stuck_progress: Ord4,
+	stuck_at_progress: Ord4,
 }
 
 
