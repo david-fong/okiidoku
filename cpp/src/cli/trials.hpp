@@ -1,33 +1,34 @@
 #ifndef HPP_SOLVENT_CLI_TRIALS
 #define HPP_SOLVENT_CLI_TRIALS
 
+#include "./enum.hpp"
 #include "../lib/gen/mod.hpp"
 
-#include <array>
-#include <string>
 #include <mutex>
+#include <string>
+#include <array>
 
 namespace solvent::cli {
 
-typedef unsigned long trials_t;
+using trials_t = unsigned long;
 
 namespace trials {
 
 	constexpr unsigned NUM_BINS = 20u;
-	enum class StopBy : unsigned {
-		Trials,
-		Successes,
+	enum class StopAfterWhat : unsigned {
+		Any,
+		Ok,
 	};
 
 	const std::string TABLE_SEPARATOR = "\n+-----------+----------+----------------+-----------+-----------+";
 	const std::string TABLE_HEADER    = "\n|  bin bot  |   hits   |   operations   |  giveup%  |  speedup  |";
 
-	struct SharedState {
+	struct SharedData {
 		std::mutex& mutex;
 		const unsigned  COLS;
-		const cli::OutputLvl::E output_level;
-		const StopBy    trials_stop_method;
-		const trials_t  trials_stop_threshold;
+		const cli::verbosity::Kind output_level;
+		const StopAfterWhat    trials_stop_method;
+		const trials_t  stop_after;
 		unsigned& pct_done;
 		trials_t& total_trials;
 		trials_t& total_successes;
@@ -42,19 +43,19 @@ namespace trials {
 	 * absolutely necessary, but it doesn't hurt to add them anyway.
 	 */
 	template<Order O>
-	class ThreadFunc final : private SharedState {
+	class ThreadFunc final : private SharedData {
 	 public:
 		using generator_t = class lib::gen::Generator<O>;
-		using OutputLvl = OutputLvl::E;
+		using verbosity = verbosity::Kind;
 	 public:
 		ThreadFunc(void) = delete;
-		explicit ThreadFunc(SharedState s) : SharedState(s) {};
+		explicit ThreadFunc(SharedData s) : SharedData(s) {};
 		inline void operator()(generator_t* gen, unsigned thread_num);
 	 private:
 		trials_t trials_stop_cur_val(void) const {
 			switch (trials_stop_method) {
-				case StopBy::Trials:    return total_trials;
-				case StopBy::Successes: return total_successes;
+				case StopAfterWhat::Any:    return total_trials;
+				case StopAfterWhat::Ok: return total_successes;
 				default: throw "unhandled enum case";
 			}
 		}

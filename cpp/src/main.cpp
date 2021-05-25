@@ -2,8 +2,8 @@
  * Choose build flags here.
  */
 
-#include "./lib/gen/mod.cpp"
-#include "./cli/repl.cpp"
+#include "./lib/gen/mod.hpp"
+#include "./cli/repl.hpp"
 
 #if WINDOWS_ANSI
 #include <windows.h>
@@ -64,7 +64,7 @@ int main(const int argc, char const *const argv[]) {
 	<< std::endl;
 
 	// Scramble the random number generator (std::rand is no longer used):
-	solvent::lib::gen::VALUE_RNG.seed(srand_key);
+	solvent::lib::gen::Rng.seed(srand_key);
 
 	// Create a Solver of the specified order:
 	// (It will automatically enter its REPL).

@@ -24,8 +24,8 @@ namespace Ansi {
 	} NAME;
 	#endif
 
-	SGR(DIM, "\e[2m",  "\e[22m")
-	SGR(RED, "\e[31m", "\e[39m")
+	SGR(DIM, "\033[2m",  "\033[22m")
+	SGR(RED, "\033[31m", "\033[39m")
 
 	#undef SGR
 
@@ -40,14 +40,13 @@ namespace Ansi {
 	 * See https://cppreference.com/w/cpp/language/sizeof...#Example
 	 * for an example utility function I can make to avoid this problem.
 	 */
-	const std::array<std::u8string, 4> BLOCK_CHARS = {
+	const std::array<std::string, 4> BLOCK_CHARS = {
 		#if USE_ANSI_ESC
-		u8"\u2591", u8"\u2592", u8"\u2593", u8"\u2588",
+		"\u2591", "\u2592", "\u2593", "\u2588",
 		#else
-		u8"-", u8"*", u8"X", u8"#",
+		"-", "*", "X", "#",
 		#endif
 	};
-
-};
+}
 
 #endif

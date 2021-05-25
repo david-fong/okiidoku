@@ -3,11 +3,9 @@
 	"configurations": [
 		{
 			"name": "Linux g++",
-			"compilerPath": "/usr/bin/g++",
-			"cStandard": "c17",
-			"cppStandard": "c++20",
-			"includePath": [],
 			"intelliSenseMode": "gcc-x64",
+			"compilerPath": "/usr/bin/g++",
+			"includePath": [],
 			"browse": {
 				"path": [],
 				"limitSymbolsToIncludedHeaders": true

@@ -4,6 +4,11 @@
 	},
 	// "explorer.sortOrder": "default",
 	"C_Cpp.autoAddFileAssociations": false,
+	"C_Cpp.intelliSenseCacheSize": 0,
+
+	"C_Cpp.default.cStandard": "c17",
+	"C_Cpp.default.cppStandard": "c++20",
+	"C_Cpp.default.compilerArgs": ["-Wall", "-Wextra", "-Wpedantic", "-Wimplicit-fallthrough=5"],
 
 	"trailing-spaces.trimOnSave": true,
 

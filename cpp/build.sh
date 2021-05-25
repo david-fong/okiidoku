@@ -1,7 +1,7 @@
 #!/bin/sh
 # https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html
 set -e
-# readonly CONTEXT="$(dirname "${BASH_SOURCE[0]}")"
+readonly ROOT="$(dirname "$0")"
 
 # if [[ "$@" =~ '--clang' ]]
 # then
@@ -11,6 +11,16 @@ set -e
 	readonly COMPILER='g++ -std=c++20 -pthread -fdiagnostics-color=always -fmax-errors=5'
 # fi
 
+# readonly CPP=$(find src -type f -name '*.cpp')
+readonly CPP='
+	src/main.cpp
+	src/cli/trials.cpp
+	src/cli/repl.cpp
+	src/lib/gen/path.cpp
+	src/lib/gen/mod.cpp
+	src/lib/gen/batch.cpp
+'
+
 ${COMPILER}\
-	-Wall -Wimplicit-fallthrough=5 -O3\
-	src/main.cpp -o solvent.exe\
+	-Wall -Werror -Wpedantic -Wimplicit-fallthrough=5 -O3\
+	${CPP} -o solvent.exe\

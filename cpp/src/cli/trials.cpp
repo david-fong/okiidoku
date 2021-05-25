@@ -1,9 +1,10 @@
 #include "./trials.hpp"
-#include "../util/ansi.hpp"
-#include "./enum.hpp"
 
-#include <iostream>
+#include "./enum.hpp"
+#include "../util/ansi.hpp"
+
 #include <iomanip>
+// #include <ostream>
 
 namespace solvent::cli::trials {
 
@@ -38,22 +39,22 @@ void ThreadFunc<O>::operator()(generator_t* gen, const unsigned thread_num) {
 		// Note that doing this _after_ attempting a trial (instead of before)
 		// results in a tiny bit of wasted effort for the last [numThreads] or
 		// so trials. I'm doing this to prevent some visual printing gaps).
-		if (trials_stop_cur_val() >= trials_stop_threshold) {
+		if (trials_stop_cur_val() >= stop_after) {
 			break;
 		}
 
 		// Print a progress indicator to std::cout:
 		{
 			using lib::gen::ExitStatus;
-			ExitStatus exit_status = gen->generate_result.get_exist_status();
+			ExitStatus exit_status = gen->gen_result.get_exist_status();
 			const bool do_output_line =
-				(output_level == OutputLvl::All) ||
-				(output_level == OutputLvl::NoGiveups && exit_status == ExitStatus::Ok);
+				(output_level == verbosity::All) ||
+				(output_level == verbosity::NoGiveups && exit_status == ExitStatus::Ok);
 			if (total_trials % COLS == 0) {
-				const unsigned new_pct_done = 100u * trials_stop_cur_val() / trials_stop_threshold;
+				const unsigned new_pct_done = 100u * trials_stop_cur_val() / stop_after;
 				if (do_output_line) {
 					std::cout << "\n| " << std::setw(2) << new_pct_done << "% |";
-				} else if (output_level == OutputLvl::Silent) {
+				} else if (output_level == verbosity::Silent) {
 					const int charDiff =
 						(new_pct_done * TABLE_SEPARATOR.size() / 100u)
 						- (pct_done * TABLE_SEPARATOR.size() / 100u);
@@ -62,7 +63,7 @@ void ThreadFunc<O>::operator()(generator_t* gen, const unsigned thread_num) {
 					}
 				}
 				pct_done = new_pct_done;
-			}:
+			}
 			total_trials++;
 			if (exit_status == ExitStatus::Ok) {
 				total_successes++;
@@ -79,7 +80,7 @@ void ThreadFunc<O>::operator()(generator_t* gen, const unsigned thread_num) {
 		// Save some stats for later diagnostics-printing:
 		const unsigned binNum = NUM_BINS * (gen->get_most_backtracks()) / gen->GIVEUP_THRESHOLD;
 		bin_hit_count[binNum]++;
-		bin_ops_total[binNum] += gen->generate_result.get_op_count();
+		bin_ops_total[binNum] += gen->gen_result.get_op_count();
 	}
 	mutex.unlock();
 	if (thread_num != 0) delete gen;

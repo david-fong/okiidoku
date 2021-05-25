@@ -1,22 +1,21 @@
 #ifndef HPP_SOLVENT_CLI_ENUM
 #define HPP_SOLVENT_CLI_ENUM
-// This file is a helper for `./gen.hpp`.
 
-#include <array>
-#include <string>
 #include <iostream>
+#include <string>
+#include <array>
 
 namespace solvent::cli {
 
 	// TODO.impl Use this setting to change printing behaviour.
-	namespace OutputLvl {
-		enum class E : unsigned {
+	namespace verbosity {
+		enum class Kind : unsigned {
 			All,
 			NoGiveups,
 			Silent,
 			__MAX__ = Silent,
 		};
-		constexpr size_t size = static_cast<size_t>(E::__MAX__) + 1;
+		constexpr size_t size = static_cast<size_t>(Kind::__MAX__) + 1;
 		// Indices of entries must match the
 		// literal values of their respective enums.
 		const std::array<std::string, size> NAMES = {
@@ -24,7 +23,7 @@ namespace solvent::cli {
 			"nogiveups",
 			"silent",
 		};
-		std::ostream& operator<<(std::ostream& out, const E output_level) {
+		std::ostream& operator<<(std::ostream& out, const Kind output_level) {
 			return out << NAMES[static_cast<unsigned>(output_level)];
 		}
 		const std::string OPTIONS_MENU =
@@ -34,5 +33,4 @@ namespace solvent::cli {
 			"\n- silent     emit statistics only";
 	}
 }
-
 #endif

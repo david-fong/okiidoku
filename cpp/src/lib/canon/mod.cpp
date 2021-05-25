@@ -8,8 +8,8 @@ void Canonicalizer<O>::handle_relabeling(void) {
 	// where the x and y coordinates are values that coexist in an atom.
 	// In each block, for some symbol A, there can be up to one horizontal
 	// or vertical atoms that contain another symbol B, which is why the
-	// element type will fit within value_t.
-	std::array<value_t, O4> counts = {0};
+	// element type will fit within ord2_t.
+	std::array<ord2_t, O4> counts = {0};
 
 	for (ord2_t block = 0; block < O2; block++) {
 		ord4_t block_offset = O1 * ((block % O1) + (O2 * (block / O1)));
@@ -20,15 +20,15 @@ void Canonicalizer<O>::handle_relabeling(void) {
 					{
 						// horizontal atom
 						const offset = block_offset + (O2 * atom);
-						const value_t a = buf[offset + atom_i];
-						const value_t b = buf[offset + atom_j];
+						const ord2_t a = buf[offset + atom_i];
+						const ord2_t b = buf[offset + atom_j];
 						counts[O2 * a + b]++;
 						counts[O2 * b + a]++;
 					}{
 						// vertical atom
 						const offset = block_offset + atom;
-						const value_t a = buf[offset + (O2 * atom_i)];
-						const value_t b = buf[offset + (O2 * atom_j)];
+						const ord2_t a = buf[offset + (O2 * atom_i)];
+						const ord2_t b = buf[offset + (O2 * atom_j)];
 						counts[O2 * a + b]++;
 						counts[O2 * b + a]++;
 					}

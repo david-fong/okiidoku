@@ -1,14 +1,13 @@
 #include "./repl.hpp"
-#include "./trials.cpp"
 
 #include <iostream> // cout, endl,
 #include <iomanip>  // setw,
 #include <chrono>   // steady_clock::now, durationcast,
-#include <cmath>    // pow,
-
 #include <thread>
 #include <mutex>
+#include <cmath>    // pow,
 
+using namespace solvent::lib;
 
 namespace solvent::cli {
 
@@ -32,7 +31,7 @@ Repl<O>::Repl(std::ostream& os):
 	gen(os),
 	os(os)
 {
-	set_output_level(OutputLvl::E::All);
+	set_output_level(verbosity::Kind::All);
 
 	// Print diagnostics about Generator member size:
 	std::cout
@@ -50,7 +49,7 @@ Repl<O>::Repl(std::ostream& os):
 		std::cout << PROMPT;
 		std::getline(std::cin, command);
 	} while (run_command(command));
-};
+}
 
 
 template<Order O>
@@ -75,45 +74,45 @@ bool Repl<O>::run_command(std::string const& cmd_line) {
 		case E::Help:
 			std::cout
 			<< Command::HelpMessage << Ansi::DIM.ON
-			<< '\n' << OutputLvl::OPTIONS_MENU
-			<< '\n' << lib::gen::Path::OPTIONS_MENU
+			<< '\n' << verbosity::OPTIONS_MENU
+			<< '\n' << gen::path::OPTIONS_MENU
 			<< Ansi::DIM.OFF << std::endl;
 			break;
 		case E::Quit:
 			return false;
-		case E::OutputLevel:   set_output_level(cmd_args); break;
-		case E::SetGenPath:    gen.set_path_kind(cmd_args); break;
+		case E::ConfigVerbosity:   set_output_level(cmd_args); break;
+		case E::ConfigGenPath:    gen.set_path_kind(cmd_args); break;
 		case E::RunSingle:     run_single();     break;
 		case E::ContinuePrev:  run_single(true); break;
-		case E::RunMultiple:   run_multiple(cmd_args, trials::StopBy::Trials);    break;
-		case E::RunMultipleOk: run_multiple(cmd_args, trials::StopBy::Successes); break;
+		case E::RunMultiple:   run_multiple(cmd_args, trials::StopAfterWhat::Any);    break;
+		case E::RunMultipleOk: run_multiple(cmd_args, trials::StopAfterWhat::Ok); break;
 	}
 	return true;
 }
 
 
 template<Order O>
-OutputLvl::E Repl<O>::set_output_level(OutputLvl::E new_output_level) {
-	const OutputLvl::E old_output_level = this->output_level;
+verbosity::Kind Repl<O>::set_output_level(verbosity::Kind new_output_level) {
+	const verbosity::Kind old_output_level = this->output_level;
 	this->output_level = new_output_level;
 	return old_output_level;
 }
 
 
 template<Order O>
-OutputLvl::E Repl<O>::set_output_level(std::string const& new_output_level_str) {
+verbosity::Kind Repl<O>::set_output_level(std::string const& new_output_level_str) {
 	std::cout << "\noutput level is ";
 	if (new_output_level_str.empty()) {
 		std::cout << "currently set to: " << get_output_level() << std::endl;
 		return get_output_level();
 	}
-	for (unsigned i = 0; i < OutputLvl::size; i++) {
-		if (new_output_level_str.compare(OutputLvl::NAMES[i]) == 0) {
-			if (OutputLvl::E{i} == get_output_level()) {
+	for (unsigned i = 0; i < verbosity::size; i++) {
+		if (new_output_level_str.compare(verbosity::NAMES[i]) == 0) {
+			if (verbosity::Kind{i} == get_output_level()) {
 				std::cout << "already set to: ";
 			} else {
 				std::cout << "now set to: ";
-				set_output_level(OutputLvl::E{i});
+				set_output_level(verbosity::Kind{i});
 			}
 			std::cout << get_output_level() << std::endl;
 			return get_output_level();
@@ -123,13 +122,13 @@ OutputLvl::E Repl<O>::set_output_level(std::string const& new_output_level_str) 
 	std::cout << get_output_level() << " (unchanged).\n"
 		<< Ansi::RED.ON << '"' << new_output_level_str
 		<< "\" is not a valid output level name.\n"
-		<< OutputLvl::OPTIONS_MENU << Ansi::RED.OFF << std::endl;
+		<< verbosity::OPTIONS_MENU << Ansi::RED.OFF << std::endl;
 	return get_output_level();
 }
 
 
 template<Order O>
-Path::E Repl<O>::set_path_kind(const Path::E new_path_kind) noexcept {
+path::Kind Repl<O>::set_path_kind(const Path::E new_path_kind) noexcept {
 	if (new_path_kind == get_path_kind()) {
 		// Short circuit:
 		return get_path_kind();
@@ -147,7 +146,7 @@ Path::E Repl<O>::set_path_kind(std::string const& new_path_kind_str) noexcept {
 		std::cout << "currently set to: " << get_path_kind() << std::endl;
 		return get_path_kind();
 	}
-	for (unsigned i = 0; i < Path::E_SIZE; i++) {
+	for (unsigned i = 0; i < Path::NUM_KINDS; i++) {
 		if (new_path_kind_str.compare(Path::NAMES[i]) == 0) {
 			if (Path::E{i} == get_path_kind()) {
 				std::cout << "already set to: ";
@@ -196,20 +195,20 @@ void Repl<O>::run_single(const bool cont_prev) {
 	const double processor_time = ((double)(std::clock() - clock_start)) / CLOCKS_PER_SEC;
 
 	os << "\nprocessor time: " STATW_D << processor_time << " seconds";
-	os << "\nnum operations: " STATW_I << gen.generate_result.get_op_count();
+	os << "\nnum operations: " STATW_I << gen.gen_result.get_op_count();
 	os << "\nmax backtracks: " STATW_I << gen.get_most_backtracks();
 	if (!gen.is_pretty) gen.print_msg_bar("", '-');
 	gen.print();
-	gen.print_msg_bar((gen.generate_result.get_exit_status() == lib::gen::ExitStatus::Ok) ? "DONE" : "ABORT");
-	gen.generate_result = lib::gen::GenResult { exit_status: 1 }
+	gen.print_msg_bar((gen.gen_result.get_exit_status() == gen::ExitStatus::Ok) ? "DONE" : "ABORT");
+	gen.gen_result = generator_t::GenResult { exit_status: 1 };
 	os << std::endl;
 }
 
 
 template<Order O>
 void Repl<O>::run_multiple(
-	const trials_t trials_stop_threshold,
-	const trials::StopBy trials_stop_method
+	const trials_t stop_after,
+	const trials::StopAfterWhat trials_stop_method
 ) {
 	const unsigned COLS = [this](){ // Never zero. Not used when writing to file.
 		const unsigned term_cols = GET_TERM_COLS();
@@ -223,7 +222,7 @@ void Repl<O>::run_multiple(
 	std::array<trials_t, trials::NUM_BINS+1> bin_hit_count = {0,};
 	std::array<double,   trials::NUM_BINS+1> bin_ops_total = {0,};
 
-	gen.print_msg_bar("START x" + std::to_string(trials_stop_threshold), BAR_WIDTH);
+	gen.print_msg_bar("START x" + std::to_string(stop_after), BAR_WIDTH);
 	auto wall_clock_start = std::chrono::steady_clock::now();
 	auto proc_clock_start = std::clock();
 
@@ -232,12 +231,12 @@ void Repl<O>::run_multiple(
 		trials_t total_successes = 0u;
 		unsigned percent_done = 0u;
 		std::mutex shared_state_mutex;
-		trials::SharedState shared_state {
+		trials::SharedData shared_state {
 			shared_state_mutex, COLS, get_output_level(),
-			trials_stop_method, trials_stop_threshold, percent_done,
+			trials_stop_method, stop_after, percent_done,
 			total_trials, total_successes, bin_hit_count, bin_ops_total,
 		};
-		if (get_output_level() == OutputLvl::E::Silent) {
+		if (get_output_level() == verbosity::Kind::Silent) {
 			std::cout << '\n';
 		}
 
@@ -275,7 +274,7 @@ void Repl<O>::run_multiple(
 	}
 	// Print bins (work distribution):
 	print_trials_work_distribution(total_trials, bin_hit_count, bin_ops_total);
-	gen.print_msg_bar("DONE x" + std::to_string(trials_stop_threshold), BAR_WIDTH);
+	gen.print_msg_bar("DONE x" + std::to_string(stop_after), BAR_WIDTH);
 	os << std::endl;
 }
 
@@ -283,7 +282,7 @@ void Repl<O>::run_multiple(
 template<Order O>
 void Repl<O>::run_multiple(
 	std::string const& trials_string,
-	const trials::StopBy stop_by_method
+	const trials::StopAfterWhat stop_by_method
 ) {
 	long stopByValue;
 	try {
