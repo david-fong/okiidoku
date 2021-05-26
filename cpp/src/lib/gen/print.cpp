@@ -16,15 +16,17 @@
 template<solvent::Order O>
 std::ostream& operator<<(std::ostream& os, solvent::lib::gen::Generator<O> const& g) {
 	using namespace solvent::lib::gen;
+	namespace ansi = solvent::util::ansi;
 	using ord2_t = typename solvent::size<O>::ord2_t;
+
 	#define _M_PRINT_GRID0_TILE(PRINTER_STATEMENT) {\
 		for (ord2_t col = 0; col < g.O2; col++) {\
-			if (is_pretty && (col % g.O1) == 0) os << Ansi::DIM.ON << " |" << Ansi::DIM.OFF;\
+			if (is_pretty && (col % g.O1) == 0) os << ansi::DIM.ON << " |" << ansi::DIM.OFF;\
 			PRINTER_STATEMENT;\
 		}}
 	#define _M_PRINT_GRID_TILE(PRINTER_STATEMENT) {\
 		if (is_pretty) {\
-			os << Ansi::DIM.ON << " |" /* << Ansi::DIM.OFF */;\
+			os << ansi::DIM.ON << " |" /* << ansi::DIM.OFF */;\
 			os << GRID_SEP;\
 			_M_PRINT_GRID0_TILE(PRINTER_STATEMENT)}\
 		}
@@ -32,10 +34,10 @@ std::ostream& operator<<(std::ostream& os, solvent::lib::gen::Generator<O> const
 	const bool is_pretty = &os == &std::cout;
 	const auto print_blk_row_sep_str = [&](){
 		if (!is_pretty) return;
-		os << '\n' << Ansi::DIM.ON;
+		os << '\n' << ansi::DIM.ON;
 		os << g.blk_row_sep_str;
 		os << GRID_SEP << g.blk_row_sep_str;
-		os << Ansi::DIM.OFF;
+		os << ansi::DIM.OFF;
 	};
 	for (ord2_t row = 0; row < g.O2; row++) {
 		if (row % g.O1 == 0) {
@@ -49,7 +51,7 @@ std::ostream& operator<<(std::ostream& os, solvent::lib::gen::Generator<O> const
 		// _M_PRINT_GRID_TILE(os << std::setw(2) << values_[coord].next_try_index)
 		// _M_PRINT_GRID_TILE(os << ' ' << val_try_order_[row][col])
 		#undef _M_index
-		if (is_pretty) os << Ansi::DIM.ON << " |" << Ansi::DIM.OFF;
+		if (is_pretty) os << ansi::DIM.ON << " |" << ansi::DIM.OFF;
 	}
 	print_blk_row_sep_str();
 	#undef PRINT_GRID_TILE
@@ -58,6 +60,9 @@ std::ostream& operator<<(std::ostream& os, solvent::lib::gen::Generator<O> const
 }
 
 namespace solvent::lib::gen {
+
+	namespace ansi = solvent::util::ansi;
+
 	struct MyNumpunct : std::numpunct<char> {
 		std::string do_grouping(void) const {
 			return "\03";
@@ -69,9 +74,9 @@ namespace solvent::lib::gen {
 	std::string shaded_backtrack_stat(const long out_of, const long count) {
 		const unsigned int relative_intensity
 			= (double)(count - 1)
-			* Ansi::BLOCK_CHARS.size()
+			* ansi::BLOCK_CHARS.size()
 			/ out_of;
-		return (count == 0) ? " " : Ansi::BLOCK_CHARS[relative_intensity];
+		return (count == 0) ? " " : ansi::BLOCK_CHARS[relative_intensity];
 	}
 
 	/* friend std::ostream& operator<<(std::ostream& os, Tile const& t) noexcept {
@@ -119,11 +124,11 @@ namespace solvent::lib::gen {
 	// void Generator<O>::print_simple(void) const {
 	// 	auto const helper = [this](std::ostream& os, const bool is_pretty){
 	// 		const bool do_dim = is_pretty && (gen_result_.get_exit_status() != ExitStatus::Ok);
-	// 		if (do_dim) os << Ansi::DIM.ON;
+	// 		if (do_dim) os << ansi::DIM.ON;
 	// 		for (auto const& t : values_) {
 	// 			os << t;
 	// 		}
-	// 		if (do_dim) os << Ansi::DIM.OFF;
+	// 		if (do_dim) os << ansi::DIM.OFF;
 	// 	};
 	// 	if (&os == &std::cout) {
 	// 		helper(std::cout, true);

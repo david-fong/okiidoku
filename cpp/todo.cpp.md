@@ -3,8 +3,9 @@
 
 ## Higher Priority
 
+- Move the run-multiple business logic to the lib folder.
+- Make max_backtracks a parameter.
 - Make more conditional types in the size class.
-- Move things from gen to grid.
 - Design some smarter backtracking.
 - Take out all stream related things from gen.
   - Read about std::format and see if it has any use for printing.
@@ -13,11 +14,9 @@
 - Test performance of
   - using `std::bitset` for `has_mask_t`.
   - using `usize_t` for O1 O2 O4 definitions.
-- Turn on the `-fpermissive` compiiler flag (make sure to turn on in c_cpp_properties.json as well).
 - Decide what interfaces to support:
   - Probably best to start with just readline
   - Can look into ncurses in the future?
-- Move the run-multiple business logic to the lib folder.
 - C++20
   - std::bit_width possible usage in size.hpp
   - `typename` doesn't need to be specified as much.

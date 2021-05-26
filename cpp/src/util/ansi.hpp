@@ -10,7 +10,7 @@
  * library for this, but I'd rather cut down on bloat and dependency
  * since the portion of a full-library that I want is very small.
  */
-namespace Ansi {
+namespace solvent::util::ansi {
 
 	#if USE_ANSI_ESC
 	#define SGR(NAME, ON_STR, OFF_STR) constexpr struct {\

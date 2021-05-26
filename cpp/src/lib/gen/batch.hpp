@@ -2,18 +2,20 @@
 #define HPP_SOLVENT_LIB_BATCH
 
 #include "./mod.hpp"
+#include "../../util/timer.hpp"
 
 #include <mutex>
 #include <string>
+#include <vector>
 #include <array>
 
 namespace solvent::lib::gen::batch {
 
 	using trials_t = unsigned long;
 
-	constexpr unsigned NUM_BINS = 20u;
-
 	struct Params {
+		const gen::Params gen_params;
+		const unsigned max_backtrack_sample_granularity;
 		const bool only_count_oks;
 		const trials_t stop_after;
 	};
@@ -22,11 +24,19 @@ namespace solvent::lib::gen::batch {
 		trials_t total_anys;
 		trials_t total_oks;
 
-		struct DistSummaryRow {
-			trials_t hit_count;
-			double total_ops;
+		struct MaxBacktrackSample {
+			unsigned long max_backtracks;
+			trials_t marginal_oks;
+			double marginal_ops;
+			double marginal_average_ops; // marginal_ops / marginal_oks
+			double net_average_ops; // (accumulated marginal_ops) / (accumulated marginal_oks)
 		};
-		std::array<DistSummaryRow, NUM_BINS> dist_summary;
+		static constexpr unsigned SAMPLE_GRANULARITY_DEFAULT = 20u;
+		static constexpr unsigned SAMPLE_GRANULARITY_MAX = 50u;
+
+		// Data sampled. Each entry showing the outcome if its max_backtracks
+		// value was used.
+		std::vector<MaxBacktrackSample> max_backtrack_samples;
 	};
 
 	//
@@ -50,7 +60,7 @@ namespace solvent::lib::gen::batch {
 
 		void operator()();
 
-		trials_t get_progress(void) const {
+		trials_t get_progress(void) const noexcept {
 			if (params_.only_count_oks) {
 				return shared_data_.total_oks;
 			} else {
@@ -69,14 +79,14 @@ namespace solvent::lib::gen::batch {
 	//
 	struct BatchReport : public SharedData {
 		BatchReport() = delete;
-		explicit BatchReport(SharedData sd) : SharedData(sd) {}
+		explicit BatchReport(SharedData sd, util::Timer::Elapsed te)
+			: SharedData(sd), time_elapsed(te) {}
 
-		double processor_time_elapsed;
-		double wall_clock_time_elapsed;
+		util::Timer::Elapsed time_elapsed;
 	};
 
 	//
 	template<Order O>
-	SharedData batch(Params, void(&)(const typename Generator<O>::GenResult));
+	const BatchReport batch(Params, void(&)(const typename Generator<O>::GenResult));
 }
 #endif

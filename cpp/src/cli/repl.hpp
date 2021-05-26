@@ -1,7 +1,6 @@
 #ifndef HPP_SOLVENT_CLI_REPL
 #define HPP_SOLVENT_CLI_REPL
 
-#include "./trials.hpp"
 #include "./enum.hpp"
 #include "../lib/gen/mod.hpp"
 #include "../lib/size.hpp"
@@ -75,10 +74,6 @@ namespace solvent::cli {
 		explicit Repl(std::ostream&);
 		bool run_command(std::string const& cmd_line);
 
-		// This is equal to `MAX_EXTRA_THREADS` floored by how many
-		// concurrent threads the host processor can support at a time.
-		const unsigned num_extra_threads;
-
 		[[gnu::cold, gnu::pure]] pathkind_t get_path_kind(void) const noexcept { return path_kind; }
 		// Setters return the old value of the generator path.
 		[[gnu::cold]] pathkind_t set_path_kind(pathkind_t) noexcept;
@@ -91,8 +86,8 @@ namespace solvent::cli {
 		pathkind_t path_kind;
 
 		static constexpr unsigned MAX_EXTRA_THREADS = [](){ const unsigned _[] = {0,0,0,0,1,4,2,2}; return _[0]; }();
-		const std::string DIM_ON  = (gen.is_pretty ? Ansi::DIM.ON  : "");
-		const std::string DIM_OFF = (gen.is_pretty ? Ansi::DIM.OFF : "");
+		const std::string DIM_ON  = (gen.is_pretty ? util::ansi::DIM.ON  : "");
+		const std::string DIM_OFF = (gen.is_pretty ? util::ansi::DIM.OFF : "");
 
 		// Return false if command is to exit the program:
 		void run_single(bool contPrev = false);

@@ -23,7 +23,7 @@ namespace solvent::lib::canon {
 	 private:
 		const std::array<ord2_t, O4> buf;
 
-		void handle_relabeling(void);
+		void handle_relabeling(void) noexcept;
 	};
 }
 

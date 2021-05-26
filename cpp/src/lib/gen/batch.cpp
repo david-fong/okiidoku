@@ -2,7 +2,6 @@
 
 #include <thread>
 #include <algorithm>
-#include <vector>
 
 namespace solvent::lib::gen::batch {
 
@@ -20,45 +19,46 @@ namespace solvent::lib::gen::batch {
 			if (get_progress() >= params_.stop_after) {
 				break;
 			}
-			shared_data_mutex_.unlock(); //_______________
-			const auto gen_result = generator_.generate();
-			shared_data_mutex_.lock(); //‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+			shared_data_mutex_.unlock(); //____________________
+			const typename Generator<O>::GenResult gen_result
+				= generator_.generate(params_.gen_params);
+			shared_data_mutex_.lock(); //‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
 
 			shared_data_.total_anys++;
 			if (gen_result.exit_status == ExitStatus::Ok) {
 				shared_data_.total_oks++;
 			}
-			// Save some stats for later diagnostics-printing:
-			const unsigned bin_i = NUM_BINS * (gen_result.most_backtracks) / gen->GIVEUP_THRESHOLD;
-			shared_data_.dist_summary.hit_count[bin_i]++;
-			shared_data_.dist_summary.total_ops[bin_i] += gen_result.op_count;
+			auto& dist_summary_row = shared_data_.max_backtrack_samples[
+				params_.max_backtrack_sample_granularity
+				* gen_result.most_backtracks_seen
+				/ generator_.max_backtracks_
+			];
+			dist_summary_row.marginal_oks++;
+			dist_summary_row.marginal_ops += gen_result.op_count;
 
 			gen_result_consumer_(std::move(gen_result));
 		}
-		mutex.unlock();
+		shared_data_mutex_.unlock();
 	}
 
 	template<Order O>
-	SharedData batch(const Params params, void(& gen_result_consumer)(const typename Generator<O>::GenResult)) {
-		auto wall_clock_start = std::chrono::steady_clock::now();
-		auto proc_clock_start = std::clock();
-
+	const BatchReport batch(const Params params, void(& gen_result_consumer)(const typename Generator<O>::GenResult)) {
+		const util::Timer timer;
 		std::mutex shared_data_mutex;
 		SharedData shared_data;
 
-		const num_threads = ThreadFunc<O>::NUM_THREADS;
-		std::vector<std::thread> extra_threads(num_threads, std::thread(
+		std::vector<std::thread> threads(ThreadFunc<O>::NUM_THREADS, std::thread(
 			ThreadFunc<O>(params, shared_data, shared_data_mutex, gen_result_consumer),
 		));
-		for (unsigned i = 0; i < num_threads.size(); i++) {
-			extra_threads[i].join();
+		for (auto& thread : threads) {
+			thread.join();
 		}
-
-		const double proc_seconds = ((double)(std::clock() - proc_clock_start) / CLOCKS_PER_SEC);
-		const double wall_seconds = ((double)[wall_clock_start](){
-			using namespace std::chrono;
-			return duration_cast<microseconds>(steady_clock::now() - wall_clock_start);
-		}().count() / 1'000'000);
-		return BatchReport();
+		const time_elapsed = timer.read_elapsed();
+		{
+			for (auto& sample : shared_data.max_backtrack_samples) {
+				sample.max_backtracks = ;
+			}
+		}
+		return BatchReport(shared_data, time_elapsed);
 	}
 }

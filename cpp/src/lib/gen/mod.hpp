@@ -23,9 +23,18 @@ namespace solvent::lib::gen {
 	//
 	std::mt19937 Rng;
 
+	struct Params {
+		path::Kind path_kind;
+		unsigned long max_backtracks;
+	};
+
 	// Container for a very large number.
 	// number of operations taken to generate a solution by grid-order.
 	using opcount_t = unsigned long long;
+
+	enum class ExitStatus {
+		Exhausted, Abort, Ok,
+	};
 
 	//
 	template<Order O>
@@ -56,11 +65,11 @@ namespace solvent::lib::gen {
 
 		//
 		struct GenResult final {
-			path::Kind path_kind = path::Kind::RowMajor;
+			Params params;
 			ExitStatus status = ExitStatus::Abort;
 			ord4_t progress = 0;
 			opcount_t op_count = 0;
-			backtrack_t most_backtracks = 0;
+			backtrack_t most_backtracks_seen = 0;
 			std::array<ord2_t, O4> grid = {};
 		};
 
@@ -85,7 +94,7 @@ namespace solvent::lib::gen {
 		Generator(void);
 
 		// Pass std::nullopt to continue the previous run.
-		[[gnu::hot]] GenResult generate(std::optional<path::Kind>);
+		[[gnu::hot]] GenResult generate(std::optional<Params>);
 		GenResult get_gen_result() { return gen_result_; }
 
 	 private:
@@ -98,7 +107,7 @@ namespace solvent::lib::gen {
 
 		// clear fields and scramble val_try_order
 		void init(void);
-		[[gnu::hot]] PathDirection set_next_valid(ord4_t progress, ord4_t coord);
+		[[gnu::hot]] PathDirection set_next_valid(ord4_t progress, ord4_t coord) noexcept;
 		GenResult gen_result_;
 	};
 }

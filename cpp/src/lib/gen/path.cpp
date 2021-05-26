@@ -11,7 +11,7 @@ namespace solvent::lib::gen::path {
 		static constexpr ord2_t O2 = O*O;
 		static constexpr ord4_t O4 = O*O*O*O;
 
-		inline static constexpr ord4_t convert(const ord4_t progress) {
+		inline static constexpr ord4_t convert(const ord4_t progress) noexcept {
 			if constexpr (PK == path::Kind::RowMajor) {
 				return progress;
 			} else {
@@ -20,7 +20,7 @@ namespace solvent::lib::gen::path {
 		}
 	 private:
 		static constexpr std::array<const ord4_t, O4> path = PathCoords_<PK,O>::_init();
-		static constexpr std::array<const ord4_t, O4> _init() {
+		static constexpr std::array<const ord4_t, O4> _init() noexcept {
 			const std::array<const ord4_t, O4> path;
 			if constexpr (PK == Kind::RowMajor) {
 				// std::iota(path.begin(), path.end(), 0);

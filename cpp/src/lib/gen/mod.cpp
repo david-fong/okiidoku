@@ -42,10 +42,10 @@ namespace solvent::lib::gen {
 
 
 	template<Order O>
-	Generator<O>::GenResult Generator<O>::generate(const std::optional<path::Kind> request) {
+	Generator<O>::GenResult Generator<O>::generate(const std::optional<Params> params) {
 		GenResult info;
-		if (request) [[likely]] {
-			info.path_kind = request.value();
+		if (params) [[likely]] {
+			info.params = params.value();
 			this->init();
 		} else {
 			info = gen_result_;
@@ -53,7 +53,7 @@ namespace solvent::lib::gen {
 				return info;
 			}
 		}
-		ord4_t (& prog2coord)(ord4_t) = path::PathCoords<O>[info.path_kind];
+		ord4_t (& prog2coord)(ord4_t) = path::PathCoords<O>[info.params.path_kind];
 		PathDirection direction;
 
 		while (info.progress < O4) {
@@ -62,8 +62,8 @@ namespace solvent::lib::gen {
 			info.op_count++;
 			if (direction == PathDirection::Back) [[unlikely]] {
 				// Pop and step backward:
-				if (++backtracks_[info.progress] > info.most_backtracks) {
-					info.most_backtracks = backtracks_[info.progress];
+				if (++backtracks_[info.progress] > info.most_backtracks_seen) {
+					info.most_backtracks_seen = backtracks_[info.progress];
 				}
 				if (info.progress == 0) [[unlikely]] {
 					info.status = ExitStatus::Exhausted;
@@ -75,7 +75,7 @@ namespace solvent::lib::gen {
 				++info.progress;
 			}
 			// Check whether the give-up-condition has been met:
-			if (info.most_backtracks >= DEFAULT_MAX_BACKTRACKS) [[unlikely]] {
+			if (info.most_backtracks_seen >= info.params.most_backtracks) [[unlikely]] {
 				info.status = ExitStatus::Abort;
 				break;
 			}
@@ -94,7 +94,7 @@ namespace solvent::lib::gen {
 
 
 	template<Order O>
-	PathDirection Generator<O>::set_next_valid(const ord4_t progress, const ord4_t coord) {
+	PathDirection Generator<O>::set_next_valid(const ord4_t progress, const ord4_t coord) noexcept {
 		has_mask_t& row_has = rows_has_[this->get_row(coord)];
 		has_mask_t& col_has = cols_has_[this->get_col(coord)];
 		has_mask_t& blk_has = blks_has_[this->get_blk(coord)];

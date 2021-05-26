@@ -14,10 +14,6 @@ namespace solvent::lib::gen {
 		Back, Forward,
 	};
 
-	enum class ExitStatus {
-		Exhausted, Abort, Ok,
-	};
-
 	namespace path {
 		enum class Kind : unsigned {
 			RowMajor,
@@ -42,7 +38,7 @@ namespace solvent::lib::gen {
 			"\n- blockcol   rowmajor, but broken into columns one block wide";
 
 		template<solvent::Order O>
-		constexpr std::array<typename size<O>::ord4_t (&)(typename size<O>::ord4_t), NUM_KINDS> PathCoords;
+		extern constexpr std::array<typename size<O>::ord4_t (&)(typename size<O>::ord4_t), NUM_KINDS> PathCoords;
 	}
 }
 #endif
