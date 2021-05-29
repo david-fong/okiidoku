@@ -5,7 +5,6 @@
 			"name": "Linux g++",
 			"intelliSenseMode": "gcc-x64",
 			"compilerPath": "/usr/bin/g++",
-			"includePath": [],
 			"browse": {
 				"path": [],
 				"limitSymbolsToIncludedHeaders": true

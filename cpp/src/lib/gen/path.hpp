@@ -1,7 +1,7 @@
 #ifndef HPP_SOLVENT_LIB_GEN_PATH
 #define HPP_SOLVENT_LIB_GEN_PATH
 
-#include "../size.hpp"
+#include ":/lib/size.hpp"
 
 #include <iostream>
 // #include <numeric> // iota
@@ -9,10 +9,6 @@
 #include <array>
 
 namespace solvent::lib::gen {
-
-	enum class PathDirection : bool {
-		Back, Forward,
-	};
 
 	namespace path {
 		enum class Kind : unsigned {
@@ -38,7 +34,7 @@ namespace solvent::lib::gen {
 			"\n- blockcol   rowmajor, but broken into columns one block wide";
 
 		template<solvent::Order O>
-		extern constexpr std::array<typename size<O>::ord4_t (&)(typename size<O>::ord4_t), NUM_KINDS> PathCoords;
+		extern const std::array<typename size<O>::ord4_t (&)(typename size<O>::ord4_t), NUM_KINDS> PathCoords;
 	}
 }
 #endif

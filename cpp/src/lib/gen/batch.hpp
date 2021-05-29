@@ -2,23 +2,17 @@
 #define HPP_SOLVENT_LIB_BATCH
 
 #include "./mod.hpp"
-#include "../../util/timer.hpp"
+#include ":/util/timer.hpp"
 
 #include <mutex>
 #include <string>
 #include <vector>
 #include <array>
+#include <optional>
 
 namespace solvent::lib::gen::batch {
 
 	using trials_t = unsigned long;
-
-	struct Params {
-		const gen::Params gen_params;
-		const unsigned max_backtrack_sample_granularity;
-		const bool only_count_oks;
-		const trials_t stop_after;
-	};
 
 	struct SharedData {
 		trials_t total_anys;
@@ -39,6 +33,14 @@ namespace solvent::lib::gen::batch {
 		std::vector<MaxBacktrackSample> max_backtrack_samples;
 	};
 
+	struct Params {
+		gen::Params gen_params;
+		unsigned num_threads = 0;
+		unsigned max_backtrack_sample_granularity = SharedData::SAMPLE_GRANULARITY_DEFAULT;
+		bool only_count_oks;
+		trials_t stop_after;
+	};
+
 	//
 	template<Order O>
 	class ThreadFunc final {
@@ -49,12 +51,12 @@ namespace solvent::lib::gen::batch {
 			else if (O == 4) { return 1; }
 			else { return 2; }
 		}();
-		static const unsigned NUM_THREADS;
+		static const unsigned DEFAULT_NUM_THREADS;
 
 	 public:
 		ThreadFunc(void) = delete;
 		explicit ThreadFunc(
-			Params p, SharedData& sd, std::mutex& sdm,
+			const Params p, SharedData& sd, std::mutex& sdm,
 			void(& grc)(const typename Generator<O>::GenResult)
 		) : params_(p), shared_data_mutex_(sdm), shared_data_(sd), gen_result_consumer_(grc) {};
 
@@ -79,14 +81,14 @@ namespace solvent::lib::gen::batch {
 	//
 	struct BatchReport : public SharedData {
 		BatchReport() = delete;
-		explicit BatchReport(SharedData sd, util::Timer::Elapsed te)
-			: SharedData(sd), time_elapsed(te) {}
+		explicit BatchReport(SharedData shared_data, util::Timer::Elapsed time_elapsed)
+			: SharedData(shared_data), time_elapsed(time_elapsed) {}
 
 		util::Timer::Elapsed time_elapsed;
 	};
 
 	//
 	template<Order O>
-	const BatchReport batch(Params, void(&)(const typename Generator<O>::GenResult));
+	const BatchReport batch(Params&, void(&)(const typename Generator<O>::GenResult&));
 }
 #endif

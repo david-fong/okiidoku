@@ -1,6 +1,4 @@
-/**
- * Choose build flags here.
- */
+
 
 #include "./cli/repl.hpp"
 #include "./lib/gen/mod.hpp"
@@ -8,6 +6,7 @@
 
 #if WINDOWS_ANSI
 #include <windows.h>
+#define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
 #endif
 
 #include <string>
@@ -18,7 +17,6 @@
 using solvent::cli::Repl;
 namespace ansi = solvent::util::ansi;
 
-#define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
 const unsigned DEFAULT_ORDER = 0;
 
 /**
@@ -75,7 +73,6 @@ int main(const int argc, char const *const argv[]) {
 		case 4: { Repl<4> s(*os); break; }
 		case 5: { Repl<5> s(*os); break; }
 		case 6: { Repl<6> s(*os); break; }
-		//case 6: { Repl<6> s(*os); break; }
 		default:
 			std::cout << ansi::RED.ON << "\nILLEGAL ARGUMENT:\n  order must be one of: { ";
 			for (unsigned i = 3; i <= 6; i++) {

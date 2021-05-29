@@ -1,17 +1,17 @@
-#include "./mod.hpp"
+/* #include "./mod.hpp"
 
 #include "../../util/ansi.hpp"
 
 
-// template<Order O>
-// const std::string Generator<O>::blk_row_sep_str = [](const unsigned order) {
-// 	std::string vbar = " " + std::string((((order * (order + 1)) + 1) * 2 - 1), '-');
-// 	for (unsigned i = 0; i <= order; i++) {
-// 		// Insert crosses at vbar intersections.
-// 		vbar[(2 * (order + 1) * i) + 1] = '+';
-// 	}
-// 	return vbar;
-// }(O);
+template<Order O>
+const std::string Generator<O>::blk_row_sep_str = [](const unsigned order) {
+	std::string vbar = " " + std::string((((order * (order + 1)) + 1) * 2 - 1), '-');
+	for (unsigned i = 0; i <= order; i++) {
+		// Insert crosses at vbar intersections.
+		vbar[(2 * (order + 1) * i) + 1] = '+';
+	}
+	return vbar;
+}(O);
 
 template<solvent::Order O>
 std::ostream& operator<<(std::ostream& os, solvent::lib::gen::Generator<O> const& g) {
@@ -26,7 +26,7 @@ std::ostream& operator<<(std::ostream& os, solvent::lib::gen::Generator<O> const
 		}}
 	#define _M_PRINT_GRID_TILE(PRINTER_STATEMENT) {\
 		if (is_pretty) {\
-			os << ansi::DIM.ON << " |" /* << ansi::DIM.OFF */;\
+			os << ansi::DIM.ON << " |"; // << ansi::DIM.OFF\
 			os << GRID_SEP;\
 			_M_PRINT_GRID0_TILE(PRINTER_STATEMENT)}\
 		}
@@ -73,13 +73,13 @@ namespace solvent::lib::gen {
 
 	std::string shaded_backtrack_stat(const long out_of, const long count) {
 		const unsigned int relative_intensity
-			= (double)(count - 1)
+			= static_cast<double>(count - 1)
 			* ansi::BLOCK_CHARS.size()
 			/ out_of;
 		return (count == 0) ? " " : ansi::BLOCK_CHARS[relative_intensity];
 	}
 
-	/* friend std::ostream& operator<<(std::ostream& os, Tile const& t) noexcept {
+	friend std::ostream& operator<<(std::ostream& os, Tile const& t) noexcept {
 		static_assert(O1 <= 6, "I haven't yet decided how to translate for orders > 6.");
 		if (t.is_clear()) [[unlikely]] {
 			return os << ' ';
@@ -94,80 +94,81 @@ namespace solvent::lib::gen {
 					: os << static_cast<char>('a' + t.value - 10);
 			}
 		}
-	} */
+	}
 
-	// Output formatting:
-	// if (is_pretty) {
-	// 	os.imbue(std::locale(os.getloc(), new MyNumpunct()));
-	// }
-	// os.precision(3);
-	// os << std::fixed;
-
-
-	// Prints to std::cout and the output file if it exists.
-	// void print(void) const;
-	// void print_simple(void) const; // No newlines included.
-	// void print_msg_bar(std::string const&, unsigned int, char = '=') const;
-	// void print_msg_bar(std::string const&, char = '=') const;
+	Output formatting:
+	if (is_pretty) {
+		os.imbue(std::locale(os.getloc(), new MyNumpunct()));
+	}
+	os.precision(3);
+	os << std::fixed;
 
 
-	// template<Order O>
-	// void Generator<O>::print(void) const {
-	// 	if (&os != &std::cout) {
-	// 		std::cout << *this;
-	// 	}
-	// 	os << *this;
-	// }
+	Prints to std::cout and the output file if it exists.
+	void print(void) const;
+	void print_simple(void) const; // No newlines included.
+	void print_msg_bar(std::string const&, unsigned int, char = '=') const;
+	void print_msg_bar(std::string const&, char = '=') const;
 
 
-	// template<Order O>
-	// void Generator<O>::print_simple(void) const {
-	// 	auto const helper = [this](std::ostream& os, const bool is_pretty){
-	// 		const bool do_dim = is_pretty && (gen_result_.get_exit_status() != ExitStatus::Ok);
-	// 		if (do_dim) os << ansi::DIM.ON;
-	// 		for (auto const& t : values_) {
-	// 			os << t;
-	// 		}
-	// 		if (do_dim) os << ansi::DIM.OFF;
-	// 	};
-	// 	if (&os == &std::cout) {
-	// 		helper(std::cout, true);
-	// 	} else {
-	// 		helper(std::cout, true);
-	// 		helper(os, false);
-	// 	}
-	// }
+	template<Order O>
+	void Generator<O>::print(void) const {
+		if (&os != &std::cout) {
+			std::cout << *this;
+		}
+		os << *this;
+	}
 
 
-	// template<Order O>
-	// void Generator<O>::print_msg_bar(
-	// 	std::string const& msg,
-	// 	unsigned bar_length,
-	// 	const char fill_char
-	// ) const {
-	// 	if (bar_length < msg.length() + 8) {
-	// 		bar_length = msg.length() + 8;
-	// 	}
-	// 	std::string bar(bar_length, fill_char);
-	// 	if (!msg.empty()) {
-	// 		bar.replace(4, msg.length(), msg);
-	// 		bar.at(3) = ' ';
-	// 		bar.at(4 + msg.length()) = ' ';
-	// 	}
-	// 	os << '\n' <<bar;
-	// }
+	template<Order O>
+	void Generator<O>::print_simple(void) const {
+		auto const helper = [this](std::ostream& os, const bool is_pretty){
+			const bool do_dim = is_pretty && (gen_result_.get_exit_status() != ExitStatus::Ok);
+			if (do_dim) os << ansi::DIM.ON;
+			for (auto const& t : values_) {
+				os << t;
+			}
+			if (do_dim) os << ansi::DIM.OFF;
+		};
+		if (&os == &std::cout) {
+			helper(std::cout, true);
+		} else {
+			helper(std::cout, true);
+			helper(os, false);
+		}
+	}
 
 
-	// template<Order O>
-	// void Generator<O>::print_msg_bar(std::string const& msg, const char fill_char) const {
-	// 	const unsigned grid_bar_length = (is_pretty)
-	// 		? ((O2 + O1 + 1) * 2)
-	// 		: (O2 * 2);
-	// 	constexpr unsigned num_grids = 2u;
-	// 	unsigned all_bar_length = (num_grids * grid_bar_length);
-	// 	if (num_grids > 1) all_bar_length += (num_grids - 1) * GRID_SEP.length();
-	// 	return print_msg_bar(msg, all_bar_length + 1, fill_char);
-	// }
+	template<Order O>
+	void Generator<O>::print_msg_bar(
+		std::string const& msg,
+		unsigned bar_length,
+		const char fill_char
+	) const {
+		if (bar_length < msg.length() + 8) {
+			bar_length = msg.length() + 8;
+		}
+		std::string bar(bar_length, fill_char);
+		if (!msg.empty()) {
+			bar.replace(4, msg.length(), msg);
+			bar.at(3) = ' ';
+			bar.at(4 + msg.length()) = ' ';
+		}
+		os << '\n' <<bar;
+	}
 
-	// static constexpr unsigned STATS_WIDTH = (0.4 * O2) + 4;
+
+	template<Order O>
+	void Generator<O>::print_msg_bar(std::string const& msg, const char fill_char) const {
+		const unsigned grid_bar_length = (is_pretty)
+			? ((O2 + O1 + 1) * 2)
+			: (O2 * 2);
+		constexpr unsigned num_grids = 2u;
+		unsigned all_bar_length = (num_grids * grid_bar_length);
+		if (num_grids > 1) all_bar_length += (num_grids - 1) * GRID_SEP.length();
+		return print_msg_bar(msg, all_bar_length + 1, fill_char);
+	}
+
+	static constexpr unsigned STATS_WIDTH = (0.4 * O2) + 4;
 }
+ */

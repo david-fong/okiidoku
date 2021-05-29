@@ -6,7 +6,7 @@
 namespace solvent::lib::gen::batch {
 
 	template<Order O>
-	const unsigned ThreadFunc<O>::NUM_THREADS = [](){
+	const unsigned ThreadFunc<O>::DEFAULT_NUM_THREADS = [](){
 		const unsigned hwc = std::thread::hardware_concurrency();
 		// NOTE: hardware_concurency is specified to be zero if unknown.
 		return (hwc != 0) ? std::min(NUM_EXTRA_THREADS + 1, hwc) : 1;
@@ -42,21 +42,30 @@ namespace solvent::lib::gen::batch {
 	}
 
 	template<Order O>
-	const BatchReport batch(const Params params, void(& gen_result_consumer)(const typename Generator<O>::GenResult)) {
+	const BatchReport batch(Params& params, void(& gen_result_consumer)(const typename Generator<O>::GenResult)) {
+		if (params.num_threads == 0) {
+			params.num_threads = ThreadFunc<O>::DEFAULT_NUM_THREADS;
+		}
 		const util::Timer timer;
 		std::mutex shared_data_mutex;
 		SharedData shared_data;
 
-		std::vector<std::thread> threads(ThreadFunc<O>::NUM_THREADS, std::thread(
-			ThreadFunc<O>(params, shared_data, shared_data_mutex, gen_result_consumer),
-		));
+		std::vector<std::thread> threads(params.num_threads,
+			ThreadFunc<O>(params, shared_data, shared_data_mutex, gen_result_consumer)
+		);
 		for (auto& thread : threads) {
 			thread.join();
 		}
-		const time_elapsed = timer.read_elapsed();
+		const auto time_elapsed = timer.read_elapsed();
 		{
+			double net_ops = 0.0;
+			trials_t net_oks = 0;
 			for (auto& sample : shared_data.max_backtrack_samples) {
-				sample.max_backtracks = ;
+				sample.max_backtracks = params.gen_params.max_backtracks;
+				net_ops += sample.marginal_ops;
+				net_oks += sample.marginal_oks;
+				sample.marginal_average_ops = sample.marginal_ops / sample.marginal_oks;
+				sample.net_average_ops = static_cast<double>(net_ops) / net_oks;
 			}
 		}
 		return BatchReport(shared_data, time_elapsed);

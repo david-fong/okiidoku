@@ -1,7 +1,7 @@
-#!/bin/sh
+#!/bin/bash
 # https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html
-set -e
-readonly ROOT="$(dirname "$0")"
+readonly ROOT="$(dirname "${BASH_SOURCE[0]}")"
+# readonly ROOT="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 
 # if [[ "$@" =~ '--clang' ]]
 # then
@@ -12,15 +12,16 @@ readonly ROOT="$(dirname "$0")"
 # fi
 
 # readonly CPP=$(find src -type f -name '*.cpp')
-readonly CPP='
-	src/main.cpp
-	src/cli/trials.cpp
-	src/cli/repl.cpp
-	src/lib/gen/path.cpp
-	src/lib/gen/mod.cpp
-	src/lib/gen/batch.cpp
-'
+readonly CPP="$(echo "$ROOT/src/"{\
+main_cli,\
+cli/repl,\
+lib/gen/path,\
+lib/gen/mod,\
+lib/gen/batch\
+}.cpp)"
 
 ${COMPILER}\
+	-iquote "${ROOT}/include"\
 	-Wall -Werror -Wpedantic -Wimplicit-fallthrough=5 -O3\
+	"$@"\
 	${CPP} -o solvent.exe\

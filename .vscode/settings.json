@@ -8,7 +8,10 @@
 
 	"C_Cpp.default.cStandard": "c17",
 	"C_Cpp.default.cppStandard": "c++20",
-	"C_Cpp.default.compilerArgs": ["-Wall", "-Wextra", "-Wpedantic", "-Wimplicit-fallthrough=5"],
+	"C_Cpp.default.compilerArgs": [
+		"-Wall", "-Wextra", "-Wpedantic", "-Wimplicit-fallthrough=5",
+	],
+	"C_Cpp.default.includePath": ["${workspaceFolder}/cpp/include"],
 
 	"trailing-spaces.trimOnSave": true,
 

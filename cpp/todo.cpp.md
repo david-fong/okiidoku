@@ -3,6 +3,7 @@
 
 ## Higher Priority
 
+- Is it necessary to specify `-pthread` in cpp build.sh?
 - Move the run-multiple business logic to the lib folder.
 - Make max_backtracks a parameter.
 - Make more conditional types in the size class.
@@ -13,10 +14,15 @@
 - Scrap and rewrite the run-multiple info summary reporting.
 - Test performance of
   - using `std::bitset` for `has_mask_t`.
-  - using `usize_t` for O1 O2 O4 definitions.
 - Decide what interfaces to support:
-  - Probably best to start with just readline
+  - Probably best to start with just readline and a CLI
+    - For CLI util libraries, look into using
+      - https://github.com/docopt/docopt.cpp
+      - https://github.com/CLIUtils/CLI11
+      - http://tclap.sourceforge.net/manual.html
+      - https://github.com/Taywee/args
   - Can look into ncurses in the future?
+  - A web interface would be really nice.
 - C++20
   - std::bit_width possible usage in size.hpp
   - `typename` doesn't need to be specified as much.

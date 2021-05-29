@@ -1,12 +1,9 @@
 #ifndef HPP_SOLVENT_LIB_SIZE
 #define HPP_SOLVENT_LIB_SIZE
 
-#include "../buildflag.hpp"
-
-#include <type_traits>
 #include <bit>
 #include <cstdint>
-
+#include <type_traits>
 
 namespace solvent {
 	//

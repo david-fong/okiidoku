@@ -2,8 +2,9 @@
 #define HPP_SOLVENT_CLI_REPL
 
 #include "./enum.hpp"
-#include "../lib/gen/mod.hpp"
-#include "../lib/size.hpp"
+#include ":/lib/gen/batch.hpp"
+#include ":/lib/gen/mod.hpp"
+#include ":/lib/size.hpp"
 
 #include <map>
 #include <string>
@@ -69,6 +70,7 @@ namespace solvent::cli {
 		using opcount_t = lib::gen::opcount_t;
 		using generator_t = typename lib::gen::Generator<O>;
 		using pathkind_t = lib::gen::path::Kind;
+		using trials_t = lib::gen::batch::trials_t;
 
 		Repl(void) = delete;
 		explicit Repl(std::ostream&);
@@ -76,8 +78,8 @@ namespace solvent::cli {
 
 		[[gnu::cold, gnu::pure]] pathkind_t get_path_kind(void) const noexcept { return path_kind; }
 		// Setters return the old value of the generator path.
-		[[gnu::cold]] pathkind_t set_path_kind(pathkind_t) noexcept;
-		[[gnu::cold]] pathkind_t set_path_kind(std::string const&) noexcept;
+		[[gnu::cold]] const pathkind_t& set_path_kind(pathkind_t) noexcept;
+		[[gnu::cold]] const pathkind_t& set_path_kind(std::string const&) noexcept;
 
 	 private:
 		generator_t gen;
@@ -92,11 +94,12 @@ namespace solvent::cli {
 		// Return false if command is to exit the program:
 		void run_single(bool contPrev = false);
 
-		void run_multiple(trials_t num_trials, trials::StopAfterWhat);
-		void run_multiple(std::string const&, trials::StopAfterWhat);
-		void print_trials_work_distribution(trials_t num_total_trials,
-			std::array<trials_t, trials::NUM_BINS+1> const& bin_hit_count,
-			std::array<double,   trials::NUM_BINS+1> const& bin_ops_total);
+		void run_multiple(trials_t stop_after, bool only_count_oks);
+		void run_multiple(std::string const&,  bool only_count_oks);
+		void print_trials_work_distribution(lib::gen::batch::Params const&, lib::gen::batch::BatchReport const&);
+
+		void print_msg_bar(std::string const&, unsigned int, char = '=') const;
+		void print_msg_bar(std::string const&, char = '=') const;
 
 	 public:
 		[[gnu::cold]] verbosity::Kind get_output_level(void) const noexcept { return output_level; };

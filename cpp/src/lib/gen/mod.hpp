@@ -1,9 +1,9 @@
 #ifndef HPP_SOLVENT_LIB_GEN
 #define HPP_SOLVENT_LIB_GEN
 
-#include "./path.hpp"
-#include "../grid.hpp"
-#include "../size.hpp"
+#include ":/lib/gen/path.hpp"
+#include ":/lib/grid.hpp"
+#include ":/lib/size.hpp"
 
 #include <random>
 #include <ostream>
@@ -95,7 +95,7 @@ namespace solvent::lib::gen {
 
 		// Pass std::nullopt to continue the previous run.
 		[[gnu::hot]] GenResult generate(std::optional<Params>);
-		GenResult get_gen_result() { return gen_result_; }
+		const GenResult& get_gen_result() { return gen_result_; }
 
 	 private:
 		std::array<std::array<ord2_t, O2>, O2> val_try_order_;
@@ -107,7 +107,8 @@ namespace solvent::lib::gen {
 
 		// clear fields and scramble val_try_order
 		void init(void);
-		[[gnu::hot]] PathDirection set_next_valid(ord4_t progress, ord4_t coord) noexcept;
+		// returns whether or not to backtrack
+		[[gnu::hot]] inline bool set_next_valid(ord4_t progress) noexcept;
 		GenResult gen_result_;
 	};
 }

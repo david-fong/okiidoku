@@ -1,8 +1,8 @@
-/* #include "./repl.hpp"
+#include "./repl.hpp"
 
-#include "../lib/gen/batch.hpp"
-#include "../util/timer.hpp"
-#include "../util/ansi.hpp"
+#include ":/lib/gen/batch.hpp"
+#include ":/util/timer.hpp"
+#include ":/util/ansi.hpp"
 
 #include <iostream> // cout, endl,
 #include <iomanip>  // setw,
@@ -10,12 +10,10 @@
 
 namespace solvent::cli {
 
-	const std::string TABLE_SEPARATOR = "\n+-----------+----------+----------------+-----------+-----------+";
-	const std::string TABLE_HEADER    = "\n|  bin bot  |   hits   |   operations   |  giveup%  |  speedup  |";
-
-
 	namespace ansi = solvent::util::ansi;
 	using namespace solvent::lib;
+
+	using pathkind_t = lib::gen::path::Kind;
 
 	// Mechanism to statically toggle printing alignment:
 	// (#undef-ed before the end of this namespace)
@@ -81,12 +79,12 @@ namespace solvent::cli {
 				break;
 			case E::Quit:
 				return false;
-			case E::ConfigVerbosity:   set_output_level(cmd_args); break;
+			case E::ConfigVerbosity:  set_output_level(cmd_args); break;
 			case E::ConfigGenPath:    gen.set_path_kind(cmd_args); break;
 			case E::RunSingle:     run_single();     break;
 			case E::ContinuePrev:  run_single(true); break;
-			case E::RunMultiple:   run_multiple(cmd_args, trials::StopAfterWhat::Any);    break;
-			case E::RunMultipleOk: run_multiple(cmd_args, trials::StopAfterWhat::Ok); break;
+			case E::RunMultiple:   run_multiple(cmd_args, false); break;
+			case E::RunMultipleOk: run_multiple(cmd_args, true); break;
 		}
 		return true;
 	}
@@ -129,31 +127,31 @@ namespace solvent::cli {
 
 
 	template<Order O>
-	path::Kind Repl<O>::set_path_kind(const Path::E new_path_kind) noexcept {
+	const pathkind_t& Repl<O>::set_path_kind(const pathkind_t new_path_kind) noexcept {
 		if (new_path_kind == get_path_kind()) {
 			// Short circuit:
 			return get_path_kind();
 		}
-		const Path::E prev_path_kind = get_path_kind();
+		const pathkind_t prev_path_kind = get_path_kind();
 		path_kind = new_path_kind;
 		return prev_path_kind;
 	}
 
 
 	template<Order O>
-	Path::E Repl<O>::set_path_kind(std::string const& new_path_kind_str) noexcept {
+	const pathkind_t& Repl<O>::set_path_kind(std::string const& new_path_kind_str) noexcept {
 		std::cout << "\ngenerator path is ";
 		if (new_path_kind_str.empty()) {
 			std::cout << "currently set to: " << get_path_kind() << std::endl;
 			return get_path_kind();
 		}
-		for (unsigned i = 0; i < Path::NUM_KINDS; i++) {
-			if (new_path_kind_str.compare(Path::NAMES[i]) == 0) {
-				if (Path::E{i} == get_path_kind()) {
+		for (unsigned i = 0; i < gen::path::NUM_KINDS; i++) {
+			if (new_path_kind_str.compare(gen::path::NAMES[i]) == 0) {
+				if (pathkind_t{i} == get_path_kind()) {
 					std::cout << "already set to: ";
 				} else {
 					std::cout << "now set to: ";
-					set_path_kind(Path::E{i});
+					set_path_kind(pathkind_t{i});
 				}
 				std::cout << get_path_kind() << std::endl;
 				return get_path_kind();
@@ -163,7 +161,7 @@ namespace solvent::cli {
 		std::cout << get_path_kind() << " (unchanged).\n"
 			<< ansi::RED.ON << '"' << new_path_kind_str
 			<< "\" is not a valid generator path name.\n"
-			<< Path::OPTIONS_MENU << ansi::RED.OFF << std::endl;
+			<< gen::path::OPTIONS_MENU << ansi::RED.OFF << std::endl;
 		return get_path_kind();
 	}
 
@@ -188,20 +186,20 @@ namespace solvent::cli {
 
 	template<Order O>
 	void Repl<O>::run_single(const bool cont_prev) {
-		gen.print_msg_bar("START");
+		print_msg_bar("START");
 
 		// Generate a new solution:
 		const clock_t clock_start = std::clock();
 		gen.generate(cont_prev);
-		const double processor_time = ((double)(std::clock() - clock_start)) / CLOCKS_PER_SEC;
+		const double processor_time = (static_cast<double>(std::clock() - clock_start)) / CLOCKS_PER_SEC;
 
 		os << "\nprocessor time: " STATW_D << processor_time << " seconds";
 		os << "\nnum operations: " STATW_I << gen.gen_result.get_op_count();
 		os << "\nmax backtracks: " STATW_I << gen.get_most_backtracks();
-		if (!gen.is_pretty) gen.print_msg_bar("", '-');
+		if (!gen.is_pretty) print_msg_bar("", '-');
 		gen.print();
-		gen.print_msg_bar((gen.gen_result.get_exit_status() == gen::ExitStatus::Ok) ? "DONE" : "ABORT");
-		gen.gen_result = generator_t::GenResult { exit_status: 1 };
+		print_msg_bar((gen.gen_result.get_exit_status() == gen::ExitStatus::Ok) ? "OK" : "ABORT");
+		// gen.gen_result = generator_t::GenResult { exit_status: 1 }; // TODO why did I write this before?
 		os << std::endl;
 	}
 
@@ -209,50 +207,48 @@ namespace solvent::cli {
 	template<Order O>
 	void Repl<O>::run_multiple(
 		const trials_t stop_after,
-		const trials::StopAfterWhat trials_stop_method
+		const bool only_count_oks
 	) {
 		const unsigned COLS = [this](){ // Never zero. Not used when writing to file.
 			const unsigned term_cols = GET_TERM_COLS();
 			const unsigned cols = (term_cols-7)/(gen.O4+1);
-			return term_cols ? (cols ? cols : 1) : ((unsigned[]){0,64,5,2,1,1,1})[O];
+			return term_cols ? (cols ? cols : 1) : [](){ const unsigned _[] = {0,64,5,2,1,1,1}; return _[O]; }();
 		}();
 		const unsigned BAR_WIDTH = (gen.O4+1) * COLS + (gen.is_pretty ? 7 : 0);
 		// Note at above: the magic number `7` is the length of the progress indicator.
 
-		// NOTE: The last bin is for trials that do not succeed.
-		std::array<trials_t, trials::NUM_BINS+1> bin_hit_count = {0,};
-		std::array<double,   trials::NUM_BINS+1> bin_ops_total = {0,};
-
-		gen.print_msg_bar("START x" + std::to_string(stop_after), BAR_WIDTH);
+		print_msg_bar("START x" + std::to_string(stop_after), BAR_WIDTH);
 		// TODO use solvent::lib::gen::batch
+		const gen::batch::Params params = gen::batch::Params{ .gen_params(), .num_threads = std::nullopt };
+		const auto batch_report = gen::batch::batch<O>(params, callback);
 
 		const std::string seconds_units = DIM_ON + " seconds (with I/O)" + DIM_OFF;
-		gen.print_msg_bar("", BAR_WIDTH, '-'); os
-		<< "\nhelper threads: " STATW_I << num_extra_threads
+		print_msg_bar("", BAR_WIDTH, '-'); os
+		<< "\nhelper threads: " STATW_I << params.num_threads
 		<< "\ngenerator path: " STATW_I << gen.get_path_kind()
 		// TODO [stats] For total successes and total trieals.
-		<< "\nprocessor time: " STATW_D << proc_seconds << seconds_units
-		<< "\nreal-life time: " STATW_D << wall_seconds << seconds_units;
+		<< "\nprocessor time: " STATW_D << batch_report.time_elapsed.proc_seconds << seconds_units
+		<< "\nreal-life time: " STATW_D << batch_report.time_elapsed.wall_seconds << seconds_units;
 		;
-		if (wall_seconds > 10.0) {
+		if (batch_report.time_elapsed.wall_seconds > 10.0) {
 			// Emit a beep sound if the trials took longer than ten processor seconds:
 			std::cout << '\a' << std::flush;
 		}
 		// Print bins (work distribution):
-		print_trials_work_distribution(total_trials, bin_hit_count, bin_ops_total);
-		gen.print_msg_bar("DONE x" + std::to_string(stop_after), BAR_WIDTH);
+		print_trials_work_distribution(batch_report);
+		print_msg_bar("DONE x" + std::to_string(stop_after), BAR_WIDTH);
 		os << std::endl;
 	}
 
 
 	template<Order O>
 	void Repl<O>::run_multiple(
-		std::string const& trials_string,
-		const trials::StopAfterWhat stop_by_method
+		std::string const& stop_after_str,
+		const bool only_count_oks
 	) {
 		long stopByValue;
 		try {
-			stopByValue = std::stol(trials_string);
+			stopByValue = std::stol(stop_after_str);
 			if (stopByValue <= 0) {
 				std::cout << ansi::RED.ON;
 				std::cout << "please provide a non-zero, positive integer.";
@@ -261,31 +257,30 @@ namespace solvent::cli {
 			}
 		} catch (std::invalid_argument const& ia) {
 			std::cout << ansi::RED.ON;
-			std::cout << "could not convert \"" << trials_string << "\" to an integer.";
+			std::cout << "could not convert \"" << stop_after_str << "\" to an integer.";
 			std::cout << ansi::RED.OFF << std::endl;
 			return;
 		}
-		run_multiple(static_cast<trials_t>(stopByValue), stop_by_method);
+		this->run_multiple(static_cast<trials_t>(stopByValue), only_count_oks);
 	}
 
 
 	template<Order O>
 	void Repl<O>::print_trials_work_distribution(
-		BatchReport batch_report
+		gen::batch::Params const& params,
+		gen::batch::BatchReport const& batch_report
 	) {
-		const std::string THROUGHPUT_BAR_STRING = "--------------------------------";
+		static constexpr std::string THROUGHPUT_BAR_STRING = "--------------------------------";
+		static constexpr std::string TABLE_SEPARATOR = "\n+-----------+----------+----------------+-----------+-----------+";
+		static constexpr std::string TABLE_HEADER    = "\n|  bin bot  |   hits   |   operations   |  giveup%  |  speedup  |";
+		const unsigned NUM_BINS = params.max_backtrack_sample_granularity;
 
-
-		os << trials::TABLE_SEPARATOR;
-		os << trials::TABLE_HEADER;
-		os << trials::TABLE_SEPARATOR;
+		os << TABLE_SEPARATOR;
+		os << TABLE_HEADER;
+		os << TABLE_SEPARATOR;
 		for (unsigned i = 0; i < bin_hit_count.size(); i++) {
-			if (i == trials::NUM_BINS) {
-				// Print a special separator for the giveups row:
-				os << trials::TABLE_SEPARATOR;
-			}
 			// Bin Bottom column:
-			const double bin_bottom  = (double)(i) * gen.GIVEUP_THRESHOLD / trials::NUM_BINS;
+			const double bin_bottom  = static_cast<double>(i) * gen.GIVEUP_THRESHOLD / NUM_BINS;
 			if constexpr (O <= 4) {
 				os << "\n|" << std::setw(9) << (int)(bin_bottom);
 			} else {
@@ -310,11 +305,11 @@ namespace solvent::cli {
 
 			// Speedup Column
 			os << "  |" << std::setw(9);
-			if (i == trials::NUM_BINS) {
+			if (i == NUM_BINS) {
 				os << "unknown";
 			} else {
 				//os << std::scientific << (throughput[i]) << std::fixed;
-				os << 100.0 * (throughput[i] / throughput[trials::NUM_BINS-1]);
+				os << 100.0 * (throughput[i] / throughput[NUM_BINS-1]);
 			}
 			// Closing right-edge:
 			os << "  |";
@@ -329,12 +324,11 @@ namespace solvent::cli {
 			if (i != best_throughput_bin) os << DIM_OFF;
 		}
 		os << " <- current giveup threshold";
-		os << trials::TABLE_SEPARATOR;
-		os << DIM_ON << trials::THROUGHPUT_COMMENTARY << DIM_OFF;
+		os << TABLE_SEPARATOR;
+		os << DIM_ON << THROUGHPUT_COMMENTARY << DIM_OFF;
 	}
 
 	#undef STATW_I
 	#undef STATW_D
 
 }
- */
