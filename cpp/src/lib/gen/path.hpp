@@ -3,7 +3,7 @@
 
 #include ":/lib/size.hpp"
 
-#include <iostream>
+#include <iosfwd>
 // #include <numeric> // iota
 #include <string>
 #include <array>
@@ -25,9 +25,7 @@ namespace solvent::lib::gen {
 			"dealrwmj",
 			"blockcol",
 		};
-		std::ostream& operator<<(std::ostream& os, const Kind path_kind) {
-			return os << NAMES[static_cast<unsigned>(path_kind)];
-		}
+		std::ostream& operator<<(std::ostream& os, const Kind path_kind);
 		const std::string OPTIONS_MENU = "\nGEN-PATH OPTIONS:"
 			"\n- rowmajor   horizontal strips as wide as the grid one by one"
 			"\n- dealrwmj   like dealing cards to each block using row-major"

@@ -1,17 +1,9 @@
-/* #include "./mod.hpp"
+#include "./mod.hpp"
+#include ":/lib/size.hpp"
+#include ":/util/ansi.hpp"
 
-#include "../../util/ansi.hpp"
+#include <iostream>
 
-
-template<Order O>
-const std::string Generator<O>::blk_row_sep_str = [](const unsigned order) {
-	std::string vbar = " " + std::string((((order * (order + 1)) + 1) * 2 - 1), '-');
-	for (unsigned i = 0; i <= order; i++) {
-		// Insert crosses at vbar intersections.
-		vbar[(2 * (order + 1) * i) + 1] = '+';
-	}
-	return vbar;
-}(O);
 
 template<solvent::Order O>
 std::ostream& operator<<(std::ostream& os, solvent::lib::gen::Generator<O> const& g) {
@@ -19,16 +11,25 @@ std::ostream& operator<<(std::ostream& os, solvent::lib::gen::Generator<O> const
 	namespace ansi = solvent::util::ansi;
 	using ord2_t = typename solvent::size<O>::ord2_t;
 
-	#define _M_PRINT_GRID0_TILE(PRINTER_STATEMENT) {\
+	static const auto blk_row_sep_str = []() {
+		std::string vbar = " " + std::string((((O * (O + 1)) + 1) * 2 - 1), '-');
+		for (unsigned i = 0; i <= O; i++) {
+			vbar[(2 * (O + 1) * i) + 1] = '+';
+		}
+		return vbar;
+	}();
+
+	#define M_PRINT_GRID0_TILE(PRINTER_STATEMENT) {\
 		for (ord2_t col = 0; col < g.O2; col++) {\
 			if (is_pretty && (col % g.O1) == 0) os << ansi::DIM.ON << " |" << ansi::DIM.OFF;\
 			PRINTER_STATEMENT;\
-		}}
-	#define _M_PRINT_GRID_TILE(PRINTER_STATEMENT) {\
+		}\
+	}
+	#define M_PRINT_GRID_TILE(PRINTER_STATEMENT) {\
 		if (is_pretty) {\
-			os << ansi::DIM.ON << " |"; // << ansi::DIM.OFF\
+			os << ansi::DIM.ON << " |"/* ; << ansi::DIM.OFF */\
 			os << GRID_SEP;\
-			_M_PRINT_GRID0_TILE(PRINTER_STATEMENT)}\
+			M_PRINT_GRID0_TILE(PRINTER_STATEMENT)}\
 		}
 
 	const bool is_pretty = &os == &std::cout;
@@ -46,18 +47,19 @@ std::ostream& operator<<(std::ostream& os, solvent::lib::gen::Generator<O> const
 		os << '\n';
 		// Tile content:
 		#define _M_index ((row * g.O2) + col)
-		_M_PRINT_GRID0_TILE(os << ' ' << g.values_[_M_index])
-		_M_PRINT_GRID_TILE(g.print_shaded_backtrack_stat(g.backtracks_[_M_index]))
-		// _M_PRINT_GRID_TILE(os << std::setw(2) << values_[coord].next_try_index)
-		// _M_PRINT_GRID_TILE(os << ' ' << val_try_order_[row][col])
+		M_PRINT_GRID0_TILE(os << ' ' << g.values_[_M_index])
+		M_PRINT_GRID_TILE(g.print_shaded_backtrack_stat(g.backtracks_[_M_index]))
+		// M_PRINT_GRID_TILE(os << std::setw(2) << values_[coord].next_try_index)
+		// M_PRINT_GRID_TILE(os << ' ' << val_try_order_[row][col])
 		#undef _M_index
 		if (is_pretty) os << ansi::DIM.ON << " |" << ansi::DIM.OFF;
 	}
 	print_blk_row_sep_str();
-	#undef PRINT_GRID_TILE
-	#undef PRINT_GRID0_TILE
+	#undef M_PRINT_GRID_TILE
+	#undef M_PRINT_GRID0_TILE
 	return os;
 }
+
 
 namespace solvent::lib::gen {
 
@@ -171,4 +173,3 @@ namespace solvent::lib::gen {
 
 	static constexpr unsigned STATS_WIDTH = (0.4 * O2) + 4;
 }
- */

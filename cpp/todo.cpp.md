@@ -3,20 +3,16 @@
 
 ## Higher Priority
 
+- try to get rid of the colony include dir
 - Is it necessary to specify `-pthread` in cpp build.sh?
-- Move the run-multiple business logic to the lib folder.
-- Make max_backtracks a parameter.
-- Make more conditional types in the size class.
 - Design some smarter backtracking.
 - Take out all stream related things from gen.
   - Read about std::format and see if it has any use for printing.
-  - Make dedicated repl commands for dumping results to a file.
 - Scrap and rewrite the run-multiple info summary reporting.
-- Test performance of
-  - using `std::bitset` for `has_mask_t`.
 - Decide what interfaces to support:
   - Probably best to start with just readline and a CLI
     - For CLI util libraries, look into using
+      - https://github.com/daniele77/cli
       - https://github.com/docopt/docopt.cpp
       - https://github.com/CLIUtils/CLI11
       - http://tclap.sourceforge.net/manual.html

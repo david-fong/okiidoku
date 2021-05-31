@@ -19,10 +19,10 @@ namespace solvent {
 		// width:  4   9  16  25  36  49  64  81 100 121
 		// round:  8  16  16  32  64  64  64 128 128 128
 		using has_mask_t =
-			std::conditional_t<(O < 3), std::uint_fast8_t,
-			std::conditional_t<(O < 5), std::uint_fast16_t,
-			std::conditional_t<(O < 6), std::uint_fast32_t,
-			std::conditional_t<(O < 9), std::uint_fast64_t,
+			std::conditional_t<(O <= 2), std::uint_fast8_t,
+			std::conditional_t<(O <= 4), std::uint_fast16_t,
+			std::conditional_t<(O <= 5), std::uint_fast32_t,
+			std::conditional_t<(O <= 8), std::uint_fast64_t,
 			unsigned long long
 		>>>>; // std::bitset not used for performance reasons
 
@@ -35,7 +35,7 @@ namespace solvent {
 		// length:  4    9   16   25   36   49   64   81  100  121  144  169  196  225  256
 		// bits:    3    3    5    5    6    6    7    7    7    7    8    8    8    8    9
 		using ord2_t =
-			std::conditional_t<(O < 16), std::uint_fast8_t,
+			std::conditional_t<(O <= 15), std::uint_fast8_t,
 			std::uint_fast16_t
 		>;
 
@@ -44,9 +44,9 @@ namespace solvent {
 		// area:   16   81  256  625  1296  2401  4096  6561  10000
 		// bits:    5    7    9    9    11    12    17    17     18
 		using ord4_t =
-			std::conditional_t<(O <   4), std::uint8_t,
-			std::conditional_t<(O <   8), std::uint16_t,
-			std::conditional_t<(O < 256), std::uint32_t,
+			std::conditional_t<(O <=   3), std::uint8_t,
+			std::conditional_t<(O <=   7), std::uint16_t,
+			std::conditional_t<(O <= 255), std::uint32_t,
 			std::uint64_t
 		>>>;
 	};

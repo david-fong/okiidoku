@@ -2,6 +2,10 @@
 
 namespace solvent::lib::gen::path {
 
+	inline std::ostream& operator<<(std::ostream& os, const Kind path_kind) {
+		return os << NAMES[static_cast<unsigned>(path_kind)];
+	}
+
 	template<Kind PK, Order O>
 	struct PathCoords_ {
 		using ord1_t = typename size<O>::ord1_t;
@@ -11,7 +15,7 @@ namespace solvent::lib::gen::path {
 		static constexpr ord2_t O2 = O*O;
 		static constexpr ord4_t O4 = O*O*O*O;
 
-		[[gnu::pure]] inline static constexpr ord4_t convert(const ord4_t progress) noexcept {
+		[[gnu::pure]] static constexpr ord4_t convert(const ord4_t progress) noexcept {
 			if constexpr (PK == path::Kind::RowMajor) {
 				return progress;
 			} else {
@@ -49,8 +53,6 @@ namespace solvent::lib::gen::path {
 		}
 		static constexpr std::array<const ord4_t, O4> path = PathCoords_<PK,O>::_init();
 	};
-	// template<const Kind PK, Order O>
-	// const std::array<const typename size<O>::ord4_t, PathCoords_<PK,O>::O4> PathCoords_<PK,O>::path;
 
 	template<solvent::Order O>
 	constexpr std::array<typename size<O>::ord4_t (&)(typename size<O>::ord4_t), NUM_KINDS> PathCoords = {

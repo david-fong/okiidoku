@@ -1,6 +1,5 @@
-#include "mod.hpp"
+#include "./mod.hpp"
 
-#include <random>
 #include <mutex>
 #include <algorithm>   // random_shuffle,
 #include <numeric>     // iota,
@@ -16,7 +15,7 @@ namespace solvent::lib::gen {
 	template<Order O>
 	Generator<O>::Generator()
 	{
-		for (auto& vto : val_try_order_) {
+		for (auto& vto : val_try_orders_) {
 			std::iota(vto.begin(), vto.end(), 0);
 		}
 	}
@@ -24,7 +23,7 @@ namespace solvent::lib::gen {
 
 	template<Order O>
 	void Generator<O>::init(void) {
-		for (auto& t : values_) {
+		for (Tile& t : values_) {
 			t.clear();
 		}
 		rows_has_.fill(0);
@@ -32,9 +31,8 @@ namespace solvent::lib::gen {
 		blks_has_.fill(0);
 		backtracks_.fill(0);
 
-		// Scramble each row's value-guessing-O1:
 		RNG_MUTEX.lock();
-		for (auto& vto : val_try_order_) {
+		for (auto& vto : val_try_orders_) {
 			std::shuffle(vto.begin(), vto.end(), Rng);
 		}
 		RNG_MUTEX.unlock();
@@ -46,18 +44,25 @@ namespace solvent::lib::gen {
 		GenResult info;
 		if (params) [[likely]] {
 			info.params = params.value();
+			if (info.params.max_backtracks == 0) {
+				info.params.max_backtracks = DEFAULT_MAX_BACKTRACKS;
+			}
 			this->init();
 		} else {
+			// Continue the previous generation.
 			info = gen_result_;
 			if (info.status == ExitStatus::Exhausted) [[unlikely]] {
 				return info;
 			}
+			backtracks_.fill(0);
 		}
 		ord4_t (& prog2coord)(ord4_t) = path::PathCoords<O>[info.params.path_kind];
 		ord4_t dead_end_progress = info.progress;
 
-		while (info.progress < O4) {;
-			const bool do_backtrack = set_next_valid(info.progress);
+		while (true) {
+			const bool do_backtrack = this->set_next_valid(
+				info.progress, dead_end_progress, prog2coord
+			);
 			++info.op_count;
 			if (do_backtrack) [[unlikely]] {
 				if (info.progress == 0) [[unlikely]] {
@@ -74,18 +79,17 @@ namespace solvent::lib::gen {
 					}
 				}
 			} else {
+				if (info.progress == O4-1) [[unlikely]] {
+					info.status = ExitStatus::Ok;
+					break;
+				}
 				++info.progress;
 				if (!can_coords_see_each_other(prog2coord(info.progress), prog2coord(dead_end_progress))
 					|| (info.progress > dead_end_progress)
 				) {
-					++dead_end_progress;
+					dead_end_progress = info.progress;
 				}
 			}
-		}
-		if (info.progress == O4) [[likely]] {
-			// [[likely]] helps for small grids and barely affects large ones.
-			info.status = ExitStatus::Ok;
-			--info.progress;
 		}
 		for (ord4_t i = 0; i < O4; i++) {
 			info.grid[prog2coord(i)] = values_[i].value;
@@ -96,8 +100,10 @@ namespace solvent::lib::gen {
 
 
 	template<Order O>
-	bool Generator<O>::set_next_valid(const ord4_t progress) noexcept {
-		const ord4_t coord = prog2coord(info.progress);
+	bool Generator<O>::set_next_valid(
+		const ord4_t progress, const ord4_t dead_end_progress, ord4_t (& prog2coord)(ord4_t)
+	) noexcept {
+		const ord4_t coord = prog2coord(progress);
 		has_mask_t& row_has = rows_has_[this->get_row(coord)];
 		has_mask_t& col_has = cols_has_[this->get_col(coord)];
 		has_mask_t& blk_has = blks_has_[this->get_blk(coord)];
@@ -111,25 +117,17 @@ namespace solvent::lib::gen {
 			blk_has &= erase_mask;
 		}
 
-		const has_mask_t t_has = (row_has | col_has | blk_has);
-		// NOTE: these do not improve time-scaling performance, but I wish they did.
-		/*
-		if (std::popcount(t_has) == O2) [[unlikely]] {
+		// Smart backtracking:
+		if ((progress < dead_end_progress) && !can_coords_see_each_other(
+			prog2coord(progress), prog2coord(dead_end_progress)
+		)) {
 			t.clear();
-			return PathDirection::Back;
-		} else if (std::popcount(t_has) == O2 - 1) {
-			const ord2_t try_val = std::countl_zero(!t_has);
-			const has_mask_t try_val_mask = 0b1 << try_val;
-			row_has |= try_val_mask;
-			col_has |= try_val_mask;
-			blk_has |= try_val_mask;
-			t.value = try_val;
-			t.next_try_index = O2;
-			return false;
+			return true;
 		}
-		*/
+
+		const has_mask_t t_has = (row_has | col_has | blk_has);
 		for (ord2_t try_i = t.next_try_index; try_i < O2; try_i++) {
-			const ord2_t try_val = val_try_order_[this->get_row(coord)][try_i];
+			const ord2_t try_val = val_try_orders_[progress/O2][try_i];
 			const has_mask_t try_val_mask = has_mask_t(1) << try_val;
 			if (!(t_has & try_val_mask)) {
 				// A valid value was found:
@@ -141,7 +139,7 @@ namespace solvent::lib::gen {
 				return false;
 			}
 		}
-		// Backtrack:
+		// Nothing left to try here. Backtrack:
 		t.clear();
 		return true;
 	}

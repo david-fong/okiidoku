@@ -15,9 +15,10 @@ readonly ROOT="$(dirname "${BASH_SOURCE[0]}")"
 readonly CPP="$(echo "$ROOT/src/"{\
 main_cli,\
 cli/repl,\
-lib/gen/path,\
+lib/gen/batch,\
 lib/gen/mod,\
-lib/gen/batch\
+lib/gen/path,\
+lib/print\
 }.cpp)"
 
 ${COMPILER}\

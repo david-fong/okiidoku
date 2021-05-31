@@ -21,20 +21,20 @@ namespace solvent::cli {
 			Quit,
 			ConfigVerbosity,
 			ConfigGenPath,
-			RunSingle,
-			ContinuePrev,
-			RunMultiple,
-			RunMultipleOk,
+			GenSingle,
+			GenContinue,
+			GenMultiple,
+			GenMultipleOk,
 		};
 		const std::map<std::string, Command::E> Str2Enum = {
 			{ "help",       E::Help            },
 			{ "quit",       E::Quit            },
 			{ "output",     E::ConfigVerbosity },
 			{ "genpath",    E::ConfigGenPath   },
-			{ "",           E::RunSingle       },
-			{ "cont",       E::ContinuePrev    }, // TODO [qol] Change this to "c"? (remember to change help string too)
-			{ "trials",     E::RunMultiple     },
-			{ "strials",    E::RunMultipleOk   },
+			{ "",           E::GenSingle       },
+			{ "cont",       E::GenContinue     }, // TODO [qol] Change this to "c"? (remember to change help string too)
+			{ "gen",        E::GenMultiple     },
+			{ "gen_ok",     E::GenMultipleOk   },
 		};
 		const std::string HelpMessage = "\nCOMMAND MENU:"
 			"\n- help               print this help menu"
@@ -43,19 +43,18 @@ namespace solvent::cli {
 			"\n- genpath [<path>]   get / set generator traversal path"
 			"\n- {enter}            generate a single solution"
 			"\n- cont               continue previous generation"
-			"\n- trials <n>         attempt to generate <n> solutions"
-			"\n- strials <n>        successfully generate <n> solutions";
+			"\n- gen <n>            attempt to generate <n> solutions"
+			"\n- gen_ok <n>         successfully generate <n> solutions";
 	}
 
 	// Returns zero on error.
-	unsigned GET_TERM_COLS(void) noexcept {
+	inline unsigned GET_TERM_COLS(void) noexcept {
 		char const*const envVar = std::getenv("COLUMNS");
 		return (envVar != NULL) ? std::stoul(envVar) : 0u;
 	}
 
 
 	/**
-	 *
 	 * Notes for me as I learn how to write inheritance in C++:
 	 * I can specify base-class members like:
 	 * - Derived::Base::member
@@ -72,39 +71,37 @@ namespace solvent::cli {
 		using pathkind_t = lib::gen::path::Kind;
 		using trials_t = lib::gen::batch::trials_t;
 
-		Repl(void) = delete;
-		explicit Repl(std::ostream&);
+		Repl(void);
+		void start(void);
 		bool run_command(std::string const& cmd_line);
 
-		[[gnu::cold, gnu::pure]] pathkind_t get_path_kind(void) const noexcept { return path_kind; }
+		[[gnu::pure]] pathkind_t get_path_kind(void) const noexcept { return path_kind_; }
 		// Setters return the old value of the generator path.
-		[[gnu::cold]] const pathkind_t& set_path_kind(pathkind_t) noexcept;
-		[[gnu::cold]] const pathkind_t& set_path_kind(std::string const&) noexcept;
+		const pathkind_t set_path_kind(pathkind_t) noexcept;
+		const pathkind_t set_path_kind(std::string const&) noexcept;
+
+		[[gnu::pure]] verbosity::Kind get_verbosity(void) const noexcept { return verbosity_; };
+		// Setters return the old value of the verbosity.
+		verbosity::Kind set_verbosity(verbosity::Kind);
+		verbosity::Kind set_verbosity(std::string const&);
 
 	 private:
-		generator_t gen;
-		std::ostream& os; // alias to this->gen.os;
-		verbosity::Kind output_level;
-		pathkind_t path_kind;
+		generator_t gen_;
+		verbosity::Kind verbosity_;
+		pathkind_t path_kind_;
 
-		static constexpr unsigned MAX_EXTRA_THREADS = [](){ const unsigned _[] = {0,0,0,0,1,4,2,2}; return _[0]; }();
-		const std::string DIM_ON  = (gen.is_pretty ? util::ansi::DIM.ON  : "");
-		const std::string DIM_OFF = (gen.is_pretty ? util::ansi::DIM.OFF : "");
+		const std::string DIM_ON  = (true ? util::ansi::DIM.ON  : ""); // TODO handle file case
+		const std::string DIM_OFF = (true ? util::ansi::DIM.OFF : ""); // TODO handle file case
 
 		// Return false if command is to exit the program:
-		void run_single(bool contPrev = false);
+		void gen_single(bool contPrev = false);
 
-		void run_multiple(trials_t stop_after, bool only_count_oks);
-		void run_multiple(std::string const&,  bool only_count_oks);
+		void gen_multiple(trials_t stop_after, bool only_count_oks);
+		void gen_multiple(std::string const&,  bool only_count_oks);
 		void print_trials_work_distribution(lib::gen::batch::Params const&, lib::gen::batch::BatchReport const&);
 
 		void print_msg_bar(std::string const&, unsigned int, char = '=') const;
 		void print_msg_bar(std::string const&, char = '=') const;
-
-	 public:
-		[[gnu::cold]] verbosity::Kind get_output_level(void) const noexcept { return output_level; };
-		[[gnu::cold]] verbosity::Kind set_output_level(verbosity::Kind);
-		[[gnu::cold]] verbosity::Kind set_output_level(std::string const&);
 	};
 }
 #endif

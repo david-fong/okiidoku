@@ -1,8 +1,6 @@
-
-
-#include "./cli/repl.hpp"
-#include "./lib/gen/mod.hpp"
-#include "./util/ansi.hpp"
+#include ":/cli/repl.hpp"
+#include ":/lib/gen/mod.hpp"
+#include ":/util/ansi.hpp"
 
 #if WINDOWS_ANSI
 #include <windows.h>
@@ -10,21 +8,19 @@
 #endif
 
 #include <string>
-#include <iostream> 	// cout,
-#include <fstream>  	// ofstream,
-#include <random>   	// random_device,
+#include <iostream>  // cout,
+#include <random>    // random_device,
 
-using solvent::cli::Repl;
 namespace ansi = solvent::util::ansi;
+template class solvent::cli::Repl<4>;
 
-const unsigned DEFAULT_ORDER = 0;
+const unsigned DEFAULT_ORDER = 4;
 
 /**
  * ARGUMENTS
  * 0. executable name (fixed).
  * 1. grid order (default: 4).
  * 2. scramble random key (default: time).
- * 3. output file name.
  */
 int main(const int argc, char const *const argv[]) {
 	#if WINDOWS_ANSI
@@ -37,10 +33,8 @@ int main(const int argc, char const *const argv[]) {
 	// My implementation specifies this as safe:
 	std::ios_base::sync_with_stdio(false);
 
-	unsigned int    user_order;      // 1
-	unsigned int    srand_key;       // 2
-	std::string     out_file_name;   // 3
-	std::ostream*   os;              // 3
+	unsigned int user_order; // 1
+	unsigned int srand_key;  // 2
 
 	user_order = (argc > 1) ? std::stoi(argv[1]) : DEFAULT_ORDER;
 	if (argc > 2 && !std::string(argv[2]).empty()) {
@@ -48,19 +42,10 @@ int main(const int argc, char const *const argv[]) {
 	} else {
 		srand_key = std::random_device()();
 	}
-	if (argc > 3) {
-		// TODO [feat] Handle if file already exists: prompt user for whether to overwrite.
-		out_file_name = argv[3];
-		os = new std::ofstream(out_file_name);
-	} else {
-		out_file_name = "std::cout";
-		os = &std::cout;
-	}
 
 	std::cout << "\nPARSED ARGUMENTS:"
 	<< "\n- ARG 1 [[ grid order  ]] : " << user_order
 	<< "\n- ARG 2 [[ srand key   ]] : " << srand_key
-	<< "\n- ARG 3 [[ output file ]] : " << out_file_name
 	<< std::endl;
 
 	// Scramble the random number generator (std::rand is no longer used):
@@ -68,19 +53,22 @@ int main(const int argc, char const *const argv[]) {
 
 	// Create a Solver of the specified order:
 	// (It will automatically enter its REPL).
-	switch (static_cast<solvent::Order>(user_order)) {
-		case 3: { Repl<3> s(*os); break; }
-		case 4: { Repl<4> s(*os); break; }
-		case 5: { Repl<5> s(*os); break; }
-		case 6: { Repl<6> s(*os); break; }
-		default:
-			std::cout << ansi::RED.ON << "\nILLEGAL ARGUMENT:\n  order must be one of: { ";
-			for (unsigned i = 3; i <= 6; i++) {
-				std::cout << i << ", ";
-			}
-			std::cout << "}" << ansi::RED.OFF << std::endl;
-			break;
-	}
+	// switch (static_cast<solvent::Order>(user_order)) {
+	// 	case 3: { solvent::cli::Repl<3> s3; s3.start(); break; }
+	// 	case 4: { solvent::cli::Repl<4> s4; s4.start(); break; }
+	// 	case 5: { solvent::cli::Repl<5> s5; s5.start(); break; }
+	// 	case 6: { solvent::cli::Repl<6> s6; s6.start(); break; }
+	// 	default: {
+	// 		std::cout << ansi::RED.ON << "\nILLEGAL ARGUMENT:\n  order must be one of: { ";
+	// 		for (unsigned i = 3; i <= 6; i++) {
+	// 			std::cout << i << ", ";
+	// 		}
+	// 		std::cout << "}" << ansi::RED.OFF << std::endl;
+	// 		break;
+	// 	}
+	// }
+	solvent::cli::Repl<4> repl;
+	repl.start();
 
 	// End of program:
 	std::cout << "\nbye bye!\n" << std::endl;

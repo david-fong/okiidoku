@@ -1,7 +1,7 @@
 #ifndef HPP_SOLVENT_UTIL_ANSI
 #define HPP_SOLVENT_UTIL_ANSI
 
-#include "../buildflag.hpp"
+#include ":/buildflag.hpp"
 #include <array>
 #include <string>
 
@@ -48,5 +48,4 @@ namespace solvent::util::ansi {
 		#endif
 	};
 }
-
 #endif

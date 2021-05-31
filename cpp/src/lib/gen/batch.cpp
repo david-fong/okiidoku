@@ -36,13 +36,13 @@ namespace solvent::lib::gen::batch {
 			dist_summary_row.marginal_oks++;
 			dist_summary_row.marginal_ops += gen_result.op_count;
 
-			gen_result_consumer_(std::move(gen_result));
+			gen_result_consumer_(gen_result);
 		}
 		shared_data_mutex_.unlock();
 	}
 
 	template<Order O>
-	const BatchReport batch(Params& params, void(& gen_result_consumer)(const typename Generator<O>::GenResult)) {
+	const BatchReport batch(Params& params, callback_t<O> gen_result_consumer) {
 		if (params.num_threads == 0) {
 			params.num_threads = ThreadFunc<O>::DEFAULT_NUM_THREADS;
 		}
