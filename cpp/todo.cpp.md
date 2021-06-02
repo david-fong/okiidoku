@@ -4,6 +4,7 @@
 ## Higher Priority
 
 - try to get rid of the colony include dir
+- try this: https://arne-mertz.de/2019/02/extern-template-reduce-compile-times/
 - Is it necessary to specify `-pthread` in cpp build.sh?
 - Design some smarter backtracking.
 - Take out all stream related things from gen.

@@ -1,5 +1,7 @@
 #include "./mod.hpp"
+#include ":/util/ansi.hpp"
 
+#include <iostream>
 #include <mutex>
 #include <algorithm>   // random_shuffle,
 #include <numeric>     // iota,
@@ -142,5 +144,90 @@ namespace solvent::lib::gen {
 		// Nothing left to try here. Backtrack:
 		t.clear();
 		return true;
+	}
+
+
+	std::string shaded_backtrack_stat(const long out_of, const long count) {
+		const unsigned int relative_intensity
+			= static_cast<double>(count - 1)
+			* util::ansi::BLOCK_CHARS.size()
+			/ out_of;
+		return (count == 0) ? " " : util::ansi::BLOCK_CHARS[relative_intensity];
+	}
+
+
+	template<solvent::Order O>
+	std::ostream& operator<<(std::ostream& os, solvent::lib::gen::Generator<O> const& g) {
+		using namespace solvent::lib::gen;
+		namespace ansi = solvent::util::ansi;
+		using ord2_t = typename solvent::size<O>::ord2_t;
+		static const std::string GRID_SEP = "   ";
+
+		static const auto blk_row_sep_str = []() {
+			std::string vbar = " " + std::string((((O * (O + 1)) + 1) * 2 - 1), '-');
+			for (unsigned i = 0; i <= O; i++) {
+				vbar[(2 * (O + 1) * i) + 1] = '+';
+			}
+			return vbar;
+		}();
+
+		#define M_PRINT_GRID0_TILE(PRINTER_STATEMENT) {\
+			for (ord2_t col = 0; col < g.O2; col++) {\
+				if (is_pretty && (col % g.O1) == 0) os << ansi::DIM.ON << " |" << ansi::DIM.OFF;\
+				PRINTER_STATEMENT;\
+			}\
+		}
+		#define M_PRINT_GRID_TILE(PRINTER_STATEMENT) {\
+			if (is_pretty) {\
+				os << ansi::DIM.ON << " |";/* << ansi::DIM.OFF */\
+				os << GRID_SEP;\
+				M_PRINT_GRID0_TILE(PRINTER_STATEMENT)}\
+			}
+
+		const bool is_pretty = &os == &std::cout;
+		const auto print_blk_row_sep_str = [&](){
+			if (!is_pretty) return;
+			os << '\n' << ansi::DIM.ON;
+			os << g.blk_row_sep_str;
+			os << GRID_SEP << g.blk_row_sep_str;
+			os << ansi::DIM.OFF;
+		};
+		for (ord2_t row = 0; row < g.O2; row++) {
+			if (row % g.O1 == 0) {
+				print_blk_row_sep_str();
+			}
+			os << '\n';
+			// Tile content:
+			#define _M_index ((row * g.O2) + col)
+			M_PRINT_GRID0_TILE(os << ' ' << g.values_[_M_index])
+			M_PRINT_GRID_TILE(g.print_shaded_backtrack_stat(g.backtracks_[_M_index]))
+			// M_PRINT_GRID_TILE(os << std::setw(2) << values_[coord].next_try_index)
+			// M_PRINT_GRID_TILE(os << ' ' << val_try_order_[row][col])
+			#undef _M_index
+			if (is_pretty) os << ansi::DIM.ON << " |" << ansi::DIM.OFF;
+		}
+		print_blk_row_sep_str();
+		#undef M_PRINT_GRID_TILE
+		#undef M_PRINT_GRID0_TILE
+		return os;
+	}
+
+
+	template<Order O>
+	void Generator<O>::print_simple(std::ostream& os) const {
+		auto const helper = [this](std::ostream& os, const bool is_pretty) -> void {
+			const bool do_dim = is_pretty && (gen_result_.get_exit_status() != ExitStatus::Ok);
+			if (do_dim) os << util::ansi::DIM.ON;
+			for (auto const& t : values_) {
+				os << t;
+			}
+			if (do_dim) os << util::ansi::DIM.OFF;
+		};
+		if (&os == &std::cout) {
+			helper(std::cout, true);
+		} else {
+			helper(std::cout, true);
+			helper(os, false);
+		}
 	}
 }

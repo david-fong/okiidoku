@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 #include <array>
+#include <functional>
 #include <optional>
 
 namespace solvent::lib::gen::batch {
@@ -44,7 +45,7 @@ namespace solvent::lib::gen::batch {
 
 	//
 	template<Order O>
-	using callback_t = void(&)(typename Generator<O>::GenResult const&);
+	using callback_t = std::function<void(typename Generator<O>::GenResult const&)>;
 
 	//
 	template<Order O>

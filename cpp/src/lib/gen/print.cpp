@@ -98,7 +98,7 @@ namespace solvent::lib::gen {
 		}
 	}
 
-	Output formatting:
+	// Output formatting:
 	if (is_pretty) {
 		os.imbue(std::locale(os.getloc(), new MyNumpunct()));
 	}
@@ -106,7 +106,7 @@ namespace solvent::lib::gen {
 	os << std::fixed;
 
 
-	Prints to std::cout and the output file if it exists.
+	// Prints to std::cout and the output file if it exists.
 	void print(void) const;
 	void print_simple(void) const; // No newlines included.
 	void print_msg_bar(std::string const&, unsigned int, char = '=') const;

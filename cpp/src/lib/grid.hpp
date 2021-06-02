@@ -4,6 +4,8 @@
 #include ":/lib/size.hpp"
 #include ":/util/ansi.hpp"
 
+#include <iosfwd>
+
 namespace solvent::lib {
 	//
 	template<Order O>
@@ -30,6 +32,7 @@ namespace solvent::lib {
 				||  (get_col(c1) == get_col(c2))
 				||  (get_blk(c1) == get_blk(c2));
 		}
+		[[gnu::hot]] static std::ostream& print_value(std::ostream&, ord2_t) noexcept;
 	};
 }
 #endif

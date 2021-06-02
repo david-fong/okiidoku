@@ -5,10 +5,10 @@
 #include ":/lib/grid.hpp"
 #include ":/lib/size.hpp"
 
-#include <random>
 #include <iosfwd>
-#include <string>
+#include <random>
 #include <array>
+#include <string>
 #include <optional>
 
 
@@ -16,6 +16,7 @@
 // https://web.mst.edu/~nmjxv3/articles/templates.html
 namespace solvent::lib::gen { template<solvent::Order O> class Generator; }
 template<solvent::Order O> std::ostream& operator<<(std::ostream&, solvent::lib::gen::Generator<O> const&);
+template<solvent::Order O> [[gnu::hot]] std::ostream& operator<<(std::ostream&, typename solvent::lib::gen::Generator<O>::Tile const& t);
 
 
 namespace solvent::lib::gen {
@@ -95,6 +96,7 @@ namespace solvent::lib::gen {
 		[[gnu::hot]] GenResult generate(std::optional<Params>);
 		[[gnu::pure]] GenResult const& get_gen_result() { return gen_result_; }
 		[[gnu::pure]] std::array<backtrack_t, O4> const& get_backtracks() { return backtracks_; }
+		void print_simple(std::ostream&) const;
 
 	 private:
 		std::array<std::array<ord2_t, O2>, O2> val_try_orders_; // indexed by (progress/O2)

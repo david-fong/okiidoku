@@ -17,8 +17,8 @@ namespace solvent::lib::print {
 				os << static_cast<char>('a' + value);
 			} else {
 				(value < 10)
-					? os << static_cast<unsigned>(value)
-					: os << static_cast<char>('a' + value - 10);
+						? os << static_cast<unsigned>(value)
+						: os << static_cast<char>('a' + value - 10);
 			}
 		}
 	}
@@ -26,7 +26,7 @@ namespace solvent::lib::print {
 
 	void serial(std::ostream& os, const solvent::Order O, grid_t grid) {
 		for (unsigned coord = 0; coord < O*O*O*O; coord++) {
-			value(os, O, grid(coord));
+			print::value(os, O, grid(coord));
 		}
 	}
 
@@ -59,7 +59,7 @@ namespace solvent::lib::print {
 			for (unsigned grid_i = 0; grid_i < grids.size(); grid_i++) {
 				for (ord2_t col = 0; col < O*O; col++) {
 					if (is_pretty && (col % O) == 0) os << ansi::DIM.ON << " |" << ansi::DIM.OFF;
-					value(os, O, grids[grid_i](row * O*O + col));
+					print::value(os, O, grids[grid_i](row * O*O + col));
 				}
 				if (is_pretty) os << ansi::DIM.ON << " |";
 				if (grid_i != grids.size() - 1) {
@@ -75,17 +75,17 @@ namespace solvent::lib::print {
 	template<Order O>
 	void serial(std::ostream& os, typename gen::Generator<O>::GenResult const& gen_result) {
 		std::vector grids = {
-			[gen_result](uint16_t coord) { return gen_result.grid[coord]; }
+			[&gen_result](uint16_t coord) { return gen_result.grid[coord]; }
 		};
-		serial(os, O, grids);
+		print::serial(os, O, grids);
 	}
 
 
 	template<Order O>
 	void pretty(std::ostream& os, typename gen::Generator<O>::GenResult const& gen_result) {
 		std::vector<grid_t> grids = {
-			[gen_result](uint16_t coord) { return gen_result.grid[coord]; }
+			[&gen_result](uint16_t coord) { return gen_result.grid[coord]; }
 		};
-		pretty(os, O, grids);
+		print::pretty(os, O, grids);
 	}
 }

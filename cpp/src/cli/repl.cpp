@@ -181,6 +181,11 @@ namespace solvent::cli {
 		std::cout << '\n' <<bar;
 	}
 
+	template<Order O>
+	void Repl<O>::print_msg_bar(std::string const& msg, const char fill_char) const {
+		return print_msg_bar(msg, 64, fill_char);
+	}
+
 
 	template<Order O>
 	void Repl<O>::gen_single(const bool cont_prev) {
@@ -197,8 +202,8 @@ namespace solvent::cli {
 		std::cout << "\nnum operations: " STATW_I << gen_result.op_count;
 		std::cout << "\nmax backtracks: " STATW_I << gen_result.most_backtracks_seen;
 		print_msg_bar("", '-');
-		print::pretty(std::cout, O, gen_result);
-		print_msg_bar((gen_result.exit_status == gen::ExitStatus::Ok) ? "OK" : "ABORT");
+		print::pretty<O>(std::cout, gen_result);
+		print_msg_bar((gen_result.status == gen::ExitStatus::Ok) ? "OK" : "ABORT");
 		std::cout << std::endl;
 	}
 
@@ -222,10 +227,12 @@ namespace solvent::cli {
 			.only_count_oks = only_count_oks,
 			.stop_after = stop_after
 		};
-		const auto batch_report = gen::batch::batch<O>(params, [](typename gen::Generator<O>::GenResult const& gen_result){
-			print::serial(std::count, O, gen_result);
-			std::cout << std::endl;
-		});
+		const gen::batch::BatchReport batch_report = gen::batch::batch<O>(params,
+			[](typename gen::Generator<O>::GenResult const& gen_result) {
+				print::serial<O>(std::cout, gen_result);
+				std::cout << std::endl;
+			}
+		);
 
 		const std::string seconds_units = DIM_ON + " seconds (with I/O)" + DIM_OFF;
 		print_msg_bar("", BAR_WIDTH, '-'); std::cout
@@ -240,7 +247,7 @@ namespace solvent::cli {
 			std::cout << '\a' << std::flush;
 		}
 		// Print bins (work distribution):
-		print_trials_work_distribution(batch_report);
+		print_trials_work_distribution(params, batch_report);
 		print_msg_bar("DONE x" + std::to_string(stop_after), BAR_WIDTH);
 		std::cout << std::endl;
 	}
