@@ -17,7 +17,7 @@ namespace solvent::cli {
 		constexpr size_t size = static_cast<size_t>(Kind::__MAX__) + 1;
 		// Indices of entries must match the
 		// literal values of their respective enums.
-		const std::array<std::string, size> NAMES = {
+		inline const std::array<std::string, size> NAMES = {
 			"emitall",
 			"nogiveups",
 			"silent",
@@ -25,7 +25,7 @@ namespace solvent::cli {
 		inline std::ostream& operator<<(std::ostream& out, const Kind output_level) {
 			return out << NAMES[static_cast<unsigned>(output_level)];
 		}
-		const std::string OPTIONS_MENU =
+		inline const std::string OPTIONS_MENU =
 			"\nOUTPUT-LVL OPTIONS:"
 			"\n- emitall    emit all output"
 			"\n- nogiveups  suppress giveups"

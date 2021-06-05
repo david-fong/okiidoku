@@ -81,7 +81,8 @@ namespace solvent::lib::gen {
 		return (count == 0) ? " " : ansi::BLOCK_CHARS[relative_intensity];
 	}
 
-	friend std::ostream& operator<<(std::ostream& os, Tile const& t) noexcept {
+	template<solvent::Order O>
+	std::ostream& operator<<(std::ostream& os, typename solvent::lib::Grid<O>::Tile const& t) noexcept {
 		static_assert(O1 <= 6, "I haven't yet decided how to translate for orders > 6.");
 		if (t.is_clear()) [[unlikely]] {
 			return os << ' ';

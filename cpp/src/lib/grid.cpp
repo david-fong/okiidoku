@@ -11,13 +11,13 @@ namespace solvent::lib {
 			return os << ' ';
 		} else {
 			if constexpr (O < 4) {
-				return os << (int)t.value;
+				return os << static_cast<unsigned>(value);
 			} else if constexpr (O == 5) {
-				return os << static_cast<char>('a' + t.value);
+				return os << static_cast<char>('a' +value);
 			} else {
-				return (t.value < 10)
-					? os << static_cast<unsigned>(t.value)
-					: os << static_cast<char>('a' + t.value - 10);
+				return (value < 10)
+					? os << static_cast<unsigned>(value)
+					: os << static_cast<char>('a' + value - 10);
 			}
 		}
 	}

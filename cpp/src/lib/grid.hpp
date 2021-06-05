@@ -32,7 +32,14 @@ namespace solvent::lib {
 				||  (get_col(c1) == get_col(c2))
 				||  (get_blk(c1) == get_blk(c2));
 		}
+		// Print a value for a text stream. Aims for visual width of two characters.
 		[[gnu::hot]] static std::ostream& print_value(std::ostream&, ord2_t) noexcept;
 	};
+
+	extern template class Grid<2>;
+	extern template class Grid<3>;
+	extern template class Grid<4>;
+	extern template class Grid<5>;
+	extern template class Grid<6>;
 }
 #endif

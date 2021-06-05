@@ -21,7 +21,7 @@ template<solvent::Order O> [[gnu::hot]] std::ostream& operator<<(std::ostream&, 
 
 namespace solvent::lib::gen {
 
-	//
+	// must be manually seeded!
 	inline std::mt19937 Rng;
 
 	//
@@ -35,7 +35,7 @@ namespace solvent::lib::gen {
 	using opcount_t = unsigned long long;
 
 	//
-	enum class ExitStatus {
+	enum class ExitStatus : unsigned {
 		Exhausted, Abort, Ok,
 	};
 
@@ -114,5 +114,11 @@ namespace solvent::lib::gen {
 		) noexcept;
 		GenResult gen_result_;
 	};
+
+	extern template class Generator<2>;
+	extern template class Generator<3>;
+	extern template class Generator<4>;
+	extern template class Generator<5>;
+	extern template class Generator<6>;
 }
 #endif

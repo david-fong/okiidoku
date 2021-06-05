@@ -3,7 +3,11 @@
 
 ## Higher Priority
 
-- try to get rid of the colony include dir
+- See if there's a way to use a macro to simplify extern template definitions.
+  - One macro for the consuming code to choose sizes to compile,
+  - One macro that takes a template and for each of the sizes, substitutes the size into the template by replacing "ORDER".
+- try to get rid of the colony include dir.
+- mark global variables and function in headers and inline or extern.
 - try this: https://arne-mertz.de/2019/02/extern-template-reduce-compile-times/
 - Is it necessary to specify `-pthread` in cpp build.sh?
 - Design some smarter backtracking.
@@ -25,6 +29,7 @@
   - `typename` doesn't need to be specified as much.
   - `using enum`. Might want to wait for CLANG to support?
   - see what stringy things can now use constexpr strings.
+  - wait for support in gcc and clang for `constexpr std::string`.
 - CLI
   - implement `-h` and `--help` CLI argument.
   - Make giveup thresholds settable via CLI, and allow setting to "default".

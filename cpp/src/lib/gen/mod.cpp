@@ -15,7 +15,7 @@ namespace solvent::lib::gen {
 
 
 	template<Order O>
-	Generator<O>::Generator()
+	Generator<O>::Generator(void)
 	{
 		for (auto& vto : val_try_orders_) {
 			std::iota(vto.begin(), vto.end(), 0);
@@ -156,6 +156,13 @@ namespace solvent::lib::gen {
 	}
 
 
+	template<Order O>
+	std::ostream& operator<<(std::ostream& os, typename Generator<O>::Tile const& t) {
+		Grid<O>::print_value(os, t.value);
+		return os;
+	}
+
+
 	template<solvent::Order O>
 	std::ostream& operator<<(std::ostream& os, solvent::lib::gen::Generator<O> const& g) {
 		using namespace solvent::lib::gen;
@@ -198,12 +205,12 @@ namespace solvent::lib::gen {
 			}
 			os << '\n';
 			// Tile content:
-			#define _M_index ((row * g.O2) + col)
-			M_PRINT_GRID0_TILE(os << ' ' << g.values_[_M_index])
-			M_PRINT_GRID_TILE(g.print_shaded_backtrack_stat(g.backtracks_[_M_index]))
+			#define M_index ((row * g.O2) + col)
+			M_PRINT_GRID0_TILE(os << ' ' << g.values_[M_index])
+			M_PRINT_GRID_TILE(g.print_shaded_backtrack_stat(g.backtracks_[M_index]))
 			// M_PRINT_GRID_TILE(os << std::setw(2) << values_[coord].next_try_index)
 			// M_PRINT_GRID_TILE(os << ' ' << val_try_order_[row][col])
-			#undef _M_index
+			#undef M_index
 			if (is_pretty) os << ansi::DIM.ON << " |" << ansi::DIM.OFF;
 		}
 		print_blk_row_sep_str();

@@ -40,7 +40,7 @@ namespace solvent::util::ansi {
 	 * See https://cppreference.com/w/cpp/language/sizeof...#Example
 	 * for an example utility function I can make to avoid this problem.
 	 */
-	const std::array<std::string, 4> BLOCK_CHARS = {
+	inline const std::array<std::string, 4> BLOCK_CHARS = {
 		#if USE_ANSI_ESC
 		"\u2591", "\u2592", "\u2593", "\u2588",
 		#else

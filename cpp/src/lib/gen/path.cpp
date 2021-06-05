@@ -2,8 +2,8 @@
 
 namespace solvent::lib::gen::path {
 
-	inline std::ostream& operator<<(std::ostream& os, const Kind path_kind) {
-		return os << NAMES[static_cast<unsigned>(path_kind)];
+	std::ostream& operator<<(std::ostream& os, const Kind path_kind) {
+		return os << NAMES[static_cast<size_t>(path_kind)];
 	}
 
 	template<Kind PK, Order O>

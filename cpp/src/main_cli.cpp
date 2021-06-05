@@ -1,5 +1,4 @@
 #include ":/cli/repl.hpp"
-#include ":/lib/gen/mod.hpp"
 #include ":/util/ansi.hpp"
 
 #if WINDOWS_ANSI
@@ -11,8 +10,8 @@
 #include <iostream>  // cout,
 #include <random>    // random_device,
 
-namespace ansi = solvent::util::ansi;
 template class solvent::cli::Repl<4>;
+namespace ansi = solvent::util::ansi;
 
 const unsigned DEFAULT_ORDER = 4;
 

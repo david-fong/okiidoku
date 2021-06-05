@@ -13,16 +13,18 @@ readonly ROOT="$(dirname "${BASH_SOURCE[0]}")"
 
 # readonly CPP=$(find src -type f -name '*.cpp')
 readonly CPP="$(echo "$ROOT/src/"{\
-main_cli,\
-cli/repl,\
-lib/gen/batch,\
-lib/gen/mod,\
+lib/grid,\
+lib/print,\
 lib/gen/path,\
-lib/print\
+lib/gen/mod,\
+lib/gen/batch,\
+cli/repl,\
+main_cli\
 }.cpp)"
+echo $CPP
 
 ${COMPILER}\
 	-iquote "${ROOT}/include"\
-	-Wall -Werror -Wpedantic -Wimplicit-fallthrough=5 -O3\
+	-Wall -Werror -Wpedantic -Wimplicit-fallthrough=5 -flto\
 	"$@"\
-	${CPP} -o solvent.exe\
+	-o solvent.exe ${CPP}\

@@ -13,7 +13,7 @@
 
 namespace solvent::cli {
 
-	const std::string PROMPT = "\n$ ";
+	inline const std::string PROMPT = "\n$ ";
 
 	namespace Command {
 		enum class E : unsigned {
@@ -103,5 +103,11 @@ namespace solvent::cli {
 		void print_msg_bar(std::string const&, unsigned int, char = '=') const;
 		void print_msg_bar(std::string const&, char = '=') const;
 	};
+
+	extern template class Repl<2>;
+	extern template class Repl<3>;
+	extern template class Repl<4>;
+	extern template class Repl<5>;
+	extern template class Repl<6>;
 }
 #endif

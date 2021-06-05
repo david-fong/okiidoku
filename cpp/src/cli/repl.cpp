@@ -1,6 +1,5 @@
 #include "./repl.hpp"
 
-#include ":/lib/gen/batch.hpp"
 #include ":/lib/print.hpp"
 #include ":/util/timer.hpp"
 #include ":/util/ansi.hpp"
@@ -33,14 +32,12 @@ namespace solvent::cli {
 
 	template<Order O>
 	void Repl<O>::start(void) {
-		// Print diagnostics about Generator member size:
 		std::cout
 		<< "\nsolver obj size: " << sizeof(gen_) << " bytes"
-		<< '\n' << ansi::DIM.ON << TERMINAL_OUTPUT_TIPS << ansi::DIM.OFF;
-		std::cout << std::endl;
+		<< '\n' << ansi::DIM.ON << TERMINAL_OUTPUT_TIPS << ansi::DIM.OFF
+		<< '\n' << Command::HelpMessage
+		<< std::endl;
 
-		// Print help menu and then start the REPL (read-execute-print-loop):
-		std::cout << Command::HelpMessage << std::endl;
 		std::string command;
 		do {
 			std::cout << PROMPT;
@@ -339,5 +336,3 @@ namespace solvent::cli {
 	#undef STATW_I
 	#undef STATW_D
 }
-
-template class solvent::cli::Repl<4>;

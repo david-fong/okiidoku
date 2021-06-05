@@ -5,8 +5,8 @@
 
 #include <iosfwd>
 // #include <numeric> // iota
-#include <string>
 #include <array>
+#include <string>
 
 namespace solvent::lib::gen {
 
@@ -20,13 +20,13 @@ namespace solvent::lib::gen {
 		constexpr size_t NUM_KINDS = static_cast<size_t>(Kind::__MAX__) + 1;
 		// Indices of entries must match the
 		// literal values_ of their respective enums.
-		const std::array<std::string, NUM_KINDS> NAMES = {
+		inline const std::array<std::string, NUM_KINDS> NAMES = {
 			"rowmajor",
 			"dealrwmj",
 			"blockcol",
 		};
-		std::ostream& operator<<(std::ostream& os, const Kind path_kind);
-		const std::string OPTIONS_MENU = "\nGEN-PATH OPTIONS:"
+		extern std::ostream& operator<<(std::ostream& os, Kind path_kind);
+		inline const std::string OPTIONS_MENU = "\nGEN-PATH OPTIONS:"
 			"\n- rowmajor   horizontal strips as wide as the grid one by one"
 			"\n- dealrwmj   like dealing cards to each block using row-major"
 			"\n- blockcol   rowmajor, but broken into columns one block wide";

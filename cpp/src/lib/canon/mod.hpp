@@ -25,6 +25,12 @@ namespace solvent::lib::canon {
 
 		void handle_relabeling(void) noexcept;
 	};
+
+	extern template class Canonicalizer<2>;
+	extern template class Canonicalizer<3>;
+	extern template class Canonicalizer<4>;
+	extern template class Canonicalizer<5>;
+	extern template class Canonicalizer<6>;
 }
 
 #endif
