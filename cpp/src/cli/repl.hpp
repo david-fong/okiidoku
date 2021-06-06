@@ -104,10 +104,10 @@ namespace solvent::cli {
 		void print_msg_bar(std::string const&, char = '=') const;
 	};
 
-	extern template class Repl<2>;
-	extern template class Repl<3>;
-	extern template class Repl<4>;
-	extern template class Repl<5>;
-	extern template class Repl<6>;
+
+	#define SOLVENT_TEMPL_TEMPL(O_) \
+	extern template class Repl<O_>;
+	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
+	#undef SOLVENT_TEMPL_TEMPL
 }
 #endif

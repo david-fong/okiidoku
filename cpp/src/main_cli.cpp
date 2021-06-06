@@ -10,7 +10,6 @@
 #include <iostream>  // cout,
 #include <random>    // random_device,
 
-template class solvent::cli::Repl<4>;
 namespace ansi = solvent::util::ansi;
 
 const unsigned DEFAULT_ORDER = 4;

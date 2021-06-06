@@ -12,23 +12,21 @@ namespace solvent::lib::print {
 	//
 	using grid_t = std::function<uint8_t(uint32_t)>;
 
-	[[gnu::hot]] void value(std::ostream&, Order, uint8_t);
-	void serial(std::ostream&, Order, grid_t);
-	void pretty(std::ostream&, Order, std::vector<grid_t> const&);
+	[[gnu::hot]] void value(std::ostream&, Order order, uint8_t value);
+	void serial(std::ostream&, Order, grid_t grid_view);
+	void pretty(std::ostream&, Order, std::vector<grid_t> const& grid_views);
 
 	template<Order O> void serial(std::ostream&, typename gen::Generator<O>::GenResult const&);
 	template<Order O> void pretty(std::ostream&, typename gen::Generator<O>::GenResult const&);
 
-	extern template void serial<2>(std::ostream&, typename gen::Generator<2>::GenResult const&);
-	extern template void serial<3>(std::ostream&, typename gen::Generator<3>::GenResult const&);
-	extern template void serial<4>(std::ostream&, typename gen::Generator<4>::GenResult const&);
-	extern template void serial<5>(std::ostream&, typename gen::Generator<5>::GenResult const&);
-	extern template void serial<6>(std::ostream&, typename gen::Generator<6>::GenResult const&);
+	#define SOLVENT_TEMPL_TEMPL(O_) \
+	extern template void serial<O_>(std::ostream&, typename gen::Generator<O_>::GenResult const&);
+	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
+	#undef SOLVENT_TEMPL_TEMPL
 
-	extern template void pretty<2>(std::ostream&, typename gen::Generator<2>::GenResult const&);
-	extern template void pretty<3>(std::ostream&, typename gen::Generator<3>::GenResult const&);
-	extern template void pretty<4>(std::ostream&, typename gen::Generator<4>::GenResult const&);
-	extern template void pretty<5>(std::ostream&, typename gen::Generator<5>::GenResult const&);
-	extern template void pretty<6>(std::ostream&, typename gen::Generator<6>::GenResult const&);
+	#define SOLVENT_TEMPL_TEMPL(O_) \
+	extern template void pretty<O_>(std::ostream&, typename gen::Generator<O_>::GenResult const&);
+	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
+	#undef SOLVENT_TEMPL_TEMPL
 }
 #endif

@@ -36,10 +36,9 @@ namespace solvent::lib {
 		[[gnu::hot]] static std::ostream& print_value(std::ostream&, ord2_t) noexcept;
 	};
 
-	extern template class Grid<2>;
-	extern template class Grid<3>;
-	extern template class Grid<4>;
-	extern template class Grid<5>;
-	extern template class Grid<6>;
+	#define SOLVENT_TEMPL_TEMPL(O_) \
+	extern template class Grid<O_>;
+	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
+	#undef SOLVENT_TEMPL_TEMPL
 }
 #endif

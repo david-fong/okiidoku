@@ -22,7 +22,7 @@ template<solvent::Order O> [[gnu::hot]] std::ostream& operator<<(std::ostream&, 
 namespace solvent::lib::gen {
 
 	// must be manually seeded!
-	inline std::mt19937 Rng;
+	extern std::mt19937 Rng;
 
 	//
 	struct Params {
@@ -96,7 +96,7 @@ namespace solvent::lib::gen {
 		[[gnu::hot]] GenResult generate(std::optional<Params>);
 		[[gnu::pure]] GenResult const& get_gen_result() { return gen_result_; }
 		[[gnu::pure]] std::array<backtrack_t, O4> const& get_backtracks() { return backtracks_; }
-		void print_simple(std::ostream&) const;
+		void print_serial(std::ostream&) const; // TODO remove?
 
 	 private:
 		std::array<std::array<ord2_t, O2>, O2> val_try_orders_; // indexed by (progress/O2)
@@ -115,10 +115,10 @@ namespace solvent::lib::gen {
 		GenResult gen_result_;
 	};
 
-	extern template class Generator<2>;
-	extern template class Generator<3>;
-	extern template class Generator<4>;
-	extern template class Generator<5>;
-	extern template class Generator<6>;
+
+	#define SOLVENT_TEMPL_TEMPL(O_) \
+	extern template class Generator<O_>;
+	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
+	#undef SOLVENT_TEMPL_TEMPL
 }
 #endif

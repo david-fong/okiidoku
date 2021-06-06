@@ -6,6 +6,7 @@ namespace solvent::lib::gen::path {
 		return os << NAMES[static_cast<size_t>(path_kind)];
 	}
 
+
 	template<Kind PK, Order O>
 	struct PathCoords_ {
 		using ord1_t = typename size<O>::ord1_t;
@@ -23,8 +24,8 @@ namespace solvent::lib::gen::path {
 			}
 		}
 	 private:
-		static constexpr std::array<const ord4_t, O4> _init() noexcept {
-			const std::array<const ord4_t, O4> path;
+		static constexpr const std::array<ord4_t, O4> _init() noexcept {
+			std::array<ord4_t, O4> path_tmp = {0};
 			if constexpr (PK == Kind::RowMajor) {
 				// std::iota(path.begin(), path.end(), 0);
 			}
@@ -34,7 +35,7 @@ namespace solvent::lib::gen::path {
 					for (ord1_t b_col = 0; b_col < O1; b_col++) {
 						for (ord2_t blk = 0; blk < O2; blk++) {
 							ord4_t blkaddr = ((blk % O1) * O1) + (blk / O1 * O1 * O2);
-							path[i++] = blkaddr + (b_row * O2) + b_col;
+							path_tmp[i++] = blkaddr + (b_row * O2) + b_col;
 						}
 					}
 				}
@@ -44,20 +45,29 @@ namespace solvent::lib::gen::path {
 				for (ord1_t blk_col = 0; blk_col < O1; blk_col++) {
 					for (ord2_t row = 0; row < O2; row++) {
 						for (ord1_t b_col = 0; b_col < O1; b_col++) {
-							path[i++] = (blk_col * O1) + (row * O2) + (b_col);
+							path_tmp[i++] = (blk_col * O1) + (row * O2) + (b_col);
 						}
 					}
 				}
 			}
-			return path; // https://wikipedia.org/wiki/Copy_elision#Return_value_optimization
+			return static_cast<const std::array<ord4_t, O4>>(path_tmp);
 		}
-		static constexpr std::array<const ord4_t, O4> path = PathCoords_<PK,O>::_init();
+		static constexpr const std::array<ord4_t, O4> path = PathCoords_<PK,O>::_init();
 	};
 
+
+	#define SOLVENT_TEMPL_TEMPL(O_) \
+	template struct PathCoords_<Kind::RowMajor, O_>; \
+	template struct PathCoords_<Kind::DealRwMj, O_>; \
+	template struct PathCoords_<Kind::BlockCol, O_>;
+	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
+	#undef SOLVENT_TEMPL_TEMPL
+
+
 	template<solvent::Order O>
-	constexpr std::array<typename size<O>::ord4_t (&)(typename size<O>::ord4_t), NUM_KINDS> PathCoords = {
-		PathCoords_<Kind::RowMajor, O>::convert,
-		PathCoords_<Kind::DealRwMj, O>::convert,
-		PathCoords_<Kind::BlockCol, O>::convert,
+	const std::array<typename size<O>::ord4_t (*const)(typename size<O>::ord4_t), NUM_KINDS> PathCoords = {
+		&PathCoords_<Kind::RowMajor, O>::convert,
+		&PathCoords_<Kind::DealRwMj, O>::convert,
+		&PathCoords_<Kind::BlockCol, O>::convert,
 	};
 }

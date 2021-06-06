@@ -4,10 +4,10 @@
 #include "./mod.hpp"
 #include ":/util/timer.hpp"
 
-#include <mutex>
-#include <string>
 #include <vector>
 #include <array>
+#include <string>
+#include <mutex>
 #include <functional>
 #include <optional>
 
@@ -85,6 +85,7 @@ namespace solvent::lib::gen::batch {
 		Generator<O> generator_;
 	};
 
+
 	//
 	struct BatchReport : public SharedData {
 		BatchReport() = delete;
@@ -100,23 +101,20 @@ namespace solvent::lib::gen::batch {
 	const BatchReport batch(Params&, callback_t<O>);
 
 
-	extern template class ThreadFunc<2>;
-	extern template class ThreadFunc<3>;
-	extern template class ThreadFunc<4>;
-	extern template class ThreadFunc<5>;
-	extern template class ThreadFunc<6>;
+	#define SOLVENT_TEMPL_TEMPL(O_) \
+	extern template class ThreadFunc<O_>;
+	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
+	#undef SOLVENT_TEMPL_TEMPL
 
-	extern template const BatchReport batch<2>(Params&, callback_t<2>);
-	extern template const BatchReport batch<3>(Params&, callback_t<3>);
-	extern template const BatchReport batch<4>(Params&, callback_t<4>);
-	extern template const BatchReport batch<5>(Params&, callback_t<5>);
+	#define SOLVENT_TEMPL_TEMPL(O_) \
 	extern template const BatchReport batch<6>(Params&, callback_t<6>);
+	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
+	#undef SOLVENT_TEMPL_TEMPL
 }
 namespace std {
-	extern template class function<void(typename solvent::lib::gen::Generator<2>::GenResult const&)>;
-	extern template class function<void(typename solvent::lib::gen::Generator<3>::GenResult const&)>;
-	extern template class function<void(typename solvent::lib::gen::Generator<4>::GenResult const&)>;
-	extern template class function<void(typename solvent::lib::gen::Generator<5>::GenResult const&)>;
-	extern template class function<void(typename solvent::lib::gen::Generator<6>::GenResult const&)>;
+	#define SOLVENT_TEMPL_TEMPL(O_) \
+	extern template class function<void(typename solvent::lib::gen::Generator<O_>::GenResult const&)>;
+	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
+	#undef SOLVENT_TEMPL_TEMPL
 }
 #endif

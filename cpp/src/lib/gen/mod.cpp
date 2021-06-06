@@ -9,6 +9,8 @@
 
 namespace solvent::lib::gen {
 
+	std::mt19937 Rng;
+
 	// Guards accesses to Rng. I currently only
 	// use this when shuffling generator biases.
 	std::mutex RNG_MUTEX;
@@ -58,7 +60,7 @@ namespace solvent::lib::gen {
 			}
 			backtracks_.fill(0);
 		}
-		ord4_t (& prog2coord)(ord4_t) = path::PathCoords<O>[info.params.path_kind];
+		ord4_t (& prog2coord)(ord4_t) = *(path::PathCoords<O>[static_cast<size_t>(info.params.path_kind)]);
 		ord4_t dead_end_progress = info.progress;
 
 		while (true) {
@@ -75,7 +77,7 @@ namespace solvent::lib::gen {
 				--info.progress;
 				if (backtracks > info.most_backtracks_seen) [[unlikely]] {
 					info.most_backtracks_seen = backtracks;
-					if (info.most_backtracks_seen >= info.params.most_backtracks) [[unlikely]] {
+					if (info.most_backtracks_seen >= info.params.max_backtracks) [[unlikely]] {
 						info.status = ExitStatus::Abort;
 						break;
 					}
@@ -86,7 +88,7 @@ namespace solvent::lib::gen {
 					break;
 				}
 				++info.progress;
-				if (!can_coords_see_each_other(prog2coord(info.progress), prog2coord(dead_end_progress))
+				if (!this->can_coords_see_each_other(prog2coord(info.progress), prog2coord(dead_end_progress))
 					|| (info.progress > dead_end_progress)
 				) {
 					dead_end_progress = info.progress;
@@ -120,7 +122,7 @@ namespace solvent::lib::gen {
 		}
 
 		// Smart backtracking:
-		if ((progress < dead_end_progress) && !can_coords_see_each_other(
+		if ((progress < dead_end_progress) && !this->can_coords_see_each_other(
 			prog2coord(progress), prog2coord(dead_end_progress)
 		)) {
 			t.clear();
@@ -221,12 +223,12 @@ namespace solvent::lib::gen {
 
 
 	template<Order O>
-	void Generator<O>::print_simple(std::ostream& os) const {
+	void Generator<O>::print_serial(std::ostream& os) const {
 		auto const helper = [this](std::ostream& os, const bool is_pretty) -> void {
-			const bool do_dim = is_pretty && (gen_result_.get_exit_status() != ExitStatus::Ok);
+			const bool do_dim = is_pretty && (gen_result_.status != ExitStatus::Ok);
 			if (do_dim) os << util::ansi::DIM.ON;
 			for (auto const& t : values_) {
-				os << t;
+				this->print_value(os, t.value);
 			}
 			if (do_dim) os << util::ansi::DIM.OFF;
 		};
@@ -237,4 +239,10 @@ namespace solvent::lib::gen {
 			helper(os, false);
 		}
 	}
+
+
+	#define SOLVENT_TEMPL_TEMPL(O_) \
+	template class Generator<O_>;
+	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
+	#undef SOLVENT_TEMPL_TEMPL
 }

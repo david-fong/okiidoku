@@ -12,6 +12,7 @@ namespace solvent::lib::gen::batch {
 		return (hwc != 0) ? std::min(NUM_EXTRA_THREADS + 1, hwc) : 1;
 	}();
 
+
 	template<Order O>
 	void ThreadFunc<O>::operator()() {
 		shared_data_mutex_.lock();
@@ -25,13 +26,13 @@ namespace solvent::lib::gen::batch {
 			shared_data_mutex_.lock(); //‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
 
 			shared_data_.total_anys++;
-			if (gen_result.exit_status == ExitStatus::Ok) {
+			if (gen_result.status == ExitStatus::Ok) {
 				shared_data_.total_oks++;
 			}
 			auto& dist_summary_row = shared_data_.max_backtrack_samples[
 				params_.max_backtrack_sample_granularity
 				* gen_result.most_backtracks_seen
-				/ generator_.max_backtracks_
+				/ params_.gen_params.max_backtracks
 			];
 			dist_summary_row.marginal_oks++;
 			dist_summary_row.marginal_ops += gen_result.op_count;
@@ -40,6 +41,7 @@ namespace solvent::lib::gen::batch {
 		}
 		shared_data_mutex_.unlock();
 	}
+
 
 	template<Order O>
 	const BatchReport batch(Params& params, callback_t<O> gen_result_consumer) {
@@ -50,9 +52,10 @@ namespace solvent::lib::gen::batch {
 		std::mutex shared_data_mutex;
 		SharedData shared_data;
 
-		std::vector<std::thread> threads(params.num_threads,
-			ThreadFunc<O>(params, shared_data, shared_data_mutex, gen_result_consumer)
-		);
+		std::vector<std::thread> threads;
+		for (unsigned i = 0; i < params.num_threads; i++) {
+			threads.push_back(std::thread(ThreadFunc<O>(params, shared_data, shared_data_mutex, gen_result_consumer)));
+		}
 		for (auto& thread : threads) {
 			thread.join();
 		}
@@ -70,4 +73,21 @@ namespace solvent::lib::gen::batch {
 		}
 		return BatchReport(shared_data, time_elapsed);
 	}
+
+
+	#define SOLVENT_TEMPL_TEMPL(O_) \
+	template class ThreadFunc<O_>;
+	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
+	#undef SOLVENT_TEMPL_TEMPL
+
+	#define SOLVENT_TEMPL_TEMPL(O_) \
+	template const BatchReport batch<O_>(Params&, callback_t<O_>);
+	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
+	#undef SOLVENT_TEMPL_TEMPL
+}
+namespace std {
+	#define SOLVENT_TEMPL_TEMPL(O_) \
+	template class function<void(typename solvent::lib::gen::Generator<O_>::GenResult const&)>;
+	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
+	#undef SOLVENT_TEMPL_TEMPL
 }

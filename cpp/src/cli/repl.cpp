@@ -333,6 +333,12 @@ namespace solvent::cli {
 		}
 	}
 
+
+	#define SOLVENT_TEMPL_TEMPL(O_) \
+	template class Repl<O_>;
+	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
+	#undef SOLVENT_TEMPL_TEMPL
+
 	#undef STATW_I
 	#undef STATW_D
 }
