@@ -32,7 +32,15 @@ namespace solvent::lib::gen {
 			"\n- blockcol   rowmajor, but broken into columns one block wide";
 
 		template<solvent::Order O>
-		extern const std::array<typename size<O>::ord4_t (*const)(typename size<O>::ord4_t), NUM_KINDS> PathCoords;
+		using coord_converter_t = typename size<O>::ord4_t (&)(typename size<O>::ord4_t);
+
+		template<solvent::Order O>
+		coord_converter_t<O> GetPathCoords(Kind) noexcept;
+
+		#define SOLVENT_TEMPL_TEMPL(O_) \
+		extern template coord_converter_t<O_> GetPathCoords<O_>(Kind) noexcept;
+		SOLVENT_INSTANTIATE_ORDER_TEMPLATES
+		#undef SOLVENT_TEMPL_TEMPL
 	}
 }
 #endif

@@ -23,9 +23,8 @@ namespace solvent::util {
 			};
 		}
 
-	 private:
-		const time_point wall_clock_start_ = std::chrono::steady_clock::now();
-		const std::clock_t proc_clock_start_ = std::clock();
+		time_point wall_clock_start_ = std::chrono::steady_clock::now();
+		std::clock_t proc_clock_start_ = std::clock();
 	};
 }
 #endif

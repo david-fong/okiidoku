@@ -49,8 +49,8 @@ namespace solvent::cli {
 
 	// Returns zero on error.
 	inline unsigned GET_TERM_COLS(void) noexcept {
-		char const*const envVar = std::getenv("COLUMNS");
-		return (envVar != NULL) ? std::stoul(envVar) : 0u;
+		char const*const env_var = std::getenv("COLUMNS");
+		return (env_var != NULL) ? std::stoul(env_var) : 0u;
 	}
 
 
@@ -86,7 +86,6 @@ namespace solvent::cli {
 		verbosity::Kind set_verbosity(std::string const&);
 
 	 private:
-		generator_t gen_;
 		verbosity::Kind verbosity_;
 		pathkind_t path_kind_;
 
@@ -98,7 +97,6 @@ namespace solvent::cli {
 
 		void gen_multiple(trials_t stop_after, bool only_count_oks);
 		void gen_multiple(std::string const&,  bool only_count_oks);
-		void print_trials_work_distribution(lib::gen::batch::Params const&, lib::gen::batch::BatchReport const&);
 
 		void print_msg_bar(std::string const&, unsigned int, char = '=') const;
 		void print_msg_bar(std::string const&, char = '=') const;

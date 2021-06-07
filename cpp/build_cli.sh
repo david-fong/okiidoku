@@ -21,10 +21,9 @@ lib/gen/batch,\
 cli/repl,\
 main_cli\
 }.cpp)"
-echo $CPP
 
 ${COMPILER}\
 	-iquote "${ROOT}/include"\
 	-Wall -Werror -Wpedantic -Wimplicit-fallthrough=5 -flto\
 	"$@"\
-	-o solvent.exe ${CPP}\
+	${CPP} -o solvent.exe\

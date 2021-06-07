@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <mutex>
-#include <algorithm>   // random_shuffle,
+#include <algorithm>   // shuffle,
 #include <numeric>     // iota,
 
 
@@ -14,6 +14,15 @@ namespace solvent::lib::gen {
 	// Guards accesses to Rng. I currently only
 	// use this when shuffling generator biases.
 	std::mutex RNG_MUTEX;
+
+
+	template<Order O>
+	Params Params::clean(void) noexcept {
+		if (max_backtracks == 0) {
+			max_backtracks = Generator<O>::DEFAULT_MAX_BACKTRACKS;
+		}
+		return *this;
+	}
 
 
 	template<Order O>
@@ -46,11 +55,9 @@ namespace solvent::lib::gen {
 	template<Order O>
 	Generator<O>::GenResult Generator<O>::generate(const std::optional<Params> params) {
 		GenResult info;
-		if (params) [[likely]] {
+		if (params.has_value()) [[likely]] {
 			info.params = params.value();
-			if (info.params.max_backtracks == 0) {
-				info.params.max_backtracks = DEFAULT_MAX_BACKTRACKS;
-			}
+			info.params.template clean<O>();
 			this->init();
 		} else {
 			// Continue the previous generation.
@@ -60,7 +67,7 @@ namespace solvent::lib::gen {
 			}
 			backtracks_.fill(0);
 		}
-		ord4_t (& prog2coord)(ord4_t) = *(path::PathCoords<O>[static_cast<size_t>(info.params.path_kind)]);
+		ord4_t (& prog2coord)(ord4_t) = path::GetPathCoords<O>(info.params.path_kind);
 		ord4_t dead_end_progress = info.progress;
 
 		while (true) {
@@ -77,7 +84,7 @@ namespace solvent::lib::gen {
 				--info.progress;
 				if (backtracks > info.most_backtracks_seen) [[unlikely]] {
 					info.most_backtracks_seen = backtracks;
-					if (info.most_backtracks_seen >= info.params.max_backtracks) [[unlikely]] {
+					if (info.most_backtracks_seen > info.params.max_backtracks) [[unlikely]] {
 						info.status = ExitStatus::Abort;
 						break;
 					}
@@ -160,6 +167,7 @@ namespace solvent::lib::gen {
 
 	template<Order O>
 	std::ostream& operator<<(std::ostream& os, typename Generator<O>::Tile const& t) {
+		os << ' ';
 		Grid<O>::print_value(os, t.value);
 		return os;
 	}
@@ -240,6 +248,11 @@ namespace solvent::lib::gen {
 		}
 	}
 
+
+	#define SOLVENT_TEMPL_TEMPL(O_) \
+	template Params Params::clean<O_>(void) noexcept;
+	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
+	#undef SOLVENT_TEMPL_TEMPL
 
 	#define SOLVENT_TEMPL_TEMPL(O_) \
 	template class Generator<O_>;

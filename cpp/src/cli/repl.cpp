@@ -28,12 +28,12 @@ namespace solvent::cli {
 	template<Order O>
 	Repl<O>::Repl() {
 		set_verbosity(verbosity::Kind::All);
+		set_path_kind(pathkind_t::RowMajor);
 	}
 
 	template<Order O>
 	void Repl<O>::start(void) {
 		std::cout
-		<< "\nsolver obj size: " << sizeof(gen_) << " bytes"
 		<< '\n' << ansi::DIM.ON << TERMINAL_OUTPUT_TIPS << ansi::DIM.OFF
 		<< '\n' << Command::HelpMessage
 		<< std::endl;
@@ -189,10 +189,12 @@ namespace solvent::cli {
 		print_msg_bar("START");
 
 		// Generate a new solution:
+		generator_t gen;
+		std::cout << "\nsolver obj size: " << sizeof(gen) << " bytes";
 		const clock_t clock_start = std::clock();
 		const auto& gen_result = cont_prev
-			? gen_.generate(std::nullopt)
-			: gen_.generate(gen::Params{.path_kind = path_kind_});
+			? gen.generate(std::nullopt)
+			: gen.generate(gen::Params{.path_kind = path_kind_});
 		const double processor_time = (static_cast<double>(std::clock() - clock_start)) / CLOCKS_PER_SEC;
 
 		std::cout << "\nprocessor time: " STATW_D << processor_time << " seconds";
@@ -210,13 +212,7 @@ namespace solvent::cli {
 		const trials_t stop_after,
 		const bool only_count_oks
 	) {
-		const unsigned COLS = [this](){ // Never zero. Not used when writing to file.
-			const unsigned term_cols = GET_TERM_COLS();
-			const unsigned cols = (term_cols-7)/(gen_.O4+1);
-			return term_cols ? (cols ? cols : 1) : [](){ const unsigned _[] = {0,64,5,2,1,1,1}; return _[O]; }();
-		}();
-		const unsigned BAR_WIDTH = (gen_.O4+1) * COLS + (7);
-		// Note at above: the magic number `7` is the length of the progress indicator.
+		const unsigned BAR_WIDTH = 64;
 
 		print_msg_bar("START x" + std::to_string(stop_after), BAR_WIDTH);
 		gen::batch::Params params {
@@ -225,27 +221,40 @@ namespace solvent::cli {
 			.stop_after = stop_after
 		};
 		const gen::batch::BatchReport batch_report = gen::batch::batch<O>(params,
-			[](typename gen::Generator<O>::GenResult const& gen_result) {
-				print::serial<O>(std::cout, gen_result);
-				std::cout << std::endl;
+			[this](typename generator_t::GenResult const& gen_result) {
+				if ((verbosity_ == verbosity::Kind::All)
+				 || ((verbosity_ == verbosity::Kind::NoGiveups) && (gen_result.status == gen::ExitStatus::Ok))
+				) {
+					print::serial<O>(std::cout, gen_result);
+					if constexpr (O > 4) {
+						std::cout << std::endl;
+					} else {
+						std::cout << '\n';
+					}
+				} else if (verbosity_ == verbosity::Kind::Silent) {
+					// TODO.impl print a progress bar
+				}
 			}
 		);
+		print_msg_bar("", BAR_WIDTH, '-');
 
 		const std::string seconds_units = DIM_ON + " seconds (with I/O)" + DIM_OFF;
-		print_msg_bar("", BAR_WIDTH, '-'); std::cout
-		<< "\nhelper threads: " STATW_I << params.num_threads
-		<< "\ngenerator path: " STATW_I << params.gen_params.path_kind
-		// TODO [stats] For total successes and total trials.
-		<< "\nprocessor time: " STATW_D << batch_report.time_elapsed.proc_seconds << seconds_units
-		<< "\nreal-life time: " STATW_D << batch_report.time_elapsed.wall_seconds << seconds_units;
+		std::cout
+			<< "\nhelper threads: " STATW_I << params.num_threads
+			<< "\ngenerator path: " STATW_I << params.gen_params.path_kind
+			// TODO [stats] For total successes and total trials.
+			<< "\nprocessor time: " STATW_D << batch_report.time_elapsed.proc_seconds << seconds_units
+			<< "\nreal-life time: " STATW_D << batch_report.time_elapsed.wall_seconds << seconds_units
+			;
+
+		// Print bins (work distribution):
+		batch_report.print(std::cout, O);
+		print_msg_bar("DONE x" + std::to_string(stop_after), BAR_WIDTH);
 
 		if (batch_report.time_elapsed.wall_seconds > 10.0) {
 			// Emit a beep sound if the trials took longer than ten processor seconds:
 			std::cout << '\a' << std::flush;
 		}
-		// Print bins (work distribution):
-		print_trials_work_distribution(params, batch_report);
-		print_msg_bar("DONE x" + std::to_string(stop_after), BAR_WIDTH);
 		std::cout << std::endl;
 	}
 
@@ -255,9 +264,9 @@ namespace solvent::cli {
 		std::string const& stop_after_str,
 		const bool only_count_oks
 	) {
-		long stopByValue;
+		unsigned long stopByValue;
 		try {
-			stopByValue = std::stol(stop_after_str);
+			stopByValue = std::stoul(stop_after_str);
 			if (stopByValue <= 0) {
 				std::cout << ansi::RED.ON;
 				std::cout << "please provide a non-zero, positive integer.";
@@ -271,66 +280,6 @@ namespace solvent::cli {
 			return;
 		}
 		this->gen_multiple(static_cast<trials_t>(stopByValue), only_count_oks);
-	}
-
-
-	template<Order O>
-	void Repl<O>::print_trials_work_distribution(
-		gen::batch::Params const& params,
-		gen::batch::BatchReport const& batch_report
-	) {
-		static const std::string THROUGHPUT_BAR_STRING("--------------------------------");
-		static const std::string TABLE_SEPARATOR = "\n+------------------+------------------+------------------+-------------------+";
-		static const std::string TABLE_HEADER    = "\n|  max backtracks  |   marginal oks   |   marginal ops   |  net average ops  |";
-
-		std::cout << TABLE_SEPARATOR;
-		std::cout << TABLE_HEADER;
-		std::cout << TABLE_SEPARATOR;
-		unsigned best_sample_i = 0;
-		for (unsigned sample_i = 0; sample_i < batch_report.max_backtrack_samples.size(); sample_i++) {
-			const auto& sample = batch_report.max_backtrack_samples[sample_i];
-
-			// max_backtracks:
-			if constexpr (O <= 4) {
-				std::cout << "\n|" << std::setw(9) << sample.max_backtracks;
-			} else {
-				std::cout << "\n|" << std::setw(8) << (sample.max_backtracks / 1'000.0) << 'K';
-			}
-			// marginal_oks:
-			std::cout << "  |";
-			if (sample.marginal_oks == 0) std::cout << DIM_ON;
-			std::cout << std::setw(8) << sample.marginal_oks;
-			if (sample.marginal_oks == 0) std::cout << DIM_OFF;
-
-			// marginal_ops:
-			std::cout << "  |";
-			if (sample.marginal_oks == 0) std::cout << DIM_ON;
-			std::cout << std::setw(13) << static_cast<unsigned>(sample.marginal_ops / ((O<5)?1:1000));
-			std::cout << ((O<5)?' ':'K');
-			if (sample.marginal_oks == 0) std::cout << DIM_OFF;
-
-			// net_average_ops:
-			std::cout << "  |";
-			std::cout << std::setw(9) << (100.0 * sample.net_average_ops);
-
-			// Closing right-edge:
-			std::cout << "  |";
-
-			// Print a bar to visualize throughput relative to tha
-			// of the best. Note visual exaggeration via exponents
-			// (the exponent value was chosen by taste / visual feel)
-			const unsigned bar_length = THROUGHPUT_BAR_STRING.length() * std::pow(
-				sample.net_average_ops / batch_report.max_backtrack_samples[best_sample_i].net_average_ops,
-				static_cast<int>(20.0/O)
-			);
-			if (sample_i != best_sample_i) std::cout << DIM_ON;
-			std::cout << ' ' << THROUGHPUT_BAR_STRING.substr(0, bar_length);
-			if (sample_i != best_sample_i) std::cout << DIM_OFF;
-		}
-		std::cout << TABLE_SEPARATOR;
-		if (batch_report.total_oks < params.max_backtrack_sample_granularity * gen::batch::SharedData::RECOMMENDED_OKS_PER_SAMPLE) {
-			std::cout << DIM_ON << "\nexercise caution against small datasets!\n" << DIM_OFF;
-		}
 	}
 
 

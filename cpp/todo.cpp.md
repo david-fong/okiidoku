@@ -3,14 +3,7 @@
 
 ## Higher Priority
 
-- See if there's a way to use a macro to simplify extern template definitions.
-  - One macro for the consuming code to choose sizes to compile,
-  - One macro that takes a template and for each of the sizes, substitutes the size into the template by replacing "ORDER".
-- try to get rid of the colony include dir.
-- mark global variables and function in headers and inline or extern.
-- try this: https://arne-mertz.de/2019/02/extern-template-reduce-compile-times/
-- Is it necessary to specify `-pthread` in cpp build.sh?
-- Design some smarter backtracking.
+- try to get rid of the colon-y include dir.
 - Take out all stream related things from gen.
   - Read about std::format and see if it has any use for printing.
 - Scrap and rewrite the run-multiple info summary reporting.

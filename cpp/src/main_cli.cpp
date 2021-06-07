@@ -51,22 +51,20 @@ int main(const int argc, char const *const argv[]) {
 
 	// Create a Solver of the specified order:
 	// (It will automatically enter its REPL).
-	// switch (static_cast<solvent::Order>(user_order)) {
-	// 	case 3: { solvent::cli::Repl<3> s3; s3.start(); break; }
-	// 	case 4: { solvent::cli::Repl<4> s4; s4.start(); break; }
-	// 	case 5: { solvent::cli::Repl<5> s5; s5.start(); break; }
-	// 	case 6: { solvent::cli::Repl<6> s6; s6.start(); break; }
-	// 	default: {
-	// 		std::cout << ansi::RED.ON << "\nILLEGAL ARGUMENT:\n  order must be one of: { ";
-	// 		for (unsigned i = 3; i <= 6; i++) {
-	// 			std::cout << i << ", ";
-	// 		}
-	// 		std::cout << "}" << ansi::RED.OFF << std::endl;
-	// 		break;
-	// 	}
-	// }
-	solvent::cli::Repl<4> repl;
-	repl.start();
+	switch (static_cast<solvent::Order>(user_order)) {
+		case 3: { solvent::cli::Repl<3> s3; s3.start(); break; }
+		case 4: { solvent::cli::Repl<4> s4; s4.start(); break; }
+		case 5: { solvent::cli::Repl<5> s5; s5.start(); break; }
+		case 6: { solvent::cli::Repl<6> s6; s6.start(); break; }
+		default: {
+			std::cout << ansi::RED.ON << "\nILLEGAL ARGUMENT:\n  order must be one of: { ";
+			for (unsigned i = 3; i <= 6; i++) {
+				std::cout << i << ", ";
+			}
+			std::cout << "}" << ansi::RED.OFF << std::endl;
+			break;
+		}
+	}
 
 	// End of program:
 	std::cout << "\nbye bye!\n" << std::endl;

@@ -51,24 +51,27 @@ namespace solvent::lib::print {
 				os << "   " << blk_row_sep_str;
 			}
 		};
+
+		os << ansi::DIM.ON;
 		for (ord2_t row = 0; row < O*O; row++) {
 			if (row % O == 0) {
 				print_blk_row_sep_str();
 			}
-			os << '\n' << ansi::DIM.ON;
+			os << '\n';
 			for (unsigned grid_i = 0; grid_i < grid_views.size(); grid_i++) {
 				for (ord2_t col = 0; col < O*O; col++) {
-					if (is_pretty && (col % O) == 0) os << ansi::DIM.ON << " |" << ansi::DIM.OFF;
+					if (is_pretty && (col % O) == 0) { os << ansi::DIM.ON << " |" << ansi::DIM.OFF; }
+					os << ' ';
 					print::value(os, O, grid_views[grid_i](row * O*O + col));
 				}
-				if (is_pretty) os << ansi::DIM.ON << " |";
+				if (is_pretty) { os << ansi::DIM.ON << " |"; }
 				if (grid_i != grid_views.size() - 1) {
 					os << "   ";
 				}
 			}
-			if (is_pretty) os << ansi::DIM.ON << " |";
 		}
 		print_blk_row_sep_str();
+		os << ansi::DIM.OFF;
 	}
 
 

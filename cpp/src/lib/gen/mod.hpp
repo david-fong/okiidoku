@@ -28,6 +28,7 @@ namespace solvent::lib::gen {
 	struct Params {
 		path::Kind path_kind;
 		unsigned long max_backtracks = 0; // If zero, a default value will be used.
+		template<Order O> Params clean(void) noexcept;
 	};
 
 	// Container for a very large number.
@@ -115,6 +116,11 @@ namespace solvent::lib::gen {
 		GenResult gen_result_;
 	};
 
+
+	#define SOLVENT_TEMPL_TEMPL(O_) \
+	extern template Params Params::clean<O_>(void) noexcept;
+	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
+	#undef SOLVENT_TEMPL_TEMPL
 
 	#define SOLVENT_TEMPL_TEMPL(O_) \
 	extern template class Generator<O_>;
