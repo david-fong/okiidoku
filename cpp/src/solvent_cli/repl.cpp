@@ -1,8 +1,8 @@
-#include ":/cli/repl.hpp"
+#include <solvent_cli/repl.hpp>
 
-#include ":/lib/print.hpp"
-#include ":/util/timer.hpp"
-#include ":/util/ansi.hpp"
+#include <solvent_lib/print.hpp>
+#include <solvent_util/timer.hpp>
+#include <solvent_util/ansi.hpp>
 
 #include <iostream> // cout, endl,
 #include <iomanip>  // setw,

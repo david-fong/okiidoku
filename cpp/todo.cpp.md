@@ -3,7 +3,7 @@
 
 ## Higher Priority
 
-- try to get rid of the colon-y include dir.
+- https://cmake.org/cmake/help/latest/guide/tutorial/index.html
 - Take out all stream related things from gen.
   - Read about std::format and see if it has any use for printing.
 - Scrap and rewrite the run-multiple info summary reporting.

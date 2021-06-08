@@ -1,4 +1,4 @@
-#include ":/lib/grid.hpp"
+#include <solvent_lib/grid.hpp>
 
 #include <iostream>
 

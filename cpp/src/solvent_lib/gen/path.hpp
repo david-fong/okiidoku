@@ -1,7 +1,7 @@
 #ifndef HPP_SOLVENT_LIB_GEN_PATH
 #define HPP_SOLVENT_LIB_GEN_PATH
 
-#include ":/lib/size.hpp"
+#include <solvent_lib/size.hpp>
 
 #include <iosfwd>
 // #include <numeric> // iota

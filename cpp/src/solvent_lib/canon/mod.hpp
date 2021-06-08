@@ -1,8 +1,8 @@
 #ifndef HPP_SOLVENT_LIB_CANON
 #define HPP_SOLVENT_LIB_CANON
 
-#include ":/lib/grid.hpp"
-#include ":/lib/size.hpp"
+#include <solvent_lib/grid.hpp>
+#include <solvent_lib/size.hpp>
 
 #include <array>
 

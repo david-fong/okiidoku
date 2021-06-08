@@ -1,7 +1,7 @@
 #ifndef HPP_SOLVENT_LIB_SIZE
 #define HPP_SOLVENT_LIB_SIZE
 
-#include ":/buildflag.hpp"
+#include <solvent_config.hpp>
 
 #include <bit>
 #include <cstdint>

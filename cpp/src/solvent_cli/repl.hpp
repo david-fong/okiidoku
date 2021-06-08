@@ -1,10 +1,10 @@
 #ifndef HPP_SOLVENT_CLI_REPL
 #define HPP_SOLVENT_CLI_REPL
 
-#include ":/cli/enum.hpp"
-#include ":/lib/gen/batch.hpp"
-#include ":/lib/gen/mod.hpp"
-#include ":/lib/size.hpp"
+#include <solvent_cli/enum.hpp>
+#include <solvent_lib/gen/batch.hpp>
+#include <solvent_lib/gen/mod.hpp>
+#include <solvent_lib/size.hpp>
 
 #include <map>
 #include <string>

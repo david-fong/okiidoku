@@ -1,9 +1,9 @@
 #ifndef HPP_SOLVENT_LIB_GEN
 #define HPP_SOLVENT_LIB_GEN
 
-#include ":/lib/gen/path.hpp"
-#include ":/lib/grid.hpp"
-#include ":/lib/size.hpp"
+#include <solvent_lib/gen/path.hpp>
+#include <solvent_lib/grid.hpp>
+#include <solvent_lib/size.hpp>
 
 // #include <iosfwd>
 #include <random>

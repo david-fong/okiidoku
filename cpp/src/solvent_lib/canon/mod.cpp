@@ -1,4 +1,4 @@
-#include ":/lib/canon/mod.hpp"
+#include <solvent_lib/canon/mod.hpp>
 
 namespace solvent::lib::canon {
 

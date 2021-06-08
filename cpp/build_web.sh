@@ -5,10 +5,10 @@ readonly CPP_ROOT="$(dirname "${BASH_SOURCE[0]}")"
 readonly COMPILER='em++ -std=c++20 -fcolor-diagnostics -fansi-escape-codes -ferror-limit=5'
 
 readonly CPP="$(echo "${CPP_ROOT}/src/"{\
-main_web,\
-lib/gen/path,\
-lib/gen/mod,\
 lib/gen/batch\
+lib/gen/mod,\
+lib/gen/path,\
+web/main,\
 }.cpp)"
 
 ${COMPILER}\

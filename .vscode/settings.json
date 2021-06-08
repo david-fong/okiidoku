@@ -11,7 +11,7 @@
 	"C_Cpp.default.compilerArgs": [
 		"-Wall", "-Wextra", "-Wpedantic", "-Wimplicit-fallthrough=5",
 	],
-	"C_Cpp.default.includePath": ["${workspaceFolder}/cpp/include"],
+	"C_Cpp.default.includePath": ["${workspaceFolder}/cpp/src"],
 
 	"trailing-spaces.trimOnSave": true,
 
@@ -29,13 +29,16 @@
 	"rust.wait_to_build": 1000,
 
 	"editor.tabSize": 3,
+	"[json]": {
+		"editor.insertSpaces": false,
+	},
 	"[cpp]": {
+		"editor.insertSpaces": false,
+	},
+	"[cmake]": {
 		"editor.insertSpaces": false,
 	},
 	"[rust]": {
 		"editor.insertSpaces": false,
 	},
-	"[json]": {
-		"editor.insertSpaces": false,
-	}
 }

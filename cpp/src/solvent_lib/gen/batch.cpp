@@ -1,5 +1,5 @@
-#include ":/lib/gen/batch.hpp"
-#include ":/util/ansi.hpp"
+#include <solvent_lib/gen/batch.hpp>
+#include <solvent_util/ansi.hpp>
 
 #include <thread>
 #include <iostream>

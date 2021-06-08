@@ -1,5 +1,5 @@
-#include ":/lib/print.hpp"
-#include ":/util/ansi.hpp"
+#include <solvent_lib/print.hpp>
+#include <solvent_util/ansi.hpp>
 
 #include <iostream>
 

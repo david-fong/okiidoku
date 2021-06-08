@@ -1,8 +1,8 @@
 #ifndef HPP_SOLVENT_LIB_GRID
 #define HPP_SOLVENT_LIB_GRID
 
-#include ":/lib/size.hpp"
-#include ":/util/ansi.hpp"
+#include <solvent_lib/size.hpp>
+#include <solvent_util/ansi.hpp>
 
 #include <iosfwd>
 

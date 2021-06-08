@@ -1,5 +1,5 @@
-#include ":/cli/repl.hpp"
-#include ":/util/ansi.hpp"
+#include <solvent_cli/repl.hpp>
+#include <solvent_util/ansi.hpp>
 
 #if WINDOWS_ANSI
 #include <windows.h>

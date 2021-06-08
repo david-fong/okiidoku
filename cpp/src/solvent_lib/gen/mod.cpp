@@ -1,5 +1,5 @@
-#include ":/lib/gen/mod.hpp"
-#include ":/util/ansi.hpp"
+#include <solvent_lib/gen/mod.hpp>
+#include <solvent_util/ansi.hpp>
 
 #include <iostream>
 #include <mutex>

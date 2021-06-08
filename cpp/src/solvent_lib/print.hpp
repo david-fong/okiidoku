@@ -1,8 +1,8 @@
 #ifndef HPP_SOLVENT_LIB_PRINT
 #define HPP_SOLVENT_LIB_PRINT
 
-#include ":/lib/size.hpp"
-#include ":/lib/gen/mod.hpp"
+#include <solvent_lib/size.hpp>
+#include <solvent_lib/gen/mod.hpp>
 
 #include <iosfwd>
 #include <vector>

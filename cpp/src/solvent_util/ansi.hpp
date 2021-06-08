@@ -1,7 +1,7 @@
 #ifndef HPP_SOLVENT_UTIL_ANSI
 #define HPP_SOLVENT_UTIL_ANSI
 
-#include ":/buildflag.hpp"
+#include <solvent_config.hpp>
 #include <array>
 #include <string>
 

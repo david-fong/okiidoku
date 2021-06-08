@@ -1,8 +1,8 @@
 #ifndef HPP_SOLVENT_LIB_BATCH
 #define HPP_SOLVENT_LIB_BATCH
 
-#include ":/lib/gen/mod.hpp"
-#include ":/util/timer.hpp"
+#include <solvent_lib/gen/mod.hpp>
+#include <solvent_util/timer.hpp>
 
 #include <iosfwd>
 #include <vector>
