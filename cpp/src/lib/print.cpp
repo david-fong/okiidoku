@@ -1,4 +1,4 @@
-#include "./print.hpp"
+#include ":/lib/print.hpp"
 #include ":/util/ansi.hpp"
 
 #include <iostream>
@@ -17,8 +17,8 @@ namespace solvent::lib::print {
 				os << static_cast<char>('a' + value);
 			} else {
 				(value < 10)
-						? os << static_cast<unsigned>(value)
-						: os << static_cast<char>('a' + value - 10);
+					? os << static_cast<unsigned>(value)
+					: os << static_cast<char>('a' + value - 10);
 			}
 		}
 	}
@@ -92,12 +92,8 @@ namespace solvent::lib::print {
 
 
 	#define SOLVENT_TEMPL_TEMPL(O_) \
-	template void serial<O_>(std::ostream&, typename gen::Generator<O_>::GenResult const&);
-	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
-	#undef SOLVENT_TEMPL_TEMPL
-
-	#define SOLVENT_TEMPL_TEMPL(O_) \
-	template void pretty<O_>(std::ostream&, typename gen::Generator<O_>::GenResult const&);
+		template void serial<O_>(std::ostream&, typename gen::Generator<O_>::GenResult const&); \
+		template void pretty<O_>(std::ostream&, typename gen::Generator<O_>::GenResult const&);
 	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 	#undef SOLVENT_TEMPL_TEMPL
 }

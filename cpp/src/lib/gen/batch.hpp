@@ -1,7 +1,7 @@
 #ifndef HPP_SOLVENT_LIB_BATCH
 #define HPP_SOLVENT_LIB_BATCH
 
-#include "./mod.hpp"
+#include ":/lib/gen/mod.hpp"
 #include ":/util/timer.hpp"
 
 #include <iosfwd>
@@ -106,24 +106,16 @@ namespace solvent::lib::gen::batch {
 
 
 	#define SOLVENT_TEMPL_TEMPL(O_) \
-	extern template Params Params::clean<O_>(void) noexcept;
-	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
-	#undef SOLVENT_TEMPL_TEMPL
-
-	#define SOLVENT_TEMPL_TEMPL(O_) \
-	extern template class ThreadFunc<O_>;
-	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
-	#undef SOLVENT_TEMPL_TEMPL
-
-	#define SOLVENT_TEMPL_TEMPL(O_) \
-	extern template const BatchReport batch<6>(Params&, callback_t<6>);
+		extern template Params Params::clean<O_>(void) noexcept; \
+		extern template class ThreadFunc<O_>; \
+		extern template const BatchReport batch<O_>(Params&, callback_t<O_>);
 	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 	#undef SOLVENT_TEMPL_TEMPL
 }
 
 namespace std {
 	#define SOLVENT_TEMPL_TEMPL(O_) \
-	extern template class function<void(typename solvent::lib::gen::Generator<O_>::GenResult const&)>;
+		extern template class function<void(typename solvent::lib::gen::Generator<O_>::GenResult const&)>;
 	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 	#undef SOLVENT_TEMPL_TEMPL
 }

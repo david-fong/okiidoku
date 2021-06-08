@@ -11,7 +11,6 @@
 // Can be used to instantiate templates.
 // At usage sites, first #define SOLVENT_TEMPL_TEMPL and then #undef it right after.
 #define SOLVENT_INSTANTIATE_ORDER_TEMPLATES \
-SOLVENT_TEMPL_TEMPL(2) \
 SOLVENT_TEMPL_TEMPL(3) \
 SOLVENT_TEMPL_TEMPL(4) \
 SOLVENT_TEMPL_TEMPL(5) \

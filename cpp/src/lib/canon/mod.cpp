@@ -1,4 +1,4 @@
-#include "./mod.hpp"
+#include ":/lib/canon/mod.hpp"
 
 namespace solvent::lib::canon {
 
@@ -50,7 +50,7 @@ namespace solvent::lib::canon {
 
 
 	#define SOLVENT_TEMPL_TEMPL(O_) \
-	template class Canonicalizer<O_>;
+		template class Canonicalizer<O_>;
 	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 	#undef SOLVENT_TEMPL_TEMPL
 }

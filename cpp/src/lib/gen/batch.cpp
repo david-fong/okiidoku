@@ -1,4 +1,4 @@
-#include "./batch.hpp"
+#include ":/lib/gen/batch.hpp"
 #include ":/util/ansi.hpp"
 
 #include <thread>
@@ -86,6 +86,7 @@ namespace solvent::lib::gen::batch {
 				sample.net_average_ops = net_oks ? std::optional(static_cast<double>(net_ops) / net_oks) : std::nullopt;
 			}
 		}{
+			// Get the index of the sample representing the optimal max_backtracks setting:
 			shared_data.max_backtrack_samples_best_i = 0;
 			double best_net_average_ops = std::numeric_limits<double>::max();
 			for (unsigned i = 0; i < shared_data.max_backtrack_samples.size(); i++) {
@@ -129,11 +130,11 @@ namespace solvent::lib::gen::batch {
 			if (sample.marginal_oks == 0) { std::cout << util::ansi::DIM.ON; }
 			std::cout << std::setw(13);
 			if (sample.marginal_average_ops.has_value()) {
-				std::cout << (sample.marginal_average_ops.value() / ((O<5)?1:1000));
+				std::cout << (sample.marginal_average_ops.value() / ((O < 5) ? 1 : 1000));
 			} else {
 				std::cout << "-";
 			}
-			std::cout << ((O<5)?' ':'K');
+			std::cout << ((O < 5) ? ' ' : 'K');
 			if (sample.marginal_oks == 0) { std::cout << util::ansi::DIM.OFF; }
 
 			// net_average_ops:
@@ -166,23 +167,15 @@ namespace solvent::lib::gen::batch {
 
 
 	#define SOLVENT_TEMPL_TEMPL(O_) \
-	template Params Params::clean<O_>(void) noexcept;
-	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
-	#undef SOLVENT_TEMPL_TEMPL
-
-	#define SOLVENT_TEMPL_TEMPL(O_) \
-	template class ThreadFunc<O_>;
-	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
-	#undef SOLVENT_TEMPL_TEMPL
-
-	#define SOLVENT_TEMPL_TEMPL(O_) \
-	template const BatchReport batch<O_>(Params&, callback_t<O_>);
+		template Params Params::clean<O_>(void) noexcept; \
+		template class ThreadFunc<O_>; \
+		template const BatchReport batch<O_>(Params&, callback_t<O_>);
 	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 	#undef SOLVENT_TEMPL_TEMPL
 }
 namespace std {
 	#define SOLVENT_TEMPL_TEMPL(O_) \
-	template class function<void(typename solvent::lib::gen::Generator<O_>::GenResult const&)>;
+		template class function<void(typename solvent::lib::gen::Generator<O_>::GenResult const&)>;
 	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 	#undef SOLVENT_TEMPL_TEMPL
 }

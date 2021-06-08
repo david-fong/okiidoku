@@ -37,8 +37,9 @@ namespace solvent::lib::gen {
 		template<solvent::Order O>
 		coord_converter_t<O> GetPathCoords(Kind) noexcept;
 
+
 		#define SOLVENT_TEMPL_TEMPL(O_) \
-		extern template coord_converter_t<O_> GetPathCoords<O_>(Kind) noexcept;
+			extern template coord_converter_t<O_> GetPathCoords<O_>(Kind) noexcept;
 		SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 		#undef SOLVENT_TEMPL_TEMPL
 	}

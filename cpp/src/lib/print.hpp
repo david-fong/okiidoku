@@ -20,12 +20,8 @@ namespace solvent::lib::print {
 	template<Order O> void pretty(std::ostream&, typename gen::Generator<O>::GenResult const&);
 
 	#define SOLVENT_TEMPL_TEMPL(O_) \
-	extern template void serial<O_>(std::ostream&, typename gen::Generator<O_>::GenResult const&);
-	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
-	#undef SOLVENT_TEMPL_TEMPL
-
-	#define SOLVENT_TEMPL_TEMPL(O_) \
-	extern template void pretty<O_>(std::ostream&, typename gen::Generator<O_>::GenResult const&);
+		extern template void serial<O_>(std::ostream&, typename gen::Generator<O_>::GenResult const&); \
+		extern template void pretty<O_>(std::ostream&, typename gen::Generator<O_>::GenResult const&);
 	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 	#undef SOLVENT_TEMPL_TEMPL
 }

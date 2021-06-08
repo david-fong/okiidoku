@@ -28,7 +28,7 @@ namespace solvent::lib::canon {
 
 
 	#define SOLVENT_TEMPL_TEMPL(O_) \
-	extern template class Canonicalizer<O_>;
+		extern template class Canonicalizer<O_>;
 	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 	#undef SOLVENT_TEMPL_TEMPL
 }

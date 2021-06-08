@@ -1,7 +1,7 @@
 #ifndef HPP_SOLVENT_CLI_REPL
 #define HPP_SOLVENT_CLI_REPL
 
-#include "./enum.hpp"
+#include ":/cli/enum.hpp"
 #include ":/lib/gen/batch.hpp"
 #include ":/lib/gen/mod.hpp"
 #include ":/lib/size.hpp"
@@ -104,7 +104,7 @@ namespace solvent::cli {
 
 
 	#define SOLVENT_TEMPL_TEMPL(O_) \
-	extern template class Repl<O_>;
+		extern template class Repl<O_>;
 	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 	#undef SOLVENT_TEMPL_TEMPL
 }

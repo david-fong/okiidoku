@@ -1,4 +1,4 @@
-#include "./path.hpp"
+#include ":/lib/gen/path.hpp"
 
 namespace solvent::lib::gen::path {
 
@@ -52,7 +52,7 @@ namespace solvent::lib::gen::path {
 			}
 			return static_cast<const std::array<ord4_t, O4>>(path_tmp);
 		}
-		static constexpr const std::array<ord4_t, O4> path = PathCoords_<PK,O>::_init();
+		static constexpr const std::array<ord4_t, O4> path = PathCoords_<PK,O>::_init(); // TODO make this sizeless when not used.
 	};
 
 
@@ -63,13 +63,6 @@ namespace solvent::lib::gen::path {
 	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 	#undef SOLVENT_TEMPL_TEMPL
 
-
-	/* template<solvent::Order O>
-	const std::array<typename size<O>::ord4_t (*const)(typename size<O>::ord4_t), NUM_KINDS> PathCoords = {
-		&PathCoords_<Kind::RowMajor, O>::convert,
-		&PathCoords_<Kind::DealRwMj, O>::convert,
-		&PathCoords_<Kind::BlockCol, O>::convert,
-	}; */
 
 	template<solvent::Order O>
 	coord_converter_t<O> GetPathCoords(const Kind path_kind) noexcept {
@@ -82,7 +75,7 @@ namespace solvent::lib::gen::path {
 	}
 
 	#define SOLVENT_TEMPL_TEMPL(O_) \
-	template coord_converter_t<O_> GetPathCoords<O_>(Kind) noexcept;
+		template coord_converter_t<O_> GetPathCoords<O_>(Kind) noexcept;
 	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 	#undef SOLVENT_TEMPL_TEMPL
 }
