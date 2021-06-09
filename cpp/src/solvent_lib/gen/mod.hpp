@@ -12,13 +12,6 @@
 #include <optional>
 
 
-// https://en.cppreference.com/w/cpp/language/friend#Template_friend_operators
-// https://web.mst.edu/~nmjxv3/articles/templates.html
-// namespace solvent::lib::gen { template<solvent::Order O> class Generator; }
-// template<solvent::Order O> std::ostream& operator<<(std::ostream&, solvent::lib::gen::Generator<O> const&);
-// template<solvent::Order O> [[gnu::hot]] std::ostream& operator<<(std::ostream&, typename solvent::lib::gen::Generator<O>::Tile const& t);
-
-
 namespace solvent::lib::gen {
 
 	// must be manually seeded!

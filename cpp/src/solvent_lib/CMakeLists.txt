@@ -1,5 +1,7 @@
 
 add_compile_options(solvent
+	../solvent_util/timer
+	../solvent_util/ansi
 	size.cpp
 	grid.cpp
 	print.cpp

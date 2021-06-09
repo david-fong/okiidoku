@@ -1,9 +1,4 @@
 {
-	"files.associations": {
-		"**/gcc/**": "cpp",
-	},
-	// "explorer.sortOrder": "default",
-	"C_Cpp.autoAddFileAssociations": false,
 	"C_Cpp.intelliSenseCacheSize": 0,
 
 	"C_Cpp.default.cStandard": "c17",
@@ -11,5 +6,5 @@
 	"C_Cpp.default.compilerArgs": [
 		"-Wall", "-Wextra", "-Wpedantic", "-Wimplicit-fallthrough=5",
 	],
-	"C_Cpp.default.includePath": ["${workspaceFolder}/cpp/src"],
+	"C_Cpp.default.includePath": ["${workspaceFolder}/src"],
 }

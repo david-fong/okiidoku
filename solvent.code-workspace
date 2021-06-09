@@ -1,0 +1,48 @@
+{
+	"folders": [
+		{ "path": "cpp" },
+		{ "path": "rust" },
+		{ "path": "web" },
+	],
+	"extensions": {
+		"recommendations": [
+			"Gruntfuggly.todo-tree",
+			"shardulm94.trailing-spaces",
+		],
+	},
+	"settings": {
+		"trailing-spaces.trimOnSave": true,
+
+		"todo-tree.filtering.useBuiltInExcludes": "file excludes",
+		"todo-tree.general.statusBar": "total",
+		"todo-tree.general.tags": [
+			"TODO.learn" ,
+			"TODO.design",
+			"TODO.doc"   ,
+			"TODO.impl"  ,
+			"TODO.test"  ,
+			"TODO.build" ,
+			"TODO",
+		],
+
+		"files.associations": {
+			"**/gcc/**": "cpp",
+		},
+		// "explorer.sortOrder": "default",
+		"C_Cpp.autoAddFileAssociations": false,
+
+		"editor.tabSize": 3,
+		"[json]": {
+			"editor.insertSpaces": false,
+		},
+		"[cpp]": {
+			"editor.insertSpaces": false,
+		},
+		"[cmake]": {
+			"editor.insertSpaces": false,
+		},
+		"[rust]": {
+			"editor.insertSpaces": false,
+		},
+	},
+}

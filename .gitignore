@@ -1,10 +1,4 @@
 
 # General
 .DS_Store
-
-# Visual Studio
-/.vs/
-/Debug/
-/x64/
-*.sln
-*.vcxproj*
+Thumbs.db
