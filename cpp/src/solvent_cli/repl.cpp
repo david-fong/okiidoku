@@ -122,7 +122,7 @@ namespace solvent::cli {
 
 
 	template<Order O>
-	const pathkind_t Repl<O>::set_path_kind(const pathkind_t new_path_kind) noexcept {
+	pathkind_t Repl<O>::set_path_kind(const pathkind_t new_path_kind) noexcept {
 		if (new_path_kind == get_path_kind()) {
 			// Short circuit:
 			return get_path_kind();
@@ -134,7 +134,7 @@ namespace solvent::cli {
 
 
 	template<Order O>
-	const pathkind_t Repl<O>::set_path_kind(std::string const& new_path_kind_str) noexcept {
+	pathkind_t Repl<O>::set_path_kind(std::string const& new_path_kind_str) noexcept {
 		std::cout << "\ngenerator path is ";
 		if (new_path_kind_str.empty()) {
 			std::cout << "currently set to: " << get_path_kind() << std::endl;

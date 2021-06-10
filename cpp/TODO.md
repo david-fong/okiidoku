@@ -3,7 +3,13 @@
 
 ## Higher Priority
 
+- Count dead ends instead of backtracks.
+  - reason: backtracks from coords that can see the dead end coord are trivial and do not add significant work.
+  - create a ternary enum for set_next_valid to return.
+  - do all the identifier renaming.
+  - Update the default giveup thresholds.
 - https://cmake.org/cmake/help/latest/guide/tutorial/index.html
+  - See what can be learned from https://github.com/lefticus/cpp_weekly_game_project
 - Take out all stream related things from gen.
   - Read about std::format and see if it has any use for printing.
 - Scrap and rewrite the run-multiple info summary reporting.
@@ -15,7 +21,7 @@
       - https://github.com/CLIUtils/CLI11
       - http://tclap.sourceforge.net/manual.html
       - https://github.com/Taywee/args
-  - Can look into ncurses in the future?
+  - Can look into ncurses in the future? Or look into options for TUI libraries?
   - A web interface would be really nice.
 - C++20
   - std::bit_width possible usage in size.hpp

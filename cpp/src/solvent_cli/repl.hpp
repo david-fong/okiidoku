@@ -77,8 +77,8 @@ namespace solvent::cli {
 
 		[[gnu::pure]] pathkind_t get_path_kind(void) const noexcept { return path_kind_; }
 		// Setters return the old value of the generator path.
-		const pathkind_t set_path_kind(pathkind_t) noexcept;
-		const pathkind_t set_path_kind(std::string const&) noexcept;
+		pathkind_t set_path_kind(pathkind_t) noexcept;
+		pathkind_t set_path_kind(std::string const&) noexcept;
 
 		[[gnu::pure]] verbosity::Kind get_verbosity(void) const noexcept { return verbosity_; };
 		// Setters return the old value of the verbosity.

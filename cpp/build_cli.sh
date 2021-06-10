@@ -5,7 +5,7 @@ readonly ROOT="$(dirname "${BASH_SOURCE[0]}")"
 
 # if [[ "$@" =~ '--clang' ]]
 # then
-# 	readonly COMPILER='clang++ -target x86_64-w64-mingw64 -fcolor-diagnostics -fansi-escape-codes -ferror-limit=5'
+# 	readonly COMPILER='clang++ -target x86_64-w64-mingw64 -fcolor-diagnostics -ferror-limit=5'
 # else
 	# Use g++ by default.
 	readonly COMPILER='g++ -std=c++20 -pthread -fdiagnostics-color=always -fmax-errors=5'
@@ -22,8 +22,9 @@ cli/repl,\
 cli/main\
 }.cpp)"
 
-${COMPILER}\
-	-isystem "${ROOT}/src"\
-	-Wall -Werror -Wpedantic -Wimplicit-fallthrough=5 -flto\
-	"$@"\
-	${CPP} -o build/cli/solvent.exe\
+${COMPILER} \
+	-isystem "${ROOT}/src" \
+	-Wall -Wextra -Wpedantic -Wimplicit-fallthrough=5 -Werror \
+	-march=native -flto \
+	"$@" \
+	${CPP} -o build/solvent_cli.exe

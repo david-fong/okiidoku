@@ -106,47 +106,47 @@ namespace solvent::lib::gen::batch {
 		static const std::string TABLE_SEPARATOR = "\n+------------------+------------------+--------------------------+-------------------+";
 		static const std::string TABLE_HEADER    = "\n|  max backtracks  |   marginal oks   |   marginal average ops   |  net average ops  |";
 
-		std::cout << TABLE_SEPARATOR;
-		std::cout << TABLE_HEADER;
-		std::cout << TABLE_SEPARATOR;
+		os << TABLE_SEPARATOR;
+		os << TABLE_HEADER;
+		os << TABLE_SEPARATOR;
 		const auto& best_sample = max_backtrack_samples[max_backtrack_samples_best_i];
 		for (const auto& sample : max_backtrack_samples) {
 
 			// max_backtracks:
 			if (O <= 4) {
-				std::cout << "\n|" << std::setw(9) << sample.max_backtracks;
+				os << "\n|" << std::setw(9) << sample.max_backtracks;
 			} else {
-				std::cout << "\n|" << std::setw(8) << (sample.max_backtracks / 1'000.0) << 'K';
+				os << "\n|" << std::setw(8) << (sample.max_backtracks / 1'000.0) << 'K';
 			}
 
 			// marginal_oks:
-			std::cout << "  |";
-			if (sample.marginal_oks == 0) { std::cout << util::ansi::DIM.ON; }
-			std::cout << std::setw(8) << sample.marginal_oks;
-			if (sample.marginal_oks == 0) { std::cout << util::ansi::DIM.OFF; }
+			os << "  |";
+			if (sample.marginal_oks == 0) { os << util::ansi::DIM.ON; }
+			os << std::setw(8) << sample.marginal_oks;
+			if (sample.marginal_oks == 0) { os << util::ansi::DIM.OFF; }
 
 			// marginal_average_ops:
-			std::cout << "  |";
-			if (sample.marginal_oks == 0) { std::cout << util::ansi::DIM.ON; }
-			std::cout << std::setw(13);
+			os << "  |";
+			if (sample.marginal_oks == 0) { os << util::ansi::DIM.ON; }
+			os << std::setw(13);
 			if (sample.marginal_average_ops.has_value()) {
-				std::cout << (sample.marginal_average_ops.value() / ((O < 5) ? 1 : 1000));
+				os << (sample.marginal_average_ops.value() / ((O < 5) ? 1 : 1000));
 			} else {
-				std::cout << "-";
+				os << "-";
 			}
-			std::cout << ((O < 5) ? ' ' : 'K');
-			if (sample.marginal_oks == 0) { std::cout << util::ansi::DIM.OFF; }
+			os << ((O < 5) ? ' ' : 'K');
+			if (sample.marginal_oks == 0) { os << util::ansi::DIM.OFF; }
 
 			// net_average_ops:
-			std::cout << "  |";
-			std::cout << std::setw(9);
+			os << "  |";
+			os << std::setw(9);
 			if (sample.net_average_ops.has_value()) {
-				std::cout << (100.0 * sample.net_average_ops.value());
+				os << (100.0 * sample.net_average_ops.value());
 			} else {
-				std::cout << "-";
+				os << "-";
 			}
 
-			std::cout << "  |";
+			os << "  |";
 
 			// Print a bar to visualize throughput relative to that
 			// of the best. Note visual exaggeration via exponents
@@ -155,13 +155,13 @@ namespace solvent::lib::gen::batch {
 				1.0 / (sample.net_average_ops.value_or(0) / best_sample.net_average_ops.value()),
 				static_cast<int>(20.0 / O)
 			)) : 0;
-			if (&sample != &best_sample) std::cout << util::ansi::DIM.ON;
-			std::cout << ' ' << THROUGHPUT_BAR_STRING.substr(0, bar_length);
-			if (&sample != &best_sample) std::cout << util::ansi::DIM.OFF;
+			if (&sample != &best_sample) os << util::ansi::DIM.ON;
+			os << ' ' << THROUGHPUT_BAR_STRING.substr(0, bar_length);
+			if (&sample != &best_sample) os << util::ansi::DIM.OFF;
 		}
-		std::cout << TABLE_SEPARATOR;
+		os << TABLE_SEPARATOR;
 		if (total_oks < max_backtrack_samples.size() * gen::batch::SharedData::RECOMMENDED_OKS_PER_SAMPLE) {
-			std::cout << util::ansi::DIM.ON << "\nexercise caution against small datasets!" << util::ansi::DIM.OFF << std::endl;
+			os << util::ansi::DIM.ON << "\nexercise caution against small datasets!" << util::ansi::DIM.OFF << std::endl;
 		}
 	}
 
