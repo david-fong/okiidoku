@@ -74,6 +74,8 @@ namespace solvent::lib::gen::batch {
 			thread.join();
 		}
 		shared_data.time_elapsed = shared_data.timer.read_elapsed();
+
+		shared_data.fraction_aborted = static_cast<double>(shared_data.total_anys - shared_data.total_oks) / shared_data.total_oks;
 		{
 			double net_ops = 0.0;
 			trials_t net_oks = 0;
@@ -102,9 +104,12 @@ namespace solvent::lib::gen::batch {
 
 
 	void SharedData::print(std::ostream& os, const Order O) const {
-		static const std::string THROUGHPUT_BAR_STRING("--------------------------------");
-		static const std::string TABLE_SEPARATOR = "\n+------------------+------------------+--------------------------+-------------------+";
-		static const std::string TABLE_HEADER    = "\n|  max backtracks  |   marginal oks   |   marginal average ops   |  net average ops  |";
+		static const std::string THROUGHPUT_BAR_STRING("-------------------------");
+		static const std::string TABLE_SEPARATOR =
+		"\n├──────────────┼────────────┼───────────────┼───────────────┤";
+		static const std::string TABLE_HEADER =
+		"\n│     max      │  marginal  │   marginal    │      net      │"
+		"\n│  backtracks  │    oks     │  average ops  │  average ops  │";
 
 		os << TABLE_SEPARATOR;
 		os << TABLE_HEADER;
@@ -114,21 +119,21 @@ namespace solvent::lib::gen::batch {
 
 			// max_backtracks:
 			if (O <= 4) {
-				os << "\n|" << std::setw(9) << sample.max_backtracks;
+				os << "\n│" << std::setw(12) << sample.max_backtracks;
 			} else {
-				os << "\n|" << std::setw(8) << (sample.max_backtracks / 1'000.0) << 'K';
+				os << "\n│" << std::setw(11) << (sample.max_backtracks / 1'000.0) << 'K';
 			}
 
 			// marginal_oks:
-			os << "  |";
+			os << "  │";
 			if (sample.marginal_oks == 0) { os << util::ansi::DIM.ON; }
-			os << std::setw(8) << sample.marginal_oks;
+			os << std::setw(10) << sample.marginal_oks;
 			if (sample.marginal_oks == 0) { os << util::ansi::DIM.OFF; }
 
 			// marginal_average_ops:
-			os << "  |";
+			os << "  │";
 			if (sample.marginal_oks == 0) { os << util::ansi::DIM.ON; }
-			os << std::setw(13);
+			os << std::setw(12);
 			if (sample.marginal_average_ops.has_value()) {
 				os << (sample.marginal_average_ops.value() / ((O < 5) ? 1 : 1000));
 			} else {
@@ -138,22 +143,21 @@ namespace solvent::lib::gen::batch {
 			if (sample.marginal_oks == 0) { os << util::ansi::DIM.OFF; }
 
 			// net_average_ops:
-			os << "  |";
-			os << std::setw(9);
+			os << "  │";
+			os << std::setw(13) << std::fixed << std::setprecision(2);
 			if (sample.net_average_ops.has_value()) {
 				os << (100.0 * sample.net_average_ops.value());
 			} else {
 				os << "-";
 			}
 
-			os << "  |";
+			os << "  │";
 
 			// Print a bar to visualize throughput relative to that
 			// of the best. Note visual exaggeration via exponents
 			// (the exponent value was chosen by taste / visual feel)
-			const unsigned bar_length = (best_sample.net_average_ops.has_value()) ? (THROUGHPUT_BAR_STRING.length() * std::pow(
-				1.0 / (sample.net_average_ops.value_or(0) / best_sample.net_average_ops.value()),
-				static_cast<int>(20.0 / O)
+			const unsigned bar_length = (best_sample.net_average_ops.has_value()) ? (THROUGHPUT_BAR_STRING.length() * (
+				1.0 / (sample.net_average_ops.value_or(0) / best_sample.net_average_ops.value())
 			)) : 0;
 			if (&sample != &best_sample) os << util::ansi::DIM.ON;
 			os << ' ' << THROUGHPUT_BAR_STRING.substr(0, bar_length);

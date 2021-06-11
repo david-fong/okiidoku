@@ -34,6 +34,12 @@ namespace solvent::lib::gen {
 	};
 
 	//
+	struct Direction {
+		bool is_back: 1;
+		bool is_skip: 1 = false; // only meaningful when is_back is true.
+	};
+
+	//
 	template<Order O>
 	class Generator final : public Grid<O> {
 	 private:
@@ -57,7 +63,7 @@ namespace solvent::lib::gen {
 		static constexpr ord4_t O4 = O*O*O*O;
 
 		static constexpr backtrack_t DEFAULT_MAX_BACKTRACKS = [](){ const backtrack_t _[] = {
-			0, 1, 3, 150, 1'125, 560'000, 1'000'000'000,
+			0, 1, 3, 150, 700, 1'000'000, 1'000'000'000,
 		}; return _[O]; }();
 
 		//
@@ -102,10 +108,13 @@ namespace solvent::lib::gen {
 
 		// clear fields and scramble val_try_order
 		void init(void);
-		// returns whether or not to backtrack
-		[[gnu::hot]] inline bool set_next_valid(
-			ord4_t progress, ord4_t dead_end_progress, ord4_t (& prog2coord)(ord4_t)
+
+		[[gnu::hot]] Direction set_next_valid(
+			ord4_t progress,
+			ord4_t dead_end_progress,
+			ord4_t (& prog2coord)(ord4_t)
 		) noexcept;
+
 		GenResult gen_result_;
 	};
 

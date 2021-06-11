@@ -28,6 +28,7 @@
   - `typename` doesn't need to be specified as much.
   - `using enum`. Might want to wait for CLANG to support?
   - see what stringy things can now use constexpr strings.
+    - the ansi constants could use this. Right now, they are stuck as C-style string.
   - wait for support in gcc and clang for `constexpr std::string`.
 - CLI
   - implement `-h` and `--help` CLI argument.

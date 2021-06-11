@@ -7,7 +7,7 @@ set(CMAKE_CXX_EXTENSIONS FALSE)
 if(MSVC)
 	add_compile_options(/W4 /WX)
 else()
-	add_compile_options(-pedantic -Wall -Wextra -Wimplicit-fallthrough=5)
+	add_compile_options(-Wall -Wextra -Wpedantic -Wold-style-cast -Wimplicit-fallthrough=5)
 endif()
 
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)

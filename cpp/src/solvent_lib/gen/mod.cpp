@@ -71,23 +71,27 @@ namespace solvent::lib::gen {
 		ord4_t dead_end_progress = info.progress;
 
 		while (true) {
-			const bool do_backtrack = this->set_next_valid(
+			const Direction direction = this->set_next_valid(
 				info.progress, dead_end_progress, prog2coord
 			);
-			++info.op_count;
-			if (do_backtrack) [[unlikely]] {
+			if (!direction.is_skip) { ++info.op_count; }
+			if (direction.is_back) [[unlikely]] {
 				if (info.progress == 0) [[unlikely]] {
 					info.status = ExitStatus::Exhausted;
 					break;
 				}
-				const backtrack_t backtracks = ++backtracks_[info.progress];
-				--info.progress;
-				if (backtracks > info.most_backtracks_seen) [[unlikely]] {
-					info.most_backtracks_seen = backtracks;
-					if (info.most_backtracks_seen > info.params.max_backtracks) [[unlikely]] {
-						info.status = ExitStatus::Abort;
-						break;
+				if (!direction.is_skip) {
+					const backtrack_t backtracks = ++backtracks_[info.progress];
+					--info.progress;
+					if (backtracks > info.most_backtracks_seen) [[unlikely]] {
+						info.most_backtracks_seen = backtracks;
+						if (info.most_backtracks_seen > info.params.max_backtracks) [[unlikely]] {
+							info.status = ExitStatus::Abort;
+							break;
+						}
 					}
+				} else {
+					--info.progress;
 				}
 			} else {
 				if (info.progress == O4-1) [[unlikely]] {
@@ -95,8 +99,8 @@ namespace solvent::lib::gen {
 					break;
 				}
 				++info.progress;
-				if (!this->can_coords_see_each_other(prog2coord(info.progress), prog2coord(dead_end_progress))
-					|| (info.progress > dead_end_progress)
+				if ((info.progress > dead_end_progress)
+					|| !this->can_coords_see_each_other(prog2coord(info.progress), prog2coord(dead_end_progress))
 				) {
 					dead_end_progress = info.progress;
 				}
@@ -111,7 +115,7 @@ namespace solvent::lib::gen {
 
 
 	template<Order O>
-	bool Generator<O>::set_next_valid(
+	Direction Generator<O>::set_next_valid(
 		const ord4_t progress, const ord4_t dead_end_progress, ord4_t (& prog2coord)(ord4_t)
 	) noexcept {
 		const ord4_t coord = prog2coord(progress);
@@ -133,7 +137,7 @@ namespace solvent::lib::gen {
 			prog2coord(progress), prog2coord(dead_end_progress)
 		)) {
 			t.clear();
-			return true;
+			return Direction { .is_back = true, .is_skip = true };
 		}
 
 		const has_mask_t t_has = (row_has | col_has | blk_has);
@@ -147,12 +151,12 @@ namespace solvent::lib::gen {
 				blk_has |= try_val_mask;
 				t.value = try_val;
 				t.next_try_index = (try_i + 1u);
-				return false;
+				return Direction { .is_back = false };
 			}
 		}
 		// Nothing left to try here. Backtrack:
 		t.clear();
-		return true;
+		return Direction { .is_back = true, .is_skip = false };
 	}
 
 

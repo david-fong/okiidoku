@@ -6,7 +6,6 @@
 
 #include <iosfwd>
 #include <vector>
-#include <array>
 #include <string>
 #include <mutex>
 #include <functional>
@@ -31,6 +30,7 @@ namespace solvent::lib::gen::batch {
 	struct SharedData {
 		trials_t total_anys = 0;
 		trials_t total_oks = 0;
+		double fraction_aborted;
 
 		util::Timer timer;
 		util::Timer::Elapsed time_elapsed;

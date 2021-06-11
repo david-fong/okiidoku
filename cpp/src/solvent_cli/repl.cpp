@@ -28,7 +28,10 @@ namespace solvent::cli {
 	template<Order O>
 	Repl<O>::Repl() {
 		set_verbosity(verbosity::Kind::All);
+		if (O == 4) { set_verbosity(verbosity::Kind::Silent); }
+		if (O > 4) { set_verbosity(verbosity::Kind::NoGiveups); }
 		set_path_kind(pathkind_t::RowMajor);
+		if (O > 4) { set_path_kind(pathkind_t::BlockCol); }
 	}
 
 	template<Order O>
@@ -238,11 +241,11 @@ namespace solvent::cli {
 		);
 		print_msg_bar("", BAR_WIDTH, '-');
 
-		const std::string seconds_units = DIM_ON + " seconds (with I/O)" + DIM_OFF;
+		static const std::string seconds_units = std::string() + ansi::DIM.ON + " seconds (with I/O)" + ansi::DIM.OFF;
 		std::cout
 			<< "\nhelper threads: " STATW_I << params.num_threads
 			<< "\ngenerator path: " STATW_I << params.gen_params.path_kind
-			// TODO [stats] For total successes and total trials.
+			<< "\npercent aborts: " STATW_D << (batch_report.fraction_aborted * 100)
 			<< "\nprocessor time: " STATW_D << batch_report.time_elapsed.proc_seconds << seconds_units
 			<< "\nreal-life time: " STATW_D << batch_report.time_elapsed.wall_seconds << seconds_units
 			;

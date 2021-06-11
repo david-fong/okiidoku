@@ -22,9 +22,11 @@ cli/repl,\
 cli/main\
 }.cpp)"
 
+# -Wsign-conversion
 ${COMPILER} \
 	-isystem "${ROOT}/src" \
-	-Wall -Wextra -Wpedantic -Wimplicit-fallthrough=5 -Werror \
+	-Wall -Wextra -Wpedantic -Werror \
+	-Wold-style-cast -Wimplicit-fallthrough=5 \
 	-march=native -flto \
 	"$@" \
 	${CPP} -o build/solvent_cli.exe

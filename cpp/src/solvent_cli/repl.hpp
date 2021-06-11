@@ -89,9 +89,6 @@ namespace solvent::cli {
 		verbosity::Kind verbosity_;
 		pathkind_t path_kind_;
 
-		const std::string DIM_ON  = (true ? util::ansi::DIM.ON  : ""); // TODO handle file case
-		const std::string DIM_OFF = (true ? util::ansi::DIM.OFF : ""); // TODO handle file case
-
 		// Return false if command is to exit the program:
 		void gen_single(bool contPrev = false);
 
