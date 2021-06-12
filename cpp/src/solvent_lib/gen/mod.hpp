@@ -29,12 +29,12 @@ namespace solvent::lib::gen {
 	using opcount_t = unsigned long long;
 
 	//
-	enum class ExitStatus : unsigned {
+	enum class ExitStatus : unsigned char {
 		Exhausted, Abort, Ok,
 	};
 
 	//
-	struct Direction {
+	struct Direction final {
 		bool is_back: 1;
 		bool is_skip: 1 = false; // only meaningful when is_back is true.
 	};
@@ -50,8 +50,8 @@ namespace solvent::lib::gen {
 
 	 public:
 		// Note that this should always be smaller than opcount_t.
-		using backtrack_t =
-			// Make sure this can fit `DEFAULT_MAX_BACKTRACKS`.
+		using dead_ends_t =
+			// Make sure this can fit `DEFAULT_MAX_DEAD_ENDS`.
 			//typename std::conditional_t<(O < 4), std::uint_fast8_t,
 			std::conditional_t<(O < 5), std::uint_fast16_t,
 			std::conditional_t<(O < 6), std::uint_fast32_t,
@@ -62,7 +62,7 @@ namespace solvent::lib::gen {
 		static constexpr ord2_t O2 = O*O;
 		static constexpr ord4_t O4 = O*O*O*O;
 
-		static constexpr backtrack_t DEFAULT_MAX_BACKTRACKS = [](){ const backtrack_t _[] = {
+		static constexpr dead_ends_t DEFAULT_MAX_DEAD_ENDS = [](){ const dead_ends_t _[] = {
 			0, 1, 3, 150, 700, 1'000'000, 1'000'000'000,
 		}; return _[O]; }();
 
@@ -72,8 +72,11 @@ namespace solvent::lib::gen {
 			ExitStatus status = ExitStatus::Abort;
 			ord4_t progress = 0;
 			opcount_t op_count = 0;
-			backtrack_t most_backtracks_seen = 0;
+			dead_ends_t most_backtracks_seen = 0;
 			std::array<ord2_t, O4> grid = {};
+
+			void print_serial(std::ostream&) const;
+			void print_pretty(std::ostream&) const;
 		};
 
 		//
@@ -96,7 +99,7 @@ namespace solvent::lib::gen {
 		// Pass std::nullopt to continue the previous run.
 		[[gnu::hot]] GenResult generate(std::optional<Params>);
 		[[gnu::pure]] GenResult const& get_gen_result() const { return gen_result_; }
-		[[gnu::pure]] std::array<backtrack_t, O4> const& get_backtracks() const { return backtracks_; }
+		[[gnu::pure]] std::array<dead_ends_t, O4> const& get_backtracks() const { return backtracks_; }
 
 	 private:
 		std::array<std::array<ord2_t, O2>, O2> val_try_orders_; // indexed by (progress/O2)
@@ -104,7 +107,7 @@ namespace solvent::lib::gen {
 		std::array<has_mask_t, O2> rows_has_;
 		std::array<has_mask_t, O2> cols_has_;
 		std::array<has_mask_t, O2> blks_has_;
-		std::array<backtrack_t, O4> backtracks_; // indexed by progress
+		std::array<dead_ends_t, O4> backtracks_; // indexed by progress
 
 		// clear fields and scramble val_try_order
 		void init(void);

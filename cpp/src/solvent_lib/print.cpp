@@ -1,5 +1,5 @@
 #include <solvent_lib/print.hpp>
-#include <solvent_util/ansi.hpp>
+#include <solvent_util/str.hpp>
 
 #include <iostream>
 
@@ -32,68 +32,53 @@ namespace solvent::lib::print {
 
 
 	void pretty(std::ostream& os, const Order O, std::vector<grid_t> const& grid_views) {
-		namespace ansi = solvent::util::ansi;
+		namespace str = solvent::util::str;
 		using ord2_t = std::uint16_t;
 
-		const auto blk_row_sep_str = [O]() {
-			std::string vbar = " " + std::string((((O * (O + 1)) + 1) * 2 - 1), '-');
-			for (unsigned i = 0; i <= O; i++) {
-				vbar[(2 * (O + 1) * i) + 1] = '+';
+		const auto print_blk_row_sep_string_ = [&os, O](const unsigned border_i) -> void {
+			#define M_NOOK(NOOK_T, NOOK_C, NOOK_B) \
+			if      (border_i == 0) { os << NOOK_T; } \
+			else if (border_i == O) { os << NOOK_B; } \
+			else                    { os << NOOK_C; }
+			M_NOOK(" ┌", " ├", " └")
+			for (unsigned blk_col = 0; blk_col < O; blk_col++) {
+				for (unsigned i = 0; i < 1u + (2u * O); i++) {
+					os << "─";
+				}
+				if (blk_col < O - 1u) { M_NOOK("┬", "┼", "┴") }
 			}
-			return vbar;
-		}();
+			M_NOOK("┐", "┤", "┘")
+			#undef M_NOOK
+		};
 
-		const bool is_pretty = &os == &std::cout;
-		auto print_blk_row_sep_str = [&]() mutable {
-			if (!is_pretty) return;
-			os << '\n' << blk_row_sep_str;
+		auto print_blk_row_sep_strings = [&](const unsigned border_i) mutable {
+			os << '\n';
+			print_blk_row_sep_string_(border_i);
 			for (unsigned i = 1; i < grid_views.size(); i++) {
-				os << "   " << blk_row_sep_str;
+				os << "   ";
+				print_blk_row_sep_string_(border_i);
 			}
 		};
 
-		os << ansi::DIM.ON;
+		os << str::DIM.ON;
 		for (ord2_t row = 0; row < O*O; row++) {
 			if (row % O == 0) {
-				print_blk_row_sep_str();
+				print_blk_row_sep_strings(row / O);
 			}
 			os << '\n';
 			for (unsigned grid_i = 0; grid_i < grid_views.size(); grid_i++) {
 				for (ord2_t col = 0; col < O*O; col++) {
-					if (is_pretty && (col % O) == 0) { os << ansi::DIM.ON << " |" << ansi::DIM.OFF; }
+					if ((col % O) == 0) { os << str::DIM.ON << " │" << str::DIM.OFF; }
 					os << ' ';
 					print::value(os, O, grid_views[grid_i](row * O*O + col));
 				}
-				if (is_pretty) { os << ansi::DIM.ON << " |"; }
+				os << str::DIM.ON << " │";
 				if (grid_i != grid_views.size() - 1) {
 					os << "   ";
 				}
 			}
 		}
-		print_blk_row_sep_str();
-		os << ansi::DIM.OFF;
+		print_blk_row_sep_strings(O);
+		os << str::DIM.OFF;
 	}
-
-
-	template<Order O>
-	void serial(std::ostream& os, typename gen::Generator<O>::GenResult const& gen_result) {
-		const grid_t grid([&gen_result](uint16_t coord) { return gen_result.grid[coord]; });
-		print::serial(os, O, grid);
-	}
-
-
-	template<Order O>
-	void pretty(std::ostream& os, typename gen::Generator<O>::GenResult const& gen_result) {
-		const std::vector<grid_t> grids = {
-			grid_t([&gen_result](uint16_t coord) { return gen_result.grid[coord]; })
-		};
-		print::pretty(os, O, grids);
-	}
-
-
-	#define SOLVENT_TEMPL_TEMPL(O_) \
-		template void serial<O_>(std::ostream&, typename gen::Generator<O_>::GenResult const&); \
-		template void pretty<O_>(std::ostream&, typename gen::Generator<O_>::GenResult const&);
-	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
-	#undef SOLVENT_TEMPL_TEMPL
 }

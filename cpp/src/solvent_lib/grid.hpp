@@ -2,7 +2,7 @@
 #define HPP_SOLVENT_LIB_GRID
 
 #include <solvent_lib/size.hpp>
-#include <solvent_util/ansi.hpp>
+#include <solvent_util/str.hpp>
 
 #include <iosfwd>
 
@@ -11,12 +11,13 @@ namespace solvent::lib {
 	template<Order O>
 	class Grid {
 	 static_assert((1 < O) && (O <= MAX_REASONABLE_ORDER));
-	 public:
+	 private:
 		using has_mask_t = typename size<O>::has_mask_t;
 		using ord1_t = typename size<O>::ord1_t;
 		using ord2_t = typename size<O>::ord2_t;
 		using ord4_t = typename size<O>::ord4_t;
 
+	 public:
 		static constexpr ord1_t O1 = O;
 		static constexpr ord2_t O2 = O*O;
 		static constexpr ord4_t O4 = O*O*O*O;

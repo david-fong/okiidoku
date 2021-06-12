@@ -1,5 +1,5 @@
 #include <solvent_lib/gen/batch.hpp>
-#include <solvent_util/ansi.hpp>
+#include <solvent_util/str.hpp>
 
 #include <thread>
 #include <iostream>
@@ -111,9 +111,11 @@ namespace solvent::lib::gen::batch {
 		"\n│     max      │  marginal  │   marginal    │      net      │"
 		"\n│  backtracks  │    oks     │  average ops  │  average ops  │";
 
-		os << TABLE_SEPARATOR;
-		os << TABLE_HEADER;
-		os << TABLE_SEPARATOR;
+		os << TABLE_SEPARATOR
+			<< TABLE_HEADER
+			<< TABLE_SEPARATOR
+			 << std::fixed << std::setprecision(2);
+
 		const auto& best_sample = max_backtrack_samples[max_backtrack_samples_best_i];
 		for (const auto& sample : max_backtrack_samples) {
 
@@ -126,13 +128,13 @@ namespace solvent::lib::gen::batch {
 
 			// marginal_oks:
 			os << "  │";
-			if (sample.marginal_oks == 0) { os << util::ansi::DIM.ON; }
+			if (sample.marginal_oks == 0) { os << util::str::DIM.ON; }
 			os << std::setw(10) << sample.marginal_oks;
-			if (sample.marginal_oks == 0) { os << util::ansi::DIM.OFF; }
+			if (sample.marginal_oks == 0) { os << util::str::DIM.OFF; }
 
 			// marginal_average_ops:
 			os << "  │";
-			if (sample.marginal_oks == 0) { os << util::ansi::DIM.ON; }
+			if (sample.marginal_oks == 0) { os << util::str::DIM.ON; }
 			os << std::setw(12);
 			if (sample.marginal_average_ops.has_value()) {
 				os << (sample.marginal_average_ops.value() / ((O < 5) ? 1 : 1000));
@@ -140,11 +142,11 @@ namespace solvent::lib::gen::batch {
 				os << "-";
 			}
 			os << ((O < 5) ? ' ' : 'K');
-			if (sample.marginal_oks == 0) { os << util::ansi::DIM.OFF; }
+			if (sample.marginal_oks == 0) { os << util::str::DIM.OFF; }
 
 			// net_average_ops:
 			os << "  │";
-			os << std::setw(13) << std::fixed << std::setprecision(2);
+			os << std::setw(13);
 			if (sample.net_average_ops.has_value()) {
 				os << (100.0 * sample.net_average_ops.value());
 			} else {
@@ -159,13 +161,13 @@ namespace solvent::lib::gen::batch {
 			const unsigned bar_length = (best_sample.net_average_ops.has_value()) ? (THROUGHPUT_BAR_STRING.length() * (
 				1.0 / (sample.net_average_ops.value_or(0) / best_sample.net_average_ops.value())
 			)) : 0;
-			if (&sample != &best_sample) os << util::ansi::DIM.ON;
+			if (&sample != &best_sample) os << util::str::DIM.ON;
 			os << ' ' << THROUGHPUT_BAR_STRING.substr(0, bar_length);
-			if (&sample != &best_sample) os << util::ansi::DIM.OFF;
+			if (&sample != &best_sample) os << util::str::DIM.OFF;
 		}
 		os << TABLE_SEPARATOR;
 		if (total_oks < max_backtrack_samples.size() * gen::batch::SharedData::RECOMMENDED_OKS_PER_SAMPLE) {
-			os << util::ansi::DIM.ON << "\nexercise caution against small datasets!" << util::ansi::DIM.OFF << std::endl;
+			os << util::str::DIM.ON << "\nexercise caution against small datasets!" << util::str::DIM.OFF << std::endl;
 		}
 	}
 

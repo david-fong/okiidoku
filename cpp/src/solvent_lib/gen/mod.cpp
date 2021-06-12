@@ -1,5 +1,6 @@
 #include <solvent_lib/gen/mod.hpp>
-#include <solvent_util/ansi.hpp>
+#include <solvent_lib/print.hpp>
+#include <solvent_util/str.hpp>
 
 #include <iostream>
 #include <mutex>
@@ -19,7 +20,7 @@ namespace solvent::lib::gen {
 	template<Order O>
 	Params Params::clean(void) noexcept {
 		if (max_backtracks == 0) {
-			max_backtracks = Generator<O>::DEFAULT_MAX_BACKTRACKS;
+			max_backtracks = Generator<O>::DEFAULT_MAX_DEAD_ENDS;
 		}
 		return *this;
 	}
@@ -81,7 +82,7 @@ namespace solvent::lib::gen {
 					break;
 				}
 				if (!direction.is_skip) {
-					const backtrack_t backtracks = ++backtracks_[info.progress];
+					const dead_ends_t backtracks = ++backtracks_[info.progress];
 					--info.progress;
 					if (backtracks > info.most_backtracks_seen) [[unlikely]] {
 						info.most_backtracks_seen = backtracks;
@@ -163,9 +164,25 @@ namespace solvent::lib::gen {
 	std::string shaded_backtrack_stat(const long out_of, const long count) {
 		const unsigned int relative_intensity
 			= static_cast<double>(count - 1)
-			* util::ansi::BLOCK_CHARS.size()
+			* util::str::BLOCK_CHARS.size()
 			/ out_of;
-		return (count == 0) ? " " : util::ansi::BLOCK_CHARS[relative_intensity];
+		return (count == 0) ? " " : util::str::BLOCK_CHARS[relative_intensity];
+	}
+
+
+	template<Order O>
+	void Generator<O>::GenResult::print_serial(std::ostream& os) const {
+		const print::grid_t grid_accessor([this](uint16_t coord) { return this->grid[coord]; });
+		print::serial(os, O, grid_accessor);
+	}
+
+
+	template<Order O>
+	void Generator<O>::GenResult::print_pretty(std::ostream& os) const {
+		const std::vector<print::grid_t> grid_accessors = {
+			print::grid_t([this](uint16_t coord) { return this->grid[coord]; })
+		};
+		print::pretty(os, O, grid_accessors);
 	}
 
 

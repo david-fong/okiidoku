@@ -2,15 +2,19 @@
 #define HPP_SOLVENT_UTIL_ANSI
 
 #include <solvent_config.hpp>
+#include <locale>
 #include <array>
 #include <string>
 
-/**
- * Yes, I could get some library for this, or I could write a whole
- * library for this, but I'd rather cut down on bloat and dependency
- * since the portion of a full-library that I want is very small.
- */
-namespace solvent::util::ansi {
+//
+namespace solvent::util::str {
+
+	struct MyNumPunct : std::numpunct<char> {
+		std::string do_grouping(void) const {
+			return "\03";
+		}
+	};
+
 
 	#if USE_ANSI_ESC
 	#define SGR(NAME, ON_STR, OFF_STR) constexpr struct {\

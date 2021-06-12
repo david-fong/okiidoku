@@ -57,9 +57,9 @@ namespace solvent::lib::gen::path {
 
 
 	#define SOLVENT_TEMPL_TEMPL(O_) \
-	template struct PathCoords_<Kind::RowMajor, O_>; \
-	template struct PathCoords_<Kind::DealRwMj, O_>; \
-	template struct PathCoords_<Kind::BlockCol, O_>;
+		template struct PathCoords_<Kind::RowMajor, O_>; \
+		template struct PathCoords_<Kind::DealRwMj, O_>; \
+		template struct PathCoords_<Kind::BlockCol, O_>;
 	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 	#undef SOLVENT_TEMPL_TEMPL
 

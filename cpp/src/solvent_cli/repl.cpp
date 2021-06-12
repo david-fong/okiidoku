@@ -2,7 +2,7 @@
 
 #include <solvent_lib/print.hpp>
 #include <solvent_util/timer.hpp>
-#include <solvent_util/ansi.hpp>
+#include <solvent_util/str.hpp>
 
 #include <iostream> // cout, endl,
 #include <iomanip>  // setw,
@@ -10,7 +10,7 @@
 
 namespace solvent::cli {
 
-	namespace ansi = solvent::util::ansi;
+	namespace str = solvent::util::str;
 	using namespace solvent::lib;
 
 	using pathkind_t = lib::gen::path::Kind;
@@ -36,8 +36,10 @@ namespace solvent::cli {
 
 	template<Order O>
 	void Repl<O>::start(void) {
+		const auto my_numpunct = new util::str::MyNumPunct;
+		const auto pushed_locale = std::cout.imbue(std::locale(std::cout.getloc(), my_numpunct ));
 		std::cout
-		<< '\n' << ansi::DIM.ON << TERMINAL_OUTPUT_TIPS << ansi::DIM.OFF
+		<< '\n' << str::DIM.ON << TERMINAL_OUTPUT_TIPS << str::DIM.OFF
 		<< '\n' << Command::HelpMessage
 		<< std::endl;
 
@@ -46,6 +48,8 @@ namespace solvent::cli {
 			std::cout << PROMPT;
 			std::getline(std::cin, command);
 		} while (run_command(command));
+		std::cout.imbue(pushed_locale);
+		// delete my_numpunct; // TODO.learn why isn't this needed?
 	}
 
 
@@ -60,20 +64,20 @@ namespace solvent::cli {
 		const auto it = Command::Str2Enum.find(cmd_name);
 		if (it == Command::Str2Enum.end()) {
 			// No command name was matched.
-			std::cout << ansi::RED.ON;
+			std::cout << str::RED.ON;
 			std::cout << "command \"" << cmd_line << "\" not found."
 				" enter \"help\" for the help menu.";
-			std::cout << ansi::RED.OFF << std::endl;
+			std::cout << str::RED.OFF << std::endl;
 			return true;
 		}
 		switch (it->second) {
 			using Command::E;
 			case E::Help:
 				std::cout
-				<< Command::HelpMessage << ansi::DIM.ON
+				<< Command::HelpMessage << str::DIM.ON
 				<< '\n' << verbosity::OPTIONS_MENU
 				<< '\n' << gen::path::OPTIONS_MENU
-				<< ansi::DIM.OFF << std::endl;
+				<< str::DIM.OFF << std::endl;
 				break;
 			case E::Quit:
 				return false;
@@ -117,9 +121,9 @@ namespace solvent::cli {
 		}
 		// unsuccessful return:
 		std::cout << get_verbosity() << " (unchanged).\n"
-			<< ansi::RED.ON << '"' << new_output_level_str
+			<< str::RED.ON << '"' << new_output_level_str
 			<< "\" is not a valid output level name.\n"
-			<< verbosity::OPTIONS_MENU << ansi::RED.OFF << std::endl;
+			<< verbosity::OPTIONS_MENU << str::RED.OFF << std::endl;
 		return get_verbosity();
 	}
 
@@ -157,9 +161,9 @@ namespace solvent::cli {
 		}
 		// unsuccessful return:
 		std::cout << get_path_kind() << " (unchanged).\n"
-			<< ansi::RED.ON << '"' << new_path_kind_str
+			<< str::RED.ON << '"' << new_path_kind_str
 			<< "\" is not a valid generator path name.\n"
-			<< gen::path::OPTIONS_MENU << ansi::RED.OFF << std::endl;
+			<< gen::path::OPTIONS_MENU << str::RED.OFF << std::endl;
 		return get_path_kind();
 	}
 
@@ -167,22 +171,23 @@ namespace solvent::cli {
 	void Repl<O>::print_msg_bar(
 		std::string const& msg,
 		unsigned bar_length,
-		const char fill_char
+		const std::string fill_char
 	) const {
 		if (bar_length < msg.length() + 8) {
 			bar_length = msg.length() + 8;
 		}
-		std::string bar(bar_length, fill_char);
-		if (!msg.empty()) {
-			bar.replace(4, msg.length(), msg);
-			bar.at(3) = ' ';
-			bar.at(4 + msg.length()) = ' ';
+		std::cout << '\n';
+		if (msg.length()) {
+			for (unsigned i = 0; i < 3; i++) { std::cout << fill_char; }
+			std::cout << ' ' << msg << ' ';
+			for (unsigned i = msg.length() + 5; i < bar_length; i++) { std::cout << fill_char; }
+		} else {
+			for (unsigned i = 0; i < bar_length; i++) { std::cout << fill_char; }
 		}
-		std::cout << '\n' <<bar;
 	}
 
 	template<Order O>
-	void Repl<O>::print_msg_bar(std::string const& msg, const char fill_char) const {
+	void Repl<O>::print_msg_bar(std::string const& msg, const std::string fill_char) const {
 		return print_msg_bar(msg, 64, fill_char);
 	}
 
@@ -203,8 +208,8 @@ namespace solvent::cli {
 		std::cout << "\nprocessor time: " STATW_D << processor_time << " seconds";
 		std::cout << "\nnum operations: " STATW_I << gen_result.op_count;
 		std::cout << "\nmax backtracks: " STATW_I << gen_result.most_backtracks_seen;
-		print_msg_bar("", '-');
-		print::pretty<O>(std::cout, gen_result);
+		print_msg_bar("", "─");
+		gen_result.print_pretty(std::cout);
 		print_msg_bar((gen_result.status == gen::ExitStatus::Ok) ? "OK" : "ABORT");
 		std::cout << std::endl;
 	}
@@ -228,7 +233,7 @@ namespace solvent::cli {
 				if ((verbosity_ == verbosity::Kind::All)
 				 || ((verbosity_ == verbosity::Kind::NoGiveups) && (gen_result.status == gen::ExitStatus::Ok))
 				) {
-					print::serial<O>(std::cout, gen_result);
+					gen_result.print_serial(std::cout);
 					if constexpr (O > 4) {
 						std::cout << std::endl;
 					} else {
@@ -239,9 +244,9 @@ namespace solvent::cli {
 				}
 			}
 		);
-		print_msg_bar("", BAR_WIDTH, '-');
+		print_msg_bar("", BAR_WIDTH, "─");
 
-		static const std::string seconds_units = std::string() + ansi::DIM.ON + " seconds (with I/O)" + ansi::DIM.OFF;
+		static const std::string seconds_units = std::string() + str::DIM.ON + " seconds (with I/O)" + str::DIM.OFF;
 		std::cout
 			<< "\nhelper threads: " STATW_I << params.num_threads
 			<< "\ngenerator path: " STATW_I << params.gen_params.path_kind
@@ -271,15 +276,15 @@ namespace solvent::cli {
 		try {
 			stopByValue = std::stoul(stop_after_str);
 			if (stopByValue <= 0) {
-				std::cout << ansi::RED.ON;
+				std::cout << str::RED.ON;
 				std::cout << "please provide a non-zero, positive integer.";
-				std::cout << ansi::RED.OFF << std::endl;
+				std::cout << str::RED.OFF << std::endl;
 				return;
 			}
 		} catch (std::invalid_argument const& ia) {
-			std::cout << ansi::RED.ON;
+			std::cout << str::RED.ON;
 			std::cout << "could not convert \"" << stop_after_str << "\" to an integer.";
-			std::cout << ansi::RED.OFF << std::endl;
+			std::cout << str::RED.OFF << std::endl;
 			return;
 		}
 		this->gen_multiple(static_cast<trials_t>(stopByValue), only_count_oks);

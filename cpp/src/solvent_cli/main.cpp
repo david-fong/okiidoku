@@ -1,5 +1,5 @@
 #include <solvent_cli/repl.hpp>
-#include <solvent_util/ansi.hpp>
+#include <solvent_util/str.hpp>
 
 #if WINDOWS_ANSI
 #include <windows.h>
@@ -10,7 +10,7 @@
 #include <iostream>  // cout,
 #include <random>    // random_device,
 
-namespace ansi = solvent::util::ansi;
+namespace str = solvent::util::str;
 
 const unsigned DEFAULT_ORDER = 4;
 
@@ -57,11 +57,11 @@ int main(const int argc, char const *const argv[]) {
 		case 5: { solvent::cli::Repl<5> s5; s5.start(); break; }
 		case 6: { solvent::cli::Repl<6> s6; s6.start(); break; }
 		default: {
-			std::cout << ansi::RED.ON << "\nILLEGAL ARGUMENT:\n  order must be one of: { ";
+			std::cout << str::RED.ON << "\nILLEGAL ARGUMENT:\n  order must be one of: { ";
 			for (unsigned i = 3; i <= 6; i++) {
 				std::cout << i << ", ";
 			}
-			std::cout << "}" << ansi::RED.OFF << std::endl;
+			std::cout << "}" << str::RED.OFF << std::endl;
 			break;
 		}
 	}

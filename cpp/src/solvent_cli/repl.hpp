@@ -95,8 +95,8 @@ namespace solvent::cli {
 		void gen_multiple(trials_t stop_after, bool only_count_oks);
 		void gen_multiple(std::string const&,  bool only_count_oks);
 
-		void print_msg_bar(std::string const&, unsigned int, char = '=') const;
-		void print_msg_bar(std::string const&, char = '=') const;
+		void print_msg_bar(std::string const&, unsigned int, std::string = "═") const;
+		void print_msg_bar(std::string const&, std::string = "═") const;
 	};
 
 

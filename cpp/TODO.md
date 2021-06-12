@@ -8,6 +8,9 @@
   - create a ternary enum for set_next_valid to return.
   - do all the identifier renaming.
   - Update the default giveup thresholds.
+  - Add a field to show dead_end_progress in GenResult. This is probably more informative externally. The progress field of GenResult will be more usefull internally (for continuing the previous gen).
+- Implement toolbox to abstract away the templating with switches
+  - Get rid of the order templating from Repl.
 - https://cmake.org/cmake/help/latest/guide/tutorial/index.html
   - See what can be learned from https://github.com/lefticus/cpp_weekly_game_project
 - Take out all stream related things from gen.
@@ -25,7 +28,6 @@
   - A web interface would be really nice.
 - C++20
   - std::bit_width possible usage in size.hpp
-  - `typename` doesn't need to be specified as much.
   - `using enum`. Might want to wait for CLANG to support?
   - see what stringy things can now use constexpr strings.
     - the ansi constants could use this. Right now, they are stuck as C-style string.

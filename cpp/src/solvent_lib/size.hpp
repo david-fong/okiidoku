@@ -30,7 +30,7 @@ namespace solvent {
 
 		// uint range [0, order].
 		// not used in any critical code, so it doesn't need to be fast type.
-		using ord1_t = std::uint8_t;
+		using ord1_t = std::uint_fast8_t;
 
 		// uint range [0, order^2].
 		// order:   2    3    4    5    6    7    8    9   10   11   12   13   14   15   16
@@ -46,10 +46,10 @@ namespace solvent {
 		// area:   16   81  256  625  1296  2401  4096  6561  10000
 		// bits:    5    7    9    9    11    12    17    17     18
 		using ord4_t =
-			std::conditional_t<(O <=   3), std::uint8_t,
-			std::conditional_t<(O <=   7), std::uint16_t,
-			std::conditional_t<(O <= 255), std::uint32_t,
-			std::uint64_t
+			std::conditional_t<(O <=   3), std::uint_fast8_t,
+			std::conditional_t<(O <=   7), std::uint_fast16_t,
+			std::conditional_t<(O <= 255), std::uint_fast32_t,
+			std::uint_fast64_t
 		>>>;
 	};
 }
