@@ -13,6 +13,7 @@ readonly ROOT="$(dirname "${BASH_SOURCE[0]}")"
 
 # readonly CPP=$(find src -type f -name '*.cpp')
 readonly CPP="$(echo "$ROOT/src/solvent_"{\
+util/str,\
 lib/grid,\
 lib/print,\
 lib/gen/path,\

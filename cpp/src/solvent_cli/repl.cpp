@@ -27,9 +27,8 @@ namespace solvent::cli {
 
 	template<Order O>
 	Repl<O>::Repl() {
-		set_verbosity(verbosity::Kind::All);
-		if (O == 4) { set_verbosity(verbosity::Kind::Silent); }
-		if (O > 4) { set_verbosity(verbosity::Kind::NoGiveups); }
+		if (O <= 4) { set_verbosity(verbosity::Kind::Silent); }
+		if (O  > 4) { set_verbosity(verbosity::Kind::NoGiveups); }
 		set_path_kind(pathkind_t::RowMajor);
 	}
 
@@ -81,8 +80,9 @@ namespace solvent::cli {
 				break;
 			case E::Quit:
 				return false;
-			case E::ConfigVerbosity:  set_verbosity(cmd_args); break;
-			case E::ConfigGenPath:    set_path_kind(cmd_args); break;
+			case E::ConfigVerbosity:   set_verbosity(cmd_args); break;
+			case E::ConfigGenPath:     set_path_kind(cmd_args); break;
+			case E::ConfigMaxDeadEnds: set_max_dead_ends(cmd_args); break;
 			case E::GenSingle:     gen_single();     break;
 			case E::GenContinue:   gen_single(true); break;
 			case E::GenMultiple:   gen_multiple(cmd_args, false); break;
@@ -93,108 +93,92 @@ namespace solvent::cli {
 
 
 	template<Order O>
-	verbosity::Kind Repl<O>::set_verbosity(verbosity::Kind new_output_level) {
-		const verbosity::Kind old_output_level = this->verbosity_;
+	void Repl<O>::set_verbosity(verbosity::Kind new_output_level) {
 		this->verbosity_ = new_output_level;
-		return old_output_level;
 	}
 
 
 	template<Order O>
-	verbosity::Kind Repl<O>::set_verbosity(std::string const& new_output_level_str) {
+	void Repl<O>::set_verbosity(std::string const& new_output_level_str) {
 		std::cout << "\noutput level is ";
 		if (new_output_level_str.empty()) {
 			std::cout << "currently set to: " << get_verbosity() << std::endl;
-			return get_verbosity();
+			return;
 		}
 		for (unsigned i = 0; i < verbosity::size; i++) {
 			if (new_output_level_str.compare(verbosity::NAMES[i]) == 0) {
-				if (verbosity::Kind{i} == get_verbosity()) {
-					std::cout << "already set to: ";
-				} else {
-					std::cout << "now set to: ";
-					set_verbosity(verbosity::Kind{i});
-				}
-				std::cout << get_verbosity() << std::endl;
-				return get_verbosity();
+				set_verbosity(verbosity::Kind{i});
+				std::cout << "now set to: " << get_verbosity() << std::endl;
+				return;
 			}
 		}
 		// unsuccessful return:
 		std::cout << get_verbosity() << " (unchanged).\n"
-			<< str::RED.ON << '"' << new_output_level_str
-			<< "\" is not a valid output level name.\n"
-			<< verbosity::OPTIONS_MENU << str::RED.OFF << std::endl;
-		return get_verbosity();
+			<< str::RED.ON << '"' << new_output_level_str << "\" is not a valid verbosity level.\n" << str::RED.OFF
+			<< verbosity::OPTIONS_MENU << std::endl;
 	}
 
 
 	template<Order O>
-	pathkind_t Repl<O>::set_path_kind(const pathkind_t new_path_kind) noexcept {
-		if (new_path_kind == get_path_kind()) {
-			// Short circuit:
-			return get_path_kind();
-		}
-		const pathkind_t prev_path_kind = get_path_kind();
+	void Repl<O>::set_path_kind(const pathkind_t new_path_kind) noexcept {
 		path_kind_ = new_path_kind;
-		return prev_path_kind;
 	}
 
 
 	template<Order O>
-	pathkind_t Repl<O>::set_path_kind(std::string const& new_path_kind_str) noexcept {
+	void Repl<O>::set_path_kind(std::string const& new_path_kind_str) noexcept {
 		std::cout << "\ngenerator path is ";
 		if (new_path_kind_str.empty()) {
 			std::cout << "currently set to: " << get_path_kind() << std::endl;
-			return get_path_kind();
+			return;
 		}
 		for (unsigned i = 0; i < gen::path::NUM_KINDS; i++) {
 			if (new_path_kind_str.compare(gen::path::NAMES[i]) == 0) {
-				if (pathkind_t{i} == get_path_kind()) {
-					std::cout << "already set to: ";
-				} else {
-					std::cout << "now set to: ";
-					set_path_kind(pathkind_t{i});
-				}
-				std::cout << get_path_kind() << std::endl;
-				return get_path_kind();
+				set_path_kind(pathkind_t{i});
+				std::cout << "now set to: " << get_path_kind() << std::endl;
+				return;
 			}
 		}
 		// unsuccessful return:
 		std::cout << get_path_kind() << " (unchanged).\n"
-			<< str::RED.ON << '"' << new_path_kind_str
-			<< "\" is not a valid generator path name.\n"
-			<< gen::path::OPTIONS_MENU << str::RED.OFF << std::endl;
-		return get_path_kind();
+			<< str::RED.ON << '"' << new_path_kind_str << "\" is not a valid generator path name.\n" << str::RED.OFF
+			<< gen::path::OPTIONS_MENU << std::endl;
+		return;
 	}
 
-	template<Order O>
-	void Repl<O>::print_msg_bar(
-		std::string const& msg,
-		unsigned bar_length,
-		const std::string fill_char
-	) const {
-		if (bar_length < msg.length() + 8) {
-			bar_length = msg.length() + 8;
-		}
-		std::cout << '\n';
-		if (msg.length()) {
-			for (unsigned i = 0; i < 3; i++) { std::cout << fill_char; }
-			std::cout << ' ' << msg << ' ';
-			for (unsigned i = msg.length() + 5; i < bar_length; i++) { std::cout << fill_char; }
-		} else {
-			for (unsigned i = 0; i < bar_length; i++) { std::cout << fill_char; }
-		}
-	}
 
 	template<Order O>
-	void Repl<O>::print_msg_bar(std::string const& msg, const std::string fill_char) const {
-		return print_msg_bar(msg, 64, fill_char);
+	void Repl<O>::set_max_dead_ends(unsigned long long max_dead_ends) {
+		this->max_dead_ends_ = max_dead_ends;
+	}
+
+
+	template<Order O>
+	void Repl<O>::set_max_dead_ends(std::string const& new_max_dead_ends_str) {
+		std::cout << "\nmax dead ends is ";
+		if (new_max_dead_ends_str.empty()) {
+			std::cout << "currently set to: " << get_max_dead_ends() << std::endl;
+			return;
+		}
+		try {
+			const unsigned long long new_max_dead_ends = std::stoull(new_max_dead_ends_str);
+			set_max_dead_ends(new_max_dead_ends);
+			std::cout << "now set to: " << get_max_dead_ends() << std::endl;
+			// TODO.impl handle negative numbers being parsed as uints
+		} catch (std::invalid_argument const& ia) {
+			// unsuccessful return:
+			std::cout << get_max_dead_ends() << " (unchanged).\n"
+				<< str::RED.ON << '"' << new_max_dead_ends_str << "\" is not a valid uint64_t.\n" << str::RED.OFF
+				<< verbosity::OPTIONS_MENU << std::endl;
+			return;
+		}
+
 	}
 
 
 	template<Order O>
 	void Repl<O>::gen_single(const bool cont_prev) {
-		print_msg_bar("START");
+		str::print_msg_bar("START");
 
 		// Generate a new solution:
 		generator_t gen;
@@ -202,15 +186,15 @@ namespace solvent::cli {
 		const clock_t clock_start = std::clock();
 		const auto& gen_result = cont_prev
 			? gen.generate(std::nullopt)
-			: gen.generate(gen::Params{.path_kind = path_kind_});
+			: gen.generate(gen::Params{ .path_kind = get_path_kind(), .max_dead_ends = get_max_dead_ends() });
 		const double processor_time = (static_cast<double>(std::clock() - clock_start)) / CLOCKS_PER_SEC;
 
 		std::cout << "\nprocessor time: " STATW_D << processor_time << " seconds";
 		std::cout << "\nnum operations: " STATW_I << gen_result.op_count;
 		std::cout << "\nmax dead ends:  " STATW_I << gen_result.most_dead_ends_seen;
-		print_msg_bar("", "─");
+		str::print_msg_bar("", "─");
 		gen_result.print_pretty(std::cout);
-		print_msg_bar((gen_result.status == gen::ExitStatus::Ok) ? "OK" : "ABORT");
+		str::print_msg_bar((gen_result.status == gen::ExitStatus::Ok) ? "OK" : "ABORT");
 		std::cout << std::endl;
 	}
 
@@ -222,16 +206,16 @@ namespace solvent::cli {
 	) {
 		const unsigned BAR_WIDTH = 64;
 
-		print_msg_bar("START x" + std::to_string(stop_after), BAR_WIDTH);
+		str::print_msg_bar("START x" + std::to_string(stop_after), BAR_WIDTH);
 		gen::batch::Params params {
-			.gen_params { .path_kind = path_kind_ },
+			.gen_params { .path_kind = get_path_kind(), .max_dead_ends = get_max_dead_ends() },
 			.only_count_oks = only_count_oks,
 			.stop_after = stop_after
 		};
 		const gen::batch::BatchReport batch_report = gen::batch::batch<O>(params,
 			[this](typename generator_t::GenResult const& gen_result) {
-				if ((verbosity_ == verbosity::Kind::All)
-				 || ((verbosity_ == verbosity::Kind::NoGiveups) && (gen_result.status == gen::ExitStatus::Ok))
+				if ((get_verbosity() == verbosity::Kind::All)
+				 || ((get_verbosity() == verbosity::Kind::NoGiveups) && (gen_result.status == gen::ExitStatus::Ok))
 				) {
 					gen_result.print_serial(std::cout);
 					if constexpr (O > 4) {
@@ -239,18 +223,18 @@ namespace solvent::cli {
 					} else {
 						std::cout << '\n';
 					}
-				} else if (verbosity_ == verbosity::Kind::Silent) {
+				} else if (get_verbosity() == verbosity::Kind::Silent) {
 					// TODO.impl print a progress bar
 				}
 			}
 		);
-		if (verbosity_ == verbosity::Kind::NoGiveups
+		if (get_verbosity() == verbosity::Kind::NoGiveups
 			&& only_count_oks
 			&& batch_report.total_anys == 0
 		) {
 			std::cout << str::RED.ON << "* all generations aborted" << str::RED.OFF;
 		}
-		print_msg_bar("", BAR_WIDTH, "─");
+		str::print_msg_bar("", BAR_WIDTH, "─");
 
 		static const std::string seconds_units = std::string() + str::DIM.ON + " seconds (with I/O)" + str::DIM.OFF;
 		std::cout
@@ -263,7 +247,7 @@ namespace solvent::cli {
 
 		// Print bins (work distribution):
 		batch_report.print(std::cout, O);
-		print_msg_bar("DONE x" + std::to_string(stop_after), BAR_WIDTH);
+		str::print_msg_bar("DONE x" + std::to_string(stop_after), BAR_WIDTH);
 
 		if (batch_report.time_elapsed.wall_seconds > 10.0) {
 			// Emit a beep sound if the trials took longer than ten processor seconds:
@@ -278,10 +262,10 @@ namespace solvent::cli {
 		std::string const& stop_after_str,
 		const bool only_count_oks
 	) {
-		unsigned long stopByValue;
+		unsigned long stop_by_value;
 		try {
-			stopByValue = std::stoul(stop_after_str);
-			if (stopByValue <= 0) {
+			stop_by_value = std::stoul(stop_after_str);
+			if (stop_by_value <= 0) {
 				std::cout << str::RED.ON;
 				std::cout << "please provide a non-zero, positive integer.";
 				std::cout << str::RED.OFF << std::endl;
@@ -293,7 +277,7 @@ namespace solvent::cli {
 			std::cout << str::RED.OFF << std::endl;
 			return;
 		}
-		this->gen_multiple(static_cast<trials_t>(stopByValue), only_count_oks);
+		this->gen_multiple(static_cast<trials_t>(stop_by_value), only_count_oks);
 	}
 
 

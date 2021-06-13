@@ -1,5 +1,5 @@
-#ifndef HPP_SOLVENT_UTIL_ANSI
-#define HPP_SOLVENT_UTIL_ANSI
+#ifndef HPP_SOLVENT_UTIL_STR
+#define HPP_SOLVENT_UTIL_STR
 
 #include <solvent_config.hpp>
 #include <locale>
@@ -51,5 +51,9 @@ namespace solvent::util::str {
 		"-", "*", "X", "#",
 		#endif
 	};
+
+
+	void print_msg_bar(std::string const& msg, unsigned bar_length, std::string fill_char = "═");
+	void print_msg_bar(std::string const& msg, std::string fill_char = "═");
 }
 #endif

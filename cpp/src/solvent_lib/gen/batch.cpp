@@ -174,7 +174,7 @@ namespace solvent::lib::gen::batch {
 		}
 		os << TABLE_SEPARATOR;
 		if (total_oks < max_dead_end_samples.size() * gen::batch::SharedData::RECOMMENDED_OKS_PER_SAMPLE) {
-			os << util::str::DIM.ON << "\nexercise caution against small datasets!" << util::str::DIM.OFF << std::endl;
+			os << "\nexercise caution against small datasets!" << std::endl;
 		}
 	}
 

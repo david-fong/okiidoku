@@ -62,7 +62,7 @@ namespace solvent::lib::gen {
 		static constexpr ord4_t O4 = O*O*O*O;
 
 		static constexpr dead_ends_t DEFAULT_MAX_DEAD_ENDS = [](){ const dead_ends_t _[] = {
-			0, 0, 3, 100, 320, 100'000, 1'000'000'000,
+			0, 0, 3, 100, 320, 100'000, 10'000'000,
 		}; return _[O]; }();
 
 		//
