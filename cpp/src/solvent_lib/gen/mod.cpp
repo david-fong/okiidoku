@@ -19,8 +19,8 @@ namespace solvent::lib::gen {
 
 	template<Order O>
 	Params Params::clean(void) noexcept {
-		if (max_backtracks == 0) {
-			max_backtracks = Generator<O>::DEFAULT_MAX_DEAD_ENDS;
+		if (max_dead_ends == 0) {
+			max_dead_ends = Generator<O>::DEFAULT_MAX_DEAD_ENDS;
 		}
 		return *this;
 	}
@@ -43,7 +43,7 @@ namespace solvent::lib::gen {
 		rows_has_.fill(0);
 		cols_has_.fill(0);
 		blks_has_.fill(0);
-		backtracks_.fill(0);
+		dead_ends_.fill(0);
 
 		RNG_MUTEX.lock();
 		for (auto& vto : val_try_orders_) {
@@ -66,27 +66,28 @@ namespace solvent::lib::gen {
 			if (info.status == ExitStatus::Exhausted) [[unlikely]] {
 				return info;
 			}
-			backtracks_.fill(0);
+			dead_ends_.fill(0);
 		}
 		ord4_t (& prog2coord)(ord4_t) = path::GetPathCoords<O>(info.params.path_kind);
-		ord4_t dead_end_progress = info.progress;
+		ord4_t& dead_end_progress = info.dead_end_progress;
 
 		while (true) {
 			const Direction direction = this->set_next_valid(
 				info.progress, dead_end_progress, prog2coord
 			);
 			if (!direction.is_skip) { ++info.op_count; }
+
 			if (direction.is_back) [[unlikely]] {
 				if (info.progress == 0) [[unlikely]] {
 					info.status = ExitStatus::Exhausted;
 					break;
 				}
-				if (!direction.is_skip) {
-					const dead_ends_t backtracks = ++backtracks_[info.progress];
+				if (info.progress == dead_end_progress) [[unlikely]] {
+					const dead_ends_t dead_ends = ++dead_ends_[info.progress];
 					--info.progress;
-					if (backtracks > info.most_backtracks_seen) [[unlikely]] {
-						info.most_backtracks_seen = backtracks;
-						if (info.most_backtracks_seen > info.params.max_backtracks) [[unlikely]] {
+					if (dead_ends > info.most_dead_ends_seen) [[unlikely]] {
+						info.most_dead_ends_seen = dead_ends;
+						if (info.most_dead_ends_seen > info.params.max_dead_ends) [[unlikely]] {
 							info.status = ExitStatus::Abort;
 							break;
 						}
@@ -102,11 +103,12 @@ namespace solvent::lib::gen {
 				++info.progress;
 				if ((info.progress > dead_end_progress)
 					|| !this->can_coords_see_each_other(prog2coord(info.progress), prog2coord(dead_end_progress))
-				) {
+				) [[unlikely]] { // TODO.learn `unlikely` helps for 4:rowmajor. Does it help in general?
 					dead_end_progress = info.progress;
 				}
 			}
 		}
+
 		for (ord4_t i = 0; i < O4; i++) {
 			info.grid[prog2coord(i)] = values_[i].value;
 		}
@@ -143,7 +145,7 @@ namespace solvent::lib::gen {
 
 		const has_mask_t t_has = (row_has | col_has | blk_has);
 		for (ord2_t try_i = t.next_try_index; try_i < O2; try_i++) {
-			const ord2_t try_val = val_try_orders_[progress/O2][try_i];
+			const ord2_t try_val = val_try_orders_[progress / O2][try_i];
 			const has_mask_t try_val_mask = has_mask_t(1) << try_val;
 			if (!(t_has & try_val_mask)) {
 				// A valid value was found:
@@ -161,7 +163,7 @@ namespace solvent::lib::gen {
 	}
 
 
-	std::string shaded_backtrack_stat(const long out_of, const long count) {
+	std::string shaded_dead_end_stat(const long out_of, const long count) {
 		const unsigned int relative_intensity
 			= static_cast<double>(count - 1)
 			* util::str::BLOCK_CHARS.size()

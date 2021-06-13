@@ -5,7 +5,6 @@
 #include <solvent_lib/grid.hpp>
 #include <solvent_lib/size.hpp>
 
-// #include <iosfwd>
 #include <random>
 #include <array>
 #include <string>
@@ -20,7 +19,7 @@ namespace solvent::lib::gen {
 	//
 	struct Params {
 		path::Kind path_kind;
-		unsigned long max_backtracks = 0; // If zero, a default value will be used.
+		unsigned long max_dead_ends = 0; // Defaulted if zero.
 		template<Order O> Params clean(void) noexcept;
 	};
 
@@ -52,9 +51,9 @@ namespace solvent::lib::gen {
 		// Note that this should always be smaller than opcount_t.
 		using dead_ends_t =
 			// Make sure this can fit `DEFAULT_MAX_DEAD_ENDS`.
-			//typename std::conditional_t<(O < 4), std::uint_fast8_t,
-			std::conditional_t<(O < 5), std::uint_fast16_t,
-			std::conditional_t<(O < 6), std::uint_fast32_t,
+			// std::conditional_t<(O <= 3), std::uint_fast8_t,
+			std::conditional_t<(O <= 4), std::uint_fast16_t,
+			std::conditional_t<(O <= 5), std::uint_fast32_t,
 			std::uint64_t
 		>>;
 
@@ -63,16 +62,17 @@ namespace solvent::lib::gen {
 		static constexpr ord4_t O4 = O*O*O*O;
 
 		static constexpr dead_ends_t DEFAULT_MAX_DEAD_ENDS = [](){ const dead_ends_t _[] = {
-			0, 1, 3, 150, 700, 1'000'000, 1'000'000'000,
+			0, 0, 3, 100, 320, 100'000, 1'000'000'000,
 		}; return _[O]; }();
 
 		//
 		struct GenResult final {
 			Params params; // Mainly used internally for continuation.
 			ExitStatus status = ExitStatus::Abort;
-			ord4_t progress = 0;
+			ord4_t progress = 0; // Needed internally for continuation. `dead_end_progress` is probably more insightful.
+			ord4_t dead_end_progress = 0;
 			opcount_t op_count = 0;
-			dead_ends_t most_backtracks_seen = 0;
+			dead_ends_t most_dead_ends_seen = 0;
 			std::array<ord2_t, O4> grid = {};
 
 			void print_serial(std::ostream&) const;
@@ -99,7 +99,7 @@ namespace solvent::lib::gen {
 		// Pass std::nullopt to continue the previous run.
 		[[gnu::hot]] GenResult generate(std::optional<Params>);
 		[[gnu::pure]] GenResult const& get_gen_result() const { return gen_result_; }
-		[[gnu::pure]] std::array<dead_ends_t, O4> const& get_backtracks() const { return backtracks_; }
+		[[gnu::pure]] std::array<dead_ends_t, O4> const& get_dead_ends() const { return dead_ends_; }
 
 	 private:
 		std::array<std::array<ord2_t, O2>, O2> val_try_orders_; // indexed by (progress/O2)
@@ -107,7 +107,7 @@ namespace solvent::lib::gen {
 		std::array<has_mask_t, O2> rows_has_;
 		std::array<has_mask_t, O2> cols_has_;
 		std::array<has_mask_t, O2> blks_has_;
-		std::array<dead_ends_t, O4> backtracks_; // indexed by progress
+		std::array<dead_ends_t, O4> dead_ends_; // indexed by progress
 
 		// clear fields and scramble val_try_order
 		void init(void);
@@ -122,7 +122,7 @@ namespace solvent::lib::gen {
 	};
 
 
-	[[gnu::const]] std::string shaded_backtrack_stat(const long out_of, const long count);
+	[[gnu::const]] std::string shaded_dead_end_stat(const long out_of, const long count);
 
 
 	#define SOLVENT_TEMPL_TEMPL(O_) \

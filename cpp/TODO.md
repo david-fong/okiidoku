@@ -3,12 +3,7 @@
 
 ## Higher Priority
 
-- Count dead ends instead of backtracks.
-  - reason: backtracks from coords that can see the dead end coord are trivial and do not add significant work.
-  - create a ternary enum for set_next_valid to return.
-  - do all the identifier renaming.
-  - Update the default giveup thresholds.
-  - Add a field to show dead_end_progress in GenResult. This is probably more informative externally. The progress field of GenResult will be more usefull internally (for continuing the previous gen).
+- Add repl command to set max_dead_ends
 - Implement toolbox to abstract away the templating with switches
   - Get rid of the order templating from Repl.
 - https://cmake.org/cmake/help/latest/guide/tutorial/index.html

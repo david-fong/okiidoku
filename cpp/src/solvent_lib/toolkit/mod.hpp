@@ -14,5 +14,9 @@
 
 namespace solvent::lib::toolkit {
 
+	class Toolkit final {
+	 public:
+	 private:
+	};
 }
 #endif

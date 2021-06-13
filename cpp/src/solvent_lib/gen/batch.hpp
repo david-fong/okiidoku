@@ -18,8 +18,8 @@ namespace solvent::lib::gen::batch {
 	//
 	struct Params {
 		gen::Params gen_params;
-		unsigned num_threads = 0; // If zero, a default value will be used.
-		unsigned max_backtrack_sample_granularity = 0;
+		unsigned num_threads = 0; // Defaulted if zero.
+		unsigned max_dead_end_sample_granularity = 0; // Defaulted if zero.
 		bool only_count_oks;
 		trials_t stop_after;
 
@@ -35,8 +35,8 @@ namespace solvent::lib::gen::batch {
 		util::Timer timer;
 		util::Timer::Elapsed time_elapsed;
 
-		struct MaxBacktrackSample {
-			unsigned long max_backtracks;
+		struct MaxDeadEndSample {
+			unsigned long max_dead_ends;
 			trials_t marginal_oks;
 			double marginal_ops;
 			std::optional<double> marginal_average_ops; // marginal_ops / marginal_oks. null if no oks.
@@ -46,10 +46,10 @@ namespace solvent::lib::gen::batch {
 		static constexpr unsigned SAMPLE_GRANULARITY_MAX = 50u;
 		static constexpr unsigned RECOMMENDED_OKS_PER_SAMPLE = 20u;
 
-		// Data sampled. Each entry showing the outcome if its max_backtracks
+		// Data sampled. Each entry showing the outcome if its max_dead_ends
 		// value was used.
-		std::vector<MaxBacktrackSample> max_backtrack_samples;
-		unsigned max_backtrack_samples_best_i = 0u;
+		std::vector<MaxDeadEndSample> max_dead_end_samples;
+		unsigned max_dead_end_samples_best_i = 0u;
 
 		void print(std::ostream&, Order O) const;
 	};

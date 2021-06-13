@@ -17,8 +17,8 @@ namespace solvent::cli {
 
 	// Mechanism to statically toggle printing alignment:
 	// (#undef-ed before the end of this namespace)
-	#define STATW_I << std::setw((0.4 * O*O * 4))
-	#define STATW_D << std::setw((0.4 * O*O * 4) + 4)
+	#define STATW_I << std::setw((0.4 * O*O * 1.5))
+	#define STATW_D << std::setw((0.4 * O*O * 1.5)) << std::fixed << std::setprecision(2)
 
 	const std::string TERMINAL_OUTPUT_TIPS =
 	"\nNote: You can run `tput rmam` in your shell to disable text wrapping."
@@ -31,7 +31,6 @@ namespace solvent::cli {
 		if (O == 4) { set_verbosity(verbosity::Kind::Silent); }
 		if (O > 4) { set_verbosity(verbosity::Kind::NoGiveups); }
 		set_path_kind(pathkind_t::RowMajor);
-		if (O > 4) { set_path_kind(pathkind_t::BlockCol); }
 	}
 
 	template<Order O>
@@ -45,7 +44,8 @@ namespace solvent::cli {
 
 		std::string command;
 		do {
-			std::cout << PROMPT;
+			std::cout << "\n[" << O << "]: ";
+
 			std::getline(std::cin, command);
 		} while (run_command(command));
 		std::cout.imbue(pushed_locale);
@@ -198,7 +198,7 @@ namespace solvent::cli {
 
 		// Generate a new solution:
 		generator_t gen;
-		std::cout << "\nsolver obj size: " << sizeof(gen) << " bytes";
+		std::cout << "\nsolver obj size: " STATW_I << sizeof(gen) << " bytes";
 		const clock_t clock_start = std::clock();
 		const auto& gen_result = cont_prev
 			? gen.generate(std::nullopt)
@@ -207,7 +207,7 @@ namespace solvent::cli {
 
 		std::cout << "\nprocessor time: " STATW_D << processor_time << " seconds";
 		std::cout << "\nnum operations: " STATW_I << gen_result.op_count;
-		std::cout << "\nmax backtracks: " STATW_I << gen_result.most_backtracks_seen;
+		std::cout << "\nmax dead ends:  " STATW_I << gen_result.most_dead_ends_seen;
 		print_msg_bar("", "─");
 		gen_result.print_pretty(std::cout);
 		print_msg_bar((gen_result.status == gen::ExitStatus::Ok) ? "OK" : "ABORT");
@@ -244,13 +244,19 @@ namespace solvent::cli {
 				}
 			}
 		);
+		if (verbosity_ == verbosity::Kind::NoGiveups
+			&& only_count_oks
+			&& batch_report.total_anys == 0
+		) {
+			std::cout << str::RED.ON << "* all generations aborted" << str::RED.OFF;
+		}
 		print_msg_bar("", BAR_WIDTH, "─");
 
 		static const std::string seconds_units = std::string() + str::DIM.ON + " seconds (with I/O)" + str::DIM.OFF;
 		std::cout
 			<< "\nhelper threads: " STATW_I << params.num_threads
 			<< "\ngenerator path: " STATW_I << params.gen_params.path_kind
-			<< "\npercent aborts: " STATW_D << (batch_report.fraction_aborted * 100)
+			<< "\npercent aborts: " STATW_D << (batch_report.fraction_aborted * 100) << " %"
 			<< "\nprocessor time: " STATW_D << batch_report.time_elapsed.proc_seconds << seconds_units
 			<< "\nreal-life time: " STATW_D << batch_report.time_elapsed.wall_seconds << seconds_units
 			;

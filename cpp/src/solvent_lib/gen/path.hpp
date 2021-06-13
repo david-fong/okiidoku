@@ -13,23 +13,23 @@ namespace solvent::lib::gen {
 	namespace path {
 		enum class Kind : unsigned {
 			RowMajor,
-			DealRwMj,
 			BlockCol,
-			__MAX__ = BlockCol,
+			DealRwMj,
+			__MAX__ = DealRwMj,
 		};
 		constexpr size_t NUM_KINDS = static_cast<size_t>(Kind::__MAX__) + 1;
 		// Indices of entries must match the
 		// literal values_ of their respective enums.
 		inline const std::array<std::string, NUM_KINDS> NAMES = {
 			"rowmajor",
-			"dealrwmj",
 			"blockcol",
+			"dealrwmj",
 		};
 		extern std::ostream& operator<<(std::ostream& os, Kind path_kind);
 		inline const std::string OPTIONS_MENU = "\nGEN-PATH OPTIONS:"
 			"\n- rowmajor   horizontal strips as wide as the grid one by one"
-			"\n- dealrwmj   like dealing cards to each block using row-major"
-			"\n- blockcol   rowmajor, but broken into columns one block wide";
+			"\n- blockcol   rowmajor, but broken into columns one block wide"
+			"\n- dealrwmj   like dealing cards to each block using row-major";
 
 		template<solvent::Order O>
 		using coord_converter_t = typename size<O>::ord4_t (&)(typename size<O>::ord4_t);

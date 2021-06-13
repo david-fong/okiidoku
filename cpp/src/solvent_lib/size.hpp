@@ -9,7 +9,7 @@
 
 namespace solvent {
 	//
-	using Order = std::uint8_t;
+	using Order = unsigned;
 	constexpr Order MAX_REASONABLE_ORDER = 10u;
 
 	// Note: when printing, make sure to cast uint8_t to int.

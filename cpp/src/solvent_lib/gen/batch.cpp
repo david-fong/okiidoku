@@ -23,8 +23,8 @@ namespace solvent::lib::gen::batch {
 		if (num_threads == 0) {
 			num_threads = ThreadFunc<O>::DEFAULT_NUM_THREADS;
 		}
-		if (max_backtrack_sample_granularity == 0) {
-			max_backtrack_sample_granularity = SharedData::SAMPLE_GRANULARITY_DEFAULT;
+		if (max_dead_end_sample_granularity == 0) {
+			max_dead_end_sample_granularity = SharedData::SAMPLE_GRANULARITY_DEFAULT;
 		}
 		return *this;
 	}
@@ -43,10 +43,10 @@ namespace solvent::lib::gen::batch {
 			if (gen_result.status == ExitStatus::Ok) [[likely]] {
 				shared_data_.total_oks++;
 
-				auto& dist_summary_row = shared_data_.max_backtrack_samples[
-					params_.max_backtrack_sample_granularity
-					* (gen_result.most_backtracks_seen - 1)
-					/ gen_result.params.max_backtracks
+				auto& dist_summary_row = shared_data_.max_dead_end_samples[
+					params_.max_dead_end_sample_granularity
+					* (gen_result.most_dead_ends_seen)
+					/ (params_.gen_params.max_dead_ends + 1)
 				];
 				dist_summary_row.marginal_oks++;
 				dist_summary_row.marginal_ops += gen_result.op_count;
@@ -62,7 +62,7 @@ namespace solvent::lib::gen::batch {
 		params.clean<O>();
 		std::mutex shared_data_mutex;
 		SharedData shared_data;
-		shared_data.max_backtrack_samples.resize(params.max_backtrack_sample_granularity);
+		shared_data.max_dead_end_samples.resize(params.max_dead_end_sample_granularity);
 
 		std::vector<std::thread> threads;
 		for (unsigned i = 0; i < params.num_threads; i++) {
@@ -75,27 +75,29 @@ namespace solvent::lib::gen::batch {
 		}
 		shared_data.time_elapsed = shared_data.timer.read_elapsed();
 
-		shared_data.fraction_aborted = static_cast<double>(shared_data.total_anys - shared_data.total_oks) / shared_data.total_oks;
+		shared_data.fraction_aborted = (shared_data.total_anys == 0) ? 1.0 :
+			(static_cast<double>(shared_data.total_anys - shared_data.total_oks)
+			/ shared_data.total_anys);
 		{
 			double net_ops = 0.0;
 			trials_t net_oks = 0;
-			for (unsigned i = 0; i < shared_data.max_backtrack_samples.size(); i++) {
-				auto& sample = shared_data.max_backtrack_samples[i];
-				sample.max_backtracks = params.gen_params.max_backtracks * (i+1) / params.max_backtrack_sample_granularity;
+			for (unsigned i = 0; i < params.max_dead_end_sample_granularity; i++) {
+				auto& sample = shared_data.max_dead_end_samples[i];
+				sample.max_dead_ends = params.gen_params.max_dead_ends * (i+1) / params.max_dead_end_sample_granularity;
 				net_ops += sample.marginal_ops;
 				net_oks += sample.marginal_oks;
 				sample.marginal_average_ops = sample.marginal_oks ? std::optional(sample.marginal_ops / sample.marginal_oks) : std::nullopt;
 				sample.net_average_ops = net_oks ? std::optional(static_cast<double>(net_ops) / net_oks) : std::nullopt;
 			}
 		}{
-			// Get the index of the sample representing the optimal max_backtracks setting:
-			shared_data.max_backtrack_samples_best_i = 0;
+			// Get the index of the sample representing the optimal max_dead_ends setting:
+			shared_data.max_dead_end_samples_best_i = 0;
 			double best_net_average_ops = std::numeric_limits<double>::max();
-			for (unsigned i = 0; i < shared_data.max_backtrack_samples.size(); i++) {
-				const auto& sample = shared_data.max_backtrack_samples[i];
+			for (unsigned i = 0; i < shared_data.max_dead_end_samples.size(); i++) {
+				const auto& sample = shared_data.max_dead_end_samples[i];
 				if (sample.net_average_ops.has_value() && (sample.net_average_ops.value() < best_net_average_ops)) {
 					best_net_average_ops = sample.net_average_ops.value();
-					shared_data.max_backtrack_samples_best_i = i;
+					shared_data.max_dead_end_samples_best_i = i;
 				}
 			}
 		}
@@ -106,24 +108,24 @@ namespace solvent::lib::gen::batch {
 	void SharedData::print(std::ostream& os, const Order O) const {
 		static const std::string THROUGHPUT_BAR_STRING("-------------------------");
 		static const std::string TABLE_SEPARATOR =
-		"\n├──────────────┼────────────┼───────────────┼───────────────┤";
+		"\n├─────────────┼────────────┼───────────────┼───────────────┤";
 		static const std::string TABLE_HEADER =
-		"\n│     max      │  marginal  │   marginal    │      net      │"
-		"\n│  backtracks  │    oks     │  average ops  │  average ops  │";
+		"\n│     max     │  marginal  │   marginal    │      net      │"
+		"\n│  dead ends  │    oks     │  average ops  │  average ops  │";
 
 		os << TABLE_SEPARATOR
 			<< TABLE_HEADER
 			<< TABLE_SEPARATOR
-			 << std::fixed << std::setprecision(2);
+			<< std::fixed << std::setprecision(2);
 
-		const auto& best_sample = max_backtrack_samples[max_backtrack_samples_best_i];
-		for (const auto& sample : max_backtrack_samples) {
+		const auto& best_sample = max_dead_end_samples[max_dead_end_samples_best_i];
+		for (const auto& sample : max_dead_end_samples) {
 
-			// max_backtracks:
+			// max_dead_ends:
 			if (O <= 4) {
-				os << "\n│" << std::setw(12) << sample.max_backtracks;
+				os << "\n│" << std::setw(11) << sample.max_dead_ends;
 			} else {
-				os << "\n│" << std::setw(11) << (sample.max_backtracks / 1'000.0) << 'K';
+				os << "\n│" << std::setw(10) << (sample.max_dead_ends / 1'000.0) << 'K';
 			}
 
 			// marginal_oks:
@@ -139,34 +141,39 @@ namespace solvent::lib::gen::batch {
 			if (sample.marginal_average_ops.has_value()) {
 				os << (sample.marginal_average_ops.value() / ((O < 5) ? 1 : 1000));
 			} else {
-				os << "-";
+				os << " ";
 			}
 			os << ((O < 5) ? ' ' : 'K');
 			if (sample.marginal_oks == 0) { os << util::str::DIM.OFF; }
 
 			// net_average_ops:
 			os << "  │";
-			os << std::setw(13);
+			if (sample.marginal_oks == 0) { os << util::str::DIM.ON; }
+			os << std::setw(12);
 			if (sample.net_average_ops.has_value()) {
-				os << (100.0 * sample.net_average_ops.value());
+				os << (sample.net_average_ops.value() / ((O < 5) ? 1 : 1000));
 			} else {
-				os << "-";
+				os << " ";
 			}
+			os << ((O < 5) ? ' ' : 'K');
+			if (sample.marginal_oks == 0) { os << util::str::DIM.OFF; }
 
 			os << "  │";
 
 			// Print a bar to visualize throughput relative to that
 			// of the best. Note visual exaggeration via exponents
 			// (the exponent value was chosen by taste / visual feel)
-			const unsigned bar_length = (best_sample.net_average_ops.has_value()) ? (THROUGHPUT_BAR_STRING.length() * (
-				1.0 / (sample.net_average_ops.value_or(0) / best_sample.net_average_ops.value())
-			)) : 0;
+			const unsigned bar_length = (best_sample.net_average_ops.has_value() && sample.net_average_ops.has_value())
+				? (THROUGHPUT_BAR_STRING.length() * (
+					1.0 / (sample.net_average_ops.value() / best_sample.net_average_ops.value())
+				))
+				: 0;
 			if (&sample != &best_sample) os << util::str::DIM.ON;
 			os << ' ' << THROUGHPUT_BAR_STRING.substr(0, bar_length);
 			if (&sample != &best_sample) os << util::str::DIM.OFF;
 		}
 		os << TABLE_SEPARATOR;
-		if (total_oks < max_backtrack_samples.size() * gen::batch::SharedData::RECOMMENDED_OKS_PER_SAMPLE) {
+		if (total_oks < max_dead_end_samples.size() * gen::batch::SharedData::RECOMMENDED_OKS_PER_SAMPLE) {
 			os << util::str::DIM.ON << "\nexercise caution against small datasets!" << util::str::DIM.OFF << std::endl;
 		}
 	}

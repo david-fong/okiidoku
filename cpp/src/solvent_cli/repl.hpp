@@ -13,8 +13,6 @@
 
 namespace solvent::cli {
 
-	inline const std::string PROMPT = "\n$ ";
-
 	namespace Command {
 		enum class E : unsigned {
 			Help,
