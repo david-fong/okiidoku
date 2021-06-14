@@ -1,7 +1,9 @@
 #ifndef HPP_SOLVENT_CLI_REPL
 #define HPP_SOLVENT_CLI_REPL
 
+#include <solvent_cli/config.hpp>
 #include <solvent_cli/enum.hpp>
+#include <solvent_lib/toolkit/mod.hpp>
 #include <solvent_lib/gen/batch.hpp>
 #include <solvent_lib/gen/mod.hpp>
 #include <solvent_lib/size.hpp>
@@ -65,34 +67,20 @@ namespace solvent::cli {
 	 * - this->member
 	 * - Base<ARGS>::member
 	 */
-	template<Order O>
 	class Repl final {
 	 public:
 		using opcount_t = lib::gen::opcount_t;
-		using generator_t = typename lib::gen::Generator<O>;
 		using pathkind_t = lib::gen::path::Kind;
 		using trials_t = lib::gen::batch::trials_t;
 
-		Repl(void);
+		Repl(Order O);
 		void start(void);
 		bool run_command(std::string const& cmd_line);
 
-		[[gnu::pure]] pathkind_t get_path_kind(void) const noexcept { return path_kind_; }
-		void set_path_kind(pathkind_t) noexcept;
-		void set_path_kind(std::string const&) noexcept;
-
-		[[gnu::pure]] verbosity::Kind get_verbosity(void) const noexcept { return verbosity_; };
-		void set_verbosity(verbosity::Kind);
-		void set_verbosity(std::string const&);
-
-		[[gnu::pure]] unsigned long long get_max_dead_ends(void) const noexcept { return max_dead_ends_; };
-		void set_max_dead_ends(unsigned long long);
-		void set_max_dead_ends(std::string const&);
-
 	 private:
-		verbosity::Kind verbosity_;
-		pathkind_t path_kind_;
-		unsigned long long max_dead_ends_;
+		Order O; // TODO.impl move this to config?
+		Config config_;
+		lib::toolkit::Toolkit toolkit;
 
 		// Return false if command is to exit the program:
 		void gen_single(bool contPrev = false);
@@ -100,11 +88,5 @@ namespace solvent::cli {
 		void gen_multiple(trials_t stop_after, bool only_count_oks);
 		void gen_multiple(std::string const&,  bool only_count_oks);
 	};
-
-
-	#define SOLVENT_TEMPL_TEMPL(O_) \
-		extern template class Repl<O_>;
-	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
-	#undef SOLVENT_TEMPL_TEMPL
 }
 #endif

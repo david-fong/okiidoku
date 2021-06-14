@@ -17,14 +17,13 @@ namespace solvent::lib::toolkit {
 	class Toolkit final {
 	 public:
 		// void canonicalize();
-		void gen(gen::Params);
-		void gen_continue_prev();
-		void gen_batch(gen::batch::Params);
+		gen::GenResult gen(Order O, gen::Params);
+		gen::GenResult gen_continue_prev(Order O);
+		void gen_batch(Order O, gen::batch::Params);
 
 	 private:
-		Order O = 4;
 		#define SOLVENT_TEMPL_TEMPL(O_) \
-			gen::Generator<O_> gen##O_;
+			gen::Generator<O_> gen ## O_ ## _;
 		SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 		#undef SOLVENT_TEMPL_TEMPL
 	};
