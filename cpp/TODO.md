@@ -3,14 +3,10 @@
 
 ## Higher Priority
 
-- Add repl command to set max_dead_ends
 - Implement toolbox to abstract away the templating with switches
   - Get rid of the order templating from Repl.
 - https://cmake.org/cmake/help/latest/guide/tutorial/index.html
   - See what can be learned from https://github.com/lefticus/cpp_weekly_game_project
-- Take out all stream related things from gen.
-  - Read about std::format and see if it has any use for printing.
-- Scrap and rewrite the run-multiple info summary reporting.
 - Decide what interfaces to support:
   - Probably best to start with just readline and a CLI
     - For CLI util libraries, look into using
@@ -24,9 +20,8 @@
 - C++20
   - std::bit_width possible usage in size.hpp
   - `using enum`. Might want to wait for CLANG to support?
-  - see what stringy things can now use constexpr strings.
-    - the ansi constants could use this. Right now, they are stuck as C-style string.
   - wait for support in gcc and clang for `constexpr std::string`.
+    - the ansi constants could use this. Right now, they are stuck as C-style string.
 - CLI
   - implement `-h` and `--help` CLI argument.
   - Make giveup thresholds settable via CLI, and allow setting to "default".

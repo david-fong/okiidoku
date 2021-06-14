@@ -35,8 +35,8 @@ namespace solvent::lib::gen::batch {
 		shared_data_mutex_.lock();
 		while (get_progress() < params_.stop_after) [[likely]] {
 			shared_data_mutex_.unlock(); //____________________
-			const typename Generator<O>::GenResult gen_result
-				= generator_.generate(params_.gen_params);
+			const GenResult gen_result
+				= generator_(params_.gen_params);
 			shared_data_mutex_.lock(); //‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
 
 			shared_data_.total_anys++;
@@ -187,8 +187,5 @@ namespace solvent::lib::gen::batch {
 	#undef SOLVENT_TEMPL_TEMPL
 }
 namespace std {
-	#define SOLVENT_TEMPL_TEMPL(O_) \
-		template class function<void(typename solvent::lib::gen::Generator<O_>::GenResult const&)>;
-	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
-	#undef SOLVENT_TEMPL_TEMPL
+	template class function<void(solvent::lib::gen::GenResult const&)>;
 }

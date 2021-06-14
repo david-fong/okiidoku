@@ -30,6 +30,7 @@ namespace solvent::cli {
 		if (O <= 4) { set_verbosity(verbosity::Kind::Silent); }
 		if (O  > 4) { set_verbosity(verbosity::Kind::NoGiveups); }
 		set_path_kind(pathkind_t::RowMajor);
+		set_max_dead_ends(0);
 	}
 
 	template<Order O>
@@ -184,9 +185,9 @@ namespace solvent::cli {
 		generator_t gen;
 		std::cout << "\nsolver obj size: " STATW_I << sizeof(gen) << " bytes";
 		const clock_t clock_start = std::clock();
-		const auto& gen_result = cont_prev
-			? gen.generate(std::nullopt)
-			: gen.generate(gen::Params{ .path_kind = get_path_kind(), .max_dead_ends = get_max_dead_ends() });
+		const auto gen_result = cont_prev
+			? gen(std::nullopt)
+			: gen(gen::Params{ .path_kind = get_path_kind(), .max_dead_ends = get_max_dead_ends() }); // TODO.fix previous generator needs to be persisted.
 		const double processor_time = (static_cast<double>(std::clock() - clock_start)) / CLOCKS_PER_SEC;
 
 		std::cout << "\nprocessor time: " STATW_D << processor_time << " seconds";
@@ -213,15 +214,15 @@ namespace solvent::cli {
 			.stop_after = stop_after
 		};
 		const gen::batch::BatchReport batch_report = gen::batch::batch<O>(params,
-			[this](typename generator_t::GenResult const& gen_result) {
+			[this](gen::GenResult const& gen_result) {
 				if ((get_verbosity() == verbosity::Kind::All)
 				 || ((get_verbosity() == verbosity::Kind::NoGiveups) && (gen_result.status == gen::ExitStatus::Ok))
 				) {
 					gen_result.print_serial(std::cout);
-					if constexpr (O > 4) {
-						std::cout << std::endl;
-					} else {
+					if (O <= 4) {
 						std::cout << '\n';
+					} else {
+						std::cout << std::endl; // always flush for big grids
 					}
 				} else if (get_verbosity() == verbosity::Kind::Silent) {
 					// TODO.impl print a progress bar
@@ -234,7 +235,9 @@ namespace solvent::cli {
 		) {
 			std::cout << str::RED.ON << "* all generations aborted" << str::RED.OFF;
 		}
-		str::print_msg_bar("", BAR_WIDTH, "─");
+		if (get_verbosity() != verbosity::Kind::Silent) {
+			str::print_msg_bar("", BAR_WIDTH, "─");
+		}
 
 		static const std::string seconds_units = std::string() + str::DIM.ON + " seconds (with I/O)" + str::DIM.OFF;
 		std::cout

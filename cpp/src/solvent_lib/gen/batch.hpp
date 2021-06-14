@@ -56,7 +56,7 @@ namespace solvent::lib::gen::batch {
 
 	//
 	template<Order O>
-	using callback_t = std::function<void(typename Generator<O>::GenResult const&)>;
+	using callback_t = std::function<void(GenResult const&)>;
 
 	//
 	template<Order O>
@@ -114,9 +114,6 @@ namespace solvent::lib::gen::batch {
 }
 
 namespace std {
-	#define SOLVENT_TEMPL_TEMPL(O_) \
-		extern template class function<void(typename solvent::lib::gen::Generator<O_>::GenResult const&)>;
-	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
-	#undef SOLVENT_TEMPL_TEMPL
+	extern template class function<void(solvent::lib::gen::GenResult const&)>;
 }
 #endif

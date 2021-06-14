@@ -36,7 +36,27 @@ namespace solvent::lib::gen {
 
 
 	template<Order O>
-	void Generator<O>::init(void) {
+	GenResult Generator<O>::operator()(const std::optional<Params> params) {
+		if (params.has_value()) [[likely]] {
+			// Run a new generation.
+			params_ = params.value();
+			params_.template clean<O>();
+			this->prepare_fresh_gen();
+		} else {
+			// Continue the previous generation.
+			if (prev_gen_status_ == ExitStatus::Exhausted) [[unlikely]] {
+				return this->make_gen_result();
+			}
+			dead_ends_.fill(0); // Do not carry over previous dead_ends counters.
+			most_dead_ends_seen_ = 0;
+		}
+		this->generate();
+		return this->make_gen_result();
+	}
+
+
+	template<Order O>
+	void Generator<O>::prepare_fresh_gen(void) {
 		for (Tile& t : values_) {
 			t.clear();
 		}
@@ -44,6 +64,11 @@ namespace solvent::lib::gen {
 		cols_has_.fill(0);
 		blks_has_.fill(0);
 		dead_ends_.fill(0);
+
+		progress_ = 0;
+		dead_end_progress_ = 0;
+		most_dead_ends_seen_ = 0;
+		op_count_ = 0;
 
 		RNG_MUTEX.lock();
 		for (auto& vto : val_try_orders_) {
@@ -54,79 +79,55 @@ namespace solvent::lib::gen {
 
 
 	template<Order O>
-	Generator<O>::GenResult Generator<O>::generate(const std::optional<Params> params) {
-		GenResult info;
-		if (params.has_value()) [[likely]] {
-			info.params = params.value();
-			info.params.template clean<O>();
-			this->init();
-		} else {
-			// Continue the previous generation.
-			info = gen_result_;
-			if (info.status == ExitStatus::Exhausted) [[unlikely]] {
-				return info;
-			}
-			dead_ends_.fill(0);
-		}
-		ord4_t (& prog2coord)(ord4_t) = path::GetPathCoords<O>(info.params.path_kind);
-		ord4_t& dead_end_progress = info.dead_end_progress;
+	void Generator<O>::generate(void) {
+		ord4_t (& prog2coord)(ord4_t) = path::GetPathCoords<O>(params_.path_kind);
 
 		while (true) {
-			const Direction direction = this->set_next_valid(
-				info.progress, dead_end_progress, prog2coord
-			);
-			if (!direction.is_skip) { ++info.op_count; }
+			const Direction direction = this->set_next_valid(prog2coord);
+			if (!direction.is_skip) { ++op_count_; }
 
 			if (direction.is_back) [[unlikely]] {
-				if (info.progress == 0) [[unlikely]] {
-					info.status = ExitStatus::Exhausted;
+				if (progress_ == 0) [[unlikely]] {
+					prev_gen_status_ = ExitStatus::Exhausted;
 					break;
 				}
-				if (info.progress == dead_end_progress) [[unlikely]] {
-					const dead_ends_t dead_ends = ++dead_ends_[info.progress];
-					--info.progress;
-					if (dead_ends > info.most_dead_ends_seen) [[unlikely]] {
-						info.most_dead_ends_seen = dead_ends;
-						if (info.most_dead_ends_seen > info.params.max_dead_ends) [[unlikely]] {
-							info.status = ExitStatus::Abort;
+				if (progress_ == dead_end_progress_) [[unlikely]] {
+					const dead_ends_t dead_ends = ++dead_ends_[progress_];
+					--progress_;
+					if (dead_ends > most_dead_ends_seen_) [[unlikely]] {
+						most_dead_ends_seen_ = dead_ends;
+						if (most_dead_ends_seen_ > params_.max_dead_ends) [[unlikely]] {
+							prev_gen_status_ = ExitStatus::Abort;
 							break;
 						}
 					}
 				} else {
-					--info.progress;
+					--progress_;
 				}
 			} else {
-				if (info.progress == O4-1) [[unlikely]] {
-					info.status = ExitStatus::Ok;
+				if (progress_ == O4-1) [[unlikely]] {
+					prev_gen_status_ = ExitStatus::Ok;
 					break;
 				}
-				++info.progress;
-				if ((info.progress > dead_end_progress)
-					|| !this->can_coords_see_each_other(prog2coord(info.progress), prog2coord(dead_end_progress))
+				++progress_;
+				if ((progress_ > dead_end_progress_)
+					|| !this->can_coords_see_each_other(prog2coord(progress_), prog2coord(dead_end_progress_))
 				) [[unlikely]] { // TODO.learn `unlikely` helps for 4:rowmajor. Does it help in general?
-					dead_end_progress = info.progress;
+					dead_end_progress_ = progress_;
 				}
 			}
 		}
-
-		for (ord4_t i = 0; i < O4; i++) {
-			info.grid[prog2coord(i)] = values_[i].value;
-		}
-		gen_result_ = info;
-		return info;
 	}
 
 
 	template<Order O>
-	Direction Generator<O>::set_next_valid(
-		const ord4_t progress, const ord4_t dead_end_progress, ord4_t (& prog2coord)(ord4_t)
-	) noexcept {
-		const ord4_t coord = prog2coord(progress);
+	Direction Generator<O>::set_next_valid(ord4_t (& prog2coord)(ord4_t)) noexcept {
+		const ord4_t coord = prog2coord(progress_);
 		has_mask_t& row_has = rows_has_[this->get_row(coord)];
 		has_mask_t& col_has = cols_has_[this->get_col(coord)];
 		has_mask_t& blk_has = blks_has_[this->get_blk(coord)];
 
-		Tile& t = values_[progress];
+		Tile& t = values_[progress_];
 		if (!t.is_clear()) {
 			// Clear the current value from all masks:
 			const has_mask_t erase_mask = ~(has_mask_t(0b1u) << t.value);
@@ -136,8 +137,8 @@ namespace solvent::lib::gen {
 		}
 
 		// Smart backtracking:
-		if ((progress < dead_end_progress) && !this->can_coords_see_each_other(
-			prog2coord(progress), prog2coord(dead_end_progress)
+		if ((progress_ < dead_end_progress_) && !this->can_coords_see_each_other(
+			prog2coord(progress_), prog2coord(dead_end_progress_)
 		)) {
 			t.clear();
 			return Direction { .is_back = true, .is_skip = true };
@@ -145,7 +146,7 @@ namespace solvent::lib::gen {
 
 		const has_mask_t t_has = (row_has | col_has | blk_has);
 		for (ord2_t try_i = t.next_try_index; try_i < O2; try_i++) {
-			const ord2_t try_val = val_try_orders_[progress / O2][try_i];
+			const ord2_t try_val = val_try_orders_[progress_ / O2][try_i];
 			const has_mask_t try_val_mask = has_mask_t(1) << try_val;
 			if (!(t_has & try_val_mask)) {
 				// A valid value was found:
@@ -158,8 +159,26 @@ namespace solvent::lib::gen {
 			}
 		}
 		// Nothing left to try here. Backtrack:
-		t.clear();
+		t.clear(); // TODO.test is this needed? Maybe not!
 		return Direction { .is_back = true, .is_skip = false };
+	}
+
+
+	template<Order O>
+	GenResult Generator<O>::make_gen_result(void) const {
+		ord4_t (& prog2coord)(ord4_t) = path::GetPathCoords<O>(params_.path_kind);
+		GenResult gen_result = {
+			.O {O},
+			.status {prev_gen_status_},
+			.dead_end_progress {dead_end_progress_},
+			.most_dead_ends_seen {most_dead_ends_seen_},
+			.op_count {op_count_}
+		};
+		gen_result.grid.resize(O4);
+		for (ord4_t i = 0; i < O4; i++) {
+			gen_result.grid[prog2coord(i)] = values_[i].value;
+		}
+		return gen_result;
 	}
 
 
@@ -172,15 +191,13 @@ namespace solvent::lib::gen {
 	}
 
 
-	template<Order O>
-	void Generator<O>::GenResult::print_serial(std::ostream& os) const {
+	void GenResult::print_serial(std::ostream& os) const {
 		const print::grid_t grid_accessor([this](uint16_t coord) { return this->grid[coord]; });
 		print::serial(os, O, grid_accessor);
 	}
 
 
-	template<Order O>
-	void Generator<O>::GenResult::print_pretty(std::ostream& os) const {
+	void GenResult::print_pretty(std::ostream& os) const {
 		const std::vector<print::grid_t> grid_accessors = {
 			print::grid_t([this](uint16_t coord) { return this->grid[coord]; })
 		};

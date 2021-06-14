@@ -6,6 +6,7 @@
 #include <solvent_lib/size.hpp>
 
 #include <random>
+#include <vector>
 #include <array>
 #include <string>
 #include <optional>
@@ -30,6 +31,19 @@ namespace solvent::lib::gen {
 	//
 	enum class ExitStatus : unsigned char {
 		Exhausted, Abort, Ok,
+	};
+
+	//
+	struct GenResult final {
+		Order O;
+		ExitStatus status;
+		unsigned long dead_end_progress;
+		unsigned long long most_dead_ends_seen;
+		opcount_t op_count;
+		std::vector<unsigned char> grid = {};
+
+		void print_serial(std::ostream&) const;
+		void print_pretty(std::ostream&) const;
 	};
 
 	//
@@ -66,20 +80,6 @@ namespace solvent::lib::gen {
 		}; return _[O]; }();
 
 		//
-		struct GenResult final {
-			Params params; // Mainly used internally for continuation.
-			ExitStatus status = ExitStatus::Abort;
-			ord4_t progress = 0; // Needed internally for continuation. `dead_end_progress` is probably more insightful.
-			ord4_t dead_end_progress = 0;
-			opcount_t op_count = 0;
-			dead_ends_t most_dead_ends_seen = 0;
-			std::array<ord2_t, O4> grid = {};
-
-			void print_serial(std::ostream&) const;
-			void print_pretty(std::ostream&) const;
-		};
-
-		//
 		struct Tile final {
 			// Index into val_try_orders_. If set to O2, backtrack next.
 			ord2_t next_try_index;
@@ -97,8 +97,7 @@ namespace solvent::lib::gen {
 		Generator(void);
 
 		// Pass std::nullopt to continue the previous run.
-		[[gnu::hot]] GenResult generate(std::optional<Params>);
-		[[gnu::pure]] GenResult const& get_gen_result() const { return gen_result_; }
+		[[gnu::hot]] GenResult operator()(std::optional<Params>);
 		[[gnu::pure]] std::array<dead_ends_t, O4> const& get_dead_ends() const { return dead_ends_; }
 
 	 private:
@@ -109,16 +108,20 @@ namespace solvent::lib::gen {
 		std::array<has_mask_t, O2> blks_has_;
 		std::array<dead_ends_t, O4> dead_ends_; // indexed by progress
 
-		// clear fields and scramble val_try_order
-		void init(void);
+		Params params_;
+		ord4_t progress_ = 0;
+		ord4_t dead_end_progress_ = 0;
+		dead_ends_t most_dead_ends_seen_ = 0;
+		opcount_t op_count_ = 0;
+		ExitStatus prev_gen_status_ = ExitStatus::Abort;
 
-		[[gnu::hot]] Direction set_next_valid(
-			ord4_t progress,
-			ord4_t dead_end_progress,
-			ord4_t (& prog2coord)(ord4_t)
-		) noexcept;
+		// clear fields and scramble val_try_orders_
+		void prepare_fresh_gen(void);
 
-		GenResult gen_result_;
+		[[gnu::hot]] inline Direction set_next_valid(ord4_t (& prog2coord)(ord4_t)) noexcept;
+		void generate(void);
+
+		GenResult make_gen_result(void) const;
 	};
 
 
