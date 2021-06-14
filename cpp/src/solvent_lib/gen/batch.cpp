@@ -9,19 +9,17 @@
 
 namespace solvent::lib::gen::batch {
 
-	template<Order O>
-	const unsigned ThreadFunc<O>::DEFAULT_NUM_THREADS = [](){
+	unsigned DEFAULT_NUM_THREADS(const Order O) {
 		const unsigned hwc = std::thread::hardware_concurrency();
 		// NOTE: hardware_concurency is specified to be zero if unknown.
-		return (hwc != 0) ? std::min(TRY_DEFAULT_NUM_EXTRA_THREADS_ + 1, hwc) : 1;
-	}();
+		return (hwc != 0) ? std::min(TRY_DEFAULT_NUM_EXTRA_THREADS_(O) + 1, hwc) : 1;
+	}
 
 
-	template<Order O>
-	Params Params::clean(void) noexcept {
-		gen_params.template clean<O>();
+	Params Params::clean(const Order O) noexcept {
+		gen_params.clean(O);
 		if (num_threads == 0) {
-			num_threads = ThreadFunc<O>::DEFAULT_NUM_THREADS;
+			num_threads = DEFAULT_NUM_THREADS(O);
 		}
 		if (max_dead_end_sample_granularity == 0) {
 			max_dead_end_sample_granularity = SharedData::SAMPLE_GRANULARITY_DEFAULT;
@@ -57,18 +55,23 @@ namespace solvent::lib::gen::batch {
 	}
 
 
-	template<Order O>
-	const BatchReport batch(Params& params, callback_t<O> gen_result_consumer) {
-		params.clean<O>();
+	const BatchReport batch(const Order O, Params& params, callback_t gen_result_consumer) {
+		params.clean(O);
 		std::mutex shared_data_mutex;
 		SharedData shared_data;
 		shared_data.max_dead_end_samples.resize(params.max_dead_end_sample_granularity);
 
 		std::vector<std::thread> threads;
 		for (unsigned i = 0; i < params.num_threads; i++) {
-			threads.push_back(std::thread(ThreadFunc<O>(
-				params, shared_data, shared_data_mutex, gen_result_consumer)
-			));
+			switch (O) {
+			#define SOLVENT_TEMPL_TEMPL(O_) \
+				case O_: { threads.push_back(std::thread(ThreadFunc<O_>( \
+					params, shared_data, shared_data_mutex, gen_result_consumer) \
+				)); \
+				break; }
+			SOLVENT_INSTANTIATE_ORDER_TEMPLATES
+			#undef SOLVENT_TEMPL_TEMPL
+			}
 		}
 		for (auto& thread : threads) {
 			thread.join();
@@ -180,9 +183,7 @@ namespace solvent::lib::gen::batch {
 
 
 	#define SOLVENT_TEMPL_TEMPL(O_) \
-		template Params Params::clean<O_>(void) noexcept; \
-		template class ThreadFunc<O_>; \
-		template const BatchReport batch<O_>(Params&, callback_t<O_>);
+		template class ThreadFunc<O_>;
 	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 	#undef SOLVENT_TEMPL_TEMPL
 }

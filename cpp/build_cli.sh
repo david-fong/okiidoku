@@ -19,6 +19,7 @@ lib/print,\
 lib/gen/path,\
 lib/gen/mod,\
 lib/gen/batch,\
+lib/toolkit/mod,\
 cli/repl,\
 cli/main\
 }.cpp)"

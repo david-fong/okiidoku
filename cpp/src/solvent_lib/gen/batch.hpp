@@ -23,7 +23,7 @@ namespace solvent::lib::gen::batch {
 		bool only_count_oks;
 		trials_t stop_after;
 
-		template<Order O> Params clean(void) noexcept;
+		Params clean(Order O) noexcept;
 	};
 
 	//
@@ -55,25 +55,25 @@ namespace solvent::lib::gen::batch {
 	};
 
 	//
-	template<Order O>
 	using callback_t = std::function<void(GenResult const&)>;
+
+	constexpr unsigned TRY_DEFAULT_NUM_EXTRA_THREADS_(const Order O) {
+		if (O < 4) { return 0; }
+		else if (O == 4) { return 1; }
+		else { return 2; }
+	};
+	unsigned DEFAULT_NUM_THREADS(Order O);
 
 	//
 	template<Order O>
 	class ThreadFunc final {
 	 static_assert(O > 0);
 	 public:
-		static constexpr unsigned TRY_DEFAULT_NUM_EXTRA_THREADS_ = [](){
-			if (O < 4) { return 0; }
-			else if (O == 4) { return 1; }
-			else { return 2; }
-		}();
-		static const unsigned DEFAULT_NUM_THREADS;
 
 	 public:
 		ThreadFunc(void) = delete;
 		explicit ThreadFunc(
-			const Params p, SharedData& sd, std::mutex& sdm, callback_t<O> grc
+			const Params p, SharedData& sd, std::mutex& sdm, callback_t grc
 		):
 			params_(p), shared_data_(sd), shared_data_mutex_(sdm), gen_result_consumer_(grc)
 		{};
@@ -92,7 +92,7 @@ namespace solvent::lib::gen::batch {
 		const Params params_;
 		SharedData& shared_data_;
 		std::mutex& shared_data_mutex_;
-		callback_t<O> gen_result_consumer_;
+		callback_t gen_result_consumer_;
 		Generator<O> generator_;
 	};
 
@@ -101,14 +101,11 @@ namespace solvent::lib::gen::batch {
 	using BatchReport = SharedData;
 
 	//
-	template<Order O>
-	const BatchReport batch(Params&, callback_t<O>);
+	const BatchReport batch(Order, Params&, callback_t);
 
 
 	#define SOLVENT_TEMPL_TEMPL(O_) \
-		extern template Params Params::clean<O_>(void) noexcept; \
-		extern template class ThreadFunc<O_>; \
-		extern template const BatchReport batch<O_>(Params&, callback_t<O_>);
+		extern template class ThreadFunc<O_>;
 	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 	#undef SOLVENT_TEMPL_TEMPL
 }

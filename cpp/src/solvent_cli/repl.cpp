@@ -33,6 +33,7 @@ namespace solvent::cli {
 		set_max_dead_ends(0);
 	}
 
+
 	template<Order O>
 	void Repl<O>::start(void) {
 		const auto my_numpunct = new util::str::MyNumPunct;
@@ -186,7 +187,7 @@ namespace solvent::cli {
 		std::cout << "\nsolver obj size: " STATW_I << sizeof(gen) << " bytes";
 		const clock_t clock_start = std::clock();
 		const auto gen_result = cont_prev
-			? gen(std::nullopt)
+			? gen.continue_prev()
 			: gen(gen::Params{ .path_kind = get_path_kind(), .max_dead_ends = get_max_dead_ends() }); // TODO.fix previous generator needs to be persisted.
 		const double processor_time = (static_cast<double>(std::clock() - clock_start)) / CLOCKS_PER_SEC;
 
@@ -213,7 +214,7 @@ namespace solvent::cli {
 			.only_count_oks = only_count_oks,
 			.stop_after = stop_after
 		};
-		const gen::batch::BatchReport batch_report = gen::batch::batch<O>(params,
+		const gen::batch::BatchReport batch_report = gen::batch::batch(O, params,
 			[this](gen::GenResult const& gen_result) {
 				if ((get_verbosity() == verbosity::Kind::All)
 				 || ((get_verbosity() == verbosity::Kind::NoGiveups) && (gen_result.status == gen::ExitStatus::Ok))

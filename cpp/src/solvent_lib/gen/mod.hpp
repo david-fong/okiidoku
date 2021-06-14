@@ -9,7 +9,6 @@
 #include <vector>
 #include <array>
 #include <string>
-#include <optional>
 
 
 namespace solvent::lib::gen {
@@ -21,7 +20,7 @@ namespace solvent::lib::gen {
 	struct Params {
 		path::Kind path_kind;
 		unsigned long max_dead_ends = 0; // Defaulted if zero.
-		template<Order O> Params clean(void) noexcept;
+		Params clean(Order O) noexcept;
 	};
 
 	// Container for a very large number.
@@ -52,6 +51,11 @@ namespace solvent::lib::gen {
 		bool is_skip: 1 = false; // only meaningful when is_back is true.
 	};
 
+	constexpr unsigned long long DEFAULT_MAX_DEAD_ENDS(const Order O) {
+		const unsigned long long _[] = { 0, 0, 3, 100, 320, 100'000, 10'000'000 };
+		return _[O];
+	};
+
 	//
 	template<Order O>
 	class Generator final : public Grid<O> {
@@ -75,10 +79,6 @@ namespace solvent::lib::gen {
 		static constexpr ord2_t O2 = O*O;
 		static constexpr ord4_t O4 = O*O*O*O;
 
-		static constexpr dead_ends_t DEFAULT_MAX_DEAD_ENDS = [](){ const dead_ends_t _[] = {
-			0, 0, 3, 100, 320, 100'000, 10'000'000,
-		}; return _[O]; }();
-
 		//
 		struct Tile final {
 			// Index into val_try_orders_. If set to O2, backtrack next.
@@ -96,8 +96,9 @@ namespace solvent::lib::gen {
 	 public:
 		Generator(void);
 
-		// Pass std::nullopt to continue the previous run.
-		[[gnu::hot]] GenResult operator()(std::optional<Params>);
+		// Generates a fresh sudoku solution.
+		GenResult operator()(Params);
+		GenResult continue_prev();
 		[[gnu::pure]] std::array<dead_ends_t, O4> const& get_dead_ends() const { return dead_ends_; }
 
 	 private:
@@ -119,7 +120,7 @@ namespace solvent::lib::gen {
 		void prepare_fresh_gen(void);
 
 		[[gnu::hot]] inline Direction set_next_valid(ord4_t (& prog2coord)(ord4_t)) noexcept;
-		void generate(void);
+		[[gnu::hot]] void generate(void);
 
 		GenResult make_gen_result(void) const;
 	};
@@ -129,7 +130,6 @@ namespace solvent::lib::gen {
 
 
 	#define SOLVENT_TEMPL_TEMPL(O_) \
-		extern template Params Params::clean<O_>(void) noexcept; \
 		extern template class Generator<O_>;
 	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 	#undef SOLVENT_TEMPL_TEMPL

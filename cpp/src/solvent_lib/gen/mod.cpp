@@ -17,10 +17,9 @@ namespace solvent::lib::gen {
 	std::mutex RNG_MUTEX;
 
 
-	template<Order O>
-	Params Params::clean(void) noexcept {
+	Params Params::clean(const Order O) noexcept {
 		if (max_dead_ends == 0) {
-			max_dead_ends = Generator<O>::DEFAULT_MAX_DEAD_ENDS;
+			max_dead_ends = DEFAULT_MAX_DEAD_ENDS(O);
 		}
 		return *this;
 	}
@@ -36,20 +35,23 @@ namespace solvent::lib::gen {
 
 
 	template<Order O>
-	GenResult Generator<O>::operator()(const std::optional<Params> params) {
-		if (params.has_value()) [[likely]] {
-			// Run a new generation.
-			params_ = params.value();
-			params_.template clean<O>();
-			this->prepare_fresh_gen();
-		} else {
-			// Continue the previous generation.
-			if (prev_gen_status_ == ExitStatus::Exhausted) [[unlikely]] {
-				return this->make_gen_result();
-			}
-			dead_ends_.fill(0); // Do not carry over previous dead_ends counters.
-			most_dead_ends_seen_ = 0;
+	GenResult Generator<O>::operator()(const Params params) {
+		params_ = params;
+		params_.clean(O);
+		this->prepare_fresh_gen();
+		this->generate();
+		return this->make_gen_result();
+	}
+
+
+	template<Order O>
+	GenResult Generator<O>::continue_prev() {
+		// Continue the previous generation.
+		if (prev_gen_status_ == ExitStatus::Exhausted) [[unlikely]] {
+			return this->make_gen_result();
 		}
+		dead_ends_.fill(0); // Do not carry over previous dead_ends counters.
+		most_dead_ends_seen_ = 0;
 		this->generate();
 		return this->make_gen_result();
 	}
@@ -206,7 +208,6 @@ namespace solvent::lib::gen {
 
 
 	#define SOLVENT_TEMPL_TEMPL(O_) \
-		template Params Params::clean<O_>(void) noexcept; \
 		template class Generator<O_>;
 	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 	#undef SOLVENT_TEMPL_TEMPL
