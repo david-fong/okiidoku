@@ -1,5 +1,5 @@
-#ifndef HPP_SOLVENT_LIB_CANON
-#define HPP_SOLVENT_LIB_CANON
+#ifndef HPP_SOLVENT_LIB_SORT_CANON
+#define HPP_SOLVENT_LIB_SORT_CANON
 
 #include <solvent_lib/grid.hpp>
 #include <solvent_lib/size.hpp>

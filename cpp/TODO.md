@@ -3,8 +3,7 @@
 
 ## Higher Priority
 
-- Implement toolbox to abstract away the templating with switches
-  - Get rid of the order templating from Repl.
+- See if there's a way to put the checking functionality inside the grid class without any abstracction cost.
 - https://cmake.org/cmake/help/latest/guide/tutorial/index.html
   - See what can be learned from https://github.com/lefticus/cpp_weekly_game_project
 - Decide what interfaces to support:

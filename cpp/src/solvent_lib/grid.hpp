@@ -12,7 +12,6 @@ namespace solvent::lib {
 	class Grid {
 	 static_assert((1 < O) && (O <= MAX_REASONABLE_ORDER));
 	 private:
-		using has_mask_t = typename size<O>::has_mask_t;
 		using ord1_t = typename size<O>::ord1_t;
 		using ord2_t = typename size<O>::ord2_t;
 		using ord4_t = typename size<O>::ord4_t;
@@ -33,8 +32,6 @@ namespace solvent::lib {
 				||  (get_col(c1) == get_col(c2))
 				||  (get_blk(c1) == get_blk(c2));
 		}
-		// Print a value for a text stream. Aims for visual width of two characters.
-		[[gnu::hot]] static std::ostream& print_value(std::ostream&, ord2_t) noexcept;
 	};
 
 	#define SOLVENT_TEMPL_TEMPL(O_) \

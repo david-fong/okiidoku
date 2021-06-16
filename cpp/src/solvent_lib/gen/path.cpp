@@ -52,7 +52,8 @@ namespace solvent::lib::gen::path {
 			}
 			return static_cast<const std::array<ord4_t, O4>>(path_tmp);
 		}
-		static constexpr const std::array<ord4_t, O4> path = PathCoords_<PK,O>::_init(); // TODO make this sizeless when not used.
+		static constexpr const std::array<ord4_t, O4> path = PathCoords_<PK,O>::_init();
+		// Note: a compiler can optimize this away if not used.
 	};
 
 
