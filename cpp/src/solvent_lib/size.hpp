@@ -51,6 +51,12 @@ namespace solvent {
 			std::conditional_t<(O <= 255), std::uint_fast32_t,
 			std::uint_fast64_t
 		>>>;
+		using ord4_least_t =
+			std::conditional_t<(O <=   3), std::uint_least8_t,
+			std::conditional_t<(O <=   7), std::uint_least16_t,
+			std::conditional_t<(O <= 255), std::uint_least32_t,
+			std::uint_least64_t
+		>>>;
 	};
 }
 #endif

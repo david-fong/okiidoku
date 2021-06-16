@@ -50,7 +50,6 @@ int main(const int argc, char const *const argv[]) {
 	solvent::lib::gen::Rng.seed(srand_key);
 
 	// Create a Solver of the specified order:
-	// (It will automatically enter its REPL).
 	solvent::cli::Repl repl { user_order };
 	repl.start();
 

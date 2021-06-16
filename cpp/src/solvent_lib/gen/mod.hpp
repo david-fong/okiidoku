@@ -20,6 +20,8 @@ namespace solvent::lib::gen {
 	struct Params {
 		path::Kind path_kind;
 		unsigned long max_dead_ends = 0; // Defaulted if zero.
+
+		// Cleans self and returns a copy of self.
 		Params clean(Order O) noexcept;
 	};
 
@@ -58,7 +60,7 @@ namespace solvent::lib::gen {
 
 	//
 	template<Order O>
-	class Generator final : public Grid<O> {
+	class Generator final : public AbstractGrid<O> {
 	 private:
 		using has_mask_t = typename size<O>::has_mask_t;
 		using ord1_t = typename size<O>::ord1_t;
@@ -78,7 +80,16 @@ namespace solvent::lib::gen {
 		static constexpr ord1_t O1 = O;
 		static constexpr ord2_t O2 = O*O;
 		static constexpr ord4_t O4 = O*O*O*O;
+		[[gnu::pure]] ord2_t operator[](ord4_t coord) const override;
 
+		Generator(void);
+
+		// Generates a fresh sudoku solution.
+		GenResult operator()(Params);
+		GenResult continue_prev();
+		[[gnu::pure]] std::array<dead_ends_t, O4> const& get_dead_ends() const { return dead_ends_; }
+
+	 private:
 		//
 		struct Tile final {
 			// Index into val_try_orders_. If set to O2, backtrack next.
@@ -93,15 +104,6 @@ namespace solvent::lib::gen {
 			}
 		};
 
-	 public:
-		Generator(void);
-
-		// Generates a fresh sudoku solution.
-		GenResult operator()(Params);
-		GenResult continue_prev();
-		[[gnu::pure]] std::array<dead_ends_t, O4> const& get_dead_ends() const { return dead_ends_; }
-
-	 private:
 		std::array<std::array<ord2_t, O2>, O2> val_try_orders_; // indexed by (progress/O2)
 		std::array<Tile, O4> values_; // indexed by progress
 		std::array<has_mask_t, O2> rows_has_;

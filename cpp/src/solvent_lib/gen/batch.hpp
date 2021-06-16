@@ -23,6 +23,7 @@ namespace solvent::lib::gen::batch {
 		bool only_count_oks;
 		trials_t stop_after;
 
+		// Cleans self and returns a copy of self.
 		Params clean(Order O) noexcept;
 	};
 
@@ -69,15 +70,6 @@ namespace solvent::lib::gen::batch {
 	class ThreadFunc final {
 	 static_assert(O > 0);
 	 public:
-
-	 public:
-		ThreadFunc(void) = delete;
-		explicit ThreadFunc(
-			const Params p, SharedData& sd, std::mutex& sdm, callback_t grc
-		):
-			params_(p), shared_data_(sd), shared_data_mutex_(sdm), gen_result_consumer_(grc)
-		{};
-
 		void operator()();
 
 		trials_t get_progress(void) const noexcept {
@@ -88,12 +80,11 @@ namespace solvent::lib::gen::batch {
 			}
 		}
 
-	 private:
 		const Params params_;
 		SharedData& shared_data_;
 		std::mutex& shared_data_mutex_;
 		callback_t gen_result_consumer_;
-		Generator<O> generator_;
+		Generator<O> generator_ = Generator<O>();
 	};
 
 
@@ -101,7 +92,7 @@ namespace solvent::lib::gen::batch {
 	using BatchReport = SharedData;
 
 	//
-	const BatchReport batch(Order, Params&, callback_t);
+	BatchReport batch(Order, Params&, callback_t);
 
 
 	#define SOLVENT_TEMPL_TEMPL(O_) \

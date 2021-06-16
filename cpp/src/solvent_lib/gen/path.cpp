@@ -9,9 +9,11 @@ namespace solvent::lib::gen::path {
 
 	template<Kind PK, Order O>
 	struct PathCoords_ {
+	 private:
 		using ord1_t = typename size<O>::ord1_t;
 		using ord2_t = typename size<O>::ord2_t;
 		using ord4_t = typename size<O>::ord4_t;
+	 public:
 		static constexpr ord1_t O1 = O;
 		static constexpr ord2_t O2 = O*O;
 		static constexpr ord4_t O4 = O*O*O*O;
@@ -24,8 +26,9 @@ namespace solvent::lib::gen::path {
 			}
 		}
 	 private:
-		static constexpr const std::array<ord4_t, O4> _init() noexcept {
-			std::array<ord4_t, O4> path_tmp = {0};
+		using grid_cache_t = typename std::array<typename size<O>::ord4_least_t, O4>;
+		static constexpr const grid_cache_t _init() noexcept {
+			grid_cache_t path_tmp = {0};
 			if constexpr (PK == Kind::RowMajor) {
 				// std::iota(path.begin(), path.end(), 0);
 			}
@@ -50,9 +53,9 @@ namespace solvent::lib::gen::path {
 					}
 				}
 			}
-			return static_cast<const std::array<ord4_t, O4>>(path_tmp);
+			return static_cast<const grid_cache_t>(path_tmp);
 		}
-		static constexpr const std::array<ord4_t, O4> path = PathCoords_<PK,O>::_init();
+		static constexpr const grid_cache_t path = PathCoords_<PK,O>::_init();
 		// Note: a compiler can optimize this away if not used.
 	};
 

@@ -9,7 +9,7 @@
 namespace solvent::lib::canon {
 
 	template<Order O>
-	class Canonicalizer final : public solvent::lib::Grid<O> {
+	class Canonicalizer final : public solvent::lib::AbstractGrid<O> {
 	 private:
 		using has_mask_t = typename size<O>::has_mask_t;
 		using ord1_t  = typename size<O>::ord1_t;
@@ -20,6 +20,7 @@ namespace solvent::lib::canon {
 		static constexpr ord1_t O1 = O;
 		static constexpr ord2_t O2 = O*O;
 		static constexpr ord4_t O4 = O*O*O*O;
+		[[gnu::pure]] ord2_t operator[](ord4_t coord) const override;
 
 	 private:
 		const std::array<ord2_t, O4> buf;

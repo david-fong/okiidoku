@@ -33,8 +33,7 @@ namespace solvent::lib::gen::batch {
 		shared_data_mutex_.lock();
 		while (get_progress() < params_.stop_after) [[likely]] {
 			shared_data_mutex_.unlock(); //____________________
-			const GenResult gen_result
-				= generator_(params_.gen_params);
+			const GenResult gen_result = generator_(params_.gen_params);
 			shared_data_mutex_.lock(); //‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
 
 			shared_data_.total_anys++;
@@ -55,7 +54,7 @@ namespace solvent::lib::gen::batch {
 	}
 
 
-	const BatchReport batch(const Order O, Params& params, callback_t gen_result_consumer) {
+	BatchReport batch(const Order O, Params& params, callback_t gen_result_consumer) {
 		params.clean(O);
 		std::mutex shared_data_mutex;
 		SharedData shared_data;
@@ -65,9 +64,9 @@ namespace solvent::lib::gen::batch {
 		for (unsigned i = 0; i < params.num_threads; i++) {
 			switch (O) {
 			#define SOLVENT_TEMPL_TEMPL(O_) \
-				case O_: { threads.push_back(std::thread(ThreadFunc<O_>( \
-					params, shared_data, shared_data_mutex, gen_result_consumer) \
-				)); \
+				case O_: { threads.push_back(std::thread(ThreadFunc<O_>{ \
+					params, shared_data, shared_data_mutex, gen_result_consumer \
+				})); \
 				break; }
 			SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 			#undef SOLVENT_TEMPL_TEMPL

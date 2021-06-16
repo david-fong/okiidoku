@@ -3,6 +3,12 @@
 namespace solvent::lib::canon {
 
 	template<Order O>
+	typename size<O>::ord2_t Canonicalizer<O>::operator[](const ord4_t coord) const {
+		return buf[coord];
+	}
+
+
+	template<Order O>
 	void Canonicalizer<O>::handle_relabeling(void) noexcept {
 		// A coordinate contains the number of horizontal and vertical atoms
 		// where the x and y coordinates are values that coexist in an atom.

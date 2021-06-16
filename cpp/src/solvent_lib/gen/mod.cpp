@@ -35,6 +35,13 @@ namespace solvent::lib::gen {
 
 
 	template<Order O>
+	typename size<O>::ord2_t Generator<O>::operator[](const ord4_t coord) const {
+		ord4_t (& prog2coord)(ord4_t) = path::GetPathCoords<O>(params_.path_kind);
+		return values_[prog2coord(coord)].value;
+	}
+
+
+	template<Order O>
 	GenResult Generator<O>::operator()(const Params params) {
 		params_ = params;
 		params_.clean(O);

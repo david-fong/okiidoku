@@ -9,7 +9,7 @@
 namespace solvent::lib {
 	//
 	template<Order O>
-	class Grid {
+	class AbstractGrid {
 	 static_assert((1 < O) && (O <= MAX_REASONABLE_ORDER));
 	 private:
 		using ord1_t = typename size<O>::ord1_t;
@@ -20,6 +20,8 @@ namespace solvent::lib {
 		static constexpr ord1_t O1 = O;
 		static constexpr ord2_t O2 = O*O;
 		static constexpr ord4_t O4 = O*O*O*O;
+
+		virtual ord2_t operator[](ord4_t coord) const = 0;
 
 		[[gnu::const]] static constexpr ord2_t get_row(const ord4_t index) noexcept { return index / O2; }
 		[[gnu::const]] static constexpr ord2_t get_col(const ord4_t index) noexcept { return index % O2; }
@@ -35,7 +37,7 @@ namespace solvent::lib {
 	};
 
 	#define SOLVENT_TEMPL_TEMPL(O_) \
-		extern template class Grid<O_>;
+		extern template class AbstractGrid<O_>;
 	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 	#undef SOLVENT_TEMPL_TEMPL
 }
