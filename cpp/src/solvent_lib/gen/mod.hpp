@@ -5,6 +5,7 @@
 #include <solvent_lib/grid.hpp>
 #include <solvent_lib/size.hpp>
 
+#include <iosfwd>
 #include <random>
 #include <vector>
 #include <array>
@@ -124,7 +125,7 @@ namespace solvent::lib::gen {
 		[[gnu::hot]] inline Direction set_next_valid(ord4_t (& prog2coord)(ord4_t)) noexcept;
 		[[gnu::hot]] void generate(void);
 
-		GenResult make_gen_result(void) const;
+		[[nodiscard]] GenResult make_gen_result(void) const; // TODO.can this be gnu::pure ?
 	};
 
 

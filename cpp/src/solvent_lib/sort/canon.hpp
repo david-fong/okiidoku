@@ -23,7 +23,7 @@ namespace solvent::lib::canon {
 		[[gnu::pure]] ord2_t operator[](ord4_t coord) const override;
 
 	 private:
-		const std::array<ord2_t, O4> buf;
+		const std::array<ord2_t, O4> buf_;
 
 		void handle_relabeling(void) noexcept;
 	};

@@ -23,6 +23,10 @@ namespace solvent::lib {
 
 		virtual ord2_t operator[](ord4_t coord) const = 0;
 
+		// Returns false if any coords that can see each other contain the same value.
+		// Can be used for incomplete grids.
+		[[gnu::pure]] bool is_grid_valid(void) const;
+
 		[[gnu::const]] static constexpr ord2_t get_row(const ord4_t index) noexcept { return index / O2; }
 		[[gnu::const]] static constexpr ord2_t get_col(const ord4_t index) noexcept { return index % O2; }
 		[[gnu::const]] static constexpr ord2_t get_blk(const ord4_t index) noexcept { return get_blk(get_row(index), get_col(index)); }

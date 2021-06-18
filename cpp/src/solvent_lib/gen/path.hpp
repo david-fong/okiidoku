@@ -4,7 +4,6 @@
 #include <solvent_lib/size.hpp>
 
 #include <iosfwd>
-// #include <numeric> // iota
 #include <array>
 #include <string>
 
