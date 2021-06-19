@@ -26,10 +26,10 @@ namespace solvent::cli {
 
 	Repl::Repl(const Order O) {
 		this->O = O;
-		if (O <= 4) { config_.set_verbosity(verbosity::Kind::Silent); }
-		if (O  > 4) { config_.set_verbosity(verbosity::Kind::NoGiveups); }
-		config_.set_path_kind(pathkind_t::RowMajor);
-		config_.set_max_dead_ends(0);
+		if (O <= 4) { config_.verbosity(verbosity::Kind::Silent); }
+		if (O  > 4) { config_.verbosity(verbosity::Kind::NoGiveups); }
+		config_.path_kind(pathkind_t::RowMajor);
+		config_.max_dead_ends(0);
 	}
 
 
@@ -79,9 +79,9 @@ namespace solvent::cli {
 				break;
 			case E::Quit:
 				return false;
-			case E::ConfigVerbosity:   config_.set_verbosity(cmd_args); break;
-			case E::ConfigGenPath:     config_.set_path_kind(cmd_args); break;
-			case E::ConfigMaxDeadEnds: config_.set_max_dead_ends(cmd_args); break;
+			case E::ConfigVerbosity:   config_.verbosity(cmd_args); break;
+			case E::ConfigGenPath:     config_.path_kind(cmd_args); break;
+			case E::ConfigMaxDeadEnds: config_.max_dead_ends(cmd_args); break;
 			case E::GenSingle:     gen_single();     break;
 			case E::GenContinue:   gen_single(true); break;
 			case E::GenMultiple:   gen_multiple(cmd_args, false); break;
@@ -99,8 +99,8 @@ namespace solvent::cli {
 		const auto gen_result = cont_prev
 			? toolkit.gen_continue_prev(O)
 			: toolkit.gen(O, gen::Params{
-				.path_kind = config_.get_path_kind(),
-				.max_dead_ends = config_.get_max_dead_ends(),
+				.path_kind = config_.path_kind(),
+				.max_dead_ends = config_.max_dead_ends(),
 			}); // TODO.fix previous generator needs to be persisted.
 		const double processor_time = (static_cast<double>(std::clock() - clock_start)) / CLOCKS_PER_SEC;
 
@@ -122,14 +122,14 @@ namespace solvent::cli {
 
 		str::print_msg_bar("START x" + std::to_string(stop_after), BAR_WIDTH);
 		gen::batch::Params params {
-			.gen_params { .path_kind = config_.get_path_kind(), .max_dead_ends = config_.get_max_dead_ends() },
+			.gen_params { .path_kind = config_.path_kind(), .max_dead_ends = config_.max_dead_ends() },
 			.only_count_oks = only_count_oks,
 			.stop_after = stop_after
 		};
 		const gen::batch::BatchReport batch_report = gen::batch::batch(O, params,
 			[this](gen::GenResult const& gen_result) {
-				if ((config_.get_verbosity() == verbosity::Kind::All)
-				 || ((config_.get_verbosity() == verbosity::Kind::NoGiveups) && (gen_result.status == gen::ExitStatus::Ok))
+				if ((config_.verbosity() == verbosity::Kind::All)
+				 || ((config_.verbosity() == verbosity::Kind::NoGiveups) && (gen_result.status == gen::ExitStatus::Ok))
 				) {
 					gen_result.print_serial(std::cout);
 					if (O <= 4) {
@@ -137,18 +137,18 @@ namespace solvent::cli {
 					} else {
 						std::cout << std::endl; // always flush for big grids
 					}
-				} else if (config_.get_verbosity() == verbosity::Kind::Silent) {
+				} else if (config_.verbosity() == verbosity::Kind::Silent) {
 					// TODO.impl print a progress bar
 				}
 			}
 		);
-		if (config_.get_verbosity() == verbosity::Kind::NoGiveups
+		if (config_.verbosity() == verbosity::Kind::NoGiveups
 			&& only_count_oks
 			&& batch_report.total_anys == 0
 		) {
 			std::cout << str::RED.ON << "* all generations aborted" << str::RED.OFF;
 		}
-		if (config_.get_verbosity() != verbosity::Kind::Silent) {
+		if (config_.verbosity() != verbosity::Kind::Silent) {
 			str::print_msg_bar("", BAR_WIDTH, "─");
 		}
 

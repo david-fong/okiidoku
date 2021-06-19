@@ -40,37 +40,31 @@ namespace solvent::lib::canon {
 				}
 			}
 		}
-		// Sort the counts table...
 		// Note: in the below struct, sum only needs to hold up to (O2 * (O1-1)*2).
 		struct Label {
 			ord2_t value;
-			ord4_t sum = 0; // Relabelling has on effect on this calculated value.
+			ord4_t sum = 0; // Relabelling has no effect on this calculated value.
 		};
-		std::array<Label, O2> labels = {};
-		for (ord2_t i = 0; i < O2; i++) {
-			labels[i] = Label{ .value = i, .sum = 0 };
-			for (ord2_t j = 0; j < O2; j++) { labels[i].sum += counts[i][j]; }
-		}
-		std::ranges::sort(labels, {}, &Label::sum);
-		std::array<std::array<ord2_t, O2>, O2> counts_sorted;
-		for (ord2_t i = 0; i < O2; i++) {
-			for (ord2_t j = 0; j < O2; j++) {
-				counts_sorted[i][j] = counts[labels[i].value][labels[j].value];
+		const auto sort_by_count_slices = [&](const bool is_tie_breaker) -> void {
+			std::array<Label, O2> labels = {};
+			for (ord2_t i = 0; i < O2; i++) {
+				labels[i] = Label { .value = i, .sum = 0 };
+				for (ord2_t j = 0; j < O2; j++) {
+					labels[i].sum += !is_tie_breaker ? counts[i][j] : counts[j][i];
+				}
 			}
-		}
-		// Break ties by using the transposed counts table:
-		counts = counts_sorted;
-		for (ord2_t i = 0; i < O2; i++) {
-			labels[i] = Label{ .value = i, .sum = 0 };
-			for (ord2_t j = 0; j < O2; j++) { labels[i].sum += counts[j][i]; }
-		}
-		std::ranges::sort(labels, {}, &Label::sum);
-		for (ord2_t i = 0; i < O2; i++) {
-			for (ord2_t j = 0; j < O2; j++) {
-				counts_sorted[i][j] = counts[labels[i].value][labels[j].value];
-			}
-		}
+			std::ranges::stable_sort(labels, {}, &Label::sum);
 
+			std::array<std::array<ord2_t, O2>, O2> counts_sorted;
+			for (ord2_t i = 0; i < O2; i++) {
+				for (ord2_t j = 0; j < O2; j++) {
+					counts_sorted[i][j] = counts[labels[i].value][labels[j].value];
+				}
+			}
+			counts = counts_sorted;
+		};
+		sort_by_count_slices(false);
+		sort_by_count_slices(true);
 	}
 
 

@@ -3,7 +3,8 @@
 
 ## Higher Priority
 
-- See if there's a way to put the checking functionality inside the grid class without any abstracction cost.
+- Make the toolbox uses unions in template-sized fields to use less space at a time.
+  - Give it a method `set_O1` that initializes its fields.
 - https://cmake.org/cmake/help/latest/guide/tutorial/index.html
   - See what can be learned from https://github.com/lefticus/cpp_weekly_game_project
 - Decide what interfaces to support:

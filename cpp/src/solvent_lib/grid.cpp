@@ -5,7 +5,7 @@
 namespace solvent::lib {
 
 	template<Order O>
-	bool AbstractGrid<O>::is_grid_valid(void) const {
+	bool AbstractGrid<O>::is_grid_invalid(void) const {
 		using has_mask_t = typename size<O>::has_mask_t;
 		std::array<has_mask_t, O2> rows_has_ {};
 		std::array<has_mask_t, O2> cols_has_ {};
@@ -19,14 +19,14 @@ namespace solvent::lib {
 			const has_mask_t t_has = (row_has | col_has | blk_has);
 			const has_mask_t try_val_mask = has_mask_t(1) << this->operator[](coord);
 			if (t_has & try_val_mask) [[unlikely]] {
-				return false;
+				return true;
 			} else {
 				row_has |= try_val_mask;
 				col_has |= try_val_mask;
 				blk_has |= try_val_mask;
 			}
 		}
-		return true;
+		return false;
 	}
 
 	#define SOLVENT_TEMPL_TEMPL(O_) \
