@@ -19,6 +19,7 @@ namespace solvent::cli {
 		enum class E : unsigned {
 			Help,
 			Quit,
+			ConfigOrder,
 			ConfigVerbosity,
 			ConfigGenPath,
 			ConfigMaxDeadEnds,
@@ -30,7 +31,8 @@ namespace solvent::cli {
 		const std::map<std::string, Command::E> Str2Enum = {
 			{ "help",         E::Help              },
 			{ "quit",         E::Quit              },
-			{ "output",       E::ConfigVerbosity   },
+			{ "order",        E::ConfigOrder       },
+			{ "verbosity",    E::ConfigVerbosity   },
 			{ "genpath",      E::ConfigGenPath     },
 			{ "maxdeadends",  E::ConfigMaxDeadEnds },
 			{ "",             E::GenSingle         },
@@ -41,7 +43,8 @@ namespace solvent::cli {
 		const std::string HelpMessage = "\nCOMMAND MENU:"
 			"\n- help                  print this help menu"
 			"\n- quit                  cleanly exit this program"
-			"\n- output [<level>]      get/set output level"
+			"\n- order [<order>]       get/set order (sqrt of grid length)"
+			"\n- verbosity [<level>]   get/set verbosity level"
 			"\n- genpath [<path>]      get/set generator traversal path"
 			"\n- maxdeadends [<max>]   get/set generator max dead ends"
 			"\n- {enter}               generate a single solution"
@@ -78,7 +81,6 @@ namespace solvent::cli {
 		bool run_command(std::string const& cmd_line);
 
 	 private:
-		Order O; // TODO.impl move this to config?
 		Config config_;
 		lib::toolkit::Toolkit toolkit;
 

@@ -16,8 +16,8 @@ namespace solvent::cli {
 
 	// Mechanism to statically toggle printing alignment:
 	// (#undef-ed before the end of this namespace)
-	#define STATW_I << std::setw((0.4 * O*O * 1.5))
-	#define STATW_D << std::setw((0.4 * O*O * 1.5)) << std::fixed << std::setprecision(2)
+	#define STATW_I << std::setw((0.4 * config_.order() * config_.order() * 1.5))
+	#define STATW_D << std::setw((0.4 * config_.order() * config_.order() * 1.5)) << std::fixed << std::setprecision(2)
 
 	const std::string TERMINAL_OUTPUT_TIPS =
 	"\nNote: You can run `tput rmam` in your shell to disable text wrapping."
@@ -25,7 +25,7 @@ namespace solvent::cli {
 
 
 	Repl::Repl(const Order O) {
-		this->O = O;
+		config_.order(O);
 		if (O <= 4) { config_.verbosity(verbosity::Kind::Silent); }
 		if (O  > 4) { config_.verbosity(verbosity::Kind::NoGiveups); }
 		config_.path_kind(pathkind_t::RowMajor);
@@ -43,7 +43,7 @@ namespace solvent::cli {
 
 		std::string command;
 		do {
-			std::cout << "\n[" << O << "]: ";
+			std::cout << "\n[" << config_.order() << "]: ";
 
 			std::getline(std::cin, command);
 		} while (run_command(command));
@@ -79,6 +79,7 @@ namespace solvent::cli {
 				break;
 			case E::Quit:
 				return false;
+			case E::ConfigOrder:       config_.order(cmd_args); break;
 			case E::ConfigVerbosity:   config_.verbosity(cmd_args); break;
 			case E::ConfigGenPath:     config_.path_kind(cmd_args); break;
 			case E::ConfigMaxDeadEnds: config_.max_dead_ends(cmd_args); break;
@@ -97,8 +98,8 @@ namespace solvent::cli {
 		// Generate a new solution:
 		const clock_t clock_start = std::clock();
 		const auto gen_result = cont_prev
-			? toolkit.gen_continue_prev(O)
-			: toolkit.gen(O, gen::Params{
+			? toolkit.gen_continue_prev(config_.order())
+			: toolkit.gen(config_.order(), gen::Params{
 				.path_kind = config_.path_kind(),
 				.max_dead_ends = config_.max_dead_ends(),
 			}); // TODO.fix previous generator needs to be persisted.
@@ -126,13 +127,13 @@ namespace solvent::cli {
 			.only_count_oks = only_count_oks,
 			.stop_after = stop_after
 		};
-		const gen::batch::BatchReport batch_report = gen::batch::batch(O, params,
+		const gen::batch::BatchReport batch_report = gen::batch::batch(config_.order(), params,
 			[this](gen::GenResult const& gen_result) {
 				if ((config_.verbosity() == verbosity::Kind::All)
 				 || ((config_.verbosity() == verbosity::Kind::NoGiveups) && (gen_result.status == gen::ExitStatus::Ok))
 				) {
 					gen_result.print_serial(std::cout);
-					if (O <= 4) {
+					if (config_.order() <= 4) {
 						std::cout << '\n';
 					} else {
 						std::cout << std::endl; // always flush for big grids
@@ -162,7 +163,7 @@ namespace solvent::cli {
 			;
 
 		// Print bins (work distribution):
-		batch_report.print(std::cout, O);
+		batch_report.print(std::cout, config_.order());
 		str::print_msg_bar("DONE x" + std::to_string(stop_after), BAR_WIDTH);
 
 		if (batch_report.time_elapsed.wall_seconds > 10.0) {
