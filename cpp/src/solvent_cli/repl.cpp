@@ -14,17 +14,12 @@ namespace solvent::cli {
 
 	using pathkind_t = lib::gen::path::Kind;
 
-	// Mechanism to statically toggle printing alignment:
-	// (#undef-ed before the end of this namespace)
-	#define STATW_I << std::setw((0.4 * config_.order() * config_.order() * 1.5))
-	#define STATW_D << std::setw((0.4 * config_.order() * config_.order() * 1.5)) << std::fixed << std::setprecision(2)
-
 	const std::string TERMINAL_OUTPUT_TIPS =
 	"\nNote: You can run `tput rmam` in your shell to disable text wrapping."
 	"\nIf UTF-8 characters are garbled on Windows, run `chcp.com 65001`.";
 
 
-	Repl::Repl(const Order O) {
+	Repl::Repl(const Order O): toolkit(toolkit::Toolkit(O)) {
 		config_.order(O);
 		if (O <= 4) { config_.verbosity(verbosity::Kind::Silent); }
 		if (O  > 4) { config_.verbosity(verbosity::Kind::NoGiveups); }
@@ -79,7 +74,7 @@ namespace solvent::cli {
 				break;
 			case E::Quit:
 				return false;
-			case E::ConfigOrder:       config_.order(cmd_args); break;
+			case E::ConfigOrder:       config_.order(cmd_args); toolkit.set_order(config_.order()); break;
 			case E::ConfigVerbosity:   config_.verbosity(cmd_args); break;
 			case E::ConfigGenPath:     config_.path_kind(cmd_args); break;
 			case E::ConfigMaxDeadEnds: config_.max_dead_ends(cmd_args); break;
@@ -98,18 +93,17 @@ namespace solvent::cli {
 		// Generate a new solution:
 		const clock_t clock_start = std::clock();
 		const auto gen_result = cont_prev
-			? toolkit.gen_continue_prev(config_.order())
-			: toolkit.gen(config_.order(), gen::Params{
+			? toolkit.gen_continue_prev()
+			: toolkit.gen(gen::Params{
 				.path_kind = config_.path_kind(),
 				.max_dead_ends = config_.max_dead_ends(),
 			}); // TODO.fix previous generator needs to be persisted.
 		const double processor_time = (static_cast<double>(std::clock() - clock_start)) / CLOCKS_PER_SEC;
 
-		std::cout << "\nprocessor time: " STATW_D << processor_time << " seconds";
-		std::cout << "\nnum operations: " STATW_I << gen_result.op_count;
-		std::cout << "\nmax dead ends:  " STATW_I << gen_result.most_dead_ends_seen;
-		str::print_msg_bar("", "─");
 		gen_result.print_pretty(std::cout);
+		std::cout << "\nprocessor time: " << processor_time << " seconds";
+		std::cout << "\nnum operations: " << gen_result.op_count;
+		std::cout << "\nmax dead ends:  " << gen_result.most_dead_ends_seen;
 		str::print_msg_bar((gen_result.status == gen::ExitStatus::Ok) ? "OK" : "ABORT");
 		std::cout << std::endl;
 	}
@@ -155,11 +149,11 @@ namespace solvent::cli {
 
 		static const std::string seconds_units = std::string() + str::DIM.ON + " seconds (with I/O)" + str::DIM.OFF;
 		std::cout
-			<< "\nhelper threads: " STATW_I << params.num_threads
-			<< "\ngenerator path: " STATW_I << params.gen_params.path_kind
-			<< "\npercent aborts: " STATW_D << (batch_report.fraction_aborted * 100) << " %"
-			<< "\nprocessor time: " STATW_D << batch_report.time_elapsed.proc_seconds << seconds_units
-			<< "\nreal-life time: " STATW_D << batch_report.time_elapsed.wall_seconds << seconds_units
+			<< "\nnum threads: " << params.num_threads
+			<< "\ngenerator path: " << params.gen_params.path_kind
+			<< "\npercent aborted: " << (batch_report.fraction_aborted * 100) << " %"
+			<< "\nprocess time:    " << batch_report.time_elapsed.proc_seconds << seconds_units
+			<< "\nwall-clock time: " << batch_report.time_elapsed.wall_seconds << seconds_units
 			;
 
 		// Print bins (work distribution):
@@ -182,21 +176,17 @@ namespace solvent::cli {
 		try {
 			stop_by_value = std::stoul(stop_after_str);
 			if (stop_by_value <= 0) {
-				std::cout << str::RED.ON;
-				std::cout << "please provide a non-zero, positive integer.";
-				std::cout << str::RED.OFF << std::endl;
+				std::cout << str::RED.ON
+					<< "please provide a non-zero, positive integer."
+					<< str::RED.OFF << std::endl;
 				return;
 			}
 		} catch (std::invalid_argument const& ia) {
-			std::cout << str::RED.ON;
-			std::cout << "could not convert \"" << stop_after_str << "\" to an integer.";
-			std::cout << str::RED.OFF << std::endl;
+			std::cout << str::RED.ON
+				<< "could not convert \"" << stop_after_str << "\" to an integer."
+				<< str::RED.OFF << std::endl;
 			return;
 		}
 		this->gen_multiple(static_cast<trials_t>(stop_by_value), only_count_oks);
 	}
-
-
-	#undef STATW_I
-	#undef STATW_D
 }

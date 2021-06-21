@@ -10,6 +10,7 @@
 #include <vector>
 #include <array>
 #include <string>
+#include <numeric>   // iota,
 
 
 namespace solvent::lib::gen {
@@ -83,8 +84,6 @@ namespace solvent::lib::gen {
 		static constexpr ord4_t O4 = O*O*O*O;
 		[[gnu::pure]] ord2_t operator[](ord4_t coord) const override;
 
-		Generator(void);
-
 		// Generates a fresh sudoku solution.
 		GenResult operator()(Params);
 		GenResult continue_prev();
@@ -105,7 +104,15 @@ namespace solvent::lib::gen {
 			}
 		};
 
-		std::array<std::array<ord2_t, O2>, O2> val_try_orders_; // indexed by (progress/O2)
+		// indexed by (progress/O2)
+		std::array<std::array<ord2_t, O2>, O2> val_try_orders_ = []() {
+			std::array<std::array<ord2_t, O2>, O2> val_try_orders;
+			for (auto& vto : val_try_orders) {
+				std::iota(vto.begin(), vto.end(), 0);
+			}
+			return val_try_orders;
+		}();
+
 		std::array<Tile, O4> values_; // indexed by progress
 		std::array<has_mask_t, O2> rows_has_;
 		std::array<has_mask_t, O2> cols_has_;

@@ -18,7 +18,7 @@ namespace solvent::lib::gen::path {
 		static constexpr ord2_t O2 = O*O;
 		static constexpr ord4_t O4 = O*O*O*O;
 
-		[[gnu::pure]] static constexpr ord4_t convert(const ord4_t progress) noexcept {
+		[[gnu::pure, gnu::hot]] static constexpr ord4_t convert(const ord4_t progress) noexcept {
 			if constexpr (PK == path::Kind::RowMajor) {
 				return progress;
 			} else {

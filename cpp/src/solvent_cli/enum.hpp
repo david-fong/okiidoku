@@ -26,7 +26,7 @@ namespace solvent::cli {
 			return out << NAMES[static_cast<unsigned>(output_level)];
 		}
 		inline const std::string OPTIONS_MENU =
-			"\nOUTPUT-LVL OPTIONS:"
+			"\nVERBOSITY OPTIONS:"
 			"\n- emitall    emit all output"
 			"\n- nogiveups  suppress giveups"
 			"\n- silent     emit statistics only";

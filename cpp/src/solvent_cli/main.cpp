@@ -12,8 +12,6 @@
 
 namespace str = solvent::util::str;
 
-const unsigned DEFAULT_ORDER = 4;
-
 /**
  * ARGUMENTS
  * 0. executable name (fixed).
@@ -34,7 +32,7 @@ int main(const int argc, char const *const argv[]) {
 	unsigned int user_order; // 1
 	unsigned int srand_key;  // 2
 
-	user_order = (argc > 1) ? std::stoi(argv[1]) : DEFAULT_ORDER;
+	user_order = (argc > 1) ? std::stoi(argv[1]) : SOLVENT_DEFAULT_ORDER;
 	if (argc > 2 && !std::string(argv[2]).empty()) {
 		srand_key = std::stoi(argv[2]);
 	} else {

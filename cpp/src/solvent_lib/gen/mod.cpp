@@ -5,7 +5,6 @@
 #include <iostream>
 #include <mutex>
 #include <algorithm>   // shuffle,
-#include <numeric>     // iota,
 
 
 namespace solvent::lib::gen {
@@ -22,15 +21,6 @@ namespace solvent::lib::gen {
 			max_dead_ends = DEFAULT_MAX_DEAD_ENDS(O);
 		}
 		return *this;
-	}
-
-
-	template<Order O>
-	Generator<O>::Generator(void)
-	{
-		for (auto& vto : val_try_orders_) {
-			std::iota(vto.begin(), vto.end(), 0);
-		}
 	}
 
 
