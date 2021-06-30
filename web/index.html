@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8"/>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>solvent</title>
+		<meta name="referrer" content="same-origin"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<!-- <link rel="manifest" href="manifest.webmanifest"/> -->
+
+		<link href="./index.css">
+		<script defer="" src="./index.js"></script>
+		<meta name="og:title"       content="solvent"/>
+		<meta name="author"         content="David Fong"/>
+		<meta name="description"    content="A Sudoku solution generator. Simple, fast, and variable size."/>
+		<meta name="og:description" content="A Sudoku solution generator. Simple, fast, and variable size."/>
+		<meta name="og:image"       content="https://raw.githubusercontent.com/david-fong/solvent/dev/web/banner.png"/>
+	</head>
+
+	<body>
+		<!-- SCRIPTS ======================= -->
+		<script defer src="dist/tile.js"></script>
+		<script defer src="dist/gen.js"></script>
+		<script defer src="dist/index.js"></script>
+
+		<div id="sidebar">
+			<!-- SOLVER OPTIONS ================ -->
+			<fieldset id="container-solver-options">
+				<legend>solver behaviour</legend>
+				<select id="sel-grid-order">
+					<!-- last used is persisted in local storage -->
+					<option>2</option>
+					<option>3</option>
+					<option>4</option>
+					<option>5</option>
+				</select>
+				<select id="sel-gen-path">
+					<!-- best value is automatically chosen base on grid order -->
+					<option>row-major</option>
+					<option>block-col</option>
+				</select>
+			</fieldset>
+
+			<!-- PLAYBACK STEP OPTIONS ========= -->
+			<fieldset>
+				<legend>playback actions</legend>
+				<button id="btn-playback-value-test">value test</button>
+				<button id="btn-playback-backtrack">backtrack</button>
+				<button id="btn-playback-play-pause">play</button>
+				<button id="btn-playback-value-start-over">start over</button>
+			</fieldset>
+			<fieldset>
+				<legend>playback speed</legend>
+				<label>
+					coarse:
+					<input id="slider-playback-speed-coarse" type="range" min="1" max="84" value="10"/>
+				</label>
+				<label>
+					fine:
+					<input id="slider-playback-speed-fine" type="range" min="0" max="16" value="0"/>
+				</label>
+			</fieldset>
+		</div>
+
+		<!-- SUDOKU GRID =================== -->
+		<div id="host-grid" class="center-contents"></div>
+	</body>
+</html>

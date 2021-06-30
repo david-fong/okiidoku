@@ -26,7 +26,7 @@ namespace solvent::lib::gen {
 
 	template<Order O>
 	typename size<O>::ord2_t Generator<O>::operator[](const ord4_t coord) const {
-		ord4_t (& prog2coord)(ord4_t) = path::GetPathCoords<O>(params_.path_kind);
+		typename path::coord_converter_t<O> prog2coord = path::GetPathCoords<O>(params_.path_kind);
 		return values_[prog2coord(coord)].value;
 	}
 
@@ -79,7 +79,7 @@ namespace solvent::lib::gen {
 
 	template<Order O>
 	void Generator<O>::generate(void) {
-		ord4_t (& prog2coord)(ord4_t) = path::GetPathCoords<O>(params_.path_kind);
+		typename path::coord_converter_t<O> prog2coord = path::GetPathCoords<O>(params_.path_kind);
 
 		while (true) {
 			const Direction direction = this->set_next_valid(prog2coord);
@@ -120,7 +120,7 @@ namespace solvent::lib::gen {
 
 
 	template<Order O>
-	Direction Generator<O>::set_next_valid(ord4_t (& prog2coord)(ord4_t)) noexcept {
+	Direction Generator<O>::set_next_valid(typename path::coord_converter_t<O> prog2coord) noexcept {
 		const ord4_t coord = prog2coord(progress_);
 		has_mask_t& row_has = rows_has_[this->get_row(coord)];
 		has_mask_t& col_has = cols_has_[this->get_col(coord)];
@@ -165,7 +165,7 @@ namespace solvent::lib::gen {
 
 	template<Order O>
 	GenResult Generator<O>::make_gen_result(void) const {
-		ord4_t (& prog2coord)(ord4_t) = path::GetPathCoords<O>(params_.path_kind);
+		typename path::coord_converter_t<O> prog2coord = path::GetPathCoords<O>(params_.path_kind);
 		GenResult gen_result = {
 			.O {O},
 			.status {prev_gen_status_},

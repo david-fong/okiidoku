@@ -44,5 +44,17 @@
 		"[rust]": {
 			"editor.insertSpaces": false,
 		},
+		"[typescript]": {
+			"editor.insertSpaces": false,
+		},
+		"[javascript]": {
+			"editor.insertSpaces": false,
+		},
+		"[html]": {
+			"editor.insertSpaces": false,
+		},
+		"[css]": {
+			"editor.insertSpaces": false,
+		},
 	},
 }

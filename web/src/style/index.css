@@ -1,0 +1,108 @@
+@import "./root.css";
+@import "./utils.css";
+
+:root {
+	--colour-tile-bd: #cdcdcd;
+	--colour-tile-bg: white;
+	--colour-main-bg: whitesmoke;
+}
+
+body {
+	/* --grid-order is set programmatically.*/
+	--grid-length: calc(var(--grid-order)  * var(--grid-order));
+	--grid-area:   calc(var(--grid-length) * var(--grid-length));
+
+	--border-radius: 0.5em;
+	--grid-block-spacing: 0.4em;
+	--tile-width: 2em;
+	--tile-bd-width: 2px;
+
+	position: absolute;
+	min-height: 100%;
+	min-width: 100%;
+
+	display: grid;
+	grid-auto-flow: column;
+	grid-template-columns: min-content 1fr;
+	align-items: center;
+
+	background-color: var(--colour-main-bg);
+}
+body > * {
+	box-sizing: border-box;
+	padding: 0.5em;
+}
+
+#sidebar {
+	z-index: 1;
+	align-self: flex-start;
+	position: sticky;
+	top: 0; left: 0;
+	width: min-content;
+	padding-right: 0px;
+}
+#sidebar, #sidebar > * {
+	box-sizing: border-box;
+	display: grid;
+	gap: var(--grid-block-spacing);
+}
+#sidebar > * > :not(legend) {
+	width: 100%;
+	margin: calc(var(--tile-bd-width)) 0px;
+}
+button, input, select, fieldset, legend {
+	contain: content;
+	height: var(--tile-width);
+	border-radius: var(--border-radius);
+	border-style: solid;
+	border-width: var(--tile-bd-width);
+
+	border-color: var(--colour-tile-bd);
+	background-color: var(--colour-tile-bg);
+}
+fieldset, legend {
+	contain: style;
+	height: initial;
+	margin: 0px;
+}
+legend {
+	padding: 0.2em 0.5em;
+}
+
+
+
+.center-contents {
+	display: grid;
+	place-content: center center;
+	place-items: center center;
+}
+
+.tile {
+	background-color: var(--colour-tile-bg);
+}
+.tile--char {
+}
+
+#grid-host {
+	contain: content;
+	display: grid;
+}
+.grid {
+	contain: content;
+	padding: var(--grid-block-spacing);
+	display: grid;
+	grid-template-columns: repeat(var(--grid-order), min-content);
+	gap: var(--grid-block-spacing);
+}
+.grid--block {
+	contain: strict;
+	border-radius: var(--border-radius);
+	border: var(--tile-bd-width) solid var(--colour-tile-bd);
+
+	gap: var(--tile-bd-width);
+	display: grid;
+	grid-template-columns: repeat(var(--grid-order), var(--tile-width));
+	grid-auto-rows: var(--tile-width);
+
+	background-color: var(--colour-tile-bd);
+}

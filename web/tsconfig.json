@@ -1,0 +1,48 @@
+{
+	"compilerOptions": {
+		"outDir": "./dist",
+		"rootDir": "./src",
+		"baseUrl": "./src",
+
+		// Project References:
+		"composite": true,
+
+		// Compiler Behaviour:
+		"moduleResolution": "node",
+		"esModuleInterop": true,
+		"resolveJsonModule": true,
+		"forceConsistentCasingInFileNames": true,
+		"skipLibCheck": true, // time-saving measure.
+
+		// Language Settings:
+		"target": "es2017",
+		"module": "es2020",
+		"lib": [ "es2020", "dom", "es2019.array" ],
+		//"experimentalDecorators": true,
+
+		// Emit Flags:
+		"sourceMap": true,
+		//"removeComments": true,
+		"alwaysStrict": true,
+		"useDefineForClassFields": true,
+
+		// Grammar Checking:
+		"strict": true,
+		"strictPropertyInitialization": false,
+		"noImplicitReturns": true,
+		"noImplicitAny": true,
+		"noUncheckedIndexedAccess": true,
+		"importsNotUsedAsValues": "error",
+		"noImplicitOverride": true,
+
+		// Linting:
+		"noFallthroughCasesInSwitch": true,
+
+		// "plugins": [{
+		// 	"name": "typescript-plugin-css-modules",
+		// 	"options": {
+		// 		"customMatcher": "\\.m.css$",
+		// 	},
+		// }],
+	},
+}
