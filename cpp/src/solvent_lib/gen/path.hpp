@@ -31,7 +31,7 @@ namespace solvent::lib::gen {
 			"\n- dealrwmj   like dealing cards to each block using row-major";
 
 		template<solvent::Order O>
-		using coord_converter_t = typename size<O>::ord4_t (&)(typename size<O>::ord4_t);
+		using coord_converter_t = [[gnu::const]] typename size<O>::ord4_t (&)(typename size<O>::ord4_t) noexcept;
 
 		template<solvent::Order O>
 		coord_converter_t<O> GetPathCoords(Kind) noexcept;

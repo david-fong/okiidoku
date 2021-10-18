@@ -3,6 +3,7 @@
 
 ## Higher Priority
 
+- Is it possible to get rid of the value field in the Tile struct?
 - https://cmake.org/cmake/help/latest/guide/tutorial/index.html
   - See what can be learned from https://github.com/lefticus/cpp_weekly_game_project
 - Decide what interfaces to support:

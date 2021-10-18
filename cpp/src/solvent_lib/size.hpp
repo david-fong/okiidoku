@@ -17,8 +17,8 @@ namespace solvent {
 	struct size {
 	 public:
 		// mask width `order^2` bits.
-		// order:  2   3   4   5   6   7   8   9  10  11
-		// width:  4   9  16  25  36  49  64  81 100 121
+		// O1:     2   3   4   5   6   7   8   9  10  11
+		// O2:     4   9  16  25  36  49  64  81 100 121
 		// round:  8  16  16  32  64  64  64 128 128 128
 		using has_mask_t =
 			std::conditional_t<(O <= 2), std::uint_fast8_t,
@@ -33,18 +33,18 @@ namespace solvent {
 		using ord1_t = std::uint_fast8_t;
 
 		// uint range [0, order^2].
-		// order:   2    3    4    5    6    7    8    9   10   11   12   13   14   15   16
-		// length:  4    9   16   25   36   49   64   81  100  121  144  169  196  225  256
-		// bits:    3    3    5    5    6    6    7    7    7    7    8    8    8    8    9
+		// O1:   2    3    4    5    6    7    8    9   10   11   12   13   14   15   16
+		// O1:   4    9   16   25   36   49   64   81  100  121  144  169  196  225  256
+		// bits: 3    3    5    5    6    6    7    7    7    7    8    8    8    8    9
 		using ord2_t =
 			std::conditional_t<(O <= 15), std::uint_fast8_t,
 			std::uint_fast16_t
 		>;
 
 		// uint range [0, order^4].
-		// order:   2    3    4    5     6     7     8     9     10
-		// area:   16   81  256  625  1296  2401  4096  6561  10000
-		// bits:    5    7    9    9    11    12    17    17     18
+		// O1:    2    3    4    5     6     7     8     9     10
+		// O4:   16   81  256  625  1296  2401  4096  6561  10000
+		// bits:  5    7    9    9    11    12    17    17     18
 		using ord4_t =
 			std::conditional_t<(O <=   3), std::uint_fast8_t,
 			std::conditional_t<(O <=   7), std::uint_fast16_t,

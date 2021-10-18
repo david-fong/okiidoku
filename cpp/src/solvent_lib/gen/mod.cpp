@@ -11,8 +11,7 @@ namespace solvent::lib::gen {
 
 	std::mt19937 Rng;
 
-	// Guards accesses to Rng. I currently only
-	// use this when shuffling generator biases.
+	// Guards accesses to Rng. Only used when shuffling generator biases.
 	std::mutex RNG_MUTEX;
 
 
@@ -35,9 +34,9 @@ namespace solvent::lib::gen {
 	GenResult Generator<O>::operator()(const Params params) {
 		params_ = params;
 		params_.clean(O);
-		this->prepare_fresh_gen();
-		this->generate();
-		return this->make_gen_result();
+		this->prepare_fresh_gen_();
+		this->generate_();
+		return this->make_gen_result_();
 	}
 
 
@@ -45,17 +44,17 @@ namespace solvent::lib::gen {
 	GenResult Generator<O>::continue_prev() {
 		// Continue the previous generation.
 		if (prev_gen_status_ == ExitStatus::Exhausted) [[unlikely]] {
-			return this->make_gen_result();
+			return this->make_gen_result_();
 		}
 		dead_ends_.fill(0); // Do not carry over previous dead_ends counters.
 		most_dead_ends_seen_ = 0;
-		this->generate();
-		return this->make_gen_result();
+		this->generate_();
+		return this->make_gen_result_();
 	}
 
 
 	template<Order O>
-	void Generator<O>::prepare_fresh_gen(void) {
+	void Generator<O>::prepare_fresh_gen_(void) {
 		for (Tile& t : values_) {
 			t.clear();
 		}
@@ -78,11 +77,11 @@ namespace solvent::lib::gen {
 
 
 	template<Order O>
-	void Generator<O>::generate(void) {
+	void Generator<O>::generate_(void) {
 		typename path::coord_converter_t<O> prog2coord = path::GetPathCoords<O>(params_.path_kind);
 
 		while (true) {
-			const Direction direction = this->set_next_valid(prog2coord);
+			const Direction direction = this->set_next_valid_(prog2coord);
 			if (!direction.is_skip) { ++op_count_; }
 
 			if (direction.is_back) [[unlikely]] {
@@ -120,7 +119,7 @@ namespace solvent::lib::gen {
 
 
 	template<Order O>
-	Direction Generator<O>::set_next_valid(typename path::coord_converter_t<O> prog2coord) noexcept {
+	Direction Generator<O>::set_next_valid_(typename path::coord_converter_t<O> prog2coord) noexcept {
 		const ord4_t coord = prog2coord(progress_);
 		has_mask_t& row_has = rows_has_[this->get_row(coord)];
 		has_mask_t& col_has = cols_has_[this->get_col(coord)];
@@ -137,7 +136,7 @@ namespace solvent::lib::gen {
 
 		// Smart backtracking:
 		if ((progress_ < dead_end_progress_) && !this->can_coords_see_each_other(
-			prog2coord(progress_), prog2coord(dead_end_progress_)
+			coord, prog2coord(dead_end_progress_)
 		)) {
 			t.clear();
 			return Direction { .is_back = true, .is_skip = true };
@@ -145,7 +144,7 @@ namespace solvent::lib::gen {
 
 		const has_mask_t t_has = (row_has | col_has | blk_has);
 		for (ord2_t try_i = t.next_try_index; try_i < O2; try_i++) {
-			const ord2_t try_val = val_try_orders_[progress_ / O2][try_i];
+			const ord2_t try_val = val_try_orders_[coord / O2][try_i];
 			const has_mask_t try_val_mask = has_mask_t(1) << try_val;
 			if (!(t_has & try_val_mask)) {
 				// A valid value was found:
@@ -158,13 +157,13 @@ namespace solvent::lib::gen {
 			}
 		}
 		// Nothing left to try here. Backtrack:
-		t.clear(); // TODO.test is this needed? Maybe not!
+		t.clear(); // TODO.test is this needed? Maybe not! Would need to change the clear check to use next_try_val_ instead
 		return Direction { .is_back = true, .is_skip = false };
 	}
 
 
 	template<Order O>
-	GenResult Generator<O>::make_gen_result(void) const {
+	GenResult Generator<O>::make_gen_result_(void) const {
 		typename path::coord_converter_t<O> prog2coord = path::GetPathCoords<O>(params_.path_kind);
 		GenResult gen_result = {
 			.O {O},

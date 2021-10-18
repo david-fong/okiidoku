@@ -16,6 +16,9 @@
 namespace solvent::lib::gen {
 
 	// must be manually seeded!
+	// Used for shuffling Generator.
+	// Shared between threads, guarded by mutex.
+	// Using thread_local instead does not cause any noticeable perf change.
 	extern std::mt19937 Rng;
 
 	//
@@ -43,7 +46,7 @@ namespace solvent::lib::gen {
 		unsigned long dead_end_progress;
 		unsigned long long most_dead_ends_seen;
 		opcount_t op_count;
-		std::vector<unsigned char> grid = {};
+		std::vector<std::uint_fast8_t> grid = {}; // NOTE: assumes O1 < 16
 
 		void print_serial(std::ostream&) const;
 		void print_pretty(std::ostream&) const;
@@ -104,7 +107,7 @@ namespace solvent::lib::gen {
 			}
 		};
 
-		// indexed by (progress/O2)
+		// indexed by floordiv of coord
 		std::array<std::array<ord2_t, O2>, O2> val_try_orders_ = []() {
 			std::array<std::array<ord2_t, O2>, O2> val_try_orders;
 			for (auto& vto : val_try_orders) {
@@ -127,12 +130,12 @@ namespace solvent::lib::gen {
 		ExitStatus prev_gen_status_ = ExitStatus::Abort;
 
 		// clear fields and scramble val_try_orders_
-		void prepare_fresh_gen(void);
+		void prepare_fresh_gen_(void);
 
-		[[gnu::hot]] inline Direction set_next_valid(typename path::coord_converter_t<O>) noexcept;
-		[[gnu::hot]] void generate(void);
+		[[gnu::hot]] inline Direction set_next_valid_(typename path::coord_converter_t<O>) noexcept;
+		[[gnu::hot]] void generate_(void);
 
-		[[nodiscard]] GenResult make_gen_result(void) const; // TODO.can this be gnu::pure ?
+		[[nodiscard]] GenResult make_gen_result_(void) const; // TODO.can this be gnu::pure ?
 	};
 
 

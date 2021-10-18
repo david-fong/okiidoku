@@ -18,7 +18,7 @@ namespace solvent::lib::gen::path {
 		static constexpr ord2_t O2 = O*O;
 		static constexpr ord4_t O4 = O*O*O*O;
 
-		[[gnu::pure, gnu::hot]] static constexpr ord4_t convert(const ord4_t progress) noexcept {
+		[[gnu::const, gnu::hot]] static constexpr ord4_t convert(const ord4_t progress) noexcept {
 			if constexpr (PK == path::Kind::RowMajor) {
 				return progress;
 			} else {
@@ -55,7 +55,7 @@ namespace solvent::lib::gen::path {
 			}
 			return static_cast<const grid_cache_t>(path_tmp);
 		}
-		static constexpr const grid_cache_t path = PathCoords_<PK,O>::_init();
+		static constexpr grid_cache_t path = PathCoords_<PK,O>::_init();
 		// Note: a compiler can optimize this away if not used.
 	};
 

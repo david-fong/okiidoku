@@ -31,7 +31,6 @@
 		// "explorer.sortOrder": "default",
 		"C_Cpp.autoAddFileAssociations": false,
 
-		"editor.tabSize": 3,
 		"[json]": {
 			"editor.insertSpaces": false,
 		},
