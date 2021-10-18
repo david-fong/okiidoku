@@ -25,8 +25,8 @@ namespace solvent::lib::gen {
 
 	template<Order O>
 	typename size<O>::ord2_t Generator<O>::operator[](const ord4_t coord) const {
-		typename path::coord_converter_t<O> prog2coord = path::GetPathCoords<O>(params_.path_kind);
-		return values_[prog2coord(coord)].value;
+		// typename path::coord_converter_t<O> prog2coord = path::GetPathCoords<O>(params_.path_kind);
+		return val_try_orders_[coord / O2][values_[coord].try_index];
 	}
 
 
@@ -64,7 +64,7 @@ namespace solvent::lib::gen {
 		dead_ends_.fill(0);
 
 		progress_ = 0;
-		dead_end_progress_ = 0;
+		frontier_progress_ = 0;
 		most_dead_ends_seen_ = 0;
 		op_count_ = 0;
 
@@ -89,7 +89,7 @@ namespace solvent::lib::gen {
 					prev_gen_status_ = ExitStatus::Exhausted;
 					break;
 				}
-				if (progress_ == dead_end_progress_) [[unlikely]] {
+				if (progress_ == frontier_progress_) [[unlikely]] {
 					const dead_ends_t dead_ends = ++dead_ends_[progress_];
 					--progress_;
 					if (dead_ends > most_dead_ends_seen_) [[unlikely]] {
@@ -108,10 +108,10 @@ namespace solvent::lib::gen {
 					break;
 				}
 				++progress_;
-				if ((progress_ > dead_end_progress_)
-					|| !this->can_coords_see_each_other(prog2coord(progress_), prog2coord(dead_end_progress_))
+				if ((progress_ > frontier_progress_)
+					|| !this->can_coords_see_each_other(prog2coord(progress_), prog2coord(frontier_progress_))
 				) [[unlikely]] { // TODO.learn `unlikely` helps for 4:rowmajor. Does it help in general?
-					dead_end_progress_ = progress_;
+					frontier_progress_ = progress_;
 				}
 			}
 		}
@@ -124,40 +124,39 @@ namespace solvent::lib::gen {
 		has_mask_t& row_has = rows_has_[this->get_row(coord)];
 		has_mask_t& col_has = cols_has_[this->get_col(coord)];
 		has_mask_t& blk_has = blks_has_[this->get_blk(coord)];
+		auto& val_try_order = val_try_orders_[coord / O2];
 
-		Tile& t = values_[progress_];
+		Tile& t = values_[coord]; // TODO test theory that indexing by progress is better for cache.
 		if (!t.is_clear()) {
 			// Clear the current value from all masks:
-			const has_mask_t erase_mask = ~(has_mask_t(0b1u) << t.value);
+			const has_mask_t erase_mask = ~( has_mask_t(0b1u) << val_try_order[t.try_index] );
 			row_has &= erase_mask;
 			col_has &= erase_mask;
 			blk_has &= erase_mask;
 		}
 
 		// Smart backtracking:
-		if ((progress_ < dead_end_progress_) && !this->can_coords_see_each_other(
-			coord, prog2coord(dead_end_progress_)
+		if ((progress_ < frontier_progress_) && !this->can_coords_see_each_other(
+			coord, prog2coord(frontier_progress_)
 		)) {
 			t.clear();
 			return Direction { .is_back = true, .is_skip = true };
 		}
 
 		const has_mask_t t_has = (row_has | col_has | blk_has);
-		for (ord2_t try_i = t.next_try_index; try_i < O2; try_i++) {
-			const ord2_t try_val = val_try_orders_[coord / O2][try_i];
-			const has_mask_t try_val_mask = has_mask_t(1) << try_val;
+		for (ord2_t try_i = (t.try_index+1) % (O2+1); try_i < O2; try_i++) {
+			const has_mask_t try_val_mask = has_mask_t(1) << val_try_order[try_i];
 			if (!(t_has & try_val_mask)) {
 				// A valid value was found:
 				row_has |= try_val_mask;
 				col_has |= try_val_mask;
 				blk_has |= try_val_mask;
-				t.value = try_val;
-				t.next_try_index = (try_i + 1u);
-				return Direction { .is_back = false };
+				t.try_index = try_i;
+				return Direction { .is_back = false, .is_skip = false };
 			}
 		}
 		// Nothing left to try here. Backtrack:
-		t.clear(); // TODO.test is this needed? Maybe not! Would need to change the clear check to use next_try_val_ instead
+		t.clear();
 		return Direction { .is_back = true, .is_skip = false };
 	}
 
@@ -168,13 +167,14 @@ namespace solvent::lib::gen {
 		GenResult gen_result = {
 			.O {O},
 			.status {prev_gen_status_},
-			.dead_end_progress {dead_end_progress_},
+			.dead_end_progress {frontier_progress_},
 			.most_dead_ends_seen {most_dead_ends_seen_},
-			.op_count {op_count_}
+			.op_count {op_count_},
+			.grid = std::vector(O4, O2)
 		};
-		gen_result.grid.resize(O4);
-		for (ord4_t i = 0; i < O4; i++) {
-			gen_result.grid[prog2coord(i)] = values_[i].value;
+		for (ord4_t p = 0; p <= progress_; p++) {
+			const ord4_t coord = prog2coord(p);
+			gen_result.grid[coord] = val_try_orders_[coord / O2][values_[coord].try_index];
 		}
 		return gen_result;
 	}

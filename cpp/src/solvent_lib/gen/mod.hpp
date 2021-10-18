@@ -95,19 +95,17 @@ namespace solvent::lib::gen {
 	 private:
 		//
 		struct Tile final {
-			// Index into val_try_orders_. If set to O2, backtrack next.
-			ord2_t next_try_index;
-			ord2_t value;
+			// Index into val_try_orders_. O2 if clear.
+			ord2_t try_index;
 			void clear(void) noexcept {
-				next_try_index = 0;
-				value = O2;
+				try_index = O2;
 			}
 			[[gnu::pure]] bool is_clear(void) const noexcept {
-				return value == O2;
+				return try_index == O2;
 			}
 		};
 
-		// indexed by floordiv of coord
+		// indexed by `coord // O2`
 		std::array<std::array<ord2_t, O2>, O2> val_try_orders_ = []() {
 			std::array<std::array<ord2_t, O2>, O2> val_try_orders;
 			for (auto& vto : val_try_orders) {
@@ -116,7 +114,7 @@ namespace solvent::lib::gen {
 			return val_try_orders;
 		}();
 
-		std::array<Tile, O4> values_; // indexed by progress
+		std::array<Tile, O4> values_; // indexed by coord
 		std::array<has_mask_t, O2> rows_has_;
 		std::array<has_mask_t, O2> cols_has_;
 		std::array<has_mask_t, O2> blks_has_;
@@ -124,7 +122,7 @@ namespace solvent::lib::gen {
 
 		Params params_;
 		ord4_t progress_ = 0;
-		ord4_t dead_end_progress_ = 0;
+		ord4_t frontier_progress_ = 0;
 		dead_ends_t most_dead_ends_seen_ = 0;
 		opcount_t op_count_ = 0;
 		ExitStatus prev_gen_status_ = ExitStatus::Abort;

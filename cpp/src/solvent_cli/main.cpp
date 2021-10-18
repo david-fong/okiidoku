@@ -34,7 +34,7 @@ int main(const int argc, char const *const argv[]) {
 
 	user_order = (argc > 1) ? std::stoi(argv[1]) : SOLVENT_DEFAULT_ORDER;
 	if (argc > 2 && !std::string(argv[2]).empty()) {
-		srand_key = std::stoi(argv[2]);
+		srand_key = std::stoul(argv[2]);
 	} else {
 		srand_key = std::random_device()();
 	}
