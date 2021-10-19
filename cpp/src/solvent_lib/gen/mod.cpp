@@ -147,15 +147,18 @@ namespace solvent::lib::gen {
 		}
 
 		const has_mask_t t_has = (row_has | col_has | blk_has);
-		for (ord2_t try_i = (t.try_index+1) % (O2+1); try_i < O2; try_i++) {
-			const has_mask_t try_val_mask = has_mask_t(1) << val_try_order[try_i];
-			if (!(t_has & try_val_mask)) [[unlikely]] {
-				// A valid value was found:
-				row_has |= try_val_mask;
-				col_has |= try_val_mask;
-				blk_has |= try_val_mask;
-				t.try_index = try_i;
-				return Direction { .is_back = false, .is_skip = false };
+		if (std::popcount(t_has) != O2) [[likely]] {
+			// The above optimization comes into effect ~1/5 of the time for size 5.
+			for (ord2_t try_i = (t.try_index+1) % (O2+1); try_i < O2; try_i++) {
+				const has_mask_t try_val_mask = has_mask_t(1) << val_try_order[try_i];
+				if (!(t_has & try_val_mask)) [[unlikely]] {
+					// A valid value was found:
+					row_has |= try_val_mask;
+					col_has |= try_val_mask;
+					blk_has |= try_val_mask;
+					t.try_index = try_i;
+					return Direction { .is_back = false, .is_skip = false };
+				}
 			}
 		}
 		// Nothing left to try here. Backtrack:
