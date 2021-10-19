@@ -80,9 +80,11 @@ namespace solvent::lib::gen {
 	void Generator<O>::generate_(void) {
 		typename path::coord_converter_t<O> prog2coord = path::GetPathCoords<O>(params_.path_kind);
 
+		bool do_clear_masks = true;
 		while (true) {
-			const Direction direction = this->set_next_valid_(prog2coord);
-			if (!direction.is_skip) { ++op_count_; }
+			const Direction direction = this->set_next_valid_(prog2coord, do_clear_masks);
+			do_clear_masks = direction.is_back;
+			if (!direction.is_skip) [[likely]] { ++op_count_; }
 
 			if (direction.is_back) [[unlikely]] {
 				if (progress_ == 0) [[unlikely]] {
@@ -110,7 +112,7 @@ namespace solvent::lib::gen {
 				++progress_;
 				if ((progress_ > frontier_progress_)
 					|| !this->can_coords_see_each_other(prog2coord(progress_), prog2coord(frontier_progress_))
-				) [[unlikely]] { // TODO.learn `unlikely` helps for 4:rowmajor. Does it help in general?
+				) [[unlikely]] {
 					frontier_progress_ = progress_;
 				}
 			}
@@ -119,15 +121,15 @@ namespace solvent::lib::gen {
 
 
 	template<Order O>
-	Direction Generator<O>::set_next_valid_(typename path::coord_converter_t<O> prog2coord) noexcept {
+	Direction Generator<O>::set_next_valid_(typename path::coord_converter_t<O> prog2coord, const bool do_clear_masks) noexcept {
 		const ord4_t coord = prog2coord(progress_);
 		has_mask_t& row_has = rows_has_[this->get_row(coord)];
 		has_mask_t& col_has = cols_has_[this->get_col(coord)];
 		has_mask_t& blk_has = blks_has_[this->get_blk(coord)];
 		auto& val_try_order = val_try_orders_[coord / O2];
 
-		Tile& t = values_[coord]; // TODO test theory that indexing by progress is better for cache.
-		if (!t.is_clear()) {
+		Tile& t = values_[coord];
+		if (do_clear_masks) [[unlikely]]/* average direction is forward */ {
 			// Clear the current value from all masks:
 			const has_mask_t erase_mask = ~( has_mask_t(0b1u) << val_try_order[t.try_index] );
 			row_has &= erase_mask;
@@ -136,9 +138,10 @@ namespace solvent::lib::gen {
 		}
 
 		// Smart backtracking:
+		// This optimization's degree of usefulness depends on the genpath and size.
 		if ((progress_ < frontier_progress_) && !this->can_coords_see_each_other(
 			coord, prog2coord(frontier_progress_)
-		)) {
+		)) [[unlikely]] {
 			t.clear();
 			return Direction { .is_back = true, .is_skip = true };
 		}
@@ -146,7 +149,7 @@ namespace solvent::lib::gen {
 		const has_mask_t t_has = (row_has | col_has | blk_has);
 		for (ord2_t try_i = (t.try_index+1) % (O2+1); try_i < O2; try_i++) {
 			const has_mask_t try_val_mask = has_mask_t(1) << val_try_order[try_i];
-			if (!(t_has & try_val_mask)) {
+			if (!(t_has & try_val_mask)) [[unlikely]] {
 				// A valid value was found:
 				row_has |= try_val_mask;
 				col_has |= try_val_mask;
@@ -167,10 +170,10 @@ namespace solvent::lib::gen {
 		GenResult gen_result = {
 			.O {O},
 			.status {prev_gen_status_},
-			.dead_end_progress {frontier_progress_},
+			.frontier_progress {frontier_progress_},
 			.most_dead_ends_seen {most_dead_ends_seen_},
 			.op_count {op_count_},
-			.grid = std::vector(O4, O2)
+			.grid = std::vector(O4, O2),
 		};
 		for (ord4_t p = 0; p <= progress_; p++) {
 			const ord4_t coord = prog2coord(p);

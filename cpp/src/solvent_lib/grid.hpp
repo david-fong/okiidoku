@@ -38,6 +38,7 @@ namespace solvent::lib {
 				||  (get_col(c1) == get_col(c2))
 				||  (get_blk(c1) == get_blk(c2));
 		}
+		// Note: the compiler optimizes the division/modulus pairs just fine.
 	};
 
 	#define SOLVENT_TEMPL_TEMPL(O_) \

@@ -97,7 +97,7 @@ namespace solvent::cli {
 			: toolkit.gen(gen::Params{
 				.path_kind = config_.path_kind(),
 				.max_dead_ends = config_.max_dead_ends(),
-			}); // TODO.fix previous generator needs to be persisted.
+			});
 		const double processor_time = (static_cast<double>(std::clock() - clock_start)) / CLOCKS_PER_SEC;
 
 		gen_result.print_pretty(std::cout);

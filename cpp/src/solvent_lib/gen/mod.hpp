@@ -43,7 +43,7 @@ namespace solvent::lib::gen {
 	struct GenResult final {
 		Order O;
 		ExitStatus status;
-		unsigned long dead_end_progress;
+		unsigned long frontier_progress;
 		unsigned long long most_dead_ends_seen;
 		opcount_t op_count;
 		std::vector<std::uint_fast8_t> grid = {}; // NOTE: assumes O1 < 16
@@ -130,10 +130,10 @@ namespace solvent::lib::gen {
 		// clear fields and scramble val_try_orders_
 		void prepare_fresh_gen_(void);
 
-		[[gnu::hot]] inline Direction set_next_valid_(typename path::coord_converter_t<O>) noexcept;
+		[[gnu::hot]] inline Direction set_next_valid_(typename path::coord_converter_t<O>, bool do_clear_masks) noexcept;
 		[[gnu::hot]] void generate_(void);
 
-		[[nodiscard]] GenResult make_gen_result_(void) const; // TODO.can this be gnu::pure ?
+		[[gnu::pure, nodiscard]] GenResult make_gen_result_(void) const;
 	};
 
 

@@ -36,7 +36,7 @@ namespace solvent::cli {
 			{ "genpath",      E::ConfigGenPath     },
 			{ "maxdeadends",  E::ConfigMaxDeadEnds },
 			{ "",             E::GenSingle         },
-			{ "cont",         E::GenContinue       }, // TODO [qol] Change this to "c"? (remember to change help string too)
+			{ "c",            E::GenContinue       },
 			{ "gen",          E::GenMultiple       },
 			{ "gen_ok",       E::GenMultipleOk     },
 		};
@@ -50,7 +50,7 @@ namespace solvent::cli {
 			"\n- maxdeadends [<max>]   get/set generator max dead ends"
 			"\n"
 			"\n- {enter}               generate a single solution"
-			"\n- cont                  continue previous generation"
+			"\n- c                     continue previous generation"
 			"\n- gen <n>               attempt to generate <n> solutions"
 			"\n- gen_ok <n>            successfully generate <n> solutions"
 			;
