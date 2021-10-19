@@ -90,6 +90,10 @@ namespace solvent::lib::gen {
 		// Generates a fresh sudoku solution.
 		GenResult operator()(Params);
 		GenResult continue_prev();
+
+		void print_pretty(std::ostream&) const;
+
+		Params const& get_params() const { return params_; }
 		[[gnu::pure]] std::array<dead_ends_t, O4> const& get_dead_ends() const { return dead_ends_; }
 
 	 private:

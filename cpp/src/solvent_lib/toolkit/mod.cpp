@@ -1,6 +1,7 @@
 #include <solvent_lib/toolkit/mod.hpp>
+#include <solvent_lib/print.hpp>
 
-#include<iostream>
+#include <iostream>
 
 namespace solvent::lib::toolkit {
 
@@ -53,6 +54,16 @@ namespace solvent::lib::toolkit {
 		#undef SOLVENT_TEMPL_TEMPL
 		}
 		return gen::GenResult {}; // never
+	}
+
+
+	void Toolkit::gen_print_pretty(std::ostream& os) const {
+		switch (O) {
+		#define SOLVENT_TEMPL_TEMPL(O_) \
+			case O_: gen_.o ## O_.print_pretty(os); break;
+		SOLVENT_INSTANTIATE_ORDER_TEMPLATES
+		#undef SOLVENT_TEMPL_TEMPL
+		}
 	}
 
 

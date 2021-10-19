@@ -3,6 +3,10 @@
 
 ## Higher Priority
 
+- some diagnostics to try rendering:
+  - A scatter chart showing max-dead-ends and num operations
+  - a bar graph where each bar counts the number of GenResults that had a frontier_progress within the range for that bar's "bin".
+
 - https://cmake.org/cmake/help/latest/guide/tutorial/index.html
   - See what can be learned from https://github.com/lefticus/cpp_weekly_game_project
 - Decide what interfaces to support:

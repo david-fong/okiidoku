@@ -25,8 +25,8 @@ namespace solvent::lib::gen {
 
 	template<Order O>
 	typename size<O>::ord2_t Generator<O>::operator[](const ord4_t coord) const {
-		// typename path::coord_converter_t<O> prog2coord = path::GetPathCoords<O>(params_.path_kind);
-		return val_try_orders_[coord / O2][values_[coord].try_index];
+		const auto try_index = values_[coord].try_index;
+		return (try_index == O2) ? O2 : val_try_orders_[coord / O2][try_index];
 	}
 
 
@@ -190,20 +190,37 @@ namespace solvent::lib::gen {
 		const unsigned int relative_intensity
 			= static_cast<double>(count - 1)
 			* util::str::BLOCK_CHARS.size()
-			/ out_of;
+			/ (out_of + 1);
 		return (count == 0) ? " " : util::str::BLOCK_CHARS[relative_intensity];
 	}
 
 
 	void GenResult::print_serial(std::ostream& os) const {
-		const print::grid_t grid_accessor([this](uint16_t coord) { return this->grid[coord]; });
+		const print::val_grid_t grid_accessor([this](uint32_t coord) { return this->grid[coord]; });
 		print::serial(os, O, grid_accessor);
 	}
 
 
 	void GenResult::print_pretty(std::ostream& os) const {
-		const std::vector<print::grid_t> grid_accessors = {
-			print::grid_t([this](uint16_t coord) { return this->grid[coord]; })
+		const std::vector<print::print_grid_t> grid_accessors = {
+			print::print_grid_t([this](std::ostream& os, uint16_t coord) {
+				os << ' '; print::val2str(os, O, this->grid[coord]);
+			}),
+		};
+		print::pretty(os, O, grid_accessors);
+	}
+
+
+	template<Order O>
+	void Generator<O>::print_pretty(std::ostream& os) const {
+		const std::vector<print::print_grid_t> grid_accessors = {
+			print::print_grid_t([this](std::ostream& os, uint16_t coord) {
+				os << ' '; print::val2str(os, O, operator[](coord));
+			}),
+			print::print_grid_t([this](std::ostream& os, uint16_t coord) {
+				const auto shade = shaded_dead_end_stat(params_.max_dead_ends, dead_ends_[coord]);
+				os << shade << shade;
+			}),
 		};
 		print::pretty(os, O, grid_accessors);
 	}

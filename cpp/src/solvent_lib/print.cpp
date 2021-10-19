@@ -7,7 +7,7 @@
 namespace solvent::lib::print {
 
 	//
-	void value(std::ostream& os, const solvent::Order O, const uint8_t value) {
+	void val2str(std::ostream& os, const solvent::Order O, const uint8_t value) {
 		if (value == O*O) [[unlikely]] {
 			os << ' ';
 		} else {
@@ -24,14 +24,14 @@ namespace solvent::lib::print {
 	}
 
 
-	void serial(std::ostream& os, const solvent::Order O, grid_t grid_view) {
+	void serial(std::ostream& os, const solvent::Order O, val_grid_t grid_view) {
 		for (unsigned coord = 0; coord < O*O*O*O; coord++) {
-			print::value(os, O, grid_view(coord));
+			print::val2str(os, O, grid_view(coord));
 		}
 	}
 
 
-	void pretty(std::ostream& os, const Order O, std::vector<grid_t> const& grid_views) {
+	void pretty(std::ostream& os, const Order O, std::vector<print_grid_t> const& grid_views) {
 		namespace str = solvent::util::str;
 		using ord2_t = std::uint16_t;
 
@@ -69,8 +69,7 @@ namespace solvent::lib::print {
 			for (unsigned grid_i = 0; grid_i < grid_views.size(); grid_i++) {
 				for (ord2_t col = 0; col < O*O; col++) {
 					if ((col % O) == 0) { os << str::DIM.ON << " │" << str::DIM.OFF; }
-					os << ' ';
-					print::value(os, O, grid_views[grid_i](row * O*O + col));
+					grid_views[grid_i](os, row * O*O + col);
 				}
 				os << str::DIM.ON << " │";
 				if (grid_i != grid_views.size() - 1) {

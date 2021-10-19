@@ -6,7 +6,7 @@
 #include <solvent_lib/grid.hpp>
 #include <solvent_lib/size.hpp>
 
-// #include <iosfwd>
+#include <iosfwd>
 #include <array>
 #include <string>
 #include <optional>
@@ -22,6 +22,7 @@ namespace solvent::lib::toolkit {
 		// void canonicalize();
 		gen::GenResult gen(gen::Params);
 		gen::GenResult gen_continue_prev();
+		void gen_print_pretty(std::ostream&) const;
 		void gen_batch(gen::batch::Params);
 
 	 private:
