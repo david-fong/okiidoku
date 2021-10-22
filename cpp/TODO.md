@@ -4,8 +4,11 @@
 ## Higher Priority
 
 - some diagnostics to try rendering:
+  - A print_simple method to the AbstractGrid class?
   - A scatter chart showing max-dead-ends and num operations
   - a bar graph where each bar counts the number of GenResults that had a frontier_progress within the range for that bar's "bin".
+  - comparing the average heatmaps of aborted vs successful generations.
+- Rename things to match the standard literature / terminology. Do some research to try to get it right. See sudopedia.
 
 - https://cmake.org/cmake/help/latest/guide/tutorial/index.html
   - See what can be learned from https://github.com/lefticus/cpp_weekly_game_project
@@ -26,7 +29,6 @@
     - the ansi constants could use this. Right now, they are stuck as C-style string.
 - CLI
   - implement `-h` and `--help` CLI argument.
-  - Make giveup thresholds settable via CLI, and allow setting to "default".
   - give a red message when trying to continue and nothing is left to be found.
 
 ## Things That Seem To Not Have Worked

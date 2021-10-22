@@ -59,7 +59,7 @@ namespace solvent::lib::gen {
 	};
 
 	constexpr unsigned long long DEFAULT_MAX_DEAD_ENDS(const Order O) {
-		const unsigned long long _[] = { 0, 0, 3, 100, 320, 100'000, 10'000'000 };
+		unsigned long long _[] = { 0, 0, 3, 100, 320, 100'000, 10'000'000 };
 		return _[O];
 	};
 

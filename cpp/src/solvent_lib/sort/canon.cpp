@@ -1,26 +1,39 @@
 #include <solvent_lib/sort/canon.hpp>
+#include <solvent_lib/print.hpp>
 
+#include <iostream>
 #include <algorithm> // ranges::sort
 #include <numeric>   // accumulate
 
 namespace solvent::lib::canon {
 
 	template<Order O>
-	typename size<O>::ord2_t Canonicalizer<O>::operator[](const ord4_t coord) const {
-		return buf_[coord];
-	}
+	void canonicalize(std::vector<typename size<O>::ord2_t>& input) noexcept {
+		// using has_mask_t = typename size<O>::has_mask_t;
+		using ord1_t  = typename size<O>::ord1_t;
+		using ord2_t  = typename size<O>::ord2_t;
+		using ord4_t  = typename size<O>::ord4_t;
 
+		static constexpr ord1_t O1 = O;
+		static constexpr ord2_t O2 = O*O;
+		// static constexpr ord4_t O4 = O*O*O*O;
 
-	template<Order O>
-	void Canonicalizer<O>::handle_relabeling(void) noexcept {
-		// An entry at coordinate (R,C) contains the number of atoms in
-		// the grid where the values R and C coexist. For each block, this
-		// can happen up to one time with probability (2*(O1-1))/(O2-1).
-		// Therefore, the maximum value is O2. The diagonal is all zeroes.
+		// An entry at coordinate (A,B) contains the number of atoms in
+		// the grid where the values A and B coexist. For each block, this
+		// can happen up to one time with probability (2*(O1-1))/(O2-1)
+		// (choose an arbitrary coordinate in the block as A, and of the
+		// remaining O2-1 coordinates, 2*(O1-1) are in the same atom).
+		// The maximum value at any coordinate is is O2. The diagonal is
+		// all zeroes. Every row and column sums to O2*(2*(O1-1)).
 		std::array<std::array<ord2_t, O2>, O2> counts = {{}};
+		const std::vector<print::print_grid_t> grid_accessors = {
+			print::print_grid_t([&counts](std::ostream& os, uint16_t coord) {
+				os << ' '; print::val2str(os, O, counts[coord/O2][coord%O2]);
+			}),
+		};
 
 		for (ord2_t block = 0; block < O2; block++) {
-			ord4_t block_offset = O1 * ((block % O1) + (O2 * (block / O1)));
+			ord4_t block_offset = O1 * ((O2 * (block / O1)) + (block % O1));
 			for (ord1_t atom = 0; atom < O1; atom++) {
 				// Go through all unique pairs in the atom:
 				for (ord1_t atom_i = 0; atom_i < O1 - 1; atom_i++) {
@@ -28,12 +41,12 @@ namespace solvent::lib::canon {
 						{
 							// horizontal atom
 							const ord4_t offset = block_offset + (O2 * atom);
-							const ord2_t a = buf_[offset + atom_i], b = buf_[offset + atom_j];
+							const ord2_t a = input[offset + atom_i], b = input[offset + atom_j];
 							counts[a][b]++; counts[b][a]++;
 						}{
 							// vertical atom
 							const ord4_t offset = block_offset + atom;
-							const ord2_t a = buf_[offset + (O2 * atom_i)], b = buf_[offset + (O2 * atom_j)];
+							const ord2_t a = input[offset + (O2 * atom_i)], b = input[offset + (O2 * atom_j)];
 							counts[a][b]++; counts[b][a]++;
 						}
 					}
@@ -45,6 +58,9 @@ namespace solvent::lib::canon {
 			ord2_t value;
 			ord4_t sum = 0; // Relabelling has no effect on this calculated value.
 		};
+
+		// TODO this section deprecated. I realized the algorithm hereon doesn't work.
+		print::pretty(std::cout, O, grid_accessors);
 		const auto sort_by_count_slices = [&](const bool is_tie_breaker) -> void {
 			std::array<Label, O2> labels = {};
 			for (ord2_t i = 0; i < O2; i++) {
@@ -65,11 +81,13 @@ namespace solvent::lib::canon {
 		};
 		sort_by_count_slices(false);
 		sort_by_count_slices(true);
+
+		print::pretty(std::cout, O, grid_accessors);
 	}
 
 
 	#define SOLVENT_TEMPL_TEMPL(O_) \
-		template class Canonicalizer<O_>;
+		template void canonicalize<O_>(std::vector<typename size<O_>::ord2_t>&) noexcept;
 	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 	#undef SOLVENT_TEMPL_TEMPL
 }

@@ -100,7 +100,9 @@ namespace solvent::cli {
 	void Config::max_dead_ends(std::string const& new_max_dead_ends_str) {
 		std::cout << "\nmax dead ends is ";
 		if (new_max_dead_ends_str.empty()) {
-			std::cout << "currently set to: " << max_dead_ends() << std::endl;
+			std::cout << "currently set to: " << max_dead_ends()
+				<< "\nsetting to zero will default to " << gen::DEFAULT_MAX_DEAD_ENDS(order_)
+				<< std::endl;
 			return;
 		}
 		try {

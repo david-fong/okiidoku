@@ -1,7 +1,7 @@
 
 # Sudoku Utilities in C++ and Rust
 
-The project currently provides two utilities: a solution generator, and a canonicalizer. It is _not_ a solver or even a puzzle generator (hence "solve-n't"). It _is_ a solution generator and a canonicalizer (with perhaps more to be added in the future). It supports parametric size (which many other sudoku projects surpringly do not) while optimizing cache usage by choosing minimal value widths.
+The project currently provides two utilities: a solution generator, and a canonicalizer. It is _not_ a solver or even a puzzle generator (hence "solve-n't"). It _is_ a solution generator and a canonicalizer (with perhaps more to be added in the future). It supports parametric size (which many other sudoku projects surprisingly do not) while optimizing cache usage by choosing minimal value widths.
 
 For usage instructions, see the readmes in the [cpp](./cpp/readme.md) and [rust](./rust/readme.md) directories.
 

@@ -2,6 +2,7 @@
 #define HPP_SOLVENT_LIB_TOOLKIT
 
 #include <solvent_lib/gen/batch.hpp>
+#include <solvent_lib/sort/canon.hpp>
 #include <solvent_lib/gen/mod.hpp>
 #include <solvent_lib/grid.hpp>
 #include <solvent_lib/size.hpp>
@@ -19,14 +20,16 @@ namespace solvent::lib::toolkit {
 		Toolkit(Order);
 		void set_order(Order);
 
-		// void canonicalize();
 		gen::GenResult gen(gen::Params);
 		gen::GenResult gen_continue_prev();
 		void gen_print_pretty(std::ostream&) const;
 		void gen_batch(gen::batch::Params);
 
+		void canonicalize(std::vector<std::uint_fast8_t>);
+
 	 private:
 		Order O;
+
 		union generator_union_t {
 		#define SOLVENT_TEMPL_TEMPL(O_) \
 			gen::Generator<O_> o ## O_;

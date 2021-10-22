@@ -16,16 +16,14 @@ namespace solvent::util::str {
 	};
 
 
+	struct SgrPair {
+		char const*const ON;
+		char const*const OFF;
+	};
 	#if USE_ANSI_ESC
-	#define SGR(NAME, ON_STR, OFF_STR) constexpr struct {\
-		char const*const ON  = ON_STR;\
-		char const*const OFF = OFF_STR;\
-	} NAME;
+	#define SGR(NAME, ON_STR, OFF_STR) constexpr SgrPair NAME = { .ON = (ON_STR), .OFF = (OFF_STR) };
 	#else
-	#define SGR(NAME, ON_STR, OFF_STR) constexpr struct {\
-		char const*const ON  = "";\
-		char const*const OFF = "";\
-	} NAME;
+	#define SGR(NAME, ON_STR, OFF_STR) constexpr SgrPair NAME = { .ON = "", .OFF = "" };
 	#endif
 
 	SGR(DIM, "\033[2m",  "\033[22m")
