@@ -26,6 +26,8 @@ cli/repl,\
 cli/main\
 }.cpp)"
 
+echo 'note: -O# must be manually specified'
+
 # -Wsign-conversion
 ${COMPILER} \
 	-isystem "${ROOT}/src" \

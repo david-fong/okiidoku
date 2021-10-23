@@ -16,17 +16,25 @@ namespace solvent::lib::canon {
 
 		static constexpr ord1_t O1 = O;
 		static constexpr ord2_t O2 = O*O;
+		static constexpr double count_expected = static_cast<double>(2*O2)/(O1+1);
 		// static constexpr ord4_t O4 = O*O*O*O;
 
-		// An entry at coordinate (A,B) contains the number of atoms in
-		// the grid where the values A and B coexist. For each block, this
-		// can happen up to one time with probability (2*(O1-1))/(O2-1)
-		// (choose an arbitrary coordinate in the block as A, and of the
-		// remaining O2-1 coordinates, 2*(O1-1) are in the same atom).
-		// The maximum value at any coordinate is is O2. The diagonal is
-		// all zeroes. Every row and column sums to O2*(2*(O1-1)).
-		std::array<std::array<ord2_t, O2>, O2> counts = {{}};
+		/*
+		An entry at coordinate (A,B) contains the number of atoms in
+		the grid where the values A and B coexist..
+
+		- The diagonal is all zeroes.
+		- Each row (or column) sums to O2*(2*(O1-1)).
+		- The maximum possible value at any coordinate is O2.
+		- The expected value at any non-diagonal coordinate is 2*O2/(O1+1).
+			Simplified from (O2*(2*(O1-1)))/(O2-1). Using law of large numbers.
+			Examples by order: 2: 2.67,  3: 4.50,  4: 6.40,  5: 8.33
+		*/
+		std::array<std::array<ord2_t, O2>, O2> counts = {{0}};
 		const std::vector<print::print_grid_t> grid_accessors = {
+			// print::print_grid_t([&counts](std::ostream& os, uint16_t coord) {
+			// 	os << ' '; print::val2str(os, O, counts[coord/O2][coord%O2]);
+			// }),
 			print::print_grid_t([&counts](std::ostream& os, uint16_t coord) {
 				os << ' '; print::val2str(os, O, counts[coord/O2][coord%O2]);
 			}),
@@ -54,34 +62,52 @@ namespace solvent::lib::canon {
 			}
 		}
 		// Note: in the below struct, sum only needs to hold up to (O2 * (O1-1)*2).
-		struct Label {
-			ord2_t value;
-			ord4_t sum = 0; // Relabelling has no effect on this calculated value.
+		struct SortMapEntry {
+			ord2_t orig; // The original label value
+			double sort_basis = 0; // Relabelling has no effect on this calculated value.
+			// ord4_t dist_mid;
 		};
-
-		// TODO this section deprecated. I realized the algorithm hereon doesn't work.
-		print::pretty(std::cout, O, grid_accessors);
-		const auto sort_by_count_slices = [&](const bool is_tie_breaker) -> void {
-			std::array<Label, O2> labels = {};
-			for (ord2_t i = 0; i < O2; i++) {
-				labels[i] = Label { .value = i, .sum = 0 };
-				for (ord2_t j = 0; j < O2; j++) {
-					labels[i].sum += !is_tie_breaker ? counts[i][j] : counts[j][i];
+		{
+			std::array<SortMapEntry, O2> canon2orig = {};
+			// The reduction calculation's result must not depend on the ordering
+			// of the counts entries. It should represent favouratism: a label's degree
+			// of preference to being in an atom with some labels more than others.
+			// The specific reduction below is loosely based on standard deviation.
+			for (ord2_t label = 0; label < O2; label++) {
+				canon2orig[label] = SortMapEntry { .orig = label, .sort_basis = 0 };
+				for (ord2_t neighbour_i = 0; neighbour_i < O2; neighbour_i++) {
+					if (neighbour_i != label) {
+						canon2orig[label].sort_basis += std::pow(
+							static_cast<double>(counts[label][neighbour_i]) - count_expected,
+						4);
+						// Note: using 4 as the exponent was found much better than 2.
+						// Using 6 was found almost as good as 4, but sometimes worse.
+						// The data set used, though, was extremely small. Investigation needed.
+					}
 				}
 			}
-			std::ranges::stable_sort(labels, {}, &Label::sum);
+			std::ranges::stable_sort(canon2orig, {}, &SortMapEntry::sort_basis);
+			// TODO: design a way to break ties
 
-			std::array<std::array<ord2_t, O2>, O2> counts_sorted;
+			decltype(counts) input_canon_label;
 			for (ord2_t i = 0; i < O2; i++) {
 				for (ord2_t j = 0; j < O2; j++) {
-					counts_sorted[i][j] = counts[labels[i].value][labels[j].value];
+					input_canon_label[i][j] = input[canon2orig[i].orig][canon2orig[j].orig];
 				}
+				// std::ranges::stable_sort(counts_sorted[i]);
+			}
+			input = input_canon_label;
+
+			// The below only done for debugging purposes.
+			decltype(counts) counts_sorted;
+			for (ord2_t i = 0; i < O2; i++) {
+				for (ord2_t j = 0; j < O2; j++) {
+					counts_sorted[i][j] = counts[canon2orig[i].orig][canon2orig[j].orig];
+				}
+				// std::ranges::stable_sort(counts_sorted[i]);
 			}
 			counts = counts_sorted;
-		};
-		sort_by_count_slices(false);
-		sort_by_count_slices(true);
-
+		}
 		print::pretty(std::cout, O, grid_accessors);
 	}
 

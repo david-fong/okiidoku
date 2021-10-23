@@ -3,6 +3,12 @@
 
 ## Higher Priority
 
+- Design an efficient algorithm for canonicalization.
+  - Hypothesis directions for implementing relabelling. They must not depend on anything subject to change by doing valid transformations other than relabelling.
+    - Comparing pairs in vertical and horizontal atoms.
+    - Do the counts table by block.
+    - Use the full counts table and do some "walk"/matrix-multiplication things.
+
 - some diagnostics to try rendering:
   - A print_simple method to the AbstractGrid class?
   - A scatter chart showing max-dead-ends and num operations
