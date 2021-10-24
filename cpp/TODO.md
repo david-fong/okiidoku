@@ -3,11 +3,12 @@
 
 ## Higher Priority
 
-- Design an efficient algorithm for canonicalization.
-  - Hypothesis directions for implementing relabelling. They must not depend on anything subject to change by doing valid transformations other than relabelling.
-    - Comparing pairs in vertical and horizontal atoms.
-    - Do the counts table by block.
-    - Use the full counts table and do some "walk"/matrix-multiplication things.
+- Design canonicalization for non-labelling transformations.
+- Consider differences with other algorithms and compare pros and cons.
+  - http://sudopedia.enjoysudoku.com/Canonical_Form.html
+  - https://github.com/Emerentius/sudoku/blob/master/src/board/canonicalization.rs
+  - https://www.degruyter.com/document/doi/10.2478/s13537-012-0011-y/pdf
+  - https://sudokugarden.de/en/info/canonical-form
 
 - some diagnostics to try rendering:
   - A print_simple method to the AbstractGrid class?
