@@ -54,8 +54,8 @@ namespace solvent::lib::gen {
 
 	//
 	struct Direction final {
-		bool is_back: 1;
-		bool is_skip: 1 = false; // only meaningful when is_back is true.
+		bool is_back;
+		bool is_skip; // only meaningful when is_back is true.
 	};
 
 	constexpr unsigned long long DEFAULT_MAX_DEAD_ENDS(const Order O) {
@@ -98,7 +98,7 @@ namespace solvent::lib::gen {
 
 	 private:
 		//
-		struct Tile final {
+		struct Cell final {
 			// Index into val_try_orders_. O2 if clear.
 			ord2_t try_index;
 			void clear(void) noexcept {
@@ -118,7 +118,7 @@ namespace solvent::lib::gen {
 			return val_try_orders;
 		}();
 
-		std::array<Tile, O4> values_; // indexed by coord
+		std::array<Cell, O4> cells_; // indexed by coord
 		std::array<has_mask_t, O2> rows_has_;
 		std::array<has_mask_t, O2> cols_has_;
 		std::array<has_mask_t, O2> blks_has_;

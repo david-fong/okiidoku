@@ -3,12 +3,7 @@
 
 ## Higher Priority
 
-- Design canonicalization for non-labelling transformations.
-- Consider differences with other algorithms and compare pros and cons.
-  - http://sudopedia.enjoysudoku.com/Canonical_Form.html
-  - https://github.com/Emerentius/sudoku/blob/master/src/board/canonicalization.rs
-  - https://www.degruyter.com/document/doi/10.2478/s13537-012-0011-y/pdf
-  - https://sudokugarden.de/en/info/canonical-form
+- (?) Change canonicalization to not use templates. Verify first that it isn't a performance bottleneck.
 
 - some diagnostics to try rendering:
   - A print_simple method to the AbstractGrid class?
@@ -43,7 +38,7 @@
 These didn't end up doing the thing I wanted / thought might happen.
 
 - Try making traversal order not grid-row-major and see if it improves performance:
-  - Hypothesis: Tiles with fewer candidates are like the solution space's dominant bottlenecks. If we were to leave them to the end, we may spend many long advances creating almost-complete solutions that cannot be complete because they violate the bottlenecks (and possibly often in similar ways). If we start with them first, we may be less likely to encounter that problem.
+  - Hypothesis: Cells with fewer candidates are like the solution space's dominant bottlenecks. If we were to leave them to the end, we may spend many long advances creating almost-complete solutions that cannot be complete because they violate the bottlenecks (and possibly often in similar ways). If we start with them first, we may be less likely to encounter that problem.
   - Update: I think this didn't work because I was doing naive backtracking. If I improve the backtracking logic. Now I need to remember/find out which traversal paths should make better usage of this and then test it out.
 
 - Use `__builtin_popcount(occmask)`

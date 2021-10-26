@@ -25,7 +25,7 @@ namespace solvent::lib::gen {
 
 	template<Order O>
 	typename size<O>::ord2_t Generator<O>::operator[](const ord4_t coord) const {
-		const auto try_index = values_[coord].try_index;
+		const auto try_index = cells_[coord].try_index;
 		return (try_index == O2) ? O2 : val_try_orders_[coord / O2][try_index];
 	}
 
@@ -55,8 +55,8 @@ namespace solvent::lib::gen {
 
 	template<Order O>
 	void Generator<O>::prepare_fresh_gen_(void) {
-		for (Tile& t : values_) {
-			t.clear();
+		for (Cell& cell : cells_) {
+			cell.clear();
 		}
 		rows_has_.fill(0);
 		cols_has_.fill(0);
@@ -111,7 +111,7 @@ namespace solvent::lib::gen {
 				}
 				++progress_;
 				if ((progress_ > frontier_progress_)
-					|| !this->can_coords_see_each_other(prog2coord(progress_), prog2coord(frontier_progress_))
+					|| !this->cells_share_house(prog2coord(progress_), prog2coord(frontier_progress_))
 				) [[unlikely]] {
 					frontier_progress_ = progress_;
 				}
@@ -128,10 +128,10 @@ namespace solvent::lib::gen {
 		has_mask_t& blk_has = blks_has_[this->get_blk(coord)];
 		auto& val_try_order = val_try_orders_[coord / O2];
 
-		Tile& t = values_[coord];
+		Cell& cell = cells_[coord];
 		if (do_clear_masks) [[unlikely]]/* average direction is forward */ {
 			// Clear the current value from all masks:
-			const has_mask_t erase_mask = ~( has_mask_t(0b1u) << val_try_order[t.try_index] );
+			const has_mask_t erase_mask = ~( has_mask_t(0b1u) << val_try_order[cell.try_index] );
 			row_has &= erase_mask;
 			col_has &= erase_mask;
 			blk_has &= erase_mask;
@@ -139,30 +139,30 @@ namespace solvent::lib::gen {
 
 		// Smart backtracking:
 		// This optimization's degree of usefulness depends on the genpath and size.
-		if ((progress_ < frontier_progress_) && !this->can_coords_see_each_other(
+		if ((progress_ < frontier_progress_) && !this->cells_share_house(
 			coord, prog2coord(frontier_progress_)
 		)) [[unlikely]] {
-			t.clear();
+			cell.clear();
 			return Direction { .is_back = true, .is_skip = true };
 		}
 
-		const has_mask_t t_has = (row_has | col_has | blk_has);
-		if (std::popcount(t_has) != O2) [[likely]] {
+		const has_mask_t cell_has = (row_has | col_has | blk_has);
+		if (std::popcount(cell_has) != O2) [[likely]] {
 			// The above optimization comes into effect ~1/5 of the time for size 5.
-			for (ord2_t try_i = (t.try_index+1) % (O2+1); try_i < O2; try_i++) {
+			for (ord2_t try_i = (cell.try_index+1) % (O2+1); try_i < O2; try_i++) {
 				const has_mask_t try_val_mask = has_mask_t(1) << val_try_order[try_i];
-				if (!(t_has & try_val_mask)) [[unlikely]] {
+				if (!(cell_has & try_val_mask)) [[unlikely]] {
 					// A valid value was found:
 					row_has |= try_val_mask;
 					col_has |= try_val_mask;
 					blk_has |= try_val_mask;
-					t.try_index = try_i;
+					cell.try_index = try_i;
 					return Direction { .is_back = false, .is_skip = false };
 				}
 			}
 		}
 		// Nothing left to try here. Backtrack:
-		t.clear();
+		cell.clear();
 		return Direction { .is_back = true, .is_skip = false };
 	}
 
@@ -180,7 +180,7 @@ namespace solvent::lib::gen {
 		};
 		for (ord4_t p = 0; p <= progress_; p++) {
 			const ord4_t coord = prog2coord(p);
-			gen_result.grid[coord] = val_try_orders_[coord / O2][values_[coord].try_index];
+			gen_result.grid[coord] = val_try_orders_[coord / O2][cells_[coord].try_index];
 		}
 		return gen_result;
 	}

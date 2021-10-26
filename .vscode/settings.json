@@ -1,0 +1,13 @@
+{
+   "cSpell.words": [
+      "Canonicalizer"
+   ],
+   "files.associations": {
+      "iostream": "cpp",
+      "*.tcc": "cpp",
+      "functional": "cpp",
+      "random": "cpp",
+      "mutex": "cpp",
+      "type_traits": "cpp"
+   }
+}

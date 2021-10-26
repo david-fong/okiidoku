@@ -33,7 +33,7 @@ namespace solvent::lib {
 		[[gnu::const]] static constexpr ord2_t get_blk(const ord2_t row, const ord2_t col) noexcept {
 			return ((row / O1) * O1) + (col / O1);
 		}
-		[[gnu::const]] static constexpr bool can_coords_see_each_other(ord4_t c1, ord4_t c2) noexcept {
+		[[gnu::const]] static constexpr bool cells_share_house(ord4_t c1, ord4_t c2) noexcept {
 			return (get_row(c1) == get_row(c2))
 				||  (get_col(c1) == get_col(c2))
 				||  (get_blk(c1) == get_blk(c2));
