@@ -89,7 +89,7 @@ namespace solvent::lib::gen {
 
 		// Generates a fresh sudoku solution.
 		GenResult operator()(Params);
-		GenResult continue_prev();
+		GenResult continue_prev(void);
 
 		void print_pretty(std::ostream&) const;
 

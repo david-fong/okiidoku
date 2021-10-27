@@ -10,8 +10,31 @@
 namespace solvent::lib::canon {
 
 	template<Order O>
-	void Canonicalizer<O>::relabel_(void) noexcept {
+	Canonicalizer<O>::Canonicalizer(std::vector<ord2_t> const& input) {
+		for (ord2_t row = 0; row < O2; row++) {
+			for (ord2_t col = 0; col < O2; col++) {
+				input_[row][col] = input[(row*O2)+col];
+			}
+		}
+	}
 
+
+	template<Order O>
+	std::vector<typename size<O>::ord2_t> Canonicalizer<O>::operator()(void) {
+		relabel_();
+		movement_();
+		std::vector<ord2_t> ans(O4);
+		for (ord2_t row = 0; row < O2; row++) {
+			for (ord2_t col = 0; col < O2; col++) {
+				ans[(row*O2)+col] = input_[row][col];
+			}
+		}
+		return ans;
+	}
+
+
+	template<Order O>
+	void Canonicalizer<O>::relabel_(void) noexcept {
 		/*
 		An entry at coordinate (A,B) contains the number of atoms in the
 		grid where the values A and B coexist. Rephrase: the number of blocks
@@ -36,22 +59,18 @@ namespace solvent::lib::canon {
 		*/
 		std::array<std::array<ord2_t, O2>, O2> counts = {{0}};
 
-		for (ord2_t block = 0; block < O2; block++) {
-			ord4_t block_offset = O1 * ((O2 * (block / O1)) + (block % O1));
-			for (ord1_t atom = 0; atom < O1; atom++) {
+		for (ord2_t line = 0; line < O2; line++) {
+			for (ord2_t atom = 0; atom < O2; atom += O1) {
 				// Go through all unique pairs in the atom:
-				for (ord1_t atom_i = 0; atom_i < O1 - 1; atom_i++) {
-					for (ord1_t atom_j = atom_i + 1; atom_j < O1; atom_j++) {
-						{
-							// horizontal atom
-							const ord4_t offset = block_offset + (O2 * atom);
-							const ord2_t a = input_[offset + atom_i], b = input_[offset + atom_j];
-							counts[a][b]++; counts[b][a]++;
-						}{
-							// vertical atom
-							const ord4_t offset = block_offset + atom;
-							const ord2_t a = input_[offset + (O2 * atom_i)], b = input_[offset + (O2 * atom_j)];
-							counts[a][b]++; counts[b][a]++;
+				for (ord1_t cell_i = 0; cell_i < O1 - 1; cell_i++) {
+					for (ord1_t cell_j = cell_i + 1; cell_j < O1; cell_j++) {
+						{ // boxrow
+							const ord2_t label_i = input_[line][atom+cell_i], label_j = input_[line][atom+cell_j];
+							counts[label_i][label_j]++; counts[label_j][label_i]++;
+						}
+						{ // boxcol
+							const ord2_t label_i = input_[atom+cell_i][line], label_j = input_[atom+cell_j][line];
+							counts[label_i][label_j]++; counts[label_j][label_i]++;
 						}
 					}
 				}
@@ -61,13 +80,13 @@ namespace solvent::lib::canon {
 			ord2_t orig; // The original label value
 			double sort_basis = 0; // Relabelling has no effect on this calculated value.
 		};
-		std::array<SortMapEntry, O2> canon2orig = {};
+		std::array<SortMapEntry, O2> canon2orig_label = {};
 		// The reduction calculation's result must not depend on the ordering
 		// of the counts entries. It should encapsulate a label's degree of
 		// preference to being in an atom with some labels more than others.
 		// The specific reduction below is the sample standard deviation.
 		for (ord2_t label = 0; label < O2; label++) {
-			canon2orig[label] = SortMapEntry { .orig = label, .sort_basis = 0 };
+			canon2orig_label[label] = SortMapEntry { .orig = label, .sort_basis = 0 };
 			for (ord2_t neighbour_i = 0; neighbour_i < O2; neighbour_i++) {
 				if (neighbour_i != label) [[likely]] {
 					ord2_t count = counts[label][neighbour_i];
@@ -84,102 +103,90 @@ namespace solvent::lib::canon {
 					) / std::pow(O1+1, O2);
 
 					static constexpr double expected = static_cast<double>(2*O2)/(O1+1);
-					canon2orig[label].sort_basis += p_binomial * std::pow(
+					canon2orig_label[label].sort_basis += p_binomial * std::pow(
 						static_cast<double>(count) - expected,
 					2);
 				}
 			}
 		}
 		// Make the lower-valued labels "play favourites":
-		std::ranges::sort(canon2orig, std::ranges::greater(), &SortMapEntry::sort_basis);
-		// std::cout << "\n"; for (auto e : canon2orig) { std::cout << e.sort_basis << "  "; }
+		std::ranges::sort(canon2orig_label, std::ranges::greater(), &SortMapEntry::sort_basis);
+		// std::cout << "\n"; for (auto e : canon2orig_label) { std::cout << e.sort_basis << "  "; }
 
-		for (auto& e : input_) {
-			e = canon2orig[e].orig;
+		for (auto& row : input_) {
+			for (auto& e : row) {
+				e = canon2orig_label[e].orig;
+			}
 		}
 		// The below only done for debugging purposes.
 		/* decltype(counts) counts_sorted;
 		for (ord2_t i = 0; i < O2; i++) {
 			for (ord2_t j = 0; j < O2; j++) {
-				counts_sorted[i][j] = counts[canon2orig[i].orig][canon2orig[j].orig];
+				counts_sorted[i][j] = counts[canon2orig_label[i].orig][canon2orig_label[j].orig];
 			}
 			std::ranges::sort(counts_sorted[i]);
 		}
 		counts = counts_sorted; */
 
 		const std::vector<print::print_grid_t> grid_accessors = {
-			print::print_grid_t([&input_](std::ostream& os, uint16_t coord) {
-				os << ' '; print::val2str(os, O, input_[coord]);
+			print::print_grid_t([this](std::ostream& os, uint16_t coord) {
+				os << ' '; print::val2str(os, O, input_[coord/O2][coord%O2]);
 			}),
 		};
 		print::pretty(std::cout, O, grid_accessors);
 	}
 
 
-	// returns true if lhs is less than rhs
 	template<Order O>
-	[[gnu::const]] bool cmp_less_atom_slides(
-		std::array<typename size<O>::ord2_t, O>& lhs,
-		std::array<typename size<O>::ord2_t, O>& rhs
-	) {
-		for (ord1_t i = 0; i < O1; i++) {
+	bool Canonicalizer<O>::cmp_less_atom_slides::operator()(
+		atom_slide_t const& lhs, atom_slide_t const& rhs
+	) const {
+		for (ord1_t i = 0; i < O; i++) {
 			if      (lhs[i] < rhs[i]) { return true; }
 			else if (lhs[i] > rhs[i]) { return false; }
 		}
-		return false;
+		return false; // equal
+	}
+
+
+	template<Order O>
+	bool Canonicalizer<O>::cmp_less_line_slides::operator()(
+		line_slide_t const& lhs, line_slide_t const& rhs
+	) const {
+		for (ord1_t line_slider = 0; line_slider < O; line_slider++) {
+			// TODO
+		}
+		return false; // equal
 	}
 
 
 	template<Order O>
 	void Canonicalizer<O>::movement_() {
-		std::array<std::array<std::array<ord2_t, O1>, O1>, O2> row_atom_slides;
-		for (ord2_t row = 0; row < O2; row++) {
-			for (ord1_t atom = 0; atom < O1; atom++) {
-				auto& atom_slide = row_atom_slides[row][atom];
-				for (ord1_t cell = 0; cell < O1; cell++) {
-					atom_slide[cell] = input_[(O2*row)+(O1*atom)+cell];
+		std::array<std::array<std::array<ord4_t, O1>, O1>, O2> row_atom_slides;
+		struct line_sort_t { ord1_t orig; };
+		for (ord1_t chute = 0; chute < O1; chute++) {
+			for (ord1_t chute_row = 0; chute_row < O1; chute_row++) {
+				for (ord2_t atom_offset = 0; atom_offset < O2; atom_offset += O1) {
+					auto& atom_slide = row_atom_slides[chute_row][atom_offset];
+					for (ord1_t cell = 0; cell < O1; cell++) {
+						atom_slide[cell] = input_[chute_row][atom_offset+cell];
+					}
+					std::ranges::sort(atom_slide, std::ranges::greater());
+					for (ord1_t cell = O1-1; cell > 0; cell--) {
+						atom_slide[cell-1] += atom_slide[cell];
+					}
 				}
-				std::ranges::sort(atom_slide, std::ranges::greater());
-				for (ord1_t cell = O1-1; cell > 0; cell--) {
-					atom_slide[cell-1] += atom_slide[cell];
-				}
+				std::ranges::sort(row_atom_slides[chute_row], cmp_less_atom_slides());
 			}
-			std::sort(row_atom_slides[row], cmp_less_atom_slides);
 		}
-		/* Row and column blocks can be sorted according to mapping each
-		block to some reduction of its atoms. Perhaps the product of the
-		product of the bits of distance between ones in the mask (including
-		the distance to the first one bit)? Or maybe mapping to the index/
-		id of the combination (O2 choose O1) (ex. 111000000 would be 0,
-		110100000 would be 1).
-
-		Perhaps a similar idea can be used for sorting rows and columns
-		withing row/column blocks.
 		
-		Worth noting that taking the products of the masks probably does
-		a similar effect, but definitely requires many more bits. */
-
-		/*
-		Another option: For each row, get a view of its atoms. Sort within
-		the atoms, and then sort the atoms relative to one another (make a
-		cmp_atoms function (that assumes the atom is sorted)).
-
-		reuse the cmp_atoms function inside a cmp_rows function and use that
-		to sort the rows within a row block.
-		
-		use the cmp_rows function to make a cmp_row_blocks function and use
-		that to sort the row blocks.
-
-		use the cmp_row_blocks to decide whether the original transposition
-		of the grid (now sorted) vs the transposed, sorted grid should be
-		used.
-		*/
 	}
 
 
 	template<Order O>
 	void canonicalize(std::vector<typename size<O>::ord2_t>& input) noexcept {
-		Canonicalizer<O> canon; // TODO
+		// TODO assert that input is the correct length and is a complete, valid sudoku?
+		(Canonicalizer<O>(input))(); // TODO
 	}
 
 

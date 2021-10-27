@@ -41,7 +41,7 @@ namespace solvent::lib::gen {
 
 
 	template<Order O>
-	GenResult Generator<O>::continue_prev() {
+	GenResult Generator<O>::continue_prev(void) {
 		// Continue the previous generation.
 		if (prev_gen_status_ == ExitStatus::Exhausted) [[unlikely]] {
 			return this->make_gen_result_();
