@@ -6,6 +6,7 @@
 
 #include <iosfwd>
 #include <vector>
+#include <compare>
 
 namespace solvent::lib::canon {
 
@@ -34,16 +35,40 @@ namespace solvent::lib::canon {
 		using ord1_t = typename size<O>::ord1_t;
 		using ord2_t = typename size<O>::ord2_t;
 		using ord4_t = typename size<O>::ord4_t;
+		using ord5_t = typename size<O>::ord5_t;
 
-		using atom_slide_t = std::array<ord4_t, O>;
-		using line_slide_t = std::array<atom_slide_t, O>;
+		using grid_arr_t = typename std::array<std::array<ord2_t, O*O>, O*O>;
+		using input_it_t = typename std::array<ord2_t, O*O>::const_iterator;
 
-		struct cmp_less_atom_slides {
-			[[gnu::const]] bool operator()(atom_slide_t const& lhs, atom_slide_t const& rhs) const;
+		struct AtomSlide final {
+			std::array<ord5_t, O> slide_;
+			static AtomSlide build(input_it_t atom_it);
+			[[gnu::pure]] ord5_t operator[](ord1_t i) const { return slide_[i]; }
+			[[gnu::pure]] std::strong_ordering operator<=>(AtomSlide const& that) const;
+			AtomSlide& operator+=(AtomSlide const& other) { for (ord1_t i = 0; i < O; i++) { slide_[i] += other.slide_[i]; }}
 		};
-		struct cmp_less_line_slides {
-			// returns true if lhs is less than rhs
-			[[gnu::const]] bool operator()(line_slide_t const& lhs, line_slide_t const& rhs) const;
+		struct LineSlide final {
+			ord1_t orig_blkline;
+			std::array<AtomSlide, O> slide_;
+			static LineSlide build(ord1_t orig_blkline, std::array<ord2_t, O*O> const& line_it);
+			[[gnu::pure]] AtomSlide const& operator[](ord1_t i) const { return slide_[i]; }
+			[[gnu::pure]] std::strong_ordering operator<=>(LineSlide const& that) const;
+			LineSlide& operator+=(LineSlide const& other) { for (ord1_t i = 0; i < O; i++) { slide_[i] += other.slide_[i]; }}
+
+		};
+		struct ChuteSlide final {
+			ord1_t orig_chute;
+			std::array<LineSlide, O> slide_;
+			static ChuteSlide build(ord1_t orig_chute, grid_arr_t const& chute_it);
+			[[gnu::const]] LineSlide const& operator[](ord1_t i) const { return slide_[i]; }
+			[[gnu::const]] std::strong_ordering operator<=>(ChuteSlide const& that) const;
+			ChuteSlide& operator+=(ChuteSlide const& other) { for (ord1_t i = 0; i < O; i++) { slide_[i] += other.slide_[i]; }}
+		};
+		struct GridSlide final {
+			std::array<ChuteSlide, O> slide_;
+			static GridSlide build(grid_arr_t const& grid_it);
+			[[gnu::const]] ChuteSlide const& operator[](ord1_t i) const { return slide_[i]; }
+			[[gnu::const]] std::strong_ordering operator<=>(GridSlide const& that) const;
 		};
 
 	 public:

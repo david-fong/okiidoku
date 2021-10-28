@@ -37,25 +37,36 @@ namespace solvent {
 		// O1:   4    9   16   25   36   49   64   81  100  121  144  169  196  225  256
 		// bits: 3    3    5    5    6    6    7    7    7    7    8    8    8    8    9
 		using ord2_t =
-			std::conditional_t<(O <= 15), std::uint_fast8_t,
+			std::conditional_t<(O < 16), std::uint_fast8_t,
 			std::uint_fast16_t
 		>;
 
 		// uint range [0, order^4].
-		// O1:    2    3    4    5     6     7     8     9     10
-		// O4:   16   81  256  625  1296  2401  4096  6561  10000
-		// bits:  5    7    9    9    11    12    17    17     18
+		// O1:    2    3    4    5     6     7     8     9     10  ...     16
+		// O4:   16   81  256  625  1296  2401  4096  6561  10000  ...  65536
+		// bits:  5    7    9    9    11    12    13    13     14  ...     17
 		using ord4_t =
-			std::conditional_t<(O <=   3), std::uint_fast8_t,
-			std::conditional_t<(O <=   7), std::uint_fast16_t,
-			std::conditional_t<(O <= 255), std::uint_fast32_t,
+			std::conditional_t<(O <   4), std::uint_fast8_t,
+			std::conditional_t<(O <  16), std::uint_fast16_t,
+			std::conditional_t<(O < 256), std::uint_fast32_t,
 			std::uint_fast64_t
 		>>>;
 		using ord4_least_t =
-			std::conditional_t<(O <=   3), std::uint_least8_t,
-			std::conditional_t<(O <=   7), std::uint_least16_t,
-			std::conditional_t<(O <= 255), std::uint_least32_t,
+			std::conditional_t<(O <   4), std::uint_least8_t,
+			std::conditional_t<(O <  16), std::uint_least16_t,
+			std::conditional_t<(O < 256), std::uint_least32_t,
 			std::uint_least64_t
+		>>>;
+
+		// uint range [0, order^5].
+		// O1:    2    3     4     5     6      7      8      9     10
+		// O4:   32  243  1024  3125  7776  16807  32768  59049  10000
+		// bits:  6    8    11    12    13     15     16     16     17
+		using ord5_t =
+			std::conditional_t<(O <=  3), std::uint_fast8_t,
+			std::conditional_t<(O <=  9), std::uint_fast16_t,
+			std::conditional_t<(O <= 84), std::uint_fast32_t,
+			std::uint_fast64_t
 		>>>;
 	};
 }

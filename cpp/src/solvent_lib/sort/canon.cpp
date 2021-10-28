@@ -5,6 +5,7 @@
 #include <iostream>
 #include <algorithm> // ranges::sort, ranges::greater
 #include <array>
+#include <iterator>
 #include <cmath>     // pow
 
 namespace solvent::lib::canon {
@@ -138,48 +139,106 @@ namespace solvent::lib::canon {
 
 
 	template<Order O>
-	bool Canonicalizer<O>::cmp_less_atom_slides::operator()(
-		atom_slide_t const& lhs, atom_slide_t const& rhs
-	) const {
-		for (ord1_t i = 0; i < O; i++) {
-			if      (lhs[i] < rhs[i]) { return true; }
-			else if (lhs[i] > rhs[i]) { return false; }
-		}
-		return false; // equal
+	Canonicalizer<O>::AtomSlide Canonicalizer<O>::AtomSlide::build(input_it_t atom_it) {
+		std::array<ord4_t, O> slide;
+		for (ord1_t i = 0; i < O; i++) { slide[i] = *(atom_it++); }
+		std::sort(slide.begin(), slide.end()); // sort cells in atom
+		for (ord1_t i = 1; i < O; i++) { slide[i] += slide[i-1]; }
+		return AtomSlide { .slide_ = slide };
+	}
+	template<Order O>
+	Canonicalizer<O>::LineSlide Canonicalizer<O>::LineSlide::build(const ord1_t orig_blkline, std::array<ord2_t, O*O> const& line) {
+		std::array<AtomSlide, O> slide;
+		for (ord1_t i = 0; i < O; i++) { slide[i] = AtomSlide::build(line.cbegin() + (O*i)); }
+		std::sort(slide.begin(), slide.end()); // sort AtomSlides in line
+		for (ord1_t i = 1; i < O; i++) { slide[i] += slide[i-1]; }
+		return LineSlide { .orig_blkline = orig_blkline, .slide_ = slide };
+	}
+	template<Order O>
+	Canonicalizer<O>::ChuteSlide Canonicalizer<O>::ChuteSlide::build(const ord1_t orig_chute, grid_arr_t const& grid) {
+		std::array<LineSlide, O> slide;
+		for (ord1_t i = 0; i < O; i++) { slide[i] = LineSlide::build(i, grid[(O*orig_chute)+i]); }
+		std::sort(slide.begin(), slide.end()); // sort LineSlides in chute
+		for (ord1_t i = 1; i < O; i++) { slide[i] += slide[i-1]; }
+		return ChuteSlide { .orig_chute = orig_chute, .slide_ = slide };
+	}
+	template<Order O>
+	Canonicalizer<O>::GridSlide Canonicalizer<O>::GridSlide::build(grid_arr_t const& grid) {
+		std::array<ChuteSlide, O> slide;
+		for (ord1_t i = 0; i < O; i++) { slide[i] = ChuteSlide::build(i, grid); }
+		std::sort(slide.begin(), slide.end()); // sort ChuteSlides in grid
+		for (ord1_t i = 1; i < O; i++) { slide[i] += slide[i-1]; }
+		return GridSlide { .slide_ = slide };
 	}
 
 
 	template<Order O>
-	bool Canonicalizer<O>::cmp_less_line_slides::operator()(
-		line_slide_t const& lhs, line_slide_t const& rhs
-	) const {
-		for (ord1_t line_slider = 0; line_slider < O; line_slider++) {
-			// TODO
-		}
-		return false; // equal
+	std::strong_ordering Canonicalizer<O>::AtomSlide::operator<=>(AtomSlide const& that) const {
+		ord1_t i = O; do { i--;
+			if (auto const cmp = slide_[i] <=> that.slide_[i]; cmp != 0) { return cmp; }
+		} while (i != 0);
+		return std::strong_ordering::equal;
+	}
+	template<Order O>
+	std::strong_ordering Canonicalizer<O>::LineSlide::operator<=>(LineSlide const& that) const {
+		ord1_t i = O; do { i--;
+			if (auto const cmp = slide_[i] <=> that.slide_[i]; cmp != 0) { return cmp; }
+		} while (i != 0);
+		return std::strong_ordering::equal;
+	}
+	template<Order O>
+	std::strong_ordering Canonicalizer<O>::ChuteSlide::operator<=>(ChuteSlide const& that) const {
+		ord1_t i = O; do { i--;
+			if (auto const cmp = slide_[i] <=> that.slide_[i]; cmp != 0) { return cmp; }
+		} while (i != 0);
+		return std::strong_ordering::equal;
+	}
+	template<Order O>
+	std::strong_ordering Canonicalizer<O>::GridSlide::operator<=>(GridSlide const& that) const {
+		ord1_t i = O; do { i--;
+			if (auto const cmp = slide_[i] <=> that.slide_[i]; cmp != 0) { return cmp; }
+		} while (i != 0);
+		return std::strong_ordering::equal;
 	}
 
 
 	template<Order O>
 	void Canonicalizer<O>::movement_() {
-		std::array<std::array<std::array<ord4_t, O1>, O1>, O2> row_atom_slides;
-		struct line_sort_t { ord1_t orig; };
-		for (ord1_t chute = 0; chute < O1; chute++) {
-			for (ord1_t chute_row = 0; chute_row < O1; chute_row++) {
-				for (ord2_t atom_offset = 0; atom_offset < O2; atom_offset += O1) {
-					auto& atom_slide = row_atom_slides[chute_row][atom_offset];
-					for (ord1_t cell = 0; cell < O1; cell++) {
-						atom_slide[cell] = input_[chute_row][atom_offset+cell];
-					}
-					std::ranges::sort(atom_slide, std::ranges::greater());
-					for (ord1_t cell = O1-1; cell > 0; cell--) {
-						atom_slide[cell-1] += atom_slide[cell];
-					}
-				}
-				std::ranges::sort(row_atom_slides[chute_row], cmp_less_atom_slides());
+		const GridSlide grid_slide = GridSlide::build(input_);
+		decltype(input_) transposed_input;
+		for (ord2_t i = 0; i < O2; i++) {
+			for (ord2_t j = 0; j < O2; j++) {
+				transposed_input[i][j] = input_[j][i];
 			}
 		}
-		
+		const GridSlide transposed_grid_slide = GridSlide::build(transposed_input);
+
+		decltype(input_) canon_input = {O2};
+		for (ord2_t canon_row = 0; canon_row < O2; canon_row++) {
+			for (ord2_t canon_col = 0; canon_col < O2; canon_col++) {
+				auto const& r_chute = grid_slide[canon_row/O1];
+				auto const& c_chute = grid_slide[canon_col/O1];
+				const ord2_t orig_row = (O1*r_chute.orig_chute) + r_chute[canon_row%O1].orig_blkline;
+				const ord2_t orig_col = (O1*c_chute.orig_chute) + c_chute[canon_col%O1].orig_blkline;
+				canon_input[canon_row][canon_col] = input_[orig_row][orig_col];
+			}
+		}
+		if (transposed_grid_slide < grid_slide) {
+			for (ord2_t i = 0; i < O2; i++) {
+				for (ord2_t j = 0; j < O2; j++) {
+					input_[i][j] = canon_input[j][i];
+				}
+			}
+		} else {
+			input_ = canon_input;
+		}
+
+		const std::vector<print::print_grid_t> grid_accessors = {
+			print::print_grid_t([this](std::ostream& os, uint16_t coord) {
+				os << ' '; print::val2str(os, O, input_[coord/O2][coord%O2]);
+			}),
+		};
+		print::pretty(std::cout, O, grid_accessors);
 	}
 
 

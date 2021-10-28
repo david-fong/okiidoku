@@ -14,10 +14,7 @@
 // Must include `SOLVENT_DEFAULT_ORDER`.
 // At usage sites, first #define SOLVENT_TEMPL_TEMPL and then #undef it right after.
 #define SOLVENT_INSTANTIATE_ORDER_TEMPLATES \
-SOLVENT_TEMPL_TEMPL(3) \
-SOLVENT_TEMPL_TEMPL(4) \
-SOLVENT_TEMPL_TEMPL(5) \
-SOLVENT_TEMPL_TEMPL(6)
+SOLVENT_TEMPL_TEMPL(4)
 
 
 // For internal usage- not for configuration.

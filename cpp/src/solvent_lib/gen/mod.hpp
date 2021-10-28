@@ -141,7 +141,7 @@ namespace solvent::lib::gen {
 	};
 
 
-	[[gnu::const]] std::string shaded_dead_end_stat(const long out_of, const long count);
+	[[gnu::const]] std::string shaded_dead_end_stat(long out_of, long count);
 
 
 	#define SOLVENT_TEMPL_TEMPL(O_) \
