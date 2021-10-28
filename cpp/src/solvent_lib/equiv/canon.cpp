@@ -1,33 +1,48 @@
-#include <solvent_lib/sort/canon.hpp>
+#include <solvent_lib/equiv/canon.hpp>
 #include <solvent_lib/print.hpp>
 #include <solvent_util/prob.hpp>
 
 #include <iostream>
-#include <algorithm> // ranges::sort, ranges::greater
-#include <array>
-#include <iterator>
+#include <algorithm> // sort, ranges::sort, ranges::greater
 #include <cmath>     // pow
 
 namespace solvent::lib::canon {
 
+
 	template<Order O>
-	Canonicalizer<O>::Canonicalizer(std::vector<ord2_t> const& input) {
+	vec_grid_t<O> canonicalize(vec_grid_t<O> const& input) {
+		// TODO assert that input is the correct length and is a complete, valid sudoku?
+		Canonicalizer<O> canon(input);
+		return canon();
+	}
+
+
+	template<Order O>
+	Canonicalizer<O>::Canonicalizer(vec_grid_t<O> const& input) {
 		for (ord2_t row = 0; row < O2; row++) {
 			for (ord2_t col = 0; col < O2; col++) {
-				input_[row][col] = input[(row*O2)+col];
+				input_[row][col] = input[(O2*row)+col];
 			}
 		}
 	}
 
 
 	template<Order O>
-	std::vector<typename size<O>::ord2_t> Canonicalizer<O>::operator()(void) {
+	vec_grid_t<O> Canonicalizer<O>::operator()(void) {
 		relabel_();
 		movement_();
+
+		// const std::vector<print::print_grid_t> grid_accessors = {
+		// 	print::print_grid_t([this](std::ostream& os, uint16_t coord) {
+		// 		os << ' '; print::val2str(os, O, input_[coord/O2][coord%O2]);
+		// 	}),
+		// };
+		// print::pretty(std::cout, O, grid_accessors);
+
 		std::vector<ord2_t> ans(O4);
 		for (ord2_t row = 0; row < O2; row++) {
 			for (ord2_t col = 0; col < O2; col++) {
-				ans[(row*O2)+col] = input_[row][col];
+				ans[(O2*row)+col] = input_[row][col];
 			}
 		}
 		return ans;
@@ -94,7 +109,7 @@ namespace solvent::lib::canon {
 
 					static constexpr std::array<long, O2+1> O2_choose_r = [](){
 						std::array<long, O2+1> arr;
-						for (int i = 1; i < 1 + O2/2; i++) {
+						for (int i = 0; i < 1 + O2/2; i++) {
 							arr[O2-i] = arr[i] = n_choose_r(O2, i);
 						}
 						return arr;
@@ -128,26 +143,20 @@ namespace solvent::lib::canon {
 			std::ranges::sort(counts_sorted[i]);
 		}
 		counts = counts_sorted; */
-
-		const std::vector<print::print_grid_t> grid_accessors = {
-			print::print_grid_t([this](std::ostream& os, uint16_t coord) {
-				os << ' '; print::val2str(os, O, input_[coord/O2][coord%O2]);
-			}),
-		};
-		print::pretty(std::cout, O, grid_accessors);
 	}
 
 
 	template<Order O>
 	Canonicalizer<O>::AtomSlide Canonicalizer<O>::AtomSlide::build(input_it_t atom_it) {
-		std::array<ord4_t, O> slide;
-		for (ord1_t i = 0; i < O; i++) { slide[i] = *(atom_it++); }
+		std::array<ord5_t, O> slide;
+		for (ord1_t i = 0; i < O; i++) { slide[i] = *(atom_it + i); }
 		std::sort(slide.begin(), slide.end()); // sort cells in atom
 		for (ord1_t i = 1; i < O; i++) { slide[i] += slide[i-1]; }
 		return AtomSlide { .slide_ = slide };
 	}
 	template<Order O>
 	Canonicalizer<O>::LineSlide Canonicalizer<O>::LineSlide::build(const ord1_t orig_blkline, std::array<ord2_t, O*O> const& line) {
+		
 		std::array<AtomSlide, O> slide;
 		for (ord1_t i = 0; i < O; i++) { slide[i] = AtomSlide::build(line.cbegin() + (O*i)); }
 		std::sort(slide.begin(), slide.end()); // sort AtomSlides in line
@@ -232,25 +241,11 @@ namespace solvent::lib::canon {
 		} else {
 			input_ = canon_input;
 		}
-
-		const std::vector<print::print_grid_t> grid_accessors = {
-			print::print_grid_t([this](std::ostream& os, uint16_t coord) {
-				os << ' '; print::val2str(os, O, input_[coord/O2][coord%O2]);
-			}),
-		};
-		print::pretty(std::cout, O, grid_accessors);
-	}
-
-
-	template<Order O>
-	void canonicalize(std::vector<typename size<O>::ord2_t>& input) noexcept {
-		// TODO assert that input is the correct length and is a complete, valid sudoku?
-		(Canonicalizer<O>(input))(); // TODO
 	}
 
 
 	#define SOLVENT_TEMPL_TEMPL(O_) \
-		template void canonicalize<O_>(std::vector<typename size<O_>::ord2_t>&) noexcept; \
+		template vec_grid_t<O_> canonicalize<O_>(vec_grid_t<O_> const&); \
 		template class Canonicalizer<O_>;
 	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 	#undef SOLVENT_TEMPL_TEMPL

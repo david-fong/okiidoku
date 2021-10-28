@@ -16,7 +16,7 @@ readonly CPP="$(echo "$ROOT/src/solvent_"{\
 util/str,\
 lib/grid,\
 lib/print,\
-lib/sort/canon,\
+lib/equiv/canon,\
 lib/gen/path,\
 lib/gen/mod,\
 lib/gen/batch,\

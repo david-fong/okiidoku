@@ -27,3 +27,7 @@ Discussions related to equivalence checking can be found by searching for "Sudok
 Unlike most existing solutions, my solution does not have any aspect of brute force.
 
 ## Solution Generation
+
+## More Links
+
+- [Math Cornell - There is no 16 clue sudoku](https://arxiv.org/abs/1201.0749)

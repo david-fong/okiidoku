@@ -3,6 +3,9 @@
 
 ## Higher Priority
 
+- write a scrambler.
+- write some correctness-tests for canonicalization and scrambling.
+
 - (?) Change canonicalization to not use templates. Verify first that it isn't a performance bottleneck.
 
 - some diagnostics to try rendering:

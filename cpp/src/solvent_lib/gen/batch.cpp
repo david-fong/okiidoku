@@ -1,5 +1,6 @@
 #include <solvent_lib/gen/batch.hpp>
 #include <solvent_util/str.hpp>
+#include <solvent_lib/equiv/canon.hpp>
 
 #include <thread>
 #include <iostream>
@@ -30,10 +31,14 @@ namespace solvent::lib::gen::batch {
 
 	template<Order O>
 	void ThreadFunc<O>::operator()() {
+		long a = 0;
 		shared_data_mutex_.lock();
 		while (get_progress() < params_.stop_after) [[likely]] {
 			shared_data_mutex_.unlock(); //____________________
 			const GenResult gen_result = generator_(params_.gen_params);
+			if (gen_result.status == ExitStatus::Ok) [[unlikely]] {
+				a += canon::canonicalize<O>(gen_result.grid)[0];
+			}
 			shared_data_mutex_.lock(); //‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
 
 			shared_data_.total_anys++;
@@ -47,10 +52,12 @@ namespace solvent::lib::gen::batch {
 				];
 				dist_summary_row.marginal_oks++;
 				dist_summary_row.marginal_ops += gen_result.op_count;
+
 			}
 			gen_result_consumer_(gen_result);
 		}
 		shared_data_mutex_.unlock();
+		std::cout << a << std::endl;
 	}
 
 
