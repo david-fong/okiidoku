@@ -23,8 +23,9 @@ namespace solvent::lib::gen {
 
 	//
 	struct Params {
-		path::Kind path_kind;
+		path::Kind path_kind = path::Kind::RowMajor;
 		unsigned long max_dead_ends = 0; // Defaulted if zero.
+		bool canonicalize = false;
 
 		// Cleans self and returns a copy of self.
 		Params clean(Order O) noexcept;

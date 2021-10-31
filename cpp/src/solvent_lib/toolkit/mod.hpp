@@ -2,7 +2,7 @@
 #define HPP_SOLVENT_LIB_TOOLKIT
 
 #include <solvent_lib/gen/batch.hpp>
-#include <solvent_lib/equiv/canon.hpp>
+// #include <solvent_lib/equiv/canon.hpp>
 #include <solvent_lib/gen/mod.hpp>
 #include <solvent_lib/grid.hpp>
 #include <solvent_lib/size.hpp>
@@ -23,9 +23,12 @@ namespace solvent::lib::toolkit {
 		gen::GenResult gen(gen::Params);
 		gen::GenResult gen_continue_prev();
 		void gen_print_pretty(std::ostream&) const;
-		void gen_batch(gen::batch::Params);
 
-		void canonicalize(std::vector<std::uint_fast8_t>);
+		// Note: commented out since currently not in use (and not very useful either).
+		// void gen_batch(gen::batch::Params);
+
+		// Note: commented out since currently not in use.
+		// void canonicalize(std::vector<std::uint_fast8_t>) const;
 
 	 private:
 		Order O;

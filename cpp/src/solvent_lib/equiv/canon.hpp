@@ -1,10 +1,9 @@
-#ifndef HPP_SOLVENT_LIB_SORT_CANON
-#define HPP_SOLVENT_LIB_SORT_CANON
+#ifndef HPP_SOLVENT_LIB_EQUIV_CANON
+#define HPP_SOLVENT_LIB_EQUIV_CANON
 
-#include <solvent_lib/grid.hpp>
+// #include <solvent_lib/grid.hpp>
 #include <solvent_lib/size.hpp>
 
-#include <iosfwd>
 #include <vector>
 #include <array>
 #include <compare>
@@ -90,18 +89,11 @@ namespace solvent::lib::canon {
 
 		Canonicalizer(std::vector<ord2_t> const&);
 
-		// Generates a fresh sudoku solution.
 		std::vector<ord2_t> operator()(void);
-
-		// void print_pretty(std::ostream&) const;
 
 	 private:
 		std::array<std::array<ord2_t, O2>, O2> input_;
-
-		//
 		void relabel_(void) noexcept;
-
-		//
 		void movement_(void);
 	};
 

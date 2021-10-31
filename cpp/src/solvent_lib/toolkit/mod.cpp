@@ -68,19 +68,19 @@ namespace solvent::lib::toolkit {
 	}
 
 
-	void Toolkit::gen_batch(gen::batch::Params params) {
+	/* void Toolkit::gen_batch(gen::batch::Params params) {
 		gen::batch::batch(O, params, [](gen::GenResult gen_result){
 			gen_result.print_pretty(std::cout);
 		});
-	}
+	} */
 
 
-	void Toolkit::canonicalize(std::vector<std::uint_fast8_t> params) {
+	/* void Toolkit::canonicalize(std::vector<std::uint_fast8_t> params) const {
 		switch (O) {
 		#define SOLVENT_TEMPL_TEMPL(O_) \
 			case O_: canon::canonicalize<O_>(params); break;
 		SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 		#undef SOLVENT_TEMPL_TEMPL
 		}
-	}
+	} */
 }

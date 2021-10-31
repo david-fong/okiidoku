@@ -16,6 +16,10 @@ namespace solvent::cli {
 	 public:
 		using pathkind_t = lib::gen::path::Kind;
 
+		[[gnu::pure]] verbosity::Kind verbosity(void) const noexcept { return verbosity_; };
+		void verbosity(verbosity::Kind);
+		void verbosity(std::string const&);
+
 		[[gnu::pure]] Order order(void) const noexcept { return order_; }
 		void order(Order) noexcept;
 		void order(std::string const&) noexcept;
@@ -24,19 +28,20 @@ namespace solvent::cli {
 		void path_kind(pathkind_t) noexcept;
 		void path_kind(std::string const&) noexcept;
 
-		[[gnu::pure]] verbosity::Kind verbosity(void) const noexcept { return verbosity_; };
-		void verbosity(verbosity::Kind);
-		void verbosity(std::string const&);
-
 		[[gnu::pure]] unsigned long long max_dead_ends(void) const noexcept { return max_dead_ends_; };
 		void max_dead_ends(unsigned long long);
 		void max_dead_ends(std::string const&);
+
+		[[gnu::pure]] bool canonicalize(void) const noexcept { return canonicalize_; };
+		void canonicalize(bool);
+		void canonicalize(std::string const&);
 
 	 private:
 		Order order_;
 		verbosity::Kind verbosity_ = verbosity::Kind::NoGiveups;
 		pathkind_t path_kind_ = pathkind_t::RowMajor;
 		unsigned long long max_dead_ends_ = 0;
+		bool canonicalize_ = false;
 	};
 }
 #endif

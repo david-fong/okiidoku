@@ -78,6 +78,7 @@ namespace solvent::cli {
 			case E::ConfigVerbosity:   config_.verbosity(cmd_args); break;
 			case E::ConfigGenPath:     config_.path_kind(cmd_args); break;
 			case E::ConfigMaxDeadEnds: config_.max_dead_ends(cmd_args); break;
+			case E::Canonicalize:      config_.canonicalize(cmd_args); break;
 			case E::GenSingle:     gen_single();     break;
 			case E::GenContinue:   gen_single(true); break;
 			case E::GenMultiple:   gen_multiple(cmd_args, false); break;
@@ -97,6 +98,7 @@ namespace solvent::cli {
 			: toolkit.gen(gen::Params{
 				.path_kind = config_.path_kind(),
 				.max_dead_ends = config_.max_dead_ends(),
+				.canonicalize = config_.canonicalize(),
 			});
 		const double processor_time = (static_cast<double>(std::clock() - clock_start)) / CLOCKS_PER_SEC;
 
@@ -105,9 +107,6 @@ namespace solvent::cli {
 		std::cout << "\nnum operations: " << gen_result.op_count;
 		std::cout << "\nmax dead ends:  " << gen_result.most_dead_ends_seen;
 		str::print_msg_bar((gen_result.status == gen::ExitStatus::Ok) ? "OK" : "ABORT");
-		if (gen_result.status == gen::ExitStatus::Ok) {
-			toolkit.canonicalize(gen_result.grid);
-		}
 		std::cout << std::endl;
 	}
 
@@ -120,7 +119,11 @@ namespace solvent::cli {
 
 		str::print_msg_bar("START x" + std::to_string(stop_after), BAR_WIDTH);
 		gen::batch::Params params {
-			.gen_params { .path_kind = config_.path_kind(), .max_dead_ends = config_.max_dead_ends() },
+			.gen_params {
+				.path_kind = config_.path_kind(),
+				.max_dead_ends = config_.max_dead_ends(),
+				.canonicalize = config_.canonicalize(),
+			},
 			.only_count_oks = only_count_oks,
 			.stop_after = stop_after
 		};

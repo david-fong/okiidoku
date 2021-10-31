@@ -3,14 +3,24 @@
 
 ## Higher Priority
 
-- write a scrambler.
-- write some correctness-tests for canonicalization and scrambling.
+1. write a scrambler.
+1. write some correctness-tests for canonicalization and scrambling.
+1. get some benchmarks and maybe show emerentius.
 
 - (?) Change canonicalization to not use templates. Verify first that it isn't a performance bottleneck.
 
+- What specific pattern of cells can always be removed from a solution while guaranteeing that the result remains possible and easy to restore to the full solution?
+  - One option:
+    - The blocks along a diagonal / shifted diagonal
+    - one cell in each remaining block
+  - Could it be possible to use this as an optimization for solution generation?
+    - Set the genpath to skip over these specific cells, and when progress has reached to these cells, switch over to attempting completion.
+  - Notice that this allows putting an upper bound on the known number of possible solutions for a given grid order.
+
+
 - some diagnostics to try rendering:
   - A print_simple method to the AbstractGrid class?
-  - A scatter chart showing max-dead-ends and num operations
+  - A scatter chart showing max-dead-ends vs. num operations
   - a bar graph where each bar counts the number of GenResults that had a frontier_progress within the range for that bar's "bin".
   - comparing the average heatmaps of aborted vs successful generations.
 - Rename things to match the standard literature / terminology. Do some research to try to get it right. See sudopedia.

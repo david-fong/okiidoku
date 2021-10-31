@@ -184,28 +184,28 @@ namespace solvent::lib::canon {
 	template<Order O>
 	std::strong_ordering Canonicalizer<O>::AtomSlide::operator<=>(AtomSlide const& that) const {
 		ord1_t i = O; do { i--;
-			if (auto const cmp = slide_[i] <=> that.slide_[i]; cmp != 0) { return cmp; }
+			if (auto const cmp = slide_[i] <=> that.slide_[i]; cmp != 0) [[likely]] { return cmp; }
 		} while (i != 0);
 		return std::strong_ordering::equal;
 	}
 	template<Order O>
 	std::strong_ordering Canonicalizer<O>::LineSlide::operator<=>(LineSlide const& that) const {
 		ord1_t i = O; do { i--;
-			if (auto const cmp = slide_[i] <=> that.slide_[i]; cmp != 0) { return cmp; }
+			if (auto const cmp = slide_[i] <=> that.slide_[i]; cmp != 0) [[likely]] { return cmp; }
 		} while (i != 0);
 		return std::strong_ordering::equal;
 	}
 	template<Order O>
 	std::strong_ordering Canonicalizer<O>::ChuteSlide::operator<=>(ChuteSlide const& that) const {
 		ord1_t i = O; do { i--;
-			if (auto const cmp = slide_[i] <=> that.slide_[i]; cmp != 0) { return cmp; }
+			if (auto const cmp = slide_[i] <=> that.slide_[i]; cmp != 0) [[likely]] { return cmp; }
 		} while (i != 0);
 		return std::strong_ordering::equal;
 	}
 	template<Order O>
 	std::strong_ordering Canonicalizer<O>::GridSlide::operator<=>(GridSlide const& that) const {
 		ord1_t i = O; do { i--;
-			if (auto const cmp = slide_[i] <=> that.slide_[i]; cmp != 0) { return cmp; }
+			if (auto const cmp = slide_[i] <=> that.slide_[i]; cmp != 0) [[likely]] { return cmp; }
 		} while (i != 0);
 		return std::strong_ordering::equal;
 	}

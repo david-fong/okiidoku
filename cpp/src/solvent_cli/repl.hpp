@@ -23,6 +23,7 @@ namespace solvent::cli {
 			ConfigVerbosity,
 			ConfigGenPath,
 			ConfigMaxDeadEnds,
+			Canonicalize,
 			GenSingle,
 			GenContinue,
 			GenMultiple,
@@ -31,10 +32,11 @@ namespace solvent::cli {
 		const std::map<std::string, Command::E> Str2Enum = {
 			{ "help",         E::Help              },
 			{ "quit",         E::Quit              },
-			{ "order",        E::ConfigOrder       },
 			{ "verbosity",    E::ConfigVerbosity   },
+			{ "order",        E::ConfigOrder       },
 			{ "genpath",      E::ConfigGenPath     },
 			{ "maxdeadends",  E::ConfigMaxDeadEnds },
+			{ "canonicalize", E::Canonicalize      },
 			{ "",             E::GenSingle         },
 			{ "c",            E::GenContinue       },
 			{ "gen",          E::GenMultiple       },
@@ -44,10 +46,11 @@ namespace solvent::cli {
 			"\n- help                  print this help menu"
 			"\n- quit                  cleanly exit this program"
 			"\n"
-			"\n- order [<order>]       get/set order (sqrt of grid length)"
 			"\n- verbosity [<level>]   get/set verbosity level"
+			"\n- order [<order>]       get/set order (sqrt of grid length)"
 			"\n- genpath [<path>]      get/set generator traversal path"
 			"\n- maxdeadends [<max>]   get/set generator max dead ends"
+			"\n- canonicalize [<y/n>]  get/set canonicalization"
 			"\n"
 			"\n- {enter}               generate a single solution"
 			"\n- c                     continue previous generation"

@@ -1,4 +1,5 @@
 #include <solvent_lib/gen/mod.hpp>
+#include <solvent_lib/equiv/canon.hpp>
 #include <solvent_lib/print.hpp>
 #include <solvent_util/str.hpp>
 
@@ -181,6 +182,9 @@ namespace solvent::lib::gen {
 		for (ord4_t p = 0; p <= progress_; p++) {
 			const ord4_t coord = prog2coord(p);
 			gen_result.grid[coord] = val_try_orders_[coord / O2][cells_[coord].try_index];
+		}
+		if (params_.canonicalize && gen_result.status == ExitStatus::Ok) /* [[unlikely]] (worth?) */ {
+			gen_result.grid = canon::canonicalize<O>(gen_result.grid);
 		}
 		return gen_result;
 	}
