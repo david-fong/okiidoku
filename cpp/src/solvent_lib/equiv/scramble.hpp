@@ -19,13 +19,9 @@ namespace solvent::lib::scramble {
 	template<Order O>
 	class Scrambler final /* : public AbstractGrid<O> */ {
 	 private:
-		using has_mask_t = typename size<O>::has_mask_t;
 		using ord1_t = typename size<O>::ord1_t;
 		using ord2_t = typename size<O>::ord2_t;
 		using ord4_t = typename size<O>::ord4_t;
-
-		using grid_arr_t = typename std::array<std::array<ord2_t, O*O>, O*O>;
-		using input_it_t = typename std::array<ord2_t, O*O>::const_iterator;
 
 	 public:
 		static constexpr ord1_t O1 = O;

@@ -1,9 +1,9 @@
-#include <solvent_lib/toolkit/mod.hpp>
+#include <solvent_lib/toolkit.hpp>
 #include <solvent_lib/print.hpp>
 
 #include <iostream>
 
-namespace solvent::lib::toolkit {
+namespace solvent::lib {
 
 	Toolkit::Toolkit(Order O):
 		gen_([O]() -> generator_union_t {

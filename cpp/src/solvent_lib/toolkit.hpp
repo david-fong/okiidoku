@@ -13,7 +13,7 @@
 #include <optional>
 
 
-namespace solvent::lib::toolkit {
+namespace solvent::lib {
 
 	class Toolkit final {
 	 public:

@@ -19,7 +19,7 @@ namespace solvent::cli {
 	"\nIf UTF-8 characters are garbled on Windows, run `chcp.com 65001`.";
 
 
-	Repl::Repl(const Order O): toolkit(toolkit::Toolkit(O)) {
+	Repl::Repl(const Order O): toolkit(Toolkit(O)) {
 		config_.order(O);
 		if (O <= 4) { config_.verbosity(verbosity::Kind::Silent); }
 		if (O  > 4) { config_.verbosity(verbosity::Kind::NoGiveups); }

@@ -7,24 +7,15 @@
 1. write some correctness-tests for canonicalization and scrambling.
 1. get some benchmarks and maybe show emerentius.
 
-- (?) Change canonicalization to not use templates. Verify first that it isn't a performance bottleneck.
-
-- What specific pattern of cells can always be removed from a solution while guaranteeing that the result remains possible and easy to restore to the full solution?
-  - One option:
-    - The blocks along a diagonal / shifted diagonal
-    - one cell in each remaining block
-  - Could it be possible to use this as an optimization for solution generation?
-    - Set the genpath to skip over these specific cells, and when progress has reached to these cells, switch over to attempting completion.
-  - Notice that this allows putting an upper bound on the known number of possible solutions for a given grid order.
-
-
 - some diagnostics to try rendering:
   - A print_simple method to the AbstractGrid class?
   - A scatter chart showing max-dead-ends vs. num operations
-  - a bar graph where each bar counts the number of GenResults that had a frontier_progress within the range for that bar's "bin".
+  - a bar graph where each bar counts the number of GenResults that had a frontier_progress within the range for that bar's "bin". (to see "how far" aborted generations usually get). This sounds flawed, since frontier-progress changes frequently during a generation.
   - comparing the average heatmaps of aborted vs successful generations.
+    - See if there are clear differences/patterns in where they usually spike in backtracking. Perhaps this can be used to inform more sophisticated thresholds for each genpath.
 - Rename things to match the standard literature / terminology. Do some research to try to get it right. See sudopedia.
 
+- (?) Change canonicalization to not use templates. Verify first that it isn't a performance bottleneck.
 - https://cmake.org/cmake/help/latest/guide/tutorial/index.html
   - See what can be learned from https://github.com/lefticus/cpp_weekly_game_project
 - Decide what interfaces to support:
@@ -45,6 +36,20 @@
 - CLI
   - implement `-h` and `--help` CLI argument.
   - give a red message when trying to continue and nothing is left to be found.
+
+## Interesting Questions for Further Research
+
+- Is there any correlation between the potential for creating difficult puzzles from a solution and the value-pair-same-atom-count-probability table I'm using for canonicalization? Or perhaps the specific cells that are removed (targeting and those relationships in specific ways)?
+
+- What specific pattern of cells can always be removed from a solution while guaranteeing that the result remains possible and easy to restore to the full solution?
+  - One option:
+    - The blocks along a diagonal / shifted diagonal
+    - one cell in each remaining block
+  - Usefulness:
+    - To reduce unnecessary bytes sent over network?
+    - Could it be possible to use this as an optimization for solution generation?
+      - Set the genpath to skip over these specific cells, and when progress has reached to these cells, switch over to attempting completion.
+    - Notice that this allows putting an intuitive upper bound on the known number of possible solutions for a given grid order (`(O2!)^(O1*(O1-1))`).
 
 ## Things That Seem To Not Have Worked
 

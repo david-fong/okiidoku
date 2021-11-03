@@ -40,7 +40,6 @@ namespace solvent::lib::canon {
 	template<Order O>
 	class Canonicalizer final /* : public AbstractGrid<O> */ {
 	 private:
-		using has_mask_t = typename size<O>::has_mask_t;
 		using ord1_t = typename size<O>::ord1_t;
 		using ord2_t = typename size<O>::ord2_t;
 		using ord4_t = typename size<O>::ord4_t;

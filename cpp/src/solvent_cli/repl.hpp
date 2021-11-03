@@ -3,7 +3,7 @@
 
 #include <solvent_cli/config.hpp>
 #include <solvent_cli/enum.hpp>
-#include <solvent_lib/toolkit/mod.hpp>
+#include <solvent_lib/toolkit.hpp>
 #include <solvent_lib/gen/batch.hpp>
 #include <solvent_lib/gen/mod.hpp>
 #include <solvent_lib/size.hpp>
@@ -87,7 +87,7 @@ namespace solvent::cli {
 
 	 private:
 		Config config_;
-		lib::toolkit::Toolkit toolkit;
+		lib::Toolkit toolkit;
 
 		// Return false if command is to exit the program:
 		void gen_single(bool contPrev = false);

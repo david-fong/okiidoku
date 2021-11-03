@@ -111,6 +111,8 @@ namespace solvent::lib::gen {
 		};
 
 		// indexed by `coord // O2`
+		// Note: a possibly more performant option would be `progress_ // O2`,
+		// which the current simple setup doesn't accommodate for `operator[]`.
 		std::array<std::array<ord2_t, O2>, O2> val_try_orders_ = []() {
 			std::array<std::array<ord2_t, O2>, O2> val_try_orders;
 			for (auto& vto : val_try_orders) {

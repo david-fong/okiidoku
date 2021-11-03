@@ -20,7 +20,7 @@ lib/equiv/canon,\
 lib/gen/path,\
 lib/gen/mod,\
 lib/gen/batch,\
-lib/toolkit/mod,\
+lib/toolkit,\
 cli/config,\
 cli/repl,\
 cli/main\
