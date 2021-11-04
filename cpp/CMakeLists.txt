@@ -6,7 +6,7 @@ project(solvent)
 # https://cliutils.gitlab.io/modern-cmake/
 # https://github.com/lefticus/cpp_weekly_game_project
 
-set(CMAKE_CXX_STANDARD 20 CACHE)
+set(CMAKE_CXX_STANDARD 20 CACHE STRING "The C++ standard to use")
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_CXX_EXTENSIONS FALSE)
 if(MSVC)
@@ -17,8 +17,7 @@ endif()
 
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 
+add_subdirectory(src/solvent_util)
 add_subdirectory(src/solvent_lib)
 add_subdirectory(src/solvent_cli)
-add_subdirectory(src/solvent_web)
-
-
+# add_subdirectory(src/solvent_web)

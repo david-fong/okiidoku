@@ -37,7 +37,7 @@ namespace solvent::lib::canon {
 			static AtomSlide build(input_it_t atom_it);
 			[[gnu::pure]] ord5_t operator[](ord1_t i) const { return slide_[i]; }
 			[[gnu::pure]] std::strong_ordering operator<=>(AtomSlide const& that) const;
-			AtomSlide& operator+=(AtomSlide const& other) { for (ord1_t i = 0; i < O; i++) { slide_[i] += other.slide_[i]; return *this; }}
+			AtomSlide& operator+=(AtomSlide const& other) { for (ord1_t i = 0; i < O; i++) { slide_[i] += other.slide_[i]; } return *this; }
 		};
 		struct LineSlide final {
 			ord1_t orig_blkline;
@@ -45,7 +45,7 @@ namespace solvent::lib::canon {
 			static LineSlide build(ord1_t orig_blkline, std::array<ord2_t, O*O> const& line_it);
 			[[gnu::pure]] AtomSlide const& operator[](ord1_t i) const { return slide_[i]; }
 			[[gnu::pure]] std::strong_ordering operator<=>(LineSlide const& that) const;
-			LineSlide& operator+=(LineSlide const& other) { for (ord1_t i = 0; i < O; i++) { slide_[i] += other.slide_[i]; return *this; }}
+			LineSlide& operator+=(LineSlide const& other) { for (ord1_t i = 0; i < O; i++) { slide_[i] += other.slide_[i]; } return *this; }
 
 		};
 		struct ChuteSlide final {
@@ -54,7 +54,7 @@ namespace solvent::lib::canon {
 			static ChuteSlide build(ord1_t orig_chute, grid_arr_t const& chute_it);
 			[[gnu::const]] LineSlide const& operator[](ord1_t i) const { return slide_[i]; }
 			[[gnu::const]] std::strong_ordering operator<=>(ChuteSlide const& that) const;
-			ChuteSlide& operator+=(ChuteSlide const& other) { for (ord1_t i = 0; i < O; i++) { slide_[i] += other.slide_[i]; return *this; }}
+			ChuteSlide& operator+=(ChuteSlide const& other) { for (ord1_t i = 0; i < O; i++) { slide_[i] += other.slide_[i]; } return *this; }
 		};
 		struct GridSlide final {
 			std::array<ChuteSlide, O> slide_;

@@ -116,6 +116,7 @@ namespace solvent::lib::gen::batch {
 		"\n│     max     │  marginal  │   marginal    │      net      │"
 		"\n│  dead ends  │    oks     │  average ops  │  average ops  │";
 
+		const auto prev_fmtflags = os.flags();
 		os << TABLE_SEPARATOR
 			<< TABLE_HEADER
 			<< TABLE_SEPARATOR
@@ -179,6 +180,7 @@ namespace solvent::lib::gen::batch {
 		if (total_oks < max_dead_end_samples.size() * gen::batch::SharedData::RECOMMENDED_OKS_PER_SAMPLE) {
 			os << "\nexercise caution against small datasets!" << std::endl;
 		}
+		os.flags(prev_fmtflags);
 	}
 
 

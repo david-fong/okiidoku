@@ -1,11 +1,12 @@
-add_library(solvent_lib
-	../solvent_util/timer
-	../solvent_util/str
+add_library(solvent_lib STATIC
+	../solvent_util/str.cpp
 	grid.cpp
 	print.cpp
 	equiv/canon.cpp
 	gen/path.cpp
 	gen/mod.cpp
 	gen/batch.cpp
-	# toolkit.cpp
+	toolkit.cpp
 )
+target_include_directories(solvent_lib PRIVATE ../)
+target_link_libraries(solvent_lib PRIVATE solvent_util)

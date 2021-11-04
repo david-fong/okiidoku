@@ -35,7 +35,7 @@ namespace solvent::cli {
 	}
 
 
-	void Config::order(Order new_order) {
+	void Config::order(Order new_order) noexcept {
 		order_ = new_order;
 	}
 

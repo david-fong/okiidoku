@@ -137,7 +137,7 @@ namespace solvent::lib::gen {
 		// clear fields and scramble val_try_orders_
 		void prepare_fresh_gen_(void);
 
-		[[gnu::hot]] inline Direction set_next_valid_(typename path::coord_converter_t<O>, bool do_clear_masks) noexcept;
+		[[gnu::hot]] Direction set_next_valid_(typename path::coord_converter_t<O>, bool do_clear_masks) noexcept;
 		[[gnu::hot]] void generate_(void);
 
 		[[gnu::pure, nodiscard]] GenResult make_gen_result_(void) const;

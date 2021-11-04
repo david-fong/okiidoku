@@ -22,7 +22,7 @@ namespace solvent::cli {
 
 		[[gnu::pure]] Order order(void) const noexcept { return order_; }
 		void order(Order) noexcept;
-		void order(std::string const&) noexcept;
+		void order(std::string const&);
 
 		[[gnu::pure]] pathkind_t path_kind(void) const noexcept { return path_kind_; }
 		void path_kind(pathkind_t) noexcept;

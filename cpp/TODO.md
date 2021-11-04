@@ -3,6 +3,12 @@
 
 ## Higher Priority
 
+1. Try out CMake
+    - Make the libraries static
+    - get a working build
+    - try making solvent_lib a shared library
+    - get a working build
+
 1. write a scrambler.
 1. write some correctness-tests for canonicalization and scrambling.
 1. get some benchmarks and maybe show emerentius.
