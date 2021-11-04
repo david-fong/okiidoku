@@ -1,5 +1,5 @@
-#ifndef HPP_SOLVENT_LIB_BATCH
-#define HPP_SOLVENT_LIB_BATCH
+#ifndef HPP_SOLVENT_LIB__GEN__BATCH
+#define HPP_SOLVENT_LIB__GEN__BATCH
 
 #include <solvent_lib/gen/mod.hpp>
 #include <solvent_util/timer.hpp>

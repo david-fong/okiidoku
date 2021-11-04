@@ -1,5 +1,5 @@
-#ifndef HPP_SOLVENT_CLI_ENUM
-#define HPP_SOLVENT_CLI_ENUM
+#ifndef HPP_SOLVENT_CLI__ENUM
+#define HPP_SOLVENT_CLI__ENUM
 
 #include <iosfwd>
 #include <string>

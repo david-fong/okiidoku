@@ -1,5 +1,5 @@
-#ifndef HPP_SOLVENT_LIB_GEN_PATH
-#define HPP_SOLVENT_LIB_GEN_PATH
+#ifndef HPP_SOLVENT_LIB__GEN__PATH
+#define HPP_SOLVENT_LIB__GEN__PATH
 
 #include <solvent_lib/size.hpp>
 

@@ -1,5 +1,5 @@
-#ifndef HPP_SOLVENT_LIB_EQUIV_SCRAMBLE
-#define HPP_SOLVENT_LIB_EQUIV_SCRAMBLE
+#ifndef HPP_SOLVENT_LIB__EQUIV__SCRAMBLE
+#define HPP_SOLVENT_LIB__EQUIV__SCRAMBLE
 
 // #include <solvent_lib/grid.hpp>
 #include <solvent_lib/size.hpp>

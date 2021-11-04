@@ -1,6 +1,6 @@
 #include <solvent_lib/equiv/canon.hpp>
 #include <solvent_lib/print.hpp>
-#include <solvent_util/prob.hpp>
+#include <solvent_util/math.hpp>
 
 #include <iostream>
 #include <algorithm> // sort, ranges::sort, ranges::greater

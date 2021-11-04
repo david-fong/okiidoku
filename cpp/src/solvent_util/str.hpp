@@ -1,5 +1,5 @@
-#ifndef HPP_SOLVENT_UTIL_STR
-#define HPP_SOLVENT_UTIL_STR
+#ifndef HPP_SOLVENT_UTIL__STR
+#define HPP_SOLVENT_UTIL__STR
 
 #include <solvent_config.hpp>
 #include <locale>

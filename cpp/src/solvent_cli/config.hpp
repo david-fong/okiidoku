@@ -1,5 +1,5 @@
-#ifndef HPP_SOLVENT_CLI_CONFIG
-#define HPP_SOLVENT_CLI_CONFIG
+#ifndef HPP_SOLVENT_CLI__CONFIG
+#define HPP_SOLVENT_CLI__CONFIG
 
 #include <solvent_cli/enum.hpp>
 #include <solvent_lib/gen/batch.hpp>

@@ -1,5 +1,5 @@
-#ifndef HPP_SOLVENT_CLI_REPL
-#define HPP_SOLVENT_CLI_REPL
+#ifndef HPP_SOLVENT_CLI__REPL
+#define HPP_SOLVENT_CLI__REPL
 
 #include <solvent_cli/config.hpp>
 #include <solvent_cli/enum.hpp>

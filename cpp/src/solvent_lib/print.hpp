@@ -1,5 +1,5 @@
-#ifndef HPP_SOLVENT_LIB_PRINT
-#define HPP_SOLVENT_LIB_PRINT
+#ifndef HPP_SOLVENT_LIB__PRINT
+#define HPP_SOLVENT_LIB__PRINT
 
 #include <solvent_lib/size.hpp>
 #include <solvent_lib/gen/mod.hpp>

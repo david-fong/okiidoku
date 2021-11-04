@@ -1,5 +1,5 @@
-#ifndef HPP_SOLVENT_LIB_GRID
-#define HPP_SOLVENT_LIB_GRID
+#ifndef HPP_SOLVENT_LIB__GRID
+#define HPP_SOLVENT_LIB__GRID
 
 #include <solvent_lib/size.hpp>
 #include <solvent_util/str.hpp>

@@ -1,5 +1,5 @@
-#ifndef HPP_SOLVENT_LIB_SIZE
-#define HPP_SOLVENT_LIB_SIZE
+#ifndef HPP_SOLVENT_LIB__SIZE
+#define HPP_SOLVENT_LIB__SIZE
 
 #include <solvent_config.hpp>
 

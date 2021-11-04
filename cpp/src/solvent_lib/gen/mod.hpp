@@ -1,5 +1,5 @@
-#ifndef HPP_SOLVENT_LIB_GEN
-#define HPP_SOLVENT_LIB_GEN
+#ifndef HPP_SOLVENT_LIB__GEN
+#define HPP_SOLVENT_LIB__GEN
 
 #include <solvent_lib/gen/path.hpp>
 #include <solvent_lib/grid.hpp>

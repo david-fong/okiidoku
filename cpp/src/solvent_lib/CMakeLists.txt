@@ -1,5 +1,4 @@
-
-add_compile_options(solvent
+add_library(solvent_lib
 	../solvent_util/timer
 	../solvent_util/str
 	grid.cpp

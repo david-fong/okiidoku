@@ -1,5 +1,5 @@
-#ifndef HPP_SOLVENT_UTIL_TIMER
-#define HPP_SOLVENT_UTIL_TIMER
+#ifndef HPP_SOLVENT_UTIL__TIMER
+#define HPP_SOLVENT_UTIL__TIMER
 
 #include <chrono>
 

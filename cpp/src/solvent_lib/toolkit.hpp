@@ -1,5 +1,5 @@
-#ifndef HPP_SOLVENT_LIB_TOOLKIT
-#define HPP_SOLVENT_LIB_TOOLKIT
+#ifndef HPP_SOLVENT_LIB__TOOLKIT
+#define HPP_SOLVENT_LIB__TOOLKIT
 
 #include <solvent_lib/gen/batch.hpp>
 // #include <solvent_lib/equiv/canon.hpp>

@@ -1,5 +1,5 @@
-#ifndef HPP_SOLVENT_UTIL_PROB
-#define HPP_SOLVENT_UTIL_PROB
+#ifndef HPP_SOLVENT_UTIL__PROB
+#define HPP_SOLVENT_UTIL__PROB
 
 constexpr inline unsigned long n_choose_r(int n, int r) {
 	if (r > n - r) r = n - r;

@@ -16,8 +16,6 @@
 - Rename things to match the standard literature / terminology. Do some research to try to get it right. See sudopedia.
 
 - (?) Change canonicalization to not use templates. Verify first that it isn't a performance bottleneck.
-- https://cmake.org/cmake/help/latest/guide/tutorial/index.html
-  - See what can be learned from https://github.com/lefticus/cpp_weekly_game_project
 - Decide what interfaces to support:
   - Probably best to start with just readline and a CLI
     - For CLI util libraries, look into using
@@ -49,7 +47,7 @@
     - To reduce unnecessary bytes sent over network?
     - Could it be possible to use this as an optimization for solution generation?
       - Set the genpath to skip over these specific cells, and when progress has reached to these cells, switch over to attempting completion.
-    - Notice that this allows putting an intuitive upper bound on the known number of possible solutions for a given grid order (`(O2!)^(O1*(O1-1))`).
+    - Notice that this allows putting an intuitive upper bound on the known number of possible solutions for a given grid order (`(O2!)^(O1*(O1-1))`). But other people have probably come up with better calculations; will need to do some reading.
 
 ## Things That Seem To Not Have Worked
 
@@ -59,6 +57,6 @@ These didn't end up doing the thing I wanted / thought might happen.
   - Hypothesis: Cells with fewer candidates are like the solution space's dominant bottlenecks. If we were to leave them to the end, we may spend many long advances creating almost-complete solutions that cannot be complete because they violate the bottlenecks (and possibly often in similar ways). If we start with them first, we may be less likely to encounter that problem.
   - Update: I think this didn't work because I was doing naive backtracking. If I improve the backtracking logic. Now I need to remember/find out which traversal paths should make better usage of this and then test it out.
 
-- Use `__builtin_popcount(occmask)`
+- Use `popcount(has_mask)`
   - What about if length - popcount is 1?
     - Then I could just set the value right away. This would need a c++ builtin for arbiting a bit.

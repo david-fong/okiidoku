@@ -1,5 +1,5 @@
-#ifndef HPP_SOLVENT_LIB_EQUIV_CANON
-#define HPP_SOLVENT_LIB_EQUIV_CANON
+#ifndef HPP_SOLVENT_LIB__EQUIV__CANON
+#define HPP_SOLVENT_LIB__EQUIV__CANON
 
 // #include <solvent_lib/grid.hpp>
 #include <solvent_lib/size.hpp>
@@ -15,23 +15,7 @@ namespace solvent::lib::canon {
 
 	/**
 	input must be a complete grid.
-
-	Goal:
-	- no brute forcing / guess-and-check.
-	- default to factoring as many cells as possible into the sorting
-		bases, and only factoring them out when necessary to break ties
-		instead of vice versa.
-
-	Note that there are many possible variations on the calculations
-	used in this algorithm that can just as well canonicalize. I made
-	decisions according to the above goals.
-
-	The end result of the specific choices made is that:
-	- Labels are given such that lower valued labels "play favourites".
-		(they will cohabit atoms with some labels more than others).
-	- The placement of labels is such that lines that spread their
-		larger values across blocks will be closer to the top and left,
-		with chutes following a derived, similar rule.
+	See readme for information about the algorithm.
 	*/
 	template<Order O>
 	vec_grid_t<O> canonicalize(vec_grid_t<O> const& input);

@@ -1,0 +1,2 @@
+add_executable(solvent_cli)
+target_link_libraries(solvent_cli PRIVATE solvent_lib)
