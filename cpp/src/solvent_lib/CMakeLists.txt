@@ -1,8 +1,8 @@
 add_library(solvent_lib STATIC
-	../solvent_util/str.cpp
 	grid.cpp
 	print.cpp
 	equiv/canon.cpp
+	equiv/scramble.cpp
 	gen/path.cpp
 	gen/mod.cpp
 	gen/batch.cpp

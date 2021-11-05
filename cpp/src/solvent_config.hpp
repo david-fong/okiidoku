@@ -1,5 +1,5 @@
-#ifndef HPP_SOLVENT_BUILDFLAG
-#define HPP_SOLVENT_BUILDFLAG
+#ifndef HPP_SOLVENT_CONFIG
+#define HPP_SOLVENT_CONFIG
 
 // Whether or not ansi-escape sequences should be emitted within output
 // to dim out harsh, non-essential text.

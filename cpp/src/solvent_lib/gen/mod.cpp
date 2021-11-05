@@ -184,7 +184,7 @@ namespace solvent::lib::gen {
 			gen_result.grid[coord] = val_try_orders_[coord / O2][cells_[coord].try_index];
 		}
 		if (params_.canonicalize && gen_result.status == ExitStatus::Ok) /* [[unlikely]] (worth?) */ {
-			gen_result.grid = canon::canonicalize<O>(gen_result.grid);
+			gen_result.grid = equiv::canonicalize<O>(gen_result.grid);
 		}
 		return gen_result;
 	}

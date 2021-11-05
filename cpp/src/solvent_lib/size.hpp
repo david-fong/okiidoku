@@ -14,7 +14,7 @@ namespace solvent {
 
 	// Note: when printing, make sure to cast uint8_t to int.
 	template<Order O>
-	struct size {
+	struct size final {
 	 public:
 		// mask width `order^2` bits.
 		// O1:     2   3   4   5   6   7   8   9  10  11

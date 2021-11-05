@@ -55,5 +55,8 @@
 		"[css]": {
 			"editor.insertSpaces": false,
 		},
+		"cSpell.words": [
+			"Canonicalizer"
+		],
 	},
 }

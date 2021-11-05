@@ -7,9 +7,9 @@ namespace solvent::lib {
 	template<Order O>
 	bool AbstractGrid<O>::is_grid_invalid(void) const {
 		using has_mask_t = typename size<O>::has_mask_t;
-		std::array<has_mask_t, O2> rows_has_ {};
-		std::array<has_mask_t, O2> cols_has_ {};
-		std::array<has_mask_t, O2> blks_has_ {};
+		std::array<has_mask_t, O2> rows_has_ {0};
+		std::array<has_mask_t, O2> cols_has_ {0};
+		std::array<has_mask_t, O2> blks_has_ {0};
 
 		for (ord4_t coord = 0; coord < O4; coord++) {
 			has_mask_t& row_has = rows_has_[this->get_row(coord)];

@@ -8,7 +8,7 @@ namespace solvent::lib::gen::path {
 
 
 	template<Kind PK, Order O>
-	struct PathCoords_ {
+	struct PathCoords_ final {
 	 private:
 		using ord1_t = typename size<O>::ord1_t;
 		using ord2_t = typename size<O>::ord2_t;
@@ -19,7 +19,7 @@ namespace solvent::lib::gen::path {
 		static constexpr ord4_t O4 = O*O*O*O;
 
 		[[gnu::const, gnu::hot]] static constexpr ord4_t convert(const ord4_t progress) noexcept {
-			if constexpr (PK == path::Kind::RowMajor) {
+			if constexpr (PK == Kind::RowMajor) {
 				return progress;
 			} else {
 				return path[progress];

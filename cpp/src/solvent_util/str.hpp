@@ -9,14 +9,14 @@
 //
 namespace solvent::util::str {
 
-	struct MyNumPunct : std::numpunct<char> {
+	struct MyNumPunct final : std::numpunct<char> {
 		std::string do_grouping(void) const {
 			return "\03";
 		}
 	};
 
 
-	struct SgrPair {
+	struct SgrPair final {
 		char const*const ON;
 		char const*const OFF;
 	};

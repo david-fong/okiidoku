@@ -6,8 +6,7 @@
 #include <algorithm> // sort, ranges::sort, ranges::greater
 #include <cmath>     // pow
 
-namespace solvent::lib::canon {
-
+namespace solvent::lib::equiv {
 
 	template<Order O>
 	vec_grid_t<O> canonicalize(vec_grid_t<O> const& input) {
@@ -92,7 +91,7 @@ namespace solvent::lib::canon {
 				}
 			}
 		}
-		struct SortMapEntry {
+		struct SortMapEntry final {
 			ord2_t orig; // The original label value
 			double sort_basis = 0; // Relabelling has no effect on this calculated value.
 		};
@@ -129,9 +128,13 @@ namespace solvent::lib::canon {
 		std::ranges::sort(canon2orig_label, std::ranges::greater(), &SortMapEntry::sort_basis);
 		// std::cout << "\n"; for (auto e : canon2orig_label) { std::cout << e.sort_basis << "  "; }
 
+		std::array<ord2_t, O2> label_map;
+		for (ord2_t i = 0; i < O2; i++) {
+			label_map[canon2orig_label[i].orig] = i;
+		}
 		for (auto& row : input_) {
 			for (auto& e : row) {
-				e = canon2orig_label[e].orig;
+				e = label_map[e];
 			}
 		}
 		// The below only done for debugging purposes.
@@ -156,7 +159,6 @@ namespace solvent::lib::canon {
 	}
 	template<Order O>
 	Canonicalizer<O>::LineSlide Canonicalizer<O>::LineSlide::build(const ord1_t orig_blkline, std::array<ord2_t, O*O> const& line) {
-		
 		std::array<AtomSlide, O> slide;
 		for (ord1_t i = 0; i < O; i++) { slide[i] = AtomSlide::build(line.cbegin() + (O*i)); }
 		std::sort(slide.begin(), slide.end()); // sort AtomSlides in line
@@ -214,22 +216,25 @@ namespace solvent::lib::canon {
 	template<Order O>
 	void Canonicalizer<O>::movement_() {
 		const GridSlide grid_slide = GridSlide::build(input_);
-		decltype(input_) transposed_input;
-		for (ord2_t i = 0; i < O2; i++) {
-			for (ord2_t j = 0; j < O2; j++) {
-				transposed_input[i][j] = input_[j][i];
+		const GridSlide transposed_grid_slide = [this](){
+			decltype(input_) transposed_input;
+			for (ord2_t i = 0; i < O2; i++) {
+				for (ord2_t j = 0; j < O2; j++) {
+					transposed_input[i][j] = input_[j][i];
+				}
 			}
-		}
-		const GridSlide transposed_grid_slide = GridSlide::build(transposed_input);
+			return GridSlide::build(transposed_input);
+		}();
 
 		decltype(input_) canon_input = {O2};
 		for (ord2_t canon_row = 0; canon_row < O2; canon_row++) {
+			auto const& r_chute = grid_slide[canon_row/O1];
+			const ord2_t orig_row = (O1*r_chute.orig_chute) + r_chute[canon_row%O1].orig_blkline;
 			for (ord2_t canon_col = 0; canon_col < O2; canon_col++) {
-				auto const& r_chute = grid_slide[canon_row/O1];
-				auto const& c_chute = grid_slide[canon_col/O1];
-				const ord2_t orig_row = (O1*r_chute.orig_chute) + r_chute[canon_row%O1].orig_blkline;
+				auto const& c_chute = transposed_grid_slide[canon_col/O1];
 				const ord2_t orig_col = (O1*c_chute.orig_chute) + c_chute[canon_col%O1].orig_blkline;
 				canon_input[canon_row][canon_col] = input_[orig_row][orig_col];
+				// canon_input[orig_row][orig_col] = input_[canon_row][canon_col];
 			}
 		}
 		if (transposed_grid_slide < grid_slide) {

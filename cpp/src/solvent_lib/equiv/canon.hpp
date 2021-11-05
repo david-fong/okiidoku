@@ -8,7 +8,7 @@
 #include <array>
 #include <compare>
 
-namespace solvent::lib::canon {
+namespace solvent::lib::equiv {
 
 	template<Order O>
 	using vec_grid_t = std::vector<typename size<O>::ord2_t>;
@@ -18,7 +18,7 @@ namespace solvent::lib::canon {
 	See readme for information about the algorithm.
 	*/
 	template<Order O>
-	vec_grid_t<O> canonicalize(vec_grid_t<O> const& input);
+	[[gnu::const]] vec_grid_t<O> canonicalize(vec_grid_t<O> const& input);
 
 	//
 	template<Order O>

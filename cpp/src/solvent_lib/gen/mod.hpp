@@ -15,7 +15,7 @@
 
 namespace solvent::lib::gen {
 
-	// must be manually seeded!
+	// must be manually seeded in the main function!
 	// Used for shuffling Generator.
 	// Shared between threads, guarded by mutex.
 	// Using thread_local instead does not cause any noticeable perf change.

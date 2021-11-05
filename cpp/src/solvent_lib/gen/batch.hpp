@@ -16,7 +16,7 @@ namespace solvent::lib::gen::batch {
 	using trials_t = unsigned long;
 
 	//
-	struct Params {
+	struct Params final {
 		gen::Params gen_params;
 		unsigned num_threads = 0; // Defaulted if zero.
 		unsigned max_dead_end_sample_granularity = 0; // Defaulted if zero.
@@ -28,7 +28,7 @@ namespace solvent::lib::gen::batch {
 	};
 
 	//
-	struct SharedData {
+	struct SharedData final {
 		trials_t total_anys = 0;
 		trials_t total_oks = 0;
 		double fraction_aborted;
@@ -36,7 +36,7 @@ namespace solvent::lib::gen::batch {
 		util::Timer timer;
 		util::Timer::Elapsed time_elapsed;
 
-		struct MaxDeadEndSample {
+		struct MaxDeadEndSample final {
 			unsigned long max_dead_ends;
 			trials_t marginal_oks;
 			double marginal_ops;
