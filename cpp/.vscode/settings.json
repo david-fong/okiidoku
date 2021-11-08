@@ -6,5 +6,8 @@
 	"C_Cpp.default.compilerArgs": [
 		"-Wall", "-Wextra", "-Wpedantic", "-Wimplicit-fallthrough=5",
 	],
-	"C_Cpp.default.includePath": ["${workspaceFolder}/src"],
+	"C_Cpp.default.includePath": [
+		"${workspaceFolder}/include",
+		"${workspaceFolder}/src"
+	],
 }

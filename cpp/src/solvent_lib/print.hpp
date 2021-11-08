@@ -2,14 +2,13 @@
 #define HPP_SOLVENT_LIB__PRINT
 
 #include <solvent_lib/size.hpp>
-#include <solvent_lib/gen/mod.hpp>
 
 #include <iosfwd>
 #include <vector>
 #include <functional>
 
 namespace solvent::lib::print {
-	//
+
 	using val_grid_t = std::function<uint8_t (uint32_t)>;
 	using print_grid_t = std::function<void (std::ostream&, uint32_t)>;
 

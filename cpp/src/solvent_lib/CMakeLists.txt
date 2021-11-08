@@ -8,5 +8,6 @@ add_library(solvent_lib STATIC
 	gen/batch.cpp
 	toolkit.cpp
 )
-target_include_directories(solvent_lib PRIVATE ../)
+target_include_directories(solvent_lib PRIVATE ..)
+target_include_directories(solvent_lib PUBLIC ../../include)
 target_link_libraries(solvent_lib PRIVATE solvent_util)

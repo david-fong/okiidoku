@@ -1,6 +1,7 @@
 #ifndef HPP_SOLVENT_LIB__EQUIV__SCRAMBLE
 #define HPP_SOLVENT_LIB__EQUIV__SCRAMBLE
 
+#include <solvent_lib/grid.hpp>
 #include <solvent_lib/size.hpp>
 
 #include <random>
@@ -16,14 +17,11 @@ namespace solvent::lib::equiv {
 	extern std::mt19937 ScramblerRng;
 
 	template<Order O>
-	using vec_grid_t = std::vector<typename size<O>::ord2_t>;
-
-	template<Order O>
-	vec_grid_t<O> scramble(vec_grid_t<O> const& input);
+	grid_vec_t<O> scramble(grid_vec_t<O> const& input);
 
 
 	#define SOLVENT_TEMPL_TEMPL(O_) \
-		extern template vec_grid_t<O_> scramble<O_>(vec_grid_t<O_> const&); \
+		extern template grid_vec_t<O_> scramble<O_>(grid_vec_t<O_> const&); \
 	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 	#undef SOLVENT_TEMPL_TEMPL
 }

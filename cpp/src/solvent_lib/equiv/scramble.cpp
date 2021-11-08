@@ -7,7 +7,7 @@ namespace solvent::lib::equiv {
 	std::mt19937 ScramblerRng;
 
 	template<Order O>
-	vec_grid_t<O> scramble(vec_grid_t<O> const& input_vec) {
+	grid_vec_t<O> scramble(grid_vec_t<O> const& input_vec) {
 		using ord1_t = typename size<O>::ord1_t;
 		using ord2_t = typename size<O>::ord2_t;
 		using ord4_t = typename size<O>::ord4_t;
@@ -40,7 +40,7 @@ namespace solvent::lib::equiv {
 		}
 		transpose = ScramblerRng() % 2;
 		
-		vec_grid_t<O> output_vec(O4);
+		grid_vec_t<O> output_vec(O4);
 		for (ord2_t row = 0; row < O2; row++) {
 			for (ord2_t col = 0; col < O2; col++) {
 				ord2_t mapped_row = row_map[row/O1][row%O1];

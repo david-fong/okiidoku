@@ -66,7 +66,7 @@ namespace solvent::lib::gen {
 
 	//
 	template<Order O>
-	class Generator final : public AbstractGrid<O> {
+	class Generator final {
 	 private:
 		using has_mask_t = typename size<O>::has_mask_t;
 		using ord1_t = typename size<O>::ord1_t;
@@ -86,7 +86,7 @@ namespace solvent::lib::gen {
 		static constexpr ord1_t O1 = O;
 		static constexpr ord2_t O2 = O*O;
 		static constexpr ord4_t O4 = O*O*O*O;
-		[[gnu::pure]] ord2_t operator[](ord4_t coord) const override;
+		[[gnu::pure]] ord2_t operator[](ord4_t coord) const;
 
 		// Generates a fresh sudoku solution.
 		GenResult operator()(Params);

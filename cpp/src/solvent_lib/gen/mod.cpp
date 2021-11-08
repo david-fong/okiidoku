@@ -112,7 +112,7 @@ namespace solvent::lib::gen {
 				}
 				++progress_;
 				if ((progress_ > frontier_progress_)
-					|| !this->cells_share_house(prog2coord(progress_), prog2coord(frontier_progress_))
+					|| !cells_share_house<O>(prog2coord(progress_), prog2coord(frontier_progress_))
 				) [[unlikely]] {
 					frontier_progress_ = progress_;
 				}
@@ -124,9 +124,9 @@ namespace solvent::lib::gen {
 	template<Order O>
 	Direction Generator<O>::set_next_valid_(typename path::coord_converter_t<O> prog2coord, const bool do_clear_masks) noexcept {
 		const ord4_t coord = prog2coord(progress_);
-		has_mask_t& row_has = rows_has_[this->get_row(coord)];
-		has_mask_t& col_has = cols_has_[this->get_col(coord)];
-		has_mask_t& blk_has = blks_has_[this->get_blk(coord)];
+		has_mask_t& row_has = rows_has_[rmi2row<O>(coord)];
+		has_mask_t& col_has = cols_has_[rmi2col<O>(coord)];
+		has_mask_t& blk_has = blks_has_[rmi2blk<O>(coord)];
 		auto& val_try_order = val_try_orders_[coord / O2];
 
 		Cell& cell = cells_[coord];
@@ -140,7 +140,7 @@ namespace solvent::lib::gen {
 
 		// Smart backtracking:
 		// This optimization's degree of usefulness depends on the genpath and size.
-		if ((progress_ < frontier_progress_) && !this->cells_share_house(
+		if ((progress_ < frontier_progress_) && !cells_share_house<O>(
 			coord, prog2coord(frontier_progress_)
 		)) [[unlikely]] {
 			cell.clear();
@@ -222,7 +222,7 @@ namespace solvent::lib::gen {
 				os << ' '; print::val2str(os, O, operator[](coord));
 			}),
 			print::print_grid_t([this](std::ostream& os, uint16_t coord) {
-				const auto shade = shaded_dead_end_stat(params_.max_dead_ends, dead_ends_[coord]);
+				const auto shade = shaded_dead_end_stat(params_.max_dead_ends, dead_ends_[coord]); // TODO.fix should be by progress. but thinking of removing this printer entirely in favour of one on GenResult
 				os << shade << shade;
 			}),
 		};
