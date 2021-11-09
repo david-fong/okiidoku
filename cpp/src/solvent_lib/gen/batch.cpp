@@ -2,8 +2,10 @@
 #include <solvent_util/str.hpp>
 
 #include <thread>
+#include <mutex>
 #include <iostream>
 #include <iomanip>
+#include <string>
 #include <algorithm>
 #include <limits>
 
@@ -22,10 +24,33 @@ namespace solvent::lib::gen::batch {
 			num_threads = DEFAULT_NUM_THREADS(O);
 		}
 		if (max_dead_end_sample_granularity == 0) {
-			max_dead_end_sample_granularity = SharedData::SAMPLE_GRANULARITY_DEFAULT;
+			max_dead_end_sample_granularity = BatchReport::SAMPLE_GRANULARITY_DEFAULT;
 		}
 		return *this;
 	}
+
+
+	//
+	template<Order O>
+	class ThreadFunc final {
+	 static_assert(O > 0);
+	 public:
+		void operator()();
+
+		trials_t get_progress(void) const noexcept {
+			if (params_.only_count_oks) {
+				return shared_data_.total_oks;
+			} else {
+				return shared_data_.total_anys;
+			}
+		}
+
+		const Params params_;
+		BatchReport& shared_data_;
+		std::mutex& shared_data_mutex_;
+		callback_t gen_result_consumer_;
+		Generator<O> generator_ = Generator<O>();
+	};
 
 
 	template<Order O>
@@ -58,7 +83,7 @@ namespace solvent::lib::gen::batch {
 	BatchReport batch(const Order O, Params& params, callback_t gen_result_consumer) {
 		params.clean(O);
 		std::mutex shared_data_mutex;
-		SharedData shared_data;
+		BatchReport shared_data;
 		shared_data.max_dead_end_samples.resize(params.max_dead_end_sample_granularity);
 
 		std::vector<std::thread> threads;
@@ -108,7 +133,7 @@ namespace solvent::lib::gen::batch {
 	}
 
 
-	void SharedData::print(std::ostream& os, const Order O) const {
+	void BatchReport::print(std::ostream& os, const Order O) const {
 		static const std::string THROUGHPUT_BAR_STRING("-------------------------");
 		static const std::string TABLE_SEPARATOR =
 		"\n├─────────────┼────────────┼───────────────┼───────────────┤";
@@ -177,17 +202,11 @@ namespace solvent::lib::gen::batch {
 			if (&sample != &best_sample) os << util::str::DIM.OFF;
 		}
 		os << TABLE_SEPARATOR;
-		if (total_oks < max_dead_end_samples.size() * gen::batch::SharedData::RECOMMENDED_OKS_PER_SAMPLE) {
+		if (total_oks < max_dead_end_samples.size() * gen::batch::BatchReport::RECOMMENDED_OKS_PER_SAMPLE) {
 			os << "\nexercise caution against small datasets!" << std::endl;
 		}
 		os.flags(prev_fmtflags);
 	}
-
-
-	#define SOLVENT_TEMPL_TEMPL(O_) \
-		template class ThreadFunc<O_>;
-	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
-	#undef SOLVENT_TEMPL_TEMPL
 }
 namespace std {
 	template class function<void(solvent::lib::gen::GenResult const&)>;

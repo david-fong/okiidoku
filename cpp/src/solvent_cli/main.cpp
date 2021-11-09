@@ -46,11 +46,10 @@ int main(const int argc, char const *const argv[]) {
 	<< "\n- ARG 2 [[ srand key  ]] : " << srand_key
 	<< std::endl;
 
-	// Scramble the random number generator:
-	solvent::lib::gen::Rng.seed(srand_key);
-	solvent::lib::equiv::ScramblerRng.seed(srand_key);
+	// Scramble the random number generators:
+	solvent::lib::gen::seed_rng(srand_key);
+	solvent::lib::equiv::seed_scrambler_rng(srand_key);
 
-	// Create a Solver of the specified order:
 	solvent::cli::Repl repl { user_order };
 	repl.start();
 

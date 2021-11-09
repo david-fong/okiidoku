@@ -4,17 +4,12 @@
 #include <solvent_lib/grid.hpp>
 #include <solvent_lib/size.hpp>
 
-#include <random>
-#include <vector>
-#include <array>
-#include <numeric>   // iota,
-
 namespace solvent::lib::equiv {
 
 	// must be manually seeded in the main function!
 	// Used for scrambling.
 	// NOTE: if parallel access is later required, add a mutex to guard.
-	extern std::mt19937 ScramblerRng;
+	extern void seed_scrambler_rng(std::uint_fast32_t) noexcept;
 
 	template<Order O>
 	grid_vec_t<O> scramble(grid_vec_t<O> const& input);

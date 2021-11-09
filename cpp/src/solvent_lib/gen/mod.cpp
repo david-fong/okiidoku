@@ -4,15 +4,19 @@
 #include <solvent_util/str.hpp>
 
 #include <iostream>
+#include <string>
 #include <mutex>
 #include <algorithm>   // shuffle,
-
+#include <random>
 
 namespace solvent::lib::gen {
 
-	std::mt19937 Rng;
+	std::mt19937 Rng_;
+	extern void seed_rng(std::uint_fast32_t seed) noexcept {
+		Rng_.seed(seed);
+	}
 
-	// Guards accesses to Rng. Only used when shuffling generator biases.
+	// Guards accesses to Rng_. Only used when shuffling generator biases.
 	std::mutex RNG_MUTEX;
 
 
@@ -71,7 +75,7 @@ namespace solvent::lib::gen {
 
 		RNG_MUTEX.lock();
 		for (auto& vto : val_try_orders_) {
-			std::shuffle(vto.begin(), vto.end(), Rng);
+			std::shuffle(vto.begin(), vto.end(), Rng_);
 		}
 		RNG_MUTEX.unlock();
 	}

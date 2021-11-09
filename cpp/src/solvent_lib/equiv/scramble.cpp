@@ -1,10 +1,15 @@
 #include <solvent_lib/equiv/scramble.hpp>
 
+#include <array>
 #include <algorithm>   // shuffle,
+#include <random>
 
 namespace solvent::lib::equiv {
 
-	std::mt19937 ScramblerRng;
+	std::mt19937 ScramblerRng_;
+	extern void seed_scrambler_rng(const std::uint_fast32_t seed) noexcept {
+		ScramblerRng_.seed(seed);
+	}
 
 	template<Order O>
 	grid_vec_t<O> scramble(grid_vec_t<O> const& input_vec) {
@@ -31,14 +36,14 @@ namespace solvent::lib::equiv {
 			row_map[i/O1][i%O1] = i;
 			col_map[i/O1][i%O1] = i;
 		}
-		std::ranges::shuffle(label_map, ScramblerRng);
-		std::ranges::shuffle(row_map, ScramblerRng);
-		std::ranges::shuffle(col_map, ScramblerRng);
+		std::ranges::shuffle(label_map, ScramblerRng_);
+		std::ranges::shuffle(row_map, ScramblerRng_);
+		std::ranges::shuffle(col_map, ScramblerRng_);
 		for (ord1_t chute = 0; chute < O1; chute++) {
-			std::ranges::shuffle(row_map[chute], ScramblerRng);
-			std::ranges::shuffle(col_map[chute], ScramblerRng);
+			std::ranges::shuffle(row_map[chute], ScramblerRng_);
+			std::ranges::shuffle(col_map[chute], ScramblerRng_);
 		}
-		transpose = ScramblerRng() % 2;
+		transpose = ScramblerRng_() % 2;
 		
 		grid_vec_t<O> output_vec(O4);
 		for (ord2_t row = 0; row < O2; row++) {

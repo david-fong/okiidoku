@@ -3,8 +3,6 @@
 
 ## Higher Priority
 
-1. try: rather than putting the RNGs in the header files, put functions that seed them in the header files, and put the RNG and function implementation in the cpp files.
-
 1. write a scrambler.
 1. write some correctness-tests for canonicalization and scrambling.
     - already found a case where canonicalization seems to be failing (maybe it's a tie-breaking problem?): 709ce82564d31fbaeb4560f7a891d3c2d6284a31fc5b90e7a13fcdb92e0746589f80ae42516dc73b5ac6031db97f284ebde27f864a3c51093417b59c028efa6d47a38ceb95f20d16f2be96043d1875ac0cd9215a76b43e8f8561f7d3e0cab924185d327ecba964f0690bd4af8325ec71c3741b68dfe0a2952efa59c017468bd3 and 708ce92564d31fbaeb4560f7a981d3c2d6294a31fc5b80e7a13fcdb82e0746598f90ae42516dc73b5ac6031db87f294ebde27f964a3c51083417b58c029efa6d47a39ceb85f20d169561f7d3e0cab8240cd8215a76b43e9ff2be86043d1975ac195d327ecba864f0680bd4af9325ec71c3741b69dfe0a2852efa58c017469bd3

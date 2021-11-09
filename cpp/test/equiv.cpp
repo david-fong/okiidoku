@@ -47,8 +47,8 @@ int main(const int argc, char const *const argv[]) {
 	<< std::endl;
 
 	// Scramble the random number generator:
-	solvent::lib::gen::Rng.seed(srand_key);
-	solvent::lib::equiv::ScramblerRng.seed(srand_key);
+	solvent::lib::gen::seed_rng(srand_key);
+	solvent::lib::equiv::seed_scrambler_rng(srand_key);
 
 	using namespace solvent::lib;
 	unsigned int round = 0;

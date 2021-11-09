@@ -8,10 +8,6 @@
 #include <solvent_lib/size.hpp>
 
 #include <iosfwd>
-#include <array>
-#include <string>
-#include <optional>
-
 
 namespace solvent::lib {
 

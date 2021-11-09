@@ -6,7 +6,6 @@
 
 #include <vector>
 #include <array>
-#include <compare>
 
 namespace solvent::lib::equiv {
 

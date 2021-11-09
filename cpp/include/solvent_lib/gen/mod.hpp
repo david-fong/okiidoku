@@ -6,12 +6,9 @@
 #include <solvent_lib/size.hpp>
 
 #include <iosfwd>
-#include <random>
 #include <vector>
 #include <array>
-#include <string>
 #include <numeric>   // iota,
-
 
 namespace solvent::lib::gen {
 
@@ -19,7 +16,7 @@ namespace solvent::lib::gen {
 	// Used for shuffling Generator.
 	// Shared between threads, guarded by mutex.
 	// Using thread_local instead does not cause any noticeable perf change.
-	extern std::mt19937 Rng;
+	extern void seed_rng(std::uint_fast32_t) noexcept;
 
 	//
 	struct Params {
@@ -142,9 +139,6 @@ namespace solvent::lib::gen {
 
 		[[gnu::pure, nodiscard]] GenResult make_gen_result_(void) const;
 	};
-
-
-	[[gnu::const]] std::string shaded_dead_end_stat(long out_of, long count);
 
 
 	#define SOLVENT_TEMPL_TEMPL(O_) \

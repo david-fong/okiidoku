@@ -2,7 +2,7 @@
 #define HPP_SOLVENT_CLI__CONFIG
 
 #include <solvent_cli/enum.hpp>
-#include <solvent_lib/gen/batch.hpp>
+// #include <solvent_lib/gen/batch.hpp>
 #include <solvent_lib/gen/mod.hpp>
 #include <solvent_lib/size.hpp>
 

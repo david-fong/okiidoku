@@ -6,8 +6,6 @@
 
 #include <iosfwd>
 #include <vector>
-#include <string>
-#include <mutex>
 #include <functional>
 #include <optional>
 
@@ -28,7 +26,7 @@ namespace solvent::lib::gen::batch {
 	};
 
 	//
-	struct SharedData final {
+	struct BatchReport final {
 		trials_t total_anys = 0;
 		trials_t total_oks = 0;
 		double fraction_aborted;
@@ -55,9 +53,6 @@ namespace solvent::lib::gen::batch {
 		void print(std::ostream&, Order O) const;
 	};
 
-	//
-	using callback_t = std::function<void(GenResult const&)>;
-
 	constexpr unsigned TRY_DEFAULT_NUM_EXTRA_THREADS_(const Order O) {
 		if (O < 4) { return 0; }
 		else if (O == 4) { return 1; }
@@ -66,42 +61,13 @@ namespace solvent::lib::gen::batch {
 	unsigned DEFAULT_NUM_THREADS(Order O);
 
 	//
-	template<Order O>
-	class ThreadFunc final {
-	 static_assert(O > 0);
-	 public:
-		void operator()();
-
-		trials_t get_progress(void) const noexcept {
-			if (params_.only_count_oks) {
-				return shared_data_.total_oks;
-			} else {
-				return shared_data_.total_anys;
-			}
-		}
-
-		const Params params_;
-		SharedData& shared_data_;
-		std::mutex& shared_data_mutex_;
-		callback_t gen_result_consumer_;
-		Generator<O> generator_ = Generator<O>();
-	};
-
-
-	//
-	using BatchReport = SharedData;
+	using callback_t = std::function<void (GenResult const&)>;
 
 	//
 	BatchReport batch(Order, Params&, callback_t);
-
-
-	#define SOLVENT_TEMPL_TEMPL(O_) \
-		extern template class ThreadFunc<O_>;
-	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
-	#undef SOLVENT_TEMPL_TEMPL
 }
 
 namespace std {
-	extern template class function<void(solvent::lib::gen::GenResult const&)>;
+	extern template class function<void (solvent::lib::gen::GenResult const&)>;
 }
 #endif

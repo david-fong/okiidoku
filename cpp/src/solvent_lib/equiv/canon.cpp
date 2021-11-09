@@ -5,6 +5,7 @@
 #include <iostream>
 #include <algorithm> // sort, ranges::sort, ranges::greater
 #include <cmath>     // pow
+#include <compare>
 
 namespace solvent::lib::equiv {
 
@@ -274,6 +275,8 @@ namespace solvent::lib::equiv {
 	}
 
 
+	// TODO test the tie-breaking strength of this implementation.
+	// if it fails, look into using the same-atom-relationship table
 	template<Order O>
 	void Canonicalizer<O>::movement_() {
 		const GridSlide grid_slide = GridSlide::build(input_);
