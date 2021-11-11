@@ -58,16 +58,6 @@ namespace solvent::lib {
 	}
 
 
-	void Toolkit::gen_print_pretty(std::ostream& os) const {
-		switch (O) {
-		#define SOLVENT_TEMPL_TEMPL(O_) \
-			case O_: gen_.o ## O_.print_pretty(os); break;
-		SOLVENT_INSTANTIATE_ORDER_TEMPLATES
-		#undef SOLVENT_TEMPL_TEMPL
-		}
-	}
-
-
 	/* void Toolkit::gen_batch(gen::batch::Params params) {
 		gen::batch::batch(O, params, [](gen::GenResult gen_result){
 			gen_result.print_pretty(std::cout);

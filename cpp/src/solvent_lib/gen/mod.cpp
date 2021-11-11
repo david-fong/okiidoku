@@ -15,7 +15,6 @@ namespace solvent::lib::gen {
 	extern void seed_rng(std::uint_fast32_t seed) noexcept {
 		Rng_.seed(seed);
 	}
-
 	// Guards accesses to Rng_. Only used when shuffling generator biases.
 	std::mutex RNG_MUTEX;
 
@@ -25,13 +24,6 @@ namespace solvent::lib::gen {
 			max_dead_ends = DEFAULT_MAX_DEAD_ENDS(O);
 		}
 		return *this;
-	}
-
-
-	template<Order O>
-	typename size<O>::ord2_t Generator<O>::operator[](const ord4_t coord) const {
-		const auto try_index = cells_[coord].try_index;
-		return (try_index == O2) ? O2 : val_try_orders_[coord / O2][try_index];
 	}
 
 
@@ -108,6 +100,8 @@ namespace solvent::lib::gen {
 					}
 				} else {
 					--progress_;
+					// note: the placement of these decrement instructions is
+					// comparatively performant.
 				}
 			} else {
 				if (progress_ == O4-1) [[unlikely]] {
@@ -131,9 +125,9 @@ namespace solvent::lib::gen {
 		has_mask_t& row_has = rows_has_[rmi2row<O>(coord)];
 		has_mask_t& col_has = cols_has_[rmi2col<O>(coord)];
 		has_mask_t& blk_has = blks_has_[rmi2blk<O>(coord)];
-		auto& val_try_order = val_try_orders_[coord / O2];
+		auto& val_try_order = val_try_orders_[progress_ / O2];
 
-		Cell& cell = cells_[coord];
+		Cell& cell = cells_[progress_];
 		if (do_clear_masks) [[unlikely]]/* average direction is forward */ {
 			// Clear the current value from all masks:
 			const has_mask_t erase_mask = ~( has_mask_t(0b1u) << val_try_order[cell.try_index] );
@@ -177,15 +171,21 @@ namespace solvent::lib::gen {
 		typename path::coord_converter_t<O> prog2coord = path::GetPathCoords<O>(params_.path_kind);
 		GenResult gen_result = {
 			.O {O},
+			.params {params_},
 			.status {prev_gen_status_},
 			.frontier_progress {frontier_progress_},
 			.most_dead_ends_seen {most_dead_ends_seen_},
 			.op_count {op_count_},
-			.grid = std::vector(O4, O2),
+			.grid = std::vector<std::uint_fast8_t>(O4, O2),
+			.dead_ends = std::vector<std::uint_least64_t>(O4),
 		};
 		for (ord4_t p = 0; p <= progress_; p++) {
+			// note: The bound under progress_ is significant.
+			// It allows the optimization of not cleaning up some
+			// guesses when backtracking.
 			const ord4_t coord = prog2coord(p);
-			gen_result.grid[coord] = val_try_orders_[coord / O2][cells_[coord].try_index];
+			gen_result.grid[coord] = val_try_orders_[p/O2][cells_[p].try_index];
+			gen_result.dead_ends[coord] = dead_ends_[p];
 		}
 		if (params_.canonicalize && gen_result.status == ExitStatus::Ok) /* [[unlikely]] (worth?) */ {
 			gen_result.grid = equiv::canonicalize<O>(gen_result.grid);
@@ -214,19 +214,8 @@ namespace solvent::lib::gen {
 			print::print_grid_t([this](std::ostream& os, uint16_t coord) {
 				os << ' '; print::val2str(os, O, this->grid[coord]);
 			}),
-		};
-		print::pretty(os, O, grid_accessors);
-	}
-
-
-	template<Order O>
-	void Generator<O>::print_pretty(std::ostream& os) const {
-		const std::vector<print::print_grid_t> grid_accessors = {
 			print::print_grid_t([this](std::ostream& os, uint16_t coord) {
-				os << ' '; print::val2str(os, O, operator[](coord));
-			}),
-			print::print_grid_t([this](std::ostream& os, uint16_t coord) {
-				const auto shade = shaded_dead_end_stat(params_.max_dead_ends, dead_ends_[coord]); // TODO.fix should be by progress. but thinking of removing this printer entirely in favour of one on GenResult
+				const auto shade = shaded_dead_end_stat(params.max_dead_ends, dead_ends[coord]);
 				os << shade << shade;
 			}),
 		};

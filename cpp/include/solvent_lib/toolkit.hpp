@@ -18,7 +18,6 @@ namespace solvent::lib {
 
 		gen::GenResult gen(gen::Params);
 		gen::GenResult gen_continue_prev();
-		void gen_print_pretty(std::ostream&) const;
 
 		// Note: commented out since currently not in use (and not very useful either).
 		// void gen_batch(gen::batch::Params);

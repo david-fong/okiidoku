@@ -102,7 +102,7 @@ namespace solvent::cli {
 			});
 		const double processor_time = (static_cast<double>(std::clock() - clock_start)) / CLOCKS_PER_SEC;
 
-		toolkit.gen_print_pretty(std::cout);
+		gen_result.print_pretty(std::cout);
 		std::cout << "\nprocessor time: " << processor_time << " seconds";
 		std::cout << "\nnum operations: " << gen_result.op_count;
 		std::cout << "\nmax dead ends:  " << gen_result.most_dead_ends_seen;

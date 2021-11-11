@@ -40,11 +40,13 @@ namespace solvent::lib::gen {
 	//
 	struct GenResult final {
 		Order O;
+		Params params;
 		ExitStatus status;
 		unsigned long frontier_progress;
 		unsigned long long most_dead_ends_seen;
 		opcount_t op_count;
-		std::vector<std::uint_fast8_t> grid = {}; // NOTE: assumes O1 < 16
+		std::vector<std::uint_fast8_t> grid; // NOTE: assumes O1 < 16
+		std::vector<std::uint_fast64_t> dead_ends;
 
 		void print_serial(std::ostream&) const;
 		void print_pretty(std::ostream&) const;
@@ -64,6 +66,7 @@ namespace solvent::lib::gen {
 	//
 	template<Order O>
 	class Generator final {
+	 static_assert(O > 0 && O < MAX_REASONABLE_ORDER);
 	 private:
 		using has_mask_t = typename size<O>::has_mask_t;
 		using ord1_t = typename size<O>::ord1_t;
@@ -83,13 +86,10 @@ namespace solvent::lib::gen {
 		static constexpr ord1_t O1 = O;
 		static constexpr ord2_t O2 = O*O;
 		static constexpr ord4_t O4 = O*O*O*O;
-		[[gnu::pure]] ord2_t operator[](ord4_t coord) const;
 
 		// Generates a fresh sudoku solution.
 		GenResult operator()(Params);
 		GenResult continue_prev(void);
-
-		void print_pretty(std::ostream&) const;
 
 		Params const& get_params() const { return params_; }
 		[[gnu::pure]] std::array<dead_ends_t, O4> const& get_dead_ends() const { return dead_ends_; }
@@ -107,7 +107,7 @@ namespace solvent::lib::gen {
 			}
 		};
 
-		// indexed by `coord // O2`
+		// indexed by `progress // O2`
 		// Note: a possibly more performant option would be `progress_ // O2`,
 		// which the current simple setup doesn't accommodate for `operator[]`.
 		std::array<std::array<ord2_t, O2>, O2> val_try_orders_ = []() {
@@ -118,7 +118,7 @@ namespace solvent::lib::gen {
 			return val_try_orders;
 		}();
 
-		std::array<Cell, O4> cells_; // indexed by coord
+		std::array<Cell, O4> cells_; // indexed by progress
 		std::array<has_mask_t, O2> rows_has_;
 		std::array<has_mask_t, O2> cols_has_;
 		std::array<has_mask_t, O2> blks_has_;

@@ -11,7 +11,8 @@ namespace solvent::lib::equiv {
 
 	//
 	template<Order O>
-	class Canonicalizer final /* : public AbstractGrid<O> */ {
+	class Canonicalizer final {
+	 static_assert(O > 0 && O < MAX_REASONABLE_ORDER);
 	 private:
 		using ord1_t = typename size<O>::ord1_t;
 		using ord2_t = typename size<O>::ord2_t;
