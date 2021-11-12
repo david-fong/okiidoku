@@ -14,11 +14,11 @@ namespace solvent::lib::equiv {
 	See readme for information about the algorithm.
 	*/
 	template<Order O>
-	[[gnu::const]] grid_vec_t<O> canonicalize(grid_vec_t<O> const& input);
+	[[gnu::const]] grid_vec_t<O> canonicalize(const grid_vec_t<O>& input);
 
 
 	#define SOLVENT_TEMPL_TEMPL(O_) \
-		extern template grid_vec_t<O_> canonicalize<O_>(grid_vec_t<O_> const&); \
+		extern template grid_vec_t<O_> canonicalize<O_>(const grid_vec_t<O_>&); \
 	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 	#undef SOLVENT_TEMPL_TEMPL
 }

@@ -91,8 +91,8 @@ namespace solvent::lib::gen {
 		GenResult operator()(Params);
 		GenResult continue_prev(void);
 
-		Params const& get_params() const { return params_; }
-		[[gnu::pure]] std::array<dead_ends_t, O4> const& get_dead_ends() const { return dead_ends_; }
+		const Params& get_params() const { return params_; }
+		[[gnu::pure]] const std::array<dead_ends_t, O4>& get_dead_ends() const { return dead_ends_; }
 
 	 private:
 		//

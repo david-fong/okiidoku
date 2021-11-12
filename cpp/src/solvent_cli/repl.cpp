@@ -47,7 +47,7 @@ namespace solvent::cli {
 	}
 
 
-	bool Repl::run_command(std::string const& cmd_line) {
+	bool Repl::run_command(const std::string& cmd_line) {
 		size_t token_pos;
 		// Very simple parsing: Assumes no leading spaces, and does not
 		// trim leading or trailing spaces from the arguments substring.
@@ -128,7 +128,7 @@ namespace solvent::cli {
 			.stop_after = stop_after
 		};
 		const gen::batch::BatchReport batch_report = gen::batch::batch(config_.order(), params,
-			[this](gen::GenResult const& gen_result) {
+			[this](const gen::GenResult& gen_result) {
 				if ((config_.verbosity() == verbosity::Kind::All)
 				 || ((config_.verbosity() == verbosity::Kind::NoGiveups) && (gen_result.status == gen::ExitStatus::Ok))
 				) {
@@ -175,7 +175,7 @@ namespace solvent::cli {
 
 
 	void Repl::gen_multiple(
-		std::string const& stop_after_str,
+		const std::string& stop_after_str,
 		const bool only_count_oks
 	) {
 		unsigned long stop_by_value;
@@ -187,7 +187,7 @@ namespace solvent::cli {
 					<< str::RED.OFF << std::endl;
 				return;
 			}
-		} catch (std::invalid_argument const& ia) {
+		} catch (const std::invalid_argument& ia) {
 			std::cout << str::RED.ON
 				<< "could not convert \"" << stop_after_str << "\" to an integer."
 				<< str::RED.OFF << std::endl;

@@ -9,7 +9,6 @@
 1. get some benchmarks and maybe show emerentius.
 
 - some diagnostics to try rendering:
-  - A print_simple method to the AbstractGrid class?
   - A scatter chart showing max-dead-ends vs. num operations
   - a bar graph where each bar counts the number of GenResults that had a frontier_progress within the range for that bar's "bin". (to see "how far" aborted generations usually get). This sounds flawed, since frontier-progress changes frequently during a generation.
   - comparing the average heatmaps of aborted vs successful generations.

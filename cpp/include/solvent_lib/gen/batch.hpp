@@ -61,13 +61,13 @@ namespace solvent::lib::gen::batch {
 	unsigned DEFAULT_NUM_THREADS(Order O);
 
 	//
-	using callback_t = std::function<void (GenResult const&)>;
+	using callback_t = std::function<void (const GenResult&)>;
 
 	//
 	BatchReport batch(Order, Params&, callback_t);
 }
 
 namespace std {
-	extern template class function<void (solvent::lib::gen::GenResult const&)>;
+	extern template class function<void (const solvent::lib::gen::GenResult&)>;
 }
 #endif

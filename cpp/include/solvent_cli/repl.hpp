@@ -83,7 +83,7 @@ namespace solvent::cli {
 
 		Repl(Order O);
 		void start(void);
-		bool run_command(std::string const& cmd_line);
+		bool run_command(const std::string& cmd_line);
 
 	 private:
 		Config config_;
@@ -93,7 +93,7 @@ namespace solvent::cli {
 		void gen_single(bool contPrev = false);
 
 		void gen_multiple(trials_t stop_after, bool only_count_oks);
-		void gen_multiple(std::string const&,  bool only_count_oks);
+		void gen_multiple(const std::string&,  bool only_count_oks);
 	};
 }
 #endif

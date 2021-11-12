@@ -12,7 +12,7 @@ namespace solvent::lib::equiv {
 	}
 
 	template<Order O>
-	grid_vec_t<O> scramble(grid_vec_t<O> const& input_vec) {
+	grid_vec_t<O> scramble(const grid_vec_t<O>& input_vec) {
 		using ord1_t = typename size<O>::ord1_t;
 		using ord2_t = typename size<O>::ord2_t;
 		using ord4_t = typename size<O>::ord4_t;
@@ -58,7 +58,7 @@ namespace solvent::lib::equiv {
 	}
 
 	#define SOLVENT_TEMPL_TEMPL(O_) \
-		template vec_grid_t<O_> scramble<O_>(vec_grid_t<O_> const&); \
+		template vec_grid_t<O_> scramble<O_>(const vec_grid_t<O_>&); \
 	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 	#undef SOLVENT_TEMPL_TEMPL
 }

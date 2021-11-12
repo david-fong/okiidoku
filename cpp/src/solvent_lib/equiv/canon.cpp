@@ -25,32 +25,32 @@ namespace solvent::lib::equiv {
 		struct AtomSlide final {
 			std::array<ord5_t, O> slide_;
 			static AtomSlide build(input_it_t atom_it);
-			[[gnu::pure]] ord5_t operator[](ord1_t i) const { return slide_[i]; }
-			[[gnu::pure]] std::strong_ordering operator<=>(AtomSlide const& that) const;
-			AtomSlide& operator+=(AtomSlide const& other) { for (ord1_t i = 0; i < O; i++) { slide_[i] += other.slide_[i]; } return *this; }
+			[[gnu::pure]] const ord5_t operator[](ord1_t i) const { return slide_[i]; }
+			[[gnu::pure]] std::strong_ordering operator<=>(const AtomSlide& that) const;
+			AtomSlide& operator+=(const AtomSlide& other) { for (ord1_t i = 0; i < O; i++) { slide_[i] += other.slide_[i]; } return *this; }
 		};
 		struct LineSlide final {
 			ord1_t orig_blkline;
 			std::array<AtomSlide, O> slide_;
-			static LineSlide build(ord1_t orig_blkline, std::array<ord2_t, O*O> const& line_it);
-			[[gnu::pure]] AtomSlide const& operator[](ord1_t i) const { return slide_[i]; }
-			[[gnu::pure]] std::strong_ordering operator<=>(LineSlide const& that) const;
-			LineSlide& operator+=(LineSlide const& other) { for (ord1_t i = 0; i < O; i++) { slide_[i] += other.slide_[i]; } return *this; }
+			static LineSlide build(ord1_t orig_blkline, const std::array<ord2_t, O*O>& line_it);
+			[[gnu::pure]] const AtomSlide& operator[](ord1_t i) const { return slide_[i]; }
+			[[gnu::pure]] std::strong_ordering operator<=>(const LineSlide& that) const;
+			LineSlide& operator+=(const LineSlide& other) { for (ord1_t i = 0; i < O; i++) { slide_[i] += other.slide_[i]; } return *this; }
 
 		};
 		struct ChuteSlide final {
 			ord1_t orig_chute;
 			std::array<LineSlide, O> slide_;
-			static ChuteSlide build(ord1_t orig_chute, grid_arr_t const& chute_it);
-			[[gnu::const]] LineSlide const& operator[](ord1_t i) const { return slide_[i]; }
-			[[gnu::const]] std::strong_ordering operator<=>(ChuteSlide const& that) const;
-			ChuteSlide& operator+=(ChuteSlide const& other) { for (ord1_t i = 0; i < O; i++) { slide_[i] += other.slide_[i]; } return *this; }
+			static ChuteSlide build(ord1_t orig_chute, const grid_arr_t& chute_it);
+			[[gnu::const]] const LineSlide& operator[](ord1_t i) const { return slide_[i]; }
+			[[gnu::const]] std::strong_ordering operator<=>(const ChuteSlide& that) const;
+			ChuteSlide& operator+=(const ChuteSlide& other) { for (ord1_t i = 0; i < O; i++) { slide_[i] += other.slide_[i]; } return *this; }
 		};
 		struct GridSlide final {
 			std::array<ChuteSlide, O> slide_;
-			static GridSlide build(grid_arr_t const& grid_it);
-			[[gnu::const]] ChuteSlide const& operator[](ord1_t i) const { return slide_[i]; }
-			[[gnu::const]] std::strong_ordering operator<=>(GridSlide const& that) const;
+			static GridSlide build(const grid_arr_t& grid_it);
+			[[gnu::const]] const ChuteSlide& operator[](ord1_t i) const { return slide_[i]; }
+			[[gnu::const]] std::strong_ordering operator<=>(const GridSlide& that) const;
 		};
 
 	 public:
@@ -60,7 +60,7 @@ namespace solvent::lib::equiv {
 		static constexpr ord4_t O4 = O*O*O*O;
 		// [[gnu::pure]] ord2_t operator[](ord4_t coord) const override;
 
-		Canonicalizer(std::vector<ord2_t> const&);
+		Canonicalizer(const std::vector<ord2_t>&);
 
 		std::vector<ord2_t> operator()(void);
 
@@ -72,7 +72,7 @@ namespace solvent::lib::equiv {
 
 
 	template<Order O>
-	grid_vec_t<O> canonicalize(grid_vec_t<O> const& input) {
+	grid_vec_t<O> canonicalize(const grid_vec_t<O>& input) {
 		// TODO assert that input is the correct length and is a complete, valid sudoku?
 		Canonicalizer<O> canon(input);
 		return canon();
@@ -80,7 +80,7 @@ namespace solvent::lib::equiv {
 
 
 	template<Order O>
-	Canonicalizer<O>::Canonicalizer(grid_vec_t<O> const& input) {
+	Canonicalizer<O>::Canonicalizer(const grid_vec_t<O>& input) {
 		for (ord2_t row = 0; row < O2; row++) {
 			for (ord2_t col = 0; col < O2; col++) {
 				input_[row][col] = input[(O2*row)+col];
@@ -221,7 +221,7 @@ namespace solvent::lib::equiv {
 		return AtomSlide { .slide_ = slide };
 	}
 	template<Order O>
-	Canonicalizer<O>::LineSlide Canonicalizer<O>::LineSlide::build(const ord1_t orig_blkline, std::array<ord2_t, O*O> const& line) {
+	Canonicalizer<O>::LineSlide Canonicalizer<O>::LineSlide::build(const ord1_t orig_blkline, const std::array<ord2_t, O*O>& line) {
 		std::array<AtomSlide, O> slide;
 		for (ord1_t i = 0; i < O; i++) { slide[i] = AtomSlide::build(line.cbegin() + (O*i)); }
 		std::sort(slide.begin(), slide.end()); // sort AtomSlides in line
@@ -229,7 +229,7 @@ namespace solvent::lib::equiv {
 		return LineSlide { .orig_blkline = orig_blkline, .slide_ = slide };
 	}
 	template<Order O>
-	Canonicalizer<O>::ChuteSlide Canonicalizer<O>::ChuteSlide::build(const ord1_t orig_chute, grid_arr_t const& grid) {
+	Canonicalizer<O>::ChuteSlide Canonicalizer<O>::ChuteSlide::build(const ord1_t orig_chute, const grid_arr_t& grid) {
 		std::array<LineSlide, O> slide;
 		for (ord1_t i = 0; i < O; i++) { slide[i] = LineSlide::build(i, grid[(O*orig_chute)+i]); }
 		std::sort(slide.begin(), slide.end()); // sort LineSlides in chute
@@ -237,7 +237,7 @@ namespace solvent::lib::equiv {
 		return ChuteSlide { .orig_chute = orig_chute, .slide_ = slide };
 	}
 	template<Order O>
-	Canonicalizer<O>::GridSlide Canonicalizer<O>::GridSlide::build(grid_arr_t const& grid) {
+	Canonicalizer<O>::GridSlide Canonicalizer<O>::GridSlide::build(const grid_arr_t& grid) {
 		std::array<ChuteSlide, O> slide;
 		for (ord1_t i = 0; i < O; i++) { slide[i] = ChuteSlide::build(i, grid); }
 		std::sort(slide.begin(), slide.end()); // sort ChuteSlides in grid
@@ -247,28 +247,28 @@ namespace solvent::lib::equiv {
 
 
 	template<Order O>
-	std::strong_ordering Canonicalizer<O>::AtomSlide::operator<=>(AtomSlide const& that) const {
+	std::strong_ordering Canonicalizer<O>::AtomSlide::operator<=>(const AtomSlide& that) const {
 		ord1_t i = O; do { i--;
 			if (auto const cmp = slide_[i] <=> that.slide_[i]; cmp != 0) [[likely]] { return cmp; }
 		} while (i != 0);
 		return std::strong_ordering::equal;
 	}
 	template<Order O>
-	std::strong_ordering Canonicalizer<O>::LineSlide::operator<=>(LineSlide const& that) const {
+	std::strong_ordering Canonicalizer<O>::LineSlide::operator<=>(const LineSlide& that) const {
 		ord1_t i = O; do { i--;
 			if (auto const cmp = slide_[i] <=> that.slide_[i]; cmp != 0) [[likely]] { return cmp; }
 		} while (i != 0);
 		return std::strong_ordering::equal;
 	}
 	template<Order O>
-	std::strong_ordering Canonicalizer<O>::ChuteSlide::operator<=>(ChuteSlide const& that) const {
+	std::strong_ordering Canonicalizer<O>::ChuteSlide::operator<=>(const ChuteSlide& that) const {
 		ord1_t i = O; do { i--;
 			if (auto const cmp = slide_[i] <=> that.slide_[i]; cmp != 0) [[likely]] { return cmp; }
 		} while (i != 0);
 		return std::strong_ordering::equal;
 	}
 	template<Order O>
-	std::strong_ordering Canonicalizer<O>::GridSlide::operator<=>(GridSlide const& that) const {
+	std::strong_ordering Canonicalizer<O>::GridSlide::operator<=>(const GridSlide& that) const {
 		ord1_t i = O; do { i--;
 			if (auto const cmp = slide_[i] <=> that.slide_[i]; cmp != 0) [[likely]] { return cmp; }
 		} while (i != 0);
@@ -293,10 +293,10 @@ namespace solvent::lib::equiv {
 
 		decltype(input_) canon_input = {O2};
 		for (ord2_t canon_row = 0; canon_row < O2; canon_row++) {
-			auto const& r_chute = grid_slide[canon_row/O1];
+			const auto& r_chute = grid_slide[canon_row/O1];
 			const ord2_t orig_row = (O1*r_chute.orig_chute) + r_chute[canon_row%O1].orig_blkline;
 			for (ord2_t canon_col = 0; canon_col < O2; canon_col++) {
-				auto const& c_chute = transposed_grid_slide[canon_col/O1];
+				const auto& c_chute = transposed_grid_slide[canon_col/O1];
 				const ord2_t orig_col = (O1*c_chute.orig_chute) + c_chute[canon_col%O1].orig_blkline;
 				canon_input[canon_row][canon_col] = input_[orig_row][orig_col];
 				// canon_input[orig_row][orig_col] = input_[canon_row][canon_col];
@@ -315,7 +315,7 @@ namespace solvent::lib::equiv {
 
 
 	#define SOLVENT_TEMPL_TEMPL(O_) \
-		template grid_vec_t<O_> canonicalize<O_>(grid_vec_t<O_> const&); \
+		template grid_vec_t<O_> canonicalize<O_>(const grid_vec_t<O_>&); \
 		template class Canonicalizer<O_>;
 	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 	#undef SOLVENT_TEMPL_TEMPL

@@ -4,7 +4,7 @@
 namespace solvent::util::str {
 
 	void print_msg_bar(
-		std::string const& msg,
+		const std::string& msg,
 		unsigned bar_length,
 		const std::string fill_char
 	) {
@@ -22,7 +22,7 @@ namespace solvent::util::str {
 	}
 
 
-	void print_msg_bar(std::string const& msg, const std::string fill_char) {
+	void print_msg_bar(const std::string& msg, const std::string fill_char) {
 		return print_msg_bar(msg, 64, fill_char);
 	}
 }

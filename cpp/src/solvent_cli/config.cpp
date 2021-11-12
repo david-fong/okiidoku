@@ -17,7 +17,7 @@ namespace solvent::cli {
 		verbosity_ = verbosity;
 	}
 
-	void Config::verbosity(std::string const& new_verbosity_str) {
+	void Config::verbosity(const std::string& new_verbosity_str) {
 		std::cout << "is ";
 		if (new_verbosity_str.empty()) {
 			std::cout << "is " << verbosity() << std::endl;
@@ -39,7 +39,7 @@ namespace solvent::cli {
 		order_ = new_order;
 	}
 
-	void Config::order(std::string const& new_order_str) {
+	void Config::order(const std::string& new_order_str) {
 		if (new_order_str.empty()) {
 			std::cout << "is: " << order() << std::endl;
 			return;
@@ -52,7 +52,7 @@ namespace solvent::cli {
 			SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 			#undef SOLVENT_TEMPL_TEMPL
 			}
-		} catch (std::invalid_argument const& ia) {
+		} catch (const std::invalid_argument& ia) {
 		}
 		std::cout
 			<< str::RED.ON << '"' << new_order_str << "\" is not a valid order.\n" << str::RED.OFF
@@ -69,7 +69,7 @@ namespace solvent::cli {
 		path_kind_ = new_path_kind;
 	}
 
-	void Config::path_kind(std::string const& new_path_kind_str) noexcept {
+	void Config::path_kind(const std::string& new_path_kind_str) noexcept {
 		if (new_path_kind_str.empty()) {
 			std::cout << "is: " << path_kind() << std::endl;
 			return;
@@ -91,7 +91,7 @@ namespace solvent::cli {
 		max_dead_ends_ = max_dead_ends;
 	}
 
-	void Config::max_dead_ends(std::string const& new_max_dead_ends_str) {
+	void Config::max_dead_ends(const std::string& new_max_dead_ends_str) {
 		if (new_max_dead_ends_str.empty()) {
 			std::cout << "is: " << max_dead_ends()
 				<< "\nsetting to zero will default to " << gen::DEFAULT_MAX_DEAD_ENDS(order_)
@@ -101,7 +101,7 @@ namespace solvent::cli {
 		try {
 			max_dead_ends(std::stoull(new_max_dead_ends_str));
 			// TODO.impl handle negative numbers being parsed as uints
-		} catch (std::invalid_argument const& ia) {
+		} catch (const std::invalid_argument& ia) {
 			std::cout << max_dead_ends() << " (unchanged).\n"
 				<< str::RED.ON << '"' << new_max_dead_ends_str << "\" is not a valid uint64_t.\n" << str::RED.OFF
 				<< verbosity::OPTIONS_MENU << std::endl;
@@ -114,7 +114,7 @@ namespace solvent::cli {
 		canonicalize_ = canonicalize;
 	}
 
-	void Config::canonicalize(std::string const& new_canonicalize_str) {
+	void Config::canonicalize(const std::string& new_canonicalize_str) {
 		if (new_canonicalize_str.empty()) {
 			std::cout << "is: " << (canonicalize() ? "y" : "n") << std::endl;
 			return;

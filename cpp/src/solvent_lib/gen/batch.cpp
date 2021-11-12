@@ -32,9 +32,8 @@ namespace solvent::lib::gen::batch {
 
 	//
 	template<Order O>
-	class ThreadFunc final {
+	struct ThreadFunc final {
 	 static_assert(O > 0);
-	 public:
 		void operator()();
 
 		trials_t get_progress(void) const noexcept {
@@ -209,5 +208,5 @@ namespace solvent::lib::gen::batch {
 	}
 }
 namespace std {
-	template class function<void(solvent::lib::gen::GenResult const&)>;
+	template class function<void(const solvent::lib::gen::GenResult&)>;
 }

@@ -11,12 +11,12 @@ namespace solvent::lib {
 	template<Order O> using grid_vec_t = std::vector<typename size<O>::ord2_t>;
 	template<Order O> using grid_mtx_t = std::array<std::array<typename size<O>::ord2_t, O*O>, O*O>;
 
-	template<Order O> grid_vec_t<O> grid_mtx2vec(grid_mtx_t<O> const&) noexcept;
-	template<Order O> grid_mtx_t<O> grid_mtx2vec(grid_vec_t<O> const&) noexcept;
+	template<Order O> grid_vec_t<O> grid_mtx2vec(const grid_mtx_t<O>&) noexcept;
+	template<Order O> grid_mtx_t<O> grid_mtx2vec(const grid_vec_t<O>&) noexcept;
 
 	// Returns true if any cell in the same house contain the same value.
 	// Can be used for incomplete grids.
-	template<Order O> [[gnu::const]] bool is_grid_invalid(grid_mtx_t<O> const&) noexcept;
+	template<Order O> [[gnu::const]] bool is_grid_invalid(const grid_mtx_t<O>&) noexcept;
 
 	template<Order O> [[gnu::const]] constexpr typename size<O>::ord2_t rmi2row(const typename size<O>::ord4_t index) noexcept { return index / (O*O); }
 	template<Order O> [[gnu::const]] constexpr typename size<O>::ord2_t rmi2col(const typename size<O>::ord4_t index) noexcept { return index % (O*O); }

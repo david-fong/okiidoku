@@ -14,6 +14,6 @@ namespace solvent::lib::print {
 
 	[[gnu::hot]] void val2str(std::ostream&, Order order, uint8_t value);
 	void serial(std::ostream&, Order, val_grid_t grid_view);
-	void pretty(std::ostream&, Order, std::vector<print_grid_t> const& grid_views);
+	void pretty(std::ostream&, Order, const std::vector<print_grid_t>& grid_views);
 }
 #endif

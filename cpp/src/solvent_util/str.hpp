@@ -51,7 +51,7 @@ namespace solvent::util::str {
 	};
 
 
-	void print_msg_bar(std::string const& msg, unsigned bar_length, std::string fill_char = "═");
-	void print_msg_bar(std::string const& msg, std::string fill_char = "═");
+	void print_msg_bar(const std::string& msg, unsigned bar_length, std::string fill_char = "═");
+	void print_msg_bar(const std::string& msg, std::string fill_char = "═");
 }
 #endif

@@ -12,11 +12,11 @@ namespace solvent::lib::equiv {
 	extern void seed_scrambler_rng(std::uint_fast32_t) noexcept;
 
 	template<Order O>
-	grid_vec_t<O> scramble(grid_vec_t<O> const& input);
+	grid_vec_t<O> scramble(const grid_vec_t<O>& input);
 
 
 	#define SOLVENT_TEMPL_TEMPL(O_) \
-		extern template grid_vec_t<O_> scramble<O_>(grid_vec_t<O_> const&); \
+		extern template grid_vec_t<O_> scramble<O_>(const grid_vec_t<O_>&); \
 	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 	#undef SOLVENT_TEMPL_TEMPL
 }

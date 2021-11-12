@@ -18,23 +18,23 @@ namespace solvent::cli {
 
 		[[gnu::pure]] verbosity::Kind verbosity(void) const noexcept { return verbosity_; };
 		void verbosity(verbosity::Kind);
-		void verbosity(std::string const&);
+		void verbosity(const std::string&);
 
 		[[gnu::pure]] Order order(void) const noexcept { return order_; }
 		void order(Order) noexcept;
-		void order(std::string const&);
+		void order(const std::string&);
 
 		[[gnu::pure]] pathkind_t path_kind(void) const noexcept { return path_kind_; }
 		void path_kind(pathkind_t) noexcept;
-		void path_kind(std::string const&) noexcept;
+		void path_kind(const std::string&) noexcept;
 
 		[[gnu::pure]] unsigned long long max_dead_ends(void) const noexcept { return max_dead_ends_; };
 		void max_dead_ends(unsigned long long);
-		void max_dead_ends(std::string const&);
+		void max_dead_ends(const std::string&);
 
 		[[gnu::pure]] bool canonicalize(void) const noexcept { return canonicalize_; };
 		void canonicalize(bool);
-		void canonicalize(std::string const&);
+		void canonicalize(const std::string&);
 
 	 private:
 		Order order_;
