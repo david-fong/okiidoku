@@ -5,9 +5,9 @@
 
 namespace solvent::lib {
 
-	Toolkit::Toolkit(Order O):
-		gen_([O]() -> generator_union_t {
-			switch (O) {
+	Toolkit::Toolkit(Order order):
+		gen_([order]() -> generator_union_t {
+			switch (order) {
 			 #define SOLVENT_TEMPL_TEMPL(O_) \
 				case O_: return generator_union_t { .o ## O_ = gen::Generator<O_>() };
 			 SOLVENT_INSTANTIATE_ORDER_TEMPLATES
@@ -19,13 +19,13 @@ namespace solvent::lib {
 			}
 		}())
 	{
-		set_order(O);
+		set_order(order);
 	}
 
 
-	void Toolkit::set_order(const Order O) {
-		this->O = O;
-		switch (O) {
+	void Toolkit::set_order(const Order new_order) {
+		this->order_ = new_order;
+		switch (new_order) {
 		#define SOLVENT_TEMPL_TEMPL(O_) \
 			case O_: { \
 				gen_.o ## O_ = gen::Generator<O_>(); break; \
@@ -37,7 +37,7 @@ namespace solvent::lib {
 
 
 	gen::GenResult Toolkit::gen(gen::Params params) {
-		switch (O) {
+		switch (order_) {
 		#define SOLVENT_TEMPL_TEMPL(O_) \
 			case O_: return gen_.o ## O_(params);
 		SOLVENT_INSTANTIATE_ORDER_TEMPLATES
@@ -48,7 +48,7 @@ namespace solvent::lib {
 
 
 	gen::GenResult Toolkit::gen_continue_prev() {
-		switch (O) {
+		switch (order_) {
 		#define SOLVENT_TEMPL_TEMPL(O_) \
 			case O_: return gen_.o ## O_.continue_prev();
 		SOLVENT_INSTANTIATE_ORDER_TEMPLATES
@@ -59,14 +59,14 @@ namespace solvent::lib {
 
 
 	/* void Toolkit::gen_batch(gen::batch::Params params) {
-		gen::batch::batch(O, params, [](gen::GenResult gen_result){
+		gen::batch::batch(order_, params, [](gen::GenResult gen_result){
 			gen_result.print_pretty(std::cout);
 		});
 	} */
 
 
 	/* void Toolkit::canonicalize(std::vector<std::uint_fast8_t> params) const {
-		switch (O) {
+		switch (order_) {
 		#define SOLVENT_TEMPL_TEMPL(O_) \
 			case O_: equiv::canonicalize<O_>(params); break;
 		SOLVENT_INSTANTIATE_ORDER_TEMPLATES

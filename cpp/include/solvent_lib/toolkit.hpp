@@ -26,7 +26,7 @@ namespace solvent::lib {
 		// void canonicalize(std::vector<std::uint_fast8_t>) const;
 
 	 private:
-		Order O;
+		Order order_;
 
 		union generator_union_t {
 		#define SOLVENT_TEMPL_TEMPL(O_) \

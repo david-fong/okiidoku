@@ -19,12 +19,7 @@ namespace solvent::lib::equiv {
 		static constexpr ord1_t O1 = O;
 		static constexpr ord2_t O2 = O*O;
 		static constexpr ord4_t O4 = O*O*O*O;
-		std::array<std::array<ord2_t, O2>, O2> input;
-		for (ord2_t row = 0; row < O2; row++) {
-			for (ord2_t col = 0; col < O2; col++) {
-				input[row][col] = input_vec[(O2*row)+col];
-			}
-		}
+		grid_mtx_t<O> input = grid_vec2mtx(input_vec);
 
 		std::array<ord2_t, O2> label_map;
 		std::array<std::array<ord2_t, O1>, O1> row_map;

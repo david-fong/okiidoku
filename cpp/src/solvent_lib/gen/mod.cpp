@@ -74,13 +74,13 @@ namespace solvent::lib::gen {
 
 
 	template<Order O>
-	void Generator<O>::generate_(void) {
+	void Generator<O>::generate_() {
 		typename path::coord_converter_t<O> prog2coord = path::GetPathCoords<O>(params_.path_kind);
 
-		bool do_clear_masks = true;
+		bool backtracked = prev_gen_status_ == ExitStatus::Abort;
 		while (true) {
-			const Direction direction = this->set_next_valid_(prog2coord, do_clear_masks);
-			do_clear_masks = direction.is_back;
+			const Direction direction = this->set_next_valid_(prog2coord, backtracked);
+			backtracked = direction.is_back;
 			if (!direction.is_skip) [[likely]] { ++op_count_; }
 
 			if (direction.is_back) [[unlikely]] {
@@ -120,7 +120,7 @@ namespace solvent::lib::gen {
 
 
 	template<Order O>
-	Direction Generator<O>::set_next_valid_(typename path::coord_converter_t<O> prog2coord, const bool do_clear_masks) noexcept {
+	Direction Generator<O>::set_next_valid_(typename path::coord_converter_t<O> prog2coord, const bool backtracked) noexcept {
 		const ord4_t coord = prog2coord(progress_);
 		has_mask_t& row_has = rows_has_[rmi2row<O>(coord)];
 		has_mask_t& col_has = cols_has_[rmi2col<O>(coord)];
@@ -128,7 +128,7 @@ namespace solvent::lib::gen {
 		auto& val_try_order = val_try_orders_[progress_ / O2];
 
 		Cell& cell = cells_[progress_];
-		if (do_clear_masks) [[unlikely]]/* average direction is forward */ {
+		if (backtracked) [[unlikely]]/* average direction is forward */ {
 			// Clear the current value from all masks:
 			const has_mask_t erase_mask = ~( has_mask_t(0b1u) << val_try_order[cell.try_index] );
 			row_has &= erase_mask;
@@ -187,6 +187,13 @@ namespace solvent::lib::gen {
 			gen_result.grid[coord] = val_try_orders_[p/O2][cells_[p].try_index];
 			gen_result.dead_ends[coord] = dead_ends_[p];
 		}
+		if (gen_result.status == ExitStatus::Abort) [[likely]] {
+			// progress was decremented to maintain the continuability invariant.
+			// this is the most important dead_end cell!
+			const ord4_t p = progress_+1;
+			const ord4_t coord = prog2coord(p);
+			gen_result.dead_ends[coord] = dead_ends_[p];
+		}
 		if (params_.canonicalize && gen_result.status == ExitStatus::Ok) /* [[unlikely]] (worth?) */ {
 			gen_result.grid = equiv::canonicalize<O>(gen_result.grid);
 		}
@@ -211,12 +218,12 @@ namespace solvent::lib::gen {
 
 	void GenResult::print_pretty(std::ostream& os) const {
 		const std::vector<print::print_grid_t> grid_accessors = {
-			print::print_grid_t([this](std::ostream& os, uint16_t coord) {
-				os << ' '; print::val2str(os, O, this->grid[coord]);
+			print::print_grid_t([this](std::ostream& _os, uint16_t coord) {
+				_os << ' '; print::val2str(_os, O, this->grid[coord]);
 			}),
-			print::print_grid_t([this](std::ostream& os, uint16_t coord) {
+			print::print_grid_t([this](std::ostream& _os, uint16_t coord) {
 				const auto shade = shaded_dead_end_stat(params.max_dead_ends, dead_ends[coord]);
-				os << shade << shade;
+				_os << shade << shade;
 			}),
 		};
 		print::pretty(os, O, grid_accessors);

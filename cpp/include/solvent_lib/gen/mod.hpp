@@ -34,7 +34,7 @@ namespace solvent::lib::gen {
 
 	//
 	enum class ExitStatus : unsigned char {
-		Exhausted, Abort, Ok,
+		Ok, Abort, Exhausted,
 	};
 
 	//
@@ -129,13 +129,13 @@ namespace solvent::lib::gen {
 		ord4_t frontier_progress_ = 0;
 		dead_ends_t most_dead_ends_seen_ = 0;
 		opcount_t op_count_ = 0;
-		ExitStatus prev_gen_status_ = ExitStatus::Abort;
+		ExitStatus prev_gen_status_ = ExitStatus::Ok;
 
 		// clear fields and scramble val_try_orders_
 		void prepare_fresh_gen_(void);
 
-		[[gnu::hot]] Direction set_next_valid_(typename path::coord_converter_t<O>, bool do_clear_masks) noexcept;
-		[[gnu::hot]] void generate_(void);
+		[[gnu::hot]] Direction set_next_valid_(typename path::coord_converter_t<O>, bool backtracked) noexcept;
+		[[gnu::hot]] void generate_();
 
 		[[gnu::pure, nodiscard]] GenResult make_gen_result_(void) const;
 	};

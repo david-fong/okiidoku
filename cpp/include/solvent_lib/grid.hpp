@@ -12,7 +12,7 @@ namespace solvent::lib {
 	template<Order O> using grid_mtx_t = std::array<std::array<typename size<O>::ord2_t, O*O>, O*O>;
 
 	template<Order O> grid_vec_t<O> grid_mtx2vec(const grid_mtx_t<O>&) noexcept;
-	template<Order O> grid_mtx_t<O> grid_mtx2vec(const grid_vec_t<O>&) noexcept;
+	template<Order O> grid_mtx_t<O> grid_vec2mtx(const grid_vec_t<O>&) noexcept;
 
 	// Returns true if any cell in the same house contain the same value.
 	// Can be used for incomplete grids.
