@@ -4,6 +4,8 @@
 
 #include <iostream>
 #include <algorithm> // sort, ranges::sort, ranges::greater
+#include <numeric>   // transform_reduce
+#include <execution> // parallel_unsequenced_policy
 #include <cmath>     // pow
 #include <compare>
 
@@ -60,12 +62,12 @@ namespace solvent::lib::equiv {
 		static constexpr ord4_t O4 = O*O*O*O;
 		// [[gnu::pure]] ord2_t operator[](ord4_t coord) const override;
 
-		Canonicalizer(const std::vector<ord2_t>&);
+		Canonicalizer(const grid_vec_t<O>&);
 
-		std::vector<ord2_t> operator()(void);
+		grid_vec_t<O> operator()(void);
 
 	 private:
-		std::array<std::array<ord2_t, O2>, O2> input_;
+		grid_mtx_t<O> input_;
 		void relabel_(void) noexcept;
 		void movement_(void);
 	};
@@ -81,11 +83,7 @@ namespace solvent::lib::equiv {
 
 	template<Order O>
 	Canonicalizer<O>::Canonicalizer(const grid_vec_t<O>& input) {
-		for (ord2_t row = 0; row < O2; row++) {
-			for (ord2_t col = 0; col < O2; col++) {
-				input_[row][col] = input[(O2*row)+col];
-			}
-		}
+		input_ = lib::grid_vec2mtx<O>(input);
 	}
 
 
@@ -101,13 +99,8 @@ namespace solvent::lib::equiv {
 		// };
 		// print::pretty(std::cout, O, grid_accessors);
 
-		std::vector<ord2_t> ans(O4);
-		for (ord2_t row = 0; row < O2; row++) {
-			for (ord2_t col = 0; col < O2; col++) {
-				ans[(O2*row)+col] = input_[row][col];
-			}
-		}
-		return ans;
+		grid_vec_t<O> ret = grid_mtx2vec<O>(input_);
+		return ret;
 	}
 
 
@@ -162,36 +155,40 @@ namespace solvent::lib::equiv {
 		// The reduction calculation's result must not depend on the ordering
 		// of the counts entries. It should encapsulate a label's degree of
 		// preference to being in an atom with some labels more than others.
-		// The specific reduction below is the sample standard deviation.
+		// The specific reduction below is the standard deviation.
 		for (ord2_t label = 0; label < O2; label++) {
-			canon2orig_label[label] = SortMapEntry { .orig = label, .sort_basis = 0 };
-			for (ord2_t neighbour_i = 0; neighbour_i < O2; neighbour_i++) {
-				if (neighbour_i != label) [[likely]] {
-					ord2_t count = counts[label][neighbour_i];
-
-					static constexpr std::array<long, O2+1> O2_choose_r = [](){
-						std::array<long, O2+1> arr;
-						for (int i = 0; i < 1 + O2/2; i++) {
-							arr[O2-i] = arr[i] = n_choose_r(O2, i);
-						}
-						return arr;
-					}();
-					double p_binomial = static_cast<double>(
-						O2_choose_r[count] * std::pow(2, count) * std::pow(O1-1, O2-count)
-					) / std::pow(O1+1, O2);
-
+			static constexpr std::array<double, O2+1> std_dev = [](){
+				std::array<double, O2+1> arr;
+				for (unsigned count = 0; count < O2+1; count++) {
 					static constexpr double expected = static_cast<double>(2*O2)/(O1+1);
-					canon2orig_label[label].sort_basis += p_binomial * std::pow(
+					const double p_binomial = static_cast<double>(
+						n_choose_r(O2, count) * std::pow(2, count) * std::pow(O1-1, O2-count)
+					) / std::pow(O1+1, O2);
+					arr[count] = p_binomial * std::pow(
 						static_cast<double>(count) - expected,
 					2);
 				}
-			}
+				return arr;
+			}();
+			const double sort_basis = std::transform_reduce(
+				std::execution::par_unseq,
+				counts[label].cbegin(), counts[label].cend(),
+				0.0, std::plus<double>(), [](const ord2_t count) {
+					return std_dev[count];
+				}
+			);
+			canon2orig_label[label] = SortMapEntry {
+				.orig {label},
+				.sort_basis {sort_basis},
+			};
+			// Note: skipped taking the square root of .sort_basis (the standard
+			// deviation), since doing it does not change the outcome of sorting.
 		}
 		// Make the lower-valued labels "play favourites":
 		std::ranges::sort(canon2orig_label, std::ranges::greater(), &SortMapEntry::sort_basis);
 		// std::cout << "\n"; for (auto e : canon2orig_label) { std::cout << e.sort_basis << "  "; }
 
-		std::array<ord2_t, O2> label_map;
+		std::array<ord2_t, O2> label_map = {0};
 		for (ord2_t i = 0; i < O2; i++) {
 			label_map[canon2orig_label[i].orig] = i;
 		}

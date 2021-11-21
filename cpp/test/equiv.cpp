@@ -1,6 +1,6 @@
 #include <solvent_lib/gen/mod.hpp>
-#include <solvent_lib/equiv/scramble.hpp>
 #include <solvent_lib/equiv/canon.hpp>
+#include <solvent_lib/equiv/scramble.hpp>
 #include <solvent_util/str.hpp>
 
 #if WINDOWS_ANSI
@@ -56,15 +56,16 @@ int main(const int argc, char const *const argv[]) {
 		auto gen = gen::Generator<4>();
 		const auto result = gen(gen::Params {.canonicalize = true});
 		if (result.status != gen::ExitStatus::Ok) { continue; }
-		result.print_serial(std::cout);
 		std::cout << std::endl;
 		auto other_result = result;
-		other_result.grid = equiv::canonicalize<4>(equiv::scramble<4>(result.grid));
-		other_result.print_serial(std::cout);
-		std::cout << std::endl;
-		std::cout << std::endl;
-		if (result.grid == other_result.grid) {
+		auto const scrambled = equiv::scramble<4>(result.grid);
+		other_result.grid = equiv::canonicalize<4>(scrambled);
+		if (result.grid != other_result.grid) {
 			// TODO
+			result.print_serial(std::cout);
+			other_result.print_serial(std::cout);
+			std::cout << std::endl;
+			std::cout << std::endl;
 		}
 		round++;
 	}

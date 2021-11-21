@@ -3,10 +3,17 @@
 
 ## Higher Priority
 
+1. Figure out why when adding the test executable, the linker cannot find the scramble function.
+
 1. make the grid conversion utilities make use of std::span instead of std::vector?
 
 1. Consider: The current relabelling canonicalization method may have a big weakness: I think ties can be easily crafted: consider the "Most Canonical" solution grid- it would be all ties. How can this be addressed? (Or perhaps the "Most Canonical" grid is the only weakness?)
-    - Break ties by designing a way to give symbols that frequently cohabit atoms label value that are closer together in value.
+    - First of all, how often to ties happen with the current relabelling solution, and what do the grids where this happens look like? Ie. 
+    - Break ties by designing a way to give symbols that frequently cohabit atoms label-values that are closer together in value:
+    - In the cohabitation table, the table tiles, and a coordinate's vertical or horizontal distance (since relabelling moves both the col and row together, these are the same) from the closest tiling of the main diagonal represents the distance of the labels from each other.
+    - For each label, make an array where each index represents another label, and the value is an object containing the left and right distances between them, and the cohabitation count.
+    - Hm. So far this seems to suggest a hill-climbing / brute-force-type solution...
+    - What if we prioritized labels according to the existing standard deviation information
 
 1. write a scrambler.
 1. write some correctness-tests for canonicalization and scrambling.

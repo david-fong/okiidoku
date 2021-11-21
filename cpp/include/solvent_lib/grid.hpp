@@ -31,10 +31,17 @@ namespace solvent::lib {
 			||  (rmi2blk<O>(c1) == rmi2blk<O>(c2));
 	}
 	// Note: the compiler optimizes the division/modulus pairs just fine.
+
+	#define SOLVENT_TEMPL_TEMPL(O_) \
+		extern template grid_vec_t<O_> grid_mtx2vec<O_>(const grid_mtx_t<O_>&) noexcept; \
+		extern template grid_mtx_t<O_> grid_vec2mtx<O_>(const grid_vec_t<O_>&) noexcept; \
+		extern template [[gnu::const]] bool is_grid_invalid<O_>(const grid_mtx_t<O_>&) noexcept;
+	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
+	#undef SOLVENT_TEMPL_TEMPL
 }
 
 
-extern template class std::vector<std::uint_least8_t>;
+extern template class std::vector<std::uint_fast8_t>;
 #define SOLVENT_TEMPL_TEMPL(O_) \
 	extern template class std::array<std::array<typename solvent::size<O_>::ord2_t, O_*O_>, O_*O_>;
 SOLVENT_INSTANTIATE_ORDER_TEMPLATES

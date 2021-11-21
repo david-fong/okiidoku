@@ -12,7 +12,7 @@
 namespace solvent::lib::gen {
 
 	std::mt19937 Rng_;
-	extern void seed_rng(std::uint_fast32_t seed) noexcept {
+	void seed_rng(std::uint_fast32_t seed) noexcept {
 		Rng_.seed(seed);
 	}
 	// Guards accesses to Rng_. Only used when shuffling generator biases.
@@ -177,7 +177,7 @@ namespace solvent::lib::gen {
 			.most_dead_ends_seen {most_dead_ends_seen_},
 			.op_count {op_count_},
 			.grid = std::vector<std::uint_fast8_t>(O4, O2),
-			.dead_ends = std::vector<std::uint_least64_t>(O4),
+			.dead_ends = std::vector<std::uint_fast64_t>(O4),
 		};
 		for (ord4_t p = 0; p <= progress_; p++) {
 			// note: The bound under progress_ is significant.

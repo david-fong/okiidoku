@@ -7,7 +7,7 @@
 namespace solvent::lib::equiv {
 
 	std::mt19937 ScramblerRng_;
-	extern void seed_scrambler_rng(const std::uint_fast32_t seed) noexcept {
+	void seed_scrambler_rng(const std::uint_fast32_t seed) noexcept {
 		ScramblerRng_.seed(seed);
 	}
 

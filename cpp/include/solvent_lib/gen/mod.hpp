@@ -80,7 +80,7 @@ namespace solvent::lib::gen {
 			// std::conditional_t<(O <= 3), std::uint_fast8_t,
 			std::conditional_t<(O <= 4), std::uint_fast16_t,
 			std::conditional_t<(O <= 5), std::uint_fast32_t,
-			std::uint64_t
+			std::uint_fast64_t
 		>>;
 
 		static constexpr ord1_t O1 = O;

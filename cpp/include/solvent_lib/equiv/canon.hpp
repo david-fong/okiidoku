@@ -4,7 +4,6 @@
 #include <solvent_lib/grid.hpp>
 #include <solvent_lib/size.hpp>
 
-#include <vector>
 #include <array>
 
 namespace solvent::lib::equiv {
