@@ -56,16 +56,15 @@ int main(const int argc, char const *const argv[]) {
 		auto gen = gen::Generator<4>();
 		const auto result = gen(gen::Params {.canonicalize = true});
 		if (result.status != gen::ExitStatus::Ok) { continue; }
-		std::cout << std::endl;
-		auto other_result = result;
-		auto const scrambled = equiv::scramble<4>(result.grid);
-		other_result.grid = equiv::canonicalize<4>(scrambled);
+		auto other_result = result; {
+			auto const scrambled = equiv::scramble<4>(result.grid);
+			other_result.grid = equiv::canonicalize<4>(scrambled);
+		}
 		if (result.grid != other_result.grid) {
 			// TODO
 			result.print_serial(std::cout);
 			other_result.print_serial(std::cout);
-			std::cout << std::endl;
-			std::cout << std::endl;
+			std::cout << "\n\n" << std::flush;
 		}
 		round++;
 	}

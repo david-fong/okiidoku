@@ -5,8 +5,8 @@
 #include <solvent_util/timer.hpp>
 
 #include <iosfwd>
-#include <vector>
 #include <functional>
+#include <vector>
 #include <optional>
 
 namespace solvent::lib::gen::batch {

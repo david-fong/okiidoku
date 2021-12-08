@@ -16,7 +16,7 @@ namespace solvent::lib::equiv {
 
 
 	#define SOLVENT_TEMPL_TEMPL(O_) \
-		extern template grid_vec_t<O_> scramble<O_>(const grid_vec_t<O_>&); \
+		extern template grid_vec_t<O_> scramble<O_>(const grid_vec_t<O_>&);
 	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 	#undef SOLVENT_TEMPL_TEMPL
 }

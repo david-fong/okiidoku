@@ -3,6 +3,7 @@
 #include <solvent_util/math.hpp>
 
 #include <iostream>
+#include <array>
 #include <algorithm> // sort, ranges::sort, ranges::greater
 #include <numeric>   // transform_reduce
 #include <execution> // parallel_unsequenced_policy
@@ -164,9 +165,7 @@ namespace solvent::lib::equiv {
 					const double p_binomial = static_cast<double>(
 						n_choose_r(O2, count) * std::pow(2, count) * std::pow(O1-1, O2-count)
 					) / std::pow(O1+1, O2);
-					arr[count] = p_binomial * std::pow(
-						static_cast<double>(count) - expected,
-					2);
+					arr[count] = p_binomial * std::pow(static_cast<double>(count) - expected, 2);
 				}
 				return arr;
 			}();

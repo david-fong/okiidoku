@@ -7,7 +7,7 @@
 		"-Wall", "-Wextra", "-Wpedantic", "-Wimplicit-fallthrough=5",
 	],
 	"C_Cpp.default.includePath": [
+		"${workspaceFolder}/src",
 		"${workspaceFolder}/include",
-		"${workspaceFolder}/src"
 	],
 }

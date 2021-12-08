@@ -4,8 +4,6 @@
 #include <solvent_lib/grid.hpp>
 #include <solvent_lib/size.hpp>
 
-#include <array>
-
 namespace solvent::lib::equiv {
 
 	/**
@@ -17,7 +15,7 @@ namespace solvent::lib::equiv {
 
 
 	#define SOLVENT_TEMPL_TEMPL(O_) \
-		extern template grid_vec_t<O_> canonicalize<O_>(const grid_vec_t<O_>&); \
+		extern template grid_vec_t<O_> canonicalize<O_>(const grid_vec_t<O_>&);
 	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 	#undef SOLVENT_TEMPL_TEMPL
 }

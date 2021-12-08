@@ -2,8 +2,8 @@
 #define HPP_SOLVENT_LIB__TOOLKIT
 
 #include <solvent_lib/gen/batch.hpp>
-// #include <solvent_lib/equiv/canon.hpp>
 #include <solvent_lib/gen/mod.hpp>
+// #include <solvent_lib/equiv/canon.hpp>
 #include <solvent_lib/grid.hpp>
 #include <solvent_lib/size.hpp>
 

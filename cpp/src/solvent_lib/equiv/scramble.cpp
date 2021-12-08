@@ -19,7 +19,7 @@ namespace solvent::lib::equiv {
 		static constexpr ord1_t O1 = O;
 		static constexpr ord2_t O2 = O*O;
 		static constexpr ord4_t O4 = O*O*O*O;
-		grid_mtx_t<O> input = grid_vec2mtx(input_vec);
+		grid_mtx_t<O> input = grid_vec2mtx<O>(input_vec);
 
 		std::array<ord2_t, O2> label_map;
 		std::array<std::array<ord2_t, O1>, O1> row_map;
@@ -53,7 +53,7 @@ namespace solvent::lib::equiv {
 	}
 
 	#define SOLVENT_TEMPL_TEMPL(O_) \
-		template vec_grid_t<O_> scramble<O_>(const vec_grid_t<O_>&); \
+		template grid_vec_t<O_> scramble<O_>(const grid_vec_t<O_>&);
 	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 	#undef SOLVENT_TEMPL_TEMPL
 }
