@@ -27,19 +27,15 @@ Discussions related to equivalence checking can be found by searching for "Sudok
 
 Notable properties:
 
-- no brute forcing / guess-and-check.
-- default to factoring as many cells as possible into the sorting
-  bases, and only factoring them out when necessary to break ties
-  instead of vice versa.
+- no "brute forcing" / "guess-and-check".
+- default to factoring as many cells as possible into the sorting bases, and only factoring them out when necessary to break ties instead of vice versa.
+- TODO what is the time complexity?
 
-Note that there are many possible variations on the calculations / measures
-used in my algorithm that can just as well canonicalize. I made
-decisions according to the above goals.
+Note that there are many possible variations on the calculations / measures used in my algorithm that can just as well canonicalize. I made decisions according to the above goals.
 
 The end result of the specific choices made is that:
 
-- Labels are given such that lower valued labels "play favourites".
-  (they will cohabit atoms with some label values more than others).
-- The placement of labels is such that lines that spread their
-  larger values across blocks will be closer to the top and left,
-		with chutes following a derived, similar rule.
+- Labels are given such that lower valued labels "play favourites". (they will cohabit atoms with some label values more than others).
+- Instances of favouritism will be more concentrated at the top and left of the grid.
+
+This may help with solving- labelling and positioning are "sorted" to specific relationship patterns.

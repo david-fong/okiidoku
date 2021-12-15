@@ -14,8 +14,8 @@ namespace solvent::lib::gen {
 
 	// must be manually seeded in the main function!
 	// Used for shuffling Generator.
-	// Shared between threads, guarded by mutex.
-	// Using thread_local instead does not cause any noticeable perf change.
+	// RNG is shared between threads, guarded by mutex.
+	// Note: Using thread_local instead does not cause any noticeable perf change.
 	extern void seed_rng(std::uint_fast32_t) noexcept;
 
 	//
@@ -95,27 +95,19 @@ namespace solvent::lib::gen {
 		[[gnu::pure]] const std::array<dead_ends_t, O4>& get_dead_ends() const { return dead_ends_; }
 
 	 private:
-		//
 		struct Cell final {
-			// Index into val_try_orders_. O2 if clear.
-			ord2_t try_index;
-			void clear(void) noexcept {
-				try_index = O2;
-			}
-			[[gnu::pure]] bool is_clear(void) const noexcept {
-				return try_index == O2;
-			}
+			ord2_t try_index; // Index into val_try_orders_. O2 if clear.
+			void clear(void) noexcept { try_index = O2; }
+			[[gnu::pure]] bool is_clear(void) const noexcept { return try_index == O2; }
 		};
 
 		// indexed by `progress // O2`
 		// Note: a possibly more performant option would be `progress_ // O2`,
 		// which the current simple setup doesn't accommodate for `operator[]`.
 		std::array<std::array<ord2_t, O2>, O2> val_try_orders_ = []() {
-			std::array<std::array<ord2_t, O2>, O2> val_try_orders;
-			for (auto& vto : val_try_orders) {
-				std::iota(vto.begin(), vto.end(), 0);
-			}
-			return val_try_orders;
+			std::array<std::array<ord2_t, O2>, O2> _;
+			for (auto& vto : _) { std::iota(vto.begin(), vto.end(), 0); }
+			return _;
 		}();
 
 		std::array<Cell, O4> cells_; // indexed by progress

@@ -22,9 +22,9 @@ namespace solvent::lib::equiv {
 		grid_mtx_t<O> input = grid_vec2mtx<O>(input_vec);
 
 		std::array<ord2_t, O2> label_map;
-		std::array<std::array<ord2_t, O1>, O1> row_map;
-		std::array<std::array<ord2_t, O1>, O1> col_map;
-		bool transpose;
+		std::array<std::array<ord1_t, O1>, O1> row_map;
+		std::array<std::array<ord1_t, O1>, O1> col_map;
+		bool transpose = false;
 
 		for (ord2_t i = 0; i < O2; i++) {
 			label_map[i] = i;
@@ -32,13 +32,13 @@ namespace solvent::lib::equiv {
 			col_map[i/O1][i%O1] = i;
 		}
 		std::ranges::shuffle(label_map, ScramblerRng_);
-		std::ranges::shuffle(row_map, ScramblerRng_);
-		std::ranges::shuffle(col_map, ScramblerRng_);
-		for (ord1_t chute = 0; chute < O1; chute++) {
-			std::ranges::shuffle(row_map[chute], ScramblerRng_);
-			std::ranges::shuffle(col_map[chute], ScramblerRng_);
-		}
-		transpose = ScramblerRng_() % 2;
+		// std::ranges::shuffle(row_map, ScramblerRng_);
+		// std::ranges::shuffle(col_map, ScramblerRng_);
+		// for (ord1_t chute = 0; chute < O1; chute++) {
+		// 	std::ranges::shuffle(row_map[chute], ScramblerRng_);
+		// 	std::ranges::shuffle(col_map[chute], ScramblerRng_);
+		// }
+		// transpose = static_cast<bool>(ScramblerRng_() % 2);
 		
 		grid_vec_t<O> output_vec(O4);
 		for (ord2_t row = 0; row < O2; row++) {
@@ -46,7 +46,7 @@ namespace solvent::lib::equiv {
 				ord2_t mapped_row = row_map[row/O1][row%O1];
 				ord2_t mapped_col = col_map[col/O1][col%O1];
 				if (transpose) { std::swap(mapped_row, mapped_col); }
-				output_vec[(O2*row)+col] = label_map[input[mapped_row][mapped_col]];
+				output_vec[(O2*mapped_row)+mapped_col] = label_map[input[row][col]];
 			}
 		}
 		return output_vec;

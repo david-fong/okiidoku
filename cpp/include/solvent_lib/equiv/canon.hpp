@@ -5,7 +5,6 @@
 #include <solvent_lib/size.hpp>
 
 namespace solvent::lib::equiv {
-
 	/**
 	input must be a complete grid.
 	See readme for information about the algorithm.
