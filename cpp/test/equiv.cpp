@@ -63,10 +63,11 @@ int main(const int argc, char const *const argv[]) {
 		if (result.grid != other_result.grid) {
 			count_bad++;
 			// TODO
-			// result.print_serial(std::cout);
-			// std::cout << "\n";
-			// other_result.print_serial(std::cout);
-			// std::cout << "\n";
+			std::cout << "\n!bad\n";
+			result.print_serial(std::cout);
+			std::cout << "\n";
+			other_result.print_serial(std::cout);
+			std::cout << "\n";
 		}
 		std::cout << "\n";
 	}

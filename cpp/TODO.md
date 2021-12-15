@@ -3,10 +3,13 @@
 
 ## Higher Priority
 
-1. Try breaking relabelling ties by using powers of the counts matrix (normalized to the same support). Need to find a continuous version or approximation of the Binomial distribution's PMF. Do some research, and as a last resort, just lerp it or something. Read about the gamma function (continuous version of factorial?). `tgamma(i+1) = i!`
-    - A public domain library for the Jacobi algorithm (for diagonalizing dense, real symmetric matrices) https://github.com/jewettaij/jacobi_pd
-
-1. Figure out why when adding the test executable, the linker cannot find the scramble function.
+1. Come up with a weight mapping for each edge in rel_counts and then do a [Floyd-Warshall](https://en.wikipedia.org/wiki/Floyd%E2%80%93Warshall_algorithm), and then map each row of the result to either its max or its sum, and then sort. For mapping meanings, see [Closeness Centrality](https://en.wikipedia.org/wiki/Closeness_centrality)- also the section on disconnected graphs.
+    - The weight mapping can be: (recall that `(rel_counts[i][j])/O2` represents the probability in this sudoku grid's markov chain of transitioning from label i to label j.)
+      - `O2 - rel_counts[i][j]`
+      - `rel_counts[i][j]` interesting? what's would this mean / represent?
+      - `p_binom(rel_counts[i][j])` what would this mean / represent?
+    - Would this work against the Most Canonical Grid? I don't have high hopes. Will need to test or reason it out. Wait a second- the relabelling doesn't need to handle the MCG right? Because it would be handled afterward by the repositioning (I think?)!
+    - Note that there are other definitions of centrality, such as [Betweenness Centrality](https://en.wikipedia.org/wiki/Betweenness_centrality), but it uses information that isn't retained in the basic Floyd-Warshall algorithm
 
 1. make the grid conversion utilities make use of std::span instead of std::vector? Or just see where spans can be used in general.
 
@@ -21,7 +24,6 @@
 
 1. write a scrambler.
 1. write some correctness-tests for canonicalization and scrambling.
-    - already found a case where canonicalization seems to be failing (maybe it's a tie-breaking problem?): 709ce82564d31fbaeb4560f7a891d3c2d6284a31fc5b90e7a13fcdb92e0746589f80ae42516dc73b5ac6031db97f284ebde27f864a3c51093417b59c028efa6d47a38ceb95f20d16f2be96043d1875ac0cd9215a76b43e8f8561f7d3e0cab924185d327ecba964f0690bd4af8325ec71c3741b68dfe0a2952efa59c017468bd3 and 708ce92564d31fbaeb4560f7a981d3c2d6294a31fc5b80e7a13fcdb82e0746598f90ae42516dc73b5ac6031db87f294ebde27f964a3c51083417b58c029efa6d47a39ceb85f20d169561f7d3e0cab8240cd8215a76b43e9ff2be86043d1975ac195d327ecba864f0680bd4af9325ec71c3741b69dfe0a2852efa58c017469bd3
 1. get some benchmarks and maybe show emerentius.
 
 - some diagnostics to try rendering:
@@ -66,9 +68,11 @@
       - Set the genpath to skip over these specific cells, and when progress has reached to these cells, switch over to attempting completion.
     - Notice that this allows putting an intuitive upper bound on the known number of possible solutions for a given grid order (`(O2!)^(O1*(O1-1))`). But other people have probably come up with better calculations; will need to do some reading.
 
-## Things That Seem To Not Have Worked
+## Ideas That Seem To Not Have Worked / Are Impractical
 
 These didn't end up doing the thing I wanted / thought might happen.
+
+### Generator
 
 - Try making traversal order not grid-row-major and see if it improves performance:
   - Hypothesis: Cells with fewer candidates are like the solution space's dominant bottlenecks. If we were to leave them to the end, we may spend many long advances creating almost-complete solutions that cannot be complete because they violate the bottlenecks (and possibly often in similar ways). If we start with them first, we may be less likely to encounter that problem.
@@ -77,3 +81,16 @@ These didn't end up doing the thing I wanted / thought might happen.
 - Use `popcount(has_mask)`
   - What about if length - popcount is 1?
     - Then I could just set the value right away. This would need a c++ builtin for arbiting a bit.
+
+### Canonicalizer Relabelling
+
+- Linear Algebra Route: Try breaking relabelling ties by using powers of the counts matrix (normalized to the same support). Need to find a continuous version or approximation of the Binomial distribution's PMF. Do some research, and as a last resort, just lerp it or something. Read about the gamma function (continuous version of factorial?). `tgamma(i+1) = i!`
+  - A public domain library for the Jacobi algorithm (for diagonalizing dense, real symmetric matrices) https://github.com/jewettaij/jacobi_pd. This could be useful if going through several steps is needed to break ties.
+  - This doesn't work for order 2. I know order 2 isn't even marginally interesting, but I think the solution should work for any order, and if it doesn't work for order 2, then something's wrong with it. That being said, I didn't explore this route much. Perhaps with adjustments, it can be useful.
+
+- Graph Theory Route: 
+  - Could the relabelling canonicalization be approached as a travelling salesman problem? I wonder if this would succeed. The cost of each edge would be the probability of that edge's count.
+    - See https://www.math.northwestern.edu/documents/book-markov-chains.pdf section 8.2.2.
+    - Is NP
+  - Graph Bandwidth Problem.
+    - Is NP

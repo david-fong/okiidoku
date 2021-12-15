@@ -4,7 +4,7 @@
 
 #include <iostream>
 #include <array>
-#include <algorithm> // sort, ranges::sort, inner_product
+#include <algorithm> // sort, inner_product
 #include <numeric>   // transform_reduce
 #include <execution> // execution::par_unseq
 #include <cmath>     // pow, tgamma
@@ -20,32 +20,31 @@ namespace solvent::lib::equiv {
 		using ord1_t = typename size<O>::ord1_t;
 		using ord2_t = typename size<O>::ord2_t;
 		using ord4_t = typename size<O>::ord4_t;
-		using ord5_t = typename size<O>::ord5_t;
 
 		using grid_arr_t = grid_mtx_t<O>;
 
 		struct RelCount final {
-			ord2_t all, polar_max, polar_h, polar_v;
+			ord2_t all = 0, polar_max = 0, polar_h = 0, polar_v = 0;
 		};
 		struct LineSortEntry final {
 			ord1_t orig_blkline;
-			double prob_;
-			static LineSortEntry build(const grid_mtx_t<O>& counts, ord1_t orig_blkline, const std::array<ord2_t, O*O>& line);
+			double prob_polar;
+			static LineSortEntry build(const grid_mtx_t<O, RelCount>& counts, ord1_t orig_blkline, const std::array<ord2_t, O*O>& line);
 			[[gnu::pure]] std::partial_ordering operator<=>(const LineSortEntry& that) const;
 		};
 		struct ChuteSortEntry final {
 			ord1_t orig_chute;
-			double prob_all_;
-			double prob_polar_;
+			double prob_all;
+			double prob_polar;
 			std::array<LineSortEntry, O> lines_;
-			static ChuteSortEntry build(const grid_mtx_t<O>& counts, ord1_t orig_chute, const grid_arr_t& grid);
+			static ChuteSortEntry build(const grid_mtx_t<O, RelCount>& counts, ord1_t orig_chute, const grid_arr_t& grid);
 			[[gnu::const]] const LineSortEntry& operator[](ord1_t i) const { return lines_[i]; }
 			[[gnu::const]] std::partial_ordering operator<=>(const ChuteSortEntry& that) const;
 		};
 		struct GridSortEntry final {
-			double prob_;
+			double prob;
 			std::array<ChuteSortEntry, O> chutes_;
-			static GridSortEntry build(const grid_mtx_t<O>& counts, const grid_arr_t& grid);
+			static GridSortEntry build(const grid_mtx_t<O, RelCount>& counts, const grid_arr_t& grid);
 			[[gnu::const]] const ChuteSortEntry& operator[](ord1_t i) const { return chutes_[i]; }
 			[[gnu::const]] std::partial_ordering operator<=>(const GridSortEntry& that) const;
 		};
@@ -84,7 +83,7 @@ namespace solvent::lib::equiv {
 			atom and then hops to a random cell with the same value.
 		- See https://en.wikipedia.org/wiki/Jacobi_eigenvalue_algorithm#Applications_for_real_symmetric_matrices
 		*/
-		grid_mtx_t<O> rel_count_ = {{0}};
+		grid_mtx_t<O, RelCount> rel_count_;
 
 		/**
 		Indices whose entries are false indicate labels whose values are
@@ -98,23 +97,30 @@ namespace solvent::lib::equiv {
 		probability of this ocurring k times in a grid is given by a binomial
 		distribution B(o^2, 2/(o+1)).
 		*/
-		static constexpr std::array<double, O2+1> LABEL_REL_COUNT_PROB = [](){
-			std::array<double, O2+1> arr;
-			// constexpr double expected = static_cast<double>(2*O2)/(O1+1);
-			for (unsigned count = 0; count < O2+1; count++) {
-				arr[count] = static_cast<double>(
-					n_choose_r(O2, count) * std::pow(2, count) * std::pow(O1-1, O2-count)
-				) / std::pow(O1+1, O2);// * std::pow(static_cast<double>(count) - expected, 2);
-				// arr[count] = std::pow(arr[count], -3.0/O2);
-			}
-			return arr;
+		static constexpr std::array<double, O2+1> REL_COUNT_ALL_PROB = [](){
+			std::array<double, O2+1> _;
+			for (unsigned i = 0; i < O2+1; i++) {
+				_[i] = static_cast<double>(n_choose_r(O2, i) * (1<<i) * std::pow(O1-1, O2-i)) / std::pow(O1+1, O2); }
+			return _;
+		}();
+		static constexpr std::array<double, O2+1> REL_COUNT_POLAR_PROB = [](){
+			std::array<double, O2+1> _;
+			for (unsigned i = 0; i < O2+1; i++) {
+				_[i] = static_cast<double>(n_choose_r(O2, i) * std::pow(O1, O2-i)) / std::pow(O1+1, O2); }
+			return _;
 		}();
 		// The continuous version of the above binomial PMF
-		[[gnu::const]] static double LABEL_REL_COUNT_PROB_CONT(const double count) noexcept {
+		[[gnu::const]] static double REL_COUNT_ALL_PROB_CONT(const double count) noexcept {
 			static const double NCR_NUMERATOR = std::tgamma(O2); // NOTE: kludge for tgamma not constexpr
 			static const double PROB_DENOMINATOR = std::pow(O1+1, O2);
 			const double nCr = NCR_NUMERATOR / (std::tgamma(O2-count) * std::tgamma(count));
 			return nCr * std::pow(2, count) * std::pow(O1-1, O2-count) / PROB_DENOMINATOR;
+		}
+		[[gnu::const]] static double REL_COUNT_POLAR_PROB_CONT(const double count) noexcept {
+			static const double NCR_NUMERATOR = std::tgamma(O2); // NOTE: kludge for tgamma not constexpr
+			static const double PROB_DENOMINATOR = std::pow(O1+1, O2);
+			const double nCr = NCR_NUMERATOR / (std::tgamma(O2-count) * std::tgamma(count));
+			return nCr * std::pow(O1, O2-count) / PROB_DENOMINATOR;
 		}
 
 		void canonicalize_labelling_init_(void) noexcept;
@@ -138,16 +144,20 @@ namespace solvent::lib::equiv {
 		for (ord2_t line = 0; line < O2; line++) {
 			for (ord2_t atom = 0; atom < O2; atom += O1) {
 				// Go through all unique pairs in the atom:
-				for (ord1_t cell_i = 0; cell_i < O1 - 1; cell_i++) {
-					for (ord1_t cell_j = cell_i + 1; cell_j < O1; cell_j++) {
+				for (ord1_t atom_i = 0; atom_i < O1 - 1; atom_i++) {
+					for (ord1_t atom_j = atom_i + 1; atom_j < O1; atom_j++) {
 						{ // boxrow
-							const ord2_t label_i = grid_[line][atom+cell_i], label_j = grid_[line][atom+cell_j];
-							rel_count_[label_i][label_j]++; rel_count_[label_j][label_i]++;
+							const ord2_t label_i = grid_[line][atom+atom_i], label_j = grid_[line][atom+atom_j];
+							rel_count_[label_i][label_j].polar_h++; rel_count_[label_j][label_i].polar_h++;
 						}
 						{ // boxcol
-							const ord2_t label_i = grid_[atom+cell_i][line], label_j = grid_[atom+cell_j][line];
-							rel_count_[label_i][label_j]++; rel_count_[label_j][label_i]++;
+							const ord2_t label_i = grid_[atom+atom_i][line], label_j = grid_[atom+atom_j][line];
+							rel_count_[label_i][label_j].polar_v++; rel_count_[label_j][label_i].polar_v++;
 		}	}	}	}	}
+		for (auto& row : rel_count_) { for (auto& rel : row) {
+			rel.all = rel.polar_h + rel.polar_v;
+			rel.polar_max = std::max(rel.polar_h, rel.polar_v);
+		}}
 	}
 
 	template<Order O>
@@ -171,18 +181,23 @@ namespace solvent::lib::equiv {
 	template<Order O>
 	void Canonicalizer<O>::canonicalize_labelling_init_(void) noexcept {
 		// Slightly higher powers of rel_count_ have lower chances of ties:
-		std::array<std::array<double, O2>, O2> rel_count_step2;
+		/* std::array<std::array<double, O2>, O2> rel_count_step2;
 		for (ord2_t i = 0; i < O2; i++) {
 			const auto& row_i = rel_count_[i];
 			for (ord2_t j = i; j < O2; j++) {
 				rel_count_step2[i][j] = rel_count_step2[j][i]
 					= static_cast<double>(std::inner_product(row_i.cbegin(), row_i.cend(), rel_count_[j].cbegin(), 0u))
 					/ (O2 * 2 * (O1-1));
-		}	}
+		}	} */
 		struct SortMapEntry final {
 			ord2_t orig; // The original label value
-			double joint_prob; // Relabelling has no effect on this calculated value.
-			double joint_prob_step2;
+			double p_all;
+			double p_polar;
+			[[gnu::pure]] std::partial_ordering operator<=>(const SortMapEntry& that) const {
+				auto cmp = p_all <=> that.p_all;
+				if (cmp != std::partial_ordering::equivalent) [[likely]] { return cmp; }
+				return p_polar <=> that.p_polar;
+			}
 		};
 		std::array<SortMapEntry, O2> canon2orig_label = {};
 		/* The reduction calculation's result must not depend on the
@@ -190,34 +205,30 @@ namespace solvent::lib::equiv {
 		label's degree of relational favouritism. The specific reduction
 		below is a naive joint-probability. */
 		for (ord2_t label = 0; label < O2; label++) {
-			const auto& counts = rel_count_[label];
-			const double joint_prob = std::transform_reduce(
-				std::execution::par_unseq, counts.cbegin(), counts.cend(),
-				1.0, std::multiplies<double>(), [](const ord2_t count) { return LABEL_REL_COUNT_PROB[count]; }
+			const double p_all = std::transform_reduce(
+				std::execution::par_unseq, rel_count_[label].cbegin(), rel_count_[label].cend(),
+				1.0, std::multiplies<double>(), [](const auto& rel) { return REL_COUNT_ALL_PROB[rel.all]; }
 			);
-			const auto& counts2 = rel_count_step2[label];
-			const double joint_prob_step2 = std::transform_reduce(
-				std::execution::par_unseq, counts2.cbegin(), counts2.cend(),
-				1.0, std::multiplies<double>(), LABEL_REL_COUNT_PROB_CONT
+			const double p_polar = std::transform_reduce(
+				std::execution::par_unseq, rel_count_[label].cbegin(), rel_count_[label].cend(),
 			);
 			canon2orig_label[label] = SortMapEntry {
-				.orig = label,
-				.joint_prob = joint_prob,
-				.joint_prob_step2 = joint_prob_step2,
+				.orig = label, .p_all = p_all, .p_polar = p_polar,
 			};
 		}
 		// Make the lower-valued labels "play favourites":
-		std::ranges::sort(canon2orig_label, std::ranges::less(), &SortMapEntry::joint_prob_step2);
-		std::ranges::stable_sort(canon2orig_label, std::ranges::less(), &SortMapEntry::joint_prob);
+		std::sort(canon2orig_label.begin(), canon2orig_label.end());
 		// std::cout << "\n"; for (auto e : canon2orig_label) { std::cout << e.joint_prob << "  "; }
-		{
-			double p_prev = canon2orig_label[0].joint_prob_step2;
+		/* {
+			auto p_prev = canon2orig_label[0];
 			for (ord2_t i = 1; i < O2; i++) {
-				const double p = canon2orig_label[i].joint_prob_step2;
-				if (p == p_prev) [[unlikely]] { rel_count_tie_mask_[i-1] = true; rel_count_tie_mask_[i] = true; }
+				const auto p = canon2orig_label[i];
+				if (p.p_all == p_prev.p_all && p.p_polar == p_prev.p_polar) [[unlikely]] {
+					rel_count_tie_mask_[i-1] = true; rel_count_tie_mask_[i] = true; 
+				}
 				p_prev = p;
 			}
-		}
+		} */
 		std::array<ord2_t, O2> label_map = {0};
 		for (ord2_t i = 0; i < O2; i++) {
 			label_map[canon2orig_label[i].orig] = i;
@@ -237,14 +248,14 @@ namespace solvent::lib::equiv {
 
 	template<Order O>
 	void Canonicalizer<O>::canonicalize_labelling_ties_(void) noexcept {
-		std::cout << "\n"; for (auto& e : rel_count_tie_mask_) { std::cout << e << ' '; }
+		// std::cout << "\n"; for (auto& e : rel_count_tie_mask_) { std::cout << e << ' '; }
 		// const std::vector<print::print_grid_t> grid_accessors = {
 		// 	print::print_grid_t([this](std::ostream& _os, uint16_t coord) {
 		// 		_os << ' '; print::val2str(_os, O, rel_count_[coord/O2][coord%O2]);
 		// 	}),
 		// };
 		// print::pretty(std::cout, O1, grid_accessors);
-		std::cout << "\nX = ["; for (auto& row : rel_count_) { for (auto& e : row) { std::cout << ' ' << static_cast<unsigned>(e); } std::cout << ';'; } std::cout << "]/" << (2*(O1-1)*O2);
+		std::cout << "\nX = ["; for (auto& row : rel_count_) { for (auto& e : row) { std::cout << ' ' << static_cast<unsigned>(e.all); } std::cout << ';'; } std::cout << "]/" << (2*(O1-1)*O2);
 		// columns(unique(sort(X^2)', "rows")') # seems that this has "impulse, slow decay" behaviour
 
 		for (ord2_t i = 0; i < O2; i++) {
@@ -256,50 +267,50 @@ namespace solvent::lib::equiv {
 
 	template<Order O>
 	Canonicalizer<O>::LineSortEntry Canonicalizer<O>::LineSortEntry::build(
-		const grid_mtx_t<O>& counts, const ord1_t orig_blkline, const std::array<ord2_t, O*O>& line
+		const grid_mtx_t<O, RelCount>& counts, const ord1_t orig_blkline, const std::array<ord2_t, O*O>& line
 	) {
-		double prob = 1.0;
+		double prob_polar = 1.0;
 		for (ord2_t atom = 0; atom < O2; atom += O1) {
 			for (ord1_t i = 0; i < O1-1; i++) {
 				for (ord1_t j = i+1; j < O1; j++) {
-					prob *= LABEL_REL_COUNT_PROB[counts[line[atom+i]][line[atom+j]]];
+					prob_polar *= REL_COUNT_ALL_PROB[counts[line[atom+i]][line[atom+j]].polar_h];
 		}	}	}
-		return LineSortEntry { .orig_blkline = orig_blkline, .prob_ = prob };
+		return LineSortEntry { .orig_blkline = orig_blkline, .prob_polar = prob_polar };
 	}
 	template<Order O>
 	Canonicalizer<O>::ChuteSortEntry Canonicalizer<O>::ChuteSortEntry::build(
-		const grid_mtx_t<O>& counts, const ord1_t orig_chute, const grid_arr_t& grid
+		const grid_mtx_t<O, RelCount>& counts, const ord1_t orig_chute, const grid_arr_t& grid
 	) {
 		std::array<LineSortEntry, O> lines;
 		for (ord1_t i = 0; i < O1; i++) { lines[i] = LineSortEntry::build(counts, i, grid[(O1*orig_chute)+i]); }
 		std::sort(lines.begin(), lines.end());
-		double prob_polar = 1.0; for (const auto& e : lines) { prob *= e.prob_; }
+		double prob_polar = 1.0; for (const auto& e : lines) { prob_polar *= e.prob_polar; }
 		double prob_all = prob_polar; // TODO
-		return ChuteSortEntry { .orig_chute = orig_chute, .prob_all_ = prob_all, .prob_polar_ = prob_polar, .lines_ = lines };
+		return ChuteSortEntry { .orig_chute = orig_chute, .prob_all = prob_all, .prob_polar = prob_polar, .lines_ = lines };
 	}
 	template<Order O>
 	Canonicalizer<O>::GridSortEntry Canonicalizer<O>::GridSortEntry::build(
-		const grid_mtx_t<O>& counts, const grid_arr_t& grid
+		const grid_mtx_t<O, RelCount>& counts, const grid_arr_t& grid
 	) {
 		std::array<ChuteSortEntry, O> chutes;
 		for (ord1_t i = 0; i < O1; i++) { chutes[i] = ChuteSortEntry::build(counts, i, grid); }
 		std::sort(chutes.begin(), chutes.end());
-		double prob = 1.0; for (const auto& e : chutes) { prob *= e.prob_polar_; }
-		return GridSortEntry { .prob_ = prob, .chutes_ = chutes };
+		double prob = 1.0; for (const auto& e : chutes) { prob *= e.prob_polar; }
+		return GridSortEntry { .prob = prob, .chutes_ = chutes };
 	}
 
 
 	template<Order O>
 	std::partial_ordering Canonicalizer<O>::LineSortEntry::operator<=>(const LineSortEntry& that) const {
-		return prob_ <=> that.prob_;
+		return prob_polar <=> that.prob_polar;
 	}
 	template<Order O>
 	std::partial_ordering Canonicalizer<O>::ChuteSortEntry::operator<=>(const ChuteSortEntry& that) const {
-		return prob_all_ <=> that.prob_all_;
+		return prob_all <=> that.prob_all;
 	}
 	template<Order O>
 	std::partial_ordering Canonicalizer<O>::GridSortEntry::operator<=>(const GridSortEntry& that) const {
-		return prob_ <=> that.prob_;
+		return prob <=> that.prob;
 	}
 
 
