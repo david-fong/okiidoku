@@ -23,6 +23,14 @@ Discussions related to equivalence checking can be found by searching for "Sudok
 - https://www.degruyter.com/document/doi/10.2478/s13537-012-0011-y/pdf
 - https://sudokugarden.de/en/info/canonical-form
 
+## Unscramble-able Relationships
+
+Scrambling cannot:
+- Swap cells between 1xO1 (vertical or horizontal) block-aligned slices (I will call this an "atom").
+- Swap cells between houses.
+- Swap blocks between chutes.
+- Change the vertical/horizontal orientation of an atom without doing so for all atoms (transposing the grid).
+
 ## My Canonicalization Algorithm
 
 Notable properties:

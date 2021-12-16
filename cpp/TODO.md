@@ -8,6 +8,9 @@
       - `O2 - rel_counts[i][j]`
       - `rel_counts[i][j]` interesting? what's would this mean / represent?
       - `p_binom(rel_counts[i][j])` what would this mean / represent?
+      - If further differentiation is needed, look into factoring in  information about:
+        - blocks being in the same chute: retain in rel_counts, instead of a count, store a mask where each bit contains whether that block has an atom with this relationship. The count is obtained by counting 1-bits, and each 1-bit can have a weight according to the number of blocks in same chutes that also have this bit on.
+        - The "skew"-neww of the atom relationships: what is the ratio of contributing horizontal vs vertical atoms?
     - Would this work against the Most Canonical Grid? I don't have high hopes. Will need to test or reason it out. Wait a second- the relabelling doesn't need to handle the MCG right? Because it would be handled afterward by the repositioning (I think?)!
     - Note that there are other definitions of centrality, such as [Betweenness Centrality](https://en.wikipedia.org/wiki/Betweenness_centrality), but it uses information that isn't retained in the basic Floyd-Warshall algorithm
 

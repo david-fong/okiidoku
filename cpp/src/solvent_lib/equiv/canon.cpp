@@ -7,7 +7,7 @@
 #include <algorithm> // sort, inner_product
 #include <numeric>   // transform_reduce
 #include <execution> // execution::par_unseq
-#include <cmath>     // pow, tgamma
+#include <cmath>     // pow
 #include <compare>   // partial_ordering
 
 namespace solvent::lib::equiv {
@@ -75,13 +75,17 @@ namespace solvent::lib::equiv {
 		
 		- It is a Real Symmetric Matrix -> It is a Normal Matrix -> It is
 			diagonalizable by an Orthogonal Matrix.
+		- It can be interpreted as a Markov Chain: The walk where starting
+			at a cell with a certain value, each transition hops to another
+			cell in a same atom and then hops to a random cell with the same
+			value.
 		- It is a Doubly Stochastic Matrix (when divided by O2*2*(O1-1))
 			AKA a Symmetric Markov Chain -> Its stationary distribution is
 			the uniform distribution -> It converges to uniformity as steps
-			increase. It represents the walk where starting at a cell with
-			a certain value, each transition hops to another cell in a same
-			atom and then hops to a random cell with the same value.
+			increase.
 		- See https://en.wikipedia.org/wiki/Jacobi_eigenvalue_algorithm#Applications_for_real_symmetric_matrices
+		- It can be interpreted as / converted to a graph. It is weighted,
+			undirected, and dense.
 		*/
 		grid_mtx_t<O, RelCount> rel_count_;
 
@@ -109,19 +113,6 @@ namespace solvent::lib::equiv {
 				_[i] = static_cast<double>(n_choose_r(O2, i) * std::pow(O1, O2-i)) / std::pow(O1+1, O2); }
 			return _;
 		}();
-		// The continuous version of the above binomial PMF
-		[[gnu::const]] static double REL_COUNT_ALL_PROB_CONT(const double count) noexcept {
-			static const double NCR_NUMERATOR = std::tgamma(O2); // NOTE: kludge for tgamma not constexpr
-			static const double PROB_DENOMINATOR = std::pow(O1+1, O2);
-			const double nCr = NCR_NUMERATOR / (std::tgamma(O2-count) * std::tgamma(count));
-			return nCr * std::pow(2, count) * std::pow(O1-1, O2-count) / PROB_DENOMINATOR;
-		}
-		[[gnu::const]] static double REL_COUNT_POLAR_PROB_CONT(const double count) noexcept {
-			static const double NCR_NUMERATOR = std::tgamma(O2); // NOTE: kludge for tgamma not constexpr
-			static const double PROB_DENOMINATOR = std::pow(O1+1, O2);
-			const double nCr = NCR_NUMERATOR / (std::tgamma(O2-count) * std::tgamma(count));
-			return nCr * std::pow(O1, O2-count) / PROB_DENOMINATOR;
-		}
 
 		void canonicalize_labelling_init_(void) noexcept;
 		void canonicalize_labelling_ties_(void) noexcept;
@@ -153,7 +144,8 @@ namespace solvent::lib::equiv {
 						{ // boxcol
 							const ord2_t label_i = grid_[atom+atom_i][line], label_j = grid_[atom+atom_j][line];
 							rel_count_[label_i][label_j].polar_v++; rel_count_[label_j][label_i].polar_v++;
-		}	}	}	}	}
+						}
+		}	}	}	}
 		for (auto& row : rel_count_) { for (auto& rel : row) {
 			rel.all = rel.polar_h + rel.polar_v;
 			rel.polar_max = std::max(rel.polar_h, rel.polar_v);
@@ -180,55 +172,61 @@ namespace solvent::lib::equiv {
 
 	template<Order O>
 	void Canonicalizer<O>::canonicalize_labelling_init_(void) noexcept {
-		// Slightly higher powers of rel_count_ have lower chances of ties:
-		/* std::array<std::array<double, O2>, O2> rel_count_step2;
-		for (ord2_t i = 0; i < O2; i++) {
-			const auto& row_i = rel_count_[i];
-			for (ord2_t j = i; j < O2; j++) {
-				rel_count_step2[i][j] = rel_count_step2[j][i]
-					= static_cast<double>(std::inner_product(row_i.cbegin(), row_i.cend(), rel_count_[j].cbegin(), 0u))
-					/ (O2 * 2 * (O1-1));
-		}	} */
 		struct SortMapEntry final {
 			ord2_t orig; // The original label value
+			double dist;
 			double p_all;
-			double p_polar;
 			[[gnu::pure]] std::partial_ordering operator<=>(const SortMapEntry& that) const {
-				auto cmp = p_all <=> that.p_all;
-				if (cmp != std::partial_ordering::equivalent) [[likely]] { return cmp; }
-				return p_polar <=> that.p_polar;
+				// auto cmp = p_all <=> that.p_all;
+				// if (cmp != std::partial_ordering::equivalent) [[likely]] { return cmp; }
+				// return dist <=> that.dist;
+				return p_all <=> that.p_all;
 			}
 		};
 		std::array<SortMapEntry, O2> canon2orig_label = {};
-		/* The reduction calculation's result must not depend on the
-		ordering of rel_count_'s entries. It should encapsulate a
-		label's degree of relational favouritism. The specific reduction
-		below is a naive joint-probability. */
+
+		// Set up Floyd-Warshall:
+		grid_mtx_t<O, double> dist_graph;
+		for (ord2_t i = 0; i < O2; i++) {
+			for (ord2_t j = 0; j < O2; j++) {
+				dist_graph[i][j] = std::pow(O2, O2 - rel_count_[i][j].all);
+		}	}
+		for (ord2_t i = 0; i < O2; i++) { dist_graph[i][i] = 0.0; }
+
+		// Do Floyd-Warshall:
+		for (ord2_t k = 0; k < O2; k++) {
+			for (ord2_t i = 0; i < O2; i++) {
+				for (ord2_t j = 0; j < O2; j++) {
+					double other = dist_graph[i][k] + dist_graph[k][j];
+					double& it = dist_graph[i][j];
+					if (it > other) { it = other; }
+		}	}	}
+
+		// Sort vertices by Closeness-Centrality (reciprocal of dist):
 		for (ord2_t label = 0; label < O2; label++) {
+			const auto& paths = dist_graph[label];
+			const double dist = std::accumulate(paths.cbegin(), paths.cend(), 0.0);
 			const double p_all = std::transform_reduce(
 				std::execution::par_unseq, rel_count_[label].cbegin(), rel_count_[label].cend(),
 				1.0, std::multiplies<double>(), [](const auto& rel) { return REL_COUNT_ALL_PROB[rel.all]; }
 			);
-			const double p_polar = std::transform_reduce(
-				std::execution::par_unseq, rel_count_[label].cbegin(), rel_count_[label].cend(),
-			);
 			canon2orig_label[label] = SortMapEntry {
-				.orig = label, .p_all = p_all, .p_polar = p_polar,
+				.orig = label, .dist = dist, .p_all = p_all,
 			};
 		}
 		// Make the lower-valued labels "play favourites":
 		std::sort(canon2orig_label.begin(), canon2orig_label.end());
 		// std::cout << "\n"; for (auto e : canon2orig_label) { std::cout << e.joint_prob << "  "; }
-		/* {
+		{
 			auto p_prev = canon2orig_label[0];
 			for (ord2_t i = 1; i < O2; i++) {
 				const auto p = canon2orig_label[i];
-				if (p.p_all == p_prev.p_all && p.p_polar == p_prev.p_polar) [[unlikely]] {
+				if (p.dist == p_prev.dist) [[unlikely]] {
 					rel_count_tie_mask_[i-1] = true; rel_count_tie_mask_[i] = true; 
 				}
 				p_prev = p;
 			}
-		} */
+		}
 		std::array<ord2_t, O2> label_map = {0};
 		for (ord2_t i = 0; i < O2; i++) {
 			label_map[canon2orig_label[i].orig] = i;
@@ -248,10 +246,10 @@ namespace solvent::lib::equiv {
 
 	template<Order O>
 	void Canonicalizer<O>::canonicalize_labelling_ties_(void) noexcept {
-		// std::cout << "\n"; for (auto& e : rel_count_tie_mask_) { std::cout << e << ' '; }
+		std::cout << "\n"; for (auto& e : rel_count_tie_mask_) { std::cout << e << ' '; }
 		// const std::vector<print::print_grid_t> grid_accessors = {
 		// 	print::print_grid_t([this](std::ostream& _os, uint16_t coord) {
-		// 		_os << ' '; print::val2str(_os, O, rel_count_[coord/O2][coord%O2]);
+		// 		_os << ' '; print::val2str(_os, O, rel_count_[coord/O2][coord%O2].all);
 		// 	}),
 		// };
 		// print::pretty(std::cout, O1, grid_accessors);
