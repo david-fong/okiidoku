@@ -29,7 +29,7 @@ namespace solvent::lib {
 	template<Order O>
 	bool is_grid_invalid(const grid_mtx_t<O>& grid) noexcept {
 		using ord2_t = typename size<O>::ord2_t;
-		using has_mask_t = typename size<O>::has_mask_t;
+		using has_mask_t = typename size<O>::O2_mask_fast_t;
 		static constexpr ord2_t O2 = O*O;
 
 		std::array<has_mask_t, O2> rows_has_ {0};

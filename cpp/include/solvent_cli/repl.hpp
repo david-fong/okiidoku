@@ -87,7 +87,7 @@ namespace solvent::cli {
 
 	 private:
 		Config config_;
-		lib::Toolkit toolkit;
+		lib::Toolkit toolkit_;
 
 		// Return false if command is to exit the program:
 		void gen_single(bool contPrev = false);

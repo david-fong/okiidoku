@@ -23,13 +23,24 @@ Discussions related to equivalence checking can be found by searching for "Sudok
 - https://www.degruyter.com/document/doi/10.2478/s13537-012-0011-y/pdf
 - https://sudokugarden.de/en/info/canonical-form
 
-## Unscramble-able Relationships
+## Scramble-Invariant Properties of Grids
 
 Scrambling cannot:
 - Swap cells between 1xO1 (vertical or horizontal) block-aligned slices (I will call this an "atom").
-- Swap cells between houses.
+- Swap cells or atoms between houses.
 - Swap blocks between chutes.
 - Change the vertical/horizontal orientation of an atom without doing so for all atoms (transposing the grid).
+
+### A Bounty of Information
+
+I was surprised to find so many
+
+- I am only looking at size-2 relationships between labels, but one can observe and use the nature and number of relationships of size up to the grid order (the size of an atom). I only look at size-2 because I'm not sure how to gather this information and retain the minimum necessary amount so that space usage doesn't get out of hand, since the size of the observed relationships determines of the number of dimensions of the multidimensional array, with each dimension having length `o^2`.
+  - Some observations:
+    - A grid has `2 * o^3` atoms. Analysis can be performed with relationships within atoms of sizes in `[2, o]`. For a size `s`, TODO continue count limits summary
+    - As the size of the grid increases, the 
+
+- For canonicalization of labelling, I am only looking at the counts of relationships between labels- which only makes use of the first "scrambling-cannot" bullet. The combination of all the bullets would be, for each relationship between two labels, to gather a trinary "mask", where each digit corresponds to one of the blocks, and the value of the digit is either "no relationship", "horizontal atom relationship", or "vertical atom relationship". This mask cannot be used raw, since the repositioning of chutes will reorder digits, and transposition of the grid will swap the orientation of atoms. The mask itself must be canonicalized in isolation
 
 ## My Canonicalization Algorithm
 
@@ -47,3 +58,29 @@ The end result of the specific choices made is that:
 - Instances of favouritism will be more concentrated at the top and left of the grid.
 
 This may help with solving- labelling and positioning are "sorted" to specific relationship patterns.
+
+## Impractical or Seemingly Insufficient Other Approaches
+
+### Canonicalizer Relabelling
+
+Note: It's possible (and perhaps even likely) that these weren't "working" for me because I wasn't taking into account any scramble-invariant properties of grid other than the number of times a pair of label values occurred in the same atom in a grid.
+
+- Linear Algebra Route: Try breaking relabelling ties by using powers of the counts matrix (normalized to the same support). Need to find a continuous version or approximation of the Binomial distribution's PMF. Do some research, and as a last resort, just lerp it or something. Read about the gamma function (continuous version of factorial?). `tgamma(i+1) = i!`
+  - A public domain library for the Jacobi algorithm (for diagonalizing dense, real symmetric matrices) https://github.com/jewettaij/jacobi_pd. This could be useful if going through several steps is needed to break ties.
+  - This doesn't work for order 2. I know order 2 isn't even marginally interesting, but I think the solution should work for any order, and if it doesn't work for order 2, then something's wrong with it. That being said, I didn't explore this route much. Perhaps with adjustments, it can be useful.
+
+- Graph Theory Route: 
+  - Could the relabelling canonicalization be approached as a travelling salesman problem? I wonder if this would succeed. The cost of each edge would be the probability of that edge's count.
+    - See https://www.math.northwestern.edu/documents/book-markov-chains.pdf section 8.2.2.
+    - Is NP
+  - Graph Bandwidth Problem.
+    - Is NP
+
+1. Come up with a weight mapping for each edge in rel_counts and then do a [Floyd-Warshall](https://en.wikipedia.org/wiki/Floyd%E2%80%93Warshall_algorithm), and then map each row of the result to either its max or its sum, and then sort. For mapping meanings, see [Closeness Centrality](https://en.wikipedia.org/wiki/Closeness_centrality)- also the section on disconnected graphs.
+    - The weight mapping can be: (recall that `(rel_counts[i][j])/O2` represents the probability in this sudoku grid's markov chain of transitioning from label i to label j.)
+      - `O2 - rel_counts[i][j]`
+      - `rel_counts[i][j]` interesting? what's would this mean / represent?
+      - `p_binom(rel_counts[i][j])` what would this mean / represent?
+      - If further differentiation is needed, look into factoring in more scramble-invariant properties.
+    - Would this work against the Most Canonical Grid? I don't have high hopes. Will need to test or reason it out.
+    - Note that there are other definitions of centrality, such as [Betweenness Centrality](https://en.wikipedia.org/wiki/Betweenness_centrality), but it uses information that isn't retained in the basic Floyd-Warshall algorithm.

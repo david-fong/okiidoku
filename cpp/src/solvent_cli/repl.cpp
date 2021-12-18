@@ -15,11 +15,10 @@ namespace solvent::cli {
 	using pathkind_t = lib::gen::path::Kind;
 
 	const std::string TERMINAL_OUTPUT_TIPS =
-	"\nNote: You can run `tput rmam` in your shell to disable text wrapping."
-	"\nIf UTF-8 characters are garbled on Windows, run `chcp.com 65001`.";
+	"\nNote: You can run `tput rmam` in your shell to disable text wrapping.";
 
 
-	Repl::Repl(const Order O): toolkit(Toolkit(O)) {
+	Repl::Repl(const Order O): toolkit_(Toolkit(O)) {
 		config_.order(O);
 		if (O <= 4) { config_.verbosity(verbosity::Kind::Silent); }
 		if (O  > 4) { config_.verbosity(verbosity::Kind::NoGiveups); }
@@ -74,7 +73,7 @@ namespace solvent::cli {
 				break;
 			case E::Quit:
 				return false;
-			case E::ConfigOrder:       config_.order(cmd_args); toolkit.set_order(config_.order()); break;
+			case E::ConfigOrder:       config_.order(cmd_args); toolkit_.set_order(config_.order()); break;
 			case E::ConfigVerbosity:   config_.verbosity(cmd_args); break;
 			case E::ConfigGenPath:     config_.path_kind(cmd_args); break;
 			case E::ConfigMaxDeadEnds: config_.max_dead_ends(cmd_args); break;
@@ -94,8 +93,8 @@ namespace solvent::cli {
 		// Generate a new solution:
 		const clock_t clock_start = std::clock();
 		const auto gen_result = cont_prev
-			? toolkit.gen_continue_prev()
-			: toolkit.gen(gen::Params{
+			? toolkit_.gen_continue_prev()
+			: toolkit_.gen(gen::Params{
 				.path_kind = config_.path_kind(),
 				.max_dead_ends = config_.max_dead_ends(),
 				.canonicalize = config_.canonicalize(),

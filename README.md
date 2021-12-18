@@ -1,20 +1,21 @@
 
 # Sudoku Utilities in C++ and Rust
 
-The project currently provides two utilities: a solution generator, and a canonicalizer. It is _not_ a solver or even a puzzle generator (hence "solve-n't"). It _is_ a solution generator and a canonicalizer (with perhaps more to be added in the future). It supports parametric size (which many other sudoku projects surprisingly do not) while optimizing cache usage by choosing minimal value widths.
+The project currently provides two utilities: a solution generator, and a canonicalizer. It is _not_ a solver or even a puzzle generator (hence "solve-n't"), although I may try tackling these problems in the future. It supports parametric size which many other sudoku projects do not.
 
-For usage instructions, see the readmes in the [cpp](./cpp/readme.md) and [rust](./rust/readme.md) directories.
+For usage instructions, see the readmes in the [cpp](./cpp/readme.md) and [rust](./rust/readme.md) directories. Note that the rust implementation is more of a learning project for me, and is currently not in development.
 
-I work on this project for fun. I want to come up with things without referencing other peoples' work. I am not at all an experienced C++ or rust programmer; I'm learning as I go. Feedback and suggestions on how to improve my usage of C++ and Rust are very welcome (but please be gentle if you can).
+I work on this project for fun. Feedback and suggestions on how to improve are very welcome- just be prepared to help me understand the rationale.
 
-## But y u no solve tho
+## If You Want a Solver
 
-Other people have gone super technical into it and it blows me away while going way over my head. I'm not so interested in towing my chunky brain along a path that has already been expertly paved.
+\*Insert image of spongebob indignantly gesturing to many instances of a thing here.
 
 - [codegolf competition](https://codegolf.stackexchange.com/questions/190727/the-fastest-sudoku-solver)
   - [the winner, tdoku](https://t-dillon.github.io/tdoku/)
 - [Emerentius/sudoku](https://github.com/Emerentius/sudoku)
 - [Peter Norvig](https://norvig.com/sudoku.html)
+- There are more. Google it.
 
 ## My Past and Future Related Works
 

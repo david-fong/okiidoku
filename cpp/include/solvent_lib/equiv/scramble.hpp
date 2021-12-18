@@ -9,7 +9,7 @@ namespace solvent::lib::equiv {
 	// must be manually seeded in the main function!
 	// Used for scrambling.
 	// NOTE: if parallel access is later required, add a mutex to guard.
-	extern void seed_scrambler_rng(std::uint_fast32_t) noexcept;
+	void seed_scrambler_rng(std::uint_fast32_t) noexcept;
 
 	template<Order O>
 	grid_vec_t<O> scramble(const grid_vec_t<O>& input);

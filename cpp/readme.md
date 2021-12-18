@@ -1,15 +1,22 @@
 
 # C++ Implementation
 
-## How to Run It
+## Using solvent_lib
 
-Note: If building for windows, make sure you have mingw-w64 installed, and set the [`WINDOWS_ANSI`](./src/solvent_config.hpp) build flag to true. This project was originally developed using mingw-w64 but is now being developed on a linux machine. Pull requests are appreciated to fix any platform-related issues encountered when building.
+¯\\\_(ツ)_/¯ See [solvent_cli's CMakeLists.txt](./src/solvent_cli/CMakeLists.txt) for inspiration. I'm new to CMake and I have no idea how to properly make distributable libraries. If you have experience with CMake, a PR updating these instructions and fixing any of my noob CMakeLists.txt mistakes would be much appreciated.
+
+Note that the library does all its IO without `printf` and friends, so it is safe to do `std::ios_base::sync_with_stdio(false);`.
+
+## Building and Running solvent_cli
 
 ```shell
+# cd into the cpp directory first
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build
+cmake --build build --config=Release
 ./build/src/solvent_cli/solvent_cli
 ```
+
+If you run into build issues, please raise a GitHub issue; I don't actively test on multiple platforms. PR's are welcome.
 
 Upon starting the program, you will enter the REPL and be greeted with information about defaulted arguments to the main function, and a menu of commands and their functions.
 

@@ -5,6 +5,7 @@
 	"C_Cpp.default.cppStandard": "c++20",
 	"C_Cpp.default.compilerArgs": [
 		"-Wall", "-Wextra", "-Wpedantic", "-Wimplicit-fallthrough=5",
+		// TODO the CMakeLists.txt has more. But do all compiler support those?
 	],
 	"C_Cpp.default.includePath": [
 		"${workspaceFolder}/src",

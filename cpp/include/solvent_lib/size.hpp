@@ -20,13 +20,21 @@ namespace solvent {
 		// O1:     2   3   4   5   6   7   8   9  10  11
 		// O2:     4   9  16  25  36  49  64  81 100 121
 		// round:  8  16  16  32  64  64  64 128 128 128
-		using has_mask_t =
+		using O2_mask_fast_t =
 			std::conditional_t<(O <= 2), std::uint_fast8_t,
 			std::conditional_t<(O <= 4), std::uint_fast16_t,
 			std::conditional_t<(O <= 5), std::uint_fast32_t,
 			std::conditional_t<(O <= 8), std::uint_fast64_t,
 			unsigned long long
 		>>>>; // std::bitset not used for performance reasons
+
+		using O2_mask_least_t =
+			std::conditional_t<(O <= 2), std::uint_least8_t,
+			std::conditional_t<(O <= 4), std::uint_least16_t,
+			std::conditional_t<(O <= 5), std::uint_least32_t,
+			std::conditional_t<(O <= 8), std::uint_least64_t,
+			unsigned long long
+		>>>>;
 
 		// uint range [0, order].
 		// not used in any critical code, so it doesn't need to be fast type.

@@ -16,7 +16,7 @@ namespace solvent::lib::gen {
 	// Used for shuffling Generator.
 	// RNG is shared between threads, guarded by mutex.
 	// Note: Using thread_local instead does not cause any noticeable perf change.
-	extern void seed_rng(std::uint_fast32_t) noexcept;
+	void seed_rng(std::uint_fast32_t) noexcept;
 
 	//
 	struct Params {
@@ -68,7 +68,7 @@ namespace solvent::lib::gen {
 	class Generator final {
 	 static_assert(O > 0 && O < MAX_REASONABLE_ORDER);
 	 private:
-		using has_mask_t = typename size<O>::has_mask_t;
+		using has_mask_t = typename size<O>::O2_mask_fast_t;
 		using ord1_t = typename size<O>::ord1_t;
 		using ord2_t = typename size<O>::ord2_t;
 		using ord4_t = typename size<O>::ord4_t;

@@ -1,25 +1,23 @@
 
 # Things To Do
 
+## C++ Notes
+
+I didn't want to make a separate file just for a small list of rules / notes to self, and I'm in this file all the time, so I just put it here.
+
+- For defining global variables (not constants!) shared between cpp files, declare prefixed with `extern` in a hpp files, and then define it in one of the cpp files. Functions always have external linkage.
+- `inline` means a name can have multiple _identical_ definitions. For defining _and defining_ global constants in headers with a single memory address, prefix the definition with `inline`. Same for functions in headers.
+
 ## Higher Priority
 
-1. Come up with a weight mapping for each edge in rel_counts and then do a [Floyd-Warshall](https://en.wikipedia.org/wiki/Floyd%E2%80%93Warshall_algorithm), and then map each row of the result to either its max or its sum, and then sort. For mapping meanings, see [Closeness Centrality](https://en.wikipedia.org/wiki/Closeness_centrality)- also the section on disconnected graphs.
-    - The weight mapping can be: (recall that `(rel_counts[i][j])/O2` represents the probability in this sudoku grid's markov chain of transitioning from label i to label j.)
-      - `O2 - rel_counts[i][j]`
-      - `rel_counts[i][j]` interesting? what's would this mean / represent?
-      - `p_binom(rel_counts[i][j])` what would this mean / represent?
-      - If further differentiation is needed, look into factoring in  information about:
-        - blocks being in the same chute: retain in rel_counts, instead of a count, store a mask where each bit contains whether that block has an atom with this relationship. The count is obtained by counting 1-bits, and each 1-bit can have a weight according to the number of blocks in same chutes that also have this bit on.
-        - The "skew"-neww of the atom relationships: what is the ratio of contributing horizontal vs vertical atoms?
-    - Would this work against the Most Canonical Grid? I don't have high hopes. Will need to test or reason it out. Wait a second- the relabelling doesn't need to handle the MCG right? Because it would be handled afterward by the repositioning (I think?)!
-    - Note that there are other definitions of centrality, such as [Betweenness Centrality](https://en.wikipedia.org/wiki/Betweenness_centrality), but it uses information that isn't retained in the basic Floyd-Warshall algorithm
+1. Do I have any unnecessary usages of the "extern" or "inline" keywords? I should probably make a note to myself to remind when they need to be used.
 
 1. make the grid conversion utilities make use of std::span instead of std::vector? Or just see where spans can be used in general.
 
 1. Consider: The current relabelling canonicalization method may have a big weakness: I think ties can be easily crafted: consider the "Most Canonical" solution grid- it would be all ties. How can this be addressed? (Or perhaps the "Most Canonical" grid is the only weakness?)
     - First of all, how often to ties happen with the current relabelling solution, and what do the grids where this happens look like? Ie. 
     - Break ties by designing a way to give symbols that frequently cohabit atoms label-values that are closer together in value:
-    - In the cohabitation table, the table tiles, and a coordinate's vertical or horizontal distance (since relabelling moves both the col and row together, these are the same) from the closest tiling of the main diagonal represents the distance of the labels from each other.
+    - The cohabitation table can be tiled; a coordinate's vertical or horizontal distance (these are the same, since relabelling moves both the col and row together) from the closest tiling of the main diagonal represents the distance of the labels from each other.
     - For each label, make an array where each index represents another label, and the value is an object containing the left and right distances between them, and the cohabitation count.
     - Hm. So far this seems to suggest a hill-climbing / brute-force-type solution...
     - What if we prioritized labels according to the existing standard deviation information
@@ -59,9 +57,9 @@
 
 ## Interesting Questions for Further Research
 
-- Is there any correlation between the potential for creating difficult puzzles from a solution and the value-pair-same-atom-count-probability table I'm using for canonicalization? Or perhaps the specific cells that are removed (targeting and those relationships in specific ways)?
+- Can the scramble-invariant property analysis of a grid be used to efficiently estimate the difficulty of a puzzle? I believe (and hope) there is potential that the answer is yes. If it is the case, how? And what would the accuracy of the estimation be (error distribution)?
 
-- What specific pattern of cells can always be removed from a solution while guaranteeing that the result remains possible and easy to restore to the full solution?
+- Lossless Compression: What specific pattern of cells can always be removed from a solution while guaranteeing that the result is _trivial_ to restore to the full solution?
   - One option:
     - The blocks along a diagonal / shifted diagonal
     - one cell in each remaining block
@@ -69,7 +67,6 @@
     - To reduce unnecessary bytes sent over network?
     - Could it be possible to use this as an optimization for solution generation?
       - Set the genpath to skip over these specific cells, and when progress has reached to these cells, switch over to attempting completion.
-    - Notice that this allows putting an intuitive upper bound on the known number of possible solutions for a given grid order (`(O2!)^(O1*(O1-1))`). But other people have probably come up with better calculations; will need to do some reading.
 
 ## Ideas That Seem To Not Have Worked / Are Impractical
 
@@ -85,15 +82,6 @@ These didn't end up doing the thing I wanted / thought might happen.
   - What about if length - popcount is 1?
     - Then I could just set the value right away. This would need a c++ builtin for arbiting a bit.
 
-### Canonicalizer Relabelling
+### Canonicalizer
 
-- Linear Algebra Route: Try breaking relabelling ties by using powers of the counts matrix (normalized to the same support). Need to find a continuous version or approximation of the Binomial distribution's PMF. Do some research, and as a last resort, just lerp it or something. Read about the gamma function (continuous version of factorial?). `tgamma(i+1) = i!`
-  - A public domain library for the Jacobi algorithm (for diagonalizing dense, real symmetric matrices) https://github.com/jewettaij/jacobi_pd. This could be useful if going through several steps is needed to break ties.
-  - This doesn't work for order 2. I know order 2 isn't even marginally interesting, but I think the solution should work for any order, and if it doesn't work for order 2, then something's wrong with it. That being said, I didn't explore this route much. Perhaps with adjustments, it can be useful.
-
-- Graph Theory Route: 
-  - Could the relabelling canonicalization be approached as a travelling salesman problem? I wonder if this would succeed. The cost of each edge would be the probability of that edge's count.
-    - See https://www.math.northwestern.edu/documents/book-markov-chains.pdf section 8.2.2.
-    - Is NP
-  - Graph Bandwidth Problem.
-    - Is NP
+- See [the bottom of the canonicalization readme](./src/solvent_lib/equiv/readme.md)

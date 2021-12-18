@@ -17,6 +17,7 @@ namespace solvent::lib::equiv {
 	class Canonicalizer final {
 	 static_assert(O > 0 && O < MAX_REASONABLE_ORDER);
 	 private:
+		using has_mask_t = typename size<O>::O2_mask_least_t;
 		using ord1_t = typename size<O>::ord1_t;
 		using ord2_t = typename size<O>::ord2_t;
 		using ord4_t = typename size<O>::ord4_t;
@@ -24,7 +25,9 @@ namespace solvent::lib::equiv {
 		using grid_arr_t = grid_mtx_t<O>;
 
 		struct RelCount final {
-			ord2_t all = 0, polar_max = 0, polar_h = 0, polar_v = 0;
+			has_mask_t blocks_h, blocks_v;
+			ord2_t val = 0;
+			unsigned concentration; // a value with an upper bound proportional to val.
 		};
 		struct LineSortEntry final {
 			ord1_t orig_blkline;

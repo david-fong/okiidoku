@@ -2,31 +2,16 @@
 #include <solvent_lib/equiv/canon.hpp>
 #include <solvent_lib/equiv/scramble.hpp>
 // #include <solvent_lib/print.hpp>
-#include <solvent_util/str.hpp>
-
-#if WINDOWS_ANSI
-#include <windows.h>
-#define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
-#endif
+#include <solvent_util/console_setup.hpp>
 
 #include <string>
 #include <iostream>  // cout,
 #include <random>    // random_device,
 
-namespace str = solvent::util::str;
-
 /**
- */
+*/
 int main(const int argc, char const *const argv[]) {
-	#if WINDOWS_ANSI
-	DWORD mode;
-	GetConsoleMode(GetStdHandle(STD_OUTPUT_HANDLE), &mode);
-	mode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
-	SetConsoleMode(GetStdHandle(STD_OUTPUT_HANDLE), mode);
-	#endif
-
-	// My implementation specifies this as safe:
-	std::ios_base::sync_with_stdio(false);
+	solvent::util::setup_console();
 
 	unsigned int user_order; // 1
 	unsigned int srand_key;  // 2
