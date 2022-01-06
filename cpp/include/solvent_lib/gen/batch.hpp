@@ -64,7 +64,7 @@ namespace solvent::lib::gen::batch {
 	using callback_t = std::function<void (const GenResult&)>;
 
 	//
-	BatchReport batch(Order, Params&, callback_t);
+	[[nodiscard]] BatchReport batch(Order, Params&, callback_t);
 }
 
 namespace std {

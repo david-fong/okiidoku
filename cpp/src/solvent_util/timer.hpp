@@ -13,7 +13,7 @@ namespace solvent::util {
 			double wall_seconds;
 		};
 
-		Elapsed read_elapsed() const noexcept {
+		[[nodiscard]] Elapsed read_elapsed() const noexcept {
 			using namespace std::chrono;
 			return Elapsed {
 				.proc_seconds = (static_cast<double>(std::clock() - proc_clock_start_) / CLOCKS_PER_SEC),

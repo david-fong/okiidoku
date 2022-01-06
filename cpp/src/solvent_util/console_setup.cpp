@@ -1,11 +1,11 @@
 #include <solvent_util/console_setup.hpp>
 
-#include <ios>
-#include <cstdlib>
-#include <optional>
+#include <ios>     // ios_base::sync_with_stdio
+#include <cstdlib> // atexit
 
 #ifdef _WIN32
 #include <windows.h>
+#include <optional>
 constexpr DWORD ENABLE_VIRTUAL_TERMINAL_PROCESSING = 0x0004;
 std::optional<DWORD> old_con_mode = std::nullopt;
 std::optional<UINT> old_con_input_codepage = std::nullopt;
@@ -16,7 +16,7 @@ std::optional<UINT> old_con_output_codepage = std::nullopt;
 
 namespace solvent::util {
 
-	void restore_console_config() {
+	void restore_console_config_() {
 		#ifdef _WIN32
 		if (old_con_mode) { SetConsoleMode(GetStdHandle(STD_OUTPUT_HANDLE), old_con_mode.value); }
 		if (old_con_input_codepage) { SetConsoleCP(old_con_input_codepage.value); }
@@ -44,6 +44,6 @@ namespace solvent::util {
 		}
 		#endif
 
-		std::atexit(&restore_console_config);
+		std::atexit(&restore_console_config_);
 	}
 }

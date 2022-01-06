@@ -9,7 +9,7 @@
 
 namespace solvent::lib::gen::path {
 
-	enum class Kind : unsigned {
+	enum class Kind : std::uint8_t {
 		RowMajor,
 		BlockCol,
 		DealRwMj,
@@ -32,7 +32,7 @@ namespace solvent::lib::gen::path {
 	template<solvent::Order O>
 	using coord_converter_t = [[gnu::const]] typename size<O>::ord4_t (&)(typename size<O>::ord4_t) noexcept;
 
-	template<solvent::Order O>
+	template<solvent::Order O> [[nodiscard]]
 	coord_converter_t<O> GetPathCoords(Kind) noexcept;
 
 

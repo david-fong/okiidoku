@@ -16,23 +16,23 @@ namespace solvent::cli {
 	 public:
 		using pathkind_t = lib::gen::path::Kind;
 
-		[[gnu::pure]] verbosity::Kind verbosity(void) const noexcept { return verbosity_; };
+		[[nodiscard, gnu::pure]] verbosity::Kind verbosity(void) const noexcept { return verbosity_; };
 		void verbosity(verbosity::Kind);
 		void verbosity(const std::string&);
 
-		[[gnu::pure]] Order order(void) const noexcept { return order_; }
+		[[nodiscard, gnu::pure]] Order order(void) const noexcept { return order_; }
 		void order(Order) noexcept;
 		void order(const std::string&);
 
-		[[gnu::pure]] pathkind_t path_kind(void) const noexcept { return path_kind_; }
+		[[nodiscard, gnu::pure]] pathkind_t path_kind(void) const noexcept { return path_kind_; }
 		void path_kind(pathkind_t) noexcept;
 		void path_kind(const std::string&) noexcept;
 
-		[[gnu::pure]] unsigned long long max_dead_ends(void) const noexcept { return max_dead_ends_; };
+		[[nodiscard, gnu::pure]] unsigned long long max_dead_ends(void) const noexcept { return max_dead_ends_; };
 		void max_dead_ends(unsigned long long);
 		void max_dead_ends(const std::string&);
 
-		[[gnu::pure]] bool canonicalize(void) const noexcept { return canonicalize_; };
+		[[nodiscard, gnu::pure]] bool canonicalize(void) const noexcept { return canonicalize_; };
 		void canonicalize(bool);
 		void canonicalize(const std::string&);
 

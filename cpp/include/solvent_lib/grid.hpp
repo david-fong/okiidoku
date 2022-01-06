@@ -11,21 +11,25 @@ namespace solvent::lib {
 	template<Order O> using grid_vec_t = std::vector<typename size<O>::ord2_t>;
 	template<Order O, typename T=size<O>::ord2_t> using grid_mtx_t = std::array<std::array<T, O*O>, O*O>;
 
-	template<Order O> grid_vec_t<O> grid_mtx2vec(const grid_mtx_t<O>&) noexcept;
-	template<Order O> grid_mtx_t<O> grid_vec2mtx(const grid_vec_t<O>&) noexcept;
+	template<Order O> [[nodiscard]] grid_vec_t<O> grid_mtx2vec(const grid_mtx_t<O>&) noexcept;
+	template<Order O> [[nodiscard]] grid_mtx_t<O> grid_vec2mtx(const grid_vec_t<O>&) noexcept;
 
 	// Returns true if any cell in the same house contain the same value.
 	// Can be used for incomplete grids.
-	template<Order O> [[gnu::const]] bool is_grid_invalid(const grid_mtx_t<O>&) noexcept;
+	template<Order O> [[nodiscard, gnu::const]] bool is_grid_invalid(const grid_mtx_t<O>&) noexcept;
 
-	template<Order O> [[gnu::const]] constexpr typename size<O>::ord2_t rmi2row(const typename size<O>::ord4_t index) noexcept { return index / (O*O); }
-	template<Order O> [[gnu::const]] constexpr typename size<O>::ord2_t rmi2col(const typename size<O>::ord4_t index) noexcept { return index % (O*O); }
-	template<Order O> [[gnu::const]] constexpr typename size<O>::ord2_t rmi2blk(const typename size<O>::ord2_t row, const typename size<O>::ord2_t col) noexcept {
+	template<Order O> [[nodiscard, gnu::const]] constexpr typename size<O>::ord2_t rmi2row(const typename size<O>::ord4_t index) noexcept { return index / (O*O); }
+	template<Order O> [[nodiscard, gnu::const]] constexpr typename size<O>::ord2_t rmi2col(const typename size<O>::ord4_t index) noexcept { return index % (O*O); }
+	template<Order O> [[nodiscard, gnu::const]] constexpr typename size<O>::ord2_t rmi2blk(const typename size<O>::ord2_t row, const typename size<O>::ord2_t col) noexcept {
 		return ((row / O) * O) + (col / O);
 	}
-	template<Order O> [[gnu::const]] constexpr typename size<O>::ord2_t rmi2blk(const typename size<O>::ord4_t index) noexcept { return rmi2blk<O>(rmi2row<O>(index), rmi2col<O>(index)); }
+	template<Order O> [[nodiscard, gnu::const]]
+	constexpr typename size<O>::ord2_t rmi2blk(const typename size<O>::ord4_t index) noexcept {
+		return rmi2blk<O>(rmi2row<O>(index), rmi2col<O>(index));
+	}
 
-	template<Order O> [[gnu::const]] static constexpr bool cells_share_house(typename size<O>::ord4_t c1, typename size<O>::ord4_t c2) noexcept {
+	template<Order O> [[nodiscard, gnu::const]]
+	static constexpr bool cells_share_house(typename size<O>::ord4_t c1, typename size<O>::ord4_t c2) noexcept {
 		return (rmi2row<O>(c1) == rmi2row<O>(c2))
 			||  (rmi2col<O>(c1) == rmi2col<O>(c2))
 			||  (rmi2blk<O>(c1) == rmi2blk<O>(c2));

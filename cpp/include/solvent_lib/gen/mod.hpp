@@ -21,7 +21,7 @@ namespace solvent::lib::gen {
 	//
 	struct Params {
 		path::Kind path_kind = path::Kind::RowMajor;
-		unsigned long max_dead_ends = 0; // Defaulted if zero.
+		std::uint_fast64_t max_dead_ends = 0; // Defaulted if zero.
 		bool canonicalize = false;
 
 		// Cleans self and returns a copy of self.
@@ -33,7 +33,7 @@ namespace solvent::lib::gen {
 	using opcount_t = unsigned long long;
 
 	//
-	enum class ExitStatus : unsigned char {
+	enum class ExitStatus : std::uint8_t {
 		Ok, Abort, Exhausted,
 	};
 
@@ -43,7 +43,7 @@ namespace solvent::lib::gen {
 		Params params;
 		ExitStatus status;
 		unsigned long frontier_progress;
-		unsigned long long most_dead_ends_seen;
+		std::uint_fast64_t most_dead_ends_seen;
 		opcount_t op_count;
 		std::vector<std::uint_fast8_t> grid; // NOTE: assumes O1 < 16
 		std::vector<std::uint_fast64_t> dead_ends;
@@ -88,11 +88,10 @@ namespace solvent::lib::gen {
 		static constexpr ord4_t O4 = O*O*O*O;
 
 		// Generates a fresh sudoku solution.
-		GenResult operator()(Params);
-		GenResult continue_prev(void);
+		[[nodiscard]] GenResult operator()(Params);
+		[[nodiscard]] GenResult continue_prev(void);
 
-		const Params& get_params() const { return params_; }
-		[[gnu::pure]] const std::array<dead_ends_t, O4>& get_dead_ends() const { return dead_ends_; }
+		[[nodiscard]] const Params& get_params() const { return params_; }
 
 	 private:
 		struct Cell final {
@@ -101,20 +100,18 @@ namespace solvent::lib::gen {
 			[[gnu::pure]] bool is_clear(void) const noexcept { return try_index == O2; }
 		};
 
-		// indexed by `progress // O2`
-		// Note: a possibly more performant option would be `progress_ // O2`,
-		// which the current simple setup doesn't accommodate for `operator[]`.
+		// indexed by `progress_ // O2`
 		std::array<std::array<ord2_t, O2>, O2> val_try_orders_ = []() {
 			std::array<std::array<ord2_t, O2>, O2> _;
 			for (auto& vto : _) { std::iota(vto.begin(), vto.end(), 0); }
 			return _;
 		}();
 
-		std::array<Cell, O4> cells_; // indexed by progress
+		std::array<Cell, O4> cells_; // indexed by progress_
 		std::array<has_mask_t, O2> rows_has_;
 		std::array<has_mask_t, O2> cols_has_;
 		std::array<has_mask_t, O2> blks_has_;
-		std::array<dead_ends_t, O4> dead_ends_; // indexed by progress
+		std::array<dead_ends_t, O4> dead_ends_; // indexed by progress_
 
 		Params params_;
 		ord4_t progress_ = 0;

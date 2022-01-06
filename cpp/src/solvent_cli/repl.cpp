@@ -102,9 +102,11 @@ namespace solvent::cli {
 		const double processor_time = (static_cast<double>(std::clock() - clock_start)) / CLOCKS_PER_SEC;
 
 		gen_result.print_pretty(std::cout);
-		std::cout << "\nprocessor time: " << processor_time << " seconds";
-		std::cout << "\nnum operations: " << gen_result.op_count;
-		std::cout << "\nmax dead ends:  " << gen_result.most_dead_ends_seen;
+		std::cout << std::setprecision(4)
+			<< "\nprocessor time: " << processor_time << " seconds"
+			<< "\nnum operations: " << gen_result.op_count
+			<< "\nmax dead ends:  " << gen_result.most_dead_ends_seen
+			;
 		str::print_msg_bar((gen_result.status == gen::ExitStatus::Ok) ? "OK" : "ABORT");
 		std::cout << std::endl;
 	}
@@ -153,7 +155,7 @@ namespace solvent::cli {
 		}
 
 		static const std::string seconds_units = std::string() + str::DIM.ON + " seconds (with I/O)" + str::DIM.OFF;
-		std::cout
+		std::cout << std::setprecision(4)
 			<< "\nnum threads: " << params.num_threads
 			<< "\ngenerator path: " << params.gen_params.path_kind
 			<< "\npercent aborted: " << (batch_report.fraction_aborted * 100) << " %"

@@ -11,7 +11,7 @@ namespace solvent::lib::equiv {
 	// NOTE: if parallel access is later required, add a mutex to guard.
 	void seed_scrambler_rng(std::uint_fast32_t) noexcept;
 
-	template<Order O>
+	template<Order O> [[nodiscard]]
 	grid_vec_t<O> scramble(const grid_vec_t<O>& input);
 
 

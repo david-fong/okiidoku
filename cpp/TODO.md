@@ -1,4 +1,3 @@
-
 # Things To Do
 
 ## C++ Notes
@@ -10,9 +9,15 @@ I didn't want to make a separate file just for a small list of rules / notes to 
 
 ## Higher Priority
 
-1. Do I have any unnecessary usages of the "extern" or "inline" keywords? I should probably make a note to myself to remind when they need to be used.
+- Forget about canonicalization for now, and focus all efforts on gathering and analysing scramble-invariant properties of grids.
 
-1. make the grid conversion utilities make use of std::span instead of std::vector? Or just see where spans can be used in general.
+- Try some of [these solutions](https://stackoverflow.com/questions/10897552/call-a-function-before-main) for the RNG default-seeding so that users don't need to manually seed in main unless they want a specific seed. Make sure to test that it works.
+
+- Can the grid printer config functions be made static?
+
+1. write a scrambler.
+1. write some correctness-tests for canonicalization and scrambling.
+1. get some benchmarks.
 
 1. Consider: The current relabelling canonicalization method may have a big weakness: I think ties can be easily crafted: consider the "Most Canonical" solution grid- it would be all ties. How can this be addressed? (Or perhaps the "Most Canonical" grid is the only weakness?)
     - First of all, how often to ties happen with the current relabelling solution, and what do the grids where this happens look like? Ie. 
@@ -23,9 +28,7 @@ I didn't want to make a separate file just for a small list of rules / notes to 
     - What if we prioritized labels according to the existing standard deviation information
     - OR... make an empty commit saying that a solution was implemented using the [Ostritch Alorithm](https://en.wikipedia.org/wiki/Ostrich_algorithm)
 
-1. write a scrambler.
-1. write some correctness-tests for canonicalization and scrambling.
-1. get some benchmarks and maybe show emerentius.
+- make the grid conversion utilities make use of std::span instead of std::vector? Or just see where spans can be used in general.
 
 - some diagnostics to try rendering:
   - A scatter chart showing max-dead-ends vs. num operations
@@ -33,6 +36,8 @@ I didn't want to make a separate file just for a small list of rules / notes to 
   - comparing the average heatmaps of aborted vs successful generations.
     - See if there are clear differences/patterns in where they usually spike in backtracking. Perhaps this can be used to inform more sophisticated thresholds for each genpath.
 - Rename things to match the standard literature / terminology. Do some research to try to get it right. See sudopedia.
+
+- ? Refactor names to use terminology suitable for more than just 2 dimensions? Ex. in 2D: row -> `d0i` (as in "dimension-zero index"), col -> `d1i`. But doing so would imply that I'm going to support multiple dimensions... and that's a huge can of worms.
 
 - (?) Change canonicalization to not use templates. Verify first that it isn't a performance bottleneck.
 - Decide what interfaces to support:
@@ -50,7 +55,7 @@ I didn't want to make a separate file just for a small list of rules / notes to 
   - `using enum`. Might want to wait for CLANG to support?
   - wait for support in gcc and clang for `constexpr std::string`.
     - the ansi constants could use this. Right now, they are stuck as C-style string.
-- I have a nagging feeling that I'm going too far with the namespacing. I a C++ noob with no reference so I'm not sure. I can probably make some improvements.
+- I have a nagging feeling that I'm going too far with the namespacing. I'm a C++ noob with no reference so I'm not sure. I can probably make some improvements.
 - CLI
   - implement `-h` and `--help` CLI argument.
   - give a red message when trying to continue and nothing is left to be found.

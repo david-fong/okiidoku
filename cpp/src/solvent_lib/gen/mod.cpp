@@ -39,7 +39,6 @@ namespace solvent::lib::gen {
 
 	template<Order O>
 	GenResult Generator<O>::continue_prev(void) {
-		// Continue the previous generation.
 		if (prev_gen_status_ == ExitStatus::Exhausted) [[unlikely]] {
 			return this->make_gen_result_();
 		}
@@ -78,7 +77,7 @@ namespace solvent::lib::gen {
 		typename path::coord_converter_t<O> prog2coord = path::GetPathCoords<O>(params_.path_kind);
 
 		bool backtracked = prev_gen_status_ == ExitStatus::Abort;
-		while (true) {
+		while (true) [[likely]] {
 			const Direction direction = this->set_next_valid_(prog2coord, backtracked);
 			backtracked = direction.is_back;
 			if (!direction.is_skip) [[likely]] { ++op_count_; }
@@ -125,7 +124,7 @@ namespace solvent::lib::gen {
 		has_mask_t& row_has = rows_has_[rmi2row<O>(coord)];
 		has_mask_t& col_has = cols_has_[rmi2col<O>(coord)];
 		has_mask_t& blk_has = blks_has_[rmi2blk<O>(coord)];
-		auto& val_try_order = val_try_orders_[progress_ / O2];
+		const auto& val_try_order = val_try_orders_[progress_ / O2];
 
 		Cell& cell = cells_[progress_];
 		if (backtracked) [[unlikely]]/* average direction is forward */ {
@@ -148,7 +147,7 @@ namespace solvent::lib::gen {
 		const has_mask_t cell_has = (row_has | col_has | blk_has);
 		if (std::popcount(cell_has) != O2) [[likely]] {
 			// The above optimization comes into effect ~1/5 of the time for size 5.
-			for (ord2_t try_i = (cell.try_index+1) % (O2+1); try_i < O2; try_i++) {
+			for (ord2_t try_i = (cell.try_index+1) % (O2+1); try_i < O2; try_i++) [[likely]] {
 				const has_mask_t try_val_mask = has_mask_t(1) << val_try_order[try_i];
 				if (!(cell_has & try_val_mask)) [[unlikely]] {
 					// A valid value was found:

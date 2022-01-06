@@ -5,11 +5,8 @@
 #include <solvent_lib/size.hpp>
 
 namespace solvent::lib::equiv {
-	/**
-	input must be a complete grid.
-	See readme for information about the algorithm.
-	*/
-	template<Order O>
+	/** input must be a complete grid. */
+	template<Order O> [[nodiscard]]
 	[[gnu::const]] grid_vec_t<O> canonicalize(const grid_vec_t<O>& input);
 
 

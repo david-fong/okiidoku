@@ -76,7 +76,7 @@ namespace solvent::cli {
 		}
 		for (unsigned i = 0; i < gen::path::NUM_KINDS; i++) {
 			if (new_path_kind_str.compare(gen::path::NAMES[i]) == 0) {
-				path_kind(pathkind_t{i});
+				path_kind(pathkind_t(i));
 				return;
 			}
 		}

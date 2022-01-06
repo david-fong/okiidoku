@@ -21,6 +21,7 @@ Discussions related to equivalence checking can be found by searching for "Sudok
 - [dobrichev/sudoku-minlexing-tool](https://github.com/dobrichev/sudoku-minlexing-tool)
 - [The rust Sudoku library](https://github.com/Emerentius/sudoku/blob/master/src/board/canonicalization.rs)
 - https://www.degruyter.com/document/doi/10.2478/s13537-012-0011-y/pdf
+  - Designed for canonicalizing (and then enumerating) _puzzles_- not solutions.
 - https://sudokugarden.de/en/info/canonical-form
 
 ## Scramble-Invariant Properties of Grids
@@ -37,7 +38,7 @@ I was surprised to find so many
 
 - I am only looking at size-2 relationships between labels, but one can observe and use the nature and number of relationships of size up to the grid order (the size of an atom). I only look at size-2 because I'm not sure how to gather this information and retain the minimum necessary amount so that space usage doesn't get out of hand, since the size of the observed relationships determines of the number of dimensions of the multidimensional array, with each dimension having length `o^2`.
   - Some observations:
-    - A grid has `2 * o^3` atoms. Analysis can be performed with relationships within atoms of sizes in `[2, o]`. For a size `s`, TODO continue count limits summary
+    - A grid has `2 * o^3` atoms. Analysis can be performed with relationships within atoms of sizes in `[2, o]`. For a size `s`, there are `nCr(o^2, s)` possible atoms.
     - As the size of the grid increases, the 
 
 - For canonicalization of labelling, I am only looking at the counts of relationships between labels- which only makes use of the first "scrambling-cannot" bullet. The combination of all the bullets would be, for each relationship between two labels, to gather a trinary "mask", where each digit corresponds to one of the blocks, and the value of the digit is either "no relationship", "horizontal atom relationship", or "vertical atom relationship". This mask cannot be used raw, since the repositioning of chutes will reorder digits, and transposition of the grid will swap the orientation of atoms. The mask itself must be canonicalized in isolation

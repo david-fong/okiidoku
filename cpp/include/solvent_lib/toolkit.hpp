@@ -16,8 +16,8 @@ namespace solvent::lib {
 		Toolkit(Order);
 		void set_order(Order);
 
-		gen::GenResult gen(gen::Params);
-		gen::GenResult gen_continue_prev();
+		[[nodiscard]] gen::GenResult gen(gen::Params);
+		[[nodiscard]] gen::GenResult gen_continue_prev();
 
 		// Note: commented out since currently not in use (and not very useful either).
 		// void gen_batch(gen::batch::Params);
