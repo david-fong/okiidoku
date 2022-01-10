@@ -9,13 +9,12 @@ I didn't want to make a separate file just for a small list of rules / notes to 
 
 ## Higher Priority
 
+- Go back and try the old canonicalization by rel row prob, but break ties by doing some brute force: try each tied permutation and valuate it according to some reduction of how it pushes rarer rel counts to the top left. Just be careful to shift to get rid of the main diagonal seam.
+
 - Forget about canonicalization for now, and focus all efforts on gathering and analysing scramble-invariant properties of grids.
 
 - Try some of [these solutions](https://stackoverflow.com/questions/10897552/call-a-function-before-main) for the RNG default-seeding so that users don't need to manually seed in main unless they want a specific seed. Make sure to test that it works.
 
-- Can the grid printer config functions be made static?
-
-1. write a scrambler.
 1. write some correctness-tests for canonicalization and scrambling.
 1. get some benchmarks.
 

@@ -1,36 +1,28 @@
 #include <solvent_lib/equiv/analyze.hpp>
-#include <solvent_lib/print.hpp>
+#include <solvent_lib/print.hpp> // TODO remove after done implementing
 #include <solvent_util/math.hpp>
 
 #include <iostream>
-#include <array>
-#include <algorithm> // sort, inner_product
+#include <algorithm> // sort
 #include <numeric>   // transform_reduce
 #include <execution> // execution::par_unseq
 #include <cmath>     // pow
 #include <compare>   // partial_ordering
+#include <bit>       // popcount
 
 namespace solvent::lib::equiv {
 
 	template<Order O>
 	class GridInnerRelStats final {
-	 static_assert(O > 0 && O < MAX_REASONABLE_ORDER);
-	 private:
-		using has_mask_t = typename size<O>::O2_mask_least_t;
-		using ord1_t = typename size<O>::ord1_t;
-		using ord2_t = typename size<O>::ord2_t;
-		using ord4_t = typename size<O>::ord4_t;
 
-		using grid_arr_t = grid_mtx_t<O>;
-
-		struct RelCount final {
-			has_mask_t blocks_h, blocks_v; // one for each dimension of grid. we are 2D.
-			ord2_t count;
-		};
+		/**
+		Carries position-independent information about the way two
+		labels relate to one another in a grid.
+		*/
 		struct LineSortEntry final {
 			ord1_t orig_blkline;
 			double prob_polar;
-			static LineSortEntry build(const grid_mtx_t<O, RelCount>& counts, ord1_t orig_blkline, const std::array<ord2_t, O*O>& line);
+			static LineSortEntry build(const grid_mtx_t<O, RelStats>& counts, ord1_t orig_blkline, const std::array<ord2_t, O*O>& line);
 			[[gnu::pure]] std::partial_ordering operator<=>(const LineSortEntry& that) const;
 		};
 		struct ChuteSortEntry final {
@@ -38,14 +30,14 @@ namespace solvent::lib::equiv {
 			double prob_all;
 			double prob_polar;
 			std::array<LineSortEntry, O> lines_;
-			static ChuteSortEntry build(const grid_mtx_t<O, RelCount>& counts, ord1_t orig_chute, const grid_arr_t& grid);
+			static ChuteSortEntry build(const grid_mtx_t<O, RelStats>& counts, ord1_t orig_chute, const grid_arr_t& grid);
 			[[gnu::const]] const LineSortEntry& operator[](ord1_t i) const { return lines_[i]; }
 			[[gnu::const]] std::partial_ordering operator<=>(const ChuteSortEntry& that) const;
 		};
 		struct GridSortEntry final {
 			double prob;
 			std::array<ChuteSortEntry, O> chutes_;
-			static GridSortEntry build(const grid_mtx_t<O, RelCount>& counts, const grid_arr_t& grid);
+			static GridSortEntry build(const grid_mtx_t<O, RelStats>& counts, const grid_arr_t& grid);
 			[[gnu::const]] const ChuteSortEntry& operator[](ord1_t i) const { return chutes_[i]; }
 			[[gnu::const]] std::partial_ordering operator<=>(const GridSortEntry& that) const;
 		};
@@ -60,35 +52,6 @@ namespace solvent::lib::equiv {
 		grid_vec_t<O> operator()(void);
 
 	 private:
-		grid_mtx_t<O> grid_;
-
-		/*
-		Coordinate (A,B) contains the number of atoms (or equivalently,
-		blocks) in the grid where the label values A and B coexist.
-		Choosing labels A and B and swapping the row A with row B and
-		col A with col B corresponds to swapping those label values.
-
-		- The diagonal is all zeroes (cohabitation with self is not counted).
-		- Each row (or column) sums to `O2 * (2*(O1-1))`.
-		- The maximum possible value at any coordinate is O2.
-		- The expected value at any non-diagonal coordinate is 2*O2/(O1+1).
-			Examples by order: 2: 2.67,  3: 4.50,  4: 6.40,  5: 8.33
-		
-		- It is a Real Symmetric Matrix -> It is a Normal Matrix -> It is
-			diagonalizable by an Orthogonal Matrix.
-		- It can be interpreted as a Markov Chain: The walk where starting
-			at a cell with a certain value, each transition hops to another
-			cell in a same atom and then hops to a random cell with the same
-			value.
-		- It is a Doubly Stochastic Matrix (when divided by O2*2*(O1-1))
-			AKA a Symmetric Markov Chain -> Its stationary distribution is
-			the uniform distribution -> It converges to uniformity as steps
-			increase.
-		- See https://en.wikipedia.org/wiki/Jacobi_eigenvalue_algorithm#Applications_for_real_symmetric_matrices
-		- It can be interpreted as / converted to a graph. It is weighted,
-			undirected, and dense.
-		*/
-		grid_mtx_t<O, RelCount> rel_count_;
 		void analyze_rel_counts_(void) noexcept;
 
 		/**
@@ -143,23 +106,40 @@ namespace solvent::lib::equiv {
 					for (ord1_t atom_j = atom_i + 1; atom_j < O1; atom_j++) {
 						{ // boxrow
 							const ord2_t label_i = grid_[line][atom+atom_i], label_j = grid_[line][atom+atom_j];
-							const has_mask_t block_mask = rmi2blk<O>(line, atom);
-							rel_count_[label_i][label_j].blocks_h |= block_mask;
-							rel_count_[label_j][label_i].blocks_h |= block_mask;
+							const has_mask_t blk_mask_bit = 1 << rmi2blk<O>(line, atom);
+							rel_count_[label_i][label_j].blocks_h |= blk_mask_bit;
+							rel_count_[label_j][label_i].blocks_h |= blk_mask_bit;
 						}
 						{ // boxcol
 							const ord2_t label_i = grid_[atom+atom_i][line], label_j = grid_[atom+atom_j][line];
-							const has_mask_t block_mask = rmi2blk<O>(atom, line);
-							rel_count_[label_i][label_j].blocks_v |= block_mask;
-							rel_count_[label_j][label_i].blocks_v |= block_mask;
+							const has_mask_t blk_mask_bit = 1 << rmi2blk<O>(atom, line);
+							rel_count_[label_i][label_j].blocks_v |= blk_mask_bit;
+							rel_count_[label_j][label_i].blocks_v |= blk_mask_bit;
 						}
 		}	}	}	}
-/* 		for (auto& row : rel_count_) { for (auto& rel : row) {
-			rel.all = rel.polar_h + rel.polar_v;
-			rel.polar_max = std::max(rel.polar_h, rel.polar_v);
+ 		for (auto& row : rel_count_) { for (auto& rel : row) {
+			std::array<ord2_t, (2*O)-1> density_counts = {0};
+			const has_mask_t blocks_mask = rel.blocks_h | rel.blocks_v;
+			rel.count = 0;
+			for (ord1_t r = 0; r < O; r++) {
+				for (ord1_t c = 0; c < O; c++) {
+					const has_mask_t blk_mask = blk_mask_chutes.row[r] & blk_mask_chutes.col[c];
+					if (blk_mask & blocks_mask) {
+						rel.count++;
+						const has_mask_t chute_see_mask = blk_mask_chutes.row[r] | blk_mask_chutes.col[c];
+						density_counts[std::popcount(blocks_mask & chute_see_mask)-1]++;
+					}
+			}	}
+			rel.density = 0;
+			for (unsigned i = 0; i < density_counts.size(); i++) {
+				rel.density += density_counts[i] * std::pow(O2, i);
+			}
+			ord1_t area_y = 0, area_x = 0;
+			for (ord1_t i = 0; i < O; i++) { area_y += (blk_mask_chutes.row[i] & blocks_mask) != 0; }
+			for (ord1_t i = 0; i < O; i++) { area_x += (blk_mask_chutes.col[i] & blocks_mask) != 0; }
+			rel.area = area_x * area_y;
 		}}
-		std::array<LabelStats, O2> canon2orig_label = {};
-
+/*
 		// Set up Floyd-Warshall:
 		grid_mtx_t<O, double> dist_graph;
 		for (ord2_t i = 0; i < O2; i++) {
@@ -194,7 +174,7 @@ namespace solvent::lib::equiv {
 
 	template<Order O>
 	GridInnerRelStats<O>::LineSortEntry GridInnerRelStats<O>::LineSortEntry::build(
-		const grid_mtx_t<O, RelCount>& counts, const ord1_t orig_blkline, const std::array<ord2_t, O*O>& line
+		const grid_mtx_t<O, RelStats>& counts, const ord1_t orig_blkline, const std::array<ord2_t, O*O>& line
 	) {
 		double prob_polar = 1.0;
 		for (ord2_t atom = 0; atom < O2; atom += O1) {
@@ -206,7 +186,7 @@ namespace solvent::lib::equiv {
 	}
 	template<Order O>
 	GridInnerRelStats<O>::ChuteSortEntry GridInnerRelStats<O>::ChuteSortEntry::build(
-		const grid_mtx_t<O, RelCount>& counts, const ord1_t orig_chute, const grid_arr_t& grid
+		const grid_mtx_t<O, RelStats>& counts, const ord1_t orig_chute, const grid_arr_t& grid
 	) {
 		std::array<LineSortEntry, O> lines;
 		for (ord1_t i = 0; i < O1; i++) { lines[i] = LineSortEntry::build(counts, i, grid[(O1*orig_chute)+i]); }
@@ -217,7 +197,7 @@ namespace solvent::lib::equiv {
 	}
 	template<Order O>
 	GridInnerRelStats<O>::GridSortEntry GridInnerRelStats<O>::GridSortEntry::build(
-		const grid_mtx_t<O, RelCount>& counts, const grid_arr_t& grid
+		const grid_mtx_t<O, RelStats>& counts, const grid_arr_t& grid
 	) {
 		std::array<ChuteSortEntry, O> chutes;
 		for (ord1_t i = 0; i < O1; i++) { chutes[i] = ChuteSortEntry::build(counts, i, grid); }
@@ -242,7 +222,8 @@ namespace solvent::lib::equiv {
 
 
 	#define SOLVENT_TEMPL_TEMPL(O_) \
-		extern template GridStats<O_> analyze<O_>(const grid_vec_t<O_>&); \
+		template struct GridStats<O_>; \
+		template GridStats<O_> analyze<O_>(const grid_vec_t<O_>&); \
 		template class GridInnerRelStats<O_>;
 	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 	#undef SOLVENT_TEMPL_TEMPL

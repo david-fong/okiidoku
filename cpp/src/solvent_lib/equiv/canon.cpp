@@ -1,5 +1,5 @@
 #include <solvent_lib/equiv/canon.hpp>
-#include <solvent_lib/print.hpp>
+#include <solvent_lib/print.hpp> // TODO remove after done implementing
 // #include <solvent_util/math.hpp>
 
 #include <iostream>
@@ -34,6 +34,7 @@ namespace solvent::lib::equiv {
 
 	 private:
 		grid_mtx_t<O> grid_;
+		grid_mtx_t<O> rel_counts_;
 
 		void canonicalize_labelling_(void) noexcept;
 		void canonicalize_positioning_(void);
@@ -72,7 +73,7 @@ namespace solvent::lib::equiv {
 	template<Order O>
 	void Canonicalizer<O>::canonicalize_labelling_(void) noexcept {
 		// TODO
-		/* struct SortMapEntry final {
+		struct SortMapEntry final {
 			ord2_t orig; // The original label value
 			double dist;
 			double p_all;
@@ -109,7 +110,7 @@ namespace solvent::lib::equiv {
 			for (ord2_t j = 0; j < O2; j++) {
 				canon_counts[label_map[i]][label_map[j]] = rel_count_[i][j];
 		}	}
-		rel_count_ = canon_counts; */
+		rel_count_ = canon_counts;
 	}
 
 

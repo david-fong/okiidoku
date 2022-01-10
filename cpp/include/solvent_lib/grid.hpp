@@ -35,6 +35,22 @@ namespace solvent::lib {
 			||  (rmi2blk<O>(c1) == rmi2blk<O>(c2));
 	}
 	// Note: the compiler optimizes the division/modulus pairs just fine.
+	
+	template<Order O>
+	struct blk_mask_chutes_t {
+		std::array<typename size<O>::O2_mask_fast_t, O> row, col;
+	};
+	template<Order O>
+	constexpr blk_mask_chutes_t blk_mask_chutes = [](){
+		blk_mask_chutes_t<O> _;
+		for (unsigned chute = 0; chute < O; chute++) {
+			for (unsigned i = 0; i < O; i++) {
+				_.row[chute] |= 1 << ((O*chute) + i);
+				_.col[chute] |= 1 << ((O*i) + chute);
+		}	}
+		return _;
+	};
+
 
 	#define SOLVENT_TEMPL_TEMPL(O_) \
 		extern template grid_vec_t<O_> grid_mtx2vec<O_>(const grid_mtx_t<O_>&) noexcept; \

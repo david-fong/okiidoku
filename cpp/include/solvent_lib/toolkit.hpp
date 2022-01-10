@@ -7,8 +7,6 @@
 #include <solvent_lib/grid.hpp>
 #include <solvent_lib/size.hpp>
 
-#include <iosfwd>
-
 namespace solvent::lib {
 
 	class Toolkit final {

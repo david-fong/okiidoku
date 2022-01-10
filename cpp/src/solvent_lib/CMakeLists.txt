@@ -1,7 +1,7 @@
 add_library(solvent_lib STATIC
 	grid.cpp
 	print.cpp
-	equiv/analyze.cpp
+	# equiv/analyze.cpp
 	equiv/canon.cpp
 	equiv/scramble.cpp
 	gen/path.cpp
