@@ -197,13 +197,12 @@ namespace solvent::lib::gen {
 
 
 	void GenResult::print_serial(std::ostream& os) const {
-		static const print::val_grid_t grid_accessor {[this](uint32_t coord) { return this->grid[coord]; }};
-		print::serial(os, O, grid_accessor);
+		print::serial(os, O, [this](uint32_t coord) { return this->grid[coord]; });
 	}
 
 
 	void GenResult::print_pretty(std::ostream& os) const {
-		static const std::vector<print::print_grid_t> grid_accessors {
+		const std::vector<print::print_grid_t> grid_accessors {
 			print::print_grid_t([this](std::ostream& _os, uint16_t coord) {
 				_os << ' '; print::val2str(_os, O, this->grid[coord]);
 			}),
