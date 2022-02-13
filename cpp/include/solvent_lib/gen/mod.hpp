@@ -42,7 +42,7 @@ namespace solvent::lib::gen {
 		Order O;
 		Params params;
 		ExitStatus status;
-		unsigned long frontier_progress;
+		unsigned long backtrack_origin;
 		std::uint_fast64_t most_dead_ends_seen;
 		opcount_t op_count;
 		std::vector<std::uint_fast8_t> grid; // NOTE: assumes O1 < 16
@@ -55,7 +55,7 @@ namespace solvent::lib::gen {
 	//
 	struct Direction final {
 		bool is_back;
-		bool is_skip; // only meaningful when is_back is true.
+		bool is_back_skip; // only meaningful when is_back is true.
 	};
 
 	constexpr unsigned long long DEFAULT_MAX_DEAD_ENDS(const Order O) {
@@ -101,11 +101,11 @@ namespace solvent::lib::gen {
 		};
 
 		// indexed by `progress_ // O2`
-		std::array<std::array<ord2_t, O2>, O2> val_try_orders_ = []() {
+		std::array<std::array<ord2_t, O2>, O2> val_try_orders_ {[]() {
 			std::array<std::array<ord2_t, O2>, O2> _;
 			for (auto& vto : _) { std::iota(vto.begin(), vto.end(), 0); }
 			return _;
-		}();
+		}()};
 
 		std::array<Cell, O4> cells_; // indexed by progress_
 		std::array<has_mask_t, O2> rows_has_;
@@ -115,10 +115,10 @@ namespace solvent::lib::gen {
 
 		Params params_;
 		ord4_t progress_ = 0;
-		ord4_t frontier_progress_ = 0;
+		ord4_t backtrack_origin_ = 0;
 		dead_ends_t most_dead_ends_seen_ = 0;
 		opcount_t op_count_ = 0;
-		ExitStatus prev_gen_status_ = ExitStatus::Ok;
+		ExitStatus prev_gen_status_ = ExitStatus::Abort;
 
 		// clear fields and scramble val_try_orders_
 		void prepare_fresh_gen_(void);

@@ -60,7 +60,7 @@ namespace solvent::lib::gen {
 		dead_ends_.fill(0);
 
 		progress_ = 0;
-		frontier_progress_ = 0;
+		backtrack_origin_ = 0;
 		most_dead_ends_seen_ = 0;
 		op_count_ = 0;
 
@@ -76,43 +76,35 @@ namespace solvent::lib::gen {
 	void Generator<O>::generate_() {
 		typename path::coord_converter_t<O> prog2coord = path::GetPathCoords<O>(params_.path_kind);
 
-		bool backtracked = prev_gen_status_ == ExitStatus::Abort;
+		bool backtracked = op_count_ != 0;
 		while (true) [[likely]] {
 			const Direction direction = this->set_next_valid_(prog2coord, backtracked);
 			backtracked = direction.is_back;
-			if (!direction.is_skip) [[likely]] { ++op_count_; }
+			if (!direction.is_back_skip) [[likely]] { ++op_count_; }
 
 			if (direction.is_back) [[unlikely]] {
 				if (progress_ == 0) [[unlikely]] {
 					prev_gen_status_ = ExitStatus::Exhausted;
 					break;
 				}
-				if (progress_ == frontier_progress_) [[unlikely]] {
+				if (!direction.is_back_skip) [[unlikely]] {
 					const dead_ends_t dead_ends = ++dead_ends_[progress_];
-					--progress_;
 					if (dead_ends > most_dead_ends_seen_) [[unlikely]] {
 						most_dead_ends_seen_ = dead_ends;
-						if (most_dead_ends_seen_ > params_.max_dead_ends) [[unlikely]] {
+						if (dead_ends > params_.max_dead_ends) [[unlikely]] {
 							prev_gen_status_ = ExitStatus::Abort;
+							--progress_;
 							break;
 						}
 					}
-				} else {
-					--progress_;
-					// note: the placement of these decrement instructions is
-					// comparatively performant.
 				}
+				--progress_;
 			} else {
 				if (progress_ == O4-1) [[unlikely]] {
 					prev_gen_status_ = ExitStatus::Ok;
 					break;
 				}
 				++progress_;
-				if ((progress_ > frontier_progress_)
-					|| !cells_share_house<O>(prog2coord(progress_), prog2coord(frontier_progress_))
-				) [[unlikely]] {
-					frontier_progress_ = progress_;
-				}
 			}
 		}
 	}
@@ -137,11 +129,11 @@ namespace solvent::lib::gen {
 
 		// Smart backtracking:
 		// This optimization's degree of usefulness depends on the genpath and size.
-		if ((progress_ < frontier_progress_) && !cells_share_house<O>(
-			coord, prog2coord(frontier_progress_)
+		if ((progress_ < backtrack_origin_) && !cells_share_house<O>(
+			coord, prog2coord(backtrack_origin_)
 		)) [[unlikely]] {
 			cell.clear();
-			return Direction { .is_back = true, .is_skip = true };
+			return Direction { .is_back = true, .is_back_skip = true };
 		}
 
 		const has_mask_t cell_has = (row_has | col_has | blk_has);
@@ -155,46 +147,41 @@ namespace solvent::lib::gen {
 					col_has |= try_val_mask;
 					blk_has |= try_val_mask;
 					cell.try_index = try_i;
-					return Direction { .is_back = false, .is_skip = false };
+					return Direction { .is_back = false, .is_back_skip = false };
 				}
 			}
 		}
 		// Nothing left to try here. Backtrack:
 		cell.clear();
-		return Direction { .is_back = true, .is_skip = false };
+		backtrack_origin_ = progress_;
+		return Direction { .is_back = true, .is_back_skip = false };
 	}
 
 
 	template<Order O>
 	GenResult Generator<O>::make_gen_result_(void) const {
 		typename path::coord_converter_t<O> prog2coord = path::GetPathCoords<O>(params_.path_kind);
-		GenResult gen_result = {
+		GenResult gen_result {
 			.O {O},
 			.params {params_},
 			.status {prev_gen_status_},
-			.frontier_progress {frontier_progress_},
+			.backtrack_origin {backtrack_origin_},
 			.most_dead_ends_seen {most_dead_ends_seen_},
 			.op_count {op_count_},
 			.grid = std::vector<std::uint_fast8_t>(O4, O2),
-			.dead_ends = std::vector<std::uint_fast64_t>(O4),
+			.dead_ends = std::vector<std::uint_fast64_t>(O4, 0),
 		};
-		for (ord4_t p = 0; p <= progress_; p++) {
+		for (ord4_t p = 0; p < O4; p++) {
 			// note: The bound under progress_ is significant.
-			// It allows the optimization of not cleaning up some
-			// guesses when backtracking.
+			// try_indexes afterward are out of val_try_order's range.
 			const ord4_t coord = prog2coord(p);
-			gen_result.grid[coord] = val_try_orders_[p/O2][cells_[p].try_index];
-			gen_result.dead_ends[coord] = dead_ends_[p];
-		}
-		if (gen_result.status == ExitStatus::Abort) [[likely]] {
-			// progress was decremented to maintain the continuability invariant.
-			// this is the most important dead_end cell!
-			const ord4_t p = progress_+1;
-			const ord4_t coord = prog2coord(p);
+			if (!cells_[p].is_clear()) {
+				gen_result.grid[coord] = val_try_orders_[p/O2][cells_[p].try_index];
+			}
 			gen_result.dead_ends[coord] = dead_ends_[p];
 		}
 		if (params_.canonicalize && gen_result.status == ExitStatus::Ok) /* [[unlikely]] (worth?) */ {
-			gen_result.grid = equiv::canonicalize<O>(gen_result.grid);
+			// gen_result.grid = equiv::canonicalize<O>(gen_result.grid); // TODO put back in when working on canonicalization
 		}
 		return gen_result;
 	}
@@ -210,13 +197,13 @@ namespace solvent::lib::gen {
 
 
 	void GenResult::print_serial(std::ostream& os) const {
-		static const print::val_grid_t grid_accessor([this](uint32_t coord) { return this->grid[coord]; });
+		static const print::val_grid_t grid_accessor {[this](uint32_t coord) { return this->grid[coord]; }};
 		print::serial(os, O, grid_accessor);
 	}
 
 
 	void GenResult::print_pretty(std::ostream& os) const {
-		static const std::vector<print::print_grid_t> grid_accessors = {
+		static const std::vector<print::print_grid_t> grid_accessors {
 			print::print_grid_t([this](std::ostream& _os, uint16_t coord) {
 				_os << ' '; print::val2str(_os, O, this->grid[coord]);
 			}),

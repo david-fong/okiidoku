@@ -45,7 +45,7 @@ namespace solvent::lib::equiv {
 	grid_vec_t<O> canonicalize(const grid_vec_t<O>& input) {
 		// TODO assert that input is the correct length and is a complete, valid sudoku?
 		Canonicalizer<O> canon(input);
-		return canon();
+		return canon.operator()();
 	}
 
 	template<Order O>
@@ -73,6 +73,7 @@ namespace solvent::lib::equiv {
 	template<Order O>
 	void Canonicalizer<O>::canonicalize_labelling_(void) noexcept {
 		// TODO
+		/*
 		struct SortMapEntry final {
 			ord2_t orig; // The original label value
 			double dist;
@@ -91,9 +92,9 @@ namespace solvent::lib::equiv {
 			auto p_prev = canon2orig_label[0];
 			for (ord2_t i = 1; i < O2; i++) {
 				const auto p = canon2orig_label[i];
-				if (p.dist == p_prev.dist) [[unlikely]] {
-					rel_count_tie_mask_[i-1] = true; rel_count_tie_mask_[i] = true; 
-				}
+				// if (p.dist == p_prev.dist) [[unlikely]] {
+				// 	rel_count_tie_mask_[i-1] = true; rel_count_tie_mask_[i] = true; 
+				// }
 				p_prev = p;
 			}
 		}
@@ -105,12 +106,13 @@ namespace solvent::lib::equiv {
 			for (auto& e : row) {
 				e = label_map[e];
 		}	}
-		decltype(rel_count_) canon_counts;
+		decltype(rel_counts_) canon_counts;
 		for (ord2_t i = 0; i < O2; i++) {
 			for (ord2_t j = 0; j < O2; j++) {
 				canon_counts[label_map[i]][label_map[j]] = rel_count_[i][j];
 		}	}
 		rel_count_ = canon_counts;
+		*/
 	}
 
 

@@ -48,7 +48,7 @@ namespace solvent::lib::gen::batch {
 		BatchReport& shared_data_;
 		std::mutex& shared_data_mutex_;
 		callback_t gen_result_consumer_;
-		Generator<O> generator_ = Generator<O>();
+		Generator<O> generator_ {};
 	};
 
 
@@ -71,7 +71,6 @@ namespace solvent::lib::gen::batch {
 				];
 				dist_summary_row.marginal_oks++;
 				dist_summary_row.marginal_ops += gen_result.op_count;
-
 			}
 			gen_result_consumer_(gen_result);
 		}

@@ -63,7 +63,7 @@ namespace solvent::lib::gen::batch {
 	//
 	using callback_t = std::function<void (const GenResult&)>;
 
-	//
+	// callback is guarded by mutex.
 	[[nodiscard]] BatchReport batch(Order, Params&, callback_t);
 }
 

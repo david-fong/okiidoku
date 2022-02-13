@@ -107,7 +107,8 @@ namespace solvent::cli {
 			<< "\nnum operations: " << gen_result.op_count
 			<< "\nmax dead ends:  " << gen_result.most_dead_ends_seen
 			;
-		str::print_msg_bar((gen_result.status == gen::ExitStatus::Ok) ? "OK" : "ABORT");
+		str::print_msg_bar((gen_result.status == gen::ExitStatus::Ok) ? "OK"
+			: (gen_result.status == gen::ExitStatus::Abort) ? "ABORT" : "NOTHING LEFT TO CONTINUE");
 		std::cout << std::endl;
 	}
 

@@ -5,7 +5,8 @@
 namespace solvent::lib {
 
 	Toolkit::Toolkit(Order order):
-		gen_([order]() -> generator_union_t {
+		order_{order},
+		gen_{[order]() -> generator_union_t {
 			switch (order) {
 			 #define SOLVENT_TEMPL_TEMPL(O_) \
 				case O_: return generator_union_t { .o ## O_ = gen::Generator<O_>() };
@@ -16,9 +17,8 @@ namespace solvent::lib {
 				.SOLVENT_TEMPL_UNION_DEFAULT(o) = gen::Generator<SOLVENT_DEFAULT_ORDER>()
 			 };
 			}
-		}())
+		}()}
 	{
-		set_order(order);
 	}
 
 

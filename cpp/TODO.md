@@ -10,6 +10,17 @@ I didn't want to make a separate file just for a small list of rules / notes to 
 ## Higher Priority
 
 - Go back and try the old canonicalization by rel row prob, but break ties by doing some brute force: try each tied permutation and valuate it according to some reduction of how it pushes rarer rel counts to the top left. Just be careful to shift to get rid of the main diagonal seam.
+    ```
+    count[rel] = 
+    exp[rel] = i + j
+    scale[rel] = 1 - (p_binomial(count[rel]) ^ 1/O)
+    score[rel] = 2 ^ (exp[rel]) * scale[rel]
+    find labelling with maximum
+    ```
+
+- (maybe?) instead of defining RNGs, make the library functions that use RNG take a reference to an RNG?
+  - rationale: give the library user more control over the RNGs. easy for them to seed it, and they can choose whether to share an RNG for gen and shuffle operations.
+  - make sure it is still thread safe. Keep the locking mechanism inside the library. don't ask user to provide lock.
 
 - Forget about canonicalization for now, and focus all efforts on gathering and analysing scramble-invariant properties of grids.
 
