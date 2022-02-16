@@ -12,6 +12,10 @@
 
 namespace solvent::lib::gen {
 
+	// used for manual branch likelihood profiling
+	// extern long long total;
+	// extern long long true_;
+
 	// must be manually seeded in the main function!
 	// Used for shuffling Generator.
 	// RNG is shared between threads, guarded by mutex.

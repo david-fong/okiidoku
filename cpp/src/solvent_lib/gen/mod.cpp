@@ -11,6 +11,9 @@
 
 namespace solvent::lib::gen {
 
+	// long long total = 0;
+	// long long true_ = 0;
+
 	std::mt19937 Rng_;
 	void seed_rng(std::uint_fast32_t seed) noexcept {
 		Rng_.seed(seed);
@@ -125,15 +128,15 @@ namespace solvent::lib::gen {
 			row_has &= erase_mask;
 			col_has &= erase_mask;
 			blk_has &= erase_mask;
-		}
 
-		// Smart backtracking:
-		// This optimization's degree of usefulness depends on the genpath and size.
-		if ((progress_ < backtrack_origin_) && !cells_share_house<O>(
-			coord, prog2coord(backtrack_origin_)
-		)) [[unlikely]] {
-			cell.clear();
-			return Direction { .is_back = true, .is_back_skip = true };
+			// Smart skip-backtracking:
+			// This optimization's degree of usefulness depends on the genpath and size.
+			if (!cells_share_house<O>(coord, prog2coord(backtrack_origin_))) [[unlikely]] {
+				// only likely when dealrwmj. dealrwmj is so slow already it doesn't
+				// feel worth slowing other genpaths down to microoptimize.
+				cell.clear();
+				return Direction { .is_back = true, .is_back_skip = true };
+			}
 		}
 
 		const has_mask_t cell_has = (row_has | col_has | blk_has);

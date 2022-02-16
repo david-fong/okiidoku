@@ -39,5 +39,7 @@ int main(const int argc, char const *const argv[]) {
 
 	// End of program:
 	std::cout << "\nbye bye!\n" << std::endl;
+	// std::cout << "\ntotal: " << solvent::lib::gen::total;
+	// std::cout << "\ntrue_: " << solvent::lib::gen::true_ << std::endl;
 	return 0;
 }
