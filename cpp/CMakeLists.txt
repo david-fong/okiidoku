@@ -5,6 +5,7 @@ project(solvent)
 # https://cmake.org/cmake/help/latest/guide/tutorial/index.html
 # https://cliutils.gitlab.io/modern-cmake/
 # https://github.com/lefticus/cpp_weekly_game_project
+
 # cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 # cmake --build build
 
@@ -34,6 +35,7 @@ endif()
 
 add_subdirectory(src/solvent_util)
 add_subdirectory(src/solvent_lib)
+# add_subdirectory(src/solvent_lib_gpu)
 
 add_subdirectory(src/solvent_cli)
 # add_subdirectory(src/solvent_web)

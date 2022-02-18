@@ -9,6 +9,10 @@ add_library(solvent_lib STATIC
 	gen/batch.cpp
 	toolkit.cpp
 )
+
+find_package(Threads REQUIRED)
+
 target_include_directories(solvent_lib PRIVATE ..)
 target_include_directories(solvent_lib PUBLIC ../../include)
+target_link_libraries(solvent_lib PUBLIC Threads::Threads)
 target_link_libraries(solvent_lib PRIVATE solvent_util)

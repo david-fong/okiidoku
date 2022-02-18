@@ -96,6 +96,7 @@ namespace solvent::lib::gen {
 		[[nodiscard]] GenResult continue_prev(void);
 
 		[[nodiscard]] const Params& get_params() const { return params_; }
+		[[nodiscard]] ExitStatus get_exit_status(void) const noexcept;
 
 	 private:
 		struct Cell final {
@@ -122,7 +123,6 @@ namespace solvent::lib::gen {
 		ord4_t backtrack_origin_ = 0;
 		dead_ends_t most_dead_ends_seen_ = 0;
 		opcount_t op_count_ = 0;
-		ExitStatus prev_gen_status_ = ExitStatus::Abort;
 
 		// clear fields and scramble val_try_orders_
 		void prepare_fresh_gen_(void);

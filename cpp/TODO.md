@@ -10,14 +10,12 @@ I didn't want to make a separate file just for a small list of rules / notes to 
 
 ## Higher Priority
 
-- Go back and try the old canonicalization by rel row prob, but break ties by doing some brute force: try each tied permutation and valuate it according to some reduction of how it pushes rarer rel counts to the top left. Just be careful to shift to get rid of the main diagonal seam.
-    ```
-    count[rel] = 
-    exp[rel] = i + j
-    scale[rel] = 1 - (p_binomial(count[rel]) ^ 1/O)
-    score[rel] = 2 ^ (exp[rel]) * scale[rel]
-    find labelling with maximum
-    ```
+- "smarter"/greedier backtracking: backtracking may be occurring frequently at a coord because of values much earlier in the genpath progress.
+  - backtracking is less likely to occur when other coords in the same house as the stuck coord that have different house types have the same value (overlapping has_mask). Can make an array like a count version of has_mask counting the times a value is taken in each house seen by the stuck coord.
+    - Indicators of "bad packing" (lack of overlap): how many more bits are in the coord's has_mask than the has_mask of the house with the most bits in its has_mask?
+    - Each coord has a level of prone-ness to bad packing: To get it, walk the gen path, and at each cell, accumulate that cell's coord to a pool, then walk the pool and count how many coords are seen by the current coord. Take `max(count_seen - O2, 0)`.
+  - stupid solution: backtrack a distance proportional to the backtrack count of a cell: distance equals `1+floor(log_{base}(backtrack_count))`, where a logical value for `base` is `O2`, since each cell can try up to that many values (distance of backtrack is proportional to the max effort to get back to the backtrack origin), but that is very slow to take effect. If assuming the average probability of going forward at a cell is 0.5, then use `base = O2/2`? stupid because progress does not correlate to coords that are in the same house as the backtrack origin. Can make it so that it only decrements the remaining backtrack distance counter when backtracking from a coord in the same house as the backtrack origin, and then treating an abort as when hitting `progress == 0` with a non-zero remaining backtrack distance counter?
+    - The assumption of 0.5 chance of going forward at any coord is not very realistic. A better approximation might take into account a cell's prone-ness to bad packing with the given genpath.
 
 - (maybe?) instead of defining RNGs, make the library functions that use RNG take a reference to an RNG?
   - rationale: give the library user more control over the RNGs. easy for them to seed it, and they can choose whether to share an RNG for gen and shuffle operations.
@@ -42,8 +40,8 @@ I didn't want to make a separate file just for a small list of rules / notes to 
 - make the grid conversion utilities make use of std::span instead of std::vector? Or just see where spans can be used in general.
 
 - some diagnostics to try rendering:
-  - A scatter chart showing max-dead-ends vs. num operations
-  - a bar graph where each bar counts the number of GenResults that had a frontier_progress within the range for that bar's "bin". (to see "how far" aborted generations usually get). This sounds flawed, since frontier-progress changes frequently during a generation.
+  - A scatter chart showing max-dead-ends vs. num operations. (only caring about success results)
+  - a bar graph where each bar counts the number of GenResults that had a progress (or a furthest coord with a non-zero backtrack count) within the range for that bar's "bin". (to see "how far" aborted generations usually get).
   - comparing the average heatmaps of aborted vs successful generations.
     - See if there are clear differences/patterns in where they usually spike in backtracking. Perhaps this can be used to inform more sophisticated thresholds for each genpath.
 - Rename things to match the standard literature / terminology. Do some research to try to get it right. See sudopedia.

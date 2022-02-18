@@ -31,6 +31,16 @@ namespace solvent::lib::gen {
 
 
 	template<Order O>
+	ExitStatus Generator<O>::get_exit_status(void) const noexcept {
+		switch (progress_) {
+			case O4-1: return ExitStatus::Ok;
+			case O4:   return ExitStatus::Exhausted;
+			default:   return ExitStatus::Abort;
+		}
+	}
+
+
+	template<Order O>
 	GenResult Generator<O>::operator()(const Params params) {
 		params_ = params;
 		params_.clean(O);
@@ -42,7 +52,7 @@ namespace solvent::lib::gen {
 
 	template<Order O>
 	GenResult Generator<O>::continue_prev(void) {
-		if (prev_gen_status_ == ExitStatus::Exhausted) [[unlikely]] {
+		if (this->get_exit_status() == ExitStatus::Exhausted) [[unlikely]] {
 			return this->make_gen_result_();
 		}
 		dead_ends_.fill(0); // Do not carry over previous dead_ends counters.
@@ -87,7 +97,6 @@ namespace solvent::lib::gen {
 
 			if (direction.is_back) [[unlikely]] {
 				if (progress_ == 0) [[unlikely]] {
-					prev_gen_status_ = ExitStatus::Exhausted;
 					break;
 				}
 				if (!direction.is_back_skip) [[unlikely]] {
@@ -95,7 +104,6 @@ namespace solvent::lib::gen {
 					if (dead_ends > most_dead_ends_seen_) [[unlikely]] {
 						most_dead_ends_seen_ = dead_ends;
 						if (dead_ends > params_.max_dead_ends) [[unlikely]] {
-							prev_gen_status_ = ExitStatus::Abort;
 							--progress_;
 							break;
 						}
@@ -104,7 +112,6 @@ namespace solvent::lib::gen {
 				--progress_;
 			} else {
 				if (progress_ == O4-1) [[unlikely]] {
-					prev_gen_status_ = ExitStatus::Ok;
 					break;
 				}
 				++progress_;
@@ -167,7 +174,7 @@ namespace solvent::lib::gen {
 		GenResult gen_result {
 			.O {O},
 			.params {params_},
-			.status {prev_gen_status_},
+			.status {this->get_exit_status()},
 			.backtrack_origin {backtrack_origin_},
 			.most_dead_ends_seen {most_dead_ends_seen_},
 			.op_count {op_count_},

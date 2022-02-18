@@ -12,22 +12,23 @@
 		"jsonc"
 	],
 	"words": [
-		"sudoku",
+		"builtin",
+		"chrono",
+		"cout",
+		"ctzll",
+		"emscripten",
+		"genpath",
 		"giveup",
 		"occmask",
 		"occmasks",
 		"opcount",
-		"strials",
-		"speedup",
-
-		"prefetch",
-		"cout",
-		"stoi",
-		"stoul",
-		"ctzll",
 		"popcount",
 		"popcountll",
-		"builtin",
-		"chrono"
+		"prefetch",
+		"speedup",
+		"stoi",
+		"stoul",
+		"strials",
+		"sudoku"
 	]
 }
