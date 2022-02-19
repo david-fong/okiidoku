@@ -1,12 +1,16 @@
 #include <solvent_lib/gen/mod.hpp>
-#include <solvent_lib/equiv/canon.hpp>
-#include <solvent_lib/equiv/scramble.hpp>
+#include <solvent_lib/morph/canon.hpp>
+#include <solvent_lib/morph/scramble.hpp>
 // #include <solvent_lib/print.hpp>
 #include <solvent_util/console_setup.hpp>
+#include <solvent_lib/grid.hpp>
 
 #include <string>
 #include <iostream>  // cout,
 #include <random>    // random_device,
+
+// TODO change the test to try out all orders.
+constexpr uint8_t O = 3;
 
 /**
 */
@@ -31,19 +35,21 @@ int main(const int argc, char const *const argv[]) {
 	<< "\n- ARG 3 [[ num rounds ]] : " << num_rounds
 	<< std::endl;
 
-	// Scramble the random number generators:
-	solvent::lib::gen::seed_rng(srand_key);
-	solvent::lib::equiv::seed_scrambler_rng(srand_key);
 
 	using namespace solvent::lib;
+
+	// Scramble the random number generators:
+	solvent::lib::gen::seed_rng(srand_key);
+	solvent::lib::morph::seed_scrambler_rng(srand_key);
+
 	unsigned int count_bad = 0;
 	for (unsigned round = 0; round < num_rounds; round++) {
-		auto gen = gen::Generator<3>();
+		auto gen = gen::Generator<O>();
 		const auto result = gen(gen::Params {.canonicalize = true});
 		if (result.status != gen::ExitStatus::Ok) { continue; }
 		auto other_result = result; {
-			auto const scrambled = equiv::scramble<3>(result.grid);
-			other_result.grid = equiv::canonicalize<3>(scrambled);
+			auto const scrambled = morph::scramble<O>(result.grid);
+			other_result.grid = morph::canonicalize<O>(scrambled);
 		}
 		if (result.grid != other_result.grid) {
 			count_bad++;

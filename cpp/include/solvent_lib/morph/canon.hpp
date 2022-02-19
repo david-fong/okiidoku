@@ -1,10 +1,10 @@
-#ifndef HPP_SOLVENT_LIB__EQUIV__CANON
-#define HPP_SOLVENT_LIB__EQUIV__CANON
+#ifndef HPP_SOLVENT_LIB__MORPH__CANON
+#define HPP_SOLVENT_LIB__MORPH__CANON
 
 #include <solvent_lib/grid.hpp>
 #include <solvent_lib/size.hpp>
 
-namespace solvent::lib::equiv {
+namespace solvent::lib::morph {
 	/** input must be a complete grid. */
 	template<Order O> [[nodiscard]]
 	[[gnu::const]] grid_vec_t<O> canonicalize(const grid_vec_t<O>& input);

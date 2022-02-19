@@ -1,12 +1,12 @@
-#ifndef HPP_SOLVENT_LIB__EQUIV__ANALYZE
-#define HPP_SOLVENT_LIB__EQUIV__ANALYZE
+#ifndef HPP_SOLVENT_LIB__MORPH__ANALYZE
+#define HPP_SOLVENT_LIB__MORPH__ANALYZE
 
 #include <solvent_lib/grid.hpp>
 #include <solvent_lib/size.hpp>
 
 #include <array>
 
-namespace solvent::lib::equiv {
+namespace solvent::lib::morph {
 
 	template<Order O>
 	struct GridStats {

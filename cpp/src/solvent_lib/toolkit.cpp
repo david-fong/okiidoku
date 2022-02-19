@@ -67,7 +67,7 @@ namespace solvent::lib {
 	/* void Toolkit::canonicalize(std::vector<std::uint_fast8_t> params) const {
 		switch (order_) {
 		#define SOLVENT_TEMPL_TEMPL(O_) \
-			case O_: equiv::canonicalize<O_>(params); break;
+			case O_: morph::canonicalize<O_>(params); break;
 		SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 		#undef SOLVENT_TEMPL_TEMPL
 		}

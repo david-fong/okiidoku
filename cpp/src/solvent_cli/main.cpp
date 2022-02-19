@@ -1,6 +1,6 @@
 #include <solvent_cli/repl.hpp>
 #include <solvent_lib/gen/mod.hpp>
-#include <solvent_lib/equiv/scramble.hpp>
+#include <solvent_lib/morph/scramble.hpp>
 #include <solvent_util/console_setup.hpp>
 
 #include <string>
@@ -32,7 +32,7 @@ int main(const int argc, char const *const argv[]) {
 
 	// Scramble the random number generators:
 	solvent::lib::gen::seed_rng(srand_key);
-	solvent::lib::equiv::seed_scrambler_rng(srand_key);
+	solvent::lib::morph::seed_scrambler_rng(srand_key);
 
 	solvent::cli::Repl repl { user_order };
 	repl.start();

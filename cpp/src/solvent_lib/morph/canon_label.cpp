@@ -1,4 +1,4 @@
-#include <solvent_lib/equiv/analyze.hpp>
+#include <solvent_lib/morph/analyze.hpp>
 #include <solvent_lib/print.hpp> // TODO remove after done implementing
 #include <solvent_util/math.hpp>
 
@@ -10,37 +10,10 @@
 #include <compare>   // partial_ordering
 #include <bit>       // popcount
 
-namespace solvent::lib::equiv {
+namespace solvent::lib::morph {
 
 	template<Order O>
 	class GridInnerRelStats final {
-
-		/**
-		Carries position-independent information about the way two
-		labels relate to one another in a grid.
-		*/
-		struct LineSortEntry final {
-			ord1_t orig_blkline;
-			double prob_polar;
-			static LineSortEntry build(const grid_mtx_t<O, RelStats>& counts, ord1_t orig_blkline, const std::array<ord2_t, O*O>& line);
-			[[gnu::pure]] std::partial_ordering operator<=>(const LineSortEntry& that) const;
-		};
-		struct ChuteSortEntry final {
-			ord1_t orig_chute;
-			double prob_all;
-			double prob_polar;
-			std::array<LineSortEntry, O> lines_;
-			static ChuteSortEntry build(const grid_mtx_t<O, RelStats>& counts, ord1_t orig_chute, const grid_arr_t& grid);
-			[[gnu::const]] const LineSortEntry& operator[](ord1_t i) const { return lines_[i]; }
-			[[gnu::const]] std::partial_ordering operator<=>(const ChuteSortEntry& that) const;
-		};
-		struct GridSortEntry final {
-			double prob;
-			std::array<ChuteSortEntry, O> chutes_;
-			static GridSortEntry build(const grid_mtx_t<O, RelStats>& counts, const grid_arr_t& grid);
-			[[gnu::const]] const ChuteSortEntry& operator[](ord1_t i) const { return chutes_[i]; }
-			[[gnu::const]] std::partial_ordering operator<=>(const GridSortEntry& that) const;
-		};
 
 	 public:
 		static constexpr ord1_t O1 = O;
@@ -54,18 +27,18 @@ namespace solvent::lib::equiv {
 	 private:
 		void analyze_rel_counts_(void) noexcept;
 
-		/**
-		The probability of values A and B being in the same atom within a
+
+		/** The probability of values A and B being in the same atom within a
 		block is `p(n) = 2/(o+1)` (simplified from `2(o-1)/(o^2-1)`). The
 		probability of this ocurring k times in a grid is given by a binomial
-		distribution B(o^2, 2/(o+1)).
-		*/
+		distribution B(o^2, 2/(o+1)). */
 		static constexpr std::array<double, O2+1> REL_COUNT_ALL_PROB = [](){
 			std::array<double, O2+1> _;
 			for (unsigned i = 0; i < O2+1; i++) {
 				_[i] = static_cast<double>(n_choose_r(O2, i) * (1<<i) * std::pow(O1-1, O2-i)) / std::pow(O1+1, O2); }
 			return _;
 		}();
+
 		static constexpr std::array<double, O2+1> REL_COUNT_POLAR_PROB = [](){
 			std::array<double, O2+1> _;
 			for (unsigned i = 0; i < O2+1; i++) {
@@ -73,27 +46,6 @@ namespace solvent::lib::equiv {
 			return _;
 		}();
 	};
-
-
-	template<Order O>
-	GridStats<O> analyze(const grid_vec_t<O>& input) {
-		// TODO assert that input is the correct length and is a complete, valid sudoku?
-		GridInnerRelStats<O> stats(input);
-		return stats();
-	}
-
-	template<Order O>
-	GridInnerRelStats<O>::GridInnerRelStats(const grid_vec_t<O>& input):
-		grid_(lib::grid_vec2mtx<O>(input))
-	{
-	}
-
-	template<Order O>
-	grid_vec_t<O> GridInnerRelStats<O>::operator()(void) {
-		analyze_rel_counts_();
-		grid_vec_t<O> ret = grid_mtx2vec<O>(grid_);
-		return ret;
-	}
 
 
 	template<Order O>
@@ -173,58 +125,48 @@ namespace solvent::lib::equiv {
 
 
 	template<Order O>
-	GridInnerRelStats<O>::LineSortEntry GridInnerRelStats<O>::LineSortEntry::build(
-		const grid_mtx_t<O, RelStats>& counts, const ord1_t orig_blkline, const std::array<ord2_t, O*O>& line
-	) {
-		double prob_polar = 1.0;
-		for (ord2_t atom = 0; atom < O2; atom += O1) {
-			for (ord1_t i = 0; i < O1-1; i++) {
-				for (ord1_t j = i+1; j < O1; j++) {
-					prob_polar *= REL_COUNT_ALL_PROB[counts[line[atom+i]][line[atom+j]].count];
-		}	}	}
-		return LineSortEntry { .orig_blkline = orig_blkline, .prob_polar = prob_polar };
-	}
-	template<Order O>
-	GridInnerRelStats<O>::ChuteSortEntry GridInnerRelStats<O>::ChuteSortEntry::build(
-		const grid_mtx_t<O, RelStats>& counts, const ord1_t orig_chute, const grid_arr_t& grid
-	) {
-		std::array<LineSortEntry, O> lines;
-		for (ord1_t i = 0; i < O1; i++) { lines[i] = LineSortEntry::build(counts, i, grid[(O1*orig_chute)+i]); }
-		std::sort(lines.begin(), lines.end());
-		double prob_polar = 1.0; for (const auto& e : lines) { prob_polar *= e.prob_polar; }
-		double prob_all = prob_polar; // TODO
-		return ChuteSortEntry { .orig_chute = orig_chute, .prob_all = prob_all, .prob_polar = prob_polar, .lines_ = lines };
-	}
-	template<Order O>
-	GridInnerRelStats<O>::GridSortEntry GridInnerRelStats<O>::GridSortEntry::build(
-		const grid_mtx_t<O, RelStats>& counts, const grid_arr_t& grid
-	) {
-		std::array<ChuteSortEntry, O> chutes;
-		for (ord1_t i = 0; i < O1; i++) { chutes[i] = ChuteSortEntry::build(counts, i, grid); }
-		std::sort(chutes.begin(), chutes.end());
-		double prob = 1.0; for (const auto& e : chutes) { prob *= e.prob_polar; }
-		return GridSortEntry { .prob = prob, .chutes_ = chutes };
-	}
-
-
-	template<Order O>
-	std::partial_ordering GridInnerRelStats<O>::LineSortEntry::operator<=>(const LineSortEntry& that) const {
-		return prob_polar <=> that.prob_polar;
-	}
-	template<Order O>
-	std::partial_ordering GridInnerRelStats<O>::ChuteSortEntry::operator<=>(const ChuteSortEntry& that) const {
-		return prob_all <=> that.prob_all;
-	}
-	template<Order O>
-	std::partial_ordering GridInnerRelStats<O>::GridSortEntry::operator<=>(const GridSortEntry& that) const {
-		return prob <=> that.prob;
+	void canonicalize_labelling_(void) noexcept {
+		// TODO
+		/*
+		struct SortMapEntry final {
+			ord2_t orig; // The original label value
+			double dist;
+			double p_all;
+			[[gnu::pure]] std::partial_ordering operator<=>(const SortMapEntry& that) const {
+				// auto cmp = p_all <=> that.p_all;
+				// if (cmp != std::partial_ordering::equivalent) [[likely]] { return cmp; }
+				// return dist <=> that.dist;
+				return p_all <=> that.p_all;
+			}
+		};
+		// Make the lower-valued labels "play favourites":
+		std::sort(canon2orig_label.begin(), canon2orig_label.end());
+		// std::cout << "\n"; for (auto e : canon2orig_label) { std::cout << e.joint_prob << "  "; }
+		{
+			auto p_prev = canon2orig_label[0];
+			for (ord2_t i = 1; i < O2; i++) {
+				const auto p = canon2orig_label[i];
+				// if (p.dist == p_prev.dist) [[unlikely]] {
+				// 	rel_count_tie_mask_[i-1] = true; rel_count_tie_mask_[i] = true; 
+				// }
+				p_prev = p;
+			}
+		}
+		std::array<ord2_t, O2> label_map = {0};
+		for (ord2_t i = 0; i < O2; i++) {
+			label_map[canon2orig_label[i].orig] = i;
+		}
+		for (auto& row : grid_) {
+			for (auto& e : row) {
+				e = label_map[e];
+		}	}
+		decltype(rel_counts_) canon_counts;
+		for (ord2_t i = 0; i < O2; i++) {
+			for (ord2_t j = 0; j < O2; j++) {
+				canon_counts[label_map[i]][label_map[j]] = rel_count_[i][j];
+		}	}
+		rel_count_ = canon_counts;
+		*/
 	}
 
-
-	#define SOLVENT_TEMPL_TEMPL(O_) \
-		template struct GridStats<O_>; \
-		template GridStats<O_> analyze<O_>(const grid_vec_t<O_>&); \
-		template class GridInnerRelStats<O_>;
-	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
-	#undef SOLVENT_TEMPL_TEMPL
 }

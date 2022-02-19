@@ -98,4 +98,4 @@ These didn't end up doing the thing I wanted / thought might happen.
 
 ### Canonicalizer
 
-- See [the bottom of the canonicalization readme](./src/solvent_lib/equiv/readme.md)
+- See [the bottom of the canonicalization readme](./src/solvent_lib/morph/readme.md)

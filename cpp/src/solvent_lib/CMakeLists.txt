@@ -1,9 +1,11 @@
 add_library(solvent_lib STATIC
 	grid.cpp
 	print.cpp
-	# equiv/analyze.cpp
-	equiv/canon.cpp
-	equiv/scramble.cpp
+	# morph/analyze.cpp
+	# morph/analyze_label.cpp
+	# morph/analyze_place.cpp
+	morph/canon.cpp
+	morph/scramble.cpp
 	gen/path.cpp
 	gen/mod.cpp
 	gen/batch.cpp

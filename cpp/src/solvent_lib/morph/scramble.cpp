@@ -1,10 +1,10 @@
-#include <solvent_lib/equiv/scramble.hpp>
+#include <solvent_lib/morph/scramble.hpp>
 
 #include <array>
 #include <algorithm>   // shuffle,
 #include <random>
 
-namespace solvent::lib::equiv {
+namespace solvent::lib::morph {
 
 	std::mt19937 ScramblerRng_;
 	void seed_scrambler_rng(const std::uint_fast32_t seed) noexcept {
@@ -22,9 +22,9 @@ namespace solvent::lib::equiv {
 		grid_mtx_t<O> input = grid_vec2mtx<O>(input_vec);
 
 		std::array<ord2_t, O2> label_map;
+		bool transpose = false;
 		std::array<std::array<ord1_t, O1>, O1> row_map;
 		std::array<std::array<ord1_t, O1>, O1> col_map;
-		bool transpose = false;
 
 		for (ord2_t i = 0; i < O2; i++) {
 			label_map[i] = i;

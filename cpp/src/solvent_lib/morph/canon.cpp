@@ -1,0 +1,20 @@
+#include <solvent_lib/morph/canon.hpp>
+#include <solvent_lib/print.hpp> // TODO remove after done implementing
+
+#include <iostream>
+
+namespace solvent::lib::morph {
+
+	template<Order O>
+	grid_vec_t<O> canonicalize(const grid_vec_t<O>& input) {
+		grid_vec_t<O> out(input);
+		// TODO assert that input is the correct length and is a complete, valid sudoku?
+		// Canonicalizer<O> canon(input);
+		return out;
+	}
+
+	#define SOLVENT_TEMPL_TEMPL(O_) \
+		template grid_vec_t<O_> canonicalize<O_>(const grid_vec_t<O_>&);
+	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
+	#undef SOLVENT_TEMPL_TEMPL
+}

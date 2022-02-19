@@ -1,10 +1,10 @@
-#ifndef HPP_SOLVENT_LIB__EQUIV__SCRAMBLE
-#define HPP_SOLVENT_LIB__EQUIV__SCRAMBLE
+#ifndef HPP_SOLVENT_LIB__MORPH__SCRAMBLE
+#define HPP_SOLVENT_LIB__MORPH__SCRAMBLE
 
 #include <solvent_lib/grid.hpp>
 #include <solvent_lib/size.hpp>
 
-namespace solvent::lib::equiv {
+namespace solvent::lib::morph {
 
 	// must be manually seeded in the main function!
 	// Used for scrambling.

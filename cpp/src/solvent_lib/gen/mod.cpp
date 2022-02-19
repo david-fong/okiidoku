@@ -1,5 +1,5 @@
 #include <solvent_lib/gen/mod.hpp>
-#include <solvent_lib/equiv/canon.hpp>
+#include <solvent_lib/morph/canon.hpp>
 #include <solvent_lib/print.hpp>
 #include <solvent_util/str.hpp>
 
@@ -191,7 +191,7 @@ namespace solvent::lib::gen {
 			gen_result.dead_ends[coord] = dead_ends_[p];
 		}
 		if (params_.canonicalize && gen_result.status == ExitStatus::Ok) /* [[unlikely]] (worth?) */ {
-			// gen_result.grid = equiv::canonicalize<O>(gen_result.grid); // TODO put back in when working on canonicalization
+			// gen_result.grid = morph::canonicalize<O>(gen_result.grid); // TODO put back in when working on canonicalization
 		}
 		return gen_result;
 	}
