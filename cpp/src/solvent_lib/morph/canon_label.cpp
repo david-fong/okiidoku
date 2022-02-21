@@ -1,6 +1,6 @@
 #include <solvent_lib/morph/analyze.hpp>
 #include <solvent_lib/print.hpp> // TODO remove after done implementing
-#include <solvent_util/math.hpp>
+#include <solvent_lib/morph/rel_prob.hpp>
 
 #include <iostream>
 #include <algorithm> // sort
@@ -13,114 +13,76 @@
 namespace solvent::lib::morph {
 
 	template<Order O>
-	class GridInnerRelStats final {
-
+	class CanonLabel final {
+	 static_assert(O > 0 && O < MAX_REASONABLE_ORDER);
+		using has_mask_t = typename size<O>::O2_mask_least_t;
+		using ord1_t = typename size<O>::ord1_t;
+		using ord2_t = typename size<O>::ord2_t;
+		using ord4_t = typename size<O>::ord4_t;
 	 public:
 		static constexpr ord1_t O1 = O;
 		static constexpr ord2_t O2 = O*O;
 		static constexpr ord4_t O4 = O*O*O*O;
-		// [[gnu::pure]] ord2_t operator[](ord4_t coord) const override;
 
-		GridInnerRelStats(const grid_vec_t<O>&);
-		grid_vec_t<O> operator()(void);
+		struct RelCountPass1Entry {
+			has_mask_t blocks_h;
+			has_mask_t blocks_v;
+		};
+		grid_mtx_t<O, RelCountPass1Entry<O>> rel_counts_pass1_(std::span<const ord4_t, O4> grid) noexcept {
+			grid_mtx_t<O, RelCountPass1Entry<O>> table;
+			for (ord2_t line = 0; line < O2; line++) {
+				for (ord2_t atom = 0; atom < O2; atom += O1) {
+					// Go through all unique pairs in the atom:
+					for (ord1_t i = 0; i < O1 - 1; i++) {
+						for (ord1_t j = i + 1; j < O1; j++) {
+							{ // boxrow
+								const ord2_t i_val = grid[line][atom+i], j_val = grid[line][atom+j];
+								const has_mask_t blk_mask_bit = 1 << rmi2blk<O>(line, atom);
+								rel_count_[i_val][j_val].blocks_h |= blk_mask_bit;
+								rel_count_[j_val][i_val].blocks_h |= blk_mask_bit;
+							}
+							{ // boxcol
+								const ord2_t i_val = grid[atom+i][line], j_val = grid[atom+j][line];
+								const has_mask_t blk_mask_bit = 1 << rmi2blk<O>(atom, line);
+								rel_count_[i_val][j_val].blocks_v |= blk_mask_bit;
+								rel_count_[j_val][i_val].blocks_v |= blk_mask_bit;
+							}
+			}	}	}	}
+			return table;
+		}
 
-	 private:
-		void analyze_rel_counts_(void) noexcept;
-
-
-		/** The probability of values A and B being in the same atom within a
-		block is `p(n) = 2/(o+1)` (simplified from `2(o-1)/(o^2-1)`). The
-		probability of this ocurring k times in a grid is given by a binomial
-		distribution B(o^2, 2/(o+1)). */
-		static constexpr std::array<double, O2+1> REL_COUNT_ALL_PROB = [](){
-			std::array<double, O2+1> _;
-			for (unsigned i = 0; i < O2+1; i++) {
-				_[i] = static_cast<double>(n_choose_r(O2, i) * (1<<i) * std::pow(O1-1, O2-i)) / std::pow(O1+1, O2); }
-			return _;
-		}();
-
-		static constexpr std::array<double, O2+1> REL_COUNT_POLAR_PROB = [](){
-			std::array<double, O2+1> _;
-			for (unsigned i = 0; i < O2+1; i++) {
-				_[i] = static_cast<double>(n_choose_r(O2, i) * std::pow(O1, O2-i)) / std::pow(O1+1, O2); }
-			return _;
-		}();
+		struct RelCountPass2Entry {
+			;
+		};
+		template<Order O>
+		grid_mtx_t<O, RelCountPass2Entry<O>> rel_counts_pass2_(const grid_mtx_t<O, RelCountPass1Entry<O>>& pass1_table) noexcept {
+			grid_mtx_t<O, RelCountPass2Entry<O>> table;
+			for (auto& row : rel_count_) { for (auto& rel : row) {
+				std::array<ord2_t, (2*O)-1> density_counts = {0};
+				const has_mask_t blocks_mask = rel.blocks_h | rel.blocks_v;
+				rel.count = 0;
+				for (ord1_t r = 0; r < O; r++) {
+					for (ord1_t c = 0; c < O; c++) {
+						const has_mask_t blk_mask = blk_mask_chutes.row[r] & blk_mask_chutes.col[c];
+						if (blk_mask & blocks_mask) {
+							rel.count++;
+							const has_mask_t chute_see_mask = blk_mask_chutes.row[r] | blk_mask_chutes.col[c];
+							density_counts[std::popcount(blocks_mask & chute_see_mask)-1]++;
+						}
+				}	}
+				rel.density = 0;
+				for (unsigned i = 0; i < density_counts.size(); i++) {
+					rel.density += density_counts[i] * std::pow(O2, i);
+				}
+			}}
+			return table;
+		}
 	};
 
-
 	template<Order O>
-	void GridInnerRelStats<O>::analyze_rel_counts_(void) noexcept {
-		// Initialize rel_count_:
-		for (ord2_t line = 0; line < O2; line++) {
-			for (ord2_t atom = 0; atom < O2; atom += O1) {
-				// Go through all unique pairs in the atom:
-				for (ord1_t atom_i = 0; atom_i < O1 - 1; atom_i++) {
-					for (ord1_t atom_j = atom_i + 1; atom_j < O1; atom_j++) {
-						{ // boxrow
-							const ord2_t label_i = grid_[line][atom+atom_i], label_j = grid_[line][atom+atom_j];
-							const has_mask_t blk_mask_bit = 1 << rmi2blk<O>(line, atom);
-							rel_count_[label_i][label_j].blocks_h |= blk_mask_bit;
-							rel_count_[label_j][label_i].blocks_h |= blk_mask_bit;
-						}
-						{ // boxcol
-							const ord2_t label_i = grid_[atom+atom_i][line], label_j = grid_[atom+atom_j][line];
-							const has_mask_t blk_mask_bit = 1 << rmi2blk<O>(atom, line);
-							rel_count_[label_i][label_j].blocks_v |= blk_mask_bit;
-							rel_count_[label_j][label_i].blocks_v |= blk_mask_bit;
-						}
-		}	}	}	}
- 		for (auto& row : rel_count_) { for (auto& rel : row) {
-			std::array<ord2_t, (2*O)-1> density_counts = {0};
-			const has_mask_t blocks_mask = rel.blocks_h | rel.blocks_v;
-			rel.count = 0;
-			for (ord1_t r = 0; r < O; r++) {
-				for (ord1_t c = 0; c < O; c++) {
-					const has_mask_t blk_mask = blk_mask_chutes.row[r] & blk_mask_chutes.col[c];
-					if (blk_mask & blocks_mask) {
-						rel.count++;
-						const has_mask_t chute_see_mask = blk_mask_chutes.row[r] | blk_mask_chutes.col[c];
-						density_counts[std::popcount(blocks_mask & chute_see_mask)-1]++;
-					}
-			}	}
-			rel.density = 0;
-			for (unsigned i = 0; i < density_counts.size(); i++) {
-				rel.density += density_counts[i] * std::pow(O2, i);
-			}
-			ord1_t area_y = 0, area_x = 0;
-			for (ord1_t i = 0; i < O; i++) { area_y += (blk_mask_chutes.row[i] & blocks_mask) != 0; }
-			for (ord1_t i = 0; i < O; i++) { area_x += (blk_mask_chutes.col[i] & blocks_mask) != 0; }
-			rel.area = area_x * area_y;
-		}}
-/*
-		// Set up Floyd-Warshall:
-		grid_mtx_t<O, double> dist_graph;
-		for (ord2_t i = 0; i < O2; i++) {
-			for (ord2_t j = 0; j < O2; j++) {
-				dist_graph[i][j] = std::pow(O2, O2 - rel_count_[i][j].all);
-		}	}
-		for (ord2_t i = 0; i < O2; i++) { dist_graph[i][i] = 0.0; }
-
-		// Do Floyd-Warshall:
-		for (ord2_t k = 0; k < O2; k++) {
-			for (ord2_t i = 0; i < O2; i++) {
-				for (ord2_t j = 0; j < O2; j++) {
-					double other = dist_graph[i][k] + dist_graph[k][j];
-					double& it = dist_graph[i][j];
-					if (it > other) { it = other; }
-		}	}	}
-
-		// Sort vertices by Closeness-Centrality (reciprocal of dist):
-		for (ord2_t label = 0; label < O2; label++) {
-			const auto& paths = dist_graph[label];
-			const double dist = std::accumulate(paths.cbegin(), paths.cend(), 0.0);
-			const double p_all = std::transform_reduce(
-				std::execution::par_unseq, rel_count_[label].cbegin(), rel_count_[label].cend(),
-				1.0, std::multiplies<double>(), [](const auto& rel) { return REL_COUNT_ALL_PROB[rel.all]; }
-			);
-			canon2orig_label[label] = SortMapEntry {
-				.orig = label, .dist = dist, .p_all = p_all,
-			};
-		} */
+	grid_vec_t<O> canon_label(const grid_vec_t<O>& input) {
+		const auto rel_info1 = res_counts_pass1_(input);
+		const auto rel_info2 = res_counts_pass1_(rel_info1);
 	}
 
 
@@ -169,4 +131,8 @@ namespace solvent::lib::morph {
 		*/
 	}
 
+	#define SOLVENT_TEMPL_TEMPL(O_) \
+		template grid_vec_t<O_> canon_label<O_>(const grid_vec_t<O_>&);
+	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
+	#undef SOLVENT_TEMPL_TEMPL
 }

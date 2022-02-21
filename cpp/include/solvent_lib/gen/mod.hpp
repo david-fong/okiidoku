@@ -102,7 +102,7 @@ namespace solvent::lib::gen {
 		struct Cell final {
 			ord2_t try_index; // Index into val_try_orders_. O2 if clear.
 			void clear(void) noexcept { try_index = O2; }
-			[[gnu::pure]] bool is_clear(void) const noexcept { return try_index == O2; }
+			[[gnu::pure, nodiscard]] bool is_clear(void) const noexcept { return try_index == O2; }
 		};
 
 		// indexed by `progress_ // O2`

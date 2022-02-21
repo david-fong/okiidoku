@@ -5,6 +5,7 @@
 #include <solvent_lib/size.hpp>
 
 namespace solvent::lib::morph {
+
 	/** input must be a complete grid. */
 	template<Order O> [[nodiscard]]
 	[[gnu::const]] grid_vec_t<O> canonicalize(const grid_vec_t<O>& input);
