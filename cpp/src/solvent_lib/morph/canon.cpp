@@ -6,7 +6,7 @@
 namespace solvent::lib::morph {
 
 	template<Order O>
-	grid_vec_t<O> canon_label(const grid_vec_t<O>& input);
+	grid_vec_t<O> canon_label(grid_const_span_t<O>);
 
 	template<Order O>
 	grid_vec_t<O> canon_place(const grid_vec_t<O>& input);
@@ -20,7 +20,7 @@ namespace solvent::lib::morph {
 	}
 
 	#define SOLVENT_TEMPL_TEMPL(O_) \
-		extern template grid_vec_t<O_> canon_label<O_>(const grid_vec_t<O_>&); \
+		extern template grid_vec_t<O_> canon_label<O_>(grid_const_span_t<O_>); \
 		extern template grid_vec_t<O_> canon_place<O_>(const grid_vec_t<O_>&); \
 		template grid_vec_t<O_> canonicalize<O_>(const grid_vec_t<O_>&);
 	SOLVENT_INSTANTIATE_ORDER_TEMPLATES

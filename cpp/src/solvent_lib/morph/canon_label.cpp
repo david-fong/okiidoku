@@ -1,9 +1,9 @@
-#include <solvent_lib/morph/analyze.hpp>
 #include <solvent_lib/print.hpp> // TODO remove after done implementing
 #include <solvent_lib/morph/rel_prob.hpp>
+#include <solvent_lib/grid.hpp>
 
 #include <iostream>
-#include <algorithm> // sort
+#include <algorithm> // swap, sort
 #include <numeric>   // transform_reduce
 #include <execution> // execution::par_unseq
 #include <cmath>     // pow
@@ -24,65 +24,115 @@ namespace solvent::lib::morph {
 		static constexpr ord2_t O2 = O*O;
 		static constexpr ord4_t O4 = O*O*O*O;
 
-		struct RelCountPass1Entry {
+
+		// Info not placement-independent.
+		// Does not include self-to-self relationship bit for main diagonal entries.
+		struct RelMask {
 			has_mask_t blocks_h;
 			has_mask_t blocks_v;
 		};
-		grid_mtx_t<O, RelCountPass1Entry<O>> rel_counts_pass1_(std::span<const ord4_t, O4> grid) noexcept {
-			grid_mtx_t<O, RelCountPass1Entry<O>> table;
+		static grid_mtx_t<O, RelMask> get_rel_masks_(const grid_const_span_t<O> grid_span) noexcept {
+			grid_mtx_wrapper_t<O, const ord2_t> grid(grid_span);
+			grid_mtx_t<O, RelMask> masks;
 			for (ord2_t line = 0; line < O2; line++) {
 				for (ord2_t atom = 0; atom < O2; atom += O1) {
 					// Go through all unique pairs in the atom:
 					for (ord1_t i = 0; i < O1 - 1; i++) {
 						for (ord1_t j = i + 1; j < O1; j++) {
 							{ // boxrow
-								const ord2_t i_val = grid[line][atom+i], j_val = grid[line][atom+j];
+								const ord2_t i_val = grid.at(line, atom+i), j_val = grid.at(line, atom+j);
 								const has_mask_t blk_mask_bit = 1 << rmi2blk<O>(line, atom);
-								rel_count_[i_val][j_val].blocks_h |= blk_mask_bit;
-								rel_count_[j_val][i_val].blocks_h |= blk_mask_bit;
+								masks[i_val][j_val].blocks_h |= blk_mask_bit;
+								masks[j_val][i_val].blocks_h |= blk_mask_bit;
 							}
 							{ // boxcol
-								const ord2_t i_val = grid[atom+i][line], j_val = grid[atom+j][line];
+								const ord2_t i_val = grid.at(atom+i, line), j_val = grid.at(atom+j, line);
 								const has_mask_t blk_mask_bit = 1 << rmi2blk<O>(atom, line);
-								rel_count_[i_val][j_val].blocks_v |= blk_mask_bit;
-								rel_count_[j_val][i_val].blocks_v |= blk_mask_bit;
+								masks[i_val][j_val].blocks_v |= blk_mask_bit;
+								masks[j_val][i_val].blocks_v |= blk_mask_bit;
 							}
 			}	}	}	}
-			return table;
+			return masks;
 		}
 
-		struct RelCountPass2Entry {
-			;
+
+		// Info is placement-independent.
+		struct RelCount {
+			ord2_t all, polar_a, polar_b;
+			std::array<ord1_t, O1> all_chute_a_occ, all_chute_b_occ;
+			[[gnu::pure]] double     all_prob() const noexcept { return RelCountProb<O>::ALL[all]; }
+			[[gnu::pure]] double polar_a_prob() const noexcept { return RelCountProb<O>::POLAR[polar_a]; }
+			[[gnu::pure]] double polar_b_prob() const noexcept { return RelCountProb<O>::POLAR[polar_b]; }
 		};
-		template<Order O>
-		grid_mtx_t<O, RelCountPass2Entry<O>> rel_counts_pass2_(const grid_mtx_t<O, RelCountPass1Entry<O>>& pass1_table) noexcept {
-			grid_mtx_t<O, RelCountPass2Entry<O>> table;
-			for (auto& row : rel_count_) { for (auto& rel : row) {
-				std::array<ord2_t, (2*O)-1> density_counts = {0};
-				const has_mask_t blocks_mask = rel.blocks_h | rel.blocks_v;
-				rel.count = 0;
-				for (ord1_t r = 0; r < O; r++) {
-					for (ord1_t c = 0; c < O; c++) {
-						const has_mask_t blk_mask = blk_mask_chutes.row[r] & blk_mask_chutes.col[c];
-						if (blk_mask & blocks_mask) {
-							rel.count++;
-							const has_mask_t chute_see_mask = blk_mask_chutes.row[r] | blk_mask_chutes.col[c];
-							density_counts[std::popcount(blocks_mask & chute_see_mask)-1]++;
-						}
-				}	}
-				rel.density = 0;
-				for (unsigned i = 0; i < density_counts.size(); i++) {
-					rel.density += density_counts[i] * std::pow(O2, i);
+		static grid_mtx_t<O, RelCount> get_rel_counts_(const grid_mtx_t<O, RelMask>& masks) noexcept {
+			grid_mtx_t<O, RelCount> counts;
+			for (ord2_t r = 0; r < O2; r++) { for (ord2_t c = 0; c < O2; c++) {
+				const RelMask& mask = masks[r][c];
+				RelCount& count = counts[r][c];
+				const has_mask_t non_polar_mask = mask.blocks_h | mask.blocks_v;
+				count.all     = std::popcount(non_polar_mask);
+				count.polar_a = std::popcount(mask.blocks_h);
+				count.polar_b = std::popcount(mask.blocks_v);
+
+				for (ord1_t chute = 0; chute < O1; chute++) {
+					count.all_chute_a_occ[chute] = std::popcount(chute_blk_masks<O>::row[chute] & non_polar_mask);
+					count.all_chute_b_occ[chute] = std::popcount(chute_blk_masks<O>::col[chute] & non_polar_mask);
 				}
+				std::ranges::sort(count.all_chute_a_occ, std::greater{});
+				std::ranges::sort(count.all_chute_b_occ, std::greater{});
 			}}
-			return table;
+
+			// normalize polar_a and polar_b:
+			double polar_h_prob = 1.0, polar_v_prob = 1.0;
+			for (const auto& row : counts) { for (const auto& count : row) {
+				polar_h_prob *= count.polar_a_prob();
+				polar_v_prob *= count.polar_b_prob();
+			}}
+			// TODO investigate whether ties happen below. If so, break by chute mask counts.
+			if (polar_h_prob > polar_v_prob) {
+				std::swap(polar_h_prob, polar_v_prob);
+				for (auto& row : counts) { for (auto& count : row) {
+					std::swap(count.polar_a, count.polar_b);
+					std::swap(count.all_chute_a_occ, count.all_chute_b_occ);
+				}}
+			}
+			return counts;
+		}
+
+
+		// For sorting label pair relations
+		struct RelAccumProb {
+			// a is rarer on average compared to b.
+			double all, polar_a, polar_b;
+			[[gnu::pure]] std::partial_ordering operator<=>(const RelAccumProb& that) const {
+				std::strong_ordering cmp = all <=> that.all;
+				if (cmp != std::partial_ordering::equivalent) [[likely]] { return cmp; }
+				cmp = polar_a <=> that.polar_a;
+				if (cmp != std::partial_ordering::equivalent) [[likely]] { return cmp; }
+				return polar_b <=> that.polar_b;
+			}
+		};
+		static grid_mtx_t<O, RelAccumProb> get_rel_accum_probs_(const grid_mtx_t<O, RelCount>& counts) noexcept {
+			(void)counts; // TODO
+			grid_mtx_t<O, RelAccumProb> accum_prob;
+			return accum_prob;
+		}
+
+
+		grid_vec_t<O> operator()(const grid_const_span_t<O> orig_grid) {
+			const auto rel_masks = get_rel_masks_(orig_grid);
+			const auto rel_counts = get_rel_counts_(rel_masks);
+			const auto rel_accum_probs = get_rel_accum_probs_(rel_counts);
+			(void)rel_accum_probs; // TODO	
+			grid_vec_t<O> grid(O4);
+			return grid;
 		}
 	};
 
+
 	template<Order O>
-	grid_vec_t<O> canon_label(const grid_vec_t<O>& input) {
-		const auto rel_info1 = res_counts_pass1_(input);
-		const auto rel_info2 = res_counts_pass1_(rel_info1);
+	grid_vec_t<O> canon_label(const grid_const_span_t<O> orig_grid) {
+		return (CanonLabel<O>{})(orig_grid);
 	}
 
 
@@ -132,7 +182,7 @@ namespace solvent::lib::morph {
 	}
 
 	#define SOLVENT_TEMPL_TEMPL(O_) \
-		template grid_vec_t<O_> canon_label<O_>(const grid_vec_t<O_>&);
+		template grid_vec_t<O_> canon_label<O_>(grid_const_span_t<O_>);
 	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 	#undef SOLVENT_TEMPL_TEMPL
 }

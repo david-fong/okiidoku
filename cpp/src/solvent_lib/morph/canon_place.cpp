@@ -24,27 +24,19 @@ namespace solvent::lib::morph {
 	 public:
 		static constexpr ord1_t O1 = O;
 		static constexpr ord2_t O2 = O*O;
+		static constexpr ord2_t O3 = O*O*O;
 		static constexpr ord4_t O4 = O*O*O*O;
 		// [[gnu::pure]] ord2_t operator[](ord4_t coord) const override;
-
-		CanonPlace(const grid_vec_t<O>&);
-		grid_vec_t<O> operator()(void);
-	};
-
-
-	template<Order O>
-	grid_vec_t<O> canon_place(const grid_vec_t<O>& input) {
-		// TODO assert that input is the correct length and is a complete, valid sudoku?
 
 		struct LineSortEntry final {
 			ord1_t orig_blkline;
 			double prob_polar;
-			static LineSortEntry build(const grid_mtx_t<O, ord2_t>& counts, ord1_t orig_blkline, const std::array<ord2_t, O*O>& line) {
+			static LineSortEntry build(const grid_mtx_t<O, ord2_t>& counts, ord1_t orig_blkline, const std::span<const ord2_t, O2> line) {
 				double prob_polar = 1.0;
 				for (ord2_t atom = 0; atom < O2; atom += O1) {
 					for (ord1_t i = 0; i < O1-1; i++) {
 						for (ord1_t j = i+1; j < O1; j++) {
-							prob_polar *= REL_COUNT_ALL_PROB[counts[line[atom+i]][line[atom+j]].count];
+							prob_polar *= RelCountProb<O>::ALL[counts[line[atom+i]][line[atom+j]]];
 				}	}	}
 				return LineSortEntry { .orig_blkline = orig_blkline, .prob_polar = prob_polar };
 			}
@@ -57,9 +49,11 @@ namespace solvent::lib::morph {
 			double prob_all;
 			double prob_polar;
 			std::array<LineSortEntry, O> lines_;
-			static ChuteSortEntry build(const grid_mtx_t<O, ord2_t>& counts, ord1_t orig_chute, const grid_arr_t& grid) {
+			static ChuteSortEntry build(const grid_mtx_t<O, ord2_t>& counts, ord1_t orig_chute, const std::span<const ord2_t, O3> grid_chute) {
 				std::array<LineSortEntry, O> lines;
-				for (ord1_t i = 0; i < O1; i++) { lines[i] = LineSortEntry::build(counts, i, grid[(O1*orig_chute)+i]); }
+				for (ord1_t i = 0; i < O1; i++) { lines[i] = LineSortEntry::build(
+					counts, i, static_cast<std::span<const ord2_t, O2>>(grid_chute.subspan(O2*orig_chute, O2))
+				); }
 				std::sort(lines.begin(), lines.end());
 				double prob_polar = 1.0; for (const auto& e : lines) { prob_polar *= e.prob_polar; }
 				double prob_all = prob_polar; // TODO
@@ -73,9 +67,11 @@ namespace solvent::lib::morph {
 		struct GridSortEntry final {
 			double prob;
 			std::array<ChuteSortEntry, O> chutes_;
-			static GridSortEntry build(const grid_mtx_t<O, ord2_t>& counts, const grid_arr_t& grid) {
+			static GridSortEntry build(const grid_mtx_t<O, ord2_t>& counts, const std::span<const ord2_t, O4> grid) {
 				std::array<ChuteSortEntry, O> chutes;
-				for (ord1_t i = 0; i < O1; i++) { chutes[i] = ChuteSortEntry::build(counts, i, grid); }
+				for (ord1_t i = 0; i < O1; i++) { chutes[i] = ChuteSortEntry::build(
+					counts, i, static_cast<std::span<const ord2_t, O3>>(grid.subspan(O3*i, O3))
+				); }
 				std::sort(chutes.begin(), chutes.end());
 				double prob = 1.0; for (const auto& e : chutes) { prob *= e.prob_polar; }
 				return GridSortEntry { .prob = prob, .chutes_ = chutes };
@@ -86,8 +82,25 @@ namespace solvent::lib::morph {
 			}
 		};
 
-		grid_vec_t<O> out(O4);
-		return out;
+
+		CanonPlace(const grid_vec_t<O>&);
+		grid_vec_t<O> operator()(const grid_vec_t<O>& orig_grid) {
+			// TODO assert that input is the correct length and is a complete, valid sudoku?
+
+			(void)orig_grid; // TODO
+			grid_vec_t<O> grid(O4);
+			return grid;
+		}
+	};
+
+
+	template<Order O>
+	grid_vec_t<O> canon_place(const grid_vec_t<O>& orig_grid) {
+		// TODO assert that input is the correct length and is a complete, valid sudoku?
+
+		(void)orig_grid; // TODO
+		grid_vec_t<O> grid(O*O*O*O);
+		return grid;
 	}
 
 	

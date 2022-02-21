@@ -10,6 +10,8 @@ namespace solvent::lib::morph {
 
 	template<Order O>
 	struct RelCountProb {
+		static constexpr unsigned O1 = O;
+		static constexpr unsigned O2 = O*O;
 			
 		/** The probability of values A and B being in the same atom within a
 		block is `p(n) = 2/(o+1)` (simplified from `2(o-1)/(o^2-1)`). The

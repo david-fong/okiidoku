@@ -11,15 +11,27 @@ namespace solvent::lib {
 
 	template<Order O> using grid_vec_t = std::vector<typename size<O>::ord2_t>;
 	template<Order O, typename T=size<O>::ord2_t> using grid_mtx_t = std::array<std::array<T, O*O>, O*O>;
-	template<Order O, typename T=size<O>::ord2_t> using grid_span_t = std::span<T, O*O*O*O>;
 	template<Order O, typename T=size<O>::ord2_t> using grid_const_span_t = std::span<const T, O*O*O*O>;
+	template<Order O, typename T=size<O>::ord2_t> using grid_span_t = std::span<T, O*O*O*O>;
+
+	template<Order O, typename T=size<O>::ord2_t>
+	class grid_mtx_wrapper_t final {
+		grid_span_t<O, T> span_;
+	 public:
+		grid_mtx_wrapper_t(grid_span_t<O, T> span): span_(span) {};
+		T& at(size<O>::ord2_t row, size<O>::ord2_t col) const {
+			return span_[(O*O*row) + col];
+		}
+	};
 
 	template<Order O> [[nodiscard]] grid_vec_t<O> grid_mtx2vec(const grid_mtx_t<O>&) noexcept;
 	template<Order O> [[nodiscard]] grid_mtx_t<O> grid_vec2mtx(const grid_vec_t<O>&) noexcept;
 
+
 	// Returns true if any cell in the same house contain the same value.
 	// Can be used for incomplete grids.
 	template<Order O> [[nodiscard, gnu::const]] bool is_grid_invalid(const grid_mtx_t<O>&) noexcept;
+
 
 	template<Order O> [[nodiscard, gnu::const]] constexpr typename size<O>::ord2_t rmi2row(const typename size<O>::ord4_t index) noexcept { return index / (O*O); }
 	template<Order O> [[nodiscard, gnu::const]] constexpr typename size<O>::ord2_t rmi2col(const typename size<O>::ord4_t index) noexcept { return index % (O*O); }
@@ -39,19 +51,26 @@ namespace solvent::lib {
 	}
 	// Note: the compiler optimizes the division/modulus pairs just fine.
 	
+
 	template<Order O>
-	struct blk_mask_chutes_t {
-		std::array<typename size<O>::O2_mask_fast_t, O> row, col;
-	};
-	template<Order O>
-	constexpr blk_mask_chutes_t blk_mask_chutes = [](){
-		blk_mask_chutes_t<O> _;
-		for (unsigned chute = 0; chute < O; chute++) {
-			for (unsigned i = 0; i < O; i++) {
-				_.row[chute] |= 1 << ((O*chute) + i);
-				_.col[chute] |= 1 << ((O*i) + chute);
-		}	}
-		return _;
+	struct chute_blk_masks {
+		using T = std::array<typename size<O>::O2_mask_fast_t, O>;
+		static constexpr T row = [](){
+			T _{0};
+			for (unsigned chute = 0; chute < O; chute++) {
+				for (unsigned i = 0; i < O; i++) {
+					_[chute] |= 1 << ((O*i) + chute);
+			}	}
+			return _;
+		}();
+		static constexpr T col = [](){
+			T _{0};
+			for (unsigned chute = 0; chute < O; chute++) {
+				for (unsigned i = 0; i < O; i++) {
+					_[chute] |= 1 << ((O*i) + chute);
+			}	}
+			return _;
+		}();
 	};
 
 

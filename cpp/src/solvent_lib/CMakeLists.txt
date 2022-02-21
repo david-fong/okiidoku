@@ -1,9 +1,8 @@
 add_library(solvent_lib STATIC
 	grid.cpp
 	print.cpp
-	# morph/analyze.cpp
-	# morph/analyze_label.cpp
-	# morph/analyze_place.cpp
+	morph/canon_label.cpp
+	morph/canon_place.cpp
 	morph/canon.cpp
 	morph/scramble.cpp
 	gen/path.cpp
