@@ -18,9 +18,8 @@ namespace solvent::cli {
 	}
 
 	void Config::verbosity(const std::string& new_verbosity_str) {
-		std::cout << "is ";
 		if (new_verbosity_str.empty()) {
-			std::cout << "is " << verbosity() << std::endl;
+			std::cout << "is: " << verbosity() << std::endl;
 			return;
 		}
 		for (unsigned i = 0; i < verbosity::size; i++) {

@@ -52,7 +52,7 @@ namespace solvent::lib::morph {
 			static ChuteSortEntry build(const grid_mtx_t<O, ord2_t>& counts, ord1_t orig_chute, const std::span<const ord2_t, O3> grid_chute) {
 				std::array<LineSortEntry, O> lines;
 				for (ord1_t i = 0; i < O1; i++) { lines[i] = LineSortEntry::build(
-					counts, i, static_cast<std::span<const ord2_t, O2>>(grid_chute.subspan(O2*orig_chute, O2))
+					counts, i, static_cast<std::span<const ord2_t, O2>>(grid_chute.subspan(O2*orig_chute, O2)) // *sad cast noises
 				); }
 				std::sort(lines.begin(), lines.end());
 				double prob_polar = 1.0; for (const auto& e : lines) { prob_polar *= e.prob_polar; }
@@ -70,7 +70,7 @@ namespace solvent::lib::morph {
 			static GridSortEntry build(const grid_mtx_t<O, ord2_t>& counts, const std::span<const ord2_t, O4> grid) {
 				std::array<ChuteSortEntry, O> chutes;
 				for (ord1_t i = 0; i < O1; i++) { chutes[i] = ChuteSortEntry::build(
-					counts, i, static_cast<std::span<const ord2_t, O3>>(grid.subspan(O3*i, O3))
+					counts, i, static_cast<std::span<const ord2_t, O3>>(grid.subspan(O3*i, O3)) // *sad cast noises
 				); }
 				std::sort(chutes.begin(), chutes.end());
 				double prob = 1.0; for (const auto& e : chutes) { prob *= e.prob_polar; }
@@ -83,10 +83,7 @@ namespace solvent::lib::morph {
 		};
 
 
-		CanonPlace(const grid_vec_t<O>&);
-		grid_vec_t<O> operator()(const grid_vec_t<O>& orig_grid) {
-			// TODO assert that input is the correct length and is a complete, valid sudoku?
-
+		static grid_vec_t<O> do_it(const grid_const_span_t<O> orig_grid) {
 			(void)orig_grid; // TODO
 			grid_vec_t<O> grid(O4);
 			return grid;
@@ -95,12 +92,9 @@ namespace solvent::lib::morph {
 
 
 	template<Order O>
-	grid_vec_t<O> canon_place(const grid_vec_t<O>& orig_grid) {
+	grid_vec_t<O> canon_place(const grid_const_span_t<O> orig_grid) {
 		// TODO assert that input is the correct length and is a complete, valid sudoku?
-
-		(void)orig_grid; // TODO
-		grid_vec_t<O> grid(O*O*O*O);
-		return grid;
+		return CanonPlace<O>::do_it(orig_grid);
 	}
 
 	
@@ -141,7 +135,7 @@ namespace solvent::lib::morph {
 
 
 	#define SOLVENT_TEMPL_TEMPL(O_) \
-		template grid_vec_t<O_> canon_place<O_>(const grid_vec_t<O_>&); \
+		template grid_vec_t<O_> canon_place<O_>(grid_const_span_t<O_>); \
 		template class CanonPlace<O_>;
 	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 	#undef SOLVENT_TEMPL_TEMPL

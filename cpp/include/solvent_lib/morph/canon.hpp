@@ -8,11 +8,11 @@ namespace solvent::lib::morph {
 
 	/** input must be a complete grid. */
 	template<Order O> [[nodiscard]]
-	[[gnu::const]] grid_vec_t<O> canonicalize(const grid_vec_t<O>& input);
+	[[gnu::const]] grid_vec_t<O> canonicalize(grid_const_span_t<O>);
 
 
 	#define SOLVENT_TEMPL_TEMPL(O_) \
-		extern template grid_vec_t<O_> canonicalize<O_>(const grid_vec_t<O_>&);
+		extern template grid_vec_t<O_> canonicalize<O_>(grid_const_span_t<O_>);
 	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 	#undef SOLVENT_TEMPL_TEMPL
 }
