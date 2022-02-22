@@ -4,9 +4,7 @@
 
 #include <iostream>
 #include <algorithm> // swap, sort
-#include <numeric>   // transform_reduce
-#include <execution> // execution::par_unseq
-#include <cmath>     // pow
+#include <numeric>   // iota
 #include <compare>   // partial_ordering
 #include <bit>       // popcount
 
@@ -27,9 +25,9 @@ namespace solvent::lib::morph {
 
 		// Info not placement-independent.
 		// Does not include self-to-self relationship bit for main diagonal entries.
-		struct RelMask {
-			has_mask_t blocks_h;
-			has_mask_t blocks_v;
+		struct RelMask final {
+			has_mask_t blocks_h = 0;
+			has_mask_t blocks_v = 0;
 		};
 		static grid_mtx_t<O, RelMask> get_rel_masks_(const grid_const_span_t<O> grid_span) noexcept {
 			grid_mtx_wrapper_t<O, const ord2_t> grid(grid_span);
@@ -57,7 +55,7 @@ namespace solvent::lib::morph {
 
 
 		// Info is placement-independent.
-		struct RelCount {
+		struct RelCount final {
 			ord2_t all, polar_a, polar_b;
 			std::array<ord1_t, O1> all_chute_a_occ, all_chute_b_occ;
 			[[gnu::pure]] double     all_prob() const noexcept { return RelCountProb<O>::ALL[all]; }
@@ -89,7 +87,10 @@ namespace solvent::lib::morph {
 				polar_v_prob *= count.polar_b_prob();
 			}}
 			// TODO investigate whether ties happen below. If so, break by chute mask counts.
-			if (polar_h_prob > polar_v_prob) {
+			if (polar_h_prob == polar_v_prob) {
+				std::cout << "! tie between polar_h_prob and polar_v_prob." << std::endl;
+			}
+			if ((polar_h_prob > polar_v_prob) || false/* TODO */) {
 				std::swap(polar_h_prob, polar_v_prob);
 				for (auto& row : counts) { for (auto& count : row) {
 					std::swap(count.polar_a, count.polar_b);
@@ -101,85 +102,87 @@ namespace solvent::lib::morph {
 
 
 		// For sorting label pair relations
-		struct RelAccumProb {
-			// a is rarer on average compared to b.
+		struct RelAccumProb final {
+			// a is rarer on average compared to b (due to rel_count pass).
 			double all, polar_a, polar_b;
 			[[gnu::pure]] std::partial_ordering operator<=>(const RelAccumProb& that) const {
-				std::strong_ordering cmp = all <=> that.all;
+				std::partial_ordering cmp = all <=> that.all;
 				if (cmp != std::partial_ordering::equivalent) [[likely]] { return cmp; }
 				cmp = polar_a <=> that.polar_a;
 				if (cmp != std::partial_ordering::equivalent) [[likely]] { return cmp; }
 				return polar_b <=> that.polar_b;
 			}
 		};
-		static grid_mtx_t<O, RelAccumProb> get_rel_accum_probs_(const grid_mtx_t<O, RelCount>& counts) noexcept {
-			(void)counts; // TODO
-			grid_mtx_t<O, RelAccumProb> accum_prob;
-			return accum_prob;
+		static grid_mtx_t<O, RelAccumProb> get_rel_cmp_layers_(const grid_mtx_t<O, RelCount>& counts) noexcept {
+			// sort, accumulate/ramp, transpose (for caching optimization)
+			grid_mtx_t<O, RelAccumProb> pre_transpose;
+			for (ord2_t i = 0; i < O2; i++) { for (ord2_t j = 0; j < O2; j++) {
+				const auto count = counts[i][j];
+				pre_transpose[i][j] = RelAccumProb {
+					.all = count.all_prob(), .polar_a = count.polar_a_prob(), .polar_b = count.polar_b_prob()
+				};
+			}}
+			for (auto& row : pre_transpose) {
+				// put rare things at the back:
+				std::ranges::sort(row, std::greater{});
+			}
+			for (auto& row : pre_transpose) {
+				for (ord2_t i = O2-1; i > 0; i--) {
+					// Iterating forward progressively removes non-rare items:
+					row[i-1].all *= row[i].all;
+					row[i-1].polar_a *= row[i].polar_a;
+					row[i-1].polar_b *= row[i].polar_b;
+			}	}
+			grid_mtx_t<O, RelAccumProb> cmp_layers;
+			for (ord2_t i = 0; i < O2; i++) { for (ord2_t j = 0; j < O2; j++) {
+				cmp_layers[i][j] = pre_transpose[j][i];
+			}}
+			return cmp_layers;
 		}
 
 
-		grid_vec_t<O> operator()(const grid_const_span_t<O> orig_grid) {
-			const auto rel_masks = get_rel_masks_(orig_grid);
-			const auto rel_counts = get_rel_counts_(rel_masks);
-			const auto rel_accum_probs = get_rel_accum_probs_(rel_counts);
-			(void)rel_accum_probs; // TODO	
-			grid_vec_t<O> grid(O4);
-			return grid;
+		//
+		static grid_vec_t<O> do_it(const grid_const_span_t<O> orig_grid) {
+			const std::array<ord2_t, O2> label_orig2canon = [&orig_grid](){
+				std::array<ord2_t, O2> label_canon2orig;
+				std::iota(label_canon2orig.begin(), label_canon2orig.end(), 0);
+
+				const auto rel_cmp_layers = get_rel_cmp_layers_(
+					get_rel_counts_(
+						get_rel_masks_(orig_grid)
+					)
+				);
+				std::sort(label_canon2orig.begin(), label_canon2orig.end(), [&rel_cmp_layers](const ord2_t& a_orig_label, const ord2_t& b_orig_label){
+					for (ord2_t layer = 0; layer < O2; layer++) {
+						const auto& a = rel_cmp_layers[layer][a_orig_label];
+						const auto& b = rel_cmp_layers[layer][b_orig_label];
+						if (a.all != b.all) [[likely]] { return a.all < b.all; }
+						if (a.polar_a != b.polar_a) [[likely]] { return a.polar_a < b.polar_a; }
+						if (a.polar_b != b.polar_b) [[likely]] { return a.polar_b < b.polar_b; }
+					}
+					std::cout << "! equivalent rel encountered." << std::endl;
+					return false;
+				});
+				std::array<ord2_t, O2> _;
+				for (ord2_t i_canon = 0; i_canon < O2; i_canon++) {
+					_[label_canon2orig[i_canon]] = i_canon;
+				}
+				return _;
+			}();
+			grid_vec_t<O> canon_grid_vec(O4);
+			for (ord4_t i = 0; i < O4; i++) {
+				canon_grid_vec[i] = label_orig2canon[orig_grid[i]];
+			}
+			return canon_grid_vec;
 		}
 	};
 
 
 	template<Order O>
 	grid_vec_t<O> canon_label(const grid_const_span_t<O> orig_grid) {
-		return (CanonLabel<O>{})(orig_grid);
+		return CanonLabel<O>::do_it(orig_grid);
 	}
 
-
-	template<Order O>
-	void canonicalize_labelling_(void) noexcept {
-		// TODO
-		/*
-		struct SortMapEntry final {
-			ord2_t orig; // The original label value
-			double dist;
-			double p_all;
-			[[gnu::pure]] std::partial_ordering operator<=>(const SortMapEntry& that) const {
-				// auto cmp = p_all <=> that.p_all;
-				// if (cmp != std::partial_ordering::equivalent) [[likely]] { return cmp; }
-				// return dist <=> that.dist;
-				return p_all <=> that.p_all;
-			}
-		};
-		// Make the lower-valued labels "play favourites":
-		std::sort(canon2orig_label.begin(), canon2orig_label.end());
-		// std::cout << "\n"; for (auto e : canon2orig_label) { std::cout << e.joint_prob << "  "; }
-		{
-			auto p_prev = canon2orig_label[0];
-			for (ord2_t i = 1; i < O2; i++) {
-				const auto p = canon2orig_label[i];
-				// if (p.dist == p_prev.dist) [[unlikely]] {
-				// 	rel_count_tie_mask_[i-1] = true; rel_count_tie_mask_[i] = true; 
-				// }
-				p_prev = p;
-			}
-		}
-		std::array<ord2_t, O2> label_map = {0};
-		for (ord2_t i = 0; i < O2; i++) {
-			label_map[canon2orig_label[i].orig] = i;
-		}
-		for (auto& row : grid_) {
-			for (auto& e : row) {
-				e = label_map[e];
-		}	}
-		decltype(rel_counts_) canon_counts;
-		for (ord2_t i = 0; i < O2; i++) {
-			for (ord2_t j = 0; j < O2; j++) {
-				canon_counts[label_map[i]][label_map[j]] = rel_count_[i][j];
-		}	}
-		rel_count_ = canon_counts;
-		*/
-	}
 
 	#define SOLVENT_TEMPL_TEMPL(O_) \
 		template grid_vec_t<O_> canon_label<O_>(grid_const_span_t<O_>);

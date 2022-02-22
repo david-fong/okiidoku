@@ -13,9 +13,8 @@ namespace solvent::lib::morph {
 
 	template<Order O>
 	grid_vec_t<O> canonicalize(const grid_vec_t<O>& input) {
-		grid_vec_t<O> out(input);
 		// TODO assert that input is the correct length and is a complete, valid sudoku?
-		// Canonicalizer<O> canon(input);
+		grid_vec_t<O> out = canon_label<O>(grid_const_span_t<O>(input));
 		return out;
 	}
 

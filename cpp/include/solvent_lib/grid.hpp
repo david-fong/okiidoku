@@ -59,7 +59,7 @@ namespace solvent::lib {
 			T _{0};
 			for (unsigned chute = 0; chute < O; chute++) {
 				for (unsigned i = 0; i < O; i++) {
-					_[chute] |= 1 << ((O*i) + chute);
+					_[chute] |= 1 << ((O*chute) + i);
 			}	}
 			return _;
 		}();

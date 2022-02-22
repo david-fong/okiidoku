@@ -5,6 +5,7 @@ project(solvent)
 # https://cmake.org/cmake/help/latest/guide/tutorial/index.html
 # https://cliutils.gitlab.io/modern-cmake/
 # https://github.com/lefticus/cpp_weekly_game_project
+# https://api.csswg.org/bikeshed/?force=1&url=https://raw.githubusercontent.com/vector-of-bool/pitchfork/develop/data/spec.bs
 
 # cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 # cmake --build build
@@ -41,5 +42,5 @@ add_subdirectory(src/solvent_cli)
 # add_subdirectory(src/solvent_web)
 
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND BUILD_TESTING)
-	add_subdirectory(test)
+	add_subdirectory(tests)
 endif()

@@ -1,5 +1,5 @@
-#ifndef HPP_SOLVENT_LIB__MORPH__CANON
-#define HPP_SOLVENT_LIB__MORPH__CANON
+#ifndef HPP_SOLVENT_LIB__MORPH__REL_PROB
+#define HPP_SOLVENT_LIB__MORPH__REL_PROB
 
 #include <solvent_lib/size.hpp>
 #include <solvent_util/math.hpp>
@@ -9,7 +9,7 @@
 namespace solvent::lib::morph {
 
 	template<Order O>
-	struct RelCountProb {
+	struct RelCountProb final {
 		static constexpr unsigned O1 = O;
 		static constexpr unsigned O2 = O*O;
 			
@@ -23,6 +23,7 @@ namespace solvent::lib::morph {
 				_[i] = static_cast<double>(n_choose_r(O2, i) * (1<<i) * std::pow(O1-1, O2-i)) / std::pow(O1+1, O2); }
 			return _;
 		}();
+		static constexpr double ALL_E = O2 * (2.0/(O+1));
 
 		static constexpr std::array<double, O2+1> POLAR = [](){
 			std::array<double, O2+1> _;
@@ -30,6 +31,7 @@ namespace solvent::lib::morph {
 				_[i] = static_cast<double>(n_choose_r(O2, i) * std::pow(O1, O2-i)) / std::pow(O1+1, O2); }
 			return _;
 		}();
+		static constexpr double POLAR_E = O2 * (1.0/(O+1));
 	};
 }
 #endif

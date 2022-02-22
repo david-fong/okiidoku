@@ -1,13 +1,5 @@
 # Things To Do
 
-## C++ Notes
-
-I didn't want to make a separate file just for a small list of rules / notes to self, and I'm in this file all the time, so I just put it here.
-
-- For defining global variables (not constants!) shared between cpp files, declare prefixed with `extern` in a hpp files, and then define it in one of the cpp files. Functions always have external linkage.
-- `inline` means a name can have multiple _identical_ definitions. For defining _and defining_ global constants in headers with a single memory address, prefix the definition with `inline`. Same for functions in headers.
-- Do not use `static` inside a member function to hold a lambda that captures `this`, since `this` is not always at the same address.
-
 ## Higher Priority
 
 - "smarter"/greedier backtracking: backtracking may be occurring frequently at a coord because of values much earlier in the genpath progress.
@@ -17,9 +9,23 @@ I didn't want to make a separate file just for a small list of rules / notes to 
   - stupid solution: backtrack a distance proportional to the backtrack count of a cell: distance equals `1+floor(log_{base}(backtrack_count))`, where a logical value for `base` is `O2`, since each cell can try up to that many values (distance of backtrack is proportional to the max effort to get back to the backtrack origin), but that is very slow to take effect. If assuming the average probability of going forward at a cell is 0.5, then use `base = O2/2`? stupid because progress does not correlate to coords that are in the same house as the backtrack origin. Can make it so that it only decrements the remaining backtrack distance counter when backtracking from a coord in the same house as the backtrack origin, and then treating an abort as when hitting `progress == 0` with a non-zero remaining backtrack distance counter?
     - The assumption of 0.5 chance of going forward at any coord is not very realistic. A better approximation might take into account a cell's prone-ness to bad packing with the given genpath.
 
+- adapt canonicalization to work on puzzles (incomplete grids).
+  - this would allow checking if puzzles are equivalent.
+
+- the canonicalize param of generator seems weird in that the dead_ends grid of the result struct isn't also transformed to match. This feature should either be specced (to also transform dead_ends grid or not) and documented, or removed.
+
 - (maybe?) instead of defining RNGs, make the library functions that use RNG take a reference to an RNG?
   - rationale: give the library user more control over the RNGs. easy for them to seed it, and they can choose whether to share an RNG for gen and shuffle operations.
   - make sure it is still thread safe. Keep the locking mechanism inside the library. don't ask user to provide lock.
+
+- Go back and try the old canonicalization by rel row prob, but break ties by doing some brute force: try each tied permutation and valuate it according to some reduction of how it pushes rarer rel counts to the top left. Just be careful to shift to get rid of the main diagonal seam.
+  ```
+  count[rel] = 
+  exp[rel] = i + j
+  scale[rel] = 1 - (p_binomial(count[rel]) ^ 1/O)
+  score[rel] = 2 ^ (exp[rel]) * scale[rel]
+  find labelling with maximum
+    ```
 
 - Forget about canonicalization for now, and focus all efforts on gathering and analysing scramble-invariant properties of grids.
 

@@ -2,8 +2,9 @@
 #define HPP_SOLVENT_LIB__SIZE
 
 #include <solvent_config.hpp>
+// ^no reason to include this here except so everything else doesn't have to later.
 
-#include <bit>
+// #include <bit> // TODO use bit_width to clean up the below
 #include <cstdint>
 #include <type_traits>
 
