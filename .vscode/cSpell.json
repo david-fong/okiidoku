@@ -14,6 +14,7 @@
 	"words": [
 		"builtin",
 		"chrono",
+		"cmake",
 		"cout",
 		"ctzll",
 		"emscripten",

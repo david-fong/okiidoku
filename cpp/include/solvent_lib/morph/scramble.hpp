@@ -8,7 +8,7 @@ namespace solvent::lib::morph {
 
 	// must be manually seeded in the main function!
 	// Used for scrambling.
-	// NOTE: if parallel access is later required, add a mutex to guard.
+	// Note: if parallel access is later required, add a mutex to guard.
 	void seed_scrambler_rng(std::uint_fast32_t) noexcept;
 
 	template<Order O> [[nodiscard]]

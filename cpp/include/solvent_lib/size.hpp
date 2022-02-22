@@ -1,5 +1,7 @@
 #ifndef HPP_SOLVENT_LIB__SIZE
 #define HPP_SOLVENT_LIB__SIZE
+// Note: the byte width type logic could be done with boost, but I don't
+// have any other reason to add boost as a dependency, so I won't.
 
 #include <solvent_config.hpp>
 // ^no reason to include this here except so everything else doesn't have to later.

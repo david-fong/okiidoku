@@ -182,7 +182,7 @@ namespace solvent::lib::gen {
 			.dead_ends = std::vector<std::uint_fast64_t>(O4, 0),
 		};
 		for (ord4_t p = 0; p < O4; p++) {
-			// note: The bound under progress_ is significant.
+			// Note: The bound under progress_ is significant.
 			// try_indexes afterward are out of val_try_order's range.
 			const ord4_t coord = prog2coord(p);
 			if (!cells_[p].is_clear()) {

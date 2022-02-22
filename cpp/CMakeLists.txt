@@ -7,8 +7,8 @@ project(solvent)
 # https://github.com/lefticus/cpp_weekly_game_project
 # https://api.csswg.org/bikeshed/?force=1&url=https://raw.githubusercontent.com/vector-of-bool/pitchfork/develop/data/spec.bs
 
-# cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-# cmake --build build
+# cmake -S . -B build/release -DCMAKE_BUILD_TYPE=Release
+# cmake --build build/release
 
 set(CMAKE_CXX_STANDARD 20 CACHE STRING "The C++ standard to use")
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)

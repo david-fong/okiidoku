@@ -13,7 +13,7 @@ namespace solvent::lib::gen::batch {
 
 	unsigned DEFAULT_NUM_THREADS(const Order O) {
 		const unsigned hwc = std::thread::hardware_concurrency();
-		// NOTE: hardware_concurency is specified to be zero if unknown.
+		// Note: hardware_concurency is specified to be zero if unknown.
 		return (hwc != 0) ? std::min(TRY_DEFAULT_NUM_EXTRA_THREADS_(O) + 1, hwc) : 1;
 	}
 

@@ -3,17 +3,19 @@
 
 ## Using solvent_lib
 
-¯\\\_(ツ)_/¯ See [solvent_cli's CMakeLists.txt](./src/solvent_cli/CMakeLists.txt) for inspiration. I'm new to CMake and I have no idea how to properly make distributable libraries. If you have experience with CMake, a PR updating these instructions and fixing any of my noob CMakeLists.txt mistakes would be much appreciated.
+¯\\\_(ツ)_/¯ See [solvent_cli's CMakeLists.txt](./src/solvent_cli/CMakeLists.txt) for inspiration. I'm new to CMake and I have no idea how to properly make distributable libraries. If you have experience doing that stuff, a PR updating these instructions and fixing any of my noob CMakeLists.txt mistakes would be much appreciated. Bonus points if you link me docs to learn more about this.
 
-Note that the library does all its IO without `printf` and friends, so it is safe to do `std::ios_base::sync_with_stdio(false);`.
+- Note that the library does all its IO without `printf` and friends, so it is safe to do `std::ios_base::sync_with_stdio(false);`.
+
+- To change the supported grid sizes that get compiled, create a [tweak header](https://vector-of-bool.github.io/2020/10/04/lib-configuration.html#providing-a-tweak-header) for [`include/solvent_config.hpp`](include/solvent_config.hpp).
 
 ## Building and Running solvent_cli
 
 ```shell
 # cd into the cpp directory first
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build --config=Release
-./build/src/solvent_cli/solvent_cli
+cmake -S . -B build/release -DCMAKE_BUILD_TYPE=Release
+cmake --build build/release --config=Release
+./build/release/src/solvent_cli/solvent_cli
 ```
 
 If you run into build issues, please raise a GitHub issue; I don't actively test on multiple platforms. PR's are welcome.
