@@ -8,7 +8,7 @@ add_library(solvent_lib STATIC
 	gen/path.cpp
 	gen/mod.cpp
 	gen/batch.cpp
-	toolkit.cpp
+	gen/union.cpp
 )
 
 find_package(Threads REQUIRED)

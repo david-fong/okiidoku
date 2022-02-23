@@ -18,7 +18,7 @@ namespace solvent::cli {
 	"\nNote: You can run `tput rmam` in your shell to disable text wrapping.";
 
 
-	Repl::Repl(const Order O): toolkit_(Toolkit(O)) {
+	Repl::Repl(const Order O): gen_union_(gen::GeneratorUnion(O)) {
 		config_.order(O);
 		if (O <= 4) { config_.verbosity(verbosity::Kind::Silent); }
 		if (O  > 4) { config_.verbosity(verbosity::Kind::NoGiveups); }
@@ -76,7 +76,7 @@ namespace solvent::cli {
 				break;
 			case E::Quit:
 				return false;
-			case E::ConfigOrder:       config_.order(cmd_args); toolkit_.set_order(config_.order()); break;
+			case E::ConfigOrder:       config_.order(cmd_args); gen_union_.set_order(config_.order()); break;
 			case E::ConfigVerbosity:   config_.verbosity(cmd_args); break;
 			case E::ConfigGenPath:     config_.path_kind(cmd_args); break;
 			case E::ConfigMaxDeadEnds: config_.max_dead_ends(cmd_args); break;
@@ -93,8 +93,8 @@ namespace solvent::cli {
 	void Repl::gen_single(const bool cont_prev) {
 		const clock_t clock_start = std::clock();
 		const auto gen_result = cont_prev
-			? toolkit_.gen_continue_prev()
-			: toolkit_.gen(gen::Params{
+			? gen_union_.gen_continue_prev()
+			: gen_union_.gen(gen::Params{
 				.path_kind = config_.path_kind(),
 				.canonicalize = config_.canonicalize(),
 				.max_dead_ends = config_.max_dead_ends(),

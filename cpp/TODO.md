@@ -2,6 +2,25 @@
 
 ## Higher Priority
 
+- make a custom vector-like class for grids.
+  - fixed size and capacity, stores in heap. look into just using boost static_vector.
+  - use this as the return type of scramble and canonicalize
+- for generator max_dead_ends, create an array for max allowed values for each order. use that with uint_leastN_t to define the type based on O. use it when cleaning params, and print that info in the repl when doing config.
+- either put result buffering in Generator or in batch.
+  - batch isn't templated, but its thread functor is...
+- separate gen::GenResult into another gen::Generator::Result.
+  - put printing things on the non-template one. or even consider getting rid of the print methods there and moving it to an external function (which would be more reusable. in that case, the print_text function could change from taking a function to taking a span (before I didn't know about span)).
+  - document reasons for having both Generator::Result and gen::GenResult
+    - space usage (int types, expressing stack vs heap location (array vs vector)) when batching.
+  - consider making an additional distinction:
+    - one templated that owns all data, doesn't put members in the heap, and uses exact int sizes
+      - this one is annoying to use when the caller wants to call any size of generator but wants to avoid creating more template expansions as much as possible.
+    - one non-templated that does not own any data and instead wraps the previous one, providing accessors that do the number type-conversions.
+    - one non-templated that owns data and stores members in the heap because it's easy to program.
+      - can be used by caller as an owning storage format.
+- move canonicalize param from generator to batch (and gen::GeneratorUnion?)
+- in the repl config, consider making some fields per-order. max_dead_ends is a good candidate. verbosity might also be useful, but I'm not sure if it would be surprising in a bad way. should be fine as long as the current values are printed when switching between orders.
+
 - make some grid things for binary serdes.
 
 - "smarter"/greedier backtracking: backtracking may be occurring frequently at a coord because of values much earlier in the genpath progress.

@@ -1,5 +1,5 @@
-#ifndef HPP_SOLVENT_LIB__TOOLKIT
-#define HPP_SOLVENT_LIB__TOOLKIT
+#ifndef HPP_SOLVENT_LIB__GEN_UNION
+#define HPP_SOLVENT_LIB__GEN_UNION
 
 #include <solvent_lib/gen/batch.hpp>
 #include <solvent_lib/gen/mod.hpp>
@@ -8,11 +8,11 @@
 #include <solvent_lib/size.hpp>
 #include <solvent_config.hpp>
 
-namespace solvent::lib {
+namespace solvent::lib::gen {
 
-	class Toolkit final {
+	class GeneratorUnion final {
 	 public:
-		Toolkit(Order);
+		explicit GeneratorUnion(Order);
 		void set_order(Order);
 
 		[[nodiscard]] gen::GenResult gen(gen::Params);

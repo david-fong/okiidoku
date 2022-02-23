@@ -28,8 +28,8 @@ namespace solvent::lib::gen::batch {
 		static constexpr unsigned DEFAULT_BUFFERING[]{ 0, 1,
 			/*2*/1000,
 			/*3*/1000,
-			/*4*/1000,
-			/*5*/1,
+			/*4*/500,  // cautiously space conservative
+			/*5*/1,    // because it's so slow already
 			1, 1, 1, 1, 1
 		};
 	};

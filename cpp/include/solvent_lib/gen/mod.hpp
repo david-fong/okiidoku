@@ -45,6 +45,7 @@ namespace solvent::lib::gen {
 	};
 
 	//
+	// TODO would be cool to have arena allocator support for the vectors
 	struct GenResult final {
 	 public:
 		using val_t = size<O_MAX>::ord2i_t;

@@ -7,6 +7,7 @@
 #endif
 
 // apologies for the macros. they're used to selectively expand templates.
+// If you have ideas about how to do this better, please open a github issue!
 
 // not that interesting
 #ifndef M_SOLVENT_INCLUDE_ORDER_2
@@ -132,7 +133,7 @@ M_SOLVENT_TEMPL_TEMPL_7_
 #define M_SOLVENT_TEMPL_UNION_DEFAULT__PASTER(T, O) T ## O
 #define M_SOLVENT_TEMPL_UNION_DEFAULT__EVALUATOR(T, O) M_SOLVENT_TEMPL_UNION_DEFAULT__PASTER(T, O)
 // Concatenates the value of `T` with the value of `M_SOLVENT_DEFAULT_ORDER`.
-// Use to default-initialize unions with fields with names ending with an order (ex. in toolkit.cpp).
+// Use to default-initialize unions with fields with names ending with an order (ex. in gen/union.cpp).
 #define M_SOLVENT_TEMPL_UNION_DEFAULT(T) M_SOLVENT_TEMPL_UNION_DEFAULT__EVALUATOR(T, M_SOLVENT_DEFAULT_ORDER)
 
 
