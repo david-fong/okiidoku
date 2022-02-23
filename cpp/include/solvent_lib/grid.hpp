@@ -34,8 +34,8 @@ namespace solvent::lib {
 	template<Order O> [[nodiscard, gnu::const]] bool is_grid_invalid(const grid_mtx_t<O>&) noexcept;
 
 
-	template<Order O> [[nodiscard, gnu::const]] constexpr typename size<O>::ord2i_t rmi2row(const typename size<O>::ord4i_t index) noexcept { return static_cast<size<O>::ord2i_t>(index / (O*O)); }
-	template<Order O> [[nodiscard, gnu::const]] constexpr typename size<O>::ord2i_t rmi2col(const typename size<O>::ord4i_t index) noexcept { return static_cast<size<O>::ord2i_t>(index % (O*O)); }
+	template<Order O> [[nodiscard, gnu::const]] constexpr typename size<O>::ord2i_t rmi2row(const typename size<O>::ord4i_t index) noexcept { return static_cast<size<O>::ord2i_t>(index / (O*O)); } // I love c++ :')
+	template<Order O> [[nodiscard, gnu::const]] constexpr typename size<O>::ord2i_t rmi2col(const typename size<O>::ord4i_t index) noexcept { return static_cast<size<O>::ord2i_t>(index % (O*O)); } // whyyyyyyyyyy
 	template<Order O> [[nodiscard, gnu::const]] constexpr typename size<O>::ord2i_t rmi2blk(const typename size<O>::ord2i_t row, const typename size<O>::ord2i_t col) noexcept {
 		return static_cast<size<O>::ord2i_t>((row / O) * O) + (col / O);
 	}

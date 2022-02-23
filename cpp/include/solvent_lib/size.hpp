@@ -68,6 +68,8 @@ namespace solvent {
 		// O4:   32  243  1024  3125  7776  16807  32768  59049  10000
 		// bits:  6    8    11    12    13     15     16     16     17
 		using ord5i_t = uint_fastN_t<std::bit_width(O*O*O*O*O+1)>;
+
+		using ord6i_t = uint_fastN_t<std::bit_width(O*O*O*O*O*O+1)>;
 	};
 }
 #endif

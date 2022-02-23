@@ -33,6 +33,9 @@ namespace solvent::cli {
 		std::cout
 		<< '\n' << str::DIM.ON << TERMINAL_OUTPUT_TIPS << str::DIM.OFF
 		<< '\n' << Command::HelpMessage
+		<< '\n' << sizeof(gen::GenResult) +  9*(1+sizeof(gen::GenResult::dead_ends_t))
+		<< '\n' << sizeof(gen::GenResult) + 16*(1+sizeof(gen::GenResult::dead_ends_t))
+		<< '\n' << sizeof(gen::GenResult) + 25*(1+sizeof(gen::GenResult::dead_ends_t))
 		<< std::endl;
 
 		std::string command;
@@ -93,8 +96,8 @@ namespace solvent::cli {
 			? toolkit_.gen_continue_prev()
 			: toolkit_.gen(gen::Params{
 				.path_kind = config_.path_kind(),
-				.max_dead_ends = config_.max_dead_ends(),
 				.canonicalize = config_.canonicalize(),
+				.max_dead_ends = config_.max_dead_ends(),
 			});
 		const double processor_time = (static_cast<double>(std::clock() - clock_start)) / CLOCKS_PER_SEC;
 
@@ -117,8 +120,8 @@ namespace solvent::cli {
 		gen::batch::Params params{
 			.gen_params {
 				.path_kind = config_.path_kind(),
-				.max_dead_ends = config_.max_dead_ends(),
 				.canonicalize = config_.canonicalize(),
+				.max_dead_ends = config_.max_dead_ends(),
 			},
 			.only_count_oks = only_count_oks,
 			.stop_after = stop_after

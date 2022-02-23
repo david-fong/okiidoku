@@ -28,8 +28,8 @@ namespace solvent::lib::gen {
 	//
 	struct Params {
 		path::Kind path_kind = path::Kind::RowMajor;
-		std::uint_fast64_t max_dead_ends = 0; // Defaulted if zero.
 		bool canonicalize = false; // TODO try moving up layout-wise and see if perf improves
+		std::uint_fast64_t max_dead_ends = 0; // Defaulted if zero.
 
 		// Cleans self and returns a copy of self.
 		Params clean(Order O) noexcept;
@@ -48,21 +48,22 @@ namespace solvent::lib::gen {
 	struct GenResult final {
 	 public:
 		using val_t = size<O_MAX>::ord2i_t;
+		using dead_ends_t = float; // an experiment to save space when buffering batched results.
 		using backtrack_origin_t = size<O_MAX>::ord4x_least_t;
 
-		Order O;
+		std::uint8_t O;
 		Params params;
 		ExitStatus status;
 		backtrack_origin_t backtrack_origin;
-		std::uint_fast64_t most_dead_ends_seen;
+		dead_ends_t most_dead_ends_seen;
 		opcount_t op_count;
 		std::vector<val_t> grid;
-		std::vector<std::uint_fast64_t> dead_ends;
+		std::vector<dead_ends_t> dead_ends;
 
 		template<Order O_>
 		std::span<const val_t, O_*O_*O_*O_> grid_const_span() const {
 			assert(O_ == O);
-			std::span s(grid);
+			std::span s{grid};
 			return s.template subspan<0, O_*O_*O_*O_>();
 		}
 		void print_text(std::ostream&) const;
@@ -76,14 +77,18 @@ namespace solvent::lib::gen {
 	};
 
 	constexpr unsigned long long DEFAULT_MAX_DEAD_ENDS(const Order O) {
-		unsigned long long _[]{ 0, 0, 3, 100, 320, 100'000, 10'000'000 };
+		const unsigned long long _[]{ 0, 0, 3,
+		/*3*/30,
+		/*4*/700,
+		/*5*/100'000, // changing to anything between this and 100K doesn't seem to have any significant difference? I only tested with gen_ok 20 though.
+		/*6*/10'000'000 /* <- not tested AT ALL ... */ };
 		return _[O];
 	};
 
 	//
 	template<Order O>
 	class Generator final {
-	 static_assert(O > 0 && O < O_MAX);
+	 static_assert((O > 0) && (O < O_MAX) && (O < 6)); // added restriction for sanity
 	 private:
 		using has_mask_t = size<O>::O2_mask_fast_t;
 		using ord1i_t = size<O>::ord1i_t;

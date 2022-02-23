@@ -5,9 +5,6 @@
 
 #include <iostream>
 #include <algorithm> // sort
-// #include <numeric>   // transform_reduce
-// #include <execution> // execution::par_unseq
-// #include <cmath>     // pow
 #include <compare>   // partial_ordering
 #include <bit>       // popcount
 
@@ -84,6 +81,36 @@ namespace solvent::lib::morph {
 
 
 		static grid_vec_t<O> do_it(const grid_const_span_t<O> orig_grid) {
+			/* const GridSortEntry grid_slide = GridSortEntry::build(rel_count_, grid_);
+			const GridSortEntry transposed_grid_slide = [this](){
+				decltype(grid_) transposed_input;
+				for (ord2i_t i = 0; i < O2; i++) {
+					for (ord2i_t j = 0; j < O2; j++) {
+						transposed_input[i][j] = grid_[j][i];
+					}
+				}
+				return GridSortEntry::build(rel_count_, transposed_input);
+			}();
+
+			decltype(grid_) canon_input = {O2};
+			for (ord2i_t canon_row = 0; canon_row < O2; canon_row++) {
+				const auto& r_chute = grid_slide[canon_row/O1];
+				const ord2i_t orig_row = (O1*r_chute.orig_chute) + r_chute[canon_row%O1].orig_blkline;
+				for (ord2i_t canon_col = 0; canon_col < O2; canon_col++) {
+					const auto& c_chute = transposed_grid_slide[canon_col/O1];
+					const ord2i_t orig_col = (O1*c_chute.orig_chute) + c_chute[canon_col%O1].orig_blkline;
+					canon_input[canon_row][canon_col] = grid_[orig_row][orig_col];
+				}
+			}
+			if (transposed_grid_slide < grid_slide) {
+				for (ord2i_t i = 0; i < O2; i++) {
+					for (ord2i_t j = 0; j < O2; j++) {
+						grid_[i][j] = canon_input[j][i];
+					}
+				}
+			} else {
+				grid_ = canon_input;
+			} */
 			(void)orig_grid; // TODO
 			grid_vec_t<O> grid(O4);
 			return grid;
@@ -93,44 +120,7 @@ namespace solvent::lib::morph {
 
 	template<Order O>
 	grid_vec_t<O> canon_place(const grid_const_span_t<O> orig_grid) {
-		// TODO assert that input is the correct length and is a complete, valid sudoku?
 		return CanonPlace<O>::do_it(orig_grid);
-	}
-
-	
-	template<Order O>
-	void canonicalize_positioning_() {
-		// TODO
-		/* const GridSortEntry grid_slide = GridSortEntry::build(rel_count_, grid_);
-		const GridSortEntry transposed_grid_slide = [this](){
-			decltype(grid_) transposed_input;
-			for (ord2i_t i = 0; i < O2; i++) {
-				for (ord2i_t j = 0; j < O2; j++) {
-					transposed_input[i][j] = grid_[j][i];
-				}
-			}
-			return GridSortEntry::build(rel_count_, transposed_input);
-		}();
-
-		decltype(grid_) canon_input = {O2};
-		for (ord2i_t canon_row = 0; canon_row < O2; canon_row++) {
-			const auto& r_chute = grid_slide[canon_row/O1];
-			const ord2i_t orig_row = (O1*r_chute.orig_chute) + r_chute[canon_row%O1].orig_blkline;
-			for (ord2i_t canon_col = 0; canon_col < O2; canon_col++) {
-				const auto& c_chute = transposed_grid_slide[canon_col/O1];
-				const ord2i_t orig_col = (O1*c_chute.orig_chute) + c_chute[canon_col%O1].orig_blkline;
-				canon_input[canon_row][canon_col] = grid_[orig_row][orig_col];
-			}
-		}
-		if (transposed_grid_slide < grid_slide) {
-			for (ord2i_t i = 0; i < O2; i++) {
-				for (ord2i_t j = 0; j < O2; j++) {
-					grid_[i][j] = canon_input[j][i];
-				}
-			}
-		} else {
-			grid_ = canon_input;
-		} */
 	}
 
 

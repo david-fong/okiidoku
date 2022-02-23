@@ -20,9 +20,12 @@ namespace solvent::lib::gen::batch {
 		unsigned max_dead_end_sample_granularity = 0; // Defaulted if zero.
 		bool only_count_oks;
 		trials_t stop_after;
+		unsigned callback_buffering = 0; // Defaulted if zero.
 
 		// Cleans self and returns a copy of self.
 		Params clean(Order O) noexcept;
+
+		static constexpr unsigned DEFAULT_BUFFERING[]{ 0, 1, /*2*/1000, 1000, 1000, /*5*/1, 1, 1, 1, 1, 1 };
 	};
 
 	//

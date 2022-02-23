@@ -171,15 +171,16 @@ namespace solvent::lib::gen {
 	template<Order O>
 	GenResult Generator<O>::make_gen_result_(void) const {
 		typename path::coord_converter_t<O> prog2coord = path::GetPathCoords<O>(params_.path_kind);
+		using GR = GenResult;
 		GenResult gen_result {
 			.O {O},
 			.params {params_},
 			.status {this->get_exit_status()},
-			.backtrack_origin {static_cast<GenResult::backtrack_origin_t>(backtrack_origin_)}, // safe narrowing
-			.most_dead_ends_seen {most_dead_ends_seen_},
+			.backtrack_origin {static_cast<GR::backtrack_origin_t>(backtrack_origin_)}, // safe narrowing
+			.most_dead_ends_seen {static_cast<GR::dead_ends_t>(most_dead_ends_seen_)},
 			.op_count {op_count_},
-			.grid = std::vector<std::uint_fast8_t>(O4, O2),
-			.dead_ends = std::vector<std::uint_fast64_t>(O4, 0),
+			.grid = std::vector<GR::val_t>(O4, O2),
+			.dead_ends = std::vector<GR::dead_ends_t>(O4, 0),
 		};
 		for (ord4i_t p = 0; p < O4; p++) {
 			// Note: The bound under progress_ is significant.
@@ -188,7 +189,7 @@ namespace solvent::lib::gen {
 			if (!cells_[p].is_clear()) {
 				gen_result.grid[coord] = val_try_orders_[p/O2][cells_[p].try_index];
 			}
-			gen_result.dead_ends[coord] = dead_ends_[p];
+			gen_result.dead_ends[coord] = static_cast<GR::dead_ends_t>(dead_ends_[p]);
 		}
 		if (params_.canonicalize && gen_result.status == ExitStatus::Ok) /* [[unlikely]] (worth?) */ {
 			gen_result.grid = morph::canonicalize<O>(gen_result.grid_const_span<O>());
@@ -197,13 +198,11 @@ namespace solvent::lib::gen {
 	}
 
 
-	std::string shaded_dead_end_stat(const long out_of, const long count) {
+	std::string shaded_dead_end_stat(GenResult::dead_ends_t out_of, GenResult::dead_ends_t count) {
 		assert(count <= out_of);
-		const unsigned long relative_intensity
-			= (count - 1)
-			* util::str::BLOCK_CHARS.size()
-			/ (out_of + 1);
-		return (count == 0) ? " " : util::str::BLOCK_CHARS[relative_intensity];
+		return (count == 0) ? " " : util::str::BLOCK_CHARS[static_cast<std::size_t>(
+			(count - 1) * util::str::BLOCK_CHARS.size() / (out_of + 1)
+		)];
 	}
 
 
@@ -218,7 +217,7 @@ namespace solvent::lib::gen {
 				_os << ' '; print::val2str(_os, O, this->grid[coord]);
 			}),
 			print::print_grid_t([this](std::ostream& _os, uint16_t coord) {
-				const auto shade = shaded_dead_end_stat(params.max_dead_ends, dead_ends[coord]);
+				const auto shade = shaded_dead_end_stat(static_cast<dead_ends_t>(params.max_dead_ends), dead_ends[coord]);
 				_os << shade << shade;
 			}),
 		};

@@ -16,7 +16,7 @@
 template<solvent::Order O>
 unsigned test_morph_O(const unsigned num_rounds) {
 	using namespace solvent::lib;
-	std::cout << "\n\ntesting morph for order " << O << '\n';
+	std::cout << "\n\ntesting morph for order " << O << std::endl;
 	unsigned int count_bad = 0;
 	for (unsigned round = 0; round < num_rounds; ) {
 		auto gen = gen::Generator<O>();
@@ -30,15 +30,16 @@ unsigned test_morph_O(const unsigned num_rounds) {
 		if (result.grid != other_result.grid) {
 			count_bad++;
 			// TODO
-			std::cout << "\n!bad\n";
-			result.print_text(std::cout);
-			std::cout << "\n";
-			other_result.print_text(std::cout);
-			std::cout << "\n==========\n";
+			std::clog << "\n!bad\n";
+			result.print_text(std::clog);
+			std::clog << "\n";
+			other_result.print_text(std::clog);
+			std::clog << "\n==========\n";
 		} else {
-			std::cout << ".";
+			std::clog << ".";
 		}
 	}
+	std::clog.flush();
 	std::cout << "\ncount bad: " << count_bad << " / " << num_rounds;
 	return count_bad;
 }
@@ -69,7 +70,7 @@ int main(const int argc, char const *const argv[]) {
 	solvent::lib::morph::seed_scrambler_rng(srand_key);
 
 	// TODO change the test to try out all orders.
-	if (test_morph_O<3>(num_rounds)) {
+	if (test_morph_O<4>(num_rounds)) {
 		return 1;
 	}
 	return 0;

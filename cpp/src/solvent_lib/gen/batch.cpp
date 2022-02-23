@@ -26,6 +26,9 @@ namespace solvent::lib::gen::batch {
 		if (max_dead_end_sample_granularity == 0) {
 			max_dead_end_sample_granularity = BatchReport::SAMPLE_GRANULARITY_DEFAULT;
 		}
+		if (callback_buffering == 0) {
+			callback_buffering = DEFAULT_BUFFERING[O];
+		}
 		return *this;
 	}
 
@@ -66,7 +69,7 @@ namespace solvent::lib::gen::batch {
 
 				auto& dist_summary_row = shared_data_.max_dead_end_samples[
 					params_.max_dead_end_sample_granularity
-					* (gen_result.most_dead_ends_seen)
+					* static_cast<unsigned long>(gen_result.most_dead_ends_seen)
 					/ (params_.gen_params.max_dead_ends + 1)
 				];
 				dist_summary_row.marginal_oks++;
