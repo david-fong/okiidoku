@@ -13,6 +13,7 @@
   - this would allow checking if puzzles are equivalent.
 
 - the canonicalize param of generator seems weird in that the dead_ends grid of the result struct isn't also transformed to match. This feature should either be specced (to also transform dead_ends grid or not) and documented, or removed.
+  - I think there's some instruction and data cache optimization opportunity by doing batches of generating and then canonicalization on those batches. In the grand scheme of things, that sounds like over-optimization, but for me, enabling that level of optimization is important. Making it so easy to canonicalize immediately after generating seems like a lazy / somewhat sloppy thing to do from that perspective.
 
 - (maybe?) instead of defining RNGs, make the library functions that use RNG take a reference to an RNG?
   - rationale: give the library user more control over the RNGs. easy for them to seed it, and they can choose whether to share an RNG for gen and shuffle operations.
@@ -39,7 +40,7 @@
   - it's only needed when the part _defined_ in the header is big.
 
 1. Consider: The current relabelling canonicalization method may have a big weakness: I think ties can be easily crafted: consider the "Most Canonical" solution grid- it would be all ties. How can this be addressed? (Or perhaps the "Most Canonical" grid is the only weakness?)
-    - First of all, how often to ties happen with the current relabelling solution, and what do the grids where this happens look like? Ie. 
+    - First of all, how often do ties happen with the current relabelling solution, and what do the grids where this happens look like? Ie. 
     - Break ties by designing a way to give symbols that frequently cohabit atoms label-values that are closer together in value:
     - The cohabitation table can be tiled; a coordinate's vertical or horizontal distance (these are the same, since relabelling moves both the col and row together) from the closest tiling of the main diagonal represents the distance of the labels from each other.
     - For each label, make an array where each index represents another label, and the value is an object containing the left and right distances between them, and the cohabitation count.

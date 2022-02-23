@@ -2,6 +2,7 @@
 #define HPP_SOLVENT_LIB__GEN__PATH
 
 #include <solvent_lib/size.hpp>
+#include <solvent_config.hpp>
 
 #include <iosfwd>
 #include <array>
@@ -29,6 +30,8 @@ namespace solvent::lib::gen::path {
 		"\n- blockcol   rowmajor, but broken into columns one block wide"
 		"\n- dealrwmj   like dealing cards to each block using row-major";
 
+
+	// input progress must be _less than_ O4.
 	template<solvent::Order O>
 	using coord_converter_t = [[gnu::const]] typename size<O>::ord4_t (&)(typename size<O>::ord4_t) noexcept;
 

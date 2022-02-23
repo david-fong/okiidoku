@@ -31,7 +31,7 @@ namespace solvent::lib::print {
 	}
 
 
-	void pretty(std::ostream& os, const Order O, const std::vector<print_grid_t>& grid_views) {
+	void pretty(std::ostream& os, const Order O, const std::span<const print_grid_t> grid_views) {
 		namespace str = solvent::util::str;
 		using ord2_t = std::uint16_t;
 

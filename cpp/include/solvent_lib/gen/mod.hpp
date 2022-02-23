@@ -4,11 +4,14 @@
 #include <solvent_lib/gen/path.hpp>
 #include <solvent_lib/grid.hpp>
 #include <solvent_lib/size.hpp>
+#include <solvent_config.hpp>
 
 #include <iosfwd>
 #include <vector>
 #include <array>
+#include <span>
 #include <numeric>   // iota,
+#include <cassert>
 
 namespace solvent::lib::gen {
 
@@ -26,7 +29,7 @@ namespace solvent::lib::gen {
 	struct Params {
 		path::Kind path_kind = path::Kind::RowMajor;
 		std::uint_fast64_t max_dead_ends = 0; // Defaulted if zero.
-		bool canonicalize = false;
+		bool canonicalize = false; // TODO try moving up layout-wise and see if perf improves
 
 		// Cleans self and returns a copy of self.
 		Params clean(Order O) noexcept;
@@ -43,15 +46,27 @@ namespace solvent::lib::gen {
 
 	//
 	struct GenResult final {
+	 private:
+		static constexpr Order O_MAX = MAX_REASONABLE_ORDER;
+	 public:
+		using val_t = uint_leastN_t<std::bit_width(O_MAX*O_MAX+1)>;
+		using backtrack_origin_t = uint_leastN_t<std::bit_width(O_MAX*O_MAX*O_MAX*O_MAX)>;
+
 		Order O;
 		Params params;
 		ExitStatus status;
-		unsigned long backtrack_origin;
+		backtrack_origin_t backtrack_origin;
 		std::uint_fast64_t most_dead_ends_seen;
 		opcount_t op_count;
-		std::vector<std::uint_fast8_t> grid; // NOTE: assumes O1 < 16
+		std::vector<val_t> grid;
 		std::vector<std::uint_fast64_t> dead_ends;
 
+		template<Order O_>
+		std::span<const val_t, O_*O_*O_*O_> grid_const_span() const {
+			assert(O_ == O);
+			std::span s(grid);
+			return s.template subspan<0, O_*O_*O_*O_>();
+		}
 		void print_serial(std::ostream&) const;
 		void print_pretty(std::ostream&) const;
 	};
@@ -63,7 +78,7 @@ namespace solvent::lib::gen {
 	};
 
 	constexpr unsigned long long DEFAULT_MAX_DEAD_ENDS(const Order O) {
-		unsigned long long _[] = { 0, 0, 3, 100, 320, 100'000, 10'000'000 };
+		unsigned long long _[]{ 0, 0, 3, 100, 320, 100'000, 10'000'000 };
 		return _[O];
 	};
 
@@ -72,10 +87,10 @@ namespace solvent::lib::gen {
 	class Generator final {
 	 static_assert(O > 0 && O < MAX_REASONABLE_ORDER);
 	 private:
-		using has_mask_t = typename size<O>::O2_mask_fast_t;
-		using ord1_t = typename size<O>::ord1_t;
-		using ord2_t = typename size<O>::ord2_t;
-		using ord4_t = typename size<O>::ord4_t;
+		using has_mask_t = size<O>::O2_mask_fast_t;
+		using ord1_t = size<O>::ord1_t;
+		using ord2_t = size<O>::ord2_t;
+		using ord4_t = size<O>::ord4_t;
 
 	 public:
 		// Note that this should always be smaller than opcount_t.
@@ -120,7 +135,7 @@ namespace solvent::lib::gen {
 
 		Params params_;
 		ord4_t progress_ = 0;
-		ord4_t backtrack_origin_ = 0;
+		uint_fastN_t<std::bit_width(O4)> backtrack_origin_ = 0;
 		dead_ends_t most_dead_ends_seen_ = 0;
 		opcount_t op_count_ = 0;
 

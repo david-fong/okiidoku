@@ -2,6 +2,7 @@
 #define HPP_SOLVENT_LIB__GRID
 
 #include <solvent_lib/size.hpp>
+#include <solvent_config.hpp>
 
 #include <vector>
 #include <array>
@@ -83,7 +84,7 @@ namespace solvent::lib {
 }
 
 
-extern template class std::vector<std::uint_fast8_t>;
+// extern template class std::vector<std::uint_fast8_t>;
 #define SOLVENT_TEMPL_TEMPL(O_) \
 	extern template class std::array<std::array<typename solvent::size<O_>::ord2_t, O_*O_>, O_*O_>;
 SOLVENT_INSTANTIATE_ORDER_TEMPLATES

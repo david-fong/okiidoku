@@ -1,7 +1,7 @@
 
-# Sudoku Utilities in C++ and Rust
+# Sudoku Utilities in C++
 
-The project currently provides two utilities: a solution generator, and a canonicalizer. It is _not_ a solver or even a puzzle generator (hence "solve-n't"), although I may try tackling these problems in the future. It supports parametric size which many other sudoku projects do not.
+The project currently provides two utilities: a solution generator, and a canonicalizer. It is _not_ a solver or even a puzzle generator (hence "solve-n't"), although I may try my hand at those in the future. It supports parametric grid size which many other sudoku projects do not.
 
 For usage instructions, see the readmes in the [cpp](./cpp/readme.md) and [rust](./rust/readme.md) directories. Note that the rust implementation is more of a learning project for me, and is currently not in development.
 
@@ -9,7 +9,7 @@ I work on this project for fun. Feedback and suggestions on how to improve are v
 
 ## If You Want a Solver
 
-\*Insert image of spongebob indignantly gesturing to many instances of a thing here.
+[\*relevant meme](https://i.kym-cdn.com/photos/images/newsfeed/001/596/781/3b9.png)
 
 - [codegolf competition](https://codegolf.stackexchange.com/questions/190727/the-fastest-sudoku-solver)
   - [the winner, tdoku](https://t-dillon.github.io/tdoku/)

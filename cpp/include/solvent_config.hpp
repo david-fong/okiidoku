@@ -6,6 +6,10 @@
 	#include <solvent_config.tweaks.h>
 #endif
 
+namespace solvent::config {
+	;
+}
+
 // not that interesting
 #ifndef SOLVENT_INCLUDE_ORDER_2
 #define SOLVENT_INCLUDE_ORDER_2 false
@@ -96,7 +100,7 @@
 // Can be used to instantiate templates.
 // Must include `SOLVENT_DEFAULT_ORDER`.
 // At usage sites, first #define SOLVENT_TEMPL_TEMPL and then #undef it right after.
-// TODO this seems to pitchfork library spec:
+// TODO this seems to violate pitchfork library spec:
 //  "A library should not offer the user controls for tweaking its public interface."...
 //  https://api.csswg.org/bikeshed/?force=1&url=https://raw.githubusercontent.com/vector-of-bool/pitchfork/develop/data/spec.bs#libraries
 #define SOLVENT_INSTANTIATE_ORDER_TEMPLATES \

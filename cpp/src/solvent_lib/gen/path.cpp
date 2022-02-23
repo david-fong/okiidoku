@@ -10,9 +10,9 @@ namespace solvent::lib::gen::path {
 	template<Kind PK, Order O>
 	struct PathCoords_ final {
 	 private:
-		using ord1_t = typename size<O>::ord1_t;
-		using ord2_t = typename size<O>::ord2_t;
-		using ord4_t = typename size<O>::ord4_t;
+		using ord1_t = size<O>::ord1_t;
+		using ord2_t = size<O>::ord2_t;
+		using ord4_t = size<O>::ord4_t;
 	 public:
 		static constexpr ord1_t O1 = O;
 		static constexpr ord2_t O2 = O*O;
@@ -27,8 +27,8 @@ namespace solvent::lib::gen::path {
 		}
 	 private:
 		using grid_cache_t = typename std::array<typename size<O>::ord4_least_t, O4>;
-		static constexpr const grid_cache_t _init() noexcept {
-			grid_cache_t path_tmp = {0};
+		static constexpr grid_cache_t _init() noexcept {
+			grid_cache_t _{0};
 			if constexpr (PK == Kind::RowMajor) {
 				// std::iota(path.begin(), path.end(), 0);
 			}
@@ -37,7 +37,7 @@ namespace solvent::lib::gen::path {
 				for (ord1_t blk_col = 0; blk_col < O1; blk_col++) {
 					for (ord2_t row = 0; row < O2; row++) {
 						for (ord1_t b_col = 0; b_col < O1; b_col++) {
-							path_tmp[i++] = (blk_col * O1) + (row * O2) + (b_col);
+							_[i++] = (blk_col * O1) + (row * O2) + (b_col);
 						}
 					}
 				}
@@ -48,12 +48,12 @@ namespace solvent::lib::gen::path {
 					for (ord1_t inside_b_col = 0; inside_b_col < O1; inside_b_col++) {
 						for (ord2_t blk_i = 0; blk_i < O2; blk_i++) {
 							ord4_t blkaddr = ((blk_i % O1) * O1) + (blk_i / O1 * O1 * O2);
-							path_tmp[i++] = blkaddr + (inside_b_row * O2) + inside_b_col;
+							_[i++] = blkaddr + (inside_b_row * O2) + inside_b_col;
 						}
 					}
 				}
 			}
-			return static_cast<const grid_cache_t>(path_tmp);
+			return _;
 		}
 		static constexpr grid_cache_t path = PathCoords_<PK,O>::_init();
 		// Note: a compiler can optimize this away if not used.

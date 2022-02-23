@@ -3,12 +3,13 @@
 
 #include <solvent_lib/grid.hpp>
 #include <solvent_lib/size.hpp>
+#include <solvent_config.hpp>
 
 namespace solvent::lib::morph {
 
 	/** input must be a complete grid. */
-	template<Order O> [[nodiscard]]
-	[[gnu::const]] grid_vec_t<O> canonicalize(grid_const_span_t<O>);
+	template<Order O> [[nodiscard, gnu::const]]
+	grid_vec_t<O> canonicalize(grid_const_span_t<O>);
 
 
 	#define SOLVENT_TEMPL_TEMPL(O_) \

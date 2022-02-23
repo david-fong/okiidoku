@@ -175,7 +175,7 @@ namespace solvent::lib::gen {
 			.O {O},
 			.params {params_},
 			.status {this->get_exit_status()},
-			.backtrack_origin {backtrack_origin_},
+			.backtrack_origin {static_cast<GenResult::backtrack_origin_t>(backtrack_origin_)}, // safe narrowing
 			.most_dead_ends_seen {most_dead_ends_seen_},
 			.op_count {op_count_},
 			.grid = std::vector<std::uint_fast8_t>(O4, O2),
@@ -191,7 +191,7 @@ namespace solvent::lib::gen {
 			gen_result.dead_ends[coord] = dead_ends_[p];
 		}
 		if (params_.canonicalize && gen_result.status == ExitStatus::Ok) /* [[unlikely]] (worth?) */ {
-			gen_result.grid = morph::canonicalize<O>(gen_result.grid); // TODO put back in when working on canonicalization
+			gen_result.grid = morph::canonicalize<O>(gen_result.grid_const_span<O>());
 		}
 		return gen_result;
 	}

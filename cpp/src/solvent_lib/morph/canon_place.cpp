@@ -16,10 +16,10 @@ namespace solvent::lib::morph {
 	template<Order O>
 	class CanonPlace final {
 	 static_assert(O > 0 && O < MAX_REASONABLE_ORDER);
-		using has_mask_t = typename size<O>::O2_mask_least_t;
-		using ord1_t = typename size<O>::ord1_t;
-		using ord2_t = typename size<O>::ord2_t;
-		using ord4_t = typename size<O>::ord4_t;
+		using has_mask_t = size<O>::O2_mask_least_t;
+		using ord1_t = size<O>::ord1_t;
+		using ord2_t = size<O>::ord2_t;
+		using ord4_t = size<O>::ord4_t;
 
 	 public:
 		static constexpr ord1_t O1 = O;

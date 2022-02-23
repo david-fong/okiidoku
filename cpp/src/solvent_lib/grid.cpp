@@ -66,7 +66,7 @@ namespace solvent::lib {
 }
 
 
-template class std::vector<std::uint_fast8_t>;
+// template class std::vector<std::uint_fast8_t>;
 #define SOLVENT_TEMPL_TEMPL(O_) \
 	template class std::array<std::array<typename solvent::size<O_>::ord2_t, O_*O_>, O_*O_>;
 SOLVENT_INSTANTIATE_ORDER_TEMPLATES

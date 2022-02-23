@@ -6,6 +6,7 @@
 // #include <solvent_lib/morph/canon.hpp>
 #include <solvent_lib/grid.hpp>
 #include <solvent_lib/size.hpp>
+#include <solvent_config.hpp>
 
 namespace solvent::lib {
 
