@@ -20,6 +20,7 @@ else()
 		-Wall -Wextra -Wpedantic -Werror
 		-Wold-style-cast -Wcast-qual
 		-Wformat=2
+		-Wconversion
 		-Wimplicit-fallthrough=5
 		-Wshadow
 		-march=native

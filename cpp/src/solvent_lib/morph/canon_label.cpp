@@ -25,12 +25,12 @@ namespace solvent::lib::morph {
 		// Info not placement-independent.
 		// Does not include self-to-self relationship bit for main diagonal entries.
 		struct RelMask final {
-			has_mask_t blocks_h = 0;
-			has_mask_t blocks_v = 0;
+			has_mask_t blocks_h;
+			has_mask_t blocks_v;
 		};
 		static grid_mtx_t<O, RelMask> make_rel_masks_(const grid_const_span_t<O> grid_span) noexcept {
 			grid_mtx_wrapper_t<O, const ord2_t> grid(grid_span);
-			grid_mtx_t<O, RelMask> masks;
+			grid_mtx_t<O, RelMask> masks{}; // zero initialize
 			for (ord2_t line = 0; line < O2; line++) {
 				for (ord2_t atom = 0; atom < O2; atom += O1) {
 					// Go through all unique pairs in the atom:
@@ -79,8 +79,8 @@ namespace solvent::lib::morph {
 
 				std::array<ord1_t, O1> all_chute_a_occ, all_chute_b_occ;
 				for (ord1_t chute = 0; chute < O1; chute++) {
-					all_chute_a_occ[chute] = std::popcount(chute_blk_masks<O>::row[chute] & non_polar_mask);
-					all_chute_b_occ[chute] = std::popcount(chute_blk_masks<O>::col[chute] & non_polar_mask);
+					all_chute_a_occ[chute] = static_cast<ord1_t>(std::popcount(chute_blk_masks<O>::row[chute] & non_polar_mask));
+					all_chute_b_occ[chute] = static_cast<ord1_t>(std::popcount(chute_blk_masks<O>::col[chute] & non_polar_mask));
 				}
 				std::ranges::sort(all_chute_a_occ, std::greater{});
 				std::ranges::sort(all_chute_b_occ, std::greater{});

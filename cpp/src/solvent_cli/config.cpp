@@ -44,7 +44,7 @@ namespace solvent::cli {
 			return;
 		}
 		try {
-			const Order new_order = std::stoul(new_order_str);
+			const Order new_order = static_cast<Order>(std::stoul(new_order_str));
 			switch (new_order) {
 			#define SOLVENT_TEMPL_TEMPL(O_) \
 				case O_: { order(new_order); return; }

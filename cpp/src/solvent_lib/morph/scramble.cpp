@@ -7,7 +7,7 @@
 namespace solvent::lib::morph {
 
 	std::mt19937 ScramblerRng_;
-	void seed_scrambler_rng(const std::uint_fast32_t seed) noexcept {
+	void seed_scrambler_rng(const std::uint_fast64_t seed) noexcept {
 		ScramblerRng_.seed(seed);
 	}
 

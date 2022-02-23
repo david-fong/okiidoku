@@ -13,6 +13,7 @@ namespace solvent::lib::gen::path {
 		using ord1_t = size<O>::ord1_t;
 		using ord2_t = size<O>::ord2_t;
 		using ord4_t = size<O>::ord4_t;
+		using ord4_least_t = size<O>::ord4_least_t;
 	 public:
 		static constexpr ord1_t O1 = O;
 		static constexpr ord2_t O2 = O*O;
@@ -26,7 +27,7 @@ namespace solvent::lib::gen::path {
 			}
 		}
 	 private:
-		using grid_cache_t = typename std::array<typename size<O>::ord4_least_t, O4>;
+		using grid_cache_t = typename std::array<ord4_least_t, O4>;
 		static constexpr grid_cache_t _init() noexcept {
 			grid_cache_t _{0};
 			if constexpr (PK == Kind::RowMajor) {
@@ -37,7 +38,7 @@ namespace solvent::lib::gen::path {
 				for (ord1_t blk_col = 0; blk_col < O1; blk_col++) {
 					for (ord2_t row = 0; row < O2; row++) {
 						for (ord1_t b_col = 0; b_col < O1; b_col++) {
-							_[i++] = (blk_col * O1) + (row * O2) + (b_col);
+							_[i++] = static_cast<ord4_least_t>((blk_col * O1) + (row * O2) + (b_col));
 						}
 					}
 				}
@@ -47,8 +48,8 @@ namespace solvent::lib::gen::path {
 				for (ord1_t inside_b_row = 0; inside_b_row < O1; inside_b_row++) {
 					for (ord1_t inside_b_col = 0; inside_b_col < O1; inside_b_col++) {
 						for (ord2_t blk_i = 0; blk_i < O2; blk_i++) {
-							ord4_t blkaddr = ((blk_i % O1) * O1) + (blk_i / O1 * O1 * O2);
-							_[i++] = blkaddr + (inside_b_row * O2) + inside_b_col;
+							const ord4_t blkaddr = static_cast<ord4_t>(((blk_i % O1) * O1) + (blk_i / O1 * O1 * O2));
+							_[i++] = static_cast<ord4_least_t>(blkaddr + (inside_b_row * O2) + inside_b_col);
 						}
 					}
 				}

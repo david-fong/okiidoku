@@ -88,9 +88,6 @@ namespace solvent::cli {
 
 
 	void Repl::gen_single(const bool cont_prev) {
-		str::print_msg_bar("START");
-
-		// Generate a new solution:
 		const clock_t clock_start = std::clock();
 		const auto gen_result = cont_prev
 			? toolkit_.gen_continue_prev()
@@ -106,9 +103,9 @@ namespace solvent::cli {
 			<< "\nprocessor time: " << processor_time << " seconds"
 			<< "\nnum operations: " << gen_result.op_count
 			<< "\nmax dead ends:  " << gen_result.most_dead_ends_seen
+			<< "\nstatus:         " << ((gen_result.status == gen::ExitStatus::Ok) ? "OK"
+				: (gen_result.status == gen::ExitStatus::Abort) ? "ABORT" : "NOTHING LEFT TO CONTINUE")
 			;
-		str::print_msg_bar((gen_result.status == gen::ExitStatus::Ok) ? "OK"
-			: (gen_result.status == gen::ExitStatus::Abort) ? "ABORT" : "NOTHING LEFT TO CONTINUE");
 		std::cout << std::endl;
 	}
 
@@ -117,10 +114,7 @@ namespace solvent::cli {
 		const trials_t stop_after,
 		const bool only_count_oks
 	) {
-		const unsigned BAR_WIDTH = 64;
-
-		str::print_msg_bar("START x" + std::to_string(stop_after), BAR_WIDTH);
-		gen::batch::Params params {
+		gen::batch::Params params{
 			.gen_params {
 				.path_kind = config_.path_kind(),
 				.max_dead_ends = config_.max_dead_ends(),
@@ -134,7 +128,7 @@ namespace solvent::cli {
 				if ((config_.verbosity() == verbosity::Kind::All)
 				 || ((config_.verbosity() == verbosity::Kind::NoGiveups) && (gen_result.status == gen::ExitStatus::Ok))
 				) {
-					gen_result.print_serial(std::cout);
+					gen_result.print_text(std::cout);
 					if (config_.order() <= 4) {
 						std::cout << '\n';
 					} else {
@@ -151,14 +145,12 @@ namespace solvent::cli {
 		) {
 			std::cout << str::RED.ON << "* all generations aborted" << str::RED.OFF;
 		}
-		if (config_.verbosity() != verbosity::Kind::Silent) {
-			str::print_msg_bar("", BAR_WIDTH, "─");
-		}
 
 		static const std::string seconds_units = std::string() + str::DIM.ON + " seconds (with I/O)" + str::DIM.OFF;
 		std::cout << std::setprecision(4)
-			<< "\nnum threads: " << params.num_threads
-			<< "\ngenerator path: " << params.gen_params.path_kind
+			<< "\nstop after:      " << params.stop_after
+			<< "\nnum threads:     " << params.num_threads
+			<< "\ngenerator path:  " << params.gen_params.path_kind
 			<< "\npercent aborted: " << (batch_report.fraction_aborted * 100) << " %"
 			<< "\nprocess time:    " << batch_report.time_elapsed.proc_seconds << seconds_units
 			<< "\nwall-clock time: " << batch_report.time_elapsed.wall_seconds << seconds_units
@@ -166,7 +158,6 @@ namespace solvent::cli {
 
 		// Print bins (work distribution):
 		batch_report.print(std::cout, config_.order());
-		str::print_msg_bar("DONE x" + std::to_string(stop_after), BAR_WIDTH);
 
 		if (batch_report.time_elapsed.wall_seconds > 10.0) {
 			// Emit a beep sound if the trials took longer than ten processor seconds:

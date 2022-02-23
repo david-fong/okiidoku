@@ -67,7 +67,7 @@ namespace solvent::lib::gen {
 			std::span s(grid);
 			return s.template subspan<0, O_*O_*O_*O_>();
 		}
-		void print_serial(std::ostream&) const;
+		void print_text(std::ostream&) const;
 		void print_pretty(std::ostream&) const;
 	};
 

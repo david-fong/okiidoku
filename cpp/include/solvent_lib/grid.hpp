@@ -34,10 +34,10 @@ namespace solvent::lib {
 	template<Order O> [[nodiscard, gnu::const]] bool is_grid_invalid(const grid_mtx_t<O>&) noexcept;
 
 
-	template<Order O> [[nodiscard, gnu::const]] constexpr typename size<O>::ord2_t rmi2row(const typename size<O>::ord4_t index) noexcept { return index / (O*O); }
-	template<Order O> [[nodiscard, gnu::const]] constexpr typename size<O>::ord2_t rmi2col(const typename size<O>::ord4_t index) noexcept { return index % (O*O); }
+	template<Order O> [[nodiscard, gnu::const]] constexpr typename size<O>::ord2_t rmi2row(const typename size<O>::ord4_t index) noexcept { return static_cast<size<O>::ord2_t>(index / (O*O)); }
+	template<Order O> [[nodiscard, gnu::const]] constexpr typename size<O>::ord2_t rmi2col(const typename size<O>::ord4_t index) noexcept { return static_cast<size<O>::ord2_t>(index % (O*O)); }
 	template<Order O> [[nodiscard, gnu::const]] constexpr typename size<O>::ord2_t rmi2blk(const typename size<O>::ord2_t row, const typename size<O>::ord2_t col) noexcept {
-		return ((row / O) * O) + (col / O);
+		return static_cast<size<O>::ord2_t>((row / O) * O) + (col / O);
 	}
 	template<Order O> [[nodiscard, gnu::const]]
 	constexpr typename size<O>::ord2_t rmi2blk(const typename size<O>::ord4_t index) noexcept {

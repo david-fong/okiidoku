@@ -70,7 +70,7 @@ namespace solvent::lib::gen::batch {
 					/ (params_.gen_params.max_dead_ends + 1)
 				];
 				dist_summary_row.marginal_oks++;
-				dist_summary_row.marginal_ops += gen_result.op_count;
+				dist_summary_row.marginal_ops += static_cast<double>(gen_result.op_count);
 			}
 			gen_result_consumer_(gen_result);
 		}
@@ -103,7 +103,7 @@ namespace solvent::lib::gen::batch {
 
 		shared_data.fraction_aborted = (shared_data.total_anys == 0) ? 1.0 :
 			(static_cast<double>(shared_data.total_anys - shared_data.total_oks)
-			/ shared_data.total_anys);
+			/ static_cast<double>(shared_data.total_anys));
 		{
 			double net_ops = 0.0;
 			trials_t net_oks = 0;
@@ -112,8 +112,12 @@ namespace solvent::lib::gen::batch {
 				sample.max_dead_ends = params.gen_params.max_dead_ends * (i+1) / params.max_dead_end_sample_granularity;
 				net_ops += sample.marginal_ops;
 				net_oks += sample.marginal_oks;
-				sample.marginal_average_ops = sample.marginal_oks ? std::optional(sample.marginal_ops / sample.marginal_oks) : std::nullopt;
-				sample.net_average_ops = net_oks ? std::optional(static_cast<double>(net_ops) / net_oks) : std::nullopt;
+				sample.marginal_average_ops = sample.marginal_oks
+					? std::optional(sample.marginal_ops / static_cast<double>(sample.marginal_oks))
+					: std::nullopt;
+				sample.net_average_ops = net_oks
+					? std::optional(static_cast<double>(net_ops) / static_cast<double>(net_oks))
+					: std::nullopt;
 			}
 		}{
 			// Get the index of the sample representing the optimal max_dead_ends setting:
@@ -152,7 +156,7 @@ namespace solvent::lib::gen::batch {
 			if (O <= 4) {
 				os << "\n│" << std::setw(11) << sample.max_dead_ends;
 			} else {
-				os << "\n│" << std::setw(10) << (sample.max_dead_ends / 1'000.0) << 'K';
+				os << "\n│" << std::setw(10) << (static_cast<double>(sample.max_dead_ends) / 1'000.0) << 'K';
 			}
 
 			// marginal_oks:
@@ -190,10 +194,10 @@ namespace solvent::lib::gen::batch {
 			// Print a bar to visualize throughput relative to that
 			// of the best. Note visual exaggeration via exponents
 			// (the exponent value was chosen by taste / visual feel)
-			const unsigned bar_length = (best_sample.net_average_ops.has_value() && sample.net_average_ops.has_value())
-				? (THROUGHPUT_BAR_STRING.length() * (
-					1.0 / (sample.net_average_ops.value() / best_sample.net_average_ops.value())
-				))
+			const std::size_t bar_length = (best_sample.net_average_ops.has_value() && sample.net_average_ops.has_value())
+				? static_cast<std::size_t>(static_cast<double>(THROUGHPUT_BAR_STRING.length())
+					/ (sample.net_average_ops.value() / best_sample.net_average_ops.value())
+				)
 				: 0;
 			if (&sample != &best_sample) os << util::str::DIM.ON;
 			os << ' ' << THROUGHPUT_BAR_STRING.substr(0, bar_length);

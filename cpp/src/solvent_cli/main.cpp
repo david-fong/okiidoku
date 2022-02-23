@@ -16,11 +16,11 @@ int main(const int argc, char const *const argv[]) {
 	solvent::util::setup_console();
 
 	unsigned int user_order; // 1
-	unsigned int srand_key;  // 2
+	std::uint_fast64_t srand_key; // 2
 
 	user_order = (argc > 1) ? std::stoi(argv[1]) : SOLVENT_DEFAULT_ORDER;
 	if (argc > 2 && !std::string(argv[2]).empty()) {
-		srand_key = std::stoul(argv[2]);
+		srand_key = std::stoi(argv[2]);
 	} else {
 		srand_key = std::random_device()();
 	}

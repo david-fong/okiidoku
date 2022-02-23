@@ -10,13 +10,13 @@
 #include <random>    // random_device,
 
 
-// TODO change the test to try out all orders.
 // TODO experiment with effect of batching gen and then doing canon on that batch for perf
 // TODO it should probably just return right away if it encounters any failure.
 // returns the number of failures
 template<solvent::Order O>
 unsigned test_morph_O(const unsigned num_rounds) {
 	using namespace solvent::lib;
+	std::cout << "\n\ntesting morph for order " << O << '\n';
 	unsigned int count_bad = 0;
 	for (unsigned round = 0; round < num_rounds; ) {
 		auto gen = gen::Generator<O>();
@@ -31,9 +31,9 @@ unsigned test_morph_O(const unsigned num_rounds) {
 			count_bad++;
 			// TODO
 			std::cout << "\n!bad\n";
-			result.print_serial(std::cout);
+			result.print_text(std::cout);
 			std::cout << "\n";
-			other_result.print_serial(std::cout);
+			other_result.print_text(std::cout);
 			std::cout << "\n==========\n";
 		} else {
 			std::cout << ".";
@@ -49,11 +49,11 @@ unsigned test_morph_O(const unsigned num_rounds) {
 int main(const int argc, char const *const argv[]) {
 	solvent::util::setup_console();
 
-	unsigned int srand_key;  // 1
+	std::uint_fast64_t srand_key;  // 1
 	unsigned int num_rounds; // 2
 
 	if (argc > 1 && !std::string(argv[1]).empty()) {
-		srand_key = std::stoul(argv[1]);
+		srand_key = std::stoi(argv[1]);
 	} else {
 		srand_key = std::random_device()();
 	}
@@ -68,7 +68,8 @@ int main(const int argc, char const *const argv[]) {
 	solvent::lib::gen::seed_rng(srand_key);
 	solvent::lib::morph::seed_scrambler_rng(srand_key);
 
-	if (test_morph_O<4>(num_rounds)) {
+	// TODO change the test to try out all orders.
+	if (test_morph_O<3>(num_rounds)) {
 		return 1;
 	}
 	return 0;

@@ -15,7 +15,7 @@ namespace solvent::lib::gen {
 	// long long true_ = 0;
 
 	std::mt19937 Rng_;
-	void seed_rng(std::uint_fast32_t seed) noexcept {
+	void seed_rng(std::uint_fast64_t seed) noexcept {
 		Rng_.seed(seed);
 	}
 	// Guards accesses to Rng_. Only used when shuffling generator biases.
@@ -149,7 +149,7 @@ namespace solvent::lib::gen {
 		const has_mask_t cell_has = (row_has | col_has | blk_has);
 		if (std::popcount(cell_has) != O2) [[likely]] {
 			// The above optimization comes into effect ~1/5 of the time for size 5.
-			for (ord2_t try_i = (cell.try_index+1) % (O2+1); try_i < O2; try_i++) [[likely]] {
+			for (ord2_t try_i = static_cast<ord2_t>((cell.try_index+1u) % (O2+1)); try_i < O2; try_i++) [[likely]] {
 				const has_mask_t try_val_mask = has_mask_t(1) << val_try_order[try_i];
 				if (!(cell_has & try_val_mask)) [[unlikely]] {
 					// A valid value was found:
@@ -198,15 +198,16 @@ namespace solvent::lib::gen {
 
 
 	std::string shaded_dead_end_stat(const long out_of, const long count) {
-		const unsigned int relative_intensity
-			= static_cast<double>(count - 1)
+		assert(count <= out_of);
+		const unsigned long relative_intensity
+			= (count - 1)
 			* util::str::BLOCK_CHARS.size()
 			/ (out_of + 1);
 		return (count == 0) ? " " : util::str::BLOCK_CHARS[relative_intensity];
 	}
 
 
-	void GenResult::print_serial(std::ostream& os) const {
+	void GenResult::print_text(std::ostream& os) const {
 		print::serial(os, O, [this](uint32_t coord) { return this->grid[coord]; });
 	}
 
