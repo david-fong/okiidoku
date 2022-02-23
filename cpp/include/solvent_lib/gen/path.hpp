@@ -19,7 +19,7 @@ namespace solvent::lib::gen::path {
 	constexpr size_t NUM_KINDS = static_cast<size_t>(Kind::__MAX__) + 1;
 	// Indices of entries must match the
 	// literal values of their respective enums.
-	inline const std::array<std::string, NUM_KINDS> NAMES = {
+	inline const std::array<std::string, NUM_KINDS> NAMES {
 		"rowmajor",
 		"blockcol",
 		"dealrwmj",

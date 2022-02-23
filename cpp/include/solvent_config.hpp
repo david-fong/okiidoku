@@ -11,7 +11,7 @@
 
 // not that interesting
 #ifndef M_SOLVENT_INCLUDE_ORDER_2
-#define M_SOLVENT_INCLUDE_ORDER_2 false
+#define M_SOLVENT_INCLUDE_ORDER_2 true
 #endif
 
 // vanilla

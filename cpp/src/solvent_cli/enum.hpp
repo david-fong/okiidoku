@@ -17,7 +17,7 @@ namespace solvent::cli {
 		constexpr size_t size = static_cast<size_t>(Kind::__MAX__) + 1;
 		// Indices of entries must match the
 		// literal values of their respective enums.
-		inline const std::array<std::string, size> NAMES = {
+		inline const std::array<std::string, size> NAMES {
 			"emitall",
 			"nogiveups",
 			"silent",

@@ -5,7 +5,6 @@
 - make a custom vector-like class for grids.
   - fixed size and capacity, stores in heap. look into just using boost static_vector.
   - use this as the return type of scramble and canonicalize
-- for generator max_dead_ends, create an array for max allowed values for each order. use that with uint_leastN_t to define the type based on O. use it when cleaning params, and print that info in the repl when doing config.
 - either put result buffering in Generator or in batch.
   - batch isn't templated, but its thread functor is...
 - separate gen::GenResult into another gen::Generator::Result.

@@ -22,9 +22,9 @@ namespace solvent::util::str {
 		char const*const OFF;
 	};
 	#if USE_ANSI_ESC
-	#define SGR(NAME, ON_STR, OFF_STR) constexpr SgrPair NAME = { .ON = (ON_STR), .OFF = (OFF_STR) };
+	#define SGR(NAME, ON_STR, OFF_STR) constexpr SgrPair NAME { .ON = (ON_STR), .OFF = (OFF_STR) };
 	#else
-	#define SGR(NAME, ON_STR, OFF_STR) constexpr SgrPair NAME = { .ON = "", .OFF = "" };
+	#define SGR(NAME, ON_STR, OFF_STR) constexpr SgrPair NAME { .ON = "", .OFF = "" };
 	#endif
 
 	SGR(DIM, "\033[2m",  "\033[22m")
@@ -43,7 +43,7 @@ namespace solvent::util::str {
 	 * See https://cppreference.com/w/cpp/language/sizeof...#Example
 	 * for an example utility function I can make to avoid this problem.
 	 */
-	inline const std::array<std::string, 4> BLOCK_CHARS = {
+	inline const std::array<std::string, 4> BLOCK_CHARS {
 		#if USE_ANSI_ESC
 		"\u2591", "\u2592", "\u2593", "\u2588",
 		#else

@@ -24,7 +24,9 @@ namespace solvent::lib::gen {
 
 	Params Params::clean(const Order O) noexcept {
 		if (max_dead_ends == 0) {
-			max_dead_ends = DEFAULT_MAX_DEAD_ENDS(O);
+			max_dead_ends = cell_dead_ends::LIMIT_DEFAULT[O];
+		} else if (max_dead_ends > cell_dead_ends::LIMIT_I_MAX[O]) {
+			max_dead_ends = cell_dead_ends::LIMIT_I_MAX[O];
 		}
 		return *this;
 	}
@@ -131,7 +133,7 @@ namespace solvent::lib::gen {
 		Cell& cell = cells_[progress_];
 		if (backtracked) [[unlikely]]/* average direction is forward */ {
 			// Clear the current value from all masks:
-			const has_mask_t erase_mask = ~( has_mask_t(0b1u) << val_try_order[cell.try_index] );
+			const has_mask_t erase_mask = static_cast<has_mask_t>(~(1 << val_try_order[cell.try_index]));
 			row_has &= erase_mask;
 			col_has &= erase_mask;
 			blk_has &= erase_mask;

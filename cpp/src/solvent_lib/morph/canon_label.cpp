@@ -86,8 +86,8 @@ namespace solvent::lib::morph {
 
 				std::array<int8_t, O1> all_chute_a_occ, all_chute_b_occ;
 				for (ord1i_t chute = 0; chute < O1; chute++) {
-					all_chute_a_occ[chute] = static_cast<int8_t>(std::popcount(chute_blk_masks<O>::row[chute] & non_polar_mask));
-					all_chute_b_occ[chute] = static_cast<int8_t>(std::popcount(chute_blk_masks<O>::col[chute] & non_polar_mask));
+					all_chute_a_occ[chute] = static_cast<int8_t>(std::popcount(static_cast<has_mask_t>(chute_blk_masks<O>::row[chute] & non_polar_mask)));
+					all_chute_b_occ[chute] = static_cast<int8_t>(std::popcount(static_cast<has_mask_t>(chute_blk_masks<O>::col[chute] & non_polar_mask)));
 				}
 				std::ranges::sort(all_chute_a_occ, std::less{});
 				std::ranges::sort(all_chute_b_occ, std::less{});

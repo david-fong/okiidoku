@@ -25,6 +25,28 @@ namespace solvent::lib::gen {
 	// Note: Using thread_local instead does not cause any noticeable perf change.
 	void seed_rng(std::uint_fast32_t) noexcept;
 
+
+	namespace cell_dead_ends {
+		// TODO these values are tuned for genpath=rowmajor. make one for each genpath? :/
+		constexpr unsigned long long LIMIT_DEFAULT[]{ 0, 0, 3,
+			/*3*/30,
+			/*4*/700,
+			/*5*/100'000, // changing to anything between this and 100K doesn't seem to have any significant difference? I only tested with gen_ok 20 though.
+			/*6*/10'000'000ull, // <- not tested AT ALL ...
+			/*7*/10'000'000'000ull // <- not tested AT ALL ...
+		};
+		// allows up to and including
+		constexpr unsigned long long LIMIT_I_MAX[]{ 0, 0, 3,
+			/*3*/1'000,
+			/*4*/10'000,
+			/*5*/100'000'000ull, //  <- not tested AT ALL ...
+			/*6*/10'000'000'000ull // <- not tested AT ALL ...
+		};
+		template<Order O>
+		using t = uint_leastN_t<std::bit_width(LIMIT_I_MAX[O])>;
+	};
+
+
 	//
 	struct Params {
 		path::Kind path_kind = path::Kind::RowMajor;
@@ -77,15 +99,6 @@ namespace solvent::lib::gen {
 		bool is_back_skip; // only meaningful when is_back is true.
 	};
 
-	constexpr unsigned long long DEFAULT_MAX_DEAD_ENDS(const Order O) {
-		const unsigned long long _[]{ 0, 0, 3,
-		/*3*/30,
-		/*4*/700,
-		/*5*/100'000, // changing to anything between this and 100K doesn't seem to have any significant difference? I only tested with gen_ok 20 though.
-		/*6*/10'000'000 /* <- not tested AT ALL ... */ };
-		return _[O];
-	};
-
 	//
 	template<Order O>
 	class Generator final {
@@ -98,14 +111,7 @@ namespace solvent::lib::gen {
 		using ord4x_t = size<O>::ord4x_t;
 
 	 public:
-		// Note that this should always be smaller than opcount_t.
-		using dead_ends_t =
-			// Make sure this can fit `DEFAULT_MAX_DEAD_ENDS`.
-			// std::conditional_t<(O <= 3), std::uint_fast8_t,
-			std::conditional_t<(O <= 4), std::uint_fast16_t,
-			std::conditional_t<(O <= 5), std::uint_fast32_t,
-			std::uint_fast64_t
-		>>;
+		using dead_ends_t = cell_dead_ends::t<O>;
 
 		static constexpr ord1i_t O1 = O;
 		static constexpr ord2i_t O2 = O*O;

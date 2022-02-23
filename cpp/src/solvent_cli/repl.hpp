@@ -29,7 +29,7 @@ namespace solvent::cli {
 			GenMultiple,
 			GenMultipleOk,
 		};
-		const std::map<std::string, Command::E> Str2Enum = {
+		const std::map<std::string, Command::E> Str2Enum {
 			{ "help",         E::Help              },
 			{ "quit",         E::Quit              },
 			{ "verbosity",    E::ConfigVerbosity   },

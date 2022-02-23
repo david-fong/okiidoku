@@ -55,20 +55,21 @@ namespace solvent::lib {
 
 	template<Order O>
 	struct chute_blk_masks {
-		using T = std::array<typename size<O>::O2_mask_fast_t, O>;
+		using M = size<O>::O2_mask_least_t;
+		using T = std::array<M, O>;
 		static constexpr T row = [](){
-			T _{0};
+			T _ {0};
 			for (unsigned chute = 0; chute < O; chute++) {
 				for (unsigned i = 0; i < O; i++) {
-					_[chute] |= 1 << ((O*chute) + i);
+					_[chute] |= static_cast<M>(1 << ((O*chute) + i));
 			}	}
 			return _;
 		}();
 		static constexpr T col = [](){
-			T _{0};
+			T _ {0};
 			for (unsigned chute = 0; chute < O; chute++) {
 				for (unsigned i = 0; i < O; i++) {
-					_[chute] |= 1 << ((O*i) + chute);
+					_[chute] |= static_cast<M>(1 << ((O*i) + chute));
 			}	}
 			return _;
 		}();

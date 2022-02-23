@@ -92,7 +92,7 @@ namespace solvent::lib::morph {
 				return GridSortEntry::build(rel_count_, transposed_input);
 			}();
 
-			decltype(grid_) canon_input = {O2};
+			decltype(grid_) canon_input {O2};
 			for (ord2i_t canon_row = 0; canon_row < O2; canon_row++) {
 				const auto& r_chute = grid_slide[canon_row/O1];
 				const ord2i_t orig_row = (O1*r_chute.orig_chute) + r_chute[canon_row%O1].orig_blkline;
