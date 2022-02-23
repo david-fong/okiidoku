@@ -15,27 +15,27 @@ namespace solvent::lib::morph {
 
 	template<Order O>
 	class CanonPlace final {
-	 static_assert(O > 0 && O < MAX_REASONABLE_ORDER);
+	 static_assert(O > 0 && O < O_MAX);
 		using has_mask_t = size<O>::O2_mask_least_t;
-		using ord1_t = size<O>::ord1_t;
-		using ord2_t = size<O>::ord2_t;
-		using ord4_t = size<O>::ord4_t;
+		using ord1i_t = size<O>::ord1i_t;
+		using ord2i_t = size<O>::ord2i_t;
+		using ord4i_t = size<O>::ord4i_t;
 
 	 public:
-		static constexpr ord1_t O1 = O;
-		static constexpr ord2_t O2 = O*O;
-		static constexpr ord2_t O3 = O*O*O;
-		static constexpr ord4_t O4 = O*O*O*O;
-		// [[gnu::pure]] ord2_t operator[](ord4_t coord) const override;
+		static constexpr ord1i_t O1 = O;
+		static constexpr ord2i_t O2 = O*O;
+		static constexpr ord2i_t O3 = O*O*O;
+		static constexpr ord4i_t O4 = O*O*O*O;
+		// [[gnu::pure]] ord2i_t operator[](ord4i_t coord) const override;
 
 		struct LineSortEntry final {
-			ord1_t orig_blkline;
+			ord1i_t orig_blkline;
 			double prob_polar;
-			static LineSortEntry build(const grid_mtx_t<O, ord2_t>& counts, ord1_t orig_blkline, const std::span<const ord2_t, O2> line) {
+			static LineSortEntry build(const grid_mtx_t<O, ord2i_t>& counts, ord1i_t orig_blkline, const std::span<const ord2i_t, O2> line) {
 				double prob_polar = 1.0;
-				for (ord2_t atom = 0; atom < O2; atom += O1) {
-					for (ord1_t i = 0; i < O1-1; i++) {
-						for (ord1_t j = i+1; j < O1; j++) {
+				for (ord2i_t atom = 0; atom < O2; atom += O1) {
+					for (ord1i_t i = 0; i < O1-1; i++) {
+						for (ord1i_t j = i+1; j < O1; j++) {
 							prob_polar *= RelCountProb<O>::ALL[counts[line[atom+i]][line[atom+j]]];
 				}	}	}
 				return LineSortEntry { .orig_blkline = orig_blkline, .prob_polar = prob_polar };
@@ -45,21 +45,21 @@ namespace solvent::lib::morph {
 			}
 		};
 		struct ChuteSortEntry final {
-			ord1_t orig_chute;
+			ord1i_t orig_chute;
 			double prob_all;
 			double prob_polar;
 			std::array<LineSortEntry, O> lines_;
-			static ChuteSortEntry build(const grid_mtx_t<O, ord2_t>& counts, ord1_t orig_chute, const std::span<const ord2_t, O3> grid_chute) {
+			static ChuteSortEntry build(const grid_mtx_t<O, ord2i_t>& counts, ord1i_t orig_chute, const std::span<const ord2i_t, O3> grid_chute) {
 				std::array<LineSortEntry, O> lines;
-				for (ord1_t i = 0; i < O1; i++) { lines[i] = LineSortEntry::build(
-					counts, i, static_cast<std::span<const ord2_t, O2>>(grid_chute.subspan(O2*orig_chute, O2)) // *sad cast noises
+				for (ord1i_t i = 0; i < O1; i++) { lines[i] = LineSortEntry::build(
+					counts, i, static_cast<std::span<const ord2i_t, O2>>(grid_chute.subspan(O2*orig_chute, O2)) // *sad cast noises
 				); }
 				std::sort(lines.begin(), lines.end());
 				double prob_polar = 1.0; for (const auto& e : lines) { prob_polar *= e.prob_polar; }
 				double prob_all = prob_polar; // TODO
 				return ChuteSortEntry { .orig_chute = orig_chute, .prob_all = prob_all, .prob_polar = prob_polar, .lines_ = lines };
 			}
-			[[gnu::pure]] const LineSortEntry& operator[](ord1_t i) const { return lines_[i]; }
+			[[gnu::pure]] const LineSortEntry& operator[](ord1i_t i) const { return lines_[i]; }
 			[[gnu::pure]] std::partial_ordering operator<=>(const ChuteSortEntry& that) const {
 				return prob_all <=> that.prob_all;
 			}
@@ -67,16 +67,16 @@ namespace solvent::lib::morph {
 		struct GridSortEntry final {
 			double prob;
 			std::array<ChuteSortEntry, O> chutes_;
-			static GridSortEntry build(const grid_mtx_t<O, ord2_t>& counts, const std::span<const ord2_t, O4> grid) {
+			static GridSortEntry build(const grid_mtx_t<O, ord2i_t>& counts, const std::span<const ord2i_t, O4> grid) {
 				std::array<ChuteSortEntry, O> chutes;
-				for (ord1_t i = 0; i < O1; i++) { chutes[i] = ChuteSortEntry::build(
-					counts, i, static_cast<std::span<const ord2_t, O3>>(grid.subspan(O3*i, O3)) // *sad cast noises
+				for (ord1i_t i = 0; i < O1; i++) { chutes[i] = ChuteSortEntry::build(
+					counts, i, static_cast<std::span<const ord2i_t, O3>>(grid.subspan(O3*i, O3)) // *sad cast noises
 				); }
 				std::sort(chutes.begin(), chutes.end());
 				double prob = 1.0; for (const auto& e : chutes) { prob *= e.prob_polar; }
 				return GridSortEntry { .prob = prob, .chutes_ = chutes };
 			}
-			[[gnu::pure]] const ChuteSortEntry& operator[](ord1_t i) const { return chutes_[i]; }
+			[[gnu::pure]] const ChuteSortEntry& operator[](ord1i_t i) const { return chutes_[i]; }
 			[[gnu::pure]] std::partial_ordering operator<=>(const GridSortEntry& that) const {
 				return prob <=> that.prob;
 			}
@@ -104,8 +104,8 @@ namespace solvent::lib::morph {
 		/* const GridSortEntry grid_slide = GridSortEntry::build(rel_count_, grid_);
 		const GridSortEntry transposed_grid_slide = [this](){
 			decltype(grid_) transposed_input;
-			for (ord2_t i = 0; i < O2; i++) {
-				for (ord2_t j = 0; j < O2; j++) {
+			for (ord2i_t i = 0; i < O2; i++) {
+				for (ord2i_t j = 0; j < O2; j++) {
 					transposed_input[i][j] = grid_[j][i];
 				}
 			}
@@ -113,18 +113,18 @@ namespace solvent::lib::morph {
 		}();
 
 		decltype(grid_) canon_input = {O2};
-		for (ord2_t canon_row = 0; canon_row < O2; canon_row++) {
+		for (ord2i_t canon_row = 0; canon_row < O2; canon_row++) {
 			const auto& r_chute = grid_slide[canon_row/O1];
-			const ord2_t orig_row = (O1*r_chute.orig_chute) + r_chute[canon_row%O1].orig_blkline;
-			for (ord2_t canon_col = 0; canon_col < O2; canon_col++) {
+			const ord2i_t orig_row = (O1*r_chute.orig_chute) + r_chute[canon_row%O1].orig_blkline;
+			for (ord2i_t canon_col = 0; canon_col < O2; canon_col++) {
 				const auto& c_chute = transposed_grid_slide[canon_col/O1];
-				const ord2_t orig_col = (O1*c_chute.orig_chute) + c_chute[canon_col%O1].orig_blkline;
+				const ord2i_t orig_col = (O1*c_chute.orig_chute) + c_chute[canon_col%O1].orig_blkline;
 				canon_input[canon_row][canon_col] = grid_[orig_row][orig_col];
 			}
 		}
 		if (transposed_grid_slide < grid_slide) {
-			for (ord2_t i = 0; i < O2; i++) {
-				for (ord2_t j = 0; j < O2; j++) {
+			for (ord2i_t i = 0; i < O2; i++) {
+				for (ord2i_t j = 0; j < O2; j++) {
 					grid_[i][j] = canon_input[j][i];
 				}
 			}

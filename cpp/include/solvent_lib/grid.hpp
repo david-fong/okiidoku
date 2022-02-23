@@ -10,17 +10,17 @@
 
 namespace solvent::lib {
 
-	template<Order O> using grid_vec_t = std::vector<typename size<O>::ord2_t>;
-	template<Order O, typename T=size<O>::ord2_t> using grid_mtx_t = std::array<std::array<T, O*O>, O*O>;
-	template<Order O, typename T=size<O>::ord2_t> using grid_const_span_t = std::span<const T, O*O*O*O>;
-	template<Order O, typename T=size<O>::ord2_t> using grid_span_t = std::span<T, O*O*O*O>;
+	template<Order O> using grid_vec_t = std::vector<typename size<O>::ord2i_t>;
+	template<Order O, typename T=size<O>::ord2i_t> using grid_mtx_t = std::array<std::array<T, O*O>, O*O>;
+	template<Order O, typename T=size<O>::ord2i_t> using grid_const_span_t = std::span<const T, O*O*O*O>;
+	template<Order O, typename T=size<O>::ord2i_t> using grid_span_t = std::span<T, O*O*O*O>;
 
-	template<Order O, typename T=size<O>::ord2_t>
+	template<Order O, typename T=size<O>::ord2i_t>
 	class grid_mtx_wrapper_t final {
 		grid_span_t<O, T> span_;
 	 public:
 		grid_mtx_wrapper_t(grid_span_t<O, T> span): span_(span) {};
-		T& at(size<O>::ord2_t row, size<O>::ord2_t col) const {
+		T& at(size<O>::ord2i_t row, size<O>::ord2i_t col) const {
 			return span_[(O*O*row) + col];
 		}
 	};
@@ -34,18 +34,18 @@ namespace solvent::lib {
 	template<Order O> [[nodiscard, gnu::const]] bool is_grid_invalid(const grid_mtx_t<O>&) noexcept;
 
 
-	template<Order O> [[nodiscard, gnu::const]] constexpr typename size<O>::ord2_t rmi2row(const typename size<O>::ord4_t index) noexcept { return static_cast<size<O>::ord2_t>(index / (O*O)); }
-	template<Order O> [[nodiscard, gnu::const]] constexpr typename size<O>::ord2_t rmi2col(const typename size<O>::ord4_t index) noexcept { return static_cast<size<O>::ord2_t>(index % (O*O)); }
-	template<Order O> [[nodiscard, gnu::const]] constexpr typename size<O>::ord2_t rmi2blk(const typename size<O>::ord2_t row, const typename size<O>::ord2_t col) noexcept {
-		return static_cast<size<O>::ord2_t>((row / O) * O) + (col / O);
+	template<Order O> [[nodiscard, gnu::const]] constexpr typename size<O>::ord2i_t rmi2row(const typename size<O>::ord4i_t index) noexcept { return static_cast<size<O>::ord2i_t>(index / (O*O)); }
+	template<Order O> [[nodiscard, gnu::const]] constexpr typename size<O>::ord2i_t rmi2col(const typename size<O>::ord4i_t index) noexcept { return static_cast<size<O>::ord2i_t>(index % (O*O)); }
+	template<Order O> [[nodiscard, gnu::const]] constexpr typename size<O>::ord2i_t rmi2blk(const typename size<O>::ord2i_t row, const typename size<O>::ord2i_t col) noexcept {
+		return static_cast<size<O>::ord2i_t>((row / O) * O) + (col / O);
 	}
 	template<Order O> [[nodiscard, gnu::const]]
-	constexpr typename size<O>::ord2_t rmi2blk(const typename size<O>::ord4_t index) noexcept {
+	constexpr typename size<O>::ord2i_t rmi2blk(const typename size<O>::ord4i_t index) noexcept {
 		return rmi2blk<O>(rmi2row<O>(index), rmi2col<O>(index));
 	}
 
 	template<Order O> [[nodiscard, gnu::const]]
-	static constexpr bool cells_share_house(typename size<O>::ord4_t c1, typename size<O>::ord4_t c2) noexcept {
+	static constexpr bool cells_share_house(typename size<O>::ord4i_t c1, typename size<O>::ord4i_t c2) noexcept {
 		return (rmi2row<O>(c1) == rmi2row<O>(c2))
 			||  (rmi2col<O>(c1) == rmi2col<O>(c2))
 			||  (rmi2blk<O>(c1) == rmi2blk<O>(c2));
@@ -86,7 +86,7 @@ namespace solvent::lib {
 
 // extern template class std::vector<std::uint_fast8_t>;
 #define SOLVENT_TEMPL_TEMPL(O_) \
-	extern template class std::array<std::array<typename solvent::size<O_>::ord2_t, O_*O_>, O_*O_>;
+	extern template class std::array<std::array<typename solvent::size<O_>::ord2i_t, O_*O_>, O_*O_>;
 SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 #undef SOLVENT_TEMPL_TEMPL
 #endif

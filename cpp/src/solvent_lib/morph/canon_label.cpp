@@ -11,15 +11,15 @@ namespace solvent::lib::morph {
 
 	template<Order O>
 	class CanonLabel final {
-	 static_assert(O > 0 && O < MAX_REASONABLE_ORDER);
+	 static_assert(O > 0 && O < O_MAX);
 		using has_mask_t = size<O>::O2_mask_least_t;
-		using ord1_t = size<O>::ord1_t;
-		using ord2_t = size<O>::ord2_t;
-		using ord4_t = size<O>::ord4_t;
+		using ord1i_t = size<O>::ord1i_t;
+		using ord2i_t = size<O>::ord2i_t;
+		using ord4i_t = size<O>::ord4i_t;
 	 public:
-		static constexpr ord1_t O1 = O;
-		static constexpr ord2_t O2 = O*O;
-		static constexpr ord4_t O4 = O*O*O*O;
+		static constexpr ord1i_t O1 = O;
+		static constexpr ord2i_t O2 = O*O;
+		static constexpr ord4i_t O4 = O*O*O*O;
 
 
 		// Info not placement-independent.
@@ -29,21 +29,21 @@ namespace solvent::lib::morph {
 			has_mask_t blocks_v;
 		};
 		static grid_mtx_t<O, RelMask> make_rel_masks_(const grid_const_span_t<O> grid_span) noexcept {
-			grid_mtx_wrapper_t<O, const ord2_t> grid(grid_span);
+			grid_mtx_wrapper_t<O, const ord2i_t> grid(grid_span);
 			grid_mtx_t<O, RelMask> masks{}; // zero initialize
-			for (ord2_t line = 0; line < O2; line++) {
-				for (ord2_t atom = 0; atom < O2; atom += O1) {
+			for (ord2i_t line = 0; line < O2; line++) {
+				for (ord2i_t atom = 0; atom < O2; atom += O1) {
 					// Go through all unique pairs in the atom:
-					for (ord1_t i = 0; i < O1 - 1; i++) {
-						for (ord1_t j = i + 1; j < O1; j++) {
+					for (ord1i_t i = 0; i < O1 - 1; i++) {
+						for (ord1i_t j = i + 1; j < O1; j++) {
 							{ // boxrow
-								const ord2_t i_val = grid.at(line, atom+i), j_val = grid.at(line, atom+j);
+								const ord2i_t i_val = grid.at(line, atom+i), j_val = grid.at(line, atom+j);
 								const has_mask_t blk_mask_bit = 1 << rmi2blk<O>(line, atom);
 								masks[i_val][j_val].blocks_h |= blk_mask_bit;
 								masks[j_val][i_val].blocks_h |= blk_mask_bit;
 							}
 							{ // boxcol
-								const ord2_t i_val = grid.at(atom+i, line), j_val = grid.at(atom+j, line);
+								const ord2i_t i_val = grid.at(atom+i, line), j_val = grid.at(atom+j, line);
 								const has_mask_t blk_mask_bit = 1 << rmi2blk<O>(atom, line);
 								masks[i_val][j_val].blocks_v |= blk_mask_bit;
 								masks[j_val][i_val].blocks_v |= blk_mask_bit;
@@ -69,7 +69,7 @@ namespace solvent::lib::morph {
 		};
 		static grid_mtx_t<O, RelPlaceless> make_rel_placeless_(const grid_mtx_t<O, RelMask>& masks) noexcept {
 			grid_mtx_t<O, RelPlaceless> table;
-			for (ord2_t r = 0; r < O2; r++) { for (ord2_t c = 0; c < O2; c++) {
+			for (ord2i_t r = 0; r < O2; r++) { for (ord2i_t c = 0; c < O2; c++) {
 				const RelMask& mask = masks[r][c];
 				RelPlaceless& rel = table[r][c];
 				const has_mask_t non_polar_mask = mask.blocks_h | mask.blocks_v;
@@ -77,10 +77,10 @@ namespace solvent::lib::morph {
 				rel.polar_a_p = static_cast<float>(RelCountProb<O>::POLAR[std::popcount(mask.blocks_h)]);
 				rel.polar_b_p = static_cast<float>(RelCountProb<O>::POLAR[std::popcount(mask.blocks_v)]);
 
-				std::array<ord1_t, O1> all_chute_a_occ, all_chute_b_occ;
-				for (ord1_t chute = 0; chute < O1; chute++) {
-					all_chute_a_occ[chute] = static_cast<ord1_t>(std::popcount(chute_blk_masks<O>::row[chute] & non_polar_mask));
-					all_chute_b_occ[chute] = static_cast<ord1_t>(std::popcount(chute_blk_masks<O>::col[chute] & non_polar_mask));
+				std::array<ord1i_t, O1> all_chute_a_occ, all_chute_b_occ;
+				for (ord1i_t chute = 0; chute < O1; chute++) {
+					all_chute_a_occ[chute] = static_cast<ord1i_t>(std::popcount(chute_blk_masks<O>::row[chute] & non_polar_mask));
+					all_chute_b_occ[chute] = static_cast<ord1i_t>(std::popcount(chute_blk_masks<O>::col[chute] & non_polar_mask));
 				}
 				std::ranges::sort(all_chute_a_occ, std::greater{});
 				std::ranges::sort(all_chute_b_occ, std::greater{});
@@ -116,14 +116,14 @@ namespace solvent::lib::morph {
 				std::ranges::sort(row, std::greater{});
 			}
 			for (auto& row : pre_transpose) {
-				for (ord2_t i = O2-1; i > 0; i--) {
+				for (ord2i_t i = O2-1; i > 0; i--) {
 					// Iterating forward progressively removes non-rare items:
 					row[i-1].all_p     *= row[i].all_p;
 					row[i-1].polar_a_p *= row[i].polar_a_p;
 					row[i-1].polar_b_p *= row[i].polar_b_p;
 			}	}
 			grid_mtx_t<O, RelPlaceless> cmp_layers;
-			for (ord2_t i = 0; i < O2; i++) { for (ord2_t j = 0; j < O2; j++) {
+			for (ord2i_t i = 0; i < O2; i++) { for (ord2i_t j = 0; j < O2; j++) {
 				cmp_layers[i][j] = pre_transpose[j][i];
 			}}
 			return cmp_layers;
@@ -132,12 +132,12 @@ namespace solvent::lib::morph {
 
 		//
 		static grid_vec_t<O> do_it(const grid_const_span_t<O> orig_grid) {
-			const std::array<ord2_t, O2> label_orig2canon = [](const grid_mtx_t<O, RelPlaceless> rel_cmp_layers){
-				std::array<ord2_t, O2> label_canon2orig;
+			const std::array<ord2i_t, O2> label_orig2canon = [](const grid_mtx_t<O, RelPlaceless> rel_cmp_layers){
+				std::array<ord2i_t, O2> label_canon2orig;
 				std::iota(label_canon2orig.begin(), label_canon2orig.end(), 0);
 
-				std::sort(label_canon2orig.begin(), label_canon2orig.end(), [&rel_cmp_layers](const ord2_t& a_orig_label, const ord2_t& b_orig_label){
-					for (ord2_t layer = 0; layer < O2; layer++) {
+				std::sort(label_canon2orig.begin(), label_canon2orig.end(), [&rel_cmp_layers](const ord2i_t& a_orig_label, const ord2i_t& b_orig_label){
+					for (ord2i_t layer = 0; layer < O2; layer++) {
 						const RelPlaceless& a = rel_cmp_layers[layer][a_orig_label]; // TODO benchmark perf with vs without transpose. ie. does the transposition have more cost than its possible later benefit?
 						const RelPlaceless& b = rel_cmp_layers[layer][b_orig_label];
 						return (a <=> b) == std::partial_ordering::less;
@@ -145,15 +145,15 @@ namespace solvent::lib::morph {
 					std::cout << "\n! equivalent rel encountered.";
 					return false;
 				});
-				std::array<ord2_t, O2> _;
-				for (ord2_t i_canon = 0; i_canon < O2; i_canon++) {
+				std::array<ord2i_t, O2> _;
+				for (ord2i_t i_canon = 0; i_canon < O2; i_canon++) {
 					_[label_canon2orig[i_canon]] = i_canon;
 				}
 				return _;
 			}(make_rel_cmp_layers_(make_rel_placeless_(make_rel_masks_(orig_grid))));
 
 			grid_vec_t<O> canon_grid_vec(O4);
-			for (ord4_t i = 0; i < O4; i++) {
+			for (ord4i_t i = 0; i < O4; i++) {
 				canon_grid_vec[i] = label_orig2canon[orig_grid[i]];
 			}
 			return canon_grid_vec;

@@ -122,7 +122,7 @@ namespace solvent::lib::gen {
 
 	template<Order O>
 	Direction Generator<O>::set_next_valid_(typename path::coord_converter_t<O> prog2coord, const bool backtracked) noexcept {
-		const ord4_t coord = prog2coord(progress_);
+		const ord4x_t coord = prog2coord(progress_);
 		has_mask_t& row_has = rows_has_[rmi2row<O>(coord)];
 		has_mask_t& col_has = cols_has_[rmi2col<O>(coord)];
 		has_mask_t& blk_has = blks_has_[rmi2blk<O>(coord)];
@@ -149,8 +149,8 @@ namespace solvent::lib::gen {
 		const has_mask_t cell_has = (row_has | col_has | blk_has);
 		if (std::popcount(cell_has) != O2) [[likely]] {
 			// The above optimization comes into effect ~1/5 of the time for size 5.
-			for (ord2_t try_i = static_cast<ord2_t>((cell.try_index+1u) % (O2+1)); try_i < O2; try_i++) [[likely]] {
-				const has_mask_t try_val_mask = has_mask_t(1) << val_try_order[try_i];
+			for (ord2i_t try_i = static_cast<ord2i_t>((cell.try_index+1u) % (O2+1)); try_i < O2; try_i++) [[likely]] {
+				const has_mask_t try_val_mask = has_mask_t{1} << val_try_order[try_i];
 				if (!(cell_has & try_val_mask)) [[unlikely]] {
 					// A valid value was found:
 					row_has |= try_val_mask;
@@ -181,10 +181,10 @@ namespace solvent::lib::gen {
 			.grid = std::vector<std::uint_fast8_t>(O4, O2),
 			.dead_ends = std::vector<std::uint_fast64_t>(O4, 0),
 		};
-		for (ord4_t p = 0; p < O4; p++) {
+		for (ord4i_t p = 0; p < O4; p++) {
 			// Note: The bound under progress_ is significant.
 			// try_indexes afterward are out of val_try_order's range.
-			const ord4_t coord = prog2coord(p);
+			const ord4x_t coord = prog2coord(p);
 			if (!cells_[p].is_clear()) {
 				gen_result.grid[coord] = val_try_orders_[p/O2][cells_[p].try_index];
 			}

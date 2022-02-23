@@ -33,7 +33,7 @@ namespace solvent::lib::gen::path {
 
 	// input progress must be _less than_ O4.
 	template<solvent::Order O>
-	using coord_converter_t = [[gnu::const]] typename size<O>::ord4_t (&)(typename size<O>::ord4_t) noexcept;
+	using coord_converter_t = [[gnu::const]] typename size<O>::ord4x_t (&)(typename size<O>::ord4x_t) noexcept;
 
 	template<solvent::Order O> [[nodiscard]]
 	coord_converter_t<O> GetPathCoords(Kind) noexcept;

@@ -46,11 +46,9 @@ namespace solvent::lib::gen {
 
 	//
 	struct GenResult final {
-	 private:
-		static constexpr Order O_MAX = MAX_REASONABLE_ORDER;
 	 public:
-		using val_t = uint_leastN_t<std::bit_width(O_MAX*O_MAX+1)>;
-		using backtrack_origin_t = uint_leastN_t<std::bit_width(O_MAX*O_MAX*O_MAX*O_MAX)>;
+		using val_t = size<O_MAX>::ord2i_t;
+		using backtrack_origin_t = size<O_MAX>::ord4x_least_t;
 
 		Order O;
 		Params params;
@@ -85,12 +83,13 @@ namespace solvent::lib::gen {
 	//
 	template<Order O>
 	class Generator final {
-	 static_assert(O > 0 && O < MAX_REASONABLE_ORDER);
+	 static_assert(O > 0 && O < O_MAX);
 	 private:
 		using has_mask_t = size<O>::O2_mask_fast_t;
-		using ord1_t = size<O>::ord1_t;
-		using ord2_t = size<O>::ord2_t;
-		using ord4_t = size<O>::ord4_t;
+		using ord1i_t = size<O>::ord1i_t;
+		using ord2i_t = size<O>::ord2i_t;
+		using ord4i_t = size<O>::ord4i_t;
+		using ord4x_t = size<O>::ord4x_t;
 
 	 public:
 		// Note that this should always be smaller than opcount_t.
@@ -102,9 +101,9 @@ namespace solvent::lib::gen {
 			std::uint_fast64_t
 		>>;
 
-		static constexpr ord1_t O1 = O;
-		static constexpr ord2_t O2 = O*O;
-		static constexpr ord4_t O4 = O*O*O*O;
+		static constexpr ord1i_t O1 = O;
+		static constexpr ord2i_t O2 = O*O;
+		static constexpr ord4i_t O4 = O*O*O*O;
 
 		// Generates a fresh sudoku solution.
 		[[nodiscard]] GenResult operator()(Params);
@@ -115,14 +114,14 @@ namespace solvent::lib::gen {
 
 	 private:
 		struct Cell final {
-			ord2_t try_index; // Index into val_try_orders_. O2 if clear.
+			ord2i_t try_index; // Index into val_try_orders_. O2 if clear.
 			void clear(void) noexcept { try_index = O2; }
 			[[gnu::pure, nodiscard]] bool is_clear(void) const noexcept { return try_index == O2; }
 		};
 
 		// indexed by `progress_ // O2`
-		std::array<std::array<ord2_t, O2>, O2> val_try_orders_ {[]() {
-			std::array<std::array<ord2_t, O2>, O2> _;
+		std::array<std::array<typename size<O>::ord2x_t, O2>, O2> val_try_orders_ {[]() {
+			std::array<std::array<typename size<O>::ord2x_t, O2>, O2> _;
 			for (auto& vto : _) { std::iota(vto.begin(), vto.end(), 0); }
 			return _;
 		}()};
@@ -134,7 +133,7 @@ namespace solvent::lib::gen {
 		std::array<dead_ends_t, O4> dead_ends_; // indexed by progress_
 
 		Params params_;
-		ord4_t progress_ = 0;
+		ord4i_t progress_ = 0;
 		uint_fastN_t<std::bit_width(O4)> backtrack_origin_ = 0;
 		dead_ends_t most_dead_ends_seen_ = 0;
 		opcount_t op_count_ = 0;

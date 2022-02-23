@@ -3,6 +3,8 @@
 
 namespace solvent {
 	using Order = unsigned;
-	constexpr Order MAX_REASONABLE_ORDER = 10u;
+	constexpr Order O_MAX = 10u;
+	constexpr Order O2_MAX = O_MAX * O_MAX;
+	constexpr Order O4_MAX = O2_MAX * O2_MAX;
 }
 #endif

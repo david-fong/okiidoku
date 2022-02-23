@@ -10,16 +10,17 @@ namespace solvent::lib::gen::path {
 	template<Kind PK, Order O>
 	struct PathCoords_ final {
 	 private:
-		using ord1_t = size<O>::ord1_t;
-		using ord2_t = size<O>::ord2_t;
-		using ord4_t = size<O>::ord4_t;
-		using ord4_least_t = size<O>::ord4_least_t;
+		using ord1i_t = size<O>::ord1i_t;
+		using ord2i_t = size<O>::ord2i_t;
+		using ord4i_t = size<O>::ord4i_t;
+		using ord4x_t = size<O>::ord4x_t;
+		using ord4x_least_t = size<O>::ord4x_least_t;
 	 public:
-		static constexpr ord1_t O1 = O;
-		static constexpr ord2_t O2 = O*O;
-		static constexpr ord4_t O4 = O*O*O*O;
+		static constexpr ord1i_t O1 = O;
+		static constexpr ord2i_t O2 = O*O;
+		static constexpr ord4i_t O4 = O*O*O*O;
 
-		[[gnu::const, gnu::hot]] static constexpr ord4_t convert(const ord4_t progress) noexcept {
+		[[gnu::const, gnu::hot]] static constexpr ord4x_t convert(const ord4x_t progress) noexcept {
 			if constexpr (PK == Kind::RowMajor) {
 				return progress;
 			} else {
@@ -27,32 +28,28 @@ namespace solvent::lib::gen::path {
 			}
 		}
 	 private:
-		using grid_cache_t = typename std::array<ord4_least_t, O4>;
+		using grid_cache_t = typename std::array<ord4x_least_t, O4>;
 		static constexpr grid_cache_t _init() noexcept {
 			grid_cache_t _{0};
 			if constexpr (PK == Kind::RowMajor) {
 				// std::iota(path.begin(), path.end(), 0);
 			}
 			else if constexpr (PK == Kind::BlockCol) {
-				ord4_t i = 0;
-				for (ord1_t blk_col = 0; blk_col < O1; blk_col++) {
-					for (ord2_t row = 0; row < O2; row++) {
-						for (ord1_t b_col = 0; b_col < O1; b_col++) {
-							_[i++] = static_cast<ord4_least_t>((blk_col * O1) + (row * O2) + (b_col));
-						}
-					}
-				}
+				ord4i_t i = 0;
+				for (ord1i_t blk_col = 0; blk_col < O1; blk_col++) {
+					for (ord2i_t row = 0; row < O2; row++) {
+						for (ord1i_t b_col = 0; b_col < O1; b_col++) {
+							_[i++] = static_cast<ord4x_least_t>((blk_col * O1) + (row * O2) + (b_col));
+				}	}	}
 			}
 			else if constexpr (PK == Kind::DealRwMj) {
-				ord4_t i = 0;
-				for (ord1_t inside_b_row = 0; inside_b_row < O1; inside_b_row++) {
-					for (ord1_t inside_b_col = 0; inside_b_col < O1; inside_b_col++) {
-						for (ord2_t blk_i = 0; blk_i < O2; blk_i++) {
-							const ord4_t blkaddr = static_cast<ord4_t>(((blk_i % O1) * O1) + (blk_i / O1 * O1 * O2));
-							_[i++] = static_cast<ord4_least_t>(blkaddr + (inside_b_row * O2) + inside_b_col);
-						}
-					}
-				}
+				ord4i_t i = 0;
+				for (ord1i_t inside_b_row = 0; inside_b_row < O1; inside_b_row++) {
+					for (ord1i_t inside_b_col = 0; inside_b_col < O1; inside_b_col++) {
+						for (ord2i_t blk_i = 0; blk_i < O2; blk_i++) {
+							const ord4i_t blkaddr = static_cast<ord4i_t>(((blk_i % O1) * O1) + (blk_i / O1 * O1 * O2));
+							_[i++] = static_cast<ord4x_least_t>(blkaddr + (inside_b_row * O2) + inside_b_col);
+				}	}	}
 			}
 			return _;
 		}
