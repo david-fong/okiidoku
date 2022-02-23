@@ -88,7 +88,7 @@ namespace solvent::lib::gen {
 	//
 	template<Order O>
 	class Generator final {
-	 static_assert((O > 0) && (O < O_MAX) && (O < 6)); // added restriction for sanity
+	 static_assert((O > 0) && (O <= O_MAX) && (O < 6)); // added restriction for sanity
 	 private:
 		using has_mask_t = size<O>::O2_mask_fast_t;
 		using ord1i_t = size<O>::ord1i_t;
@@ -153,9 +153,9 @@ namespace solvent::lib::gen {
 	};
 
 
-	#define SOLVENT_TEMPL_TEMPL(O_) \
+	#define M_SOLVENT_TEMPL_TEMPL(O_) \
 		extern template class Generator<O_>;
-	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
-	#undef SOLVENT_TEMPL_TEMPL
+	M_SOLVENT_INSTANTIATE_ORDER_TEMPLATES
+	#undef M_SOLVENT_TEMPL_TEMPL
 }
 #endif

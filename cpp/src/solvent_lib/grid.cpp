@@ -57,17 +57,17 @@ namespace solvent::lib {
 	}
 
 
-	#define SOLVENT_TEMPL_TEMPL(O_) \
+	#define M_SOLVENT_TEMPL_TEMPL(O_) \
 		template grid_vec_t<O_> grid_mtx2vec<O_>(const grid_mtx_t<O_>&) noexcept; \
 		template grid_mtx_t<O_> grid_vec2mtx<O_>(const grid_vec_t<O_>&) noexcept; \
 		template bool is_grid_invalid<O_>(const grid_mtx_t<O_>&) noexcept;
-	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
-	#undef SOLVENT_TEMPL_TEMPL
+	M_SOLVENT_INSTANTIATE_ORDER_TEMPLATES
+	#undef M_SOLVENT_TEMPL_TEMPL
 }
 
 
 // template class std::vector<std::uint_fast8_t>;
-#define SOLVENT_TEMPL_TEMPL(O_) \
+#define M_SOLVENT_TEMPL_TEMPL(O_) \
 	template class std::array<std::array<typename solvent::size<O_>::ord2i_t, O_*O_>, O_*O_>;
-SOLVENT_INSTANTIATE_ORDER_TEMPLATES
-#undef SOLVENT_TEMPL_TEMPL
+M_SOLVENT_INSTANTIATE_ORDER_TEMPLATES
+#undef M_SOLVENT_TEMPL_TEMPL

@@ -28,10 +28,10 @@ namespace solvent::lib {
 		Order order_;
 
 		union generator_union_t {
-		#define SOLVENT_TEMPL_TEMPL(O_) \
+		#define M_SOLVENT_TEMPL_TEMPL(O_) \
 			gen::Generator<O_> o ## O_;
-		SOLVENT_INSTANTIATE_ORDER_TEMPLATES
-		#undef SOLVENT_TEMPL_TEMPL
+		M_SOLVENT_INSTANTIATE_ORDER_TEMPLATES
+		#undef M_SOLVENT_TEMPL_TEMPL
 		} gen_;
 	};
 }

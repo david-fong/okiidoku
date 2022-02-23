@@ -90,13 +90,13 @@ namespace solvent::lib::gen::batch {
 		std::vector<std::thread> threads;
 		for (unsigned i = 0; i < params.num_threads; i++) {
 			switch (O) {
-			#define SOLVENT_TEMPL_TEMPL(O_) \
+			#define M_SOLVENT_TEMPL_TEMPL(O_) \
 				case O_: { threads.push_back(std::thread(ThreadFunc<O_>{ \
 					params, shared_data, shared_data_mutex, gen_result_consumer \
 				})); \
 				break; }
-			SOLVENT_INSTANTIATE_ORDER_TEMPLATES
-			#undef SOLVENT_TEMPL_TEMPL
+			M_SOLVENT_INSTANTIATE_ORDER_TEMPLATES
+			#undef M_SOLVENT_TEMPL_TEMPL
 			}
 		}
 		for (auto& thread : threads) {

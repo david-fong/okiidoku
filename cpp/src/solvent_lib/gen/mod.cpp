@@ -225,8 +225,8 @@ namespace solvent::lib::gen {
 	}
 
 
-	#define SOLVENT_TEMPL_TEMPL(O_) \
+	#define M_SOLVENT_TEMPL_TEMPL(O_) \
 		template class Generator<O_>;
-	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
-	#undef SOLVENT_TEMPL_TEMPL
+	M_SOLVENT_INSTANTIATE_ORDER_TEMPLATES
+	#undef M_SOLVENT_TEMPL_TEMPL
 }

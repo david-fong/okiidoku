@@ -25,7 +25,13 @@ namespace solvent::lib::gen::batch {
 		// Cleans self and returns a copy of self.
 		Params clean(Order O) noexcept;
 
-		static constexpr unsigned DEFAULT_BUFFERING[]{ 0, 1, /*2*/1000, 1000, 1000, /*5*/1, 1, 1, 1, 1, 1 };
+		static constexpr unsigned DEFAULT_BUFFERING[]{ 0, 1,
+			/*2*/1000,
+			/*3*/1000,
+			/*4*/1000,
+			/*5*/1,
+			1, 1, 1, 1, 1
+		};
 	};
 
 	//

@@ -11,7 +11,7 @@ namespace solvent::lib::morph {
 
 	template<Order O>
 	class CanonLabel final {
-	 static_assert(O > 0 && O < O_MAX);
+	 static_assert((O > 0) && (O <= O_MAX));
 		using has_mask_t = size<O>::O2_mask_least_t;
 		using ord1i_t = size<O>::ord1i_t;
 		using ord2i_t = size<O>::ord2i_t;
@@ -190,8 +190,8 @@ namespace solvent::lib::morph {
 	}
 
 
-	#define SOLVENT_TEMPL_TEMPL(O_) \
+	#define M_SOLVENT_TEMPL_TEMPL(O_) \
 		template grid_vec_t<O_> canon_label<O_>(grid_const_span_t<O_>);
-	SOLVENT_INSTANTIATE_ORDER_TEMPLATES
-	#undef SOLVENT_TEMPL_TEMPL
+	M_SOLVENT_INSTANTIATE_ORDER_TEMPLATES
+	#undef M_SOLVENT_TEMPL_TEMPL
 }

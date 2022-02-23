@@ -46,20 +46,20 @@ namespace solvent::cli {
 		try {
 			const int new_order = std::stoi(new_order_str);
 			switch (new_order) {
-			#define SOLVENT_TEMPL_TEMPL(O_) \
+			#define M_SOLVENT_TEMPL_TEMPL(O_) \
 				case O_: { order(new_order); return; }
-			SOLVENT_INSTANTIATE_ORDER_TEMPLATES
-			#undef SOLVENT_TEMPL_TEMPL
+			M_SOLVENT_INSTANTIATE_ORDER_TEMPLATES
+			#undef M_SOLVENT_TEMPL_TEMPL
 			}
 		} catch (const std::invalid_argument& ia) {
 		}
 		std::cout
 			<< str::RED.ON << '"' << new_order_str << "\" is not a valid order.\n" << str::RED.OFF
 			<< "ORDER OPTIONS: ";
-			#define SOLVENT_TEMPL_TEMPL(O_) \
+			#define M_SOLVENT_TEMPL_TEMPL(O_) \
 				std::cout << #O_ << ", ";
-			SOLVENT_INSTANTIATE_ORDER_TEMPLATES
-			#undef SOLVENT_TEMPL_TEMPL
+			M_SOLVENT_INSTANTIATE_ORDER_TEMPLATES
+			#undef M_SOLVENT_TEMPL_TEMPL
 			std::cout << std::endl;
 	}
 

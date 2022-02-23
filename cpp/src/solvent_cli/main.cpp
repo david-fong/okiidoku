@@ -18,7 +18,7 @@ int main(const int argc, char const *const argv[]) {
 	unsigned int user_order; // 1
 	std::uint_fast64_t srand_key; // 2
 
-	user_order = (argc > 1) ? std::stoi(argv[1]) : SOLVENT_DEFAULT_ORDER;
+	user_order = (argc > 1) ? std::stoi(argv[1]) : M_SOLVENT_DEFAULT_ORDER;
 	if (argc > 2 && !std::string(argv[2]).empty()) {
 		srand_key = std::stoi(argv[2]);
 	} else {
