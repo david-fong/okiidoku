@@ -43,24 +43,40 @@ namespace solvent::lib::gen {
 
 
 	template<Order O>
-	GenResult Generator<O>::operator()(const Params params) {
-		params_ = params;
-		params_.clean(O);
-		this->prepare_fresh_gen_();
-		this->generate_();
-		return this->make_gen_result_();
+	Generator<O>::ord2i_t Generator<O>::get_value_at(const ord4x_t coord) const noexcept {
+		const auto p = path::get_coord2prog_converter<O>(params_.path_kind)(coord);
+		const auto try_index = cells_[p].try_index;
+		if (try_index == O2) { return O2; }
+		return val_try_orders_[p/O2][try_index];
 	}
 
 
 	template<Order O>
-	GenResult Generator<O>::continue_prev(void) {
+	Generator<O>::dead_ends_t Generator<O>::get_dead_ends_at(const ord4x_t coord) const noexcept {
+		const auto p = path::get_coord2prog_converter<O>(params_.path_kind)(coord);
+		return dead_ends_[p];
+	}
+
+
+	template<Order O>
+	Generator<O>::ResultView Generator<O>::operator()(const Params params) {
+		params_ = params;
+		params_.clean(O);
+		this->prepare_fresh_gen_();
+		this->generate_();
+		return ResultView(*this);
+	}
+
+
+	template<Order O>
+	Generator<O>::ResultView Generator<O>::continue_prev(void) {
 		if (this->get_exit_status() == ExitStatus::Exhausted) [[unlikely]] {
-			return this->make_gen_result_();
+			return ResultView(*this);
 		}
 		dead_ends_.fill(0); // Do not carry over previous dead_ends counters.
 		most_dead_ends_seen_ = 0;
 		this->generate_();
-		return this->make_gen_result_();
+		return ResultView(*this);
 	}
 
 
@@ -89,7 +105,8 @@ namespace solvent::lib::gen {
 
 	template<Order O>
 	void Generator<O>::generate_() {
-		typename path::coord_converter_t<O> prog2coord = path::GetPathCoords<O>(params_.path_kind);
+		// see the inline-brute-force-func git branch for experimenting with manually inlining set_next_valid_
+		typename path::coord_converter_t<O> prog2coord = path::get_prog2coord_converter<O>(params_.path_kind);
 
 		bool backtracked = op_count_ != 0;
 		while (true) [[likely]] {
@@ -172,7 +189,7 @@ namespace solvent::lib::gen {
 
 	template<Order O>
 	GenResult Generator<O>::make_gen_result_(void) const {
-		typename path::coord_converter_t<O> prog2coord = path::GetPathCoords<O>(params_.path_kind);
+		typename path::coord_converter_t<O> prog2coord = path::get_prog2coord_converter<O>(params_.path_kind);
 		using GR = GenResult;
 		GenResult gen_result {
 			.O {O},

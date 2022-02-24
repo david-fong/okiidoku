@@ -8,14 +8,14 @@ namespace solvent::lib::gen {
 		order_{order},
 		gen_{[order]() -> generator_union_t {
 			switch (order) {
-			 #define M_SOLVENT_TEMPL_TEMPL(O_) \
-				case O_: return generator_union_t { .o ## O_ = gen::Generator<O_>() };
-			 M_SOLVENT_INSTANTIATE_ORDER_TEMPLATES
-			 #undef M_SOLVENT_TEMPL_TEMPL
+			#define M_SOLVENT_TEMPL_TEMPL(O_) \
+				case O_: return generator_union_t { .o ## O_ {gen::Generator<O_>{}} };
+			M_SOLVENT_INSTANTIATE_ORDER_TEMPLATES
+			#undef M_SOLVENT_TEMPL_TEMPL
 
-			 default: return generator_union_t {
-				.M_SOLVENT_TEMPL_UNION_DEFAULT(o) = gen::Generator<M_SOLVENT_DEFAULT_ORDER>()
-			 };
+			default: return generator_union_t {
+				.M_SOLVENT_TEMPL_UNION_DEFAULT(o) {gen::Generator<M_SOLVENT_DEFAULT_ORDER>{}}
+			};
 			}
 		}()}
 	{
@@ -38,7 +38,7 @@ namespace solvent::lib::gen {
 	gen::GenResult GeneratorUnion::gen(gen::Params params) {
 		switch (order_) {
 		#define M_SOLVENT_TEMPL_TEMPL(O_) \
-			case O_: return gen_.o ## O_(params);
+			case O_: return gen_.o ## O_(params).to_non_template_view();
 		M_SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 		#undef M_SOLVENT_TEMPL_TEMPL
 		}
@@ -49,7 +49,7 @@ namespace solvent::lib::gen {
 	gen::GenResult GeneratorUnion::gen_continue_prev() {
 		switch (order_) {
 		#define M_SOLVENT_TEMPL_TEMPL(O_) \
-			case O_: return gen_.o ## O_.continue_prev();
+			case O_: return gen_.o ## O_.continue_prev().to_non_template_view();
 		M_SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 		#undef M_SOLVENT_TEMPL_TEMPL
 		}

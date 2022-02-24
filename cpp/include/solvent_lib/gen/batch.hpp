@@ -70,10 +70,31 @@ namespace solvent::lib::gen::batch {
 	unsigned DEFAULT_NUM_THREADS(Order O);
 
 	//
-	using callback_t = std::function<void (const GenResult&)>;
+	// TODO use conditional_t: if O=0, take non-template ResultView instead.
+	template<Order O>
+	// using callback_t = std::conditional_t<(O == 0),
+	// 	std::function<void (const gen::GenResult&)>,
+	// 	std::function<void (const typename Generator<O>::ResultView&)>
+	// >;
+	using callback_t = std::function<void (
+		std::conditional_t<(O == 0),
+			const gen::GenResult,
+			const std::enable_if<(O!=0), typename Generator<O>::ResultView>
+		>
+	)>;
 
-	// callback is guarded by mutex.
-	[[nodiscard]] BatchReport batch(Order, Params&, callback_t);
+	// calls to the callback will be guarded by a mutex.
+	template<Order O>
+	[[nodiscard]] BatchReport batch(Params&, std::function<void(typename Generator<O>::ResultView)>);
+
+	// calls to the callback will be guarded by a mutex.
+	[[nodiscard]] BatchReport batch_O(Order, Params&, std::function<void(const GenResult&)>);
+
+
+	#define M_SOLVENT_TEMPL_TEMPL(O_) \
+		extern template BatchReport batch<O_>(Params&, std::function<void(typename Generator<O_>::ResultView)>);
+	M_SOLVENT_INSTANTIATE_ORDER_TEMPLATES
+	#undef M_SOLVENT_TEMPL_TEMPL
 }
 
 namespace std {

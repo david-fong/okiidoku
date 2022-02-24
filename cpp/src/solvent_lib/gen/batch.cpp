@@ -13,8 +13,14 @@ namespace solvent::lib::gen::batch {
 
 	unsigned DEFAULT_NUM_THREADS(const Order O) {
 		const unsigned hwc = std::thread::hardware_concurrency();
-		// Note: hardware_concurency is specified to be zero if unknown.
-		return (hwc != 0) ? std::min(TRY_DEFAULT_NUM_EXTRA_THREADS_(O) + 1, hwc) : 1;
+		if (hwc == 0) {
+			// Note: hardware_concurency is specified to be zero if unknown.
+			return 1;
+		}
+		else return std::min(
+			TRY_DEFAULT_NUM_EXTRA_THREADS_(O) + 1,
+			hwc == 1 ? 1 : hwc - 1 // leave at least one spare thread
+		);
 	}
 
 
@@ -34,7 +40,7 @@ namespace solvent::lib::gen::batch {
 
 
 	//
-	template<Order O>
+	template<Order O, class RV>
 	struct ThreadFunc final {
 	 static_assert(O > 0);
 		void operator()();
@@ -50,38 +56,42 @@ namespace solvent::lib::gen::batch {
 		const Params params_;
 		BatchReport& shared_data_;
 		std::mutex& shared_data_mutex_;
-		callback_t gen_result_consumer_;
+		std::function<void(RV)> gen_result_consumer_;
 		Generator<O> generator_ {};
 	};
 
 
-	template<Order O>
-	void ThreadFunc<O>::operator()() {
+	template<Order O, class RV>
+	void ThreadFunc<O, RV>::operator()() {
 		shared_data_mutex_.lock();
 		while (get_progress() < params_.stop_after) [[likely]] {
 			shared_data_mutex_.unlock(); //____________________
-			const GenResult gen_result = generator_(params_.gen_params);
+			const typename Generator<O>::ResultView result = generator_(params_.gen_params);
 			shared_data_mutex_.lock(); //‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
 
 			shared_data_.total_anys++;
-			if (gen_result.status == ExitStatus::Ok) [[likely]] {
+			if (result.exit_status() == ExitStatus::Ok) [[likely]] {
 				shared_data_.total_oks++;
 
 				auto& dist_summary_row = shared_data_.max_dead_end_samples[
 					params_.max_dead_end_sample_granularity
-					* static_cast<unsigned long>(gen_result.most_dead_ends_seen)
+					* static_cast<unsigned long>(result.most_dead_ends_seen())
 					/ (params_.gen_params.max_dead_ends + 1)
 				];
 				dist_summary_row.marginal_oks++;
-				dist_summary_row.marginal_ops += static_cast<double>(gen_result.op_count);
+				dist_summary_row.marginal_ops += static_cast<double>(result.op_count());
 			}
-			gen_result_consumer_(gen_result);
+			if constexpr (std::is_same<RV, const GenResult&>::value) {
+				gen_result_consumer_(result.to_non_template_view());
+			} else {
+				gen_result_consumer_(result);
+			}
 		}
 		shared_data_mutex_.unlock();
 	}
 
 
-	BatchReport batch(const Order O, Params& params, callback_t gen_result_consumer) {
+	BatchReport batch_(const Order O, Params& params, std::function<std::thread(BatchReport&, std::mutex&)> mk_thread) {
 		params.clean(O);
 		std::mutex shared_data_mutex;
 		BatchReport shared_data;
@@ -89,15 +99,7 @@ namespace solvent::lib::gen::batch {
 
 		std::vector<std::thread> threads;
 		for (unsigned i = 0; i < params.num_threads; i++) {
-			switch (O) {
-			#define M_SOLVENT_TEMPL_TEMPL(O_) \
-				case O_: { threads.push_back(std::thread(ThreadFunc<O_>{ \
-					params, shared_data, shared_data_mutex, gen_result_consumer \
-				})); \
-				break; }
-			M_SOLVENT_INSTANTIATE_ORDER_TEMPLATES
-			#undef M_SOLVENT_TEMPL_TEMPL
-			}
+			threads.push_back(mk_thread(shared_data, shared_data_mutex));
 		}
 		for (auto& thread : threads) {
 			thread.join();
@@ -135,6 +137,39 @@ namespace solvent::lib::gen::batch {
 			}
 		}
 		return shared_data;
+	}
+
+
+	template<Order O>
+	BatchReport batch(Params& params, std::function<void(typename Generator<O>::ResultView)> gen_result_consumer) {
+		static_assert(O != 0);
+		const auto mk_thread = [&](BatchReport& sd, std::mutex& sd_mutex) -> std::thread {
+			return std::thread(ThreadFunc<O, typename Generator<O>::ResultView>{
+				params, sd, sd_mutex, gen_result_consumer
+			});
+		};
+		return batch_(O, params, mk_thread);
+	}
+
+
+	BatchReport batch_O(Order O, Params& params, std::function<void(const GenResult&)> gen_result_consumer) {
+		const auto mk_thread = [&](BatchReport& sd, std::mutex& sd_mutex) -> std::thread {
+			switch (O) {
+			#define M_SOLVENT_TEMPL_TEMPL(O_) \
+				case O_: { return std::thread(ThreadFunc<O_, const GenResult&>{ \
+					params, sd, sd_mutex, gen_result_consumer \
+				}); \
+				break; }
+			M_SOLVENT_INSTANTIATE_ORDER_TEMPLATES
+			#undef M_SOLVENT_TEMPL_TEMPL
+
+				default: { return std::thread(ThreadFunc<M_SOLVENT_DEFAULT_ORDER, const GenResult&>{
+					params, sd, sd_mutex, gen_result_consumer
+				});
+				break; }
+			}
+		};
+		return batch_(O, params, mk_thread);
 	}
 
 
@@ -212,6 +247,12 @@ namespace solvent::lib::gen::batch {
 		}
 		os.flags(prev_fmtflags);
 	}
+
+
+	#define M_SOLVENT_TEMPL_TEMPL(O_) \
+		template BatchReport batch<O_>(Params&, std::function<void(typename Generator<O_>::ResultView)>);
+	M_SOLVENT_INSTANTIATE_ORDER_TEMPLATES
+	#undef M_SOLVENT_TEMPL_TEMPL
 }
 namespace std {
 	template class function<void(const solvent::lib::gen::GenResult&)>;

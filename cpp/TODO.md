@@ -22,6 +22,8 @@
 
 - make some grid things for binary serdes.
 
+- investigate / experiment with https://en.cppreference.com/w/cpp/thread/hardware_destructive_interference_size
+
 - "smarter"/greedier backtracking: backtracking may be occurring frequently at a coord because of values much earlier in the genpath progress.
   - backtracking is less likely to occur when other coords in the same house as the stuck coord that have different house types have the same value (overlapping has_mask). Can make an array like a count version of has_mask counting the times a value is taken in each house seen by the stuck coord.
     - Indicators of "bad packing" (lack of overlap): how many more bits are in the coord's has_mask than the has_mask of the house with the most bits in its has_mask?

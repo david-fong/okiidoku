@@ -10,7 +10,8 @@
 #include <vector>
 #include <array>
 #include <span>
-#include <numeric>   // iota,
+#include <ranges>
+#include <numeric> // iota
 #include <cassert>
 
 namespace solvent::lib::gen {
@@ -50,7 +51,7 @@ namespace solvent::lib::gen {
 	//
 	struct Params {
 		path::Kind path_kind = path::Kind::RowMajor;
-		bool canonicalize = false; // TODO try moving up layout-wise and see if perf improves
+		bool canonicalize = false;
 		std::uint_fast64_t max_dead_ends = 0; // Defaulted if zero.
 
 		// Cleans self and returns a copy of self.
@@ -93,6 +94,7 @@ namespace solvent::lib::gen {
 		void print_pretty(std::ostream&) const;
 	};
 
+
 	//
 	struct Direction final {
 		bool is_back;
@@ -113,16 +115,37 @@ namespace solvent::lib::gen {
 	 public:
 		using dead_ends_t = cell_dead_ends::t<O>;
 
+		/** This exists in addition to the non-template Result class to
+		losslessly preserve suitable number types. Like the non-template
+		class, it also defers copying to the caller, and should be dropped
+		before doing further generation. */
+		class ResultView final {
+			const Generator& g_;
+		 public:
+			explicit ResultView(const Generator& g): g_(g) {}
+			      auto  order() const noexcept -> Order { return O; }
+			const auto& params() const noexcept { return g_.params_; }
+			      auto  exit_status() const noexcept -> ExitStatus { return g_.get_exit_status(); }
+			const auto& backtrack_origin() const noexcept { return g_.backtrack_origin_; }
+			const auto& most_dead_ends_seen() const noexcept { return g_.most_dead_ends_seen_; }
+			const auto& op_count() const noexcept { return g_.op_count_; }
+			      auto  get_value_at(ord4x_t coord) const noexcept { return g_.get_value_at(coord); }
+			      auto  get_dead_ends_at(ord4x_t coord) const noexcept { return g_.get_dead_ends_at(coord); }
+			GenResult to_non_template_view() const { return g_.make_gen_result_(); } // TODO update GenResult to not copy out
+		};
+
 		static constexpr ord1i_t O1 = O;
 		static constexpr ord2i_t O2 = O*O;
 		static constexpr ord4i_t O4 = O*O*O*O;
 
 		// Generates a fresh sudoku solution.
-		[[nodiscard]] GenResult operator()(Params);
-		[[nodiscard]] GenResult continue_prev(void);
+		[[nodiscard]] ResultView operator()(Params);
+		[[nodiscard]] ResultView continue_prev(void);
 
 		[[nodiscard]] const Params& get_params() const { return params_; }
 		[[nodiscard]] ExitStatus get_exit_status(void) const noexcept;
+		[[nodiscard]] ord2i_t get_value_at(ord4x_t coord) const noexcept;
+		[[nodiscard]] dead_ends_t get_dead_ends_at(ord4x_t coord) const noexcept;
 
 	 private:
 		struct Cell final {

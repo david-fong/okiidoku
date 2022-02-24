@@ -126,7 +126,7 @@ namespace solvent::cli {
 			.only_count_oks = only_count_oks,
 			.stop_after = stop_after
 		};
-		const gen::batch::BatchReport batch_report = gen::batch::batch(config_.order(), params,
+		const gen::batch::BatchReport batch_report = gen::batch::batch_O(config_.order(), params,
 			[this](const gen::GenResult& gen_result) {
 				if ((config_.verbosity() == verbosity::Kind::All)
 				 || ((config_.verbosity() == verbosity::Kind::NoGiveups) && (gen_result.status == gen::ExitStatus::Ok))

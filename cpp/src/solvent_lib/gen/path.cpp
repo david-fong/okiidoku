@@ -20,16 +20,23 @@ namespace solvent::lib::gen::path {
 		static constexpr ord2i_t O2 = O*O;
 		static constexpr ord4i_t O4 = O*O*O*O;
 
-		[[gnu::const, gnu::hot]] static constexpr ord4x_t convert(const ord4x_t progress) noexcept {
+		[[gnu::const, gnu::hot]] static constexpr ord4x_t prog2coord(const ord4x_t progress) noexcept {
 			if constexpr (PK == Kind::RowMajor) {
 				return progress;
 			} else {
-				return path[progress];
+				return map_prog2coord[progress];
+			}
+		}
+		[[gnu::const, gnu::hot]] static constexpr ord4x_t coord2prog(const ord4x_t progress) noexcept {
+			if constexpr (PK == Kind::RowMajor) {
+				return progress;
+			} else {
+				return map_coord2prog[progress];
 			}
 		}
 	 private:
 		using grid_cache_t = typename std::array<ord4x_least_t, O4>;
-		static constexpr grid_cache_t _init() noexcept {
+		static constexpr grid_cache_t init_map_prog2coord_() noexcept {
 			grid_cache_t _{0};
 			if constexpr (PK == Kind::RowMajor) {
 				// std::iota(path.begin(), path.end(), 0);
@@ -53,7 +60,15 @@ namespace solvent::lib::gen::path {
 			}
 			return _;
 		}
-		static constexpr grid_cache_t path = PathCoords_<PK,O>::_init();
+		static constexpr grid_cache_t init_map_coord2prog_() noexcept {
+			grid_cache_t _{0};
+			for (ord4i_t i = 0; i < O4; i++) {
+				_[map_prog2coord[i]] = static_cast<ord4x_least_t>(i);
+			}
+			return _;
+		}
+		static constexpr grid_cache_t map_prog2coord = PathCoords_<PK,O>::init_map_prog2coord_();
+		static constexpr grid_cache_t map_coord2prog = PathCoords_<PK,O>::init_map_coord2prog_();
 		// Note: a compiler can optimize this away if not used.
 	};
 
@@ -67,17 +82,29 @@ namespace solvent::lib::gen::path {
 
 
 	template<solvent::Order O>
-	coord_converter_t<O> GetPathCoords(const Kind path_kind) noexcept {
+	coord_converter_t<O> get_prog2coord_converter(const Kind path_kind) noexcept {
 		switch (path_kind) {
-		 case Kind::RowMajor: return PathCoords_<Kind::RowMajor, O>::convert;
-		 case Kind::BlockCol: return PathCoords_<Kind::BlockCol, O>::convert;
-		 case Kind::DealRwMj: return PathCoords_<Kind::DealRwMj, O>::convert;
-		 default: return PathCoords_<Kind::RowMajor, O>::convert; // never
+		case Kind::RowMajor: return PathCoords_<Kind::RowMajor, O>::prog2coord;
+		case Kind::BlockCol: return PathCoords_<Kind::BlockCol, O>::prog2coord;
+		case Kind::DealRwMj: return PathCoords_<Kind::DealRwMj, O>::prog2coord;
+		default: return PathCoords_<Kind::RowMajor, O>::prog2coord; // never
 		}
 	}
 
+	template<solvent::Order O>
+	coord_converter_t<O> get_coord2prog_converter(const Kind path_kind) noexcept {
+		switch (path_kind) {
+		case Kind::RowMajor: return PathCoords_<Kind::RowMajor, O>::coord2prog;
+		case Kind::BlockCol: return PathCoords_<Kind::BlockCol, O>::coord2prog;
+		case Kind::DealRwMj: return PathCoords_<Kind::DealRwMj, O>::coord2prog;
+		default: return PathCoords_<Kind::RowMajor, O>::coord2prog; // never
+		}
+	}
+
+
 	#define M_SOLVENT_TEMPL_TEMPL(O_) \
-		template coord_converter_t<O_> GetPathCoords<O_>(Kind) noexcept;
+		template coord_converter_t<O_> get_prog2coord_converter<O_>(Kind) noexcept; \
+		template coord_converter_t<O_> get_coord2prog_converter<O_>(Kind) noexcept;
 	M_SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 	#undef M_SOLVENT_TEMPL_TEMPL
 }

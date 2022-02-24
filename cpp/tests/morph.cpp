@@ -1,4 +1,5 @@
 #include <solvent_lib/gen/mod.hpp>
+#include <solvent_lib/gen/batch.hpp>
 #include <solvent_lib/morph/canon.hpp>
 #include <solvent_lib/morph/scramble.hpp>
 // #include <solvent_lib/print.hpp>
@@ -20,7 +21,7 @@ unsigned test_morph_O(const unsigned num_rounds) {
 	unsigned int count_bad = 0;
 	for (unsigned round = 0; round < num_rounds; ) {
 		auto gen = gen::Generator<O>();
-		const auto result = gen(gen::Params {.canonicalize = true});
+		const auto result = gen(gen::Params {.canonicalize = true}).to_non_template_view();
 		if (result.status != gen::ExitStatus::Ok) { continue; }
 		round++;
 		auto other_result = result; {
@@ -73,5 +74,16 @@ int main(const int argc, char const *const argv[]) {
 	if (test_morph_O<4>(num_rounds)) {
 		return 1;
 	}
+
+
+	// using solvent::lib::gen::batch::batch;
+	// auto params = solvent::lib::gen::batch::Params {
+	// 	.gen_params{}, .only_count_oks=true, .stop_after=100
+	// };
+	// batch<3>(params, [](typename solvent::lib::gen::Generator<3>::ResultView result){
+	// 	std::cout << "\nhi";
+	// 	result.to_non_template_view().print_pretty(std::cout);
+	// }).print(std::cout, 3);
+
 	return 0;
 }

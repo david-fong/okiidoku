@@ -36,11 +36,15 @@ namespace solvent::lib::gen::path {
 	using coord_converter_t = [[gnu::const]] typename size<O>::ord4x_t (&)(typename size<O>::ord4x_t) noexcept;
 
 	template<solvent::Order O> [[nodiscard]]
-	coord_converter_t<O> GetPathCoords(Kind) noexcept;
+	coord_converter_t<O> get_prog2coord_converter(Kind) noexcept;
+
+	template<solvent::Order O> [[nodiscard]]
+	coord_converter_t<O> get_coord2prog_converter(Kind) noexcept;
 
 
 	#define M_SOLVENT_TEMPL_TEMPL(O_) \
-		extern template coord_converter_t<O_> GetPathCoords<O_>(Kind) noexcept;
+		extern template coord_converter_t<O_> get_prog2coord_converter<O_>(Kind) noexcept; \
+		extern template coord_converter_t<O_> get_coord2prog_converter<O_>(Kind) noexcept;
 	M_SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 	#undef M_SOLVENT_TEMPL_TEMPL
 }
