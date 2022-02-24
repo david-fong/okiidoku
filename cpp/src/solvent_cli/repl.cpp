@@ -33,9 +33,6 @@ namespace solvent::cli {
 		std::cout
 		<< '\n' << str::DIM.ON << TERMINAL_OUTPUT_TIPS << str::DIM.OFF
 		<< '\n' << Command::HelpMessage
-		<< '\n' << sizeof(gen::ResultView) +  9*(1+sizeof(gen::ResultView::dead_ends_t))
-		<< '\n' << sizeof(gen::ResultView) + 16*(1+sizeof(gen::ResultView::dead_ends_t))
-		<< '\n' << sizeof(gen::ResultView) + 25*(1+sizeof(gen::ResultView::dead_ends_t))
 		<< std::endl;
 
 		std::string command;

@@ -5,6 +5,7 @@
 // #include <solvent_lib/print.hpp>
 #include <solvent_util/console_setup.hpp>
 #include <solvent_lib/grid.hpp>
+#include <solvent_lib/print.hpp>
 
 #include <string>
 #include <iostream>  // cout,
@@ -84,6 +85,17 @@ int main(const int argc, char const *const argv[]) {
 	// 	std::cout << "\nhi";
 	// 	result.to_generic().print_pretty(std::cout);
 	// }).print(std::cout, 3);
+
+	// playing with ranges
+	using namespace solvent::lib;
+	std::cout << "\n";
+	gen::Generator<3> g{};
+	auto range = g({}).get_grid();
+	for (auto val : range) {
+		print::val2str(std::cout, 3, val);
+	}
+	std::cout << "\n";
+	print::val2str(std::cout, 3, range[3]);
 
 	return 0;
 }

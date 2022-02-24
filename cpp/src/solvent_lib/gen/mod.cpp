@@ -43,22 +43,6 @@ namespace solvent::lib::gen {
 
 
 	template<Order O>
-	Generator<O>::ord2i_t Generator<O>::get_value_at(const ord4x_t coord) const noexcept {
-		const auto p = path::get_coord2prog_converter<O>(params_.path_kind)(coord);
-		const auto try_index = cells_[p].try_index;
-		if (try_index == O2) { return O2; }
-		return val_try_orders_[p/O2][try_index];
-	}
-
-
-	template<Order O>
-	Generator<O>::dead_ends_t Generator<O>::get_dead_ends_at(const ord4x_t coord) const noexcept {
-		const auto p = path::get_coord2prog_converter<O>(params_.path_kind)(coord);
-		return dead_ends_[p];
-	}
-
-
-	template<Order O>
 	Generator<O>::ResultView Generator<O>::operator()(const Params params) {
 		params_ = params;
 		params_.clean(O);

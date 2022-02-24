@@ -52,17 +52,6 @@
 // ==================================================================
 // !!! contents below are not part of the public config interface !!!
 
-#if (\
-   (!M_SOLVENT_INCLUDE_ORDER_2 && M_SOLVENT_DEFAULT_ORDER == 2)\
-|| (!M_SOLVENT_INCLUDE_ORDER_3 && M_SOLVENT_DEFAULT_ORDER == 3)\
-|| (!M_SOLVENT_INCLUDE_ORDER_4 && M_SOLVENT_DEFAULT_ORDER == 4)\
-|| (!M_SOLVENT_INCLUDE_ORDER_5 && M_SOLVENT_DEFAULT_ORDER == 5)\
-|| (!M_SOLVENT_INCLUDE_ORDER_6 && M_SOLVENT_DEFAULT_ORDER == 6)\
-|| (!M_SOLVENT_INCLUDE_ORDER_7 && M_SOLVENT_DEFAULT_ORDER == 7)\
-)
-#error cannot default to a non-included order
-#endif
-
 
 #if M_SOLVENT_INCLUDE_ORDER_2
 #undef M_SOLVENT_O_MAX

@@ -67,8 +67,9 @@ namespace solvent::lib::gen {
 		Ok, Abort, Exhausted,
 	};
 
-	//
-	// TODO would be cool to have arena allocator support for the vectors
+
+	/** exists to defer copying to the caller. should be dropped before
+	doing further generation. */
 	struct ResultView final {
 	 public:
 		using val_t = size<O_MAX>::ord2i_t;
@@ -101,6 +102,7 @@ namespace solvent::lib::gen {
 		bool is_back_skip; // only meaningful when is_back is true.
 	};
 
+
 	//
 	template<Order O>
 	class Generator final {
@@ -111,41 +113,51 @@ namespace solvent::lib::gen {
 		using ord2i_t = size<O>::ord2i_t;
 		using ord4i_t = size<O>::ord4i_t;
 		using ord4x_t = size<O>::ord4x_t;
-
-	 public:
 		using dead_ends_t = cell_dead_ends::t<O>;
 
+	 public:
+		static constexpr ord1i_t O1 = O;
+		static constexpr ord2i_t O2 = O*O;
+		static constexpr ord4i_t O4 = O*O*O*O;
+
 		/** This exists in addition to the non-template Result class to
-		losslessly preserve suitable number types. Like the non-template
-		class, it also defers copying to the caller, and should be dropped
-		before doing further generation. */
+		losslessly preserve suitably sized number types. */
 		class ResultView final {
 			const Generator& g_;
 		 public:
 			explicit ResultView(const Generator& g): g_(g) {}
-			      auto  order() const noexcept -> Order { return O; }
-			const auto& params() const noexcept { return g_.params_; }
-			      auto  exit_status() const noexcept -> ExitStatus { return g_.get_exit_status(); }
-			const auto& backtrack_origin() const noexcept { return g_.backtrack_origin_; }
-			const auto& most_dead_ends_seen() const noexcept { return g_.most_dead_ends_seen_; }
-			const auto& op_count() const noexcept { return g_.op_count_; }
-			      auto  get_value_at(ord4x_t coord) const noexcept { return g_.get_value_at(coord); }
-			      auto  get_dead_ends_at(ord4x_t coord) const noexcept { return g_.get_dead_ends_at(coord); }
+			[[nodiscard]]       auto  order()               const noexcept { return O; }
+			[[nodiscard]] const auto& params()              const noexcept { return g_.params_; }
+			[[nodiscard]]       auto  exit_status()         const noexcept { return g_.get_exit_status(); }
+			[[nodiscard]] const auto& backtrack_origin()    const noexcept { return g_.backtrack_origin_; }
+			[[nodiscard]] const auto& most_dead_ends_seen() const noexcept { return g_.most_dead_ends_seen_; }
+			[[nodiscard]] const auto& op_count()            const noexcept { return g_.op_count_; }
+			[[nodiscard]]       auto  get_grid()            const noexcept { return g_.get_grid(); }
+			[[nodiscard]]       auto  get_dead_ends()       const noexcept { return g_.get_dead_ends(); }
 			gen::ResultView to_generic() const { return g_.make_gen_result_(); } // TODO update ResultView to not copy out
 		};
-
-		static constexpr ord1i_t O1 = O;
-		static constexpr ord2i_t O2 = O*O;
-		static constexpr ord4i_t O4 = O*O*O*O;
 
 		// Generates a fresh sudoku solution.
 		[[nodiscard]] ResultView operator()(Params);
 		[[nodiscard]] ResultView continue_prev(void);
 
-		[[nodiscard]] const Params& get_params() const { return params_; }
 		[[nodiscard]] ExitStatus get_exit_status(void) const noexcept;
-		[[nodiscard]] ord2i_t get_value_at(ord4x_t coord) const noexcept;
-		[[nodiscard]] dead_ends_t get_dead_ends_at(ord4x_t coord) const noexcept;
+
+		auto get_grid() const noexcept {
+			path::coord_converter_t<O> c2p = path::get_coord2prog_converter<O>(params_.path_kind); // TODO why does this segfault when using auto?
+			return std::views::iota(ord4x_t{0}, O4)
+			| std::views::transform([&](auto coord){
+				const auto p = c2p(coord);
+				const auto try_index = cells_[p].try_index;
+				if (try_index == O2) { return O2; }
+				return val_try_orders_[p/O2][try_index];
+			});
+		}
+		auto get_dead_ends() const noexcept {
+			path::coord_converter_t<O> c2p = path::get_coord2prog_converter<O>(params_.path_kind);
+			return std::views::iota(ord4x_t{0}, O4)
+			| std::views::transform([&](auto coord){ return dead_ends_[c2p(coord)]; });
+		}
 
 	 private:
 		struct Cell final {

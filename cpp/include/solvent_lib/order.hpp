@@ -19,5 +19,6 @@ namespace solvent {
 		#undef M_SOLVENT_TEMPL_TEMPL
 		return false;
 	}
+	static_assert(is_order_compiled(M_SOLVENT_DEFAULT_ORDER));
 }
 #endif
