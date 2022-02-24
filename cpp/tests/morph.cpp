@@ -20,8 +20,8 @@ unsigned test_morph_O(const unsigned num_rounds) {
 	std::cout << "\n\ntesting morph for order " << O << std::endl;
 	unsigned int count_bad = 0;
 	for (unsigned round = 0; round < num_rounds; ) {
-		auto gen = gen::Generator<O>();
-		const auto result = gen(gen::Params {.canonicalize = true}).to_non_template_view();
+		gen::Generator<O> gen {};
+		const auto result = gen(gen::Params {.canonicalize = true}).to_generic();
 		if (result.status != gen::ExitStatus::Ok) { continue; }
 		round++;
 		auto other_result = result; {
@@ -82,7 +82,7 @@ int main(const int argc, char const *const argv[]) {
 	// };
 	// batch<3>(params, [](typename solvent::lib::gen::Generator<3>::ResultView result){
 	// 	std::cout << "\nhi";
-	// 	result.to_non_template_view().print_pretty(std::cout);
+	// 	result.to_generic().print_pretty(std::cout);
 	// }).print(std::cout, 3);
 
 	return 0;

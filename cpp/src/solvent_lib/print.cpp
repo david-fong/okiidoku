@@ -24,7 +24,7 @@ namespace solvent::lib::print {
 	}
 
 
-	void serial(std::ostream& os, const solvent::Order O, val_grid_t grid_view) {
+	void text(std::ostream& os, const solvent::Order O, val_grid_t grid_view) {
 		for (unsigned coord = 0; coord < O*O*O*O; coord++) {
 			print::val2str(os, O, grid_view(coord));
 		}

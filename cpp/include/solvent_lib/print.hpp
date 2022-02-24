@@ -13,7 +13,7 @@ namespace solvent::lib::print {
 	[[gnu::hot]] void val2str(std::ostream&, Order order, uint8_t value);
 
 	using val_grid_t = std::function<uint8_t (uint32_t)>;
-	void serial(std::ostream&, Order, val_grid_t grid_view);
+	void text(std::ostream&, Order, val_grid_t grid_view);
 
 	using print_grid_t = std::function<void (std::ostream&, uint32_t)>;
 	void pretty(std::ostream&, Order, std::span<const print_grid_t> grid_views);

@@ -188,10 +188,10 @@ namespace solvent::lib::gen {
 
 
 	template<Order O>
-	GenResult Generator<O>::make_gen_result_(void) const {
+	gen::ResultView Generator<O>::make_gen_result_(void) const {
 		typename path::coord_converter_t<O> prog2coord = path::get_prog2coord_converter<O>(params_.path_kind);
-		using GR = GenResult;
-		GenResult gen_result {
+		using GR = gen::ResultView;
+		gen::ResultView gen_result {
 			.O {O},
 			.params {params_},
 			.status {this->get_exit_status()},
@@ -217,7 +217,7 @@ namespace solvent::lib::gen {
 	}
 
 
-	std::string shaded_dead_end_stat(GenResult::dead_ends_t out_of, GenResult::dead_ends_t count) {
+	std::string shaded_dead_end_stat(ResultView::dead_ends_t out_of, ResultView::dead_ends_t count) {
 		assert(count <= out_of);
 		return (count == 0) ? " " : util::str::BLOCK_CHARS[static_cast<std::size_t>(
 			(count - 1) * util::str::BLOCK_CHARS.size() / (out_of + 1)
@@ -225,12 +225,12 @@ namespace solvent::lib::gen {
 	}
 
 
-	void GenResult::print_text(std::ostream& os) const {
-		print::serial(os, O, [this](uint32_t coord) { return this->grid[coord]; });
+	void ResultView::print_text(std::ostream& os) const {
+		print::text(os, O, [this](uint32_t coord) { return this->grid[coord]; });
 	}
 
 
-	void GenResult::print_pretty(std::ostream& os) const {
+	void ResultView::print_pretty(std::ostream& os) const {
 		const std::vector<print::print_grid_t> grid_accessors {
 			print::print_grid_t([this](std::ostream& _os, uint16_t coord) {
 				_os << ' '; print::val2str(_os, O, this->grid[coord]);

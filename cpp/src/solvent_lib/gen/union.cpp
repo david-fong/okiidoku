@@ -35,30 +35,30 @@ namespace solvent::lib::gen {
 	}
 
 
-	gen::GenResult GeneratorUnion::gen(gen::Params params) {
+	gen::ResultView GeneratorUnion::gen(gen::Params params) {
 		switch (order_) {
 		#define M_SOLVENT_TEMPL_TEMPL(O_) \
-			case O_: return gen_.o ## O_(params).to_non_template_view();
+			case O_: return gen_.o ## O_(params).to_generic();
 		M_SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 		#undef M_SOLVENT_TEMPL_TEMPL
 		}
-		return gen::GenResult {}; // never
+		return gen::ResultView {}; // never
 	}
 
 
-	gen::GenResult GeneratorUnion::gen_continue_prev() {
+	gen::ResultView GeneratorUnion::gen_continue_prev() {
 		switch (order_) {
 		#define M_SOLVENT_TEMPL_TEMPL(O_) \
-			case O_: return gen_.o ## O_.continue_prev().to_non_template_view();
+			case O_: return gen_.o ## O_.continue_prev().to_generic();
 		M_SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 		#undef M_SOLVENT_TEMPL_TEMPL
 		}
-		return gen::GenResult {}; // never
+		return gen::ResultView {}; // never
 	}
 
 
 	/* void GeneratorUnion::gen_batch(gen::batch::Params params) {
-		gen::batch::batch(order_, params, [](gen::GenResult gen_result){
+		gen::batch::batch(order_, params, [](gen::ResultView gen_result){
 			gen_result.print_pretty(std::cout);
 		});
 	} */

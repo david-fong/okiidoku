@@ -2,14 +2,15 @@
 
 ## Higher Priority
 
+- try making Order an enum
+  - see if it can improve switch case cover detection.
 - make a custom vector-like class for grids.
   - fixed size and capacity, stores in heap. look into just using boost static_vector.
   - use this as the return type of scramble and canonicalize
 - either put result buffering in Generator or in batch.
-  - batch isn't templated, but its thread functor is...
-- separate gen::GenResult into another gen::Generator::Result.
+- separate gen::ResultView into another gen::Generator::Result.
   - put printing things on the non-template one. or even consider getting rid of the print methods there and moving it to an external function (which would be more reusable. in that case, the print_text function could change from taking a function to taking a span (before I didn't know about span)).
-  - document reasons for having both Generator::Result and gen::GenResult
+  - document reasons for having both Generator::Result and gen::ResultView
     - space usage (int types, expressing stack vs heap location (array vs vector)) when batching.
   - consider making an additional distinction:
     - one templated that owns all data, doesn't put members in the heap, and uses exact int sizes
@@ -74,7 +75,7 @@
 
 - some diagnostics to try rendering:
   - A scatter chart showing max-dead-ends vs. num operations. (only caring about success results)
-  - a bar graph where each bar counts the number of GenResults that had a progress (or a furthest coord with a non-zero backtrack count) within the range for that bar's "bin". (to see "how far" aborted generations usually get).
+  - a bar graph where each bar counts the number of ResultViews that had a progress (or a furthest coord with a non-zero backtrack count) within the range for that bar's "bin". (to see "how far" aborted generations usually get).
   - comparing the average heatmaps of aborted vs successful generations.
     - See if there are clear differences/patterns in where they usually spike in backtracking. Perhaps this can be used to inform more sophisticated thresholds for each genpath.
 - Rename things to match the standard literature / terminology. Do some research to try to get it right. See sudopedia.

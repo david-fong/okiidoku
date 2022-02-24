@@ -7,8 +7,9 @@ add_library(solvent_lib STATIC
 	morph/scramble.cpp
 	gen/path.cpp
 	gen/mod.cpp
-	gen/batch.cpp
 	gen/union.cpp
+	gen/batch.cpp
+	gen/batch_print.cpp
 )
 
 find_package(Threads REQUIRED)

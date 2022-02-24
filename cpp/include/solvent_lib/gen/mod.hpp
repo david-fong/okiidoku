@@ -69,7 +69,7 @@ namespace solvent::lib::gen {
 
 	//
 	// TODO would be cool to have arena allocator support for the vectors
-	struct GenResult final {
+	struct ResultView final {
 	 public:
 		using val_t = size<O_MAX>::ord2i_t;
 		using dead_ends_t = float; // an experiment to save space when buffering batched results.
@@ -131,7 +131,7 @@ namespace solvent::lib::gen {
 			const auto& op_count() const noexcept { return g_.op_count_; }
 			      auto  get_value_at(ord4x_t coord) const noexcept { return g_.get_value_at(coord); }
 			      auto  get_dead_ends_at(ord4x_t coord) const noexcept { return g_.get_dead_ends_at(coord); }
-			GenResult to_non_template_view() const { return g_.make_gen_result_(); } // TODO update GenResult to not copy out
+			gen::ResultView to_generic() const { return g_.make_gen_result_(); } // TODO update ResultView to not copy out
 		};
 
 		static constexpr ord1i_t O1 = O;
@@ -179,7 +179,7 @@ namespace solvent::lib::gen {
 		[[gnu::hot]] Direction set_next_valid_(typename path::coord_converter_t<O>, bool backtracked) noexcept;
 		[[gnu::hot]] void generate_();
 
-		[[gnu::pure, nodiscard]] GenResult make_gen_result_(void) const;
+		[[gnu::pure, nodiscard]] gen::ResultView make_gen_result_(void) const;
 	};
 
 

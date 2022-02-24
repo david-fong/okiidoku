@@ -33,9 +33,9 @@ namespace solvent::cli {
 		std::cout
 		<< '\n' << str::DIM.ON << TERMINAL_OUTPUT_TIPS << str::DIM.OFF
 		<< '\n' << Command::HelpMessage
-		<< '\n' << sizeof(gen::GenResult) +  9*(1+sizeof(gen::GenResult::dead_ends_t))
-		<< '\n' << sizeof(gen::GenResult) + 16*(1+sizeof(gen::GenResult::dead_ends_t))
-		<< '\n' << sizeof(gen::GenResult) + 25*(1+sizeof(gen::GenResult::dead_ends_t))
+		<< '\n' << sizeof(gen::ResultView) +  9*(1+sizeof(gen::ResultView::dead_ends_t))
+		<< '\n' << sizeof(gen::ResultView) + 16*(1+sizeof(gen::ResultView::dead_ends_t))
+		<< '\n' << sizeof(gen::ResultView) + 25*(1+sizeof(gen::ResultView::dead_ends_t))
 		<< std::endl;
 
 		std::string command;
@@ -127,7 +127,7 @@ namespace solvent::cli {
 			.stop_after = stop_after
 		};
 		const gen::batch::BatchReport batch_report = gen::batch::batch_O(config_.order(), params,
-			[this](const gen::GenResult& gen_result) {
+			[this](const gen::ResultView& gen_result) {
 				if ((config_.verbosity() == verbosity::Kind::All)
 				 || ((config_.verbosity() == verbosity::Kind::NoGiveups) && (gen_result.status == gen::ExitStatus::Ok))
 				) {

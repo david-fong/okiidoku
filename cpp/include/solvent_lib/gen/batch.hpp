@@ -20,19 +20,11 @@ namespace solvent::lib::gen::batch {
 		unsigned max_dead_end_sample_granularity = 0; // Defaulted if zero.
 		bool only_count_oks;
 		trials_t stop_after;
-		unsigned callback_buffering = 0; // Defaulted if zero.
 
 		// Cleans self and returns a copy of self.
 		Params clean(Order O) noexcept;
-
-		static constexpr unsigned DEFAULT_BUFFERING[]{ 0, 1,
-			/*2*/1000,
-			/*3*/1000,
-			/*4*/500,  // cautiously space conservative
-			/*5*/1,    // because it's so slow already
-			1, 1, 1, 1, 1
-		};
 	};
+
 
 	//
 	struct BatchReport final {
@@ -62,6 +54,7 @@ namespace solvent::lib::gen::batch {
 		void print(std::ostream&, Order O) const;
 	};
 
+
 	constexpr unsigned TRY_DEFAULT_NUM_EXTRA_THREADS_(const Order O) {
 		if (O < 4) { return 0; }
 		else if (O == 4) { return 1; }
@@ -69,35 +62,24 @@ namespace solvent::lib::gen::batch {
 	};
 	unsigned DEFAULT_NUM_THREADS(Order O);
 
-	//
-	// TODO use conditional_t: if O=0, take non-template ResultView instead.
-	template<Order O>
-	// using callback_t = std::conditional_t<(O == 0),
-	// 	std::function<void (const gen::GenResult&)>,
-	// 	std::function<void (const typename Generator<O>::ResultView&)>
-	// >;
-	using callback_t = std::function<void (
-		std::conditional_t<(O == 0),
-			const gen::GenResult,
-			const std::enable_if<(O!=0), typename Generator<O>::ResultView>
-		>
-	)>;
 
+	template<Order O>
+	using callback_t = std::function<void(typename Generator<O>::ResultView)>;
 	// calls to the callback will be guarded by a mutex.
 	template<Order O>
-	[[nodiscard]] BatchReport batch(Params&, std::function<void(typename Generator<O>::ResultView)>);
+	[[nodiscard]] BatchReport batch(Params&, callback_t<O>);
 
+
+	using callback_o_t = std::function<void(const ResultView&)>;
 	// calls to the callback will be guarded by a mutex.
-	[[nodiscard]] BatchReport batch_O(Order, Params&, std::function<void(const GenResult&)>);
+	// asserts that the order is compiled.
+	[[nodiscard]] BatchReport batch_O(Order, Params&, callback_o_t);
 
 
 	#define M_SOLVENT_TEMPL_TEMPL(O_) \
-		extern template BatchReport batch<O_>(Params&, std::function<void(typename Generator<O_>::ResultView)>);
+		extern template BatchReport batch<O_>(Params&, callback_t<O_>);
 	M_SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 	#undef M_SOLVENT_TEMPL_TEMPL
 }
-
-namespace std {
-	extern template class function<void (const solvent::lib::gen::GenResult&)>;
-}
+inline void batch() {}
 #endif
