@@ -64,22 +64,23 @@ namespace solvent::lib::gen::batch {
 
 
 	template<Order O>
-	using callback_t = std::function<void(typename Generator<O>::ResultView)>;
+	using callback_O_t = std::function<void(const GeneratorO<O>&)>;
 	// calls to the callback will be guarded by a mutex.
 	template<Order O>
-	[[nodiscard]] BatchReport batch(Params&, callback_t<O>);
+	[[nodiscard]] BatchReport batch_O(Params&, callback_O_t<O>);
 
 
-	using callback_o_t = std::function<void(const ResultView&)>;
+	using callback_t = std::function<void(const Generator&)>;
 	// calls to the callback will be guarded by a mutex.
 	// asserts that the order is compiled.
-	[[nodiscard]] BatchReport batch_O(Order, Params&, callback_o_t);
+	[[nodiscard]] BatchReport batch(Order, Params&, callback_t);
 
 
 	#define M_SOLVENT_TEMPL_TEMPL(O_) \
-		extern template BatchReport batch<O_>(Params&, callback_t<O_>);
+		extern template BatchReport batch_O<O_>(Params&, callback_O_t<O_>);
 	M_SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 	#undef M_SOLVENT_TEMPL_TEMPL
+
+// inline void batch() {} // can we do something like this?
 }
-inline void batch() {}
 #endif

@@ -12,17 +12,16 @@ namespace solvent::cli {
 	namespace str = solvent::util::str;
 	using namespace solvent::lib;
 
-	using pathkind_t = lib::gen::path::Kind;
-
 	const std::string TERMINAL_OUTPUT_TIPS =
 	"\nNote: You can run `tput rmam` in your shell to disable text wrapping.";
 
 
-	Repl::Repl(const Order O): gen_union_(gen::GeneratorUnion(O)) {
+	Repl::Repl(const Order order_input): gen_(gen::Generator::create(order_input)) {
+		const Order O = gen_->get_order();
 		config_.order(O);
 		if (O <= 4) { config_.verbosity(verbosity::Kind::Silent); }
 		if (O  > 4) { config_.verbosity(verbosity::Kind::NoGiveups); }
-		config_.path_kind(pathkind_t::RowMajor);
+		config_.path_kind(gen::path::Kind::RowMajor);
 		config_.max_dead_ends(0);
 	}
 
@@ -73,7 +72,7 @@ namespace solvent::cli {
 				break;
 			case E::Quit:
 				return false;
-			case E::ConfigOrder:       config_.order(cmd_args); gen_union_.set_order(config_.order()); break;
+			case E::ConfigOrder:       config_.order(cmd_args); gen_ = gen::Generator::create(config_.order()); break; // TODO only call if order has changed
 			case E::ConfigVerbosity:   config_.verbosity(cmd_args); break;
 			case E::ConfigGenPath:     config_.path_kind(cmd_args); break;
 			case E::ConfigMaxDeadEnds: config_.max_dead_ends(cmd_args); break;
@@ -89,22 +88,22 @@ namespace solvent::cli {
 
 	void Repl::gen_single(const bool cont_prev) {
 		const clock_t clock_start = std::clock();
-		const auto gen_result = cont_prev
-			? gen_union_.gen_continue_prev()
-			: gen_union_.gen(gen::Params{
+		cont_prev
+			? gen_->continue_prev()
+			: gen_->operator()(gen::Params{
 				.path_kind = config_.path_kind(),
-				.canonicalize = config_.canonicalize(),
 				.max_dead_ends = config_.max_dead_ends(),
 			});
+		// TODO canonicalize if config specifies so
 		const double processor_time = (static_cast<double>(std::clock() - clock_start)) / CLOCKS_PER_SEC;
 
-		gen_result.print_pretty(std::cout);
+		gen_->print_pretty(std::cout);
 		std::cout << std::setprecision(4)
 			<< "\nprocessor time: " << processor_time << " seconds"
-			<< "\nnum operations: " << gen_result.op_count
-			<< "\nmax dead ends:  " << gen_result.most_dead_ends_seen
-			<< "\nstatus:         " << ((gen_result.status == gen::ExitStatus::Ok) ? "OK"
-				: (gen_result.status == gen::ExitStatus::Abort) ? "ABORT" : "NOTHING LEFT TO CONTINUE")
+			<< "\nnum operations: " << gen_->get_op_count()
+			<< "\nmax dead ends:  " << gen_->get_most_dead_ends_seen()
+			<< "\nstatus:         " << ((gen_->status() == gen::ExitStatus::Ok) ? "OK"
+				: (gen_->status() == gen::ExitStatus::Abort) ? "ABORT" : "GENERATOR EXHAUSTED")
 			;
 		std::cout << std::endl;
 	}
@@ -117,18 +116,18 @@ namespace solvent::cli {
 		gen::batch::Params params{
 			.gen_params {
 				.path_kind = config_.path_kind(),
-				.canonicalize = config_.canonicalize(),
 				.max_dead_ends = config_.max_dead_ends(),
 			},
 			.only_count_oks = only_count_oks,
 			.stop_after = stop_after
 		};
-		const gen::batch::BatchReport batch_report = gen::batch::batch_O(config_.order(), params,
-			[this](const gen::ResultView& gen_result) {
+		const gen::batch::BatchReport batch_report = gen::batch::batch(config_.order(), params,
+			[this](const gen::Generator& result) {
+				// TODO canonicalize if config specifies so
 				if ((config_.verbosity() == verbosity::Kind::All)
-				 || ((config_.verbosity() == verbosity::Kind::NoGiveups) && (gen_result.status == gen::ExitStatus::Ok))
+				 || ((config_.verbosity() == verbosity::Kind::NoGiveups) && (result.status() == gen::ExitStatus::Ok))
 				) {
-					gen_result.print_text(std::cout);
+					result.print_text(std::cout);
 					if (config_.order() <= 4) {
 						std::cout << '\n';
 					} else {

@@ -18,13 +18,16 @@
 template<solvent::Order O>
 unsigned test_morph_O(const unsigned num_rounds) {
 	using namespace solvent::lib;
+	constexpr unsigned O4 = O*O*O*O;
 	std::cout << "\n\ntesting morph for order " << O << std::endl;
 	unsigned int count_bad = 0;
 	for (unsigned round = 0; round < num_rounds; ) {
-		gen::Generator<O> gen {};
-		const auto result = gen(gen::Params {.canonicalize = true}).to_generic();
-		if (result.status != gen::ExitStatus::Ok) { continue; }
+		gen::GeneratorO<O> g {};
+		g({});
+		if (g.status() != gen::ExitStatus::Ok) { continue; }
 		round++;
+		std::array<size<O>::ord2i_t, O4> gen_grid;
+		g.write_to_(gen_grid);
 		auto other_result = result; {
 			const auto scrambled = morph::scramble<O>(result.grid);
 			other_result.grid = morph::canonicalize<O>((std::span{scrambled}).template subspan<0,O*O*O*O>()); // yuck
@@ -89,13 +92,10 @@ int main(const int argc, char const *const argv[]) {
 	// playing with ranges
 	using namespace solvent::lib;
 	std::cout << "\n";
-	gen::Generator<3> g{};
-	auto range = g({}).get_grid();
-	for (auto val : range) {
-		print::val2str(std::cout, 3, val);
-	}
+	gen::GeneratorO<3> g {};
+	g({});
+	g.print_pretty(std::cout);
 	std::cout << "\n";
-	print::val2str(std::cout, 3, range[3]);
 
 	return 0;
 }

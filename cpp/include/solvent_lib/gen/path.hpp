@@ -35,10 +35,10 @@ namespace solvent::lib::gen::path {
 	template<solvent::Order O>
 	using coord_converter_t = [[gnu::const]] typename size<O>::ord4x_t (&)(typename size<O>::ord4x_t) noexcept;
 
-	template<solvent::Order O> [[nodiscard]]
+	template<solvent::Order O> [[nodiscard, gnu::const]]
 	coord_converter_t<O> get_prog2coord_converter(Kind) noexcept;
 
-	template<solvent::Order O> [[nodiscard]]
+	template<solvent::Order O> [[nodiscard, gnu::const]]
 	coord_converter_t<O> get_coord2prog_converter(Kind) noexcept;
 
 

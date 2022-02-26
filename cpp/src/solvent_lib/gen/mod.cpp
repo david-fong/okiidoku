@@ -1,5 +1,4 @@
 #include <solvent_lib/gen/mod.hpp>
-#include <solvent_lib/morph/canon.hpp>
 #include <solvent_lib/print.hpp>
 #include <solvent_util/str.hpp>
 
@@ -32,8 +31,20 @@ namespace solvent::lib::gen {
 	}
 
 
+	std::unique_ptr<Generator> Generator::create(const Order order) {
+		switch (order) {
+			#define M_SOLVENT_TEMPL_TEMPL(O_) \
+			case O_: return std::unique_ptr<gen::GeneratorO<O_>> {};
+			M_SOLVENT_INSTANTIATE_ORDER_TEMPLATES
+			#undef M_SOLVENT_TEMPL_TEMPL
+
+			default: return std::unique_ptr<gen::GeneratorO<M_SOLVENT_DEFAULT_ORDER>> {};
+		}
+	}
+
+
 	template<Order O>
-	ExitStatus Generator<O>::get_exit_status(void) const noexcept {
+	ExitStatus GeneratorO<O>::status() const noexcept {
 		switch (progress_) {
 			case O4-1: return ExitStatus::Ok;
 			case O4:   return ExitStatus::Exhausted;
@@ -43,29 +54,10 @@ namespace solvent::lib::gen {
 
 
 	template<Order O>
-	Generator<O>::ResultView Generator<O>::operator()(const Params params) {
-		params_ = params;
+	void GeneratorO<O>::operator()(const Params params_input) {
+		params_ = params_input;
 		params_.clean(O);
-		this->prepare_fresh_gen_();
-		this->generate_();
-		return ResultView(*this);
-	}
-
-
-	template<Order O>
-	Generator<O>::ResultView Generator<O>::continue_prev(void) {
-		if (this->get_exit_status() == ExitStatus::Exhausted) [[unlikely]] {
-			return ResultView(*this);
-		}
-		dead_ends_.fill(0); // Do not carry over previous dead_ends counters.
-		most_dead_ends_seen_ = 0;
-		this->generate_();
-		return ResultView(*this);
-	}
-
-
-	template<Order O>
-	void Generator<O>::prepare_fresh_gen_(void) {
+		
 		for (Cell& cell : cells_) {
 			cell.clear();
 		}
@@ -84,17 +76,64 @@ namespace solvent::lib::gen {
 			std::shuffle(vto.begin(), vto.end(), Rng_);
 		}
 		RNG_MUTEX.unlock();
+
+		this->generate_();
 	}
 
 
 	template<Order O>
-	void Generator<O>::generate_() {
+	void GeneratorO<O>::continue_prev() {
+		if (this->status() == ExitStatus::Exhausted) [[unlikely]] {
+			return;
+		}
+		dead_ends_.fill(0); // Do not carry over previous dead_ends counters.
+		most_dead_ends_seen_ = 0;
+		this->generate_();
+	}
+
+
+	template<Order O>
+	GeneratorO<O>::ord2i_t GeneratorO<O>::val_at_(const GeneratorO<O>::ord4x_t coord) const noexcept {
+		const auto p = coord2prog()(coord);
+		const auto try_index = cells_[p].try_index;
+		if (try_index == O2) { return O2; }
+		return val_try_orders_[p/O2][try_index];
+	}
+
+
+	template<Order O>
+	GeneratorO<O>::dead_ends_t GeneratorO<O>::dead_ends_at_(const ord4x_t coord) const noexcept {
+		return dead_ends_[coord2prog()(coord)];
+	}
+
+
+	/* template<Order O>
+	template<class T>
+	requires std::is_integral_v<T>
+	void GeneratorO<O>::write_to<T>(const std::span<T> sink) const {
+		ord4i_t i = 0;
+		for (auto& cell : sink) { cell = static_cast<T>(val_at_(i++)); }
+	}
+
+
+	template<Order O>
+	template<class T>
+	requires std::is_integral_v<T> && (sizeof(T) >= sizeof(typename size<O>::ord2i_t))
+	void GeneratorO<O>::write_to_<T>(const std::span<T, O4> sink) const {
+		ord4i_t i = 0;
+		for (auto& cell : sink) {
+			cell = val_at_(i++);
+		}
+	} */
+
+
+	template<Order O>
+	void GeneratorO<O>::generate_() {
 		// see the inline-brute-force-func git branch for experimenting with manually inlining set_next_valid_
-		typename path::coord_converter_t<O> prog2coord = path::get_prog2coord_converter<O>(params_.path_kind);
 
 		bool backtracked = op_count_ != 0;
 		while (true) [[likely]] {
-			const Direction direction = this->set_next_valid_(prog2coord, backtracked);
+			const Direction direction = this->set_next_valid_(backtracked);
 			backtracked = direction.is_back;
 			if (!direction.is_back_skip) [[likely]] { ++op_count_; }
 
@@ -124,8 +163,8 @@ namespace solvent::lib::gen {
 
 
 	template<Order O>
-	Direction Generator<O>::set_next_valid_(typename path::coord_converter_t<O> prog2coord, const bool backtracked) noexcept {
-		const ord4x_t coord = prog2coord(progress_);
+	GeneratorO<O>::Direction GeneratorO<O>::set_next_valid_(const bool backtracked) noexcept {
+		const ord4x_t coord = prog2coord()(progress_);
 		has_mask_t& row_has = rows_has_[rmi2row<O>(coord)];
 		has_mask_t& col_has = cols_has_[rmi2col<O>(coord)];
 		has_mask_t& blk_has = blks_has_[rmi2blk<O>(coord)];
@@ -141,7 +180,7 @@ namespace solvent::lib::gen {
 
 			// Smart skip-backtracking:
 			// This optimization's degree of usefulness depends on the genpath and size.
-			if (!cells_share_house<O>(coord, prog2coord(backtrack_origin_))) [[unlikely]] {
+			if (!cells_share_house<O>(coord, prog2coord()(backtrack_origin_))) [[unlikely]] {
 				// only likely when dealrwmj. dealrwmj is so slow already it doesn't
 				// feel worth slowing other genpaths down to microoptimize.
 				cell.clear();
@@ -171,37 +210,7 @@ namespace solvent::lib::gen {
 	}
 
 
-	template<Order O>
-	gen::ResultView Generator<O>::make_gen_result_(void) const {
-		typename path::coord_converter_t<O> prog2coord = path::get_prog2coord_converter<O>(params_.path_kind);
-		using GR = gen::ResultView;
-		gen::ResultView gen_result {
-			.O {O},
-			.params {params_},
-			.status {this->get_exit_status()},
-			.backtrack_origin {static_cast<GR::backtrack_origin_t>(backtrack_origin_)}, // safe narrowing
-			.most_dead_ends_seen {static_cast<GR::dead_ends_t>(most_dead_ends_seen_)},
-			.op_count {op_count_},
-			.grid = std::vector<GR::val_t>(O4, O2),
-			.dead_ends = std::vector<GR::dead_ends_t>(O4, 0),
-		};
-		for (ord4i_t p = 0; p < O4; p++) {
-			// Note: The bound under progress_ is significant.
-			// try_indexes afterward are out of val_try_order's range.
-			const ord4x_t coord = prog2coord(p);
-			if (!cells_[p].is_clear()) {
-				gen_result.grid[coord] = val_try_orders_[p/O2][cells_[p].try_index];
-			}
-			gen_result.dead_ends[coord] = static_cast<GR::dead_ends_t>(dead_ends_[p]);
-		}
-		if (params_.canonicalize && gen_result.status == ExitStatus::Ok) /* [[unlikely]] (worth?) */ {
-			gen_result.grid = morph::canonicalize<O>(gen_result.grid_const_span<O>());
-		}
-		return gen_result;
-	}
-
-
-	std::string shaded_dead_end_stat(ResultView::dead_ends_t out_of, ResultView::dead_ends_t count) {
+	std::string shaded_dead_end_stat(Generator::dead_ends_t out_of, Generator::dead_ends_t count) {
 		assert(count <= out_of);
 		return (count == 0) ? " " : util::str::BLOCK_CHARS[static_cast<std::size_t>(
 			(count - 1) * util::str::BLOCK_CHARS.size() / (out_of + 1)
@@ -209,27 +218,27 @@ namespace solvent::lib::gen {
 	}
 
 
-	void ResultView::print_text(std::ostream& os) const {
-		print::text(os, O, [this](uint32_t coord) { return this->grid[coord]; });
+	void Generator::print_text(std::ostream& os) const {
+		print::text(os, get_order(), [this](uint32_t coord) { return val_at(coord); });
 	}
 
 
-	void ResultView::print_pretty(std::ostream& os) const {
+	void Generator::print_pretty(std::ostream& os) const {
 		const std::vector<print::print_grid_t> grid_accessors {
 			print::print_grid_t([this](std::ostream& _os, uint16_t coord) {
-				_os << ' '; print::val2str(_os, O, this->grid[coord]);
+				_os << ' '; print::val2str(_os, get_order(), val_at(coord));
 			}),
 			print::print_grid_t([this](std::ostream& _os, uint16_t coord) {
-				const auto shade = shaded_dead_end_stat(static_cast<dead_ends_t>(params.max_dead_ends), dead_ends[coord]);
+				const auto shade = shaded_dead_end_stat(static_cast<dead_ends_t>(get_params().max_dead_ends), dead_ends_at(coord));
 				_os << shade << shade;
 			}),
 		};
-		print::pretty(os, O, grid_accessors);
+		print::pretty(os, get_order(), grid_accessors);
 	}
 
 
 	#define M_SOLVENT_TEMPL_TEMPL(O_) \
-		template class Generator<O_>;
+		template class GeneratorO<O_>;
 	M_SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 	#undef M_SOLVENT_TEMPL_TEMPL
 }

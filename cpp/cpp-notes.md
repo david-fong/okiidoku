@@ -13,3 +13,10 @@ things I got wrong before which I couldn't understand based on gcc's error messa
 ## more
 
 - https://arne-mertz.de/2019/02/extern-template-reduce-compile-times/
+
+- I can specify base-class members like:
+  - Derived::Base::member
+    https://en.cppreference.com/w/cpp/language/injected-class-name
+  - this.Base->member
+  - this->member
+  - Base<ARGS>::member

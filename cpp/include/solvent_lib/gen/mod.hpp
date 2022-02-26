@@ -7,11 +7,10 @@
 #include <solvent_config.hpp>
 
 #include <iosfwd>
-#include <vector>
 #include <array>
 #include <span>
-#include <ranges>
-#include <numeric> // iota
+#include <memory> // unique_ptr
+#include <type_traits>
 #include <cassert>
 
 namespace solvent::lib::gen {
@@ -51,63 +50,64 @@ namespace solvent::lib::gen {
 	//
 	struct Params {
 		path::Kind path_kind = path::Kind::RowMajor;
-		bool canonicalize = false;
 		std::uint_fast64_t max_dead_ends = 0; // Defaulted if zero.
 
 		// Cleans self and returns a copy of self.
 		Params clean(Order O) noexcept;
 	};
 
-	// Container for a very large number.
-	// number of operations taken to generate a solution by grid-order.
-	using opcount_t = unsigned long long;
-
 	//
 	enum class ExitStatus : std::uint8_t {
 		Ok, Abort, Exhausted,
 	};
 
+	// Container for a very large number.
+	// number of operations taken to generate a solution by grid-order.
+	using opcount_t = unsigned long long;
 
-	/** exists to defer copying to the caller. should be dropped before
-	doing further generation. */
-	struct ResultView final {
+
+	class Generator {
 	 public:
 		using val_t = size<O_MAX>::ord2i_t;
-		using dead_ends_t = float; // an experiment to save space when buffering batched results.
+		using coord_t = size<O_MAX>::ord4x_t;
+		using dead_ends_t = float; // TODO is this okay?
 		using backtrack_origin_t = size<O_MAX>::ord4x_least_t;
 
-		std::uint8_t O;
-		Params params;
-		ExitStatus status;
-		backtrack_origin_t backtrack_origin;
-		dead_ends_t most_dead_ends_seen;
-		opcount_t op_count;
-		std::vector<val_t> grid;
-		std::vector<dead_ends_t> dead_ends;
+		static std::unique_ptr<Generator> create(Order O);
 
-		template<Order O_>
-		std::span<const val_t, O_*O_*O_*O_> grid_const_span() const {
-			assert(O_ == O);
-			std::span s{grid};
-			return s.template subspan<0, O_*O_*O_*O_>();
-		}
+		virtual void operator()(Params) = 0;
+		virtual void continue_prev() = 0;
+
+		[[nodiscard]] virtual Order get_order() const noexcept = 0;
+		[[nodiscard]] virtual const Params& get_params() const noexcept = 0;
+		[[nodiscard]] virtual ExitStatus status() const noexcept = 0;
+		[[nodiscard]] virtual backtrack_origin_t get_backtrack_origin() const noexcept = 0;
+		[[nodiscard]] virtual dead_ends_t get_most_dead_ends_seen() const noexcept = 0;
+		[[nodiscard]] virtual opcount_t get_op_count() const noexcept = 0;
+
+		// these are optimized for reading out specific entries _once_- not for
+		// repeated calls with the same coord. For that, use write_to or to_vec.
+		[[nodiscard]] virtual val_t val_at(coord_t) const noexcept = 0;
+		[[nodiscard]] virtual dead_ends_t dead_ends_at(coord_t) const noexcept = 0;
+
 		void print_text(std::ostream&) const;
 		void print_pretty(std::ostream&) const;
-	};
 
-
-	//
-	struct Direction final {
-		bool is_back;
-		bool is_back_skip; // only meaningful when is_back is true.
+		// this cannot statically check that T is wide enough. uses static_cast<T>.
+		// ie. it is your job to make sure T does not lose precision (sorry :/).
+		// requires that sink has size O4.
+		template<class T>
+		requires std::is_integral_v<T>
+		void write_to(std::span<T> sink) const;
+		// TODO change the above to not require contiguous layout? Used span because I don't know how to make it take an output_range
 	};
 
 
 	//
 	template<Order O>
-	class Generator final {
-	 static_assert((O > 0) && (O <= O_MAX) && (O < 6)); // added restriction for sanity
-	 private:
+	class GeneratorO final : public Generator {
+		static_assert((O > 0) && (O <= O_MAX) && (O < 6)); // added restriction for sanity
+	 public:
 		using has_mask_t = size<O>::O2_mask_fast_t;
 		using ord1i_t = size<O>::ord1i_t;
 		using ord2i_t = size<O>::ord2i_t;
@@ -115,68 +115,61 @@ namespace solvent::lib::gen {
 		using ord4x_t = size<O>::ord4x_t;
 		using dead_ends_t = cell_dead_ends::t<O>;
 
-	 public:
 		static constexpr ord1i_t O1 = O;
 		static constexpr ord2i_t O2 = O*O;
 		static constexpr ord4i_t O4 = O*O*O*O;
 
-		/** This exists in addition to the non-template Result class to
-		losslessly preserve suitably sized number types. */
-		class ResultView final {
-			const Generator& g_;
-		 public:
-			explicit ResultView(const Generator& g): g_(g) {}
-			[[nodiscard]]       auto  order()               const noexcept { return O; }
-			[[nodiscard]] const auto& params()              const noexcept { return g_.params_; }
-			[[nodiscard]]       auto  exit_status()         const noexcept { return g_.get_exit_status(); }
-			[[nodiscard]] const auto& backtrack_origin()    const noexcept { return g_.backtrack_origin_; }
-			[[nodiscard]] const auto& most_dead_ends_seen() const noexcept { return g_.most_dead_ends_seen_; }
-			[[nodiscard]] const auto& op_count()            const noexcept { return g_.op_count_; }
-			[[nodiscard]]       auto  get_grid()            const noexcept { return g_.get_grid(); }
-			[[nodiscard]]       auto  get_dead_ends()       const noexcept { return g_.get_dead_ends(); }
-			gen::ResultView to_generic() const { return g_.make_gen_result_(); } // TODO update ResultView to not copy out
-		};
+		void operator()(Params) override;
 
-		// Generates a fresh sudoku solution.
-		[[nodiscard]] ResultView operator()(Params);
-		[[nodiscard]] ResultView continue_prev(void);
+		void continue_prev() override;
 
-		[[nodiscard]] ExitStatus get_exit_status(void) const noexcept;
+		// TODO can the return type be written as auto for any of these?
+		[[nodiscard]] Order get_order() const noexcept { return O; }
+		[[nodiscard]] const Params& get_params() const noexcept { return params_; }
+		[[nodiscard]] ExitStatus status() const noexcept;
+		[[nodiscard]] Generator::backtrack_origin_t get_backtrack_origin() const noexcept { return static_cast<Generator::backtrack_origin_t>(backtrack_origin_); }
+		[[nodiscard]] Generator::dead_ends_t get_most_dead_ends_seen() const noexcept { return static_cast<Generator::dead_ends_t>(most_dead_ends_seen_); }
+		[[nodiscard]] opcount_t get_op_count() const noexcept { return op_count_; }
+		[[nodiscard]] Generator::val_t val_at(Generator::coord_t coord) const noexcept { return static_cast<Generator::val_t>(val_at_(static_cast<ord4x_t>(coord))); }
+		[[nodiscard]] Generator::dead_ends_t dead_ends_at(Generator::coord_t coord) const noexcept { return static_cast<Generator::dead_ends_t>(dead_ends_at_(static_cast<ord4x_t>(coord))); }
 
-		auto get_grid() const noexcept {
-			path::coord_converter_t<O> c2p = path::get_coord2prog_converter<O>(params_.path_kind); // TODO why does this segfault when using auto?
-			return std::views::iota(ord4x_t{0}, O4)
-			| std::views::transform([&](auto coord){
-				const auto p = c2p(coord);
-				const auto try_index = cells_[p].try_index;
-				if (try_index == O2) { return O2; }
-				return val_try_orders_[p/O2][try_index];
-			});
+		template<class T>
+		requires std::is_integral_v<T>
+		void write_to(std::span<T> sink) const {
+			ord4i_t i = 0; for (auto& cell : sink) { cell = static_cast<T>(val_at_(i++)); }
 		}
-		auto get_dead_ends() const noexcept {
-			path::coord_converter_t<O> c2p = path::get_coord2prog_converter<O>(params_.path_kind);
-			return std::views::iota(ord4x_t{0}, O4)
-			| std::views::transform([&](auto coord){ return dead_ends_[c2p(coord)]; });
+
+		[[nodiscard]] const auto& get_backtrack_origin_() const noexcept { return backtrack_origin_; }
+		[[nodiscard]] const auto& get_most_dead_ends_seen_() const noexcept { return most_dead_ends_seen_; }
+		[[nodiscard]] ord2i_t val_at_(ord4x_t coord) const noexcept;
+		[[nodiscard]] dead_ends_t dead_ends_at_(ord4x_t coord) const noexcept;
+
+		template<class T>
+		requires std::is_integral_v<T> && (sizeof(T) >= sizeof(ord2i_t))
+		void write_to_(std::span<T, O4> sink) const {
+			ord4i_t i = 0; for (auto& cell : sink) { cell = val_at_(i++); }
 		}
 
 	 private:
 		struct Cell final {
 			ord2i_t try_index; // Index into val_try_orders_. O2 if clear.
-			void clear(void) noexcept { try_index = O2; }
-			[[gnu::pure, nodiscard]] bool is_clear(void) const noexcept { return try_index == O2; }
+			void clear() noexcept { try_index = O2; }
+			[[gnu::pure, nodiscard]] bool is_clear() const noexcept { return try_index == O2; }
+		};
+		struct Direction final {
+			bool is_back;
+			bool is_back_skip; // only meaningful when is_back is true.
 		};
 
 		// indexed by `progress_ // O2`
 		std::array<std::array<typename size<O>::ord2x_t, O2>, O2> val_try_orders_ {[]() {
 			std::array<std::array<typename size<O>::ord2x_t, O2>, O2> _;
-			for (auto& vto : _) { std::iota(vto.begin(), vto.end(), 0); }
+			for (auto& vto : _) { for (ord2i_t i = 0; i < O2; i++) { vto[i] = i; } }
 			return _;
 		}()};
 
 		std::array<Cell, O4> cells_; // indexed by progress_
-		std::array<has_mask_t, O2> rows_has_;
-		std::array<has_mask_t, O2> cols_has_;
-		std::array<has_mask_t, O2> blks_has_;
+		std::array<has_mask_t, O2> rows_has_, cols_has_, blks_has_;
 		std::array<dead_ends_t, O4> dead_ends_; // indexed by progress_
 
 		Params params_;
@@ -185,18 +178,16 @@ namespace solvent::lib::gen {
 		dead_ends_t most_dead_ends_seen_ = 0;
 		opcount_t op_count_ = 0;
 
-		// clear fields and scramble val_try_orders_
-		void prepare_fresh_gen_(void);
+		[[nodiscard, gnu::pure]] path::coord_converter_t<O> prog2coord() const noexcept { return path::get_prog2coord_converter<O>(params_.path_kind); }
+		[[nodiscard, gnu::pure]] path::coord_converter_t<O> coord2prog() const noexcept { return path::get_coord2prog_converter<O>(params_.path_kind); }
 
-		[[gnu::hot]] Direction set_next_valid_(typename path::coord_converter_t<O>, bool backtracked) noexcept;
+		[[gnu::hot]] Direction set_next_valid_(bool backtracked) noexcept;
 		[[gnu::hot]] void generate_();
-
-		[[gnu::pure, nodiscard]] gen::ResultView make_gen_result_(void) const;
 	};
 
 
 	#define M_SOLVENT_TEMPL_TEMPL(O_) \
-		extern template class Generator<O_>;
+		extern template class GeneratorO<O_>;
 	M_SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 	#undef M_SOLVENT_TEMPL_TEMPL
 }

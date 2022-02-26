@@ -3,7 +3,6 @@
 
 #include <solvent_cli/config.hpp>
 #include <solvent_cli/enum.hpp>
-#include <solvent_lib/gen/union.hpp>
 #include <solvent_lib/gen/batch.hpp>
 #include <solvent_lib/gen/mod.hpp>
 #include <solvent_lib/size.hpp>
@@ -11,6 +10,7 @@
 #include <map>
 #include <string>
 #include <array>
+#include <memory> // unique_ptr
 
 
 namespace solvent::cli {
@@ -66,28 +66,20 @@ namespace solvent::cli {
 	}
 
 
-	/**
-	 * Notes for me as I learn how to write inheritance in C++:
-	 * I can specify base-class members like:
-	 * - Derived::Base::member
-	 *   https://en.cppreference.com/w/cpp/language/injected-class-name
-	 * - this.Base->member
-	 * - this->member
-	 * - Base<ARGS>::member
-	 */
+	/** */
 	class Repl final {
 	 public:
 		using opcount_t = lib::gen::opcount_t;
 		using pathkind_t = lib::gen::path::Kind;
 		using trials_t = lib::gen::batch::trials_t;
 
-		Repl(Order O);
+		explicit Repl(Order O);
 		void start(void);
 		bool run_command(const std::string& cmd_line);
 
 	 private:
 		Config config_;
-		lib::gen::GeneratorUnion gen_union_;
+		std::unique_ptr<lib::gen::Generator> gen_;
 
 		// Return false if command is to exit the program:
 		void gen_single(bool contPrev = false);

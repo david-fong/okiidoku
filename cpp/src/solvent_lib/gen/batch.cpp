@@ -50,8 +50,8 @@ namespace solvent::lib::gen::batch {
 		const Params params_;
 		BatchReport& shared_data_;
 		std::mutex& shared_data_mutex_;
-		callback_t<O> callback_;
-		Generator<O> generator_ {};
+		callback_O_t<O> callback_;
+		GeneratorO<O> generator_ {};
 	};
 
 
@@ -59,23 +59,23 @@ namespace solvent::lib::gen::batch {
 	void ThreadFunc<O>::operator()() {
 		shared_data_mutex_.lock();
 		while (get_progress() < params_.stop_after) [[likely]] {
-			shared_data_mutex_.unlock(); //____________________
-			const typename Generator<O>::ResultView result = generator_(params_.gen_params);
-			shared_data_mutex_.lock(); //‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+			shared_data_mutex_.unlock(); //___
+				generator_(params_.gen_params);
+			shared_data_mutex_.lock(); //‾‾‾‾
 
 			shared_data_.total_anys++;
-			if (result.exit_status() == ExitStatus::Ok) [[likely]] {
+			if (generator_.status() == ExitStatus::Ok) [[likely]] {
 				shared_data_.total_oks++;
 
 				auto& dist_summary_row = shared_data_.max_dead_end_samples[
 					params_.max_dead_end_sample_granularity
-					* static_cast<unsigned long>(result.most_dead_ends_seen())
+					* static_cast<unsigned long>(generator_.get_most_dead_ends_seen())
 					/ (params_.gen_params.max_dead_ends + 1)
 				];
 				dist_summary_row.marginal_oks++;
-				dist_summary_row.marginal_ops += static_cast<double>(result.op_count());
+				dist_summary_row.marginal_ops += static_cast<double>(generator_.get_op_count());
 			}
-			callback_(result);
+			callback_(generator_);
 		}
 		shared_data_mutex_.unlock();
 	}
@@ -131,7 +131,7 @@ namespace solvent::lib::gen::batch {
 
 
 	template<Order O>
-	BatchReport batch(Params& params, callback_t<O> callback) {
+	BatchReport batch_O(Params& params, callback_O_t<O> callback) {
 		return batch_(O, params, [&](auto& sd, auto& sd_mutex) {
 			return std::thread(ThreadFunc<O>{
 				params, sd, sd_mutex, callback
@@ -140,14 +140,14 @@ namespace solvent::lib::gen::batch {
 	}
 
 
-	BatchReport batch_O(Order O, Params& params, callback_o_t callback) {
+	BatchReport batch(Order O, Params& params, callback_t callback) {
 		assert(is_order_compiled(O));
 		return batch_(O, params, [&](auto& sd, auto& sd_mutex) {
 			switch (O) {
 			#define M_SOLVENT_TEMPL_TEMPL(O_) \
 				case O_: { return std::thread(ThreadFunc<O_>{ \
 					params, sd, sd_mutex, [&](const auto result){ \
-						return callback(result.to_generic()); \
+						return callback(static_cast<const Generator&>(result)); \
 					} \
 				}); \
 				break; }
@@ -160,10 +160,7 @@ namespace solvent::lib::gen::batch {
 
 
 	#define M_SOLVENT_TEMPL_TEMPL(O_) \
-		template BatchReport batch<O_>(Params&, std::function<void(typename Generator<O_>::ResultView)>);
+		template BatchReport batch_O<O_>(Params&, callback_O_t<O_>);
 	M_SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 	#undef M_SOLVENT_TEMPL_TEMPL
-}
-namespace std {
-	template class function<void(const solvent::lib::gen::ResultView&)>;
 }
