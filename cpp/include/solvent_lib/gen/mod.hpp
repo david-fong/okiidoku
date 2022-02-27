@@ -87,8 +87,8 @@ namespace solvent::lib::gen {
 
 		// these are optimized for reading out specific entries _once_- not for
 		// repeated calls with the same coord. For that, use write_to or to_vec.
-		[[nodiscard]] virtual val_t val_at(coord_t) const noexcept = 0;
-		[[nodiscard]] virtual dead_ends_t dead_ends_at(coord_t) const noexcept = 0;
+		[[nodiscard]] virtual val_t extract_val_at(coord_t) const noexcept = 0;
+		[[nodiscard]] virtual dead_ends_t extract_dead_ends_at(coord_t) const noexcept = 0;
 
 		void print_text(std::ostream&) const;
 		void print_pretty(std::ostream&) const;
@@ -123,31 +123,36 @@ namespace solvent::lib::gen {
 
 		void continue_prev() override;
 
-		// TODO can the return type be written as auto for any of these?
-		[[nodiscard]] Order get_order() const noexcept { return O; }
-		[[nodiscard]] const Params& get_params() const noexcept { return params_; }
-		[[nodiscard]] ExitStatus status() const noexcept;
-		[[nodiscard]] Generator::backtrack_origin_t get_backtrack_origin() const noexcept { return static_cast<Generator::backtrack_origin_t>(backtrack_origin_); }
-		[[nodiscard]] Generator::dead_ends_t get_most_dead_ends_seen() const noexcept { return static_cast<Generator::dead_ends_t>(most_dead_ends_seen_); }
-		[[nodiscard]] opcount_t get_op_count() const noexcept { return op_count_; }
-		[[nodiscard]] Generator::val_t val_at(Generator::coord_t coord) const noexcept { return static_cast<Generator::val_t>(val_at_(static_cast<ord4x_t>(coord))); }
-		[[nodiscard]] Generator::dead_ends_t dead_ends_at(Generator::coord_t coord) const noexcept { return static_cast<Generator::dead_ends_t>(dead_ends_at_(static_cast<ord4x_t>(coord))); }
+		[[nodiscard]] constexpr Order get_order() const noexcept { return O; }
+		[[nodiscard]] constexpr const Params& get_params() const noexcept { return params_; }
+		[[nodiscard]] constexpr ExitStatus status() const noexcept {
+			switch (progress_) {
+				case O4-1: return ExitStatus::Ok;
+				case O4:   return ExitStatus::Exhausted;
+				default:   return ExitStatus::Abort;
+			}
+		}
+		[[nodiscard]] constexpr Generator::backtrack_origin_t get_backtrack_origin() const noexcept { return static_cast<Generator::backtrack_origin_t>(backtrack_origin_); }
+		[[nodiscard]] constexpr Generator::dead_ends_t get_most_dead_ends_seen() const noexcept { return static_cast<Generator::dead_ends_t>(most_dead_ends_seen_); }
+		[[nodiscard]] constexpr opcount_t get_op_count() const noexcept { return op_count_; }
+		[[nodiscard]] Generator::val_t extract_val_at(Generator::coord_t coord) const noexcept { return static_cast<Generator::val_t>(extract_val_at_(static_cast<ord4x_t>(coord))); }
+		[[nodiscard]] Generator::dead_ends_t extract_dead_ends_at(Generator::coord_t coord) const noexcept { return static_cast<Generator::dead_ends_t>(extract_dead_ends_at_(static_cast<ord4x_t>(coord))); }
 
 		template<class T>
 		requires std::is_integral_v<T>
 		void write_to(std::span<T> sink) const {
-			ord4i_t i = 0; for (auto& cell : sink) { cell = static_cast<T>(val_at_(i++)); }
+			ord4i_t i = 0; for (auto& cell : sink) { cell = static_cast<T>(extract_val_at_(i++)); }
 		}
 
 		[[nodiscard]] const auto& get_backtrack_origin_() const noexcept { return backtrack_origin_; }
 		[[nodiscard]] const auto& get_most_dead_ends_seen_() const noexcept { return most_dead_ends_seen_; }
-		[[nodiscard]] ord2i_t val_at_(ord4x_t coord) const noexcept;
-		[[nodiscard]] dead_ends_t dead_ends_at_(ord4x_t coord) const noexcept;
+		[[nodiscard]] ord2i_t extract_val_at_(ord4x_t coord) const noexcept;
+		[[nodiscard]] dead_ends_t extract_dead_ends_at_(ord4x_t coord) const noexcept;
 
 		template<class T>
 		requires std::is_integral_v<T> && (sizeof(T) >= sizeof(ord2i_t))
 		void write_to_(std::span<T, O4> sink) const {
-			ord4i_t i = 0; for (auto& cell : sink) { cell = val_at_(i++); }
+			ord4i_t i = 0; for (auto& cell : sink) { cell = extract_val_at_(i++); }
 		}
 
 	 private:
@@ -178,10 +183,10 @@ namespace solvent::lib::gen {
 		dead_ends_t most_dead_ends_seen_ = 0;
 		opcount_t op_count_ = 0;
 
-		[[nodiscard, gnu::pure]] path::coord_converter_t<O> prog2coord() const noexcept { return path::get_prog2coord_converter<O>(params_.path_kind); }
+		// Note: even when marked pure, _prog2coord_ doesn't get optimized as well as the current usage.
 		[[nodiscard, gnu::pure]] path::coord_converter_t<O> coord2prog() const noexcept { return path::get_coord2prog_converter<O>(params_.path_kind); }
 
-		[[gnu::hot]] Direction set_next_valid_(bool backtracked) noexcept;
+		[[gnu::hot]] Direction set_next_valid_(path::coord_converter_t<O>, bool backtracked) noexcept;
 		[[gnu::hot]] void generate_();
 	};
 

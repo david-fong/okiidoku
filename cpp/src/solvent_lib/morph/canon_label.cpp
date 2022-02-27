@@ -6,6 +6,7 @@
 #include <numeric>   // iota, abs
 #include <compare>   // partial_ordering, is_eq, etc.
 #include <bit>       // popcount
+#include <cassert>
 
 namespace solvent::lib::morph {
 
@@ -15,6 +16,7 @@ namespace solvent::lib::morph {
 		using has_mask_t = size<O>::O2_mask_least_t;
 		using ord1i_t = size<O>::ord1i_t;
 		using ord2i_t = size<O>::ord2i_t;
+		using ord2x_t = size<O>::ord2x_t;
 		using ord4i_t = size<O>::ord4i_t;
 		using ord6i_t = size<O>::ord6i_t;
 	 public:
@@ -29,9 +31,9 @@ namespace solvent::lib::morph {
 			has_mask_t blocks_h;
 			has_mask_t blocks_v;
 		};
-		static grid_mtx_t<O, RelMask> make_rel_masks_(const grid_const_span_t<O> grid_span) noexcept {
-			grid_mtx_wrapper_t<O, const ord2i_t> grid(grid_span);
-			grid_mtx_t<O, RelMask> masks{}; // zero initialize
+		static grid_arr_t<O, RelMask> make_rel_masks_(const grid_const_span_t<O> grid_span) noexcept {
+			grid_span2d_t<O, const ord2i_t> grid(grid_span);
+			grid_arr_t<O, RelMask> masks{}; // zero initialize
 			for (ord2i_t line = 0; line < O2; line++) {
 				for (ord2i_t atom = 0; atom < O2; atom += O1) {
 					// Go through all unique pairs in the atom:
@@ -73,8 +75,8 @@ namespace solvent::lib::morph {
 				/* 0.95% */ return cmp;
 			}
 		};
-		static grid_mtx_t<O, RelPlaceless> make_rel_placeless_(const grid_mtx_t<O, RelMask>& masks) noexcept {
-			grid_mtx_t<O, RelPlaceless> table;
+		static grid_arr_t<O, RelPlaceless> make_rel_placeless_(const grid_arr_t<O, RelMask>& masks) noexcept {
+			grid_arr_t<O, RelPlaceless> table;
 			for (ord2i_t r = 0; r < O2; r++) { for (ord2i_t c = 0; c < O2; c++) {
 				const RelMask& mask = masks[r][c];
 				RelPlaceless& rel = table[r][c];
@@ -129,9 +131,9 @@ namespace solvent::lib::morph {
 		}
 
 
-		static grid_mtx_t<O, RelPlaceless> make_rel_cmp_layers_(const grid_mtx_t<O, RelPlaceless>& table) noexcept {
+		static grid_arr_t<O, RelPlaceless> make_rel_cmp_layers_(const grid_arr_t<O, RelPlaceless>& table) noexcept {
 			// sort, accumulate/ramp, transpose (for caching optimization)
-			grid_mtx_t<O, RelPlaceless> pre_transpose = table;
+			grid_arr_t<O, RelPlaceless> pre_transpose = table;
 			for (auto& row : pre_transpose) {
 				// put rare things at the back:
 				std::ranges::sort(row, std::greater{});
@@ -145,7 +147,7 @@ namespace solvent::lib::morph {
 			}	}
 			// TODO do more benchmarking comparing perf with or without transpose.
 			//   some rough benchmarking on O=4 seems to indicate some benefit.
-			grid_mtx_t<O, RelPlaceless> cmp_layers;
+			grid_arr_t<O, RelPlaceless> cmp_layers;
 			for (ord2i_t i = 0; i < O2; i++) { for (ord2i_t j = 0; j < O2; j++) {
 				cmp_layers[i][j] = pre_transpose[j][i];
 			}}
@@ -154,12 +156,12 @@ namespace solvent::lib::morph {
 
 
 		//
-		static grid_vec_t<O> do_it(const grid_const_span_t<O> orig_grid) {
-			const std::array<ord2i_t, O2> label_orig2canon = [](const grid_mtx_t<O, RelPlaceless> rel_cmp_layers){
-				std::array<ord2i_t, O2> label_canon2orig;
+		static void do_it(const grid_span_t<O> grid) {
+			const std::array<ord2x_t, O2> label_orig2canon = [](const grid_arr_t<O, RelPlaceless> rel_cmp_layers){
+				std::array<ord2x_t, O2> label_canon2orig;
 				std::iota(label_canon2orig.begin(), label_canon2orig.end(), 0);
 
-				std::sort(label_canon2orig.begin(), label_canon2orig.end(), [&rel_cmp_layers](const ord2i_t& a_orig_label, const ord2i_t& b_orig_label){
+				std::sort(label_canon2orig.begin(), label_canon2orig.end(), [&rel_cmp_layers](const ord2x_t& a_orig_label, const ord2x_t& b_orig_label){
 					for (ord2i_t layer = 0; layer < O2; layer++) {
 						const RelPlaceless& a = rel_cmp_layers[layer][a_orig_label];
 						const RelPlaceless& b = rel_cmp_layers[layer][b_orig_label];
@@ -173,25 +175,24 @@ namespace solvent::lib::morph {
 					_[label_canon2orig[i_canon]] = i_canon;
 				}
 				return _;
-			}(make_rel_cmp_layers_(make_rel_placeless_(make_rel_masks_(orig_grid))));
+			}(make_rel_cmp_layers_(make_rel_placeless_(make_rel_masks_(grid))));
 
-			grid_vec_t<O> canon_grid_vec(O4);
 			for (ord4i_t i = 0; i < O4; i++) {
-				canon_grid_vec[i] = label_orig2canon[orig_grid[i]];
+				grid[i] = label_orig2canon[grid[i]];
 			}
-			return canon_grid_vec;
+			assert(is_grid_valid<O>(grid));
 		}
 	};
 
 
 	template<Order O>
-	grid_vec_t<O> canon_label(const grid_const_span_t<O> orig_grid) {
-		return CanonLabel<O>::do_it(orig_grid);
+	void canon_label(const grid_span_t<O> grid) {
+		return CanonLabel<O>::do_it(grid);
 	}
 
 
 	#define M_SOLVENT_TEMPL_TEMPL(O_) \
-		template grid_vec_t<O_> canon_label<O_>(grid_const_span_t<O_>);
+		template void canon_label<O_>(grid_span_t<O_>);
 	M_SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 	#undef M_SOLVENT_TEMPL_TEMPL
 }

@@ -3,7 +3,7 @@
 namespace solvent::lib {
 
 	template<Order O>
-	grid_vec_t<O> grid_mtx2vec(const grid_mtx_t<O>& mtx) noexcept {
+	grid_vec_t<O> grid_mtx2vec(const grid_arr_t<O>& mtx) noexcept {
 		grid_vec_t<O> vec(O*O*O*O);
 		for (unsigned row = 0; row < O*O; row++) {
 			for (unsigned col = 0; col < O*O; col++) {
@@ -15,8 +15,8 @@ namespace solvent::lib {
 
 
 	template<Order O>
-	grid_mtx_t<O> grid_vec2mtx(const grid_vec_t<O>& vec) noexcept {
-		grid_mtx_t<O> mtx;
+	grid_arr_t<O> grid_vec2mtx(const grid_vec_t<O>& vec) noexcept {
+		grid_arr_t<O> mtx;
 		for (unsigned row = 0; row < O*O; row++) {
 			for (unsigned col = 0; col < O*O; col++) {
 				mtx[row][col] = vec[(row*O*O)+col];
@@ -27,7 +27,7 @@ namespace solvent::lib {
 
 
 	template<Order O>
-	bool is_grid_invalid(const grid_mtx_t<O>& grid) noexcept {
+	bool is_grid_valid(const grid_const_span_t<O> grid) noexcept {
 		using ord2i_t = typename size<O>::ord2i_t;
 		using has_mask_t = typename size<O>::O2_mask_fast_t;
 		static constexpr ord2i_t O2 = O*O;
@@ -45,7 +45,7 @@ namespace solvent::lib {
 				const has_mask_t t_has = (row_has | col_has | blk_has);
 				const has_mask_t try_val_mask = has_mask_t(1) << grid[row][col];
 				if (t_has & try_val_mask) [[unlikely]] {
-					return true;
+					return false;
 				} else {
 					row_has |= try_val_mask;
 					col_has |= try_val_mask;
@@ -53,16 +53,8 @@ namespace solvent::lib {
 				}
 			}
 		}
-		return false;
+		return true;
 	}
-
-
-	#define M_SOLVENT_TEMPL_TEMPL(O_) \
-		template grid_vec_t<O_> grid_mtx2vec<O_>(const grid_mtx_t<O_>&) noexcept; \
-		template grid_mtx_t<O_> grid_vec2mtx<O_>(const grid_vec_t<O_>&) noexcept; \
-		template bool is_grid_invalid<O_>(const grid_mtx_t<O_>&) noexcept;
-	M_SOLVENT_INSTANTIATE_ORDER_TEMPLATES
-	#undef M_SOLVENT_TEMPL_TEMPL
 }
 
 

@@ -7,31 +7,35 @@
 #include <vector>
 #include <array>
 #include <span>
+#include <cassert>
 
 namespace solvent::lib {
 
 	template<Order O> using grid_vec_t = std::vector<typename size<O>::ord2i_t>;
-	template<Order O, typename T=size<O>::ord2i_t> using grid_mtx_t = std::array<std::array<T, O*O>, O*O>;
+	template<Order O, typename T=size<O>::ord2i_t> using grid_arr_t = std::array<std::array<T, O*O>, O*O>;
 	template<Order O, typename T=size<O>::ord2i_t> using grid_const_span_t = std::span<const T, O*O*O*O>;
 	template<Order O, typename T=size<O>::ord2i_t> using grid_span_t = std::span<T, O*O*O*O>;
 
+	// A thin wrapper over a span.
 	template<Order O, typename T=size<O>::ord2i_t>
-	class grid_mtx_wrapper_t final {
+	class grid_span2d_t final {
 		grid_span_t<O, T> span_;
 	 public:
-		grid_mtx_wrapper_t(grid_span_t<O, T> span): span_(span) {};
-		T& at(size<O>::ord2i_t row, size<O>::ord2i_t col) const {
+		grid_span2d_t(grid_span_t<O, T> span): span_{span} {};
+		// contract: row and col must be in [0,O2).
+		T& at(size<O>::ord2i_t row, size<O>::ord2i_t col) const noexcept {
+			assert(row < O*O && col < O*O);
 			return span_[(O*O*row) + col];
 		}
 	};
 
-	template<Order O> [[nodiscard]] grid_vec_t<O> grid_mtx2vec(const grid_mtx_t<O>&) noexcept;
-	template<Order O> [[nodiscard]] grid_mtx_t<O> grid_vec2mtx(const grid_vec_t<O>&) noexcept;
+	template<Order O> [[nodiscard]] grid_vec_t<O> grid_mtx2vec(const grid_arr_t<O>&) noexcept;
+	template<Order O> [[nodiscard]] grid_arr_t<O> grid_vec2mtx(const grid_vec_t<O>&) noexcept;
 
 
-	// Returns true if any cell in the same house contain the same value.
-	// Can be used for incomplete grids.
-	template<Order O> [[nodiscard, gnu::const]] bool is_grid_invalid(const grid_mtx_t<O>&) noexcept;
+	// Returns true if any cells in a same house contain the same value.
+	// Can be used with incomplete grids.
+	template<Order O> [[nodiscard]] bool is_grid_valid(grid_const_span_t<O>) noexcept;
 
 
 	template<Order O> [[nodiscard, gnu::const]] constexpr typename size<O>::ord2i_t rmi2row(const typename size<O>::ord4i_t index) noexcept { return static_cast<size<O>::ord2i_t>(index / (O*O)); } // I love c++ :')
@@ -74,14 +78,6 @@ namespace solvent::lib {
 			return _;
 		}();
 	};
-
-
-	#define M_SOLVENT_TEMPL_TEMPL(O_) \
-		extern template grid_vec_t<O_> grid_mtx2vec<O_>(const grid_mtx_t<O_>&) noexcept; \
-		extern template grid_mtx_t<O_> grid_vec2mtx<O_>(const grid_vec_t<O_>&) noexcept; \
-		extern template [[gnu::const]] bool is_grid_invalid<O_>(const grid_mtx_t<O_>&) noexcept;
-	M_SOLVENT_INSTANTIATE_ORDER_TEMPLATES
-	#undef M_SOLVENT_TEMPL_TEMPL
 }
 
 

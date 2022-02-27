@@ -1,1 +1,0 @@
-// TODO test that gen_paths are valid

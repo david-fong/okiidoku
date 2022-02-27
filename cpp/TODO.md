@@ -7,6 +7,8 @@
 - try benchmarking when has_mask in Generator is changed to use small instead fast definition.
 - try benchmarking if Generator member arrays are changed to vectors and see what happens.
 - try putting constexpr on the Generator pure virtual functions and see what happens
+- use assertions in the code to get automatic testing of contracts in debug builds.
+- consider giving the callback in batch a dedicated mutex, or no mutex at all and leaving it up to the caller. need to consider how likely it is that the bulk of a callback will need synchronization.
 - make a custom vector-like class for grids.
   - fixed size and capacity, stores in heap. look into possibility of using boost static_vector.
   - use this as the return type of scramble and canonicalize
@@ -16,8 +18,6 @@
 - in the repl config, consider making some fields per-order. max_dead_ends is a good candidate. verbosity might also be useful, but I'm not sure if it would be surprising in a bad way. should be fine as long as the current values are printed when switching between orders.
 
 - make some grid things for binary serdes.
-
-- investigate / experiment with https://en.cppreference.com/w/cpp/thread/hardware_destructive_interference_size
 
 - "smarter"/greedier backtracking: backtracking may be occurring frequently at a coord because of values much earlier in the genpath progress.
   - backtracking is less likely to occur when other coords in the same house as the stuck coord that have different house types have the same value (overlapping has_mask). Can make an array like a count version of has_mask counting the times a value is taken in each house seen by the stuck coord.
@@ -114,6 +114,8 @@
 These didn't end up doing the thing I wanted / thought might happen.
 
 ### Generator
+
+- Using https://en.cppreference.com/w/cpp/thread/hardware_destructive_interference_size for batch's ThreadFunc generator field. Didn't seem to have any effect. Probably because the generator struct is larger than 64 bytes :P.
 
 - Try making traversal order not grid-row-major and see if it improves performance:
   - Hypothesis: Cells with fewer candidates are like the solution space's dominant bottlenecks. If we were to leave them to the end, we may spend many long advances creating almost-complete solutions that cannot be complete because they violate the bottlenecks (and possibly often in similar ways). If we start with them first, we may be less likely to encounter that problem.

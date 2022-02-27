@@ -14,6 +14,7 @@ namespace solvent::lib::print {
 
 	using val_grid_t = std::function<uint8_t (uint32_t)>;
 	void text(std::ostream&, Order, val_grid_t grid_view);
+	void text(std::ostream&, Order, std::span<const std::uint8_t> grid_view);
 
 	using print_grid_t = std::function<void (std::ostream&, uint32_t)>;
 	void pretty(std::ostream&, Order, std::span<const print_grid_t> grid_views);

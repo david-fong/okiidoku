@@ -33,23 +33,28 @@ namespace solvent::lib::gen::batch {
 	}
 
 
+	struct ThreadSharedData {
+		const Params params;
+		BatchReport report {};
+	};
+
+
 	//
 	template<Order O>
 	struct ThreadFunc final {
-	 static_assert(O > 0);
+		static_assert(O > 0);
 		void operator()();
 
 		trials_t get_progress(void) const noexcept {
-			if (params_.only_count_oks) {
-				return shared_data_.total_oks;
+			if (sd_.params.only_count_oks) {
+				return sd_.report.total_oks;
 			} else {
-				return shared_data_.total_anys;
+				return sd_.report.total_anys;
 			}
 		}
 
-		const Params params_;
-		BatchReport& shared_data_;
-		std::mutex& shared_data_mutex_;
+		ThreadSharedData& sd_;
+		std::mutex& sd_mutex_;
 		callback_O_t<O> callback_;
 		GeneratorO<O> generator_ {};
 	};
@@ -57,53 +62,53 @@ namespace solvent::lib::gen::batch {
 
 	template<Order O>
 	void ThreadFunc<O>::operator()() {
-		shared_data_mutex_.lock();
-		while (get_progress() < params_.stop_after) [[likely]] {
-			shared_data_mutex_.unlock(); //___
-				generator_(params_.gen_params);
-			shared_data_mutex_.lock(); //‾‾‾‾
+		sd_mutex_.lock();
+		while (get_progress() < sd_.params.stop_after) [[likely]] {
+			sd_mutex_.unlock(); //___
+				generator_(sd_.params.gen_params);
+			sd_mutex_.lock(); //‾‾‾‾
 
-			shared_data_.total_anys++;
+			sd_.report.total_anys++;
 			if (generator_.status() == ExitStatus::Ok) [[likely]] {
-				shared_data_.total_oks++;
+				sd_.report.total_oks++;
 
-				auto& dist_summary_row = shared_data_.max_dead_end_samples[
-					params_.max_dead_end_sample_granularity
+				auto& dist_summary_row = sd_.report.max_dead_end_samples[
+					sd_.params.max_dead_end_sample_granularity
 					* static_cast<unsigned long>(generator_.get_most_dead_ends_seen())
-					/ (params_.gen_params.max_dead_ends + 1)
+					/ (sd_.params.gen_params.max_dead_ends + 1)
 				];
 				dist_summary_row.marginal_oks++;
 				dist_summary_row.marginal_ops += static_cast<double>(generator_.get_op_count());
 			}
 			callback_(generator_);
 		}
-		shared_data_mutex_.unlock();
+		sd_mutex_.unlock();
 	}
 
 
-	BatchReport batch_(const Order O, Params& params, std::function<std::thread(BatchReport&, std::mutex&)> mk_thread) {
+	BatchReport batch_(const Order O, Params& params, std::function<std::thread(ThreadSharedData&, std::mutex&)> mk_thread) {
 		params.clean(O);
-		std::mutex shared_data_mutex;
-		BatchReport shared_data;
-		shared_data.max_dead_end_samples.resize(params.max_dead_end_sample_granularity);
+		std::mutex sd_mutex;
+		ThreadSharedData sd {.params {params}};
+		sd.report.max_dead_end_samples.resize(params.max_dead_end_sample_granularity);
 
 		std::vector<std::thread> threads;
 		for (unsigned i = 0; i < params.num_threads; i++) {
-			threads.push_back(mk_thread(shared_data, shared_data_mutex));
+			threads.push_back(mk_thread(sd, sd_mutex));
 		}
 		for (auto& thread : threads) {
 			thread.join();
 		}
-		shared_data.time_elapsed = shared_data.timer.read_elapsed();
+		sd.report.time_elapsed = sd.report.timer.read_elapsed();
 
-		shared_data.fraction_aborted = (shared_data.total_anys == 0) ? 1.0 :
-			(static_cast<double>(shared_data.total_anys - shared_data.total_oks)
-			/ static_cast<double>(shared_data.total_anys));
+		sd.report.fraction_aborted = (sd.report.total_anys == 0) ? 1.0 :
+			(static_cast<double>(sd.report.total_anys - sd.report.total_oks)
+			/ static_cast<double>(sd.report.total_anys));
 		{
 			double net_ops = 0.0;
 			trials_t net_oks = 0;
 			for (unsigned i = 0; i < params.max_dead_end_sample_granularity; i++) {
-				auto& sample = shared_data.max_dead_end_samples[i];
+				auto& sample = sd.report.max_dead_end_samples[i];
 				sample.max_dead_ends = params.gen_params.max_dead_ends * (i+1) / params.max_dead_end_sample_granularity;
 				net_ops += sample.marginal_ops;
 				net_oks += sample.marginal_oks;
@@ -116,17 +121,17 @@ namespace solvent::lib::gen::batch {
 			}
 		}{
 			// Get the index of the sample representing the optimal max_dead_ends setting:
-			shared_data.max_dead_end_samples_best_i = 0;
+			sd.report.max_dead_end_samples_best_i = 0;
 			double best_net_average_ops = std::numeric_limits<double>::max();
-			for (unsigned i = 0; i < shared_data.max_dead_end_samples.size(); i++) {
-				const auto& sample = shared_data.max_dead_end_samples[i];
+			for (unsigned i = 0; i < sd.report.max_dead_end_samples.size(); i++) {
+				const auto& sample = sd.report.max_dead_end_samples[i];
 				if (sample.net_average_ops.has_value() && (sample.net_average_ops.value() < best_net_average_ops)) {
 					best_net_average_ops = sample.net_average_ops.value();
-					shared_data.max_dead_end_samples_best_i = i;
+					sd.report.max_dead_end_samples_best_i = i;
 				}
 			}
 		}
-		return shared_data;
+		return sd.report;
 	}
 
 
@@ -134,7 +139,7 @@ namespace solvent::lib::gen::batch {
 	BatchReport batch_O(Params& params, callback_O_t<O> callback) {
 		return batch_(O, params, [&](auto& sd, auto& sd_mutex) {
 			return std::thread(ThreadFunc<O>{
-				params, sd, sd_mutex, callback
+				sd, sd_mutex, callback
 			});
 		});
 	}
@@ -146,7 +151,7 @@ namespace solvent::lib::gen::batch {
 			switch (O) {
 			#define M_SOLVENT_TEMPL_TEMPL(O_) \
 				case O_: { return std::thread(ThreadFunc<O_>{ \
-					params, sd, sd_mutex, [&](const auto result){ \
+					sd, sd_mutex, [&](const auto result){ \
 						return callback(static_cast<const Generator&>(result)); \
 					} \
 				}); \

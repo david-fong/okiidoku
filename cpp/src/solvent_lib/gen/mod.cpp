@@ -34,21 +34,11 @@ namespace solvent::lib::gen {
 	std::unique_ptr<Generator> Generator::create(const Order order) {
 		switch (order) {
 			#define M_SOLVENT_TEMPL_TEMPL(O_) \
-			case O_: return std::unique_ptr<gen::GeneratorO<O_>> {};
+			case O_: return std::make_unique<gen::GeneratorO<O_>>();
 			M_SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 			#undef M_SOLVENT_TEMPL_TEMPL
 
-			default: return std::unique_ptr<gen::GeneratorO<M_SOLVENT_DEFAULT_ORDER>> {};
-		}
-	}
-
-
-	template<Order O>
-	ExitStatus GeneratorO<O>::status() const noexcept {
-		switch (progress_) {
-			case O4-1: return ExitStatus::Ok;
-			case O4:   return ExitStatus::Exhausted;
-			default:   return ExitStatus::Abort;
+			default: return std::make_unique<gen::GeneratorO<M_SOLVENT_DEFAULT_ORDER>>();
 		}
 	}
 
@@ -93,7 +83,7 @@ namespace solvent::lib::gen {
 
 
 	template<Order O>
-	GeneratorO<O>::ord2i_t GeneratorO<O>::val_at_(const GeneratorO<O>::ord4x_t coord) const noexcept {
+	GeneratorO<O>::ord2i_t GeneratorO<O>::extract_val_at_(const GeneratorO<O>::ord4x_t coord) const noexcept {
 		const auto p = coord2prog()(coord);
 		const auto try_index = cells_[p].try_index;
 		if (try_index == O2) { return O2; }
@@ -102,7 +92,7 @@ namespace solvent::lib::gen {
 
 
 	template<Order O>
-	GeneratorO<O>::dead_ends_t GeneratorO<O>::dead_ends_at_(const ord4x_t coord) const noexcept {
+	GeneratorO<O>::dead_ends_t GeneratorO<O>::extract_dead_ends_at_(const ord4x_t coord) const noexcept {
 		return dead_ends_[coord2prog()(coord)];
 	}
 
@@ -112,7 +102,7 @@ namespace solvent::lib::gen {
 	requires std::is_integral_v<T>
 	void GeneratorO<O>::write_to<T>(const std::span<T> sink) const {
 		ord4i_t i = 0;
-		for (auto& cell : sink) { cell = static_cast<T>(val_at_(i++)); }
+		for (auto& cell : sink) { cell = static_cast<T>(extract_val_at_(i++)); }
 	}
 
 
@@ -122,7 +112,7 @@ namespace solvent::lib::gen {
 	void GeneratorO<O>::write_to_<T>(const std::span<T, O4> sink) const {
 		ord4i_t i = 0;
 		for (auto& cell : sink) {
-			cell = val_at_(i++);
+			cell = extract_val_at_(i++);
 		}
 	} */
 
@@ -130,10 +120,11 @@ namespace solvent::lib::gen {
 	template<Order O>
 	void GeneratorO<O>::generate_() {
 		// see the inline-brute-force-func git branch for experimenting with manually inlining set_next_valid_
+		const path::coord_converter_t<O> prog2coord = path::get_prog2coord_converter<O>(params_.path_kind);
 
 		bool backtracked = op_count_ != 0;
 		while (true) [[likely]] {
-			const Direction direction = this->set_next_valid_(backtracked);
+			const Direction direction = this->set_next_valid_(prog2coord, backtracked);
 			backtracked = direction.is_back;
 			if (!direction.is_back_skip) [[likely]] { ++op_count_; }
 
@@ -159,12 +150,17 @@ namespace solvent::lib::gen {
 				++progress_;
 			}
 		}
+		#ifndef NDEBUG
+		std::array<ord2i_t, O4> grid;
+		this->write_to_(grid).
+		assert(is_grid_valid<O>(grid));
+		#endif
 	}
 
 
 	template<Order O>
-	GeneratorO<O>::Direction GeneratorO<O>::set_next_valid_(const bool backtracked) noexcept {
-		const ord4x_t coord = prog2coord()(progress_);
+	GeneratorO<O>::Direction GeneratorO<O>::set_next_valid_(path::coord_converter_t<O> prog2coord, const bool backtracked) noexcept {
+		const ord4x_t coord = prog2coord(progress_);
 		has_mask_t& row_has = rows_has_[rmi2row<O>(coord)];
 		has_mask_t& col_has = cols_has_[rmi2col<O>(coord)];
 		has_mask_t& blk_has = blks_has_[rmi2blk<O>(coord)];
@@ -180,7 +176,7 @@ namespace solvent::lib::gen {
 
 			// Smart skip-backtracking:
 			// This optimization's degree of usefulness depends on the genpath and size.
-			if (!cells_share_house<O>(coord, prog2coord()(backtrack_origin_))) [[unlikely]] {
+			if (!cells_share_house<O>(coord, prog2coord(backtrack_origin_))) [[unlikely]] {
 				// only likely when dealrwmj. dealrwmj is so slow already it doesn't
 				// feel worth slowing other genpaths down to microoptimize.
 				cell.clear();
@@ -219,17 +215,17 @@ namespace solvent::lib::gen {
 
 
 	void Generator::print_text(std::ostream& os) const {
-		print::text(os, get_order(), [this](uint32_t coord) { return val_at(coord); });
+		print::text(os, get_order(), [this](uint32_t coord) { return extract_val_at(coord); });
 	}
 
 
 	void Generator::print_pretty(std::ostream& os) const {
 		const std::vector<print::print_grid_t> grid_accessors {
 			print::print_grid_t([this](std::ostream& _os, uint16_t coord) {
-				_os << ' '; print::val2str(_os, get_order(), val_at(coord));
+				_os << ' '; print::val2str(_os, get_order(), extract_val_at(coord));
 			}),
 			print::print_grid_t([this](std::ostream& _os, uint16_t coord) {
-				const auto shade = shaded_dead_end_stat(static_cast<dead_ends_t>(get_params().max_dead_ends), dead_ends_at(coord));
+				const auto shade = shaded_dead_end_stat(static_cast<dead_ends_t>(get_params().max_dead_ends), extract_dead_ends_at(coord));
 				_os << shade << shade;
 			}),
 		};

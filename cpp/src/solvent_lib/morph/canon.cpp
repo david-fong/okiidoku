@@ -6,22 +6,21 @@
 namespace solvent::lib::morph {
 
 	template<Order O>
-	grid_vec_t<O> canon_label(grid_const_span_t<O>);
+	void canon_label(grid_span_t<O>);
 
 	template<Order O>
-	grid_vec_t<O> canon_place(grid_const_span_t<O>);
+	void canon_place(grid_span_t<O>);
 
 	template<Order O>
-	grid_vec_t<O> canonicalize(const grid_const_span_t<O> orig_grid) {
+	void canonicalize(const grid_span_t<O> orig_grid) {
 		// TODO assert that input is the correct length and is a complete, valid sudoku?
-		grid_vec_t<O> out = canon_label<O>(grid_const_span_t<O>(orig_grid));
-		return out;
+		canon_label<O>(orig_grid);
 	}
 
 	#define M_SOLVENT_TEMPL_TEMPL(O_) \
-		extern template grid_vec_t<O_> canon_label<O_>(grid_const_span_t<O_>); \
-		extern template grid_vec_t<O_> canon_place<O_>(grid_const_span_t<O_>); \
-		template grid_vec_t<O_> canonicalize<O_>(grid_const_span_t<O_>);
+		extern template void canon_label<O_>(grid_span_t<O_>); \
+		extern template void canon_place<O_>(grid_span_t<O_>); \
+		template void canonicalize<O_>(grid_span_t<O_>);
 	M_SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 	#undef M_SOLVENT_TEMPL_TEMPL
 }

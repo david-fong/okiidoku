@@ -36,7 +36,7 @@ namespace solvent::lib::gen::path {
 		}
 	 private:
 		using grid_cache_t = typename std::array<ord4x_least_t, O4>;
-		static constexpr grid_cache_t init_map_prog2coord_() noexcept {
+		static consteval grid_cache_t init_map_prog2coord_() noexcept {
 			grid_cache_t _{0};
 			if constexpr (PK == Kind::RowMajor) {
 				// std::iota(path.begin(), path.end(), 0);
@@ -60,7 +60,7 @@ namespace solvent::lib::gen::path {
 			}
 			return _;
 		}
-		static constexpr grid_cache_t init_map_coord2prog_() noexcept {
+		static consteval grid_cache_t init_map_coord2prog_() noexcept {
 			grid_cache_t _{0};
 			for (ord4i_t i = 0; i < O4; i++) {
 				_[map_prog2coord[i]] = static_cast<ord4x_least_t>(i);

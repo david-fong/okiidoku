@@ -7,6 +7,7 @@
 #include <algorithm> // sort
 #include <compare>   // partial_ordering
 #include <bit>       // popcount
+#include <cassert>
 
 namespace solvent::lib::morph {
 
@@ -28,7 +29,7 @@ namespace solvent::lib::morph {
 		struct LineSortEntry final {
 			ord1i_t orig_blkline;
 			double prob_polar;
-			static LineSortEntry build(const grid_mtx_t<O, ord2i_t>& counts, ord1i_t orig_blkline, const std::span<const ord2i_t, O2> line) {
+			static LineSortEntry build(const grid_arr_t<O, ord2i_t>& counts, ord1i_t orig_blkline, const std::span<const ord2i_t, O2> line) {
 				double prob_polar = 1.0;
 				for (ord2i_t atom = 0; atom < O2; atom += O1) {
 					for (ord1i_t i = 0; i < O1-1; i++) {
@@ -46,7 +47,7 @@ namespace solvent::lib::morph {
 			double prob_all;
 			double prob_polar;
 			std::array<LineSortEntry, O> lines_;
-			static ChuteSortEntry build(const grid_mtx_t<O, ord2i_t>& counts, ord1i_t orig_chute, const std::span<const ord2i_t, O3> grid_chute) {
+			static ChuteSortEntry build(const grid_arr_t<O, ord2i_t>& counts, ord1i_t orig_chute, const std::span<const ord2i_t, O3> grid_chute) {
 				std::array<LineSortEntry, O> lines;
 				for (ord1i_t i = 0; i < O1; i++) { lines[i] = LineSortEntry::build(
 					counts, i, static_cast<std::span<const ord2i_t, O2>>(grid_chute.subspan(O2*orig_chute, O2)) // *sad cast noises
@@ -64,7 +65,7 @@ namespace solvent::lib::morph {
 		struct GridSortEntry final {
 			double prob;
 			std::array<ChuteSortEntry, O> chutes_;
-			static GridSortEntry build(const grid_mtx_t<O, ord2i_t>& counts, const std::span<const ord2i_t, O4> grid) {
+			static GridSortEntry build(const grid_arr_t<O, ord2i_t>& counts, const std::span<const ord2i_t, O4> grid) {
 				std::array<ChuteSortEntry, O> chutes;
 				for (ord1i_t i = 0; i < O1; i++) { chutes[i] = ChuteSortEntry::build(
 					counts, i, static_cast<std::span<const ord2i_t, O3>>(grid.subspan(O3*i, O3)) // *sad cast noises
@@ -80,7 +81,7 @@ namespace solvent::lib::morph {
 		};
 
 
-		static grid_vec_t<O> do_it(const grid_const_span_t<O> orig_grid) {
+		static void do_it(const grid_span_t<O> grid) {
 			/* const GridSortEntry grid_slide = GridSortEntry::build(rel_count_, grid_);
 			const GridSortEntry transposed_grid_slide = [this](){
 				decltype(grid_) transposed_input;
@@ -111,21 +112,19 @@ namespace solvent::lib::morph {
 			} else {
 				grid_ = canon_input;
 			} */
-			(void)orig_grid; // TODO
-			grid_vec_t<O> grid(O4);
-			return grid;
+			(void)grid; // TODO
 		}
 	};
 
 
 	template<Order O>
-	grid_vec_t<O> canon_place(const grid_const_span_t<O> orig_grid) {
-		return CanonPlace<O>::do_it(orig_grid);
+	void canon_place(const grid_span_t<O> grid) {
+		return CanonPlace<O>::do_it(grid);
 	}
 
 
 	#define M_SOLVENT_TEMPL_TEMPL(O_) \
-		template grid_vec_t<O_> canon_place<O_>(grid_const_span_t<O_>); \
+		template void canon_place<O_>(grid_span_t<O_>); \
 		template class CanonPlace<O_>;
 	M_SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 	#undef M_SOLVENT_TEMPL_TEMPL

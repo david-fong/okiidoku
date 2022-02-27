@@ -12,12 +12,12 @@ namespace solvent::lib::morph {
 	// Note: if parallel access is later required, add a mutex to guard.
 	void seed_scrambler_rng(std::uint_fast32_t) noexcept;
 
-	template<Order O> [[nodiscard]]
-	grid_vec_t<O> scramble(const grid_vec_t<O>& input);
+	template<Order O>
+	void scramble(grid_span_t<O> input);
 
 
 	#define M_SOLVENT_TEMPL_TEMPL(O_) \
-		extern template grid_vec_t<O_> scramble<O_>(const grid_vec_t<O_>&);
+		extern template void scramble<O_>(grid_span_t<O_>);
 	M_SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 	#undef M_SOLVENT_TEMPL_TEMPL
 }

@@ -4,12 +4,13 @@
 #include <solvent_lib/morph/scramble.hpp>
 // #include <solvent_lib/print.hpp>
 #include <solvent_util/console_setup.hpp>
-#include <solvent_lib/grid.hpp>
 #include <solvent_lib/print.hpp>
+#include <solvent_lib/grid.hpp>
 
-#include <string>
 #include <iostream>  // cout,
+#include <string>
 #include <random>    // random_device,
+#include <array>
 
 
 // TODO experiment with effect of batching gen and then doing canon on that batch for perf
@@ -19,30 +20,37 @@ template<solvent::Order O>
 unsigned test_morph_O(const unsigned num_rounds) {
 	using namespace solvent::lib;
 	constexpr unsigned O4 = O*O*O*O;
-	std::cout << "\n\ntesting morph for order " << O << std::endl;
+	std::cout << "\n\ntesting for order " << O << std::endl;
+	// TODO: assert that paths are valid.
+
 	unsigned int count_bad = 0;
 	for (unsigned round = 0; round < num_rounds; ) {
 		gen::GeneratorO<O> g {};
 		g({});
-		if (g.status() != gen::ExitStatus::Ok) { continue; }
-		round++;
-		std::array<size<O>::ord2i_t, O4> gen_grid;
-		g.write_to_(gen_grid);
-		auto other_result = result; {
-			const auto scrambled = morph::scramble<O>(result.grid);
-			other_result.grid = morph::canonicalize<O>((std::span{scrambled}).template subspan<0,O*O*O*O>()); // yuck
+		if (g.status() != gen::ExitStatus::Ok) {
+			continue;
 		}
-		if (result.grid != other_result.grid) {
+
+		std::array<typename solvent::size<O>::ord2i_t, O4> gen_grid;
+		g.write_to_(std::span(gen_grid));
+		morph::canonicalize<O>(gen_grid);
+
+		std::array<typename solvent::size<O>::ord2i_t, O4> canon_grid = gen_grid;
+		morph::scramble<O>(canon_grid);
+		morph::canonicalize<O>(canon_grid);
+
+		if (gen_grid != canon_grid) {
 			count_bad++;
 			// TODO
 			std::clog << "\n!bad\n";
-			result.print_text(std::clog);
+			print::text(std::clog, O, gen_grid);
 			std::clog << "\n";
-			other_result.print_text(std::clog);
+			print::text(std::clog, O, canon_grid);
 			std::clog << "\n==========\n";
 		} else {
 			std::clog << ".";
 		}
+		round++;
 	}
 	std::clog.flush();
 	std::cout << "\ncount bad: " << count_bad << " / " << num_rounds;
@@ -75,7 +83,7 @@ int main(const int argc, char const *const argv[]) {
 	solvent::lib::morph::seed_scrambler_rng(srand_key);
 
 	// TODO change the test to try out all orders.
-	if (test_morph_O<4>(num_rounds)) {
+	if (test_morph_O<3>(num_rounds)) {
 		return 1;
 	}
 
@@ -90,12 +98,12 @@ int main(const int argc, char const *const argv[]) {
 	// }).print(std::cout, 3);
 
 	// playing with ranges
-	using namespace solvent::lib;
+	/* using namespace solvent::lib;
 	std::cout << "\n";
 	gen::GeneratorO<3> g {};
 	g({});
 	g.print_pretty(std::cout);
-	std::cout << "\n";
+	std::cout << "\n"; */
 
 	return 0;
 }
