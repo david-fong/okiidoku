@@ -12,8 +12,14 @@ namespace solvent::lib::morph {
 	// Note: if parallel access is later required, add a mutex to guard.
 	void seed_scrambler_rng(std::uint_fast32_t) noexcept;
 
+	// contract: span is a valid grid (though it may be incomplete)
 	template<Order O>
-	void scramble(grid_span_t<O> input);
+	void scramble(grid_span_t<O>);
+
+	// contract: T fits size<O>::ord2i_t and scramble<O> is compiled. also see scramble<O>'s contract.
+	template<class T>
+	requires std::is_integral_v<T>
+	void scramble(Order O, std::span<T>);
 
 
 	#define M_SOLVENT_TEMPL_TEMPL(O_) \

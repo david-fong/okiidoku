@@ -113,6 +113,7 @@ namespace solvent::lib::morph {
 				grid_ = canon_input;
 			} */
 			(void)grid; // TODO
+			assert(is_grid_valid<O>(grid));
 		}
 	};
 

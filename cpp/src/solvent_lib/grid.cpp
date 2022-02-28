@@ -2,29 +2,6 @@
 
 namespace solvent::lib {
 
-	template<Order O>
-	grid_vec_t<O> grid_mtx2vec(const grid_arr_t<O>& mtx) noexcept {
-		grid_vec_t<O> vec(O*O*O*O);
-		for (unsigned row = 0; row < O*O; row++) {
-			for (unsigned col = 0; col < O*O; col++) {
-				vec[(row*O*O)+col] = mtx[row][col];
-			}
-		}
-		return vec;
-	}
-
-
-	template<Order O>
-	grid_arr_t<O> grid_vec2mtx(const grid_vec_t<O>& vec) noexcept {
-		grid_arr_t<O> mtx;
-		for (unsigned row = 0; row < O*O; row++) {
-			for (unsigned col = 0; col < O*O; col++) {
-				mtx[row][col] = vec[(row*O*O)+col];
-			}
-		}
-		return mtx;
-	}
-
 
 	template<Order O>
 	bool is_grid_valid(const grid_const_span_t<O> grid) noexcept {

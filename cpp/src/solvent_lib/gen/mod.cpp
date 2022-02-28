@@ -1,6 +1,5 @@
 #include <solvent_lib/gen/mod.hpp>
 #include <solvent_lib/print.hpp>
-#include <solvent_util/str.hpp>
 
 #include <iostream>
 #include <string>
@@ -97,26 +96,6 @@ namespace solvent::lib::gen {
 	}
 
 
-	/* template<Order O>
-	template<class T>
-	requires std::is_integral_v<T>
-	void GeneratorO<O>::write_to<T>(const std::span<T> sink) const {
-		ord4i_t i = 0;
-		for (auto& cell : sink) { cell = static_cast<T>(extract_val_at_(i++)); }
-	}
-
-
-	template<Order O>
-	template<class T>
-	requires std::is_integral_v<T> && (sizeof(T) >= sizeof(typename size<O>::ord2i_t))
-	void GeneratorO<O>::write_to_<T>(const std::span<T, O4> sink) const {
-		ord4i_t i = 0;
-		for (auto& cell : sink) {
-			cell = extract_val_at_(i++);
-		}
-	} */
-
-
 	template<Order O>
 	void GeneratorO<O>::generate_() {
 		// see the inline-brute-force-func git branch for experimenting with manually inlining set_next_valid_
@@ -203,33 +182,6 @@ namespace solvent::lib::gen {
 		cell.clear();
 		backtrack_origin_ = progress_;
 		return Direction { .is_back = true, .is_back_skip = false };
-	}
-
-
-	std::string shaded_dead_end_stat(Generator::dead_ends_t out_of, Generator::dead_ends_t count) {
-		assert(count <= out_of);
-		return (count == 0) ? " " : util::str::BLOCK_CHARS[static_cast<std::size_t>(
-			(count - 1) * util::str::BLOCK_CHARS.size() / (out_of + 1)
-		)];
-	}
-
-
-	void Generator::print_text(std::ostream& os) const {
-		print::text(os, get_order(), [this](uint32_t coord) { return extract_val_at(coord); });
-	}
-
-
-	void Generator::print_pretty(std::ostream& os) const {
-		const std::vector<print::print_grid_t> grid_accessors {
-			print::print_grid_t([this](std::ostream& _os, uint16_t coord) {
-				_os << ' '; print::val2str(_os, get_order(), extract_val_at(coord));
-			}),
-			print::print_grid_t([this](std::ostream& _os, uint16_t coord) {
-				const auto shade = shaded_dead_end_stat(static_cast<dead_ends_t>(get_params().max_dead_ends), extract_dead_ends_at(coord));
-				_os << shade << shade;
-			}),
-		};
-		print::pretty(os, get_order(), grid_accessors);
 	}
 
 

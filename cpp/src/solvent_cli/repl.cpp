@@ -1,5 +1,6 @@
 #include <solvent_cli/repl.hpp>
 
+#include <solvent_lib/morph/canon.hpp>
 #include <solvent_lib/print.hpp>
 #include <solvent_util/timer.hpp>
 #include <solvent_util/str.hpp>
@@ -94,10 +95,29 @@ namespace solvent::cli {
 				.path_kind = config_.path_kind(),
 				.max_dead_ends = config_.max_dead_ends(),
 			});
-		// TODO canonicalize if config specifies so
 		const double processor_time = (static_cast<double>(std::clock() - clock_start)) / CLOCKS_PER_SEC;
-
-		gen_->print_pretty(std::cout);
+		{
+			using val_t = gen::Generator::val_t;
+			using dead_ends_t = gen::Generator::dead_ends_t;
+			std::array<val_t, O4_MAX> grid;
+			std::array<dead_ends_t, O4_MAX> dead_ends;
+			gen_->write_to(std::span<val_t>(grid));
+			gen_->write_dead_ends_to<dead_ends_t>(std::span(dead_ends));
+			if (gen_->status() == gen::ExitStatus::Ok && config_.canonicalize()) {
+				morph::canonicalize<val_t>(gen_->get_order(), std::span(grid)); // should we make a copy and print as a third grid image?
+			}
+			
+			const std::vector<print::print_grid_t> grid_accessors {
+				print::print_grid_t([&](std::ostream& _os, uint16_t coord) {
+					_os << ' '; print::val2str(_os, config_.order(), grid[coord]);
+				}),
+				print::print_grid_t([&](std::ostream& _os, uint16_t coord) {
+					const auto shade = gen::Generator::shaded_dead_end_stat(static_cast<dead_ends_t>(gen_->get_params().max_dead_ends), dead_ends[coord]);
+					_os << shade << shade;
+				}),
+			};
+			print::pretty(std::cout, config_.order(), grid_accessors);
+		}
 		std::cout << std::setprecision(4)
 			<< "\nprocessor time: " << processor_time << " seconds"
 			<< "\nnum operations: " << gen_->get_op_count()
@@ -123,12 +143,17 @@ namespace solvent::cli {
 		};
 		const gen::batch::BatchReport batch_report = gen::batch::batch(config_.order(), params,
 			[this](const gen::Generator& result) {
-				// TODO canonicalize if config specifies so
+				using val_t = gen::Generator::val_t;
+				std::array<val_t, O4_MAX> grid;
+				result.write_to(std::span<val_t>(grid));
+				if (result.status() == gen::ExitStatus::Ok && config_.canonicalize()) {
+					morph::canonicalize<val_t>(result.get_order(), std::span(grid));
+				}
 				if ((config_.verbosity() == verbosity::Kind::All)
-				 || ((config_.verbosity() == verbosity::Kind::NoGiveups) && (result.status() == gen::ExitStatus::Ok))
+				|| ((config_.verbosity() == verbosity::Kind::NoGiveups) && (result.status() == gen::ExitStatus::Ok))
 				) {
-					result.print_text(std::cout);
-					if (config_.order() <= 4) {
+					print::text(std::cout, result.get_order(), grid);
+					if (result.get_order() <= 4) {
 						std::cout << '\n';
 					} else {
 						std::cout << std::endl; // always flush for big grids

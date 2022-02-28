@@ -4,6 +4,7 @@
 #include <solvent_lib/gen/path.hpp>
 #include <solvent_lib/grid.hpp>
 #include <solvent_lib/size.hpp>
+#include <solvent_util/str.hpp>
 #include <solvent_config.hpp>
 
 #include <iosfwd>
@@ -73,12 +74,15 @@ namespace solvent::lib::gen {
 		using dead_ends_t = float; // TODO is this okay?
 		using backtrack_origin_t = size<O_MAX>::ord4x_least_t;
 
+		// contract: GeneratorO<O> is compiled
 		static std::unique_ptr<Generator> create(Order O);
 
 		virtual void operator()(Params) = 0;
 		virtual void continue_prev() = 0;
 
 		[[nodiscard]] virtual Order get_order() const noexcept = 0;
+		[[nodiscard]] Order get_order2() const noexcept { return get_order()*get_order(); }
+		[[nodiscard]] Order get_order4() const noexcept { return get_order2()*get_order2(); }
 		[[nodiscard]] virtual const Params& get_params() const noexcept = 0;
 		[[nodiscard]] virtual ExitStatus status() const noexcept = 0;
 		[[nodiscard]] virtual backtrack_origin_t get_backtrack_origin() const noexcept = 0;
@@ -90,16 +94,33 @@ namespace solvent::lib::gen {
 		[[nodiscard]] virtual val_t extract_val_at(coord_t) const noexcept = 0;
 		[[nodiscard]] virtual dead_ends_t extract_dead_ends_at(coord_t) const noexcept = 0;
 
-		void print_text(std::ostream&) const;
-		void print_pretty(std::ostream&) const;
+		// this cannot statically check that T is wide enough. uses static_cast<T>.
+		// ie. it is your job to make sure T does not lose precision (sorry :/).
+		template<class T>
+		requires std::is_integral_v<T> && (!std::is_const_v<T>)
+		void write_to(std::span<T> sink) const {
+			const unsigned O4 = get_order4();
+			assert(sink.size() >= O4);
+			for (unsigned i = 0; i < O4; i++) { sink[i] = static_cast<T>(extract_val_at(i)); }
+		}
 
 		// this cannot statically check that T is wide enough. uses static_cast<T>.
 		// ie. it is your job to make sure T does not lose precision (sorry :/).
-		// requires that sink has size O4.
 		template<class T>
-		requires std::is_integral_v<T>
-		void write_to(std::span<T> sink) const;
+		requires std::is_arithmetic_v<T> && (!std::is_const_v<T>)
+		void write_dead_ends_to(std::span<T> sink) const {
+			const unsigned O4 = get_order4();
+			assert(sink.size() >= O4);
+			for (unsigned i = 0; i < O4; i++) { sink[i] = static_cast<T>(extract_dead_ends_at(i)); }
+		}
 		// TODO change the above to not require contiguous layout? Used span because I don't know how to make it take an output_range
+
+		static std::string shaded_dead_end_stat(dead_ends_t out_of, dead_ends_t count) {
+			assert(count <= out_of);
+			return (count == 0) ? " " : util::str::BLOCK_CHARS[static_cast<std::size_t>(
+				(count - 1) * util::str::BLOCK_CHARS.size() / (out_of + 1)
+			)];
+		}
 	};
 
 
@@ -138,21 +159,16 @@ namespace solvent::lib::gen {
 		[[nodiscard]] Generator::val_t extract_val_at(Generator::coord_t coord) const noexcept { return static_cast<Generator::val_t>(extract_val_at_(static_cast<ord4x_t>(coord))); }
 		[[nodiscard]] Generator::dead_ends_t extract_dead_ends_at(Generator::coord_t coord) const noexcept { return static_cast<Generator::dead_ends_t>(extract_dead_ends_at_(static_cast<ord4x_t>(coord))); }
 
-		template<class T>
-		requires std::is_integral_v<T>
-		void write_to(std::span<T> sink) const {
-			ord4i_t i = 0; for (auto& cell : sink) { cell = static_cast<T>(extract_val_at_(i++)); }
-		}
-
-		[[nodiscard]] const auto& get_backtrack_origin_() const noexcept { return backtrack_origin_; }
-		[[nodiscard]] const auto& get_most_dead_ends_seen_() const noexcept { return most_dead_ends_seen_; }
+		[[nodiscard]] constexpr const auto& get_backtrack_origin_() const noexcept { return backtrack_origin_; }
+		[[nodiscard]] constexpr const auto& get_most_dead_ends_seen_() const noexcept { return most_dead_ends_seen_; }
 		[[nodiscard]] ord2i_t extract_val_at_(ord4x_t coord) const noexcept;
 		[[nodiscard]] dead_ends_t extract_dead_ends_at_(ord4x_t coord) const noexcept;
 
 		template<class T>
-		requires std::is_integral_v<T> && (sizeof(T) >= sizeof(ord2i_t))
+		requires std::is_integral_v<T> && (!std::is_const_v<T>) && (sizeof(T) >= sizeof(ord2i_t))
 		void write_to_(std::span<T, O4> sink) const {
-			ord4i_t i = 0; for (auto& cell : sink) { cell = extract_val_at_(i++); }
+			assert(sink.size() >= O4);
+			for (ord4i_t i = 0; i < O4; i++) { sink[i] = extract_val_at_(i); }
 		}
 
 	 private:
@@ -184,10 +200,12 @@ namespace solvent::lib::gen {
 		opcount_t op_count_ = 0;
 
 		// Note: even when marked pure, _prog2coord_ doesn't get optimized as well as the current usage.
-		[[nodiscard, gnu::pure]] path::coord_converter_t<O> coord2prog() const noexcept { return path::get_coord2prog_converter<O>(params_.path_kind); }
+		[[nodiscard, gnu::pure]] path::coord_converter_t<O> coord2prog() const noexcept {
+			return path::get_coord2prog_converter<O>(params_.path_kind);
+		}
 
-		[[gnu::hot]] Direction set_next_valid_(path::coord_converter_t<O>, bool backtracked) noexcept;
 		[[gnu::hot]] void generate_();
+		[[gnu::hot]] Direction set_next_valid_(path::coord_converter_t<O>, bool backtracked) noexcept;
 	};
 
 

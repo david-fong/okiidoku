@@ -24,11 +24,6 @@ namespace solvent::lib::print {
 	}
 
 
-	void text(std::ostream& os, const solvent::Order O, val_grid_t grid_view) {
-		for (unsigned coord = 0; coord < O*O*O*O; coord++) {
-			print::val2str(os, O, grid_view(coord));
-		}
-	}
 	void text(std::ostream& os, const solvent::Order O, const std::span<const std::uint8_t> grid_view) {
 		assert(grid_view.size() == O*O*O*O);
 		for (auto v : grid_view) {

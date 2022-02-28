@@ -4,9 +4,10 @@
 
 - try making Order an enum
   - see if it can improve switch case cover detection.
+  - this may also make it possible to statically enforce contracts about orders for the non-template wrapper functions. If so, I will probably neither need to assert that the order is compiled, nor write vacuous default branches for their switch statements.
+  - if this works out, make sure to update all the contract docs and remove relevant assertions.
 - try benchmarking when has_mask in Generator is changed to use small instead fast definition.
 - try benchmarking if Generator member arrays are changed to vectors and see what happens.
-- try putting constexpr on the Generator pure virtual functions and see what happens
 - use assertions in the code to get automatic testing of contracts in debug builds.
 - consider giving the callback in batch a dedicated mutex, or no mutex at all and leaving it up to the caller. need to consider how likely it is that the bulk of a callback will need synchronization.
 - make a custom vector-like class for grids.

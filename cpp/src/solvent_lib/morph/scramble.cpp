@@ -12,6 +12,7 @@ namespace solvent::lib::morph {
 		ScramblerRng_.seed(seed);
 	}
 
+
 	template<Order O>
 	void scramble(const grid_span_t<O> grid) {
 		using ord1i_t = size<O>::ord1i_t;
@@ -54,6 +55,29 @@ namespace solvent::lib::morph {
 		}
 		assert(is_grid_valid<O>(grid));
 	}
+
+
+	template<class T>
+	requires std::is_integral_v<T>
+	void scramble(Order order, std::span<T> grid) {
+		assert(is_order_compiled(order));
+		assert(grid.size() >= order*order*order*order);
+		switch (order) {
+		#define M_SOLVENT_TEMPL_TEMPL(O_) \
+			case O_: { \
+				constexpr unsigned O4 = O_*O_*O_*O_; \
+				using val_t = size<O_>::ord2i_t; \
+				std::array<val_t,O4> grid_resize; \
+				for (unsigned i = 0; i < O4; i++) { grid_resize[i] = static_cast<val_t>(grid[i]); } \
+				scramble<O_>(std::span(grid_resize)); \
+				for (unsigned i = 0; i < O4; i++) { grid[i] = static_cast<T>(grid_resize[i]); } \
+				break; \
+			}
+		M_SOLVENT_INSTANTIATE_ORDER_TEMPLATES
+		#undef M_SOLVENT_TEMPL_TEMPL
+		}
+	}
+
 
 	#define M_SOLVENT_TEMPL_TEMPL(O_) \
 		template void scramble<O_>(const grid_span_t<O_>);

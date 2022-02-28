@@ -9,6 +9,8 @@
 
 - To change the supported grid sizes that get compiled, create a [tweak header](https://vector-of-bool.github.io/2020/10/04/lib-configuration.html#providing-a-tweak-header) for [`include/solvent_config.hpp`](include/solvent_config.hpp).
 
+- Make sure to read the api contracts. They are strict on sizing of collections and integer widths.
+
 ## Building and Running solvent_cli
 
 ```shell

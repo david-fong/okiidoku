@@ -29,9 +29,6 @@ namespace solvent::lib {
 		}
 	};
 
-	template<Order O> [[nodiscard]] grid_vec_t<O> grid_mtx2vec(const grid_arr_t<O>&) noexcept;
-	template<Order O> [[nodiscard]] grid_arr_t<O> grid_vec2mtx(const grid_vec_t<O>&) noexcept;
-
 
 	// Returns true if any cells in a same house contain the same value.
 	// Can be used with incomplete grids.
