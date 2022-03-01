@@ -75,6 +75,12 @@ namespace solvent::lib {
 			return _;
 		}();
 	};
+
+
+	#define M_SOLVENT_TEMPL_TEMPL(O_) \
+		extern template bool is_grid_valid<O_>(grid_const_span_t<O_>) noexcept;
+	M_SOLVENT_INSTANTIATE_ORDER_TEMPLATES
+	#undef M_SOLVENT_TEMPL_TEMPL
 }
 
 

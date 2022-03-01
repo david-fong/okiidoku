@@ -118,7 +118,7 @@ namespace solvent::lib::gen {
 		static std::string shaded_dead_end_stat(dead_ends_t out_of, dead_ends_t count) {
 			assert(count <= out_of);
 			return (count == 0) ? " " : util::str::BLOCK_CHARS[static_cast<std::size_t>(
-				(count - 1) * util::str::BLOCK_CHARS.size() / (out_of + 1)
+				(count) * util::str::BLOCK_CHARS.size() / (out_of + 1)
 			)];
 		}
 	};
@@ -156,12 +156,12 @@ namespace solvent::lib::gen {
 		[[nodiscard]] constexpr Generator::backtrack_origin_t get_backtrack_origin() const noexcept { return static_cast<Generator::backtrack_origin_t>(backtrack_origin_); }
 		[[nodiscard]] constexpr Generator::dead_ends_t get_most_dead_ends_seen() const noexcept { return static_cast<Generator::dead_ends_t>(most_dead_ends_seen_); }
 		[[nodiscard]] constexpr opcount_t get_op_count() const noexcept { return op_count_; }
-		[[nodiscard]] Generator::val_t extract_val_at(Generator::coord_t coord) const noexcept { return static_cast<Generator::val_t>(extract_val_at_(static_cast<ord4x_t>(coord))); }
+		[[nodiscard, gnu::hot]] Generator::val_t extract_val_at(Generator::coord_t coord) const noexcept { return static_cast<Generator::val_t>(extract_val_at_(static_cast<ord4x_t>(coord))); }
 		[[nodiscard]] Generator::dead_ends_t extract_dead_ends_at(Generator::coord_t coord) const noexcept { return static_cast<Generator::dead_ends_t>(extract_dead_ends_at_(static_cast<ord4x_t>(coord))); }
 
 		[[nodiscard]] constexpr const auto& get_backtrack_origin_() const noexcept { return backtrack_origin_; }
 		[[nodiscard]] constexpr const auto& get_most_dead_ends_seen_() const noexcept { return most_dead_ends_seen_; }
-		[[nodiscard]] ord2i_t extract_val_at_(ord4x_t coord) const noexcept;
+		[[nodiscard, gnu::hot]] ord2i_t extract_val_at_(ord4x_t coord) const noexcept;
 		[[nodiscard]] dead_ends_t extract_dead_ends_at_(ord4x_t coord) const noexcept;
 
 		template<class T>
@@ -175,7 +175,7 @@ namespace solvent::lib::gen {
 		struct Cell final {
 			ord2i_t try_index; // Index into val_try_orders_. O2 if clear.
 			void clear() noexcept { try_index = O2; }
-			[[gnu::pure, nodiscard]] bool is_clear() const noexcept { return try_index == O2; }
+			[[nodiscard, gnu::pure]] bool is_clear() const noexcept { return try_index == O2; }
 		};
 		struct Direction final {
 			bool is_back;

@@ -13,14 +13,16 @@ namespace solvent::lib {
 		std::array<has_mask_t, O2> cols_has_ {0};
 		std::array<has_mask_t, O2> blks_has_ {0};
 
-		for (ord2i_t row = 0; row < O*O; ++row) {
-			for (ord2i_t col = 0; col < O*O; ++col) {
-				has_mask_t& row_has = rows_has_[row];
-				has_mask_t& col_has = cols_has_[col];
-				has_mask_t& blk_has = blks_has_[rmi2blk<O>(row, col)];
+		for (ord2i_t row = 0; row < O2; ++row) {
+			for (ord2i_t col = 0; col < O2; ++col) {
+				auto& row_has = rows_has_[row];
+				auto& col_has = cols_has_[col];
+				auto& blk_has = blks_has_[rmi2blk<O>(row, col)];
 
+				const auto val = grid[(O2*row) + col];
+				if (val == O2) { continue; }
+				const has_mask_t try_val_mask = has_mask_t(1) << val;
 				const has_mask_t t_has = (row_has | col_has | blk_has);
-				const has_mask_t try_val_mask = has_mask_t(1) << grid[row][col];
 				if (t_has & try_val_mask) [[unlikely]] {
 					return false;
 				} else {
@@ -32,6 +34,12 @@ namespace solvent::lib {
 		}
 		return true;
 	}
+
+
+	#define M_SOLVENT_TEMPL_TEMPL(O_) \
+		template bool is_grid_valid<O_>(grid_const_span_t<O_>) noexcept;
+	M_SOLVENT_INSTANTIATE_ORDER_TEMPLATES
+	#undef M_SOLVENT_TEMPL_TEMPL
 }
 
 

@@ -115,7 +115,7 @@ namespace solvent::lib::gen {
 					const dead_ends_t dead_ends = ++dead_ends_[progress_];
 					if (dead_ends > most_dead_ends_seen_) [[unlikely]] {
 						most_dead_ends_seen_ = dead_ends;
-						if (dead_ends > params_.max_dead_ends) [[unlikely]] {
+						if (dead_ends >= params_.max_dead_ends) [[unlikely]] {
 							--progress_;
 							break;
 						}
@@ -131,7 +131,7 @@ namespace solvent::lib::gen {
 		}
 		#ifndef NDEBUG
 		std::array<ord2i_t, O4> grid;
-		this->write_to_(grid).
+		this->write_to_(std::span(grid));
 		assert(is_grid_valid<O>(grid));
 		#endif
 	}
