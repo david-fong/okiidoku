@@ -1,4 +1,4 @@
-#include <solvent_lib/grid.hpp>
+#include "solvent_lib/grid.hpp"
 
 namespace solvent::lib {
 
@@ -13,8 +13,8 @@ namespace solvent::lib {
 		std::array<has_mask_t, O2> cols_has_ {0};
 		std::array<has_mask_t, O2> blks_has_ {0};
 
-		for (ord2i_t row = 0; row < O*O; row++) {
-			for (ord2i_t col = 0; col < O*O; col++) {
+		for (ord2i_t row = 0; row < O*O; ++row) {
+			for (ord2i_t col = 0; col < O*O; ++col) {
 				has_mask_t& row_has = rows_has_[row];
 				has_mask_t& col_has = cols_has_[col];
 				has_mask_t& blk_has = blks_has_[rmi2blk<O>(row, col)];

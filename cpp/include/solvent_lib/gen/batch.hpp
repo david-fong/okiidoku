@@ -1,8 +1,8 @@
 #ifndef HPP_SOLVENT_LIB__GEN__BATCH
 #define HPP_SOLVENT_LIB__GEN__BATCH
 
-#include <solvent_lib/gen/mod.hpp>
-#include <solvent_util/timer.hpp>
+#include "solvent_lib/gen/mod.hpp"
+#include "solvent_util/timer.hpp"
 
 #include <iosfwd>
 #include <functional>
@@ -16,8 +16,8 @@ namespace solvent::lib::gen::batch {
 	//
 	struct Params final {
 		gen::Params gen_params;
-		unsigned num_threads = 0; // Defaulted if zero.
-		unsigned max_dead_end_sample_granularity = 0; // Defaulted if zero.
+		unsigned num_threads {0}; // Defaulted if zero.
+		unsigned max_dead_end_sample_granularity {0}; // Defaulted if zero.
 		bool only_count_oks;
 		trials_t stop_after;
 
@@ -28,8 +28,8 @@ namespace solvent::lib::gen::batch {
 
 	//
 	struct BatchReport final {
-		trials_t total_anys = 0;
-		trials_t total_oks = 0;
+		trials_t total_anys {0};
+		trials_t total_oks {0};
 		double fraction_aborted;
 
 		util::Timer timer;
@@ -42,14 +42,14 @@ namespace solvent::lib::gen::batch {
 			std::optional<double> marginal_average_ops; // marginal_ops / marginal_oks. null if no oks.
 			std::optional<double> net_average_ops; // (accumulated marginal_ops) / (accumulated marginal_oks). null if no oks.
 		};
-		static constexpr unsigned SAMPLE_GRANULARITY_DEFAULT = 20u;
-		static constexpr unsigned SAMPLE_GRANULARITY_MAX = 50u;
-		static constexpr unsigned RECOMMENDED_OKS_PER_SAMPLE = 20u;
+		static constexpr unsigned SAMPLE_GRANULARITY_DEFAULT {20u};
+		static constexpr unsigned SAMPLE_GRANULARITY_MAX {50u};
+		static constexpr unsigned RECOMMENDED_OKS_PER_SAMPLE {20u};
 
 		// Data sampled. Each entry showing the outcome if its max_dead_ends
 		// value was used.
 		std::vector<MaxDeadEndSample> max_dead_end_samples;
-		unsigned max_dead_end_samples_best_i = 0u;
+		unsigned max_dead_end_samples_best_i {0u};
 
 		void print(std::ostream&, Order O) const;
 	};

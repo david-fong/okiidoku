@@ -1,9 +1,9 @@
-#include <solvent_cli/repl.hpp>
+#include "solvent_cli/repl.hpp"
 
-#include <solvent_lib/morph/canon.hpp>
-#include <solvent_lib/print.hpp>
-#include <solvent_util/timer.hpp>
-#include <solvent_util/str.hpp>
+#include "solvent_lib/morph/canon.hpp"
+#include "solvent_lib/print.hpp"
+#include "solvent_util/timer.hpp"
+#include "solvent_util/str.hpp"
 
 #include <iostream> // cout, endl,
 #include <iomanip>  // setw,
@@ -195,7 +195,7 @@ namespace solvent::cli {
 		const std::string& stop_after_str,
 		const bool only_count_oks
 	) {
-		unsigned long stop_by_value;
+		trials_t stop_by_value;
 		try {
 			stop_by_value = std::stoul(stop_after_str);
 			if (stop_by_value <= 0) {
@@ -210,6 +210,6 @@ namespace solvent::cli {
 				<< str::RED.OFF << std::endl;
 			return;
 		}
-		this->gen_multiple(static_cast<trials_t>(stop_by_value), only_count_oks);
+		this->gen_multiple(stop_by_value, only_count_oks);
 	}
 }

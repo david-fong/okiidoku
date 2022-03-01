@@ -18,11 +18,11 @@ if(MSVC)
 else()
 	add_compile_options(
 		-Wall -Wextra -Wpedantic -Werror
-		-Wold-style-cast -Wcast-qual
+		-Wold-style-cast -Wcast-qual -Wcast-align -Wuseless-cast
 		-Wformat=2
-		-Wconversion
+		-Wconversion # -Wsign-conversion
 		-Wimplicit-fallthrough=5
-		-Wshadow
+		-Wshadow -Woverloaded-virtual
 		-march=native
 	)
 endif()

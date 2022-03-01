@@ -38,13 +38,13 @@ class Generator {
 		this.gridElem = gridElem;
 
 		{const blockElems = [];
-		for (let i = 0; i < this.O2; i++) {
+		for (let i = 0; i < this.O2; ++i) {
 			const blockElem = document.createElement("div");
 			blockElem.classList.add("grid--block");
 			blockElems.push(blockElem);
 			gridElem.appendChild(blockElem);
 		}
-		for (let i = 0; i < this.O4; i++) {
+		for (let i = 0; i < this.O4; ++i) {
 			const tile = new Tile(this);
 			grid.push(tile);
 			blockElems[this.getBlk(i)]!.appendChild(tile.baseElem);
@@ -52,9 +52,9 @@ class Generator {
 		this.grid = Object.freeze(grid);
 
 		this.valTryOrder = [];
-		for (let i = 0; i < this.O2; i++) {
+		for (let i = 0; i < this.O2; ++i) {
 			const iota = new Uint8Array(this.O2 + 1);
-			for (let i = 0; i < this.O2 + 1; i++) { iota[i] = i; }
+			for (let i = 0; i < this.O2 + 1; ++i) { iota[i] = i; }
 			this.valTryOrder.push(iota);
 		}
 		this.prog2coord = new Uint16Array(this.O4);
@@ -70,7 +70,7 @@ class Generator {
 	public clear(): void {
 		this.grid.forEach((tile) => tile.clear());
 		[this.rowsHas, this.colsHas, this.blksHas].forEach((masksArr) => {
-			for (let i = 0; i < this.O2; i++) { masksArr[i] = 0; }
+			for (let i = 0; i < this.O2; ++i) { masksArr[i] = 0; }
 		});
 		this.valTryOrder.forEach((tryOrder) => {
 			const shuffle = tryOrder.slice(1,this.O2);
@@ -112,7 +112,7 @@ class Generator {
 			this.colsHas[col]! |
 			this.blksHas[blk]!
 		);
-		for (let tryIndex = tile.nextTryIndex; tryIndex < this.O2; tryIndex++) {
+		for (let tryIndex = tile.nextTryIndex; tryIndex < this.O2; ++tryIndex) {
 			const value = this.valTryOrder[this.getRow(index)]![tryIndex]!;
 			const valueBit = 1 << value;
 			if (!(invalidBin & valueBit)) {
@@ -140,16 +140,16 @@ class Generator {
 		this.#genPath = newGenPath;
 		switch (newGenPath) {
 		case Generator.GenPath.ROW_MAJOR: {
-			for (let i = 0; i < this.O4; i++) {
+			for (let i = 0; i < this.O4; ++i) {
 				this.prog2coord[i] = i;
 			}
 			break; }
 		case Generator.GenPath.BLOCK_COL: {
 			const order = this.O1;
 			let i = 0;
-			for (let blkCol = 0; blkCol < order; blkCol++) {
-				for (let row = 0; row < this.O2; row++) {
-					for (let bCol = 0; bCol < order; bCol++) {
+			for (let blkCol = 0; blkCol < order; ++blkCol) {
+				for (let row = 0; row < this.O2; ++row) {
+					for (let bCol = 0; bCol < order; ++bCol) {
 						this.prog2coord[i++] = (blkCol * order) + (row * this.O2) + (bCol);
 					}
 				}

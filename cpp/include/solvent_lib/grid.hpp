@@ -1,8 +1,8 @@
 #ifndef HPP_SOLVENT_LIB__GRID
 #define HPP_SOLVENT_LIB__GRID
 
-#include <solvent_lib/size.hpp>
-#include <solvent_config.hpp>
+#include "solvent_lib/size.hpp"
+#include "solvent_config.hpp"
 
 #include <vector>
 #include <array>
@@ -60,16 +60,16 @@ namespace solvent::lib {
 		using T = std::array<M, O>;
 		static constexpr T row = [](){
 			T _ {0};
-			for (unsigned chute = 0; chute < O; chute++) {
-				for (unsigned i = 0; i < O; i++) {
+			for (unsigned chute = 0; chute < O; ++chute) {
+				for (unsigned i = 0; i < O; ++i) {
 					_[chute] |= static_cast<M>(1 << ((O*chute) + i));
 			}	}
 			return _;
 		}();
 		static constexpr T col = [](){
 			T _ {0};
-			for (unsigned chute = 0; chute < O; chute++) {
-				for (unsigned i = 0; i < O; i++) {
+			for (unsigned chute = 0; chute < O; ++chute) {
+				for (unsigned i = 0; i < O; ++i) {
 					_[chute] |= static_cast<M>(1 << ((O*i) + chute));
 			}	}
 			return _;

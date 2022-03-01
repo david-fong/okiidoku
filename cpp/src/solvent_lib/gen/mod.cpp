@@ -1,5 +1,5 @@
-#include <solvent_lib/gen/mod.hpp>
-#include <solvent_lib/print.hpp>
+#include "solvent_lib/gen/mod.hpp"
+#include "solvent_lib/print.hpp"
 
 #include <iostream>
 #include <string>
@@ -166,7 +166,7 @@ namespace solvent::lib::gen {
 		const has_mask_t cell_has = (row_has | col_has | blk_has);
 		if (std::popcount(cell_has) != O2) [[likely]] {
 			// The above optimization comes into effect ~1/5 of the time for size 5.
-			for (ord2i_t try_i = static_cast<ord2i_t>((cell.try_index+1u) % (O2+1)); try_i < O2; try_i++) [[likely]] {
+			for (ord2i_t try_i = static_cast<ord2i_t>((cell.try_index+1u) % (O2+1)); try_i < O2; ++try_i) [[likely]] {
 				const has_mask_t try_val_mask = has_mask_t{1} << val_try_order[try_i];
 				if (!(cell_has & try_val_mask)) [[unlikely]] {
 					// A valid value was found:

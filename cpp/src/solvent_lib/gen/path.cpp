@@ -1,4 +1,4 @@
-#include <solvent_lib/gen/path.hpp>
+#include "solvent_lib/gen/path.hpp"
 
 namespace solvent::lib::gen::path {
 
@@ -43,17 +43,17 @@ namespace solvent::lib::gen::path {
 			}
 			else if constexpr (PK == Kind::BlockCol) {
 				ord4i_t i = 0;
-				for (ord1i_t blk_col = 0; blk_col < O1; blk_col++) {
-					for (ord2i_t row = 0; row < O2; row++) {
-						for (ord1i_t b_col = 0; b_col < O1; b_col++) {
+				for (ord1i_t blk_col = 0; blk_col < O1; ++blk_col) {
+					for (ord2i_t row = 0; row < O2; ++row) {
+						for (ord1i_t b_col = 0; b_col < O1; ++b_col) {
 							_[i++] = static_cast<ord4x_least_t>((blk_col * O1) + (row * O2) + (b_col));
 				}	}	}
 			}
 			else if constexpr (PK == Kind::DealRwMj) {
 				ord4i_t i = 0;
-				for (ord1i_t inside_b_row = 0; inside_b_row < O1; inside_b_row++) {
-					for (ord1i_t inside_b_col = 0; inside_b_col < O1; inside_b_col++) {
-						for (ord2i_t blk_i = 0; blk_i < O2; blk_i++) {
+				for (ord1i_t inside_b_row = 0; inside_b_row < O1; ++inside_b_row) {
+					for (ord1i_t inside_b_col = 0; inside_b_col < O1; ++inside_b_col) {
+						for (ord2i_t blk_i = 0; blk_i < O2; ++blk_i) {
 							const ord4i_t blkaddr = static_cast<ord4i_t>(((blk_i % O1) * O1) + (blk_i / O1 * O1 * O2));
 							_[i++] = static_cast<ord4x_least_t>(blkaddr + (inside_b_row * O2) + inside_b_col);
 				}	}	}
@@ -62,7 +62,7 @@ namespace solvent::lib::gen::path {
 		}
 		static consteval grid_cache_t init_map_coord2prog_() noexcept {
 			grid_cache_t _{0};
-			for (ord4i_t i = 0; i < O4; i++) {
+			for (ord4i_t i = 0; i < O4; ++i) {
 				_[map_prog2coord[i]] = static_cast<ord4x_least_t>(i);
 			}
 			return _;

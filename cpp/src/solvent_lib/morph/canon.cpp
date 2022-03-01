@@ -1,5 +1,5 @@
-#include <solvent_lib/morph/canon.hpp>
-#include <solvent_lib/print.hpp> // TODO remove after done implementing
+#include "solvent_lib/morph/canon.hpp"
+#include "solvent_lib/print.hpp" // TODO remove after done implementing
 
 #include <iostream>
 // #include <cassert>
@@ -30,9 +30,9 @@ namespace solvent::lib::morph {
 				constexpr unsigned O4 = O_*O_*O_*O_; \
 				using val_t = size<O_>::ord2i_t; \
 				std::array<val_t,O4> grid_resize; \
-				for (unsigned i = 0; i < O4; i++) { grid_resize[i] = static_cast<val_t>(grid[i]); } \
+				for (unsigned i = 0; i < O4; ++i) { grid_resize[i] = static_cast<val_t>(grid[i]); } \
 				canonicalize<O_>(std::span(grid_resize)); \
-				for (unsigned i = 0; i < O4; i++) { grid[i] = static_cast<T>(grid_resize[i]); } \
+				for (unsigned i = 0; i < O4; ++i) { grid[i] = static_cast<T>(grid_resize[i]); } \
 				break; \
 			}
 		M_SOLVENT_INSTANTIATE_ORDER_TEMPLATES

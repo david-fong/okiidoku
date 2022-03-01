@@ -1,11 +1,11 @@
 #ifndef HPP_SOLVENT_LIB__GEN
 #define HPP_SOLVENT_LIB__GEN
 
-#include <solvent_lib/gen/path.hpp>
-#include <solvent_lib/grid.hpp>
-#include <solvent_lib/size.hpp>
-#include <solvent_util/str.hpp>
-#include <solvent_config.hpp>
+#include "solvent_lib/gen/path.hpp"
+#include "solvent_lib/grid.hpp"
+#include "solvent_lib/size.hpp"
+#include "solvent_util/str.hpp"
+#include "solvent_config.hpp"
 
 #include <iosfwd>
 #include <array>
@@ -50,8 +50,8 @@ namespace solvent::lib::gen {
 
 	//
 	struct Params {
-		path::Kind path_kind = path::Kind::RowMajor;
-		std::uint_fast64_t max_dead_ends = 0; // Defaulted if zero.
+		path::Kind path_kind {path::Kind::RowMajor};
+		std::uint_fast64_t max_dead_ends {0}; // Defaulted if zero.
 
 		// Cleans self and returns a copy of self.
 		Params clean(Order O) noexcept;
@@ -101,7 +101,7 @@ namespace solvent::lib::gen {
 		void write_to(std::span<T> sink) const {
 			const unsigned O4 = get_order4();
 			assert(sink.size() >= O4);
-			for (unsigned i = 0; i < O4; i++) { sink[i] = static_cast<T>(extract_val_at(i)); }
+			for (unsigned i = 0; i < O4; ++i) { sink[i] = static_cast<T>(extract_val_at(i)); }
 		}
 
 		// this cannot statically check that T is wide enough. uses static_cast<T>.
@@ -111,7 +111,7 @@ namespace solvent::lib::gen {
 		void write_dead_ends_to(std::span<T> sink) const {
 			const unsigned O4 = get_order4();
 			assert(sink.size() >= O4);
-			for (unsigned i = 0; i < O4; i++) { sink[i] = static_cast<T>(extract_dead_ends_at(i)); }
+			for (unsigned i = 0; i < O4; ++i) { sink[i] = static_cast<T>(extract_dead_ends_at(i)); }
 		}
 		// TODO change the above to not require contiguous layout? Used span because I don't know how to make it take an output_range
 
@@ -168,7 +168,7 @@ namespace solvent::lib::gen {
 		requires std::is_integral_v<T> && (!std::is_const_v<T>) && (sizeof(T) >= sizeof(ord2i_t))
 		void write_to_(std::span<T, O4> sink) const {
 			assert(sink.size() >= O4);
-			for (ord4i_t i = 0; i < O4; i++) { sink[i] = extract_val_at_(i); }
+			for (ord4i_t i = 0; i < O4; ++i) { sink[i] = extract_val_at_(i); }
 		}
 
 	 private:
@@ -185,7 +185,7 @@ namespace solvent::lib::gen {
 		// indexed by `progress_ // O2`
 		std::array<std::array<typename size<O>::ord2x_t, O2>, O2> val_try_orders_ {[]() {
 			std::array<std::array<typename size<O>::ord2x_t, O2>, O2> _;
-			for (auto& vto : _) { for (ord2i_t i = 0; i < O2; i++) { vto[i] = i; } }
+			for (auto& vto : _) { for (ord2i_t i = 0; i < O2; ++i) { vto[i] = i; } }
 			return _;
 		}()};
 
@@ -194,10 +194,10 @@ namespace solvent::lib::gen {
 		std::array<dead_ends_t, O4> dead_ends_; // indexed by progress_
 
 		Params params_;
-		ord4i_t progress_ = 0;
-		uint_fastN_t<std::bit_width(O4)> backtrack_origin_ = 0;
-		dead_ends_t most_dead_ends_seen_ = 0;
-		opcount_t op_count_ = 0;
+		ord4i_t progress_ {0};
+		uint_fastN_t<std::bit_width(O4)> backtrack_origin_ {0};
+		dead_ends_t most_dead_ends_seen_ {0};
+		opcount_t op_count_ {0};
 
 		// Note: even when marked pure, _prog2coord_ doesn't get optimized as well as the current usage.
 		[[nodiscard, gnu::pure]] path::coord_converter_t<O> coord2prog() const noexcept {

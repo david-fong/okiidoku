@@ -1,8 +1,8 @@
 #ifndef HPP_SOLVENT_LIB__GEN__PATH
 #define HPP_SOLVENT_LIB__GEN__PATH
 
-#include <solvent_lib/size.hpp>
-#include <solvent_config.hpp>
+#include "solvent_lib/size.hpp"
+#include "solvent_config.hpp"
 
 #include <iosfwd>
 #include <array>

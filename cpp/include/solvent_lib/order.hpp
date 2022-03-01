@@ -1,7 +1,7 @@
 #ifndef HPP_SOLVENT_LIB__ORDER
 #define HPP_SOLVENT_LIB__ORDER
 
-#include <solvent_config.hpp>
+#include "solvent_config.hpp"
 #include <cstdint>
 
 namespace solvent {

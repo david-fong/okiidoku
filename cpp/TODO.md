@@ -10,12 +10,11 @@
 - try benchmarking if Generator member arrays are changed to vectors and see what happens.
 - use assertions in the code to get automatic testing of contracts in debug builds.
 - consider giving the callback in batch a dedicated mutex, or no mutex at all and leaving it up to the caller. need to consider how likely it is that the bulk of a callback will need synchronization.
-- make a custom vector-like class for grids.
+- make a custom vector-like class for grids?
   - fixed size and capacity, stores in heap. look into possibility of using boost static_vector.
   - use this as the return type of scramble and canonicalize
 - make a buffering RAII adapter for batch callbacks.
 - try making the non-template part of batch noinline? It probably won't make a difference, but I just want to try it to learn how to do it.
-- move canonicalize param from generator to batch (and gen::GeneratorUnion?)
 - in the repl config, consider making some fields per-order. max_dead_ends is a good candidate. verbosity might also be useful, but I'm not sure if it would be surprising in a bad way. should be fine as long as the current values are printed when switching between orders.
 
 - make some grid things for binary serdes.

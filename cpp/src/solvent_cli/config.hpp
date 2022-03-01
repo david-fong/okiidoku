@@ -1,10 +1,10 @@
 #ifndef HPP_SOLVENT_CLI__CONFIG
 #define HPP_SOLVENT_CLI__CONFIG
 
-#include <solvent_cli/enum.hpp>
-// #include <solvent_lib/gen/batch.hpp>
-#include <solvent_lib/gen/mod.hpp>
-#include <solvent_lib/size.hpp>
+#include "solvent_cli/enum.hpp"
+// #include "solvent_lib/gen/batch.hpp"
+#include "solvent_lib/gen/mod.hpp"
+#include "solvent_lib/size.hpp"
 
 #include <map>
 #include <string>
@@ -38,10 +38,10 @@ namespace solvent::cli {
 
 	 private:
 		Order order_;
-		verbosity::Kind verbosity_ = verbosity::Kind::NoGiveups;
-		pathkind_t path_kind_ = pathkind_t::RowMajor;
-		unsigned long long max_dead_ends_ = 0;
-		bool canonicalize_ = false;
+		verbosity::Kind verbosity_ {verbosity::Kind::NoGiveups};
+		pathkind_t path_kind_ {pathkind_t::RowMajor};
+		unsigned long long max_dead_ends_ {0};
+		bool canonicalize_ {false};
 	};
 }
 #endif

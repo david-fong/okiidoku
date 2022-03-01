@@ -1,7 +1,7 @@
-#include <solvent_cli/repl.hpp>
-#include <solvent_lib/gen/mod.hpp>
-#include <solvent_lib/morph/scramble.hpp>
-#include <solvent_util/console_setup.hpp>
+#include "solvent_cli/repl.hpp"
+#include "solvent_lib/gen/mod.hpp"
+#include "solvent_lib/morph/scramble.hpp"
+#include "solvent_util/console_setup.hpp"
 
 #include <string>
 #include <iostream>  // cout,

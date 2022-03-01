@@ -1,7 +1,7 @@
-#include <solvent_cli/repl.hpp>
+#include "solvent_cli/repl.hpp"
 
-#include <solvent_cli/config.hpp>
-#include <solvent_util/str.hpp>
+#include "solvent_cli/config.hpp"
+#include "solvent_util/str.hpp"
 
 #include <iostream> // cout, endl,
 
@@ -22,7 +22,7 @@ namespace solvent::cli {
 			std::cout << "is: " << verbosity() << std::endl;
 			return;
 		}
-		for (unsigned i = 0; i < verbosity::size; i++) {
+		for (unsigned i = 0; i < verbosity::size; ++i) {
 			if (new_verbosity_str.compare(verbosity::NAMES[i]) == 0) {
 				verbosity(verbosity::Kind{i});
 				return;
@@ -73,7 +73,7 @@ namespace solvent::cli {
 			std::cout << "is: " << path_kind() << std::endl;
 			return;
 		}
-		for (unsigned i = 0; i < gen::path::NUM_KINDS; i++) {
+		for (unsigned i = 0; i < gen::path::NUM_KINDS; ++i) {
 			if (new_path_kind_str.compare(gen::path::NAMES[i]) == 0) {
 				path_kind(pathkind_t(i));
 				return;

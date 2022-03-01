@@ -1,4 +1,4 @@
-#include <solvent_util/console_setup.hpp>
+#include "solvent_util/console_setup.hpp"
 
 #include <ios>     // ios_base::sync_with_stdio
 #include <cstdlib> // atexit

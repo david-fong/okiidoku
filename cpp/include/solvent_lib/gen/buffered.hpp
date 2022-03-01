@@ -1,7 +1,7 @@
 #ifndef HPP_SOLVENT_LIB__GEN_BUFFERED
 #define HPP_SOLVENT_LIB__GEN_BUFFERED
 
-#include <solvent_lib/gen/mod.hpp>
+#include "solvent_lib/gen/mod.hpp"
 
 // namespace solvent::lib::gen::buf {
 

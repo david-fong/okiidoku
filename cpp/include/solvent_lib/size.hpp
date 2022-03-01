@@ -3,7 +3,7 @@
 // Note: the byte width type logic could be done with boost, but I don't
 // have any other reason to add boost as a dependency, so I won't.
 
-#include <solvent_lib/order.hpp>
+#include "solvent_lib/order.hpp"
 
 #include <bit>
 #include <cstdint>

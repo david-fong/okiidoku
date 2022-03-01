@@ -1,11 +1,11 @@
-#include <solvent_lib/gen/mod.hpp>
-#include <solvent_lib/gen/batch.hpp>
-#include <solvent_lib/morph/canon.hpp>
-#include <solvent_lib/morph/scramble.hpp>
-// #include <solvent_lib/print.hpp>
-#include <solvent_util/console_setup.hpp>
-#include <solvent_lib/print.hpp>
-#include <solvent_lib/grid.hpp>
+#include "solvent_lib/gen/mod.hpp"
+#include "solvent_lib/gen/batch.hpp"
+#include "solvent_lib/morph/canon.hpp"
+#include "solvent_lib/morph/scramble.hpp"
+// #include "solvent_lib/print.hpp"
+#include "solvent_util/console_setup.hpp"
+#include "solvent_lib/print.hpp"
+#include "solvent_lib/grid.hpp"
 
 #include <iostream>  // cout,
 #include <string>
@@ -40,7 +40,7 @@ unsigned test_morph_O(const unsigned num_rounds) {
 		morph::canonicalize<O>(canon_grid);
 
 		if (gen_grid != canon_grid) {
-			count_bad++;
+			++count_bad;
 			// TODO
 			std::clog << "\n!bad\n";
 			print::text(std::clog, O, gen_grid);
@@ -50,7 +50,7 @@ unsigned test_morph_O(const unsigned num_rounds) {
 		} else {
 			std::clog << ".";
 		}
-		round++;
+		++round;
 	}
 	std::clog.flush();
 	std::cout << "\ncount bad: " << count_bad << " / " << num_rounds;

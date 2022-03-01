@@ -1,7 +1,7 @@
 #ifndef HPP_SOLVENT_UTIL__STR
 #define HPP_SOLVENT_UTIL__STR
 
-#include <solvent_config.hpp>
+#include "solvent_config.hpp"
 
 #include <locale>
 #include <array>

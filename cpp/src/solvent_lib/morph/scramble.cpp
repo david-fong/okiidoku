@@ -1,4 +1,4 @@
-#include <solvent_lib/morph/scramble.hpp>
+#include "solvent_lib/morph/scramble.hpp"
 
 #include <array>
 #include <algorithm>   // shuffle, ranges::copy
@@ -29,7 +29,7 @@ namespace solvent::lib::morph {
 		std::array<std::array<ord1i_t, O1>, O1> row_map;
 		std::array<std::array<ord1i_t, O1>, O1> col_map;
 
-		for (ord2i_t i = 0; i < O2; i++) {
+		for (ord2i_t i = 0; i < O2; ++i) {
 			label_map[i] = i;
 			row_map[i/O1][i%O1] = i;
 			col_map[i/O1][i%O1] = i;
@@ -37,15 +37,15 @@ namespace solvent::lib::morph {
 		std::ranges::shuffle(label_map, ScramblerRng_);
 		// std::ranges::shuffle(row_map, ScramblerRng_);
 		// std::ranges::shuffle(col_map, ScramblerRng_);
-		// for (ord1i_t chute = 0; chute < O1; chute++) {
+		// for (ord1i_t chute = 0; chute < O1; ++chute) {
 		// 	std::ranges::shuffle(row_map[chute], ScramblerRng_);
 		// 	std::ranges::shuffle(col_map[chute], ScramblerRng_);
 		// }
 		// transpose = static_cast<bool>(ScramblerRng_() % 2);
 		// TODO uncomment once canon_label seems to be working.
 		
-		for (ord2i_t row = 0; row < O2; row++) {
-			for (ord2i_t col = 0; col < O2; col++) {
+		for (ord2i_t row = 0; row < O2; ++row) {
+			for (ord2i_t col = 0; col < O2; ++col) {
 				ord2i_t mapped_row = row_map[row/O1][row%O1];
 				ord2i_t mapped_col = col_map[col/O1][col%O1];
 				if (transpose) { std::swap(mapped_row, mapped_col); }
@@ -68,9 +68,9 @@ namespace solvent::lib::morph {
 				constexpr unsigned O4 = O_*O_*O_*O_; \
 				using val_t = size<O_>::ord2i_t; \
 				std::array<val_t,O4> grid_resize; \
-				for (unsigned i = 0; i < O4; i++) { grid_resize[i] = static_cast<val_t>(grid[i]); } \
+				for (unsigned i = 0; i < O4; ++i) { grid_resize[i] = static_cast<val_t>(grid[i]); } \
 				scramble<O_>(std::span(grid_resize)); \
-				for (unsigned i = 0; i < O4; i++) { grid[i] = static_cast<T>(grid_resize[i]); } \
+				for (unsigned i = 0; i < O4; ++i) { grid[i] = static_cast<T>(grid_resize[i]); } \
 				break; \
 			}
 		M_SOLVENT_INSTANTIATE_ORDER_TEMPLATES

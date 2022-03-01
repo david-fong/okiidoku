@@ -1,5 +1,5 @@
-#include <solvent_lib/print.hpp>
-#include <solvent_util/str.hpp>
+#include "solvent_lib/print.hpp"
+#include "solvent_util/str.hpp"
 
 #include <iostream>
 #include <cassert>
@@ -42,8 +42,8 @@ namespace solvent::lib::print {
 			else if (border_i == O) { os << NOOK_B; } \
 			else                    { os << NOOK_C; }
 			M_NOOK(" ┌", " ├", " └")
-			for (unsigned blk_col = 0; blk_col < O; blk_col++) {
-				for (unsigned i = 0; i < 1u + (2u * O); i++) {
+			for (unsigned blk_col = 0; blk_col < O; ++blk_col) {
+				for (unsigned i = 0; i < 1u + (2u * O); ++i) {
 					os << "─";
 				}
 				if (blk_col < O - 1u) { M_NOOK("┬", "┼", "┴") }
@@ -55,20 +55,20 @@ namespace solvent::lib::print {
 		auto print_blk_row_sep_strings = [&](const unsigned border_i) mutable {
 			os << '\n';
 			print_blk_row_sep_string_(border_i);
-			for (unsigned i = 1; i < grid_views.size(); i++) {
+			for (unsigned i = 1; i < grid_views.size(); ++i) {
 				os << "   ";
 				print_blk_row_sep_string_(border_i);
 			}
 		};
 
 		os << str::DIM.ON;
-		for (ord2i_t row = 0; row < O*O; row++) {
+		for (ord2i_t row = 0; row < O*O; ++row) {
 			if (row % O == 0) {
 				print_blk_row_sep_strings(row / O);
 			}
 			os << '\n';
-			for (unsigned grid_i = 0; grid_i < grid_views.size(); grid_i++) {
-				for (ord2i_t col = 0; col < O*O; col++) {
+			for (unsigned grid_i = 0; grid_i < grid_views.size(); ++grid_i) {
+				for (ord2i_t col = 0; col < O*O; ++col) {
 					if ((col % O) == 0) { os << str::DIM.ON << " │" << str::DIM.OFF; }
 					grid_views[grid_i](os, row * O*O + col);
 				}
