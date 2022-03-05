@@ -115,7 +115,7 @@ namespace solvent::lib::gen {
 		}
 		// TODO change the above to not require contiguous layout? Used span because I don't know how to make it take an output_range
 
-		static std::string shaded_dead_end_stat(dead_ends_t out_of, dead_ends_t count) {
+		static std::string_view shaded_dead_end_stat(dead_ends_t out_of, dead_ends_t count) {
 			assert(count <= out_of);
 			return (count == 0) ? " " : util::str::block_chars[static_cast<std::size_t>(
 				(count) * util::str::block_chars.size() / (out_of + 1)
@@ -136,9 +136,9 @@ namespace solvent::lib::gen {
 		using ord4x_t = size<O>::ord4x_t;
 		using dead_ends_t = cell_dead_ends::t<O>;
 
-		static constexpr ord1i_t O1 = O;
-		static constexpr ord2i_t O2 = O*O;
-		static constexpr ord4i_t O4 = O*O*O*O;
+		[[gnu::visibility("hidden")]] static constexpr ord1i_t O1 = O;
+		[[gnu::visibility("hidden")]] static constexpr ord2i_t O2 = O*O;
+		[[gnu::visibility("hidden")]] static constexpr ord4i_t O4 = O*O*O*O;
 
 		void operator()(Params) override;
 
@@ -174,13 +174,15 @@ namespace solvent::lib::gen {
 	 private:
 		struct Cell final {
 			ord2i_t try_index; // Index into val_try_orders_. O2 if clear.
-			void clear() noexcept { try_index = O2; }
-			[[nodiscard, gnu::pure]] bool is_clear() const noexcept { return try_index == O2; }
+			[[gnu::visibility("hidden")]] void clear() noexcept { try_index = O2; }
+			[[gnu::visibility("hidden"), nodiscard, gnu::pure]] bool is_clear() const noexcept { return try_index == O2; }
 		};
 		struct Direction final {
 			bool is_back;
 			bool is_back_skip; // only meaningful when is_back is true.
 		};
+		Params params_;
+		ord4i_t progress_ {0};
 
 		// indexed by `progress_ // O2`
 		std::array<std::array<typename size<O>::ord2x_t, O2>, O2> val_try_orders_ {[]() {
@@ -193,19 +195,17 @@ namespace solvent::lib::gen {
 		std::array<has_mask_t, O2> rows_has_, cols_has_, blks_has_;
 		std::array<dead_ends_t, O4> dead_ends_; // indexed by progress_
 
-		Params params_;
-		ord4i_t progress_ {0};
 		uint_fastN_t<std::bit_width(O4)> backtrack_origin_ {0};
 		dead_ends_t most_dead_ends_seen_ {0};
 		opcount_t op_count_ {0};
 
 		// Note: even when marked pure, _prog2coord_ doesn't get optimized as well as the current usage.
-		[[nodiscard, gnu::pure]] path::coord_converter_t<O> coord_to_prog() const noexcept {
+		[[gnu::visibility("hidden"), nodiscard, gnu::pure]] path::coord_converter_t<O> get_coord_to_prog_() const noexcept {
 			return path::get_coord2prog_converter<O>(params_.path_kind);
 		}
 
-		[[gnu::hot]] void generate_();
-		[[gnu::hot]] Direction set_next_valid_(path::coord_converter_t<O>, bool backtracked) noexcept;
+		[[gnu::visibility("hidden"), gnu::hot]] void generate_();
+		[[gnu::visibility("hidden"), gnu::hot]] Direction set_next_valid_(path::coord_converter_t<O>, bool backtracked) noexcept;
 	};
 
 

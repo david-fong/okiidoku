@@ -6,6 +6,7 @@
 #include <locale>
 #include <array>
 #include <string>
+#include <string_view>
 
 //
 namespace solvent::util::str {
@@ -43,7 +44,7 @@ namespace solvent::util::str {
 	 * See https://cppreference.com/w/cpp/language/sizeof...#Example
 	 * for an example utility function I can make to avoid this problem.
 	 */
-	inline const std::array<std::string, 4> block_chars {
+	inline constexpr std::array<std::string_view, 4> block_chars {
 		#if USE_ANSI_ESC
 		"\u2591", "\u2592", "\u2593", "\u2588",
 		#else

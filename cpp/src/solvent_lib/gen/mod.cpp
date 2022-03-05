@@ -12,7 +12,7 @@ namespace solvent::lib::gen {
 	// long long total = 0;
 	// long long true_ = 0;
 
-	std::mt19937 Rng_;
+	static std::mt19937 Rng_;
 	void seed_rng(std::uint_fast64_t seed) noexcept {
 		Rng_.seed(seed);
 	}
@@ -83,7 +83,7 @@ namespace solvent::lib::gen {
 
 	template<Order O>
 	GeneratorO<O>::ord2i_t GeneratorO<O>::extract_val_at_(const GeneratorO<O>::ord4x_t coord) const noexcept {
-		const auto p = coord_to_prog()(coord);
+		const auto p = get_coord_to_prog_()(coord);
 		const auto try_index = cells_[p].try_index;
 		if (try_index == O2) { return O2; }
 		return val_try_orders_[p/O2][try_index];
@@ -92,7 +92,7 @@ namespace solvent::lib::gen {
 
 	template<Order O>
 	GeneratorO<O>::dead_ends_t GeneratorO<O>::extract_dead_ends_at_(const ord4x_t coord) const noexcept {
-		return dead_ends_[coord_to_prog()(coord)];
+		return dead_ends_[get_coord_to_prog_()(coord)];
 	}
 
 

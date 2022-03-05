@@ -2,6 +2,7 @@
 
 ## Higher Priority
 
+- look for where string_view can be taken as a function argument instead of `const string&` <https://stackoverflow.com/a/40129198/11107541>
 - try making Order an enum
   - see if it can improve switch case cover detection.
   - this may also make it possible to statically enforce contracts about orders for the non-template wrapper functions. If so, I will probably neither need to assert that the order is compiled, nor write vacuous default branches for their switch statements.

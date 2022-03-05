@@ -1,4 +1,5 @@
-add_library(solvent_lib STATIC
+add_library(solvent_lib SHARED
+	# note: gen takes ~20% longer when linked dynamically
 	grid.cpp
 	print.cpp
 	morph/canon_label.cpp
@@ -9,6 +10,13 @@ add_library(solvent_lib STATIC
 	gen/mod.cpp
 	gen/batch.cpp
 	gen/batch_print.cpp
+)
+target_compile_options(solvent_lib
+	PRIVATE
+	-fvisibility=default
+	# ^would like to use default hidden, but that would mean defining macros
+	# for supporting many compilers, or writing huge attribute lists. chose
+	# default for experimentation and avoiding compiler compat headaches.
 )
 
 find_package(Threads REQUIRED)

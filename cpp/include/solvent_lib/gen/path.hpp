@@ -6,7 +6,7 @@
 
 #include <iosfwd>
 #include <array>
-#include <string>
+#include <string_view>
 
 namespace solvent::lib::gen::path {
 
@@ -19,16 +19,16 @@ namespace solvent::lib::gen::path {
 	constexpr size_t num_kinds = static_cast<size_t>(Kind::__MAX__) + 1;
 	// Indices of entries must match the
 	// literal values of their respective enums.
-	inline const std::array<std::string, num_kinds> names {
+	constexpr std::array<std::string_view, num_kinds> names {
 		"rowmajor",
 		"blockcol",
 		"dealrwmj",
 	};
 	extern std::ostream& operator<<(std::ostream& os, Kind path_kind);
-	inline const std::string options_menu_str = "\nGEN-PATH OPTIONS:"
+	constexpr std::string_view options_menu_str {"\nGEN-PATH OPTIONS:"
 		"\n- rowmajor   horizontal strips as wide as the grid one by one"
 		"\n- blockcol   rowmajor, but broken into columns one block wide"
-		"\n- dealrwmj   like dealing cards to each block using row-major";
+		"\n- dealrwmj   like dealing cards to each block using row-major"};
 
 
 	// input progress must be _less than_ O4.

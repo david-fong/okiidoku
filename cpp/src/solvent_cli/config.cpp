@@ -4,6 +4,7 @@
 #include "solvent_util/str.hpp"
 
 #include <iostream> // cout, endl,
+#include <charconv> // from_chars
 
 namespace solvent::cli {
 
@@ -17,7 +18,7 @@ namespace solvent::cli {
 		verbosity_ = verbosity;
 	}
 
-	void Config::verbosity(const std::string& new_verbosity_str) {
+	void Config::verbosity(const std::string_view new_verbosity_str) {
 		if (new_verbosity_str.empty()) {
 			std::cout << "is: " << verbosity() << std::endl;
 			return;
@@ -38,20 +39,20 @@ namespace solvent::cli {
 		order_ = new_order;
 	}
 
-	void Config::order(const std::string& new_order_str) {
+	void Config::order(const std::string_view new_order_str) {
 		if (new_order_str.empty()) {
 			std::cout << "is: " << order() << std::endl;
 			return;
 		}
-		try {
-			const int new_order = std::stoi(new_order_str);
+		int new_order {};
+		const auto parse_result = std::from_chars(new_order_str.begin(), new_order_str.end(), new_order);
+		if (parse_result.ec == std::errc{}) {
 			switch (new_order) {
 			#define M_SOLVENT_TEMPL_TEMPL(O_) \
 				case O_: { order(new_order); return; }
 			M_SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 			#undef M_SOLVENT_TEMPL_TEMPL
 			}
-		} catch (const std::invalid_argument& ia) {
 		}
 		std::cout
 			<< str::red.on << '"' << new_order_str << "\" is not a valid order.\n" << str::red.off
@@ -68,7 +69,7 @@ namespace solvent::cli {
 		path_kind_ = new_path_kind;
 	}
 
-	void Config::path_kind(const std::string& new_path_kind_str) noexcept {
+	void Config::path_kind(const std::string_view new_path_kind_str) noexcept {
 		if (new_path_kind_str.empty()) {
 			std::cout << "is: " << path_kind() << std::endl;
 			return;
@@ -90,7 +91,7 @@ namespace solvent::cli {
 		max_dead_ends_ = max_dead_ends;
 	}
 
-	void Config::max_dead_ends(const std::string& new_max_dead_ends_str) {
+	void Config::max_dead_ends(const std::string_view new_max_dead_ends_str) {
 		if (new_max_dead_ends_str.empty()) {
 			std::cout << "is: " << max_dead_ends()
 				<< "\nsetting to zero will default to " << gen::cell_dead_ends::limit_default[order_]
@@ -98,15 +99,15 @@ namespace solvent::cli {
 				<< std::endl;
 			return;
 		}
-		try {
-			max_dead_ends(std::stoull(new_max_dead_ends_str));
+		unsigned long long new_max_dead_ends {};
+		const auto parse_result = std::from_chars(new_max_dead_ends_str.begin(), new_max_dead_ends_str.end(), new_max_dead_ends);
+		if (parse_result.ec == std::errc{}) {
+			max_dead_ends(new_max_dead_ends);
 			// TODO.impl handle negative numbers being parsed as uints
-		} catch (const std::invalid_argument& ia) {
-			std::cout << max_dead_ends() << " (unchanged).\n"
-				<< str::red.on << '"' << new_max_dead_ends_str << "\" is not a valid uint64_t.\n" << str::red.off
-				<< verbosity::options_menu_str << std::endl;
-			return;
 		}
+		std::cout << max_dead_ends() << " (unchanged).\n"
+			<< str::red.on << '"' << new_max_dead_ends_str << "\" is not a valid value.\n" << str::red.off
+			<< verbosity::options_menu_str << std::endl;
 	}
 
 
@@ -114,7 +115,7 @@ namespace solvent::cli {
 		canonicalize_ = canonicalize;
 	}
 
-	void Config::canonicalize(const std::string& new_canonicalize_str) {
+	void Config::canonicalize(const std::string_view new_canonicalize_str) {
 		if (new_canonicalize_str.empty()) {
 			std::cout << "is: " << (canonicalize() ? "y" : "n") << std::endl;
 			return;

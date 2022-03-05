@@ -12,7 +12,7 @@
 namespace solvent::lib::morph {
 
 	template<Order O>
-	class CanonPlace final {
+	class [[gnu::visibility("hidden")]] CanonPlace final {
 	 static_assert((O > 0) && (O <= O_MAX));
 		using has_mask_t = size<O>::O2_mask_least_t;
 		using ord1i_t = size<O>::ord1i_t;

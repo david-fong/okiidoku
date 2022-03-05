@@ -3,17 +3,18 @@
 
 #include <iostream>
 #include <iomanip>
-#include <string>
+#include <string_view>
 
 namespace solvent::lib::gen::batch {
 
+	static constexpr std::string_view throughput_bar_str {"-------------------------"};
+	static constexpr std::string_view table_separator {
+	"\n├─────────────┼────────────┼───────────────┼───────────────┤"};
+	static constexpr std::string_view table_header {
+	"\n│     max     │  marginal  │   marginal    │      net      │"
+	"\n│  dead ends  │    oks     │  average ops  │  average ops  │"};
+
 	void BatchReport::print(std::ostream& os, const Order O) const {
-		static const std::string throughput_bar_str("-------------------------");
-		static const std::string table_separator =
-		"\n├─────────────┼────────────┼───────────────┼───────────────┤";
-		static const std::string table_header =
-		"\n│     max     │  marginal  │   marginal    │      net      │"
-		"\n│  dead ends  │    oks     │  average ops  │  average ops  │";
 
 		const auto prev_fmtflags = os.flags();
 		os << table_separator
