@@ -7,7 +7,7 @@
 namespace solvent::lib::print {
 
 	// value must not be greater than O^2.
-	void val2str(std::ostream& os, const solvent::Order O, const uint8_t value) {
+	void val_to_str(std::ostream& os, const solvent::Order O, const uint8_t value) {
 		if (value == O*O) [[unlikely]] {
 			os << ' ';
 		} else {
@@ -27,7 +27,7 @@ namespace solvent::lib::print {
 	void text(std::ostream& os, const solvent::Order O, const std::span<const std::uint8_t> grid_view) {
 		assert(grid_view.size() == O*O*O*O);
 		for (auto v : grid_view) {
-			print::val2str(os, O, v);
+			print::val_to_str(os, O, v);
 		}
 	}
 
@@ -61,7 +61,7 @@ namespace solvent::lib::print {
 			}
 		};
 
-		os << str::DIM.ON;
+		os << str::dim.on;
 		for (ord2i_t row = 0; row < O*O; ++row) {
 			if (row % O == 0) {
 				print_blk_row_sep_strings(row / O);
@@ -69,16 +69,16 @@ namespace solvent::lib::print {
 			os << '\n';
 			for (unsigned grid_i = 0; grid_i < grid_views.size(); ++grid_i) {
 				for (ord2i_t col = 0; col < O*O; ++col) {
-					if ((col % O) == 0) { os << str::DIM.ON << " │" << str::DIM.OFF; }
+					if ((col % O) == 0) { os << str::dim.on << " │" << str::dim.off; }
 					grid_views[grid_i](os, row * O*O + col);
 				}
-				os << str::DIM.ON << " │";
+				os << str::dim.on << " │";
 				if (grid_i != grid_views.size() - 1) {
 					os << "   ";
 				}
 			}
 		}
 		print_blk_row_sep_strings(O);
-		os << str::DIM.OFF;
+		os << str::dim.off;
 	}
 }

@@ -31,7 +31,7 @@ namespace solvent::cli {
 		const auto my_numpunct = new util::str::MyNumPunct;
 		const auto pushed_locale = std::cout.imbue(std::locale(std::cout.getloc(), my_numpunct ));
 		std::cout
-		<< '\n' << str::DIM.ON << TERMINAL_OUTPUT_TIPS << str::DIM.OFF
+		<< '\n' << str::dim.on << TERMINAL_OUTPUT_TIPS << str::dim.off
 		<< '\n' << Command::HelpMessage
 		<< std::endl;
 
@@ -56,20 +56,20 @@ namespace solvent::cli {
 		const auto it = Command::Str2Enum.find(cmd_name);
 		if (it == Command::Str2Enum.end()) {
 			// No command name was matched.
-			std::cout << str::RED.ON;
+			std::cout << str::red.on;
 			std::cout << "command \"" << cmd_line << "\" not found."
 				" enter \"help\" for the help menu.";
-			std::cout << str::RED.OFF << std::endl;
+			std::cout << str::red.off << std::endl;
 			return true;
 		}
 		switch (it->second) {
 			using Command::E;
 			case E::Help:
 				std::cout
-				<< Command::HelpMessage << str::DIM.ON
-				<< '\n' << verbosity::OPTIONS_MENU
-				<< '\n' << gen::path::OPTIONS_MENU
-				<< str::DIM.OFF << std::endl;
+				<< Command::HelpMessage << str::dim.on
+				<< '\n' << verbosity::options_menu_str
+				<< '\n' << gen::path::options_menu_str
+				<< str::dim.off << std::endl;
 				break;
 			case E::Quit:
 				return false;
@@ -109,7 +109,7 @@ namespace solvent::cli {
 			
 			const std::vector<print::print_grid_t> grid_accessors {
 				print::print_grid_t([&](std::ostream& _os, uint16_t coord) {
-					_os << ' '; print::val2str(_os, config_.order(), grid[coord]);
+					_os << ' '; print::val_to_str(_os, config_.order(), grid[coord]);
 				}),
 				print::print_grid_t([&](std::ostream& _os, uint16_t coord) {
 					const auto shade = gen::Generator::shaded_dead_end_stat(static_cast<dead_ends_t>(gen_->get_params().max_dead_ends), dead_ends[coord]);
@@ -167,10 +167,10 @@ namespace solvent::cli {
 			&& only_count_oks
 			&& batch_report.total_anys == 0
 		) {
-			std::cout << str::RED.ON << "* all generations aborted" << str::RED.OFF;
+			std::cout << str::red.on << "* all generations aborted" << str::red.off;
 		}
 
-		static const std::string seconds_units = std::string() + str::DIM.ON + " seconds (with I/O)" + str::DIM.OFF;
+		static const std::string seconds_units = std::string() + str::dim.on + " seconds (with I/O)" + str::dim.off;
 		std::cout << std::setprecision(4)
 			<< "\nstop after:      " << params.stop_after
 			<< "\nnum threads:     " << params.num_threads
@@ -199,15 +199,15 @@ namespace solvent::cli {
 		try {
 			stop_by_value = std::stoul(stop_after_str);
 			if (stop_by_value <= 0) {
-				std::cout << str::RED.ON
+				std::cout << str::red.on
 					<< "please provide a non-zero, positive integer."
-					<< str::RED.OFF << std::endl;
+					<< str::red.off << std::endl;
 				return;
 			}
 		} catch (const std::invalid_argument& ia) {
-			std::cout << str::RED.ON
+			std::cout << str::red.on
 				<< "could not convert \"" << stop_after_str << "\" to an integer."
-				<< str::RED.OFF << std::endl;
+				<< str::red.off << std::endl;
 			return;
 		}
 		this->gen_multiple(stop_by_value, only_count_oks);

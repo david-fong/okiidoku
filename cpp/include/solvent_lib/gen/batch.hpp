@@ -42,9 +42,9 @@ namespace solvent::lib::gen::batch {
 			std::optional<double> marginal_average_ops; // marginal_ops / marginal_oks. null if no oks.
 			std::optional<double> net_average_ops; // (accumulated marginal_ops) / (accumulated marginal_oks). null if no oks.
 		};
-		static constexpr unsigned SAMPLE_GRANULARITY_DEFAULT {20u};
-		static constexpr unsigned SAMPLE_GRANULARITY_MAX {50u};
-		static constexpr unsigned RECOMMENDED_OKS_PER_SAMPLE {20u};
+		static constexpr unsigned sample_granularity_default {20u};
+		static constexpr unsigned sample_granularity_max {50u};
+		static constexpr unsigned recommended_oks_per_sample {20u};
 
 		// Data sampled. Each entry showing the outcome if its max_dead_ends
 		// value was used.
@@ -55,12 +55,12 @@ namespace solvent::lib::gen::batch {
 	};
 
 
-	constexpr unsigned TRY_DEFAULT_NUM_EXTRA_THREADS_(const Order O) {
+	constexpr unsigned try_default_num_extra_threads_(const Order O) {
 		if (O < 4) { return 0; }
 		else if (O == 4) { return 1; }
 		else { return 2; }
 	};
-	unsigned DEFAULT_NUM_THREADS(Order O);
+	unsigned default_num_threads(Order O);
 
 
 	template<Order O>

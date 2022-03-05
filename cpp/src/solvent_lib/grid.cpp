@@ -17,7 +17,7 @@ namespace solvent::lib {
 			for (ord2i_t col = 0; col < O2; ++col) {
 				auto& row_has = rows_has_[row];
 				auto& col_has = cols_has_[col];
-				auto& blk_has = blks_has_[rmi2blk<O>(row, col)];
+				auto& blk_has = blks_has_[rmi_to_blk<O>(row, col)];
 
 				const auto val = grid[(O2*row) + col];
 				if (val == O2) { continue; }

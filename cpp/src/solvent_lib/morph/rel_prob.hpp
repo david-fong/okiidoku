@@ -31,7 +31,7 @@ namespace solvent::lib::morph {
 				_[i] = (static_cast<double>(n_choose_r(O2, i)) * std::pow(O1, O2-i)) / std::pow(O1+1, O2); }
 			return _;
 		}();
-		static constexpr double POLAR_E = O2 * (1.0/(O+1));
+		static constexpr double polar_e = O2 * (1.0/(O+1));
 	};
 }
 #endif

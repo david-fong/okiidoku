@@ -8,14 +8,14 @@
 
 namespace solvent::lib::gen::batch {
 
-	unsigned DEFAULT_NUM_THREADS(const Order O) {
+	unsigned default_num_threads(const Order O) {
 		const unsigned hwc = std::thread::hardware_concurrency();
 		if (hwc == 0) {
 			// Note: hardware_concurency is specified to be zero if unknown.
 			return 1;
 		}
 		else return std::min(
-			TRY_DEFAULT_NUM_EXTRA_THREADS_(O) + 1,
+			try_default_num_extra_threads_(O) + 1,
 			hwc == 1 ? 1 : hwc - 1 // leave at least one spare thread
 		);
 	}
@@ -24,10 +24,10 @@ namespace solvent::lib::gen::batch {
 	Params Params::clean(const Order O) noexcept {
 		gen_params.clean(O);
 		if (num_threads == 0) {
-			num_threads = DEFAULT_NUM_THREADS(O);
+			num_threads = default_num_threads(O);
 		}
 		if (max_dead_end_sample_granularity == 0) {
-			max_dead_end_sample_granularity = BatchReport::SAMPLE_GRANULARITY_DEFAULT;
+			max_dead_end_sample_granularity = BatchReport::sample_granularity_default;
 		}
 		return *this;
 	}
@@ -86,7 +86,7 @@ namespace solvent::lib::gen::batch {
 	}
 
 
-	BatchReport batch_(const Order O, Params& params, std::function<std::thread(ThreadSharedData&, std::mutex&)> mk_thread) {
+	[[gnu::noinline]] BatchReport batch_(const Order O, Params& params, std::function<std::thread(ThreadSharedData&, std::mutex&)> mk_thread) {
 		params.clean(O);
 		std::mutex sd_mutex;
 		ThreadSharedData sd {.params {params}};

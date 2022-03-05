@@ -6,18 +6,17 @@
   - see if it can improve switch case cover detection.
   - this may also make it possible to statically enforce contracts about orders for the non-template wrapper functions. If so, I will probably neither need to assert that the order is compiled, nor write vacuous default branches for their switch statements.
   - if this works out, make sure to update all the contract docs and remove relevant assertions.
-- try benchmarking when has_mask in Generator is changed to use small instead fast definition.
 - try benchmarking if Generator member arrays are changed to vectors and see what happens.
-- use assertions in the code to get automatic testing of contracts in debug builds.
 - consider giving the callback in batch a dedicated mutex, or no mutex at all and leaving it up to the caller. need to consider how likely it is that the bulk of a callback will need synchronization.
 - make a custom vector-like class for grids?
   - fixed size and capacity, stores in heap. look into possibility of using boost static_vector.
   - use this as the return type of scramble and canonicalize
 - make a buffering RAII adapter for batch callbacks.
-- try making the non-template part of batch noinline? It probably won't make a difference, but I just want to try it to learn how to do it.
 - in the repl config, consider making some fields per-order. max_dead_ends is a good candidate. verbosity might also be useful, but I'm not sure if it would be surprising in a bad way. should be fine as long as the current values are printed when switching between orders.
+- the opcount diagnostics shouldn't be taken seriously. opcount itself currently isn't ery representative of effort expended since it doesn't count iterations of the try_val loop.
 
 - make some grid things for binary serdes.
+  - this can be useful for gathering up a dataset of order-5 grids for future experimentation and benchmarking/testing of the non-generation parts of this library (scramble, canonicalize).
 
 - "smarter"/greedier backtracking: backtracking may be occurring frequently at a coord because of values much earlier in the genpath progress.
   - backtracking is less likely to occur when other coords in the same house as the stuck coord that have different house types have the same value (overlapping has_mask). Can make an array like a count version of has_mask counting the times a value is taken in each house seen by the stuck coord.

@@ -35,21 +35,21 @@ namespace solvent::lib {
 	template<Order O> [[nodiscard]] bool is_grid_valid(grid_const_span_t<O>) noexcept;
 
 
-	template<Order O> [[nodiscard, gnu::const]] constexpr typename size<O>::ord2i_t rmi2row(const typename size<O>::ord4i_t index) noexcept { return static_cast<size<O>::ord2i_t>(index / (O*O)); } // I love c++ :')
-	template<Order O> [[nodiscard, gnu::const]] constexpr typename size<O>::ord2i_t rmi2col(const typename size<O>::ord4i_t index) noexcept { return static_cast<size<O>::ord2i_t>(index % (O*O)); } // whyyyyyyyyyy
-	template<Order O> [[nodiscard, gnu::const]] constexpr typename size<O>::ord2i_t rmi2blk(const typename size<O>::ord2i_t row, const typename size<O>::ord2i_t col) noexcept {
+	template<Order O> [[nodiscard, gnu::const]] constexpr typename size<O>::ord2i_t rmi_to_row(const typename size<O>::ord4i_t index) noexcept { return static_cast<size<O>::ord2i_t>(index / (O*O)); } // I love c++ :')
+	template<Order O> [[nodiscard, gnu::const]] constexpr typename size<O>::ord2i_t rmi_to_col(const typename size<O>::ord4i_t index) noexcept { return static_cast<size<O>::ord2i_t>(index % (O*O)); } // whyyyyyyyyyy
+	template<Order O> [[nodiscard, gnu::const]] constexpr typename size<O>::ord2i_t rmi_to_blk(const typename size<O>::ord2i_t row, const typename size<O>::ord2i_t col) noexcept {
 		return static_cast<size<O>::ord2i_t>((row / O) * O) + (col / O);
 	}
 	template<Order O> [[nodiscard, gnu::const]]
-	constexpr typename size<O>::ord2i_t rmi2blk(const typename size<O>::ord4i_t index) noexcept {
-		return rmi2blk<O>(rmi2row<O>(index), rmi2col<O>(index));
+	constexpr typename size<O>::ord2i_t rmi_to_blk(const typename size<O>::ord4i_t index) noexcept {
+		return rmi_to_blk<O>(rmi_to_row<O>(index), rmi_to_col<O>(index));
 	}
 
 	template<Order O> [[nodiscard, gnu::const]]
 	static constexpr bool cells_share_house(typename size<O>::ord4i_t c1, typename size<O>::ord4i_t c2) noexcept {
-		return (rmi2row<O>(c1) == rmi2row<O>(c2))
-			||  (rmi2col<O>(c1) == rmi2col<O>(c2))
-			||  (rmi2blk<O>(c1) == rmi2blk<O>(c2));
+		return (rmi_to_row<O>(c1) == rmi_to_row<O>(c2))
+			||  (rmi_to_col<O>(c1) == rmi_to_col<O>(c2))
+			||  (rmi_to_blk<O>(c1) == rmi_to_blk<O>(c2));
 	}
 	// Note: the compiler optimizes the division/modulus pairs just fine.
 	

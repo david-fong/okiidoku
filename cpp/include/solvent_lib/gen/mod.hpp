@@ -29,7 +29,7 @@ namespace solvent::lib::gen {
 
 	namespace cell_dead_ends {
 		// TODO these values are tuned for genpath=rowmajor. make one for each genpath? :/
-		constexpr unsigned long long LIMIT_DEFAULT[]{ 0, 0, 3,
+		constexpr unsigned long long limit_default[]{ 0, 0, 3,
 			/*3*/30,
 			/*4*/700,
 			/*5*/100'000, // changing to anything between this and 100K doesn't seem to have any significant difference? I only tested with gen_ok 20 though.
@@ -37,14 +37,14 @@ namespace solvent::lib::gen {
 			/*7*/10'000'000'000ull // <- not tested AT ALL ...
 		};
 		// allows up to and including
-		constexpr unsigned long long LIMIT_I_MAX[]{ 0, 0, 3,
+		constexpr unsigned long long limit_i_max[]{ 0, 0, 3,
 			/*3*/1'000,
 			/*4*/10'000,
 			/*5*/100'000'000ull, //  <- not tested AT ALL ...
 			/*6*/10'000'000'000ull // <- not tested AT ALL ...
 		};
 		template<Order O>
-		using t = uint_leastN_t<std::bit_width(LIMIT_I_MAX[O])>;
+		using t = uint_leastN_t<std::bit_width(limit_i_max[O])>;
 	};
 
 
@@ -117,8 +117,8 @@ namespace solvent::lib::gen {
 
 		static std::string shaded_dead_end_stat(dead_ends_t out_of, dead_ends_t count) {
 			assert(count <= out_of);
-			return (count == 0) ? " " : util::str::BLOCK_CHARS[static_cast<std::size_t>(
-				(count) * util::str::BLOCK_CHARS.size() / (out_of + 1)
+			return (count == 0) ? " " : util::str::block_chars[static_cast<std::size_t>(
+				(count) * util::str::block_chars.size() / (out_of + 1)
 			)];
 		}
 	};
@@ -129,7 +129,7 @@ namespace solvent::lib::gen {
 	class GeneratorO final : public Generator {
 		static_assert((O > 0) && (O <= O_MAX) && (O < 6)); // added restriction for sanity
 	 public:
-		using has_mask_t = size<O>::O2_mask_fast_t;
+		using has_mask_t = size<O>::O2_mask_least_t; // perf seemed similar and slightly better compared to fast_t
 		using ord1i_t = size<O>::ord1i_t;
 		using ord2i_t = size<O>::ord2i_t;
 		using ord4i_t = size<O>::ord4i_t;
@@ -200,7 +200,7 @@ namespace solvent::lib::gen {
 		opcount_t op_count_ {0};
 
 		// Note: even when marked pure, _prog2coord_ doesn't get optimized as well as the current usage.
-		[[nodiscard, gnu::pure]] path::coord_converter_t<O> coord2prog() const noexcept {
+		[[nodiscard, gnu::pure]] path::coord_converter_t<O> coord_to_prog() const noexcept {
 			return path::get_coord2prog_converter<O>(params_.path_kind);
 		}
 

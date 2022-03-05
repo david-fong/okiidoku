@@ -16,16 +16,16 @@ namespace solvent::lib::gen::path {
 		DealRwMj,
 		__MAX__ = DealRwMj,
 	};
-	constexpr size_t NUM_KINDS = static_cast<size_t>(Kind::__MAX__) + 1;
+	constexpr size_t num_kinds = static_cast<size_t>(Kind::__MAX__) + 1;
 	// Indices of entries must match the
 	// literal values of their respective enums.
-	inline const std::array<std::string, NUM_KINDS> NAMES {
+	inline const std::array<std::string, num_kinds> names {
 		"rowmajor",
 		"blockcol",
 		"dealrwmj",
 	};
 	extern std::ostream& operator<<(std::ostream& os, Kind path_kind);
-	inline const std::string OPTIONS_MENU = "\nGEN-PATH OPTIONS:"
+	inline const std::string options_menu_str = "\nGEN-PATH OPTIONS:"
 		"\n- rowmajor   horizontal strips as wide as the grid one by one"
 		"\n- blockcol   rowmajor, but broken into columns one block wide"
 		"\n- dealrwmj   like dealing cards to each block using row-major";

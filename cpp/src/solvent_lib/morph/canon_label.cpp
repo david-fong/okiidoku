@@ -41,13 +41,13 @@ namespace solvent::lib::morph {
 						for (ord1i_t j = i + 1; j < O1; ++j) {
 							{ // boxrow
 								const ord2i_t i_val = grid.at(line, atom+i), j_val = grid.at(line, atom+j);
-								const has_mask_t blk_mask_bit = 1 << rmi2blk<O>(line, atom);
+								const has_mask_t blk_mask_bit = 1 << rmi_to_blk<O>(line, atom);
 								masks[i_val][j_val].blocks_h |= blk_mask_bit;
 								masks[j_val][i_val].blocks_h |= blk_mask_bit;
 							}
 							{ // boxcol
 								const ord2i_t i_val = grid.at(atom+i, line), j_val = grid.at(atom+j, line);
-								const has_mask_t blk_mask_bit = 1 << rmi2blk<O>(atom, line);
+								const has_mask_t blk_mask_bit = 1 << rmi_to_blk<O>(atom, line);
 								masks[i_val][j_val].blocks_v |= blk_mask_bit;
 								masks[j_val][i_val].blocks_v |= blk_mask_bit;
 							}

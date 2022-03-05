@@ -3,7 +3,7 @@
 namespace solvent::lib::gen::path {
 
 	std::ostream& operator<<(std::ostream& os, const Kind path_kind) {
-		return os << NAMES[static_cast<size_t>(path_kind)];
+		return os << names[static_cast<size_t>(path_kind)];
 	}
 
 

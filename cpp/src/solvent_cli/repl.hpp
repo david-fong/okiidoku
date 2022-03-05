@@ -60,7 +60,7 @@ namespace solvent::cli {
 	}
 
 	// Returns zero on error.
-	inline unsigned GET_TERM_COLS(void) noexcept {
+	inline unsigned get_terminal_num_cols(void) noexcept {
 		char const*const env_var = std::getenv("COLUMNS");
 		return (env_var != NULL) ? static_cast<unsigned>(std::stoul(env_var)) : 0u;
 	}

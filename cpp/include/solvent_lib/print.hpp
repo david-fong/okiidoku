@@ -10,7 +10,7 @@
 
 namespace solvent::lib::print {
 
-	[[gnu::hot]] void val2str(std::ostream&, Order order, uint8_t value);
+	[[gnu::hot]] void val_to_str(std::ostream&, Order order, uint8_t value);
 
 	void text(std::ostream&, Order, std::span<const std::uint8_t> grid_view);
 

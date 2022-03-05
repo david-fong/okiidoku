@@ -23,14 +23,14 @@ namespace solvent::cli {
 			return;
 		}
 		for (unsigned i = 0; i < verbosity::size; ++i) {
-			if (new_verbosity_str.compare(verbosity::NAMES[i]) == 0) {
+			if (new_verbosity_str.compare(verbosity::names[i]) == 0) {
 				verbosity(verbosity::Kind{i});
 				return;
 			}
 		}
 		std::cout
-			<< str::RED.ON << '"' << new_verbosity_str << "\" is not valid.\n" << str::RED.OFF
-			<< verbosity::OPTIONS_MENU << std::endl;
+			<< str::red.on << '"' << new_verbosity_str << "\" is not valid.\n" << str::red.off
+			<< verbosity::options_menu_str << std::endl;
 	}
 
 
@@ -54,7 +54,7 @@ namespace solvent::cli {
 		} catch (const std::invalid_argument& ia) {
 		}
 		std::cout
-			<< str::RED.ON << '"' << new_order_str << "\" is not a valid order.\n" << str::RED.OFF
+			<< str::red.on << '"' << new_order_str << "\" is not a valid order.\n" << str::red.off
 			<< "ORDER OPTIONS: ";
 			#define M_SOLVENT_TEMPL_TEMPL(O_) \
 				std::cout << #O_ << ", ";
@@ -73,15 +73,15 @@ namespace solvent::cli {
 			std::cout << "is: " << path_kind() << std::endl;
 			return;
 		}
-		for (unsigned i = 0; i < gen::path::NUM_KINDS; ++i) {
-			if (new_path_kind_str.compare(gen::path::NAMES[i]) == 0) {
+		for (unsigned i = 0; i < gen::path::num_kinds; ++i) {
+			if (new_path_kind_str.compare(gen::path::names[i]) == 0) {
 				path_kind(pathkind_t(i));
 				return;
 			}
 		}
 		std::cout
-			<< str::RED.ON << '"' << new_path_kind_str << "\" is not a valid generator path name.\n" << str::RED.OFF
-			<< gen::path::OPTIONS_MENU << std::endl;
+			<< str::red.on << '"' << new_path_kind_str << "\" is not a valid generator path name.\n" << str::red.off
+			<< gen::path::options_menu_str << std::endl;
 		return;
 	}
 
@@ -93,8 +93,8 @@ namespace solvent::cli {
 	void Config::max_dead_ends(const std::string& new_max_dead_ends_str) {
 		if (new_max_dead_ends_str.empty()) {
 			std::cout << "is: " << max_dead_ends()
-				<< "\nsetting to zero will default to " << gen::cell_dead_ends::LIMIT_DEFAULT[order_]
-				<< "\nvalues above " << gen::cell_dead_ends::LIMIT_I_MAX[order_] << " will be clamped"
+				<< "\nsetting to zero will default to " << gen::cell_dead_ends::limit_default[order_]
+				<< "\nvalues above " << gen::cell_dead_ends::limit_i_max[order_] << " will be clamped"
 				<< std::endl;
 			return;
 		}
@@ -103,8 +103,8 @@ namespace solvent::cli {
 			// TODO.impl handle negative numbers being parsed as uints
 		} catch (const std::invalid_argument& ia) {
 			std::cout << max_dead_ends() << " (unchanged).\n"
-				<< str::RED.ON << '"' << new_max_dead_ends_str << "\" is not a valid uint64_t.\n" << str::RED.OFF
-				<< verbosity::OPTIONS_MENU << std::endl;
+				<< str::red.on << '"' << new_max_dead_ends_str << "\" is not a valid uint64_t.\n" << str::red.off
+				<< verbosity::options_menu_str << std::endl;
 			return;
 		}
 	}
@@ -123,7 +123,7 @@ namespace solvent::cli {
 			canonicalize(new_canonicalize_str == "y");
 		} else {
 			std::cout << "is: " << canonicalize() << " (unchanged).\n"
-				<< str::RED.ON << '"' << new_canonicalize_str << "\" does not match `y` or `n`.\n" << str::RED.OFF
+				<< str::red.on << '"' << new_canonicalize_str << "\" does not match `y` or `n`.\n" << str::red.off
 				<< std::endl;
 			return;
 		}

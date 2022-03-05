@@ -22,9 +22,9 @@ namespace solvent::lib::gen {
 
 	Params Params::clean(const Order O) noexcept {
 		if (max_dead_ends == 0) {
-			max_dead_ends = cell_dead_ends::LIMIT_DEFAULT[O];
-		} else if (max_dead_ends > cell_dead_ends::LIMIT_I_MAX[O]) {
-			max_dead_ends = cell_dead_ends::LIMIT_I_MAX[O];
+			max_dead_ends = cell_dead_ends::limit_default[O];
+		} else if (max_dead_ends > cell_dead_ends::limit_i_max[O]) {
+			max_dead_ends = cell_dead_ends::limit_i_max[O];
 		}
 		return *this;
 	}
@@ -83,7 +83,7 @@ namespace solvent::lib::gen {
 
 	template<Order O>
 	GeneratorO<O>::ord2i_t GeneratorO<O>::extract_val_at_(const GeneratorO<O>::ord4x_t coord) const noexcept {
-		const auto p = coord2prog()(coord);
+		const auto p = coord_to_prog()(coord);
 		const auto try_index = cells_[p].try_index;
 		if (try_index == O2) { return O2; }
 		return val_try_orders_[p/O2][try_index];
@@ -92,18 +92,18 @@ namespace solvent::lib::gen {
 
 	template<Order O>
 	GeneratorO<O>::dead_ends_t GeneratorO<O>::extract_dead_ends_at_(const ord4x_t coord) const noexcept {
-		return dead_ends_[coord2prog()(coord)];
+		return dead_ends_[coord_to_prog()(coord)];
 	}
 
 
 	template<Order O>
 	void GeneratorO<O>::generate_() {
 		// see the inline-brute-force-func git branch for experimenting with manually inlining set_next_valid_
-		const path::coord_converter_t<O> prog2coord = path::get_prog2coord_converter<O>(params_.path_kind);
+		const path::coord_converter_t<O> prog_to_coord = path::get_prog2coord_converter<O>(params_.path_kind);
 
 		bool backtracked = op_count_ != 0;
 		while (true) [[likely]] {
-			const Direction direction = this->set_next_valid_(prog2coord, backtracked);
+			const Direction direction = this->set_next_valid_(prog_to_coord, backtracked);
 			backtracked = direction.is_back;
 			if (!direction.is_back_skip) [[likely]] { ++op_count_; }
 
@@ -138,11 +138,11 @@ namespace solvent::lib::gen {
 
 
 	template<Order O>
-	GeneratorO<O>::Direction GeneratorO<O>::set_next_valid_(path::coord_converter_t<O> prog2coord, const bool backtracked) noexcept {
-		const ord4x_t coord = prog2coord(progress_);
-		has_mask_t& row_has = rows_has_[rmi2row<O>(coord)];
-		has_mask_t& col_has = cols_has_[rmi2col<O>(coord)];
-		has_mask_t& blk_has = blks_has_[rmi2blk<O>(coord)];
+	GeneratorO<O>::Direction GeneratorO<O>::set_next_valid_(path::coord_converter_t<O> prog_to_coord, const bool backtracked) noexcept {
+		const ord4x_t coord = prog_to_coord(progress_);
+		has_mask_t& row_has = rows_has_[rmi_to_row<O>(coord)];
+		has_mask_t& col_has = cols_has_[rmi_to_col<O>(coord)];
+		has_mask_t& blk_has = blks_has_[rmi_to_blk<O>(coord)];
 		const auto& val_try_order = val_try_orders_[progress_ / O2];
 
 		Cell& cell = cells_[progress_];
@@ -155,7 +155,7 @@ namespace solvent::lib::gen {
 
 			// Smart skip-backtracking:
 			// This optimization's degree of usefulness depends on the genpath and size.
-			if (!cells_share_house<O>(coord, prog2coord(backtrack_origin_))) [[unlikely]] {
+			if (!cells_share_house<O>(coord, prog_to_coord(backtrack_origin_))) [[unlikely]] {
 				// only likely when dealrwmj. dealrwmj is so slow already it doesn't
 				// feel worth slowing other genpaths down to microoptimize.
 				cell.clear();
