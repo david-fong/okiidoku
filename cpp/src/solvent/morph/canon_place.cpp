@@ -2,6 +2,7 @@
 #include "solvent/grid.hpp"
 #include "solvent/size.hpp"
 #include "solvent/morph/rel_prob.hpp"
+#include "solvent_export.h"
 
 #include <iostream>
 #include <algorithm> // sort
@@ -12,7 +13,7 @@
 namespace solvent::lib::morph {
 
 	template<Order O>
-	class [[gnu::visibility("hidden")]] CanonPlace final {
+	class SOLVENT_NO_EXPORT /* <- just in case. */ CanonPlace final {
 	 static_assert((O > 0) && (O <= O_MAX));
 		using has_mask_t = size<O>::O2_mask_least_t;
 		using ord1i_t = size<O>::ord1i_t;

@@ -3,6 +3,7 @@
 
 #include "solvent/size.hpp"
 #include "solvent_config.hpp"
+#include "solvent_export.h"
 
 #include <iosfwd>
 #include <array>
@@ -10,7 +11,7 @@
 
 namespace solvent::lib::gen::path {
 
-	enum class Kind : std::uint8_t {
+	enum class SOLVENT_EXPORT Kind : std::uint8_t {
 		RowMajor,
 		BlockCol,
 		DealRwMj,
@@ -24,7 +25,7 @@ namespace solvent::lib::gen::path {
 		"blockcol",
 		"dealrwmj",
 	};
-	extern std::ostream& operator<<(std::ostream& os, Kind path_kind);
+	SOLVENT_EXPORT extern std::ostream& operator<<(std::ostream& os, Kind path_kind);
 	constexpr std::string_view options_menu_str {"\nGEN-PATH OPTIONS:"
 		"\n- rowmajor   horizontal strips as wide as the grid one by one"
 		"\n- blockcol   rowmajor, but broken into columns one block wide"
@@ -36,10 +37,10 @@ namespace solvent::lib::gen::path {
 	using coord_converter_t = [[gnu::const]] typename size<O>::ord4x_t (&)(typename size<O>::ord4x_t) noexcept;
 
 	template<solvent::Order O> [[nodiscard, gnu::const]]
-	coord_converter_t<O> get_prog_to_coord_converter(Kind) noexcept;
+	SOLVENT_EXPORT coord_converter_t<O> get_prog_to_coord_converter(Kind) noexcept;
 
 	template<solvent::Order O> [[nodiscard, gnu::const]]
-	coord_converter_t<O> get_coord_to_prog_converter(Kind) noexcept;
+	SOLVENT_EXPORT coord_converter_t<O> get_coord_to_prog_converter(Kind) noexcept;
 
 
 	#define M_SOLVENT_TEMPL_TEMPL(O_) \

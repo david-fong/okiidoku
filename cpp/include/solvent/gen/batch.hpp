@@ -3,6 +3,7 @@
 
 #include "solvent/gen/mod.hpp"
 #include "solvent_util/timer.hpp"
+#include "solvent_export.h"
 
 #include <iosfwd>
 #include <functional>
@@ -14,7 +15,7 @@ namespace solvent::lib::gen::batch {
 	using trials_t = unsigned long;
 
 	//
-	struct Params final {
+	struct SOLVENT_EXPORT Params final {
 		gen::Params gen_params;
 		unsigned num_threads {0}; // Defaulted if zero.
 		unsigned max_dead_end_sample_granularity {0}; // Defaulted if zero.
@@ -27,7 +28,7 @@ namespace solvent::lib::gen::batch {
 
 
 	//
-	struct BatchReport final {
+	struct SOLVENT_EXPORT BatchReport final {
 		trials_t total_anys {0};
 		trials_t total_oks {0};
 		double fraction_aborted;
@@ -55,7 +56,7 @@ namespace solvent::lib::gen::batch {
 	};
 
 
-	[[gnu::visibility("hidden")]] constexpr unsigned try_default_num_extra_threads_(const Order O) {
+	constexpr unsigned try_default_num_extra_threads_(const Order O) {
 		if (O < 4) { return 0; }
 		else if (O == 4) { return 1; }
 		else { return 2; }
@@ -67,13 +68,13 @@ namespace solvent::lib::gen::batch {
 	using callback_O_t = std::function<void(const GeneratorO<O>&)>;
 	// calls to the callback will be guarded by a mutex.
 	template<Order O>
-	[[nodiscard]] BatchReport batch_O(Params&, callback_O_t<O>);
+	SOLVENT_EXPORT [[nodiscard]] BatchReport batch_O(Params&, callback_O_t<O>);
 
 
 	using callback_t = std::function<void(const Generator&)>;
 	// calls to the callback will be guarded by a mutex.
 	// asserts that the order is compiled.
-	[[nodiscard]] BatchReport batch(Order, Params&, callback_t);
+	SOLVENT_EXPORT [[nodiscard]] BatchReport batch(Order, Params&, callback_t);
 
 
 	#define M_SOLVENT_TEMPL_TEMPL(O_) \

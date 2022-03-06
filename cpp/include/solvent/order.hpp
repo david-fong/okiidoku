@@ -2,6 +2,8 @@
 #define HPP_SOLVENT__ORDER
 
 #include "solvent_config.hpp"
+#include "solvent_export.h"
+
 #include <cstdint>
 
 namespace solvent {
@@ -12,7 +14,7 @@ namespace solvent {
 	constexpr Order O2_MAX = O_MAX * O_MAX;
 	constexpr Order O4_MAX = O2_MAX * O2_MAX;
 
-	constexpr bool is_order_compiled(Order O) {
+	SOLVENT_EXPORT constexpr bool is_order_compiled(Order O) {
 		#define M_SOLVENT_TEMPL_TEMPL(O_) \
 		if (O == O_) return true;
 		M_SOLVENT_INSTANTIATE_ORDER_TEMPLATES

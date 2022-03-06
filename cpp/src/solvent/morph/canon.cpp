@@ -7,10 +7,10 @@
 namespace solvent::lib::morph {
 
 	template<Order O>
-	[[gnu::visibility("hidden")]] void canon_label(grid_span_t<O>);
+	void canon_label(grid_span_t<O>);
 
 	template<Order O>
-	[[gnu::visibility("hidden")]] void canon_place(grid_span_t<O>);
+	void canon_place(grid_span_t<O>);
 
 	template<Order O>
 	void canonicalize(const grid_span_t<O> orig_grid) {

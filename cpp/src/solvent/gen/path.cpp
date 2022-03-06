@@ -8,7 +8,7 @@ namespace solvent::lib::gen::path {
 
 
 	template<Kind PK, Order O>
-	struct [[gnu::visibility("hidden")]] PathCoords_ final {
+	struct SOLVENT_NO_EXPORT PathCoords_ final {
 	 private:
 		using ord1i_t = size<O>::ord1i_t;
 		using ord2i_t = size<O>::ord2i_t;
@@ -16,11 +16,11 @@ namespace solvent::lib::gen::path {
 		using ord4x_t = size<O>::ord4x_t;
 		using ord4x_least_t = size<O>::ord4x_least_t;
 	 public:
-		[[gnu::visibility("hidden")]] static constexpr ord1i_t O1 = O;
-		[[gnu::visibility("hidden")]] static constexpr ord2i_t O2 = O*O;
-		[[gnu::visibility("hidden")]] static constexpr ord4i_t O4 = O*O*O*O;
+		static constexpr ord1i_t O1 = O;
+		static constexpr ord2i_t O2 = O*O;
+		static constexpr ord4i_t O4 = O*O*O*O;
 
-		[[gnu::visibility("hidden"), gnu::const, gnu::hot]]
+		[[gnu::const, gnu::hot]]
 		static constexpr ord4x_t prog_to_coord(const ord4x_t progress) noexcept {
 			if constexpr (PK == Kind::RowMajor) {
 				return progress;
@@ -28,7 +28,7 @@ namespace solvent::lib::gen::path {
 				return map_prog_to_coord[progress];
 			}
 		}
-		[[gnu::visibility("hidden"), gnu::const, gnu::hot]]
+		[[gnu::const, gnu::hot]]
 		static constexpr ord4x_t coord_to_prog(const ord4x_t progress) noexcept {
 			if constexpr (PK == Kind::RowMajor) {
 				return progress;
@@ -69,8 +69,8 @@ namespace solvent::lib::gen::path {
 			}
 			return _;
 		}
-		[[gnu::visibility("hidden")]] static constexpr grid_cache_t map_prog_to_coord = PathCoords_<PK,O>::init_map_prog_to_coord_();
-		[[gnu::visibility("hidden")]] static constexpr grid_cache_t map_coord_to_prog = PathCoords_<PK,O>::init_map_coord_to_prog_();
+		static constexpr grid_cache_t map_prog_to_coord = PathCoords_<PK,O>::init_map_prog_to_coord_();
+		static constexpr grid_cache_t map_coord_to_prog = PathCoords_<PK,O>::init_map_coord_to_prog_();
 		// Note: a compiler can optimize this away if not used.
 	};
 

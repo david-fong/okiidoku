@@ -10,17 +10,12 @@ add_library(solvent SHARED
 	gen/batch.cpp
 	gen/batch_print.cpp
 )
-target_compile_options(solvent
-	PRIVATE
-	-fvisibility=default
-	# ^would like to use default hidden, but that would mean defining macros
-	# for supporting many compilers, or writing huge attribute lists. chose
-	# default for experimentation and avoiding compiler compat headaches.
-)
 
 # https://cmake.org/cmake/help/latest/module/GenerateExportHeader.html
 include(GenerateExportHeader)
 generate_export_header(solvent)
+set_target_properties(solvent PROPERTIES CXX_VISIBILITY_PRESET hidden)
+set_target_properties(solvent PROPERTIES CMAKE_VISIBILITY_INLINES_HIDDEN TRUE)
 
 find_package(Threads REQUIRED)
 

@@ -6,6 +6,7 @@
 #include "solvent/size.hpp"
 #include "solvent_util/str.hpp"
 #include "solvent_config.hpp"
+#include "solvent_export.h"
 
 #include <iosfwd>
 #include <array>
@@ -24,7 +25,7 @@ namespace solvent::lib::gen {
 	// Used for shuffling Generator.
 	// RNG is shared between threads, guarded by mutex.
 	// Note: Using thread_local instead does not cause any noticeable perf change.
-	void seed_rng(std::uint_fast32_t) noexcept;
+	SOLVENT_EXPORT void seed_rng(std::uint_fast32_t) noexcept;
 
 
 	namespace cell_dead_ends {
@@ -49,7 +50,7 @@ namespace solvent::lib::gen {
 
 
 	//
-	struct Params {
+	struct SOLVENT_EXPORT Params {
 		path::Kind path_kind {path::Kind::RowMajor};
 		std::uint_fast64_t max_dead_ends {0}; // Defaulted if zero.
 
@@ -58,7 +59,7 @@ namespace solvent::lib::gen {
 	};
 
 	//
-	enum class ExitStatus : std::uint8_t {
+	enum class SOLVENT_EXPORT ExitStatus : std::uint8_t {
 		Ok, Abort, Exhausted,
 	};
 
@@ -67,7 +68,7 @@ namespace solvent::lib::gen {
 	using opcount_t = unsigned long long;
 
 
-	class Generator {
+	class SOLVENT_EXPORT Generator {
 	 public:
 		using val_t = size<O_MAX>::ord2i_t;
 		using coord_t = size<O_MAX>::ord4x_t;
@@ -126,7 +127,7 @@ namespace solvent::lib::gen {
 
 	//
 	template<Order O>
-	class GeneratorO final : public Generator {
+	class SOLVENT_EXPORT GeneratorO final : public Generator {
 		static_assert((O > 0) && (O <= O_MAX) && (O < 6)); // added restriction for sanity
 	 public:
 		using has_mask_t = size<O>::O2_mask_least_t; // perf seemed similar and slightly better compared to fast_t
@@ -136,12 +137,11 @@ namespace solvent::lib::gen {
 		using ord4x_t = size<O>::ord4x_t;
 		using dead_ends_t = cell_dead_ends::t<O>;
 
-		[[gnu::visibility("hidden")]] static constexpr ord1i_t O1 = O;
-		[[gnu::visibility("hidden")]] static constexpr ord2i_t O2 = O*O;
-		[[gnu::visibility("hidden")]] static constexpr ord4i_t O4 = O*O*O*O;
+		SOLVENT_NO_EXPORT static constexpr ord1i_t O1 = O;
+		SOLVENT_NO_EXPORT static constexpr ord2i_t O2 = O*O;
+		SOLVENT_NO_EXPORT static constexpr ord4i_t O4 = O*O*O*O;
 
 		void operator()(Params) override;
-
 		void continue_prev() override;
 
 		[[nodiscard]] constexpr Order get_order() const noexcept { return O; }
@@ -174,10 +174,10 @@ namespace solvent::lib::gen {
 	 private:
 		struct Cell final {
 			ord2i_t try_index; // Index into val_try_orders_. O2 if clear.
-			[[gnu::visibility("hidden")]] void clear() noexcept { try_index = O2; }
-			[[gnu::visibility("hidden"), nodiscard, gnu::pure]] bool is_clear() const noexcept { return try_index == O2; }
+			SOLVENT_NO_EXPORT void clear() noexcept { try_index = O2; }
+			SOLVENT_NO_EXPORT [[nodiscard, gnu::pure]] bool is_clear() const noexcept { return try_index == O2; }
 		};
-		struct Direction final {
+		struct SOLVENT_NO_EXPORT Direction final {
 			bool is_back;
 			bool is_back_skip; // only meaningful when is_back is true.
 		};
@@ -200,12 +200,12 @@ namespace solvent::lib::gen {
 		opcount_t op_count_ {0};
 
 		// Note: even when marked pure, _prog_to_coord_ doesn't get optimized as well as the current usage.
-		[[gnu::visibility("hidden"), nodiscard, gnu::pure]] path::coord_converter_t<O> get_coord_to_prog_() const noexcept {
+		SOLVENT_NO_EXPORT [[nodiscard, gnu::pure]] path::coord_converter_t<O> get_coord_to_prog_() const noexcept {
 			return path::get_coord_to_prog_converter<O>(params_.path_kind);
 		}
 
-		[[gnu::visibility("hidden"), gnu::hot]] void generate_();
-		[[gnu::visibility("hidden"), gnu::hot]] Direction set_next_valid_(path::coord_converter_t<O>, bool backtracked) noexcept;
+		SOLVENT_NO_EXPORT [[gnu::hot]] void generate_();
+		SOLVENT_NO_EXPORT [[gnu::hot]] Direction set_next_valid_(path::coord_converter_t<O>, bool backtracked) noexcept;
 	};
 
 

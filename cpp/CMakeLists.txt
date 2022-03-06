@@ -27,7 +27,6 @@ else()
 	)
 endif()
 
-set(CMAKE_CXX_VISIBILITY_PRESET "hidden")
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 
 # https://cliutils.gitlab.io/modern-cmake/chapters/testing.html

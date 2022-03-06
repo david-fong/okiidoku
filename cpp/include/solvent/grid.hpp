@@ -3,6 +3,7 @@
 
 #include "solvent/size.hpp"
 #include "solvent_config.hpp"
+#include "solvent_export.h"
 
 #include <vector>
 #include <array>
@@ -32,21 +33,21 @@ namespace solvent::lib {
 
 	// Returns true if any cells in a same house contain the same value.
 	// Can be used with incomplete grids.
-	template<Order O> [[nodiscard]] bool is_grid_valid(grid_const_span_t<O>) noexcept;
+	template<Order O> SOLVENT_EXPORT [[nodiscard]] bool is_grid_valid(grid_const_span_t<O>) noexcept;
 
 
-	template<Order O> [[nodiscard, gnu::const]] constexpr typename size<O>::ord2i_t rmi_to_row(const typename size<O>::ord4i_t index) noexcept { return static_cast<size<O>::ord2i_t>(index / (O*O)); } // I love c++ :')
-	template<Order O> [[nodiscard, gnu::const]] constexpr typename size<O>::ord2i_t rmi_to_col(const typename size<O>::ord4i_t index) noexcept { return static_cast<size<O>::ord2i_t>(index % (O*O)); } // whyyyyyyyyyy
-	template<Order O> [[nodiscard, gnu::const]] constexpr typename size<O>::ord2i_t rmi_to_blk(const typename size<O>::ord2i_t row, const typename size<O>::ord2i_t col) noexcept {
+	template<Order O> SOLVENT_EXPORT [[nodiscard, gnu::const]] constexpr typename size<O>::ord2i_t rmi_to_row(const typename size<O>::ord4i_t index) noexcept { return static_cast<size<O>::ord2i_t>(index / (O*O)); } // I love c++ :')
+	template<Order O> SOLVENT_EXPORT [[nodiscard, gnu::const]] constexpr typename size<O>::ord2i_t rmi_to_col(const typename size<O>::ord4i_t index) noexcept { return static_cast<size<O>::ord2i_t>(index % (O*O)); } // whyyyyyyyyyy
+	template<Order O> SOLVENT_EXPORT [[nodiscard, gnu::const]] constexpr typename size<O>::ord2i_t rmi_to_blk(const typename size<O>::ord2i_t row, const typename size<O>::ord2i_t col) noexcept {
 		return static_cast<size<O>::ord2i_t>((row / O) * O) + (col / O);
 	}
 	template<Order O> [[nodiscard, gnu::const]]
-	constexpr typename size<O>::ord2i_t rmi_to_blk(const typename size<O>::ord4i_t index) noexcept {
+	SOLVENT_EXPORT inline constexpr typename size<O>::ord2i_t rmi_to_blk(const typename size<O>::ord4i_t index) noexcept {
 		return rmi_to_blk<O>(rmi_to_row<O>(index), rmi_to_col<O>(index));
 	}
 
-	template<Order O> [[nodiscard, gnu::const]]
-	static constexpr bool cells_share_house(typename size<O>::ord4i_t c1, typename size<O>::ord4i_t c2) noexcept {
+	template<Order O> SOLVENT_EXPORT [[nodiscard, gnu::const]]
+	constexpr bool cells_share_house(typename size<O>::ord4i_t c1, typename size<O>::ord4i_t c2) noexcept {
 		return (rmi_to_row<O>(c1) == rmi_to_row<O>(c2))
 			||  (rmi_to_col<O>(c1) == rmi_to_col<O>(c2))
 			||  (rmi_to_blk<O>(c1) == rmi_to_blk<O>(c2));
@@ -55,7 +56,7 @@ namespace solvent::lib {
 	
 
 	template<Order O>
-	struct chute_blk_masks {
+	struct SOLVENT_EXPORT chute_blk_masks {
 		using M = size<O>::O2_mask_least_t;
 		using T = std::array<M, O>;
 		static constexpr T row = [](){
