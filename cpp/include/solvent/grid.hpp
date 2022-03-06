@@ -1,7 +1,7 @@
-#ifndef HPP_SOLVENT_LIB__GRID
-#define HPP_SOLVENT_LIB__GRID
+#ifndef HPP_SOLVENT__GRID
+#define HPP_SOLVENT__GRID
 
-#include "solvent_lib/size.hpp"
+#include "solvent/size.hpp"
 #include "solvent_config.hpp"
 
 #include <vector>

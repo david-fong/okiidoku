@@ -8,7 +8,7 @@ cmake -S . -B build/release -DCMAKE_BUILD_TYPE=Release
 
 # do these in a cmake build folder
 cmake --build .
-nm -nCD src/solvent_lib/libsolvent_lib.so   # view public symbols of the shared library sorted by address
+nm -nCD src/solvent/libsolvent.so   # view public symbols of the shared library sorted by address
 ```
 
 ## things I got wrong before

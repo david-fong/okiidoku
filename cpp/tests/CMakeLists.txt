@@ -7,4 +7,4 @@ target_compile_options(solvent_test
 # target_include_directories(morph PRIVATE .)
 target_include_directories(solvent_test PUBLIC ../src)
 target_include_directories(solvent_test PUBLIC ../include)
-target_link_libraries(solvent_test PRIVATE solvent_util solvent_lib)
+target_link_libraries(solvent_test PRIVATE solvent_util solvent)

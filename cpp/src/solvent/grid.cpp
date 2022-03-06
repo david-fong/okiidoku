@@ -1,4 +1,4 @@
-#include "solvent_lib/grid.hpp"
+#include "solvent/grid.hpp"
 
 namespace solvent::lib {
 

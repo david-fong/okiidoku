@@ -1,6 +1,6 @@
 #include <CL/opencl.hpp>
 #include <string>
-#include "solvent_lib_gpu/gen.hpp"
+#include "solvent_gpu/gen.hpp"
 
 int main() {
 	cl::Context context(CL_DEVICE_TYPE_CPU);

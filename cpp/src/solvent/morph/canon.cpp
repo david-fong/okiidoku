@@ -1,5 +1,5 @@
-#include "solvent_lib/morph/canon.hpp"
-#include "solvent_lib/print.hpp" // TODO remove after done implementing
+#include "solvent/morph/canon.hpp"
+#include "solvent/print.hpp" // TODO remove after done implementing
 
 #include <iostream>
 // #include <cassert>

@@ -1,4 +1,4 @@
-#include "solvent_lib/morph/scramble.hpp"
+#include "solvent/morph/scramble.hpp"
 
 #include <array>
 #include <algorithm>   // shuffle, ranges::copy

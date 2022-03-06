@@ -1,9 +1,9 @@
-#ifndef HPP_SOLVENT_LIB__SIZE
-#define HPP_SOLVENT_LIB__SIZE
+#ifndef HPP_SOLVENT__SIZE
+#define HPP_SOLVENT__SIZE
 // Note: the byte width type logic could be done with boost, but I don't
 // have any other reason to add boost as a dependency, so I won't.
 
-#include "solvent_lib/order.hpp"
+#include "solvent/order.hpp"
 
 #include <bit>
 #include <cstdint>

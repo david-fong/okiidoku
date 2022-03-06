@@ -1,11 +1,11 @@
-#include "solvent_lib/gen/mod.hpp"
-#include "solvent_lib/gen/batch.hpp"
-#include "solvent_lib/morph/canon.hpp"
-#include "solvent_lib/morph/scramble.hpp"
-// #include "solvent_lib/print.hpp"
+#include "solvent/gen/mod.hpp"
+#include "solvent/gen/batch.hpp"
+#include "solvent/morph/canon.hpp"
+#include "solvent/morph/scramble.hpp"
+// #include "solvent/print.hpp"
 #include "solvent_util/console_setup.hpp"
-#include "solvent_lib/print.hpp"
-#include "solvent_lib/grid.hpp"
+#include "solvent/print.hpp"
+#include "solvent/grid.hpp"
 
 #include <iostream>  // cout,
 #include <string>

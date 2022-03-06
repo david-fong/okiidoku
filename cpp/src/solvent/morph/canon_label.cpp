@@ -1,5 +1,5 @@
-#include "solvent_lib/grid.hpp"
-#include "solvent_lib/morph/rel_prob.hpp"
+#include "solvent/grid.hpp"
+#include "solvent/morph/rel_prob.hpp"
 
 #include <iostream> // TODO remove
 #include <algorithm> // swap, sort

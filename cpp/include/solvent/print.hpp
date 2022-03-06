@@ -1,7 +1,8 @@
-#ifndef HPP_SOLVENT_LIB__PRINT
-#define HPP_SOLVENT_LIB__PRINT
+#ifndef HPP_SOLVENT__PRINT
+#define HPP_SOLVENT__PRINT
 
-#include "solvent_lib/order.hpp"
+#include "solvent/order.hpp"
+#include "solvent_export.h"
 
 #include <iosfwd>
 #include <functional>

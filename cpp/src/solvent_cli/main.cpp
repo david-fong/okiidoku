@@ -1,6 +1,6 @@
 #include "solvent_cli/repl.hpp"
-#include "solvent_lib/gen/mod.hpp"
-#include "solvent_lib/morph/scramble.hpp"
+#include "solvent/gen/mod.hpp"
+#include "solvent/morph/scramble.hpp"
 #include "solvent_util/console_setup.hpp"
 
 #include <string>

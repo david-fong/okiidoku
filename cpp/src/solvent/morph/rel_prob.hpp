@@ -1,7 +1,7 @@
-#ifndef HPP_SOLVENT_LIB__MORPH__REL_PROB
-#define HPP_SOLVENT_LIB__MORPH__REL_PROB
+#ifndef HPP_SOLVENT__MORPH__REL_PROB
+#define HPP_SOLVENT__MORPH__REL_PROB
 
-#include "solvent_lib/order.hpp"
+#include "solvent/order.hpp"
 #include "solvent_util/math.hpp"
 #include <array>
 #include <cmath>

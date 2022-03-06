@@ -1,4 +1,4 @@
-#include "solvent_lib/gen/batch.hpp"
+#include "solvent/gen/batch.hpp"
 
 #include <thread>
 #include <mutex>

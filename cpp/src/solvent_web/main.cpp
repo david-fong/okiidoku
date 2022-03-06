@@ -1,5 +1,5 @@
 
-#include "solvent_lib/gen/mod.hpp"
+#include "solvent/gen/mod.hpp"
 
 #include <emscripten/bind.h>
 #include <random>	// random_device,

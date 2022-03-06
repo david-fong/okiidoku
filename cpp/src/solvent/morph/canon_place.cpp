@@ -1,7 +1,7 @@
-#include "solvent_lib/print.hpp" // TODO remove after done implementing
-#include "solvent_lib/grid.hpp"
-#include "solvent_lib/size.hpp"
-#include "solvent_lib/morph/rel_prob.hpp"
+#include "solvent/print.hpp" // TODO remove after done implementing
+#include "solvent/grid.hpp"
+#include "solvent/size.hpp"
+#include "solvent/morph/rel_prob.hpp"
 
 #include <iostream>
 #include <algorithm> // sort

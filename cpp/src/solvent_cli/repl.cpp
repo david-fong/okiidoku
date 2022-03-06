@@ -1,7 +1,7 @@
 #include "solvent_cli/repl.hpp"
 
-#include "solvent_lib/morph/canon.hpp"
-#include "solvent_lib/print.hpp"
+#include "solvent/morph/canon.hpp"
+#include "solvent/print.hpp"
 #include "solvent_util/timer.hpp"
 #include "solvent_util/str.hpp"
 

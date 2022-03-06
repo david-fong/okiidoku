@@ -1,8 +1,8 @@
-#ifndef HPP_SOLVENT_LIB__MORPH__SCRAMBLE
-#define HPP_SOLVENT_LIB__MORPH__SCRAMBLE
+#ifndef HPP_SOLVENT__MORPH__SCRAMBLE
+#define HPP_SOLVENT__MORPH__SCRAMBLE
 
-#include "solvent_lib/grid.hpp"
-#include "solvent_lib/size.hpp"
+#include "solvent/grid.hpp"
+#include "solvent/size.hpp"
 #include "solvent_config.hpp"
 
 namespace solvent::lib::morph {

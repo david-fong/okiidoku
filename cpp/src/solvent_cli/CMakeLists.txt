@@ -5,4 +5,4 @@ add_executable(solvent_cli
 )
 target_include_directories(solvent_cli PRIVATE ..)
 target_include_directories(solvent_cli PUBLIC ../../include)
-target_link_libraries(solvent_cli PRIVATE solvent_util solvent_lib)
+target_link_libraries(solvent_cli PRIVATE solvent_util solvent)

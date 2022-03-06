@@ -27,6 +27,7 @@ else()
 	)
 endif()
 
+set(CMAKE_CXX_VISIBILITY_PRESET "hidden")
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 
 # https://cliutils.gitlab.io/modern-cmake/chapters/testing.html
@@ -36,8 +37,8 @@ endif()
 
 
 add_subdirectory(src/solvent_util)
-add_subdirectory(src/solvent_lib)
-# add_subdirectory(src/solvent_lib_gpu)
+add_subdirectory(src/solvent)
+# add_subdirectory(src/solvent_gpu)
 
 add_subdirectory(src/solvent_cli)
 # add_subdirectory(src/solvent_web)

@@ -1,9 +1,9 @@
-#ifndef HPP_SOLVENT_LIB__GEN
-#define HPP_SOLVENT_LIB__GEN
+#ifndef HPP_SOLVENT__GEN
+#define HPP_SOLVENT__GEN
 
-#include "solvent_lib/gen/path.hpp"
-#include "solvent_lib/grid.hpp"
-#include "solvent_lib/size.hpp"
+#include "solvent/gen/path.hpp"
+#include "solvent/grid.hpp"
+#include "solvent/size.hpp"
 #include "solvent_util/str.hpp"
 #include "solvent_config.hpp"
 

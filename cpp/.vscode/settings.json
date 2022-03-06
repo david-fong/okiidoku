@@ -10,5 +10,6 @@
 	"C_Cpp.default.includePath": [
 		"${workspaceFolder}/src",
 		"${workspaceFolder}/include",
+		"${workspaceFolder}/build/release/src/solvent",
 	],
 }

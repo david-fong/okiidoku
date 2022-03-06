@@ -1,5 +1,5 @@
-#ifndef HPP_SOLVENT_LIB__ORDER
-#define HPP_SOLVENT_LIB__ORDER
+#ifndef HPP_SOLVENT__ORDER
+#define HPP_SOLVENT__ORDER
 
 #include "solvent_config.hpp"
 #include <cstdint>

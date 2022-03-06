@@ -1,5 +1,5 @@
-#include "solvent_lib/gen/mod.hpp"
-#include "solvent_lib/print.hpp"
+#include "solvent/gen/mod.hpp"
+#include "solvent/print.hpp"
 
 #include <iostream>
 #include <mutex>

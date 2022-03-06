@@ -1,4 +1,4 @@
-#include "solvent_lib/gen/path.hpp"
+#include "solvent/gen/path.hpp"
 
 namespace solvent::lib::gen::path {
 
