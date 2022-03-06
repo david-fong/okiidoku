@@ -86,7 +86,7 @@ namespace solvent::lib::gen::batch {
 	}
 
 
-	[[gnu::noinline]] BatchReport batch_(const Order O, Params& params, std::function<std::thread(ThreadSharedData&, std::mutex&)> mk_thread) {
+	[[gnu::visibility("hidden"), gnu::noinline]] BatchReport batch_(const Order O, Params& params, std::function<std::thread(ThreadSharedData&, std::mutex&)> mk_thread) {
 		params.clean(O);
 		std::mutex sd_mutex;
 		ThreadSharedData sd {.params {params}};

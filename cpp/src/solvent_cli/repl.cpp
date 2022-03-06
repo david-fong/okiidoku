@@ -7,14 +7,16 @@
 
 #include <iostream> // cout, endl,
 #include <iomanip>  // setw,
+#include <string>
+#include <charconv>
 
 namespace solvent::cli {
 
 	namespace str = solvent::util::str;
 	using namespace solvent::lib;
 
-	const std::string TERMINAL_OUTPUT_TIPS =
-	"\nNote: You can run `tput rmam` in your shell to disable text wrapping.";
+	constexpr std::string_view TERMINAL_OUTPUT_TIPS {
+	"\nNote: You can run `tput rmam` in your shell to disable text wrapping."};
 
 
 	Repl::Repl(const Order order_input): gen_(gen::Generator::create(order_input)) {
@@ -46,13 +48,13 @@ namespace solvent::cli {
 	}
 
 
-	bool Repl::run_command(const std::string& cmd_line) {
+	bool Repl::run_command(const std::string_view cmd_line) {
 		size_t token_pos;
 		// Very simple parsing: Assumes no leading spaces, and does not
 		// trim leading or trailing spaces from the arguments substring.
-		const std::string cmd_name = cmd_line.substr(0, token_pos = cmd_line.find(" "));
-		const std::string cmd_args = (token_pos == std::string::npos)
-			? "" :  cmd_line.substr(token_pos + 1, std::string::npos);
+		const std::string_view cmd_name = cmd_line.substr(0, token_pos = cmd_line.find(" "));
+		const std::string_view cmd_args = (token_pos == std::string_view::npos)
+			? "" :  cmd_line.substr(token_pos + 1, std::string_view::npos);
 		const auto it = Command::Str2Enum.find(cmd_name);
 		if (it == Command::Str2Enum.end()) {
 			// No command name was matched.
@@ -170,7 +172,7 @@ namespace solvent::cli {
 			std::cout << str::red.on << "* all generations aborted" << str::red.off;
 		}
 
-		static const std::string seconds_units = std::string() + str::dim.on + " seconds (with I/O)" + str::dim.off;
+		static const std::string seconds_units = std::string{} + str::dim.on + " seconds (with I/O)" + str::dim.off;
 		std::cout << std::setprecision(4)
 			<< "\nstop after:      " << params.stop_after
 			<< "\nnum threads:     " << params.num_threads
@@ -192,19 +194,19 @@ namespace solvent::cli {
 
 
 	void Repl::gen_multiple(
-		const std::string& stop_after_str,
+		const std::string_view stop_after_str,
 		const bool only_count_oks
 	) {
 		trials_t stop_by_value;
-		try {
-			stop_by_value = std::stoul(stop_after_str);
+		const auto parse_result = std::from_chars(stop_after_str.begin(), stop_after_str.end(), stop_by_value);
+		if (parse_result.ec == std::errc{}) {
 			if (stop_by_value <= 0) {
 				std::cout << str::red.on
 					<< "please provide a non-zero, positive integer."
 					<< str::red.off << std::endl;
 				return;
 			}
-		} catch (const std::invalid_argument& ia) {
+		} else {
 			std::cout << str::red.on
 				<< "could not convert \"" << stop_after_str << "\" to an integer."
 				<< str::red.off << std::endl;

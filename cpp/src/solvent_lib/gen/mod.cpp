@@ -2,7 +2,6 @@
 #include "solvent_lib/print.hpp"
 
 #include <iostream>
-#include <string>
 #include <mutex>
 #include <algorithm>   // shuffle,
 #include <random>
@@ -99,7 +98,7 @@ namespace solvent::lib::gen {
 	template<Order O>
 	void GeneratorO<O>::generate_() {
 		// see the inline-brute-force-func git branch for experimenting with manually inlining set_next_valid_
-		const path::coord_converter_t<O> prog_to_coord = path::get_prog2coord_converter<O>(params_.path_kind);
+		const path::coord_converter_t<O> prog_to_coord = path::get_prog_to_coord_converter<O>(params_.path_kind);
 
 		bool backtracked = op_count_ != 0;
 		while (true) [[likely]] {

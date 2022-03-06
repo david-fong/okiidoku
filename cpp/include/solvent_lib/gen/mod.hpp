@@ -199,9 +199,9 @@ namespace solvent::lib::gen {
 		dead_ends_t most_dead_ends_seen_ {0};
 		opcount_t op_count_ {0};
 
-		// Note: even when marked pure, _prog2coord_ doesn't get optimized as well as the current usage.
+		// Note: even when marked pure, _prog_to_coord_ doesn't get optimized as well as the current usage.
 		[[gnu::visibility("hidden"), nodiscard, gnu::pure]] path::coord_converter_t<O> get_coord_to_prog_() const noexcept {
-			return path::get_coord2prog_converter<O>(params_.path_kind);
+			return path::get_coord_to_prog_converter<O>(params_.path_kind);
 		}
 
 		[[gnu::visibility("hidden"), gnu::hot]] void generate_();

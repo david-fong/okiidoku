@@ -8,7 +8,7 @@
 #include "solvent_lib/size.hpp"
 
 #include <map>
-#include <string>
+#include <string_view>
 #include <array>
 #include <memory> // unique_ptr
 
@@ -29,7 +29,7 @@ namespace solvent::cli {
 			GenMultiple,
 			GenMultipleOk,
 		};
-		const std::map<std::string, Command::E> Str2Enum {
+		const std::map<std::string_view, Command::E> Str2Enum {
 			{ "help",         E::Help              },
 			{ "quit",         E::Quit              },
 			{ "verbosity",    E::ConfigVerbosity   },
@@ -42,7 +42,7 @@ namespace solvent::cli {
 			{ "gen",          E::GenMultiple       },
 			{ "gen_ok",       E::GenMultipleOk     },
 		};
-		const std::string HelpMessage = "\nCOMMAND MENU:"
+		constexpr std::string_view HelpMessage {"\nCOMMAND MENU:"
 			"\n- help                  print this help menu"
 			"\n- quit                  cleanly exit this program"
 			"\n"
@@ -56,7 +56,7 @@ namespace solvent::cli {
 			"\n- c                     continue previous generation"
 			"\n- gen <n>               attempt to generate <n> solutions"
 			"\n- gen_ok <n>            successfully generate <n> solutions"
-			;
+		};
 	}
 
 	// Returns zero on error.
@@ -75,7 +75,7 @@ namespace solvent::cli {
 
 		explicit Repl(Order O);
 		void start(void);
-		bool run_command(const std::string& cmd_line);
+		bool run_command(std::string_view cmd_line);
 
 	 private:
 		Config config_;
@@ -85,7 +85,7 @@ namespace solvent::cli {
 		void gen_single(bool contPrev = false);
 
 		void gen_multiple(trials_t stop_after, bool only_count_oks);
-		void gen_multiple(const std::string&,  bool only_count_oks);
+		void gen_multiple(std::string_view,  bool only_count_oks);
 	};
 }
 #endif

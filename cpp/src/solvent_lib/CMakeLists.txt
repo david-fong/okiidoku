@@ -1,5 +1,4 @@
 add_library(solvent_lib SHARED
-	# note: gen takes ~20% longer when linked dynamically
 	grid.cpp
 	print.cpp
 	morph/canon_label.cpp

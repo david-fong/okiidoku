@@ -7,15 +7,16 @@
 namespace solvent::lib::morph {
 
 	template<Order O>
-	void canon_label(grid_span_t<O>);
+	[[gnu::visibility("hidden")]] void canon_label(grid_span_t<O>);
 
 	template<Order O>
-	void canon_place(grid_span_t<O>);
+	[[gnu::visibility("hidden")]] void canon_place(grid_span_t<O>);
 
 	template<Order O>
 	void canonicalize(const grid_span_t<O> orig_grid) {
 		// TODO assert that is a complete, valid sudoku?
 		canon_label<O>(orig_grid);
+		canon_place<O>(orig_grid);
 	}
 
 

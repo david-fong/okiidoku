@@ -2,21 +2,21 @@
 
 ## Higher Priority
 
-- look for where string_view can be taken as a function argument instead of `const string&` <https://stackoverflow.com/a/40129198/11107541>
+- refactor template expansions and tweak config header to co-locate same-order expansions while also giving a somewhat convenient way to control what library features to include? Or look into a way to get linker to automatically do this.
 - try making Order an enum
   - see if it can improve switch case cover detection.
   - this may also make it possible to statically enforce contracts about orders for the non-template wrapper functions. If so, I will probably neither need to assert that the order is compiled, nor write vacuous default branches for their switch statements.
   - if this works out, make sure to update all the contract docs and remove relevant assertions.
-- try benchmarking if Generator member arrays are changed to vectors and see what happens.
 - consider giving the callback in batch a dedicated mutex, or no mutex at all and leaving it up to the caller. need to consider how likely it is that the bulk of a callback will need synchronization.
 - make a custom vector-like class for grids?
   - fixed size and capacity, stores in heap. look into possibility of using boost static_vector.
   - use this as the return type of scramble and canonicalize
-- make a buffering RAII adapter for batch callbacks.
+- make a buffering adapter for batch callbacks.
+  - use destructor to flush
 - in the repl config, consider making some fields per-order. max_dead_ends is a good candidate. verbosity might also be useful, but I'm not sure if it would be surprising in a bad way. should be fine as long as the current values are printed when switching between orders.
 - the opcount diagnostics shouldn't be taken seriously. opcount itself currently isn't ery representative of effort expended since it doesn't count iterations of the try_val loop.
 
-- make some grid things for binary serdes.
+- make some grid things for binary and text serdes.
   - this can be useful for gathering up a dataset of order-5 grids for future experimentation and benchmarking/testing of the non-generation parts of this library (scramble, canonicalize).
 
 - "smarter"/greedier backtracking: backtracking may be occurring frequently at a coord because of values much earlier in the genpath progress.
@@ -29,13 +29,6 @@
 - adapt canonicalization to work on puzzles (incomplete grids).
   - this would allow checking if puzzles are equivalent.
 
-- the canonicalize param of generator seems weird in that the dead_ends grid of the result struct isn't also transformed to match. This feature should either be specced (to also transform dead_ends grid or not) and documented, or removed.
-  - I think there's some instruction and data cache optimization opportunity by doing batches of generating and then canonicalization on those batches. In the grand scheme of things, that sounds like over-optimization, but for me, enabling that level of optimization is important. Making it so easy to canonicalize immediately after generating seems like a lazy / somewhat sloppy thing to do from that perspective.
-
-- (maybe?) instead of defining RNGs, make the library functions that use RNG take a reference to an RNG?
-  - rationale: give the library user more control over the RNGs. easy for them to seed it, and they can choose whether to share an RNG for gen and shuffle operations.
-  - make sure it is still thread safe. Keep the locking mechanism inside the library. don't ask user to provide lock.
-
 - Go back and try the old canonicalization by rel row prob, but break ties by doing some brute force: try each tied permutation and valuate it according to some reduction of how it pushes rarer rel counts to the top left. Just be careful to shift to get rid of the main diagonal seam.
   ```
   count[rel] = 
@@ -45,12 +38,7 @@
   find labelling with maximum
     ```
 
-- Forget about canonicalization for now, and focus all efforts on gathering and analysing scramble-invariant properties of grids.
-
 - Try some of [these solutions](https://stackoverflow.com/questions/10897552/call-a-function-before-main) for the RNG default-seeding so that users don't need to manually seed in main unless they want a specific seed. Make sure to test that it works.
-
-1. write some correctness-tests for canonicalization and scrambling.
-1. get some benchmarks.
 
 - some of my usages of `extern template` aren't sensible
   - https://arne-mertz.de/2019/02/extern-template-reduce-compile-times/
@@ -65,8 +53,6 @@
     - What if we prioritized labels according to the existing standard deviation information
     - OR... make an empty commit saying that a solution was implemented using the [Ostritch Alorithm](https://en.wikipedia.org/wiki/Ostrich_algorithm)
 
-- make the grid conversion utilities make use of std::span instead of std::vector? Or just see where spans can be used in general.
-
 - some diagnostics to try rendering:
   - A scatter chart showing max-dead-ends vs. num operations. (only caring about success results)
   - a bar graph where each bar counts the number of ResultViews that had a progress (or a furthest coord with a non-zero backtrack count) within the range for that bar's "bin". (to see "how far" aborted generations usually get).
@@ -76,7 +62,7 @@
 
 - ? Refactor names to use terminology suitable for more than just 2 dimensions? Ex. in 2D: row -> `d0i` (as in "dimension-zero index"), col -> `d1i`. But doing so would imply that I'm going to support multiple dimensions... and that's a huge can of worms.
 
-- (?) Change canonicalization to not use templates. Verify first that it isn't a performance bottleneck.
+- (?) Change canonicalization to not use templates? benchmark and compare
 - Decide what interfaces to support:
   - Probably best to start with just readline and a CLI
     - For CLI util libraries, look into using
@@ -89,8 +75,6 @@
   - A web interface would be really nice.
 - C++20
   - `using enum`. Might want to wait for CLANG to support?
-  - wait for support in gcc and clang for `constexpr std::string`.
-    - the ansi constants could use this. Right now, they are stuck as C-style string.
 - I have a nagging feeling that I'm going too far with the namespacing. I'm a C++ noob with no reference so I'm not sure. I can probably make some improvements.
 - CLI
   - implement `-h` and `--help` CLI argument.

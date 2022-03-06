@@ -1,5 +1,16 @@
 # C++ Notes
 
+## Snippets
+
+```sh
+# initialize cmake files for release build
+cmake -S . -B build/release -DCMAKE_BUILD_TYPE=Release
+
+# do these in a cmake build folder
+cmake --build .
+nm -nCD src/solvent_lib/libsolvent_lib.so   # view public symbols of the shared library sorted by address
+```
+
 ## things I got wrong before
 
 things I got wrong before which I couldn't understand based on gcc's error messages.
