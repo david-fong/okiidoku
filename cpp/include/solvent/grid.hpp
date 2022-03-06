@@ -21,7 +21,7 @@ namespace solvent::lib {
 	template<Order O, typename T=size<O>::ord2i_t>
 	class grid_span2d_t final {
 		grid_span_t<O, T> span_;
-	 public:
+	public:
 		grid_span2d_t(grid_span_t<O, T> span): span_{span} {};
 		// contract: row and col must be in [0,O2).
 		T& at(size<O>::ord2i_t row, size<O>::ord2i_t col) const noexcept {

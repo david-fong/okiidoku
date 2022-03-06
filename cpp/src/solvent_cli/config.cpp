@@ -11,10 +11,10 @@ namespace solvent::cli {
 	namespace str = solvent::util::str;
 	using namespace solvent::lib;
 
-	using pathkind_t = lib::gen::path::Kind;
+	using pathkind_t = lib::gen::path::E;
 
 
-	void Config::verbosity(verbosity::Kind verbosity) {
+	void Config::verbosity(verbosity::E verbosity) {
 		verbosity_ = verbosity;
 	}
 
@@ -25,7 +25,7 @@ namespace solvent::cli {
 		}
 		for (unsigned i = 0; i < verbosity::size; ++i) {
 			if (new_verbosity_str.compare(verbosity::names[i]) == 0) {
-				verbosity(verbosity::Kind{i});
+				verbosity(verbosity::E{i});
 				return;
 			}
 		}

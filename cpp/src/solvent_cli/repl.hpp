@@ -16,7 +16,7 @@
 namespace solvent::cli {
 
 	namespace Command {
-		enum class E : unsigned {
+		enum class E {
 			Help,
 			Quit,
 			ConfigOrder,
@@ -29,7 +29,7 @@ namespace solvent::cli {
 			GenMultiple,
 			GenMultipleOk,
 		};
-		const std::map<std::string_view, Command::E> Str2Enum {
+		const std::map<std::string_view, Command::E> enum_str_to_enum {
 			{ "help",         E::Help              },
 			{ "quit",         E::Quit              },
 			{ "verbosity",    E::ConfigVerbosity   },
@@ -68,16 +68,16 @@ namespace solvent::cli {
 
 	/** */
 	class Repl final {
-	 public:
+	public:
 		using opcount_t = lib::gen::opcount_t;
-		using pathkind_t = lib::gen::path::Kind;
+		using pathkind_t = lib::gen::path::E;
 		using trials_t = lib::gen::batch::trials_t;
 
 		explicit Repl(Order O);
 		void start(void);
 		bool run_command(std::string_view cmd_line);
 
-	 private:
+	private:
 		Config config_;
 		std::unique_ptr<lib::gen::Generator> gen_;
 
@@ -85,7 +85,7 @@ namespace solvent::cli {
 		void gen_single(bool contPrev = false);
 
 		void gen_multiple(trials_t stop_after, bool only_count_oks);
-		void gen_multiple(std::string_view,  bool only_count_oks);
+		void gen_multiple(std::string_view, bool only_count_oks);
 	};
 }
 #endif

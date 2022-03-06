@@ -51,7 +51,7 @@ namespace solvent::lib::gen {
 
 	//
 	struct SOLVENT_EXPORT Params {
-		path::Kind path_kind {path::Kind::RowMajor};
+		path::E path_kind {path::E::RowMajor};
 		std::uint_fast64_t max_dead_ends {0}; // Defaulted if zero.
 
 		// Cleans self and returns a copy of self.
@@ -69,7 +69,7 @@ namespace solvent::lib::gen {
 
 
 	class SOLVENT_EXPORT Generator {
-	 public:
+	public:
 		using val_t = size<O_MAX>::ord2i_t;
 		using coord_t = size<O_MAX>::ord4x_t;
 		using dead_ends_t = float; // TODO is this okay?
@@ -127,9 +127,9 @@ namespace solvent::lib::gen {
 
 	//
 	template<Order O>
+	requires ((O > 0) && (O <= O_MAX) && (O < 6)) // added <6 restriction for sanity
 	class SOLVENT_EXPORT GeneratorO final : public Generator {
-		static_assert((O > 0) && (O <= O_MAX) && (O < 6)); // added restriction for sanity
-	 public:
+	public:
 		using has_mask_t = size<O>::O2_mask_least_t; // perf seemed similar and slightly better compared to fast_t
 		using ord1i_t = size<O>::ord1i_t;
 		using ord2i_t = size<O>::ord2i_t;
@@ -171,7 +171,7 @@ namespace solvent::lib::gen {
 			for (ord4i_t i = 0; i < O4; ++i) { sink[i] = extract_val_at_(i); }
 		}
 
-	 private:
+	private:
 		struct Cell final {
 			ord2i_t try_index; // Index into val_try_orders_. O2 if clear.
 			SOLVENT_NO_EXPORT void clear() noexcept { try_index = O2; }
@@ -192,7 +192,9 @@ namespace solvent::lib::gen {
 		}()};
 
 		std::array<Cell, O4> cells_; // indexed by progress_
-		std::array<has_mask_t, O2> rows_has_, cols_has_, blks_has_;
+		std::array<has_mask_t, O2> rows_has_;
+		std::array<has_mask_t, O2> cols_has_;
+		std::array<has_mask_t, O2> blks_has_;
 		std::array<dead_ends_t, O4> dead_ends_; // indexed by progress_
 
 		uint_fastN_t<std::bit_width(O4)> backtrack_origin_ {0};

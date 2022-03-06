@@ -13,14 +13,14 @@
 namespace solvent::lib::morph {
 
 	template<Order O>
+	requires ((O > 0) && (O <= O_MAX))
 	class SOLVENT_NO_EXPORT /* <- just in case. */ CanonPlace final {
-	 static_assert((O > 0) && (O <= O_MAX));
 		using has_mask_t = size<O>::O2_mask_least_t;
 		using ord1i_t = size<O>::ord1i_t;
 		using ord2i_t = size<O>::ord2i_t;
 		using ord4i_t = size<O>::ord4i_t;
 
-	 public:
+	public:
 		static constexpr ord1i_t O1 = O;
 		static constexpr ord2i_t O2 = O*O;
 		static constexpr ord2i_t O3 = O*O*O;

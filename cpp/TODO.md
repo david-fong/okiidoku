@@ -2,7 +2,6 @@
 
 ## Higher Priority
 
-- refactor template expansions and tweak config header to co-locate same-order expansions while also giving a somewhat convenient way to control what library features to include? Or look into a way to get linker to automatically do this.
 - try making Order an enum
   - see if it can improve switch case cover detection.
   - this may also make it possible to statically enforce contracts about orders for the non-template wrapper functions. If so, I will probably neither need to assert that the order is compiled, nor write vacuous default branches for their switch statements.
@@ -96,6 +95,9 @@
 ## Ideas That Seem To Not Have Worked / Are Impractical
 
 These didn't end up doing the thing I wanted / thought might happen.
+
+- refactor template expansions and tweak config header to co-locate same-order expansions while also giving a somewhat convenient way to control what library features to include? Or look into a way to get linker to automatically do this.
+  - started the refactor and then decided to see if there was perf improvement when compiling for only one order. No improvement was observed. Refactoring effort abandoned for added complexity. If there is other merit found in the future, the work is stashed in the `collate-so-symbols` branch.
 
 ### Generator
 

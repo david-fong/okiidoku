@@ -8,28 +8,28 @@
 namespace solvent::cli {
 
 	namespace verbosity {
-		enum class Kind : unsigned {
-			All,
-			NoGiveups,
-			Silent,
-			__MAX__ = Silent,
+		enum class E : unsigned {
+			full,
+			quiet_aborts,
+			quiet,
+			max_ = quiet,
 		};
-		constexpr size_t size = static_cast<size_t>(Kind::__MAX__) + 1;
+		constexpr size_t size = static_cast<size_t>(E::max_) + 1;
 		// Indices of entries must match the
 		// literal values of their respective enums.
 		constexpr std::array<std::string_view, size> names {
-			"emitall",
-			"nogiveups",
-			"silent",
+			"full",
+			"quiet_aborts",
+			"quiet",
 		};
-		inline std::ostream& operator<<(std::ostream& out, const Kind output_level) {
+		inline std::ostream& operator<<(std::ostream& out, const E output_level) {
 			return out << names[static_cast<unsigned>(output_level)];
 		}
 		constexpr std::string_view options_menu_str {
 			"\nVERBOSITY OPTIONS:"
-			"\n- emitall    emit all output"
-			"\n- nogiveups  suppress giveups"
-			"\n- silent     emit statistics only"
+			"\n- full          emit all output"
+			"\n- quiet_aborts  suppress aborted generation attempt output"
+			"\n- quiet         emit summary statistics only"
 		};
 	}
 }

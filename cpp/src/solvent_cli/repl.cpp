@@ -22,9 +22,9 @@ namespace solvent::cli {
 	Repl::Repl(const Order order_input): gen_(gen::Generator::create(order_input)) {
 		const Order O = gen_->get_order();
 		config_.order(O);
-		if (O <= 4) { config_.verbosity(verbosity::Kind::Silent); }
-		if (O  > 4) { config_.verbosity(verbosity::Kind::NoGiveups); }
-		config_.path_kind(gen::path::Kind::RowMajor);
+		if (O <= 4) { config_.verbosity(verbosity::E::quiet); }
+		if (O  > 4) { config_.verbosity(verbosity::E::quiet_aborts); }
+		config_.path_kind(gen::path::E::RowMajor);
 		config_.max_dead_ends(0);
 	}
 
@@ -55,13 +55,11 @@ namespace solvent::cli {
 		const std::string_view cmd_name = cmd_line.substr(0, token_pos = cmd_line.find(" "));
 		const std::string_view cmd_args = (token_pos == std::string_view::npos)
 			? "" :  cmd_line.substr(token_pos + 1, std::string_view::npos);
-		const auto it = Command::Str2Enum.find(cmd_name);
-		if (it == Command::Str2Enum.end()) {
+		const auto it = Command::enum_str_to_enum.find(cmd_name);
+		if (it == Command::enum_str_to_enum.end()) {
 			// No command name was matched.
-			std::cout << str::red.on;
-			std::cout << "command \"" << cmd_line << "\" not found."
-				" enter \"help\" for the help menu.";
-			std::cout << str::red.off << std::endl;
+			std::cout << str::red.on << "command \"" << cmd_line << "\" not found."
+				" enter \"help\" for the help menu." << str::red.off << std::endl;
 			return true;
 		}
 		switch (it->second) {
@@ -151,8 +149,8 @@ namespace solvent::cli {
 				if (result.status() == gen::ExitStatus::Ok && config_.canonicalize()) {
 					morph::canonicalize<val_t>(result.get_order(), std::span(grid));
 				}
-				if ((config_.verbosity() == verbosity::Kind::All)
-				|| ((config_.verbosity() == verbosity::Kind::NoGiveups) && (result.status() == gen::ExitStatus::Ok))
+				if ((config_.verbosity() == verbosity::E::full)
+				|| ((config_.verbosity() == verbosity::E::quiet_aborts) && (result.status() == gen::ExitStatus::Ok))
 				) {
 					print::text(std::cout, result.get_order(), grid);
 					if (result.get_order() <= 4) {
@@ -160,12 +158,12 @@ namespace solvent::cli {
 					} else {
 						std::cout << std::endl; // always flush for big grids
 					}
-				} else if (config_.verbosity() == verbosity::Kind::Silent) {
+				} else if (config_.verbosity() == verbosity::E::quiet) {
 					// TODO.impl print a progress bar
 				}
 			}
 		);
-		if (config_.verbosity() == verbosity::Kind::NoGiveups
+		if (config_.verbosity() == verbosity::E::quiet_aborts
 			&& only_count_oks
 			&& batch_report.total_anys == 0
 		) {

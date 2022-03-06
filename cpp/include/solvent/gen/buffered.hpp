@@ -10,7 +10,7 @@
 // 	*/
 // 	template<Order O>
 // 	class BufferedGenerator final {
-// 	 public:
+// 	public:
 // 		static constexpr unsigned DEFAULT_BUFFERING[]{ 0, 1,
 // 			/*2*/1000,
 // 			/*3*/1000,
@@ -25,7 +25,7 @@
 
 // 		};
 		
-// 	 private:
+// 	private:
 // 		Generator<O> gen_{};
 		
 // 	};

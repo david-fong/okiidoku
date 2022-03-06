@@ -13,11 +13,11 @@
 namespace solvent::cli {
 
 	class Config {
-	 public:
-		using pathkind_t = lib::gen::path::Kind;
+	public:
+		using pathkind_t = lib::gen::path::E;
 
-		[[nodiscard, gnu::pure]] verbosity::Kind verbosity(void) const noexcept { return verbosity_; };
-		void verbosity(verbosity::Kind);
+		[[nodiscard, gnu::pure]] verbosity::E verbosity(void) const noexcept { return verbosity_; };
+		void verbosity(verbosity::E);
 		void verbosity(std::string_view);
 
 		[[nodiscard, gnu::pure]] Order order(void) const noexcept { return order_; }
@@ -36,9 +36,9 @@ namespace solvent::cli {
 		void canonicalize(bool);
 		void canonicalize(std::string_view);
 
-	 private:
+	private:
 		Order order_;
-		verbosity::Kind verbosity_ {verbosity::Kind::NoGiveups};
+		verbosity::E verbosity_ {verbosity::E::quiet_aborts};
 		pathkind_t path_kind_ {pathkind_t::RowMajor};
 		unsigned long long max_dead_ends_ {0};
 		bool canonicalize_ {false};
