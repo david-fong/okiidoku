@@ -56,7 +56,7 @@ namespace solvent::lib::gen::batch {
 		ThreadSharedData& sd_;
 		std::mutex& sd_mutex_;
 		callback_O_t<O> callback_;
-		GeneratorO<O> generator_ {};
+		bt::GeneratorO<O> generator_ {};
 	};
 
 
@@ -69,7 +69,7 @@ namespace solvent::lib::gen::batch {
 			sd_mutex_.lock(); //‾‾‾‾
 
 			++sd_.report.total_anys;
-			if (generator_.status() == ExitStatus::Ok) [[likely]] {
+			if (generator_.status() == bt::ExitStatus::Ok) [[likely]] {
 				++sd_.report.total_oks;
 
 				auto& dist_summary_row = sd_.report.max_dead_end_samples[
@@ -152,7 +152,7 @@ namespace solvent::lib::gen::batch {
 			#define M_SOLVENT_TEMPL_TEMPL(O_) \
 				case O_: { return std::thread(ThreadFunc<O_>{ \
 					sd, sd_mutex, [&](const auto result){ \
-						return callback(static_cast<const Generator&>(result)); \
+						return callback(static_cast<const bt::Generator&>(result)); \
 					} \
 				}); \
 				break; }

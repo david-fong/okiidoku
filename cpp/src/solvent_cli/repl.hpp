@@ -4,7 +4,7 @@
 #include "solvent_cli/config.hpp"
 #include "solvent_cli/enum.hpp"
 #include "solvent/gen/batch.hpp"
-#include "solvent/gen/mod.hpp"
+#include "solvent/gen/backtracking.hpp"
 #include "solvent/size.hpp"
 
 #include <map>
@@ -69,7 +69,7 @@ namespace solvent::cli {
 	/** */
 	class Repl final {
 	public:
-		using opcount_t = lib::gen::opcount_t;
+		using opcount_t = lib::gen::bt::opcount_t;
 		using pathkind_t = lib::gen::path::E;
 		using trials_t = lib::gen::batch::trials_t;
 
@@ -79,7 +79,7 @@ namespace solvent::cli {
 
 	private:
 		Config config_;
-		std::unique_ptr<lib::gen::Generator> gen_;
+		std::unique_ptr<lib::gen::bt::Generator> gen_;
 
 		// Return false if command is to exit the program:
 		void gen_single(bool contPrev = false);

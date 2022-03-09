@@ -94,8 +94,8 @@ namespace solvent::cli {
 	void Config::max_dead_ends(const std::string_view new_max_dead_ends_str) {
 		if (new_max_dead_ends_str.empty()) {
 			std::cout << "is: " << max_dead_ends()
-				<< "\nsetting to zero will default to " << gen::cell_dead_ends::limit_default[order_]
-				<< "\nvalues above " << gen::cell_dead_ends::limit_i_max[order_] << " will be clamped"
+				<< "\nsetting to zero will default to " << gen::bt::cell_dead_ends::limit_default[order_]
+				<< "\nvalues above " << gen::bt::cell_dead_ends::limit_i_max[order_] << " will be clamped"
 				<< std::endl;
 			return;
 		}

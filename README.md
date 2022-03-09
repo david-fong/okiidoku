@@ -18,6 +18,7 @@ Feedback and suggestions on how to improve are very welcome- particularly about 
 - [Emerentius/sudoku](https://github.com/Emerentius/sudoku)
 - [Peter Norvig](https://norvig.com/sudoku.html)
 - There are more. Google it.
+  - [github:sudoku-generator](https://github.com/topics/sudoku-generator), [github:sudoku-puzzle](https://github.com/topics/sudoku-puzzle)
 
 ## My Past and Future Related Works
 

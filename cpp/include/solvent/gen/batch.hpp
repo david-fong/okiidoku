@@ -1,7 +1,7 @@
 #ifndef HPP_SOLVENT__GEN__BATCH
 #define HPP_SOLVENT__GEN__BATCH
 
-#include "solvent/gen/mod.hpp"
+#include "solvent/gen/backtracking.hpp"
 #include "solvent_util/timer.hpp"
 #include "solvent_export.h"
 
@@ -16,7 +16,7 @@ namespace solvent::lib::gen::batch {
 
 	//
 	struct SOLVENT_EXPORT Params final {
-		gen::Params gen_params;
+		gen::bt::Params gen_params;
 		unsigned num_threads {0}; // Defaulted if zero.
 		unsigned max_dead_end_sample_granularity {0}; // Defaulted if zero.
 		bool only_count_oks;
@@ -65,13 +65,13 @@ namespace solvent::lib::gen::batch {
 
 
 	template<Order O>
-	using callback_O_t = std::function<void(const GeneratorO<O>&)>;
+	using callback_O_t = std::function<void(const bt::GeneratorO<O>&)>;
 	// calls to the callback will be guarded by a mutex.
 	template<Order O>
 	SOLVENT_EXPORT [[nodiscard]] BatchReport batch_O(Params&, callback_O_t<O>);
 
 
-	using callback_t = std::function<void(const Generator&)>;
+	using callback_t = std::function<void(const bt::Generator&)>;
 	// calls to the callback will be guarded by a mutex.
 	// asserts that the order is compiled.
 	SOLVENT_EXPORT [[nodiscard]] BatchReport batch(Order, Params&, callback_t);

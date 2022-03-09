@@ -1,5 +1,5 @@
 
-#include "solvent/gen/mod.hpp"
+#include "solvent/gen/backtracking.hpp"
 
 #include <emscripten/bind.h>
 #include <random>	// random_device,

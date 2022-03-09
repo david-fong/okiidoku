@@ -6,7 +6,7 @@ add_library(solvent SHARED
 	morph/canon.cpp
 	morph/scramble.cpp
 	gen/path.cpp
-	gen/mod.cpp
+	gen/backtracking.cpp
 	gen/batch.cpp
 	gen/batch_print.cpp
 )

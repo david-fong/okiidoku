@@ -1,4 +1,4 @@
-#include "solvent/gen/mod.hpp"
+#include "solvent/gen/backtracking.hpp"
 #include "solvent/gen/batch.hpp"
 #include "solvent/morph/canon.hpp"
 #include "solvent/morph/scramble.hpp"
@@ -25,9 +25,9 @@ unsigned test_morph_O(const unsigned num_rounds) {
 
 	unsigned int count_bad = 0;
 	for (unsigned round = 0; round < num_rounds; ) {
-		gen::GeneratorO<O> g {};
+		gen::bt::GeneratorO<O> g {};
 		g({});
-		if (g.status() != gen::ExitStatus::Ok) {
+		if (g.status() != gen::bt::ExitStatus::Ok) {
 			continue;
 		}
 
@@ -79,7 +79,7 @@ int main(const int argc, char const *const argv[]) {
 	<< std::endl;
 
 	// Scramble the random number generators:
-	solvent::lib::gen::seed_rng(srand_key);
+	solvent::lib::gen::bt::seed_rng(srand_key);
 	solvent::lib::morph::seed_scrambler_rng(srand_key);
 
 	// TODO change the test to try out all orders.

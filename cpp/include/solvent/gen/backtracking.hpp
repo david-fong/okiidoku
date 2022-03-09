@@ -1,5 +1,5 @@
-#ifndef HPP_SOLVENT__GEN
-#define HPP_SOLVENT__GEN
+#ifndef HPP_SOLVENT__GEN__BACKTRACKING
+#define HPP_SOLVENT__GEN__BACKTRACKING
 
 #include "solvent/gen/path.hpp"
 #include "solvent/grid.hpp"
@@ -15,7 +15,7 @@
 #include <type_traits>
 #include <cassert>
 
-namespace solvent::lib::gen {
+namespace solvent::lib::gen::bt {
 
 	// used for manual branch likelihood profiling
 	// extern long long total;
@@ -51,7 +51,7 @@ namespace solvent::lib::gen {
 
 	//
 	struct SOLVENT_EXPORT Params {
-		path::E path_kind {path::E::RowMajor};
+		path::E path_kind {path::E::row_major};
 		std::uint_fast64_t max_dead_ends {0}; // Defaulted if zero.
 
 		// Cleans self and returns a copy of self.

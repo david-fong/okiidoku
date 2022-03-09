@@ -1,4 +1,4 @@
-#include "solvent/gen/mod.hpp"
+#include "solvent/gen/backtracking.hpp"
 #include "solvent/print.hpp"
 
 #include <iostream>
@@ -6,7 +6,7 @@
 #include <algorithm>   // shuffle,
 #include <random>
 
-namespace solvent::lib::gen {
+namespace solvent::lib::gen::bt {
 
 	// long long total = 0;
 	// long long true_ = 0;
@@ -32,11 +32,11 @@ namespace solvent::lib::gen {
 	std::unique_ptr<Generator> Generator::create(const Order order) {
 		switch (order) {
 			#define M_SOLVENT_TEMPL_TEMPL(O_) \
-			case O_: return std::make_unique<gen::GeneratorO<O_>>();
+			case O_: return std::make_unique<gen::bt::GeneratorO<O_>>();
 			M_SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 			#undef M_SOLVENT_TEMPL_TEMPL
 
-			default: return std::make_unique<gen::GeneratorO<M_SOLVENT_DEFAULT_ORDER>>();
+			default: return std::make_unique<gen::bt::GeneratorO<M_SOLVENT_DEFAULT_ORDER>>();
 		}
 	}
 

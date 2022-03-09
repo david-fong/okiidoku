@@ -3,7 +3,7 @@
 
 #include "solvent_cli/enum.hpp"
 // #include "solvent/gen/batch.hpp"
-#include "solvent/gen/mod.hpp"
+#include "solvent/gen/backtracking.hpp"
 #include "solvent/size.hpp"
 
 #include <map>
@@ -39,7 +39,7 @@ namespace solvent::cli {
 	private:
 		Order order_;
 		verbosity::E verbosity_ {verbosity::E::quiet_aborts};
-		pathkind_t path_kind_ {pathkind_t::RowMajor};
+		pathkind_t path_kind_ {pathkind_t::row_major};
 		unsigned long long max_dead_ends_ {0};
 		bool canonicalize_ {false};
 	};

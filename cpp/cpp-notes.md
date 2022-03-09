@@ -1,5 +1,7 @@
 # C++ Notes
 
+- https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines
+
 ## Snippets
 
 ```sh

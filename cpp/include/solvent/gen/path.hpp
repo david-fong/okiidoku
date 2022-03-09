@@ -12,24 +12,24 @@
 namespace solvent::lib::gen::path {
 
 	enum class SOLVENT_EXPORT E : std::uint8_t {
-		RowMajor,
-		BlockCol,
-		DealRwMj,
-		max_ = DealRwMj,
+		row_major,
+		block_col,
+		dealer_row_major,
+		max_ = dealer_row_major,
 	};
 	constexpr size_t num_kinds = static_cast<size_t>(E::max_) + 1;
 	// Indices of entries must match the
 	// literal values of their respective enums.
 	constexpr std::array<std::string_view, num_kinds> names {
-		"rowmajor",
-		"blockcol",
-		"dealrwmj",
+		"row_major",
+		"block_col",
+		"dealer_row_major",
 	};
 	SOLVENT_EXPORT extern std::ostream& operator<<(std::ostream& os, E path_kind);
 	constexpr std::string_view options_menu_str {"\nGEN-PATH OPTIONS:"
-		"\n- rowmajor   horizontal strips as wide as the grid one by one"
-		"\n- blockcol   rowmajor, but broken into columns one block wide"
-		"\n- dealrwmj   like dealing cards to each block using row-major"};
+		"\n- row_major          horizontal strips as wide as the grid one by one"
+		"\n- block_col          rowmajor, but broken into columns one block wide"
+		"\n- dealer_row_major   like dealing cards to each block using row-major"};
 
 
 	// input progress must be _less than_ O4.

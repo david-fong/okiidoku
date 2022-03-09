@@ -2,6 +2,12 @@
 
 ## Higher Priority
 
+- http://forum.enjoysudoku.com/giant-sudoku-s-16x16-25x25-36x36-100x100-t6578-120.html#p259504
+  - these people have generators that apparently scale very well. Try implementing their algorithms?
+  - [donald knuth's dancing links paper](https://www.ocf.berkeley.edu/~jchu/publicportal/sudoku/0011047.pdf)
+    - a blog-like post with another illustration https://garethrees.org/2007/06/10/zendoku-generation/#section-4
+  - a paper http://www.dudziak.com/ArbitrarySizeSudokuCreation.pdf
+  - patterns game strats
 - try making Order an enum
   - see if it can improve switch case cover detection.
   - this may also make it possible to statically enforce contracts about orders for the non-template wrapper functions. If so, I will probably neither need to assert that the order is compiled, nor write vacuous default branches for their switch statements.
@@ -19,6 +25,7 @@
   - this can be useful for gathering up a dataset of order-5 grids for future experimentation and benchmarking/testing of the non-generation parts of this library (scramble, canonicalize).
 
 - "smarter"/greedier backtracking: backtracking may be occurring frequently at a coord because of values much earlier in the genpath progress.
+  - https://en.wikipedia.org/wiki/Backjumping
   - backtracking is less likely to occur when other coords in the same house as the stuck coord that have different house types have the same value (overlapping has_mask). Can make an array like a count version of has_mask counting the times a value is taken in each house seen by the stuck coord.
     - Indicators of "bad packing" (lack of overlap): how many more bits are in the coord's has_mask than the has_mask of the house with the most bits in its has_mask?
     - Each coord has a level of prone-ness to bad packing: To get it, walk the gen path, and at each cell, accumulate that cell's coord to a pool, then walk the pool and count how many coords are seen by the current coord. Take `max(count_seen - O2, 0)`.

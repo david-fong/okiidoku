@@ -19,12 +19,12 @@ namespace solvent::cli {
 	"\nNote: You can run `tput rmam` in your shell to disable text wrapping."};
 
 
-	Repl::Repl(const Order order_input): gen_(gen::Generator::create(order_input)) {
+	Repl::Repl(const Order order_input): gen_(gen::bt::Generator::create(order_input)) {
 		const Order O = gen_->get_order();
 		config_.order(O);
 		if (O <= 4) { config_.verbosity(verbosity::E::quiet); }
 		if (O  > 4) { config_.verbosity(verbosity::E::quiet_aborts); }
-		config_.path_kind(gen::path::E::RowMajor);
+		config_.path_kind(gen::path::E::row_major);
 		config_.max_dead_ends(0);
 	}
 
@@ -73,7 +73,7 @@ namespace solvent::cli {
 				break;
 			case E::Quit:
 				return false;
-			case E::ConfigOrder:       config_.order(cmd_args); gen_ = gen::Generator::create(config_.order()); break; // TODO only call if order has changed
+			case E::ConfigOrder:       config_.order(cmd_args); gen_ = gen::bt::Generator::create(config_.order()); break; // TODO only call if order has changed
 			case E::ConfigVerbosity:   config_.verbosity(cmd_args); break;
 			case E::ConfigGenPath:     config_.path_kind(cmd_args); break;
 			case E::ConfigMaxDeadEnds: config_.max_dead_ends(cmd_args); break;
@@ -91,19 +91,19 @@ namespace solvent::cli {
 		const clock_t clock_start = std::clock();
 		cont_prev
 			? gen_->continue_prev()
-			: gen_->operator()(gen::Params{
+			: gen_->operator()(gen::bt::Params{
 				.path_kind = config_.path_kind(),
 				.max_dead_ends = config_.max_dead_ends(),
 			});
 		const double processor_time = (static_cast<double>(std::clock() - clock_start)) / CLOCKS_PER_SEC;
 		{
-			using val_t = gen::Generator::val_t;
-			using dead_ends_t = gen::Generator::dead_ends_t;
+			using val_t = gen::bt::Generator::val_t;
+			using dead_ends_t = gen::bt::Generator::dead_ends_t;
 			std::array<val_t, O4_MAX> grid;
 			std::array<dead_ends_t, O4_MAX> dead_ends;
 			gen_->write_to(std::span<val_t>(grid));
 			gen_->write_dead_ends_to<dead_ends_t>(std::span(dead_ends));
-			if (gen_->status() == gen::ExitStatus::Ok && config_.canonicalize()) {
+			if (gen_->status() == gen::bt::ExitStatus::Ok && config_.canonicalize()) {
 				morph::canonicalize<val_t>(gen_->get_order(), std::span(grid)); // should we make a copy and print as a third grid image?
 			}
 			
@@ -112,7 +112,7 @@ namespace solvent::cli {
 					_os << ' '; print::val_to_str(_os, config_.order(), grid[coord]);
 				}),
 				print::print_grid_t([&](std::ostream& _os, uint16_t coord) {
-					const auto shade = gen::Generator::shaded_dead_end_stat(static_cast<dead_ends_t>(gen_->get_params().max_dead_ends), dead_ends[coord]);
+					const auto shade = gen::bt::Generator::shaded_dead_end_stat(static_cast<dead_ends_t>(gen_->get_params().max_dead_ends), dead_ends[coord]);
 					_os << shade << shade;
 				}),
 			};
@@ -122,8 +122,8 @@ namespace solvent::cli {
 			<< "\nprocessor time: " << processor_time << " seconds"
 			<< "\nnum operations: " << gen_->get_op_count()
 			<< "\nmax dead ends:  " << gen_->get_most_dead_ends_seen()
-			<< "\nstatus:         " << ((gen_->status() == gen::ExitStatus::Ok) ? "OK"
-				: (gen_->status() == gen::ExitStatus::Abort) ? "ABORT" : "GENERATOR EXHAUSTED")
+			<< "\nstatus:         " << ((gen_->status() == gen::bt::ExitStatus::Ok) ? "OK"
+				: (gen_->status() == gen::bt::ExitStatus::Abort) ? "ABORT" : "GENERATOR EXHAUSTED")
 			;
 		std::cout << std::endl;
 	}
@@ -142,15 +142,15 @@ namespace solvent::cli {
 			.stop_after = stop_after
 		};
 		const gen::batch::BatchReport batch_report = gen::batch::batch(config_.order(), params,
-			[this](const gen::Generator& result) {
-				using val_t = gen::Generator::val_t;
+			[this](const gen::bt::Generator& result) {
+				using val_t = gen::bt::Generator::val_t;
 				std::array<val_t, O4_MAX> grid;
 				result.write_to(std::span<val_t>(grid));
-				if (result.status() == gen::ExitStatus::Ok && config_.canonicalize()) {
+				if (result.status() == gen::bt::ExitStatus::Ok && config_.canonicalize()) {
 					morph::canonicalize<val_t>(result.get_order(), std::span(grid));
 				}
 				if ((config_.verbosity() == verbosity::E::full)
-				|| ((config_.verbosity() == verbosity::E::quiet_aborts) && (result.status() == gen::ExitStatus::Ok))
+				|| ((config_.verbosity() == verbosity::E::quiet_aborts) && (result.status() == gen::bt::ExitStatus::Ok))
 				) {
 					print::text(std::cout, result.get_order(), grid);
 					if (result.get_order() <= 4) {

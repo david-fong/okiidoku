@@ -4,9 +4,9 @@ use super::super::size::Prim;
 #[derive(PartialEq, Eq)]
 pub enum Path {
 	/// Goes through rows top to bottom, each row left to right.
-	RowMajor,
+	row_major,
 	CardDeal,
-	BlockCol,
+	block_col,
 }
 
 impl<
@@ -17,7 +17,7 @@ impl<
 	const ORD: usize,
 	const LEN: usize,
 	const ARE: usize,
-> GenericGenerator<OrdCount, LenCount, AreCount, LenField, ORD, LEN, ARE, {Path::RowMajor as usize}> {
+> GenericGenerator<OrdCount, LenCount, AreCount, LenField, ORD, LEN, ARE, {Path::row_major as usize}> {
 	fn progress_to_coord(progress: AreCount) -> AreCount {
 		return progress;
 	}
@@ -70,7 +70,7 @@ impl<
 	const ORD: usize,
 	const LEN: usize,
 	const ARE: usize,
-> GenericGenerator<OrdCount, LenCount, AreCount, LenField, ORD, LEN, ARE, {Path::BlockCol as usize}> {
+> GenericGenerator<OrdCount, LenCount, AreCount, LenField, ORD, LEN, ARE, {Path::block_col as usize}> {
 	const MAP: [AreCount; ARE] = Self::INIT_MAP();
 	const fn INIT_MAP() -> [AreCount; ARE] {
 		let mut map: [AreCount; ARE];
