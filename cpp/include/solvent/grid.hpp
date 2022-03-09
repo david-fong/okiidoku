@@ -5,14 +5,12 @@
 #include "solvent_config.hpp"
 #include "solvent_export.h"
 
-#include <vector>
 #include <array>
 #include <span>
 #include <cassert>
 
-namespace solvent::lib {
+namespace solvent {
 
-	template<Order O> using grid_vec_t = std::vector<typename size<O>::ord2i_t>;
 	template<Order O, typename T=size<O>::ord2i_t> using grid_arr_t = std::array<std::array<T, O*O>, O*O>;
 	template<Order O, typename T=size<O>::ord2i_t> using grid_const_span_t = std::span<const T, O*O*O*O>;
 	template<Order O, typename T=size<O>::ord2i_t> using grid_span_t = std::span<T, O*O*O*O>;
@@ -85,7 +83,6 @@ namespace solvent::lib {
 }
 
 
-// extern template class std::vector<std::uint_fast8_t>;
 #define M_SOLVENT_TEMPL_TEMPL(O_) \
 	extern template class std::array<std::array<typename solvent::size<O_>::ord2i_t, O_*O_>, O_*O_>;
 M_SOLVENT_INSTANTIATE_ORDER_TEMPLATES

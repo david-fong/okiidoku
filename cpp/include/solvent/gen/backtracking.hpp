@@ -8,14 +8,12 @@
 #include "solvent_config.hpp"
 #include "solvent_export.h"
 
-#include <iosfwd>
 #include <array>
 #include <span>
 #include <memory> // unique_ptr
-#include <type_traits>
 #include <cassert>
 
-namespace solvent::lib::gen::bt {
+namespace solvent::gen::bt {
 
 	// used for manual branch likelihood profiling
 	// extern long long total;

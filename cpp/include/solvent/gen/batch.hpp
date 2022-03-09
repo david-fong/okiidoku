@@ -10,7 +10,7 @@
 #include <vector>
 #include <optional>
 
-namespace solvent::lib::gen::batch {
+namespace solvent::gen::batch {
 
 	using trials_t = unsigned long;
 

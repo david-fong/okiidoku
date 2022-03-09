@@ -4,7 +4,7 @@
 #include <iostream>
 // #include <cassert>
 
-namespace solvent::lib::morph {
+namespace solvent::morph {
 
 	template<Order O>
 	void canon_label(grid_span_t<O>);

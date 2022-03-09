@@ -5,7 +5,7 @@
 #include <iomanip>
 #include <string_view>
 
-namespace solvent::lib::gen::batch {
+namespace solvent::gen::batch {
 
 	static constexpr std::string_view throughput_bar_str {"-------------------------"};
 	static constexpr std::string_view table_separator {

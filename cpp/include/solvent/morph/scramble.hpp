@@ -6,7 +6,7 @@
 #include "solvent_config.hpp"
 #include "solvent_export.h"
 
-namespace solvent::lib::morph {
+namespace solvent::morph {
 
 	// must be manually seeded in the main function!
 	// Used for scrambling.

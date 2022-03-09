@@ -10,7 +10,7 @@
 #include <bit>       // popcount
 #include <cassert>
 
-namespace solvent::lib::morph {
+namespace solvent::morph {
 
 	template<Order O>
 	requires ((O > 0) && (O <= O_MAX))

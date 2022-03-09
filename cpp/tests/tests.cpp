@@ -18,7 +18,7 @@
 // returns the number of failures
 template<solvent::Order O>
 unsigned test_morph_O(const unsigned num_rounds) {
-	using namespace solvent::lib;
+	using namespace solvent;
 	constexpr unsigned O4 = O*O*O*O;
 	std::cout << "\n\ntesting for order " << O << std::endl;
 	// TODO: assert that paths are valid.
@@ -79,8 +79,8 @@ int main(const int argc, char const *const argv[]) {
 	<< std::endl;
 
 	// Scramble the random number generators:
-	solvent::lib::gen::bt::seed_rng(srand_key);
-	solvent::lib::morph::seed_scrambler_rng(srand_key);
+	solvent::gen::bt::seed_rng(srand_key);
+	solvent::morph::seed_scrambler_rng(srand_key);
 
 	// TODO change the test to try out all orders.
 	if (test_morph_O<3>(num_rounds)) {
@@ -88,17 +88,17 @@ int main(const int argc, char const *const argv[]) {
 	}
 
 
-	// using solvent::lib::gen::batch::batch;
-	// auto params = solvent::lib::gen::batch::Params {
+	// using solvent::gen::batch::batch;
+	// auto params = solvent::gen::batch::Params {
 	// 	.gen_params{}, .only_count_oks=true, .stop_after=100
 	// };
-	// batch<3>(params, [](typename solvent::lib::gen::Generator<3>::ResultView result){
+	// batch<3>(params, [](typename solvent::gen::Generator<3>::ResultView result){
 	// 	std::cout << "\nhi";
 	// 	result.to_generic().print_pretty(std::cout);
 	// }).print(std::cout, 3);
 
 	// playing with ranges
-	/* using namespace solvent::lib;
+	/* using namespace solvent;
 	std::cout << "\n";
 	gen::GeneratorO<3> g {};
 	g({});

@@ -9,7 +9,7 @@
 #include <array>
 #include <string_view>
 
-namespace solvent::lib::gen::path {
+namespace solvent::gen::path {
 
 	enum class SOLVENT_EXPORT E : std::uint8_t {
 		row_major,

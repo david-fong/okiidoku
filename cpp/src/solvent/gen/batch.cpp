@@ -6,7 +6,7 @@
 #include <limits>
 #include <cassert>
 
-namespace solvent::lib::gen::batch {
+namespace solvent::gen::batch {
 
 	unsigned default_num_threads(const Order O) {
 		const unsigned hwc = std::thread::hardware_concurrency();

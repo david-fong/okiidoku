@@ -69,9 +69,9 @@ namespace solvent::cli {
 	/** */
 	class Repl final {
 	public:
-		using opcount_t = lib::gen::bt::opcount_t;
-		using pathkind_t = lib::gen::path::E;
-		using trials_t = lib::gen::batch::trials_t;
+		using opcount_t = gen::bt::opcount_t;
+		using pathkind_t = gen::path::E;
+		using trials_t = gen::batch::trials_t;
 
 		explicit Repl(Order O);
 		void start(void);
@@ -79,7 +79,7 @@ namespace solvent::cli {
 
 	private:
 		Config config_;
-		std::unique_ptr<lib::gen::bt::Generator> gen_;
+		std::unique_ptr<gen::bt::Generator> gen_;
 
 		// Return false if command is to exit the program:
 		void gen_single(bool contPrev = false);

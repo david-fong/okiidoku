@@ -6,7 +6,7 @@
 #include <array>
 #include <cmath>
 
-namespace solvent::lib::morph {
+namespace solvent::morph {
 
 	template<Order O>
 	struct RelCountProb final {

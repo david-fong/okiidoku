@@ -13,7 +13,6 @@
 namespace solvent::cli {
 
 	namespace str = solvent::util::str;
-	using namespace solvent::lib;
 
 	constexpr std::string_view TERMINAL_OUTPUT_TIPS {
 	"\nNote: You can run `tput rmam` in your shell to disable text wrapping."};

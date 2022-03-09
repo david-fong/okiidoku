@@ -1,6 +1,6 @@
 #include "solvent/grid.hpp"
 
-namespace solvent::lib {
+namespace solvent {
 
 
 	template<Order O>

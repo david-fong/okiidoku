@@ -1,12 +1,11 @@
 #include "solvent/gen/backtracking.hpp"
 #include "solvent/print.hpp"
 
-#include <iostream>
 #include <mutex>
 #include <algorithm>   // shuffle,
 #include <random>
 
-namespace solvent::lib::gen::bt {
+namespace solvent::gen::bt {
 
 	// long long total = 0;
 	// long long true_ = 0;

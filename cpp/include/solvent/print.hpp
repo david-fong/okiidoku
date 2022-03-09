@@ -9,7 +9,7 @@
 #include <span>
 #include <cstdint>
 
-namespace solvent::lib::print {
+namespace solvent::print {
 
 	SOLVENT_EXPORT [[gnu::hot]] void val_to_str(std::ostream&, Order order, uint8_t value);
 

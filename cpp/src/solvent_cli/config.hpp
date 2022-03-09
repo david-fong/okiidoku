@@ -14,7 +14,7 @@ namespace solvent::cli {
 
 	class Config {
 	public:
-		using pathkind_t = lib::gen::path::E;
+		using pathkind_t = gen::path::E;
 
 		[[nodiscard, gnu::pure]] verbosity::E verbosity(void) const noexcept { return verbosity_; };
 		void verbosity(verbosity::E);

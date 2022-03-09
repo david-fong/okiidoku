@@ -31,15 +31,15 @@ int main(const int argc, char const *const argv[]) {
 	<< std::endl;
 
 	// Scramble the random number generators:
-	solvent::lib::gen::bt::seed_rng(srand_key);
-	solvent::lib::morph::seed_scrambler_rng(srand_key);
+	solvent::gen::bt::seed_rng(srand_key);
+	solvent::morph::seed_scrambler_rng(srand_key);
 
 	solvent::cli::Repl repl { user_order };
 	repl.start();
 
 	// End of program:
 	std::cout << "\nbye bye!\n" << std::endl;
-	// std::cout << "\ntotal: " << solvent::lib::gen::total;
-	// std::cout << "\ntrue_: " << solvent::lib::gen::true_ << std::endl;
+	// std::cout << "\ntotal: " << solvent::gen::total;
+	// std::cout << "\ntrue_: " << solvent::gen::true_ << std::endl;
 	return 0;
 }

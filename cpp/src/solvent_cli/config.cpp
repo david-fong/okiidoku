@@ -9,9 +9,8 @@
 namespace solvent::cli {
 
 	namespace str = solvent::util::str;
-	using namespace solvent::lib;
 
-	using pathkind_t = lib::gen::path::E;
+	using pathkind_t = gen::path::E;
 
 
 	void Config::verbosity(verbosity::E verbosity) {

@@ -6,7 +6,7 @@
 #include "solvent_config.hpp"
 #include "solvent_export.h"
 
-namespace solvent::lib::morph {
+namespace solvent::morph {
 
 	// contract: the span is a complete, valid grid.
 	template<Order O>
