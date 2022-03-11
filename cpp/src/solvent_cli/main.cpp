@@ -1,6 +1,6 @@
 #include "solvent_cli/repl.hpp"
-#include "solvent/gen/backtracking.hpp"
-#include "solvent/morph/scramble.hpp"
+// #include "solvent/gen/backtracking.hpp"
+#include "solvent/rng.hpp"
 #include "solvent_util/console_setup.hpp"
 
 #include <string>
@@ -31,10 +31,9 @@ int main(const int argc, char const *const argv[]) {
 	<< std::endl;
 
 	// Scramble the random number generators:
-	solvent::gen::bt::seed_rng(srand_key);
-	solvent::morph::seed_scrambler_rng(srand_key);
+	solvent::seed_rng(srand_key);
 
-	solvent::cli::Repl repl { user_order };
+	solvent::cli::Repl repl {user_order};
 	repl.start();
 
 	// End of program:

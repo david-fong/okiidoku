@@ -5,7 +5,7 @@ The project currently provides two utilities: a _solution_ generator, and a cano
 
 For usage instructions, see the readmes in the [cpp](./cpp/readme.md) and [rust](./rust/readme.md) directories. Note that the rust implementation is more of a learning project for me, and is currently not under development.
 
-I work on this project for fun. I like sudoku. I want to learn how to develop high-performance software libraries. I like reasoning about trade-offs. I don't want to copy other peoples' algorithms; the algorithm design is like the puzzle to me; I don't want to "look at answers" at least until I have come up with my own. Perhaps in doing so, I will come up with something new, and maybe even something that is better in some ways than existing approaches. Regardless, I will do my best :)
+I work on this project for fun. I like sudoku. I want to learn how to develop high-performance software libraries. I like reasoning about trade-offs. The algorithm design is like the puzzle to me; I don't want to "look at answers" at least until I have come up with my own. Perhaps in doing so, I will come up with something new, and maybe even something that is better in some ways than existing approaches. Regardless, I will do my best :)
 
 Feedback and suggestions on how to improve are very welcome- particularly about best practice in general software development / library authoring with C++ or rust. Just be prepared to help me understand the rationale and how things work. I will appreciate it.
 
@@ -19,6 +19,7 @@ Feedback and suggestions on how to improve are very welcome- particularly about 
 - [Peter Norvig](https://norvig.com/sudoku.html)
 - There are more. Google it.
   - [github:sudoku-generator](https://github.com/topics/sudoku-generator), [github:sudoku-puzzle](https://github.com/topics/sudoku-puzzle)
+  - [sudopedia programs list](http://sudopedia.enjoysudoku.com/Sudoku_Programs.html)
 
 ## My Past and Future Related Works
 

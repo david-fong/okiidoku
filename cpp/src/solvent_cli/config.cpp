@@ -22,7 +22,7 @@ namespace solvent::cli {
 			std::cout << "is: " << verbosity() << std::endl;
 			return;
 		}
-		for (unsigned i = 0; i < verbosity::size; ++i) {
+		for (unsigned i {0}; i < verbosity::size; ++i) {
 			if (new_verbosity_str.compare(verbosity::names[i]) == 0) {
 				verbosity(verbosity::E{i});
 				return;
@@ -73,7 +73,7 @@ namespace solvent::cli {
 			std::cout << "is: " << path_kind() << std::endl;
 			return;
 		}
-		for (unsigned i = 0; i < gen::path::num_kinds; ++i) {
+		for (unsigned i {0}; i < gen::path::num_kinds; ++i) {
 			if (new_path_kind_str.compare(gen::path::names[i]) == 0) {
 				path_kind(pathkind_t(i));
 				return;

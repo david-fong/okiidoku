@@ -29,9 +29,9 @@ namespace solvent {
 	};
 
 
-	// Returns true if any cells in a same house contain the same value.
+	// Returns false if any cells in a same house contain the same value.
 	// Can be used with incomplete grids.
-	template<Order O> SOLVENT_EXPORT [[nodiscard]] bool is_grid_valid(grid_const_span_t<O>) noexcept;
+	template<Order O> SOLVENT_EXPORT [[nodiscard]] bool is_sudoku_valid(grid_const_span_t<O>) noexcept;
 
 
 	template<Order O> SOLVENT_EXPORT [[nodiscard, gnu::const]] constexpr typename size<O>::ord2i_t rmi_to_row(const typename size<O>::ord4i_t index) noexcept { return static_cast<size<O>::ord2i_t>(index / (O*O)); } // I love c++ :')
@@ -59,16 +59,16 @@ namespace solvent {
 		using T = std::array<M, O>;
 		static constexpr T row = [](){
 			T _ {0};
-			for (unsigned chute = 0; chute < O; ++chute) {
-				for (unsigned i = 0; i < O; ++i) {
+			for (unsigned chute {0}; chute < O; ++chute) {
+				for (unsigned i {0}; i < O; ++i) {
 					_[chute] |= static_cast<M>(1 << ((O*chute) + i));
 			}	}
 			return _;
 		}();
 		static constexpr T col = [](){
 			T _ {0};
-			for (unsigned chute = 0; chute < O; ++chute) {
-				for (unsigned i = 0; i < O; ++i) {
+			for (unsigned chute {0}; chute < O; ++chute) {
+				for (unsigned i {0}; i < O; ++i) {
 					_[chute] |= static_cast<M>(1 << ((O*i) + chute));
 			}	}
 			return _;
@@ -77,14 +77,8 @@ namespace solvent {
 
 
 	#define M_SOLVENT_TEMPL_TEMPL(O_) \
-		extern template bool is_grid_valid<O_>(grid_const_span_t<O_>) noexcept;
+		extern template bool is_sudoku_valid<O_>(grid_const_span_t<O_>) noexcept;
 	M_SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 	#undef M_SOLVENT_TEMPL_TEMPL
 }
-
-
-#define M_SOLVENT_TEMPL_TEMPL(O_) \
-	extern template class std::array<std::array<typename solvent::size<O_>::ord2i_t, O_*O_>, O_*O_>;
-M_SOLVENT_INSTANTIATE_ORDER_TEMPLATES
-#undef M_SOLVENT_TEMPL_TEMPL
 #endif

@@ -19,7 +19,7 @@ namespace solvent::morph {
 		distribution B(o^2, 2/(o+1)). */
 		static constexpr std::array<double, O2+1> ALL = [](){
 			std::array<double, O2+1> _;
-			for (unsigned i = 0; i < O2+1; ++i) {
+			for (unsigned i {0}; i < O2+1; ++i) {
 				_[i] = (static_cast<double>(n_choose_r(O2, i)) * (1<<i) * std::pow(O1-1, O2-i)) / std::pow(O1+1, O2); }
 			return _;
 		}();
@@ -27,7 +27,7 @@ namespace solvent::morph {
 
 		static constexpr std::array<double, O2+1> POLAR = [](){
 			std::array<double, O2+1> _;
-			for (unsigned i = 0; i < O2+1; ++i) {
+			for (unsigned i {0}; i < O2+1; ++i) {
 				_[i] = (static_cast<double>(n_choose_r(O2, i)) * std::pow(O1, O2-i)) / std::pow(O1+1, O2); }
 			return _;
 		}();

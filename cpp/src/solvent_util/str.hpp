@@ -6,6 +6,7 @@
 #include <locale>
 #include <array>
 #include <string_view>
+#include <type_traits>
 
 //
 namespace solvent::util::str {
@@ -50,5 +51,13 @@ namespace solvent::util::str {
 		"-", "*", "X", "#",
 		#endif
 	};
+	template<class T>
+	requires std::is_integral_v<T> || std::is_floating_point_v<T>
+	constexpr std::string_view get_block_char(T out_of, T count) {
+		assert(count <= out_of);
+		return (count == 0) ? " " : util::str::block_chars[static_cast<std::size_t>(
+			(count) * util::str::block_chars.size() / (out_of + 1)
+		)];
+	}
 }
 #endif

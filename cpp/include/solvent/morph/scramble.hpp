@@ -8,11 +8,6 @@
 
 namespace solvent::morph {
 
-	// must be manually seeded in the main function!
-	// Used for scrambling.
-	// Note: if parallel access is later required, add a mutex to guard.
-	SOLVENT_EXPORT void seed_scrambler_rng(std::uint_fast32_t) noexcept;
-
 	// contract: span is a valid grid (though it may be incomplete)
 	template<Order O>
 	SOLVENT_EXPORT void scramble(grid_span_t<O>);

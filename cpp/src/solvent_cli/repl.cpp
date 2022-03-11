@@ -111,7 +111,7 @@ namespace solvent::cli {
 					_os << ' '; print::val_to_str(_os, config_.order(), grid[coord]);
 				}),
 				print::print_grid_t([&](std::ostream& _os, uint16_t coord) {
-					const auto shade = gen::bt::Generator::shaded_dead_end_stat(static_cast<dead_ends_t>(gen_->get_params().max_dead_ends), dead_ends[coord]);
+					const auto shade = str::get_block_char(static_cast<dead_ends_t>(gen_->get_params().max_dead_ends), dead_ends[coord]);
 					_os << shade << shade;
 				}),
 			};

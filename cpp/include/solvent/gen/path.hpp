@@ -32,7 +32,6 @@ namespace solvent::gen::path {
 		"\n- dealer_row_major   like dealing cards to each block using row-major"};
 
 
-	// input progress must be _less than_ O4.
 	template<solvent::Order O>
 	using coord_converter_t = [[gnu::const]] typename size<O>::ord4x_t (&)(typename size<O>::ord4x_t) noexcept;
 

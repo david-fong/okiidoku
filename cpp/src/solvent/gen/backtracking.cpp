@@ -1,22 +1,13 @@
 #include "solvent/gen/backtracking.hpp"
 #include "solvent/print.hpp"
+#include "solvent/rng.hpp"
 
-#include <mutex>
-#include <algorithm>   // shuffle,
-#include <random>
+#include <algorithm> // shuffle
 
 namespace solvent::gen::bt {
 
 	// long long total = 0;
 	// long long true_ = 0;
-
-	static std::mt19937 Rng_;
-	void seed_rng(std::uint_fast64_t seed) noexcept {
-		Rng_.seed(seed);
-	}
-	// Guards accesses to Rng_. Only used when shuffling generator biases.
-	std::mutex RNG_MUTEX;
-
 
 	Params Params::clean(const Order O) noexcept {
 		if (max_dead_ends == 0) {
@@ -57,12 +48,12 @@ namespace solvent::gen::bt {
 		backtrack_origin_ = 0;
 		most_dead_ends_seen_ = 0;
 		op_count_ = 0;
-
-		RNG_MUTEX.lock();
-		for (auto& vto : val_try_orders_) {
-			std::shuffle(vto.begin(), vto.end(), Rng_);
+		{
+			std::lock_guard lock_guard {shared_mt_rng_mutex_};
+			for (auto& vto : val_try_orders_) {
+				std::shuffle(vto.begin(), vto.end(), shared_mt_rng_);
+			}
 		}
-		RNG_MUTEX.unlock();
 
 		this->generate_();
 	}
@@ -81,7 +72,7 @@ namespace solvent::gen::bt {
 
 	template<Order O>
 	GeneratorO<O>::ord2i_t GeneratorO<O>::extract_val_at_(const GeneratorO<O>::ord4x_t coord) const noexcept {
-		const auto p = get_coord_to_prog_()(coord);
+		const auto p = path::get_coord_to_prog_converter<O>(params_.path_kind)(coord);
 		const auto try_index = cells_[p].try_index;
 		if (try_index == O2) { return O2; }
 		return val_try_orders_[p/O2][try_index];
@@ -90,7 +81,7 @@ namespace solvent::gen::bt {
 
 	template<Order O>
 	GeneratorO<O>::dead_ends_t GeneratorO<O>::extract_dead_ends_at_(const ord4x_t coord) const noexcept {
-		return dead_ends_[get_coord_to_prog_()(coord)];
+		return dead_ends_[path::get_coord_to_prog_converter<O>(params_.path_kind)(coord)];
 	}
 
 
@@ -107,6 +98,7 @@ namespace solvent::gen::bt {
 
 			if (direction.is_back) [[unlikely]] {
 				if (progress_ == 0) [[unlikely]] {
+					progress_ = O4;
 					break;
 				}
 				if (!direction.is_back_skip) [[unlikely]] {
@@ -130,7 +122,7 @@ namespace solvent::gen::bt {
 		#ifndef NDEBUG
 		std::array<ord2i_t, O4> grid;
 		this->write_to_(std::span(grid));
-		assert(is_grid_valid<O>(grid));
+		assert(is_sudoku_valid<O>(grid));
 		#endif
 	}
 
@@ -164,7 +156,7 @@ namespace solvent::gen::bt {
 		const has_mask_t cell_has = (row_has | col_has | blk_has);
 		if (std::popcount(cell_has) != O2) [[likely]] {
 			// The above optimization comes into effect ~1/5 of the time for size 5.
-			for (ord2i_t try_i = static_cast<ord2i_t>((cell.try_index+1u) % (O2+1)); try_i < O2; ++try_i) [[likely]] {
+			for (ord2i_t try_i {static_cast<ord2i_t>((cell.try_index+1u) % (O2+1))}; try_i < O2; ++try_i) [[likely]] {
 				const has_mask_t try_val_mask = has_mask_t{1} << val_try_order[try_i];
 				if (!(cell_has & try_val_mask)) [[unlikely]] {
 					// A valid value was found:

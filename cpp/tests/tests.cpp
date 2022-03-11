@@ -6,6 +6,7 @@
 #include "solvent_util/console_setup.hpp"
 #include "solvent/print.hpp"
 #include "solvent/grid.hpp"
+#include "solvent/rng.hpp"
 
 #include <iostream>  // cout,
 #include <string>
@@ -19,12 +20,12 @@
 template<solvent::Order O>
 unsigned test_morph_O(const unsigned num_rounds) {
 	using namespace solvent;
-	constexpr unsigned O4 = O*O*O*O;
+	constexpr unsigned O4 {O*O*O*O};
 	std::cout << "\n\ntesting for order " << O << std::endl;
 	// TODO: assert that paths are valid.
 
-	unsigned int count_bad = 0;
-	for (unsigned round = 0; round < num_rounds; ) {
+	unsigned int count_bad {0};
+	for (unsigned round {0}; round < num_rounds; ) {
 		gen::bt::GeneratorO<O> g {};
 		g({});
 		if (g.status() != gen::bt::ExitStatus::Ok) {
@@ -79,8 +80,7 @@ int main(const int argc, char const *const argv[]) {
 	<< std::endl;
 
 	// Scramble the random number generators:
-	solvent::gen::bt::seed_rng(srand_key);
-	solvent::morph::seed_scrambler_rng(srand_key);
+	solvent::seed_rng(srand_key);
 
 	// TODO change the test to try out all orders.
 	if (test_morph_O<3>(num_rounds)) {

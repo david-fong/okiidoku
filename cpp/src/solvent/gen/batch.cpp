@@ -93,7 +93,7 @@ namespace solvent::gen::batch {
 		sd.report.max_dead_end_samples.resize(params.max_dead_end_sample_granularity);
 
 		std::vector<std::thread> threads;
-		for (unsigned i = 0; i < params.num_threads; ++i) {
+		for (unsigned i {0}; i < params.num_threads; ++i) {
 			threads.push_back(mk_thread(sd, sd_mutex));
 		}
 		for (auto& thread : threads) {
@@ -105,9 +105,9 @@ namespace solvent::gen::batch {
 			(static_cast<double>(sd.report.total_anys - sd.report.total_oks)
 			/ static_cast<double>(sd.report.total_anys));
 		{
-			double net_ops = 0.0;
-			trials_t net_oks = 0;
-			for (unsigned i = 0; i < params.max_dead_end_sample_granularity; ++i) {
+			double net_ops {0.0};
+			trials_t net_oks {0};
+			for (unsigned i {0}; i < params.max_dead_end_sample_granularity; ++i) {
 				auto& sample = sd.report.max_dead_end_samples[i];
 				sample.max_dead_ends = params.gen_params.max_dead_ends * (i+1) / params.max_dead_end_sample_granularity;
 				net_ops += sample.marginal_ops;
@@ -123,7 +123,7 @@ namespace solvent::gen::batch {
 			// Get the index of the sample representing the optimal max_dead_ends setting:
 			sd.report.max_dead_end_samples_best_i = 0;
 			double best_net_average_ops = std::numeric_limits<double>::max();
-			for (unsigned i = 0; i < sd.report.max_dead_end_samples.size(); ++i) {
+			for (unsigned i {0}; i < sd.report.max_dead_end_samples.size(); ++i) {
 				const auto& sample = sd.report.max_dead_end_samples[i];
 				if (sample.net_average_ops.has_value() && (sample.net_average_ops.value() < best_net_average_ops)) {
 					best_net_average_ops = sample.net_average_ops.value();

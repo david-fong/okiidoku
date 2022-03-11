@@ -32,8 +32,8 @@ namespace solvent::morph {
 			double prob_polar;
 			static LineSortEntry build(const grid_arr_t<O, ord2i_t>& counts, ord1i_t orig_blkline, const std::span<const ord2i_t, O2> line) {
 				double prob_polar = 1.0;
-				for (ord2i_t atom = 0; atom < O2; atom += O1) {
-					for (ord1i_t i = 0; i < O1-1; ++i) {
+				for (ord2i_t atom {0}; atom < O2; atom += O1) {
+					for (ord1i_t i {0}; i < O1-1; ++i) {
 						for (ord1i_t j = i+1; j < O1; ++j) {
 							prob_polar *= RelCountProb<O>::ALL[counts[line[atom+i]][line[atom+j]]];
 				}	}	}
@@ -50,7 +50,7 @@ namespace solvent::morph {
 			std::array<LineSortEntry, O> lines_;
 			static ChuteSortEntry build(const grid_arr_t<O, ord2i_t>& counts, ord1i_t orig_chute, const std::span<const ord2i_t, O3> grid_chute) {
 				std::array<LineSortEntry, O> lines;
-				for (ord1i_t i = 0; i < O1; ++i) { lines[i] = LineSortEntry::build(
+				for (ord1i_t i {0}; i < O1; ++i) { lines[i] = LineSortEntry::build(
 					counts, i, static_cast<std::span<const ord2i_t, O2>>(grid_chute.subspan(O2*orig_chute, O2)) // *sad cast noises
 				); }
 				std::sort(lines.begin(), lines.end());
@@ -68,7 +68,7 @@ namespace solvent::morph {
 			std::array<ChuteSortEntry, O> chutes_;
 			static GridSortEntry build(const grid_arr_t<O, ord2i_t>& counts, const std::span<const ord2i_t, O4> grid) {
 				std::array<ChuteSortEntry, O> chutes;
-				for (ord1i_t i = 0; i < O1; ++i) { chutes[i] = ChuteSortEntry::build(
+				for (ord1i_t i {0}; i < O1; ++i) { chutes[i] = ChuteSortEntry::build(
 					counts, i, static_cast<std::span<const ord2i_t, O3>>(grid.subspan(O3*i, O3)) // *sad cast noises
 				); }
 				std::sort(chutes.begin(), chutes.end());
@@ -86,8 +86,8 @@ namespace solvent::morph {
 			/* const GridSortEntry grid_slide = GridSortEntry::build(rel_count_, grid_);
 			const GridSortEntry transposed_grid_slide = [this](){
 				decltype(grid_) transposed_input;
-				for (ord2i_t i = 0; i < O2; ++i) {
-					for (ord2i_t j = 0; j < O2; ++j) {
+				for (ord2i_t i {0}; i < O2; ++i) {
+					for (ord2i_t j {0}; j < O2; ++j) {
 						transposed_input[i][j] = grid_[j][i];
 					}
 				}
@@ -95,18 +95,18 @@ namespace solvent::morph {
 			}();
 
 			decltype(grid_) canon_input {O2};
-			for (ord2i_t canon_row = 0; canon_row < O2; ++canon_row) {
+			for (ord2i_t canon_row {0}; canon_row < O2; ++canon_row) {
 				const auto& r_chute = grid_slide[canon_row/O1];
 				const ord2i_t orig_row = (O1*r_chute.orig_chute) + r_chute[canon_row%O1].orig_blkline;
-				for (ord2i_t canon_col = 0; canon_col < O2; ++canon_col) {
+				for (ord2i_t canon_col {0}; canon_col < O2; ++canon_col) {
 					const auto& c_chute = transposed_grid_slide[canon_col/O1];
 					const ord2i_t orig_col = (O1*c_chute.orig_chute) + c_chute[canon_col%O1].orig_blkline;
 					canon_input[canon_row][canon_col] = grid_[orig_row][orig_col];
 				}
 			}
 			if (transposed_grid_slide < grid_slide) {
-				for (ord2i_t i = 0; i < O2; ++i) {
-					for (ord2i_t j = 0; j < O2; ++j) {
+				for (ord2i_t i {0}; i < O2; ++i) {
+					for (ord2i_t j {0}; j < O2; ++j) {
 						grid_[i][j] = canon_input[j][i];
 					}
 				}
@@ -114,7 +114,7 @@ namespace solvent::morph {
 				grid_ = canon_input;
 			} */
 			(void)grid; // TODO
-			assert(is_grid_valid<O>(grid));
+			assert(is_sudoku_valid<O>(grid));
 		}
 	};
 

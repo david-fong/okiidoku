@@ -4,7 +4,6 @@
 #include "solvent/gen/path.hpp"
 #include "solvent/grid.hpp"
 #include "solvent/size.hpp"
-#include "solvent_util/str.hpp"
 #include "solvent_config.hpp"
 #include "solvent_export.h"
 
@@ -19,15 +18,8 @@ namespace solvent::gen::bt {
 	// extern long long total;
 	// extern long long true_;
 
-	// must be manually seeded in the main function!
-	// Used for shuffling Generator.
-	// RNG is shared between threads, guarded by mutex.
-	// Note: Using thread_local instead does not cause any noticeable perf change.
-	SOLVENT_EXPORT void seed_rng(std::uint_fast32_t) noexcept;
-
-
 	namespace cell_dead_ends {
-		// TODO these values are tuned for genpath=rowmajor. make one for each genpath? :/
+		// TODO these values are tuned for genpath=row_major. make one for each genpath? :/
 		constexpr unsigned long long limit_default[]{ 0, 0, 3,
 			/*3*/30,
 			/*4*/700,
@@ -80,8 +72,8 @@ namespace solvent::gen::bt {
 		virtual void continue_prev() = 0;
 
 		[[nodiscard]] virtual Order get_order() const noexcept = 0;
-		[[nodiscard]] Order get_order2() const noexcept { return get_order()*get_order(); }
-		[[nodiscard]] Order get_order4() const noexcept { return get_order2()*get_order2(); }
+		[[nodiscard]] constexpr Order get_order2() const noexcept { return get_order()*get_order(); }
+		[[nodiscard]] constexpr Order get_order4() const noexcept { return get_order2()*get_order2(); }
 		[[nodiscard]] virtual const Params& get_params() const noexcept = 0;
 		[[nodiscard]] virtual ExitStatus status() const noexcept = 0;
 		[[nodiscard]] virtual backtrack_origin_t get_backtrack_origin() const noexcept = 0;
@@ -94,32 +86,25 @@ namespace solvent::gen::bt {
 		[[nodiscard]] virtual dead_ends_t extract_dead_ends_at(coord_t) const noexcept = 0;
 
 		// this cannot statically check that T is wide enough. uses static_cast<T>.
-		// ie. it is your job to make sure T does not lose precision (sorry :/).
+		// ie. it is your job to make sure T does not lose precision.
 		template<class T>
 		requires std::is_integral_v<T> && (!std::is_const_v<T>)
 		void write_to(std::span<T> sink) const {
 			const unsigned O4 = get_order4();
 			assert(sink.size() >= O4);
-			for (unsigned i = 0; i < O4; ++i) { sink[i] = static_cast<T>(extract_val_at(i)); }
+			for (unsigned i {0}; i < O4; ++i) { sink[i] = static_cast<T>(extract_val_at(i)); }
 		}
 
 		// this cannot statically check that T is wide enough. uses static_cast<T>.
-		// ie. it is your job to make sure T does not lose precision (sorry :/).
+		// ie. it is your job to make sure T does not lose precision.
 		template<class T>
 		requires std::is_arithmetic_v<T> && (!std::is_const_v<T>)
 		void write_dead_ends_to(std::span<T> sink) const {
 			const unsigned O4 = get_order4();
 			assert(sink.size() >= O4);
-			for (unsigned i = 0; i < O4; ++i) { sink[i] = static_cast<T>(extract_dead_ends_at(i)); }
+			for (unsigned i {0}; i < O4; ++i) { sink[i] = static_cast<T>(extract_dead_ends_at(i)); }
 		}
 		// TODO change the above to not require contiguous layout? Used span because I don't know how to make it take an output_range
-
-		static std::string_view shaded_dead_end_stat(dead_ends_t out_of, dead_ends_t count) {
-			assert(count <= out_of);
-			return (count == 0) ? " " : util::str::block_chars[static_cast<std::size_t>(
-				(count) * util::str::block_chars.size() / (out_of + 1)
-			)];
-		}
 	};
 
 
@@ -130,9 +115,10 @@ namespace solvent::gen::bt {
 	public:
 		using has_mask_t = size<O>::O2_mask_least_t; // perf seemed similar and slightly better compared to fast_t
 		using ord1i_t = size<O>::ord1i_t;
+		using ord2x_t = size<O>::ord2x_t;
 		using ord2i_t = size<O>::ord2i_t;
-		using ord4i_t = size<O>::ord4i_t;
 		using ord4x_t = size<O>::ord4x_t;
+		using ord4i_t = size<O>::ord4i_t;
 		using dead_ends_t = cell_dead_ends::t<O>;
 
 		SOLVENT_NO_EXPORT static constexpr ord1i_t O1 = O;
@@ -166,7 +152,7 @@ namespace solvent::gen::bt {
 		requires std::is_integral_v<T> && (!std::is_const_v<T>) && (sizeof(T) >= sizeof(ord2i_t))
 		void write_to_(std::span<T, O4> sink) const {
 			assert(sink.size() >= O4);
-			for (ord4i_t i = 0; i < O4; ++i) { sink[i] = extract_val_at_(i); }
+			for (ord4i_t i {0}; i < O4; ++i) { sink[i] = extract_val_at_(i); }
 		}
 
 	private:
@@ -183,9 +169,9 @@ namespace solvent::gen::bt {
 		ord4i_t progress_ {0};
 
 		// indexed by `progress_ // O2`
-		std::array<std::array<typename size<O>::ord2x_t, O2>, O2> val_try_orders_ {[]() {
-			std::array<std::array<typename size<O>::ord2x_t, O2>, O2> _;
-			for (auto& vto : _) { for (ord2i_t i = 0; i < O2; ++i) { vto[i] = i; } }
+		grid_arr_t<O, ord2x_t> val_try_orders_ {[]{
+			grid_arr_t<O, ord2x_t> _;
+			for (auto& vto : _) { for (ord2i_t i {0}; i < O2; ++i) { vto[i] = i; } }
 			return _;
 		}()};
 
@@ -198,11 +184,6 @@ namespace solvent::gen::bt {
 		uint_fastN_t<std::bit_width(O4)> backtrack_origin_ {0};
 		dead_ends_t most_dead_ends_seen_ {0};
 		opcount_t op_count_ {0};
-
-		// Note: even when marked pure, _prog_to_coord_ doesn't get optimized as well as the current usage.
-		SOLVENT_NO_EXPORT [[nodiscard, gnu::pure]] path::coord_converter_t<O> get_coord_to_prog_() const noexcept {
-			return path::get_coord_to_prog_converter<O>(params_.path_kind);
-		}
 
 		SOLVENT_NO_EXPORT [[gnu::hot]] void generate_();
 		SOLVENT_NO_EXPORT [[gnu::hot]] Direction set_next_valid_(path::coord_converter_t<O>, bool backtracked) noexcept;

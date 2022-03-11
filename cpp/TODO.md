@@ -2,13 +2,14 @@
 
 ## Higher Priority
 
-- move the cli folder from src/ to tools/? Refer to pitchfork layout conventions.
 - http://forum.enjoysudoku.com/giant-sudoku-s-16x16-25x25-36x36-100x100-t6578-120.html#p259504
   - these people have generators that apparently scale very well. Try implementing their algorithms?
   - [donald knuth's dancing links paper](https://www.ocf.berkeley.edu/~jchu/publicportal/sudoku/0011047.pdf)
     - a blog-like post with another illustration https://garethrees.org/2007/06/10/zendoku-generation/#section-4
   - a paper http://www.dudziak.com/ArbitrarySizeSudokuCreation.pdf
-  - patterns game strats
+  - patterns game strats: http://forum.enjoysudoku.com/patterns-game-strategies-t6327.html
+- after experimenting with different stochastic implementations, try implementing an opencl program. The minstd_rand rng is very simple to implement. I think algorithm is data-parallelizable.
+
 - try making Order an enum
   - see if it can improve switch case cover detection.
   - this may also make it possible to statically enforce contracts about orders for the non-template wrapper functions. If so, I will probably neither need to assert that the order is compiled, nor write vacuous default branches for their switch statements.

@@ -6,10 +6,10 @@
 #ifdef _WIN32
 #include <windows.h>
 #include <optional>
-constexpr DWORD ENABLE_VIRTUAL_TERMINAL_PROCESSING = 0x0004;
-std::optional<DWORD> old_con_mode = std::nullopt;
-std::optional<UINT> old_con_input_codepage = std::nullopt;
-std::optional<UINT> old_con_output_codepage = std::nullopt;
+constexpr DWORD ENABLE_VIRTUAL_TERMINAL_PROCESSING {0x0004};
+std::optional<DWORD> old_con_mode {std::nullopt};
+std::optional<UINT> old_con_input_codepage {std::nullopt};
+std::optional<UINT> old_con_output_codepage {std::nullopt};
 #endif
 
 // https://docs.microsoft.com/en-us/windows/console/classic-vs-vt#exceptions-for-using-windows-console-apis
