@@ -91,7 +91,7 @@ This may help with solving- labelling and positioning are "sorted" to specific r
 
 This was originally more of a "things that I tried and didn't work" section, but I'm rebranding since when I originally tried these, I wasn't taking into account any scramble-invariant properties of grid other than the number of times a pair of label values occurred in the same atom in a grid.
 
-### Canonicalizer Relabelling
+### config_auto_canonicalizer Relabelling
 
 - Linear Algebra Route: Try breaking relabelling ties by using powers of the counts matrix (normalized to the same support). Need to find a continuous version or approximation of the Binomial distribution's PMF. Do some research, and as a last resort, just lerp it or something. Read about the gamma function (continuous version of factorial?). `tgamma(i+1) = i!`
   - A public domain library for the Jacobi algorithm (for diagonalizing dense, real symmetric matrices) https://github.com/jewettaij/jacobi_pd. This could be useful if going through several steps is needed to break ties.

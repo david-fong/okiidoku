@@ -40,8 +40,6 @@
   find labelling with maximum
   ```
 
-- Try some of [these solutions](https://stackoverflow.com/questions/10897552/call-a-function-before-main) for the RNG default-seeding so that users don't need to manually seed in main unless they want a specific seed. Make sure to test that it works.
-
 - some of my usages of `extern template` aren't sensible
   - https://arne-mertz.de/2019/02/extern-template-reduce-compile-times/
   - it's only needed when the part _defined_ in the header is big.
@@ -68,16 +66,17 @@
 - Decide what interfaces to support:
   - Probably best to start with just readline and a CLI
     - For CLI util libraries, look into using
-      - https://github.com/daniele77/cli
-      - https://github.com/docopt/docopt.cpp
-      - https://github.com/CLIUtils/CLI11
-      - http://tclap.sourceforge.net/manual.html
-      - https://github.com/Taywee/args
+      - repl
+        - https://github.com/daniele77/cli
+      - command
+        - https://github.com/docopt/docopt.cpp
+        - https://github.com/CLIUtils/CLI11
+        - http://tclap.sourceforge.net/manual.html
+        - https://github.com/Taywee/args
   - Can look into ncurses in the future? Or look into options for TUI libraries?
   - A web interface would be really nice.
 - C++20
   - `using enum`. Might want to wait for CLANG to support?
-- I have a nagging feeling that I'm going too far with the namespacing. I'm a C++ noob with no reference so I'm not sure. I can probably make some improvements.
 - CLI
   - implement `-h` and `--help` CLI argument.
   - give a red message when trying to continue and nothing is left to be found.
@@ -91,9 +90,7 @@
     - The blocks along a diagonal / shifted diagonal
     - one cell in each remaining block?
   - Usefulness:
-    - To reduce unnecessary bytes sent over network?
-    - Could it be possible to use this as an optimization for solution generation?
-      - Set the genpath to skip over these specific cells, and when progress has reached to these cells, switch over to attempting completion.
+    - To reduce unnecessary bytes sent over network? simple compressed storage?
 
 ## Ideas That Seem To Not Have Worked / Are Impractical
 
@@ -111,6 +108,6 @@ These didn't end up doing the thing I wanted / thought might happen.
   - Update: I think this didn't work because I was doing naive backtracking. If I improve the backtracking logic. Now I need to remember/find out which traversal paths should make better usage of this and then test it out.
     - hm. but even with skipping backtracks when not-in-same-house as the backtrack origin, there's the projected cost of reaching backtrack origin again. maybe that's why dealrwmj is so bad?
 
-### Canonicalizer
+### config_auto_canonicalizer
 
 - See [the bottom of the canonicalization readme](./src/solvent/morph/readme.md)

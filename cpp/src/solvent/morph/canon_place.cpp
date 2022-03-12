@@ -35,7 +35,7 @@ namespace solvent::morph {
 				for (ord2i_t atom {0}; atom < O2; atom += O1) {
 					for (ord1i_t i {0}; i < O1-1; ++i) {
 						for (ord1i_t j = i+1; j < O1; ++j) {
-							prob_polar *= RelCountProb<O>::ALL[counts[line[atom+i]][line[atom+j]]];
+							prob_polar *= RelCountProb<O>::all[counts[line[atom+i]][line[atom+j]]];
 				}	}	}
 				return LineSortEntry { .orig_blkline = orig_blkline, .prob_polar = prob_polar };
 			}

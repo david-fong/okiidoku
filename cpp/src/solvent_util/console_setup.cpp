@@ -1,7 +1,9 @@
 #include "solvent_util/console_setup.hpp"
 
-#include <ios>     // ios_base::sync_with_stdio
-#include <cstdlib> // atexit
+#include <ios>      // ios_base::sync_with_stdio
+#include <iostream> // cout
+#include <locale>   // numpunct
+#include <cstdlib>  // atexit
 
 #ifdef _WIN32
 #include <windows.h>
@@ -16,6 +18,12 @@ std::optional<UINT> old_con_output_codepage {std::nullopt};
 
 namespace solvent::util {
 
+	struct MyNumPunct final : std::numpunct<char> {
+		std::string do_grouping(void) const {
+			return "\03";
+		}
+	};
+
 	void restore_console_config_() {
 		#ifdef _WIN32
 		if (old_con_mode) { SetConsoleMode(GetStdHandle(STD_OUTPUT_HANDLE), old_con_mode.value); }
@@ -27,6 +35,7 @@ namespace solvent::util {
 	void setup_console() {
 		// My implementation specifies this as safe:
 		std::ios_base::sync_with_stdio(false);
+		const auto pushed_locale = std::cout.imbue(std::locale(std::cout.getloc(), new MyNumPunct));
 
 		#ifdef _WIN32
 		{

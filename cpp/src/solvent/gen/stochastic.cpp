@@ -84,9 +84,9 @@ namespace solvent::gen::ss {
 	template<Order O>
 	void GeneratorO<O>::generate_() {
 		while (count_total_has_nots_ != 0) [[likely]] {
-			const ord2x_t row   {static_cast<ord2x_t>(rng_() % O2)};
-			const ord2x_t col_a {static_cast<ord2x_t>(rng_() % O2)};
-			const ord2x_t col_b {static_cast<ord2x_t>(col_a + (rng_() % (O2-1)) % O2)};
+			const ord2x_t row   {static_cast<ord2x_t>((rng_() - rng_.min()) % O2)};
+			const ord2x_t col_a {static_cast<ord2x_t>((rng_() - rng_.min()) % O2)};
+			const ord2x_t col_b {static_cast<ord2x_t>((col_a + (1 + (rng_() - rng_.min()) % (O2-1))) % O2)};
 			auto& cell_a = cells_[row][col_a];
 			auto& cell_b = cells_[row][col_b];
 			// assert (col_a != col_b) && (cell_a != cell_b)

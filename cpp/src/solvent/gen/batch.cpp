@@ -69,7 +69,7 @@ namespace solvent::gen::batch {
 			sd_mutex_.lock(); //‾‾‾‾
 
 			++sd_.report.total_anys;
-			if (generator_.status() == bt::ExitStatus::Ok) [[likely]] {
+			if (generator_.status_is_ok()) [[likely]] {
 				++sd_.report.total_oks;
 
 				auto& dist_summary_row = sd_.report.max_dead_end_samples[

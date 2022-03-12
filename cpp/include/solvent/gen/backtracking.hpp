@@ -78,6 +78,7 @@ namespace solvent::gen::bt {
 		[[nodiscard]] virtual const Params& get_params() const noexcept = 0;
 		// contract: must not be called before a call to `operator()`.
 		[[nodiscard]] virtual ExitStatus status() const noexcept = 0;
+		[[nodiscard]] virtual bool status_is_ok() const noexcept = 0;
 		[[nodiscard]] virtual backtrack_origin_t get_backtrack_origin() const noexcept = 0;
 		[[nodiscard]] virtual dead_ends_t get_most_dead_ends_seen() const noexcept = 0;
 		[[nodiscard]] virtual opcount_t get_op_count() const noexcept = 0;
@@ -139,6 +140,7 @@ namespace solvent::gen::bt {
 				default:   return ExitStatus::Abort;
 			}
 		}
+		[[nodiscard]] constexpr bool status_is_ok() const noexcept { return progress_ == O4-1; }
 		[[nodiscard]] constexpr Generator::backtrack_origin_t get_backtrack_origin() const noexcept { return static_cast<Generator::backtrack_origin_t>(backtrack_origin_); }
 		[[nodiscard]] constexpr Generator::dead_ends_t get_most_dead_ends_seen() const noexcept { return static_cast<Generator::dead_ends_t>(most_dead_ends_seen_); }
 		[[nodiscard]] constexpr opcount_t get_op_count() const noexcept { return op_count_; }

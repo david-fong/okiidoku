@@ -14,8 +14,11 @@ namespace solvent::cli {
 
 	namespace str = solvent::util::str;
 
-	constexpr std::string_view TERMINAL_OUTPUT_TIPS {
-	"\nNote: You can run `tput rmam` in your shell to disable text wrapping."};
+	constexpr std::string_view welcome_message {
+	"\nNote: You can run `tput rmam` to disable terminal text wrapping."
+	"\nThis CLI is not built for getting proper benchmark stats. Timer"
+	"\nvalues reported should not be taken as such."
+	};
 
 
 	Repl::Repl(const Order order_input): gen_(gen::bt::Generator::create(order_input)) {
@@ -29,11 +32,9 @@ namespace solvent::cli {
 
 
 	void Repl::start(void) {
-		const auto my_numpunct = new util::str::MyNumPunct;
-		const auto pushed_locale = std::cout.imbue(std::locale(std::cout.getloc(), my_numpunct ));
 		std::cout
-		<< '\n' << str::dim.on << TERMINAL_OUTPUT_TIPS << str::dim.off
-		<< '\n' << Command::HelpMessage
+		<< '\n' << str::dim.on << welcome_message << str::dim.off
+		<< '\n' << Command::helpMessage
 		<< std::endl;
 
 		std::string command;
@@ -42,8 +43,6 @@ namespace solvent::cli {
 
 			std::getline(std::cin, command);
 		} while (run_command(command));
-		std::cout.imbue(pushed_locale);
-		// delete my_numpunct; // TODO.learn why isn't this needed?
 	}
 
 
@@ -63,24 +62,24 @@ namespace solvent::cli {
 		}
 		switch (it->second) {
 			using Command::E;
-			case E::Help:
+			case E::help:
 				std::cout
-				<< Command::HelpMessage << str::dim.on
+				<< Command::helpMessage << str::dim.on
 				<< '\n' << verbosity::options_menu_str
 				<< '\n' << gen::path::options_menu_str
 				<< str::dim.off << std::endl;
 				break;
-			case E::Quit:
+			case E::quit:
 				return false;
-			case E::ConfigOrder:       config_.order(cmd_args); gen_ = gen::bt::Generator::create(config_.order()); break; // TODO only call if order has changed
-			case E::ConfigVerbosity:   config_.verbosity(cmd_args); break;
-			case E::ConfigGenPath:     config_.path_kind(cmd_args); break;
-			case E::ConfigMaxDeadEnds: config_.max_dead_ends(cmd_args); break;
-			case E::Canonicalize:      config_.canonicalize(cmd_args); break;
-			case E::GenSingle:     gen_single();     break;
-			case E::GenContinue:   gen_single(true); break;
-			case E::GenMultiple:   gen_multiple(cmd_args, false); break;
-			case E::GenMultipleOk: gen_multiple(cmd_args, true); break;
+			case E::config_order:       config_.order(cmd_args); gen_ = gen::bt::Generator::create(config_.order()); break; // TODO only call if order has changed
+			case E::config_print_level: config_.verbosity(cmd_args); break;
+			case E::config_gen_path:    config_.path_kind(cmd_args); break;
+			case E::config_gen_max_dead_ends: config_.max_dead_ends(cmd_args); break;
+			case E::config_auto_canonicalize: config_.canonicalize(cmd_args); break;
+			case E::gen_single:      gen_single(); break;
+			case E::gen_continue:    gen_single(true); break;
+			case E::gen_multiple:    gen_multiple(cmd_args, false); break;
+			case E::gen_multiple_ok: gen_multiple(cmd_args, true); break;
 		}
 		return true;
 	}
@@ -102,11 +101,11 @@ namespace solvent::cli {
 			std::array<dead_ends_t, O4_MAX> dead_ends;
 			gen_->write_to(std::span<val_t>(grid));
 			gen_->write_dead_ends_to<dead_ends_t>(std::span(dead_ends));
-			if (gen_->status() == gen::bt::ExitStatus::Ok && config_.canonicalize()) {
+			if (gen_->status_is_ok() && config_.canonicalize()) {
 				morph::canonicalize<val_t>(gen_->get_order(), std::span(grid)); // should we make a copy and print as a third grid image?
 			}
 			
-			const std::vector<print::print_grid_t> grid_accessors {
+			const std::array<print::print_grid_t, 2> grid_accessors {
 				print::print_grid_t([&](std::ostream& _os, uint16_t coord) {
 					_os << ' '; print::val_to_str(_os, config_.order(), grid[coord]);
 				}),
@@ -121,8 +120,8 @@ namespace solvent::cli {
 			<< "\nprocessor time: " << processor_time << " seconds"
 			<< "\nnum operations: " << gen_->get_op_count()
 			<< "\nmax dead ends:  " << gen_->get_most_dead_ends_seen()
-			<< "\nstatus:         " << ((gen_->status() == gen::bt::ExitStatus::Ok) ? "OK"
-				: (gen_->status() == gen::bt::ExitStatus::Abort) ? "ABORT" : "GENERATOR EXHAUSTED")
+			<< "\nstatus:         " << ((gen_->status_is_ok()) ? "ok"
+				: (gen_->status() == gen::bt::ExitStatus::Abort) ? "abort" : "generator exhausted")
 			;
 		std::cout << std::endl;
 	}
@@ -142,20 +141,19 @@ namespace solvent::cli {
 		};
 		const gen::batch::BatchReport batch_report = gen::batch::batch(config_.order(), params,
 			[this](const gen::bt::Generator& result) {
-				using val_t = gen::bt::Generator::val_t;
-				std::array<val_t, O4_MAX> grid;
-				result.write_to(std::span<val_t>(grid));
-				if (result.status() == gen::bt::ExitStatus::Ok && config_.canonicalize()) {
-					morph::canonicalize<val_t>(result.get_order(), std::span(grid));
-				}
 				if ((config_.verbosity() == verbosity::E::full)
-				|| ((config_.verbosity() == verbosity::E::quiet_aborts) && (result.status() == gen::bt::ExitStatus::Ok))
+				|| ((config_.verbosity() == verbosity::E::quiet_aborts) && (result.status_is_ok()))
 				) {
+					using val_t = gen::bt::Generator::val_t;
+					std::array<val_t, O4_MAX> grid;
+					result.write_to(std::span<val_t>(grid));
+					if (result.status_is_ok() && config_.canonicalize()) {
+						morph::canonicalize<val_t>(result.get_order(), std::span(grid));
+					}
 					print::text(std::cout, result.get_order(), grid);
-					if (result.get_order() <= 4) {
-						std::cout << '\n';
-					} else {
-						std::cout << std::endl; // always flush for big grids
+					std::cout << '\n';
+					if (result.get_order() > 4) {
+						std::cout.flush();
 					}
 				} else if (config_.verbosity() == verbosity::E::quiet) {
 					// TODO.impl print a progress bar
@@ -177,6 +175,7 @@ namespace solvent::cli {
 			<< "\npercent aborted: " << (batch_report.fraction_aborted * 100) << " %"
 			<< "\nprocess time:    " << batch_report.time_elapsed.proc_seconds << seconds_units
 			<< "\nwall-clock time: " << batch_report.time_elapsed.wall_seconds << seconds_units
+			// Note: the timer will not include canonicalization time if verbosity is quiet
 			;
 
 		// Print bins (work distribution):

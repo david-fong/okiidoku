@@ -82,9 +82,9 @@ namespace solvent::morph {
 				RelPlaceless& rel = table[r][c];
 				const has_mask_t non_polar_mask = mask.blocks_h | mask.blocks_v;
 				const int all_count = static_cast<int>(std::popcount(non_polar_mask));
-				rel.all_p     = RelCountProb<O>::ALL[all_count];
-				rel.polar_a_p = static_cast<float>(RelCountProb<O>::POLAR[std::popcount(mask.blocks_h)]);
-				rel.polar_b_p = static_cast<float>(RelCountProb<O>::POLAR[std::popcount(mask.blocks_v)]);
+				rel.all_p     = RelCountProb<O>::all[all_count];
+				rel.polar_a_p = static_cast<float>(RelCountProb<O>::polar[std::popcount(mask.blocks_h)]);
+				rel.polar_b_p = static_cast<float>(RelCountProb<O>::polar[std::popcount(mask.blocks_v)]);
 
 				std::array<int8_t, O1> all_chute_a_occ, all_chute_b_occ;
 				for (ord1i_t chute {0}; chute < O1; ++chute) {

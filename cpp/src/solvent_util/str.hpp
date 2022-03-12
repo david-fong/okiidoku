@@ -3,20 +3,12 @@
 
 #include "solvent_config.hpp"
 
-#include <locale>
 #include <array>
 #include <string_view>
 #include <type_traits>
 
 //
 namespace solvent::util::str {
-
-	struct MyNumPunct final : std::numpunct<char> {
-		std::string do_grouping(void) const {
-			return "\03";
-		}
-	};
-
 
 	struct SgrPair final {
 		char const*const on;
