@@ -4,6 +4,7 @@
 
 #include <algorithm> // swap, shuffle
 
+#include <iostream>
 namespace solvent::gen::ss {
 
 	// long long total = 0;
@@ -36,7 +37,7 @@ namespace solvent::gen::ss {
 		params_ = params_input;
 		params_.clean(O);
 		op_count_ = 0;
-		count_total_has_nots_ = 0;
+		// count_total_has_nots_ = 0;
 		{
 			std::lock_guard lock_guard {shared_mt_rng_mutex_};
 			rng_.seed(shared_mt_rng_());
@@ -45,22 +46,22 @@ namespace solvent::gen::ss {
 			}
 			// TODO should the shuffle just use `rng_`? The data-parallel implementation would be much better that way.
 		}
-		for (auto counts : blks_has_) { counts.fill(0); }
-		for (auto counts : cols_has_) { counts.fill(0); }
-		for (ord2i_t row {0}; row < O2; ++row) {
-			for (ord2i_t col {0}; col < O2; ++col) {
-				const ord2i_t val {cells_[row][col]};
-				++(blks_has_[rmi_to_blk<O>(row, col)][val]);
-				++(cols_has_[col][val]);
-		}	}
-		for (const auto& house : blks_has_) {
-			for (const auto& count : house) {
-				if (count == 0) { ++count_total_has_nots_; }
-		}	}
-		for (const auto& house : cols_has_) {
-			for (const auto& count : house) {
-				if (count == 0) { ++count_total_has_nots_; }
-		}	}
+		// for (auto& counts : blks_has_) { counts.fill(0); }
+		// for (auto& counts : cols_has_) { counts.fill(0); }
+		// for (ord2i_t row {0}; row < O2; ++row) {
+		// 	for (ord2i_t col {0}; col < O2; ++col) {
+		// 		const ord2i_t val {cells_[row][col]};
+		// 		++(blks_has_[rmi_to_blk<O>(row, col)][val]);
+		// 		++(cols_has_[col][val]);
+		// }	}
+		// for (const auto& house : blks_has_) {
+		// 	for (const auto& count : house) {
+		// 		if (count == 0) { ++count_total_has_nots_; }
+		// }	}
+		// for (const auto& house : cols_has_) {
+		// 	for (const auto& count : house) {
+		// 		if (count == 0) { ++count_total_has_nots_; }
+		// }	}
 		this->generate_();
 	}
 
@@ -83,26 +84,103 @@ namespace solvent::gen::ss {
 
 	template<Order O>
 	void GeneratorO<O>::generate_() {
+		// std::array<std::array<ord2x_t, O2>, O1> has_counts {0};
+		// {
+		// 	for (auto& counts : has_counts) { counts.fill(0); }
+		// 	for (ord2i_t h_chute {0}; h_chute < O1; ++h_chute) {
+		// 		for (ord2i_t row {0}; row < O2; ++row) {
+		// 			for (ord2i_t col {0}; col < O2; ++col) {
+		// 				const ord2i_t val {cells_[row][col]};
+		// 				++(blks_has_[rmi_to_blk<O>(row, col)][val]);
+		// 		}	}
+		// 	}
+		// }
+		for (auto& counts : blks_has_) { counts.fill(0); }
+		for (ord2i_t row {0}; row < O2; ++row) {
+			for (ord2i_t col {0}; col < O2; ++col) {
+				const ord2i_t val {cells_[row][col]};
+				++(blks_has_[rmi_to_blk<O>(row, col)][val]);
+		}	}
+		for (const auto& house : blks_has_) {
+			for (const auto& count : house) {
+				if (count == 0) { ++count_total_has_nots_; }
+		}	}
 		while (count_total_has_nots_ != 0) [[likely]] {
 			const ord2x_t row   {static_cast<ord2x_t>((rng_() - rng_.min()) % O2)};
-			const ord2x_t col_a {static_cast<ord2x_t>((rng_() - rng_.min()) % O2)};
-			const ord2x_t col_b {static_cast<ord2x_t>((col_a + (1 + (rng_() - rng_.min()) % (O2-1))) % O2)};
-			auto& cell_a = cells_[row][col_a];
-			auto& cell_b = cells_[row][col_b];
-			// assert (col_a != col_b) && (cell_a != cell_b)
-			const int has_nots_diff = (
-				(blks_has_[rmi_to_blk<O>(row, col_a)][cell_a] == 1 ?  1 : 0) +
-				(blks_has_[rmi_to_blk<O>(row, col_a)][cell_b] == 0 ? -1 : 0) +
-				(blks_has_[rmi_to_blk<O>(row, col_b)][cell_b] == 1 ?  1 : 0) +
-				(blks_has_[rmi_to_blk<O>(row, col_b)][cell_a] == 0 ? -1 : 0) +
-				(cols_has_[col_a][cell_a] == 1 ?  1 : 0) +
-				(cols_has_[col_a][cell_b] == 0 ? -1 : 0) +
-				(cols_has_[col_b][cell_b] == 1 ?  1 : 0) +
-				(cols_has_[col_b][cell_a] == 0 ? -1 : 0)
-			);
+			const ord2x_t a_col {static_cast<ord2x_t>((rng_() - rng_.min()) % O2)};
+			const ord2x_t b_col {static_cast<ord2x_t>(( a_col + 1 + ((rng_() - rng_.min()) % (O2-1)) ) % O2)};
+			const ord2x_t a_blk {rmi_to_blk<O>(row, a_col)};
+			const ord2x_t b_blk {rmi_to_blk<O>(row, b_col)};
+			auto& a_cell = cells_[row][a_col];
+			auto& b_cell = cells_[row][b_col];
+			assert ((a_col != b_col) && (a_cell != b_cell));
+			int has_nots_diff {0
+				// (cols_has_[a_col][a_cell] == 1 ?  1 : 0) +
+				// (cols_has_[a_col][b_cell] == 0 ? -1 : 0) +
+				// (cols_has_[b_col][b_cell] == 1 ?  1 : 0) +
+				// (cols_has_[b_col][a_cell] == 0 ? -1 : 0)
+			};
+			if (a_blk != b_blk) [[likely]] {
+				has_nots_diff +=
+				(blks_has_[a_blk][a_cell] == 1 ?  1 : 0) +
+				(blks_has_[a_blk][b_cell] == 0 ? -1 : 0) +
+				(blks_has_[b_blk][b_cell] == 1 ?  1 : 0) +
+				(blks_has_[b_blk][a_cell] == 0 ? -1 : 0);
+			}
 			if (has_nots_diff < 0) [[unlikely]] /* TODO manually profile likelihood */ {
 				count_total_has_nots_ += has_nots_diff;
-				std::swap(cell_a, cell_b);
+				// --cols_has_[a_col][a_cell];
+				// ++cols_has_[a_col][b_cell];
+				// --cols_has_[b_col][b_cell];
+				// ++cols_has_[b_col][a_cell];
+				if (a_blk != b_blk) [[likely]] {
+					--blks_has_[a_blk][a_cell];
+					++blks_has_[a_blk][b_cell];
+					--blks_has_[b_blk][b_cell];
+					++blks_has_[b_blk][a_cell];
+				}
+				std::swap(a_cell, b_cell);
+			}
+			++op_count_;
+			if (op_count_ >= params_.max_ops) {
+				return;
+			}
+		}
+		std::cout << "hi" << std::endl;
+		for (auto& counts : cols_has_) { counts.fill(0); }
+		for (ord2i_t row {0}; row < O2; ++row) {
+			for (ord2i_t col {0}; col < O2; ++col) {
+				const ord2i_t val {cells_[row][col]};
+				++(cols_has_[col][val]);
+		}	}
+		for (const auto& house : cols_has_) {
+			for (const auto& count : house) {
+				if (count == 0) { ++count_total_has_nots_; }
+		}	}
+		while (count_total_has_nots_ != 0) [[likely]] {
+			const ord2x_t row   {static_cast<ord2x_t>((rng_() - rng_.min()) % O2)};
+			const ord2x_t blk   {static_cast<ord2x_t>((O1 * (rng_() - rng_.min()) % O1))};
+			const ord2x_t a_blk_col {static_cast<ord2x_t>((rng_() - rng_.min()) % O1)};
+			const ord2x_t a_col {static_cast<ord2x_t>(blk + a_blk_col)};
+			const ord2x_t b_col {static_cast<ord2x_t>(blk + (( a_blk_col + 1 + ((rng_() - rng_.min()) % (O1-1)) ) % O1))};
+			// const ord2x_t a_blk {rmi_to_blk<O>(row, a_col)};
+			// const ord2x_t b_blk {rmi_to_blk<O>(row, b_col)};
+			auto& a_cell = cells_[row][a_col];
+			auto& b_cell = cells_[row][b_col];
+			assert ((a_col != b_col) && (a_cell != b_cell));
+			int has_nots_diff {
+				(cols_has_[a_col][a_cell] == 1 ?  1 : 0) +
+				(cols_has_[a_col][b_cell] == 0 ? -1 : 0) +
+				(cols_has_[b_col][b_cell] == 1 ?  1 : 0) +
+				(cols_has_[b_col][a_cell] == 0 ? -1 : 0)
+			};
+			if (has_nots_diff < 0) [[unlikely]] /* TODO manually profile likelihood */ {
+				count_total_has_nots_ += has_nots_diff;
+				--cols_has_[a_col][a_cell];
+				++cols_has_[a_col][b_cell];
+				--cols_has_[b_col][b_cell];
+				++cols_has_[b_col][a_cell];
+				std::swap(a_cell, b_cell);
 			}
 			++op_count_;
 			if (op_count_ >= params_.max_ops) {

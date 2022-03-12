@@ -1,4 +1,5 @@
 #include "solvent/gen/backtracking.hpp"
+#include "solvent/gen/stochastic.hpp"
 #include "solvent/gen/batch.hpp"
 #include "solvent/morph/canon.hpp"
 #include "solvent/morph/scramble.hpp"
@@ -26,9 +27,14 @@ unsigned test_morph_O(const unsigned num_rounds) {
 
 	unsigned int count_bad {0};
 	for (unsigned round {0}; round < num_rounds; ) {
-		gen::bt::GeneratorO<O> g {};
+		gen::ss::GeneratorO<O> g {};
 		g({});
-		if (g.status() != gen::bt::ExitStatus::Ok) {
+		if (g.status() != gen::ss::ExitStatus::Ok) {
+		std::array<typename solvent::size<O>::ord2i_t, O4> gen_grid;
+		g.write_to_(std::span(gen_grid));
+			std::clog << "bad: ";
+			print::text(std::clog, O, gen_grid);
+			std::clog << std::endl;
 			continue;
 		}
 
@@ -49,7 +55,7 @@ unsigned test_morph_O(const unsigned num_rounds) {
 			print::text(std::clog, O, canon_grid);
 			std::clog << "\n==========\n";
 		} else {
-			std::clog << ".";
+			// std::clog << ".";
 		}
 		++round;
 	}

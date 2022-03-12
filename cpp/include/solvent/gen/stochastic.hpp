@@ -20,7 +20,7 @@ namespace solvent::gen::ss {
 		using t = unsigned long long;
 
 		constexpr unsigned long long limit_default[]{ 0, 0, 3'000,
-			/*3*/30'000,
+			/*3*/300'000'000,
 			/*4*/700'000,
 			/*5*/100'000'000, // changing to anything between this and 100K doesn't seem to have any significant difference? I only tested with gen_ok 20 though.
 			/*6*/10'000'000'000ull, // <- not tested AT ALL ...
@@ -103,7 +103,7 @@ namespace solvent::gen::ss {
 		[[nodiscard]] constexpr Order get_order() const noexcept { return O; }
 		[[nodiscard]] constexpr const Params& get_params() const noexcept { return params_; }
 		[[nodiscard]] constexpr ExitStatus status() const noexcept {
-			if (count_total_has_nots_ == 0) {
+			if (is_done_) {
 				return ExitStatus::Ok;
 			} else {
 				return ExitStatus::Abort;
@@ -124,17 +124,14 @@ namespace solvent::gen::ss {
 	private:
 		Params params_;
 		opcount::t op_count_ {0};
-		int count_total_has_nots_; // sum of counting zeros in blks_has_ and cols_has_.
-		std::minstd_rand rng_;
+		std::mt19937_64 rng_;
 
 		std::array<std::array<ord2x_t, O2>, O2> cells_ {[]{
 			std::array<std::array<ord2x_t, O2>, O2> _;
 			for (auto& vto : _) { for (ord2i_t i {0}; i < O2; ++i) { vto[i] = i; } }
 			return _;
 		}()};
-
-		std::array<has_count_t, O2> blks_has_; // max entry value: O1
-		std::array<has_count_t, O2> cols_has_; // max entry value: O2
+		bool is_done_;
 
 		SOLVENT_NO_EXPORT [[gnu::hot]] void generate_();
 	};
