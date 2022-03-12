@@ -1,23 +1,12 @@
 #include "solvent/gen/stochastic.hpp"
-#include "solvent/print.hpp"
 #include "solvent/rng.hpp"
 
 #include <algorithm> // swap, shuffle
 
-#include <iostream>
 namespace solvent::gen::ss {
 
-	// long long total = 0;
-	// long long true_ = 0;
-
-	Params Params::clean(const Order O) noexcept {
-		if (max_ops == 0) {
-			max_ops = opcount::limit_default[O];
-		} else if (max_ops > opcount::limit_i_max[O]) {
-			max_ops = opcount::limit_i_max[O];
-		}
-		return *this;
-	}
+	// unsigned long long total = 0;
+	// unsigned long long true_ = 0;
 
 
 	std::unique_ptr<Generator> Generator::create(const Order order) {
@@ -33,11 +22,7 @@ namespace solvent::gen::ss {
 
 
 	template<Order O>
-	void GeneratorO<O>::operator()(const Params params_input) {
-		params_ = params_input;
-		params_.clean(O);
-		op_count_ = 0;
-		// count_total_has_nots_ = 0;
+	void GeneratorO<O>::operator()() {
 		{
 			std::lock_guard lock_guard {shared_mt_rng_mutex_};
 			rng_.seed(shared_mt_rng_());
@@ -56,7 +41,6 @@ namespace solvent::gen::ss {
 		if (this->status() == ExitStatus::Ok) /* [[unlikely]] */ {
 			return;
 		}
-		op_count_ = 0;
 		this->generate_();
 	}
 
@@ -69,17 +53,21 @@ namespace solvent::gen::ss {
 
 	template<Order O>
 	void GeneratorO<O>::generate_() {
+		/* Note: wherever you see `% .../\* -1 *\/`, that's a place where the algorithm
+		would still work if it wasn't commented out, but commeting it out makes it slower
+		because sometimes what would be excluded would have a faster path to validity. */
 		using chute_has_counts_t = std::array<std::array<ord2x_t, O2>, O1>;
+		// unsigned long long op_count = 0;
 
 		for (ord2i_t h_chute {0}; h_chute < O2; h_chute += O1) {
-			chute_has_counts_t blks_has_counts {{0}};
+			chute_has_counts_t blks_has {{0}};
 			for (ord2i_t row {h_chute}; row < h_chute+O1; ++row) {
 				for (ord2i_t col {0}; col < O2; ++col) {
-					++(blks_has_counts[col/O1][cells_[row][col]]);
+					++(blks_has[col/O1][cells_[row][col]]);
 			}	}
 			int has_nots {0};
-			for (const auto& blk_has_counts : blks_has_counts) {
-				for (const auto& val_count : blk_has_counts) {
+			for (const auto& blk_has : blks_has) {
+				for (const auto& val_count : blk_has) {
 					if (val_count == 0) { ++has_nots; }
 			}	}
 			while (has_nots != 0) [[likely]] {
@@ -88,39 +76,38 @@ namespace solvent::gen::ss {
 				const ord2x_t a_blk {static_cast<ord2x_t>(a_col/O1)};
 				const ord2x_t b_blk {static_cast<ord2x_t>(b_col/O1)};
 				if (a_blk == b_blk) [[unlikely]] { continue; }
-				const ord2x_t row {static_cast<ord2x_t>(h_chute + ((rng_() - rng_.min()) % (O1/* -1 for some reason excluding this helps */)))};
+				const ord2x_t row {static_cast<ord2x_t>(h_chute + ((rng_() - rng_.min()) % (O1/* -1 */)))};
 				auto& a_cell = cells_[row][a_col];
 				auto& b_cell = cells_[row][b_col];
 				const int has_nots_diff {
-					(blks_has_counts[a_blk][a_cell] == 1 ?  1 : 0) +
-					(blks_has_counts[a_blk][b_cell] == 0 ? -1 : 0) +
-					(blks_has_counts[b_blk][b_cell] == 1 ?  1 : 0) +
-					(blks_has_counts[b_blk][a_cell] == 0 ? -1 : 0)
+					(blks_has[a_blk][a_cell] == 1 ?  1 : 0) +
+					(blks_has[a_blk][b_cell] == 0 ? -1 : 0) +
+					(blks_has[b_blk][b_cell] == 1 ?  1 : 0) +
+					(blks_has[b_blk][a_cell] == 0 ? -1 : 0)
 				};
-				if (has_nots_diff <= 0) [[unlikely]] /* TODO manually profile likelihood */ {
+				if (has_nots_diff <= 0) [[unlikely]] { // TODO.minor for fun: find out on average at what op_count it starts being unlikely
 					has_nots += has_nots_diff;
-					--blks_has_counts[a_blk][a_cell];
-					++blks_has_counts[a_blk][b_cell];
-					--blks_has_counts[b_blk][b_cell];
-					++blks_has_counts[b_blk][a_cell];
+					--blks_has[a_blk][a_cell];
+					++blks_has[a_blk][b_cell];
+					--blks_has[b_blk][b_cell];
+					++blks_has[b_blk][a_cell];
 					std::swap(a_cell, b_cell);
 				}
-				// ++op_count_;
-				// if (op_count_ >= params_.max_ops) {
-				// 	return;
-				// }
+				// ++op_count;
 			}
 		}
+		// std::cout << "\n" << op_count << ", ";
+		// op_count = 0;
 
 		for (ord2i_t v_chute {0}; v_chute < O2; v_chute += O1) {
-			chute_has_counts_t cols_has_counts {{0}};
+			chute_has_counts_t cols_has {{0}};
 			for (ord2i_t row {0}; row < O2; ++row) {
 				for (ord2i_t blk_col {0}; blk_col < O1; ++blk_col) {
-					++(cols_has_counts[blk_col][cells_[row][v_chute+blk_col]]);
+					++(cols_has[blk_col][cells_[row][v_chute+blk_col]]);
 			}	}
 			int has_nots {0};
-			for (const auto& col_has_counts : cols_has_counts) {
-				for (const auto& val_count : col_has_counts) {
+			for (const auto& col_has : cols_has) {
+				for (const auto& val_count : col_has) {
 					if (val_count == 0) { ++has_nots; }
 			}	}
 			while (has_nots != 0) [[likely]] {
@@ -131,25 +118,23 @@ namespace solvent::gen::ss {
 				auto& a_cell = cells_[row][v_chute + a_col];
 				auto& b_cell = cells_[row][v_chute + b_col];
 				const int has_nots_diff {
-					(cols_has_counts[a_col][a_cell] == 1 ?  1 : 0) +
-					(cols_has_counts[a_col][b_cell] == 0 ? -1 : 0) +
-					(cols_has_counts[b_col][b_cell] == 1 ?  1 : 0) +
-					(cols_has_counts[b_col][a_cell] == 0 ? -1 : 0)
+					(cols_has[a_col][a_cell] == 1 ?  1 : 0) +
+					(cols_has[a_col][b_cell] == 0 ? -1 : 0) +
+					(cols_has[b_col][b_cell] == 1 ?  1 : 0) +
+					(cols_has[b_col][a_cell] == 0 ? -1 : 0)
 				};
-				if (has_nots_diff <= 0) [[unlikely]] /* TODO manually profile likelihood */ {
+				if (has_nots_diff <= 0) [[unlikely]] {
 					has_nots += has_nots_diff;
-					--cols_has_counts[a_col][a_cell];
-					++cols_has_counts[a_col][b_cell];
-					--cols_has_counts[b_col][b_cell];
-					++cols_has_counts[b_col][a_cell];
+					--cols_has[a_col][a_cell];
+					++cols_has[a_col][b_cell];
+					--cols_has[b_col][b_cell];
+					++cols_has[b_col][a_cell];
 					std::swap(a_cell, b_cell);
 				}
-				++op_count_;
-				// if (op_count_ >= params_.max_ops) {
-				// 	return;
-				// }
+				// ++op_count;
 			}
 		}
+		// std::cout << op_count;
 		is_done_ = true;
 		#ifndef NDEBUG
 		std::array<ord2i_t, O4> grid;

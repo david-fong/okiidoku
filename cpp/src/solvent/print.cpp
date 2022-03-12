@@ -7,7 +7,7 @@
 namespace solvent::print {
 
 	// value must not be greater than O^2.
-	void val_to_str(std::ostream& os, const solvent::Order O, const uint8_t value) {
+	void val_to_str(std::ostream& os, const solvent::Order O, const uint8_t value) noexcept {
 		if (value == O*O) [[unlikely]] {
 			os << ' ';
 		} else {

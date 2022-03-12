@@ -1,5 +1,4 @@
 #include "solvent/gen/backtracking.hpp"
-#include "solvent/print.hpp"
 #include "solvent/rng.hpp"
 
 #include <algorithm> // shuffle

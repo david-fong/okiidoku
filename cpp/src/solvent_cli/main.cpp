@@ -1,6 +1,6 @@
 #include "solvent_cli/repl.hpp"
-// #include "solvent/gen/backtracking.hpp"
 #include "solvent/rng.hpp"
+
 #include "solvent_util/console_setup.hpp"
 
 #include <string>
@@ -38,7 +38,7 @@ int main(const int argc, char const *const argv[]) {
 
 	// End of program:
 	std::cout << "\nbye bye!\n" << std::endl;
-	// std::cout << "\ntotal: " << solvent::gen::total;
-	// std::cout << "\ntrue_: " << solvent::gen::true_ << std::endl;
+	// std::cout << "\ntotal: " << solvent::gen::::total;
+	// std::cout << "\ntrue_: " << solvent::gen::::true_ << std::endl;
 	return 0;
 }

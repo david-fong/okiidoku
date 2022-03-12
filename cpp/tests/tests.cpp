@@ -3,11 +3,11 @@
 #include "solvent/gen/batch.hpp"
 #include "solvent/morph/canon.hpp"
 #include "solvent/morph/scramble.hpp"
-// #include "solvent/print.hpp"
-#include "solvent_util/console_setup.hpp"
 #include "solvent/print.hpp"
 #include "solvent/grid.hpp"
 #include "solvent/rng.hpp"
+
+#include "solvent_util/console_setup.hpp"
 
 #include <iostream>  // cout,
 #include <string>
@@ -28,8 +28,8 @@ unsigned test_morph_O(const unsigned num_rounds) {
 	unsigned int count_bad {0};
 	for (unsigned round {0}; round < num_rounds; ) {
 		gen::ss::GeneratorO<O> g {};
-		g({});
-		if (g.status() != gen::ss::ExitStatus::Ok) {
+		g(/* {} */);
+		if (!g.status_is_ok()) {
 			// std::array<typename solvent::size<O>::ord2i_t, O4> gen_grid;
 			// g.write_to_(std::span(gen_grid));
 			// std::clog << "bad: ";
@@ -111,5 +111,7 @@ int main(const int argc, char const *const argv[]) {
 	g.print_pretty(std::cout);
 	std::cout << "\n"; */
 
+	// std::cout << "\ntotal: " << solvent::gen::ss::total;
+	// std::cout << "\ntrue_: " << solvent::gen::ss::true_ << std::endl;
 	return 0;
 }

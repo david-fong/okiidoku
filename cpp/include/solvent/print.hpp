@@ -11,7 +11,7 @@
 
 namespace solvent::print {
 
-	SOLVENT_EXPORT [[gnu::hot]] void val_to_str(std::ostream&, Order order, uint8_t value);
+	SOLVENT_EXPORT [[gnu::hot]] void val_to_str(std::ostream&, Order order, uint8_t value) noexcept;
 
 	SOLVENT_EXPORT void text(std::ostream&, Order, std::span<const std::uint8_t> grid_view);
 
