@@ -21,8 +21,8 @@ namespace solvent::gen::ss {
 
 		constexpr unsigned long long limit_default[]{ 0, 0, 3'000,
 			/*3*/300'000,
-			/*4*/700'000,
-			/*5*/100'000'000, // changing to anything between this and 100K doesn't seem to have any significant difference? I only tested with gen_ok 20 though.
+			/*4*/7000'000,
+			/*5*/50'000ull, // changing to anything between this and 100K doesn't seem to have any significant difference? I only tested with gen_ok 20 though.
 			/*6*/10'000'000'000ull, // <- not tested AT ALL ...
 			/*7*/10'000'000'000'000ull // <- not tested AT ALL ...
 		};

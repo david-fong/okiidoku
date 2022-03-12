@@ -30,11 +30,11 @@ unsigned test_morph_O(const unsigned num_rounds) {
 		gen::ss::GeneratorO<O> g {};
 		g({});
 		if (g.status() != gen::ss::ExitStatus::Ok) {
-		std::array<typename solvent::size<O>::ord2i_t, O4> gen_grid;
-		g.write_to_(std::span(gen_grid));
-			std::clog << "bad: ";
-			print::text(std::clog, O, gen_grid);
-			std::clog << std::endl;
+			// std::array<typename solvent::size<O>::ord2i_t, O4> gen_grid;
+			// g.write_to_(std::span(gen_grid));
+			// std::clog << "bad: ";
+			// print::text(std::clog, O, gen_grid);
+			std::clog << "x"/*  << std::flush */;
 			continue;
 		}
 
@@ -55,7 +55,7 @@ unsigned test_morph_O(const unsigned num_rounds) {
 			print::text(std::clog, O, canon_grid);
 			std::clog << "\n==========\n";
 		} else {
-			// std::clog << ".";
+			std::clog << ".";
 		}
 		++round;
 	}
@@ -89,7 +89,7 @@ int main(const int argc, char const *const argv[]) {
 	solvent::seed_rng(srand_key);
 
 	// TODO change the test to try out all orders.
-	if (test_morph_O<3>(num_rounds)) {
+	if (test_morph_O<5>(num_rounds)) {
 		return 1;
 	}
 
