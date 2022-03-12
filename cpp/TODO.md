@@ -2,13 +2,7 @@
 
 ## Higher Priority
 
-- http://forum.enjoysudoku.com/giant-sudoku-s-16x16-25x25-36x36-100x100-t6578-120.html#p259504
-  - these people have generators that apparently scale very well. Try implementing their algorithms?
-  - [donald knuth's dancing links paper](https://www.ocf.berkeley.edu/~jchu/publicportal/sudoku/0011047.pdf)
-    - a blog-like post with another illustration https://garethrees.org/2007/06/10/zendoku-generation/#section-4
-  - a paper http://www.dudziak.com/ArbitrarySizeSudokuCreation.pdf
-  - patterns game strats: http://forum.enjoysudoku.com/patterns-game-strategies-t6327.html
-- after experimenting with different stochastic implementations, try implementing an opencl program. The minstd_rand rng is very simple to implement. I think algorithm is data-parallelizable.
+- after experimenting with different stochastic implementations, try implementing an opencl program. The minstd_rand rng is very simple to implement. I think the stochastic algorithm is data-parallelizable.
 
 - try making Order an enum
   - see if it can improve switch case cover detection.
@@ -44,7 +38,7 @@
   scale[rel] = 1 - (p_binomial(count[rel]) ^ 1/O)
   score[rel] = 2 ^ (exp[rel]) * scale[rel]
   find labelling with maximum
-    ```
+  ```
 
 - Try some of [these solutions](https://stackoverflow.com/questions/10897552/call-a-function-before-main) for the RNG default-seeding so that users don't need to manually seed in main unless they want a specific seed. Make sure to test that it works.
 

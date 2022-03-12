@@ -69,12 +69,14 @@ namespace solvent::gen::bt {
 		static std::unique_ptr<Generator> create(Order O);
 
 		virtual void operator()(Params) = 0;
+		// contract: must not be called before a call to `operator()`.
 		virtual void continue_prev() = 0;
 
 		[[nodiscard]] virtual Order get_order() const noexcept = 0;
 		[[nodiscard]] constexpr Order get_order2() const noexcept { return get_order()*get_order(); }
 		[[nodiscard]] constexpr Order get_order4() const noexcept { return get_order2()*get_order2(); }
 		[[nodiscard]] virtual const Params& get_params() const noexcept = 0;
+		// contract: must not be called before a call to `operator()`.
 		[[nodiscard]] virtual ExitStatus status() const noexcept = 0;
 		[[nodiscard]] virtual backtrack_origin_t get_backtrack_origin() const noexcept = 0;
 		[[nodiscard]] virtual dead_ends_t get_most_dead_ends_seen() const noexcept = 0;

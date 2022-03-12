@@ -69,9 +69,6 @@ namespace solvent::cli {
 	/** */
 	class Repl final {
 	public:
-		using opcount_t = gen::bt::opcount_t;
-		using pathkind_t = gen::path::E;
-		using trials_t = gen::batch::trials_t;
 
 		explicit Repl(Order O);
 		void start(void);
@@ -84,7 +81,7 @@ namespace solvent::cli {
 		// Return false if command is to exit the program:
 		void gen_single(bool contPrev = false);
 
-		void gen_multiple(trials_t stop_after, bool only_count_oks);
+		void gen_multiple(gen::batch::trials_t stop_after, bool only_count_oks);
 		void gen_multiple(std::string_view, bool only_count_oks);
 	};
 }

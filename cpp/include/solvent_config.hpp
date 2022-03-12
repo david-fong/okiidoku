@@ -6,7 +6,7 @@
 	#include <solvent_config.tweaks.h>
 #endif
 
-// apologies for the macros. they're used to selectively expand templates.
+// apologies for the macros. they're used to selectively instantiate templates.
 // If you have ideas about how to do this better, please open a github issue!
 
 // not that interesting

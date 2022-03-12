@@ -29,8 +29,7 @@ namespace solvent {
 					col_has |= try_val_mask;
 					blk_has |= try_val_mask;
 				}
-			}
-		}
+		}	}
 		return true;
 	}
 

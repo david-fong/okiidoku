@@ -8,7 +8,7 @@ add_library(solvent SHARED
 	morph/scramble.cpp
 	gen/path.cpp
 	gen/backtracking.cpp
-	# gen/stochastic.cpp
+	gen/stochastic.cpp
 	gen/batch.cpp
 	gen/batch_print.cpp
 )

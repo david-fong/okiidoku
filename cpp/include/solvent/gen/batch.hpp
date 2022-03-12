@@ -73,7 +73,7 @@ namespace solvent::gen::batch {
 
 	using callback_t = std::function<void(const bt::Generator&)>;
 	// calls to the callback will be guarded by a mutex.
-	// asserts that the order is compiled.
+	// contract: the order is compiled.
 	SOLVENT_EXPORT [[nodiscard]] BatchReport batch(Order, Params&, callback_t);
 
 

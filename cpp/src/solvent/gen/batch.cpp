@@ -2,7 +2,7 @@
 
 #include <thread>
 #include <mutex>
-#include <algorithm>
+#include <algorithm> // min
 #include <limits>
 #include <cassert>
 

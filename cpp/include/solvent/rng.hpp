@@ -2,13 +2,14 @@
 #define HPP_SOLVENT__RNG
 
 #include "solvent_export.h"
+
 #include <random>
 #include <mutex>
 
 namespace solvent {
 
 	/* Internal Notes:
-	- avoid using this for any hot-loopy operations.
+	- consider not using this for any hot-loop operations.
 	- this is not thread-safe. guard with mutex where necessary.
 	*/
 	extern std::mt19937_64 shared_mt_rng_; // TODO check if constinit is safe and gets rid of init guards

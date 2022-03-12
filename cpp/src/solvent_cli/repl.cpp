@@ -129,7 +129,7 @@ namespace solvent::cli {
 
 
 	void Repl::gen_multiple(
-		const trials_t stop_after,
+		const gen::batch::trials_t stop_after,
 		const bool only_count_oks
 	) {
 		gen::batch::Params params{
@@ -194,7 +194,7 @@ namespace solvent::cli {
 		const std::string_view stop_after_str,
 		const bool only_count_oks
 	) {
-		trials_t stop_by_value;
+		gen::batch::trials_t stop_by_value;
 		const auto parse_result = std::from_chars(stop_after_str.begin(), stop_after_str.end(), stop_by_value);
 		if (parse_result.ec == std::errc{}) {
 			if (stop_by_value <= 0) {
