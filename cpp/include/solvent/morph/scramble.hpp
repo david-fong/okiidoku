@@ -16,11 +16,5 @@ namespace solvent::morph {
 	template<class T>
 	requires std::is_integral_v<T>
 	SOLVENT_EXPORT void scramble(Order O, std::span<T>);
-
-
-	#define M_SOLVENT_TEMPL_TEMPL(O_) \
-		extern template void scramble<O_>(grid_span_t<O_>);
-	M_SOLVENT_INSTANTIATE_ORDER_TEMPLATES
-	#undef M_SOLVENT_TEMPL_TEMPL
 }
 #endif

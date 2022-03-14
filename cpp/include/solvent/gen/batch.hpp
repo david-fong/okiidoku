@@ -76,12 +76,6 @@ namespace solvent::gen::batch {
 	// contract: the order is compiled.
 	SOLVENT_EXPORT [[nodiscard]] BatchReport batch(Order, Params&, callback_t);
 
-
-	#define M_SOLVENT_TEMPL_TEMPL(O_) \
-		extern template BatchReport batch_O<O_>(Params&, callback_O_t<O_>);
-	M_SOLVENT_INSTANTIATE_ORDER_TEMPLATES
-	#undef M_SOLVENT_TEMPL_TEMPL
-
 // inline void batch() {} // can we do something like this?
 }
 #endif

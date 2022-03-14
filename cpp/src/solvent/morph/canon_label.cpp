@@ -5,7 +5,6 @@
 #include <algorithm> // swap, sort
 #include <numeric>   // iota, abs
 #include <compare>   // partial_ordering, is_eq, etc.
-#include <bit>       // popcount
 #include <cassert>
 
 namespace solvent::morph {

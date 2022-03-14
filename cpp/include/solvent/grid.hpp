@@ -57,7 +57,7 @@ namespace solvent {
 	struct SOLVENT_EXPORT chute_blk_masks {
 		using M = size<O>::O2_mask_least_t;
 		using T = std::array<M, O>;
-		static inline const T row {[]{
+		static inline const T row {[]{ // TODO re-constexpr this when bitset gets constexpr :/
 			T _ {0};
 			for (unsigned chute {0}; chute < O; ++chute) {
 				for (unsigned i {0}; i < O; ++i) {

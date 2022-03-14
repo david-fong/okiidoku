@@ -7,7 +7,6 @@
 #include <iostream>
 #include <algorithm> // sort
 #include <compare>   // partial_ordering
-#include <bit>       // popcount
 #include <cassert>
 
 namespace solvent::morph {

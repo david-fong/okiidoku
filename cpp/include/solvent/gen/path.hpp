@@ -40,12 +40,5 @@ namespace solvent::gen::path {
 
 	template<solvent::Order O> [[nodiscard, gnu::const]]
 	SOLVENT_EXPORT coord_converter_t<O> get_coord_to_prog_converter(E) noexcept;
-
-
-	#define M_SOLVENT_TEMPL_TEMPL(O_) \
-		extern template coord_converter_t<O_> get_prog_to_coord_converter<O_>(E) noexcept; \
-		extern template coord_converter_t<O_> get_coord_to_prog_converter<O_>(E) noexcept;
-	M_SOLVENT_INSTANTIATE_ORDER_TEMPLATES
-	#undef M_SOLVENT_TEMPL_TEMPL
 }
 #endif
