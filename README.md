@@ -1,13 +1,11 @@
 
 # Sudoku Utilities in C++
 
-The project currently provides two utilities: a _solution_ generator, and a canonicalizer. It is _not_ a solver or even a _puzzle_ generator (hence "solve-_n't_"), although I may try my hand at those in the future. It supports parametric grid size which many other sudoku projects do not.
+The project currently provides two utilities: a _solution_ generator, and a canonicalizer. It is _not_ a solver or even a _puzzle_ generator (hence "solve-_n't_"), although I may try my hand at those in the future. It supports parametric grid size which many other sudoku projects do not. Two generator algorithms are supported: [stochastic search](https://en.wikipedia.org/wiki/Sudoku_solving_algorithms#Stochastic_search_/_optimization_methods) and [backtracking](https://en.wikipedia.org/wiki/Sudoku_solving_algorithms#Backtracking). The canonicalizer is currently under progress; I am experimenting with a novel approach using intrinsic statistics/characteristics of grids. I will likely implement a minlexing algorithm in the future to compare the two methods.
 
-For usage instructions, see the readmes in the [cpp](./cpp/readme.md) and [rust](./rust/readme.md) directories. Note that the rust implementation is more of a learning project for me, and is currently not under development.
+For usage instructions, see the readme in the [cpp](./cpp/readme.md) directory. The [rust](./rust/readme.md) implementation is a learning project for me, and is currently _not under development_.
 
-I work on this project for fun. I like sudoku. I want to learn how to develop high-performance software libraries. I like reasoning about trade-offs. The algorithm design is like the puzzle to me; I don't want to "look at answers" at least until I have come up with my own. Perhaps in doing so, I will come up with something new, and maybe even something that is better in some ways than existing approaches. Regardless, I will do my best :)
-
-Feedback and suggestions on how to improve are very welcome- particularly about best practice in general software development / library authoring with C++ or rust. Just be prepared to help me understand the rationale and how things work. I will appreciate it.
+I work on this project for fun. I like sudoku. I want to learn how to develop high-performance software libraries. I like reasoning about trade-offs. The algorithm design is like the puzzle to me; I don't want to "look at answers" until I have tried my best come up with my own. Perhaps in doing so, I will come up with something new, and maybe even something that is better in some ways than existing approaches.
 
 ## If You Want a Solver
 

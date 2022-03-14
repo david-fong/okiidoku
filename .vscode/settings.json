@@ -1,7 +1,4 @@
 {
-   "cSpell.words": [
-      "Canonicalizer"
-   ],
    "files.associations": {
       "iostream": "cpp",
       "*.tcc": "cpp",
