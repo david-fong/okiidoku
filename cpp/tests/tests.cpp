@@ -89,7 +89,7 @@ int main(const int argc, char const *const argv[]) {
 	solvent::seed_rng(srand_key);
 
 	// TODO change the test to try out all orders.
-	if (test_morph_O<5>(num_rounds)) {
+	if (test_morph_O<10>(num_rounds)) {
 		return 1;
 	}
 

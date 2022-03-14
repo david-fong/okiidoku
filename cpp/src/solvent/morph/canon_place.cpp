@@ -23,7 +23,7 @@ namespace solvent::morph {
 	public:
 		static constexpr ord1i_t O1 = O;
 		static constexpr ord2i_t O2 = O*O;
-		static constexpr ord2i_t O3 = O*O*O;
+		static constexpr unsigned O3 = O*O*O;
 		static constexpr ord4i_t O4 = O*O*O*O;
 		// [[gnu::pure]] ord2i_t operator[](ord4i_t coord) const override;
 

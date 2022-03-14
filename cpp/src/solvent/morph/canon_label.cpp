@@ -81,15 +81,15 @@ namespace solvent::morph {
 				const RelMask& mask = masks[r][c];
 				RelPlaceless& rel = table[r][c];
 				const has_mask_t non_polar_mask = mask.blocks_h | mask.blocks_v;
-				const int all_count = static_cast<int>(std::popcount(non_polar_mask));
+				const int all_count = static_cast<int>((non_polar_mask.count()));
 				rel.all_p     = RelCountProb<O>::all[all_count];
-				rel.polar_a_p = static_cast<float>(RelCountProb<O>::polar[std::popcount(mask.blocks_h)]);
-				rel.polar_b_p = static_cast<float>(RelCountProb<O>::polar[std::popcount(mask.blocks_v)]);
+				rel.polar_a_p = static_cast<float>(RelCountProb<O>::polar[(mask.blocks_h.count())]);
+				rel.polar_b_p = static_cast<float>(RelCountProb<O>::polar[(mask.blocks_v.count())]);
 
 				std::array<int8_t, O1> all_chute_a_occ, all_chute_b_occ;
 				for (ord1i_t chute {0}; chute < O1; ++chute) {
-					all_chute_a_occ[chute] = static_cast<int8_t>(std::popcount(static_cast<has_mask_t>(chute_blk_masks<O>::row[chute] & non_polar_mask)));
-					all_chute_b_occ[chute] = static_cast<int8_t>(std::popcount(static_cast<has_mask_t>(chute_blk_masks<O>::col[chute] & non_polar_mask)));
+					all_chute_a_occ[chute] = static_cast<int8_t>((chute_blk_masks<O>::row[chute] & non_polar_mask).count());
+					all_chute_b_occ[chute] = static_cast<int8_t>((chute_blk_masks<O>::col[chute] & non_polar_mask).count());
 				}
 				std::ranges::sort(all_chute_a_occ, std::less{});
 				std::ranges::sort(all_chute_b_occ, std::less{});

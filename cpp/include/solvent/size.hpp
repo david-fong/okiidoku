@@ -6,6 +6,7 @@
 #include "solvent/order.hpp"
 
 #include <bit>
+#include <bitset>
 #include <cstdint>
 #include <type_traits>
 
@@ -17,7 +18,7 @@ namespace solvent {
 		std::conditional_t<(N <=  16), std::uint_fast16_t,
 		std::conditional_t<(N <=  32), std::uint_fast32_t,
 		std::conditional_t<(N <=  64), std::uint_fast64_t,
-		std::conditional_t<(N <= 128), unsigned long long,
+		std::conditional_t<(N <= 128), __uint128_t,
 		void
 	>>>>>;
 
@@ -27,7 +28,7 @@ namespace solvent {
 		std::conditional_t<(N <=  16), std::uint_least16_t,
 		std::conditional_t<(N <=  32), std::uint_least32_t,
 		std::conditional_t<(N <=  64), std::uint_least64_t,
-		std::conditional_t<(N <= 128), unsigned long long,
+		std::conditional_t<(N <= 128), __uint128_t,
 		void
 	>>>>>;
 
@@ -41,8 +42,8 @@ namespace solvent {
 		// O2:     4   9  16  25  36  49  64  81 100 121
 		// round:  8  16  16  32  64  64  64 128 128 128
 		// std::bitset not used because it's apparently not fast
-		using O2_mask_fast_t = uint_fastN_t<O*O>;
-		using O2_mask_least_t = uint_leastN_t<O*O>;
+		using O2_mask_fast_t = std::bitset<O*O>;
+		using O2_mask_least_t = std::bitset<O*O>;
 
 		// uint range [0, order].
 		using ord1i_t = std::uint_fast8_t;

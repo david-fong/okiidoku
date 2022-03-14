@@ -57,22 +57,22 @@ namespace solvent {
 	struct SOLVENT_EXPORT chute_blk_masks {
 		using M = size<O>::O2_mask_least_t;
 		using T = std::array<M, O>;
-		static constexpr T row = [](){
+		static inline const T row {[]{
 			T _ {0};
 			for (unsigned chute {0}; chute < O; ++chute) {
 				for (unsigned i {0}; i < O; ++i) {
-					_[chute] |= static_cast<M>(1 << ((O*chute) + i));
+					_[chute] |= static_cast<M>(M{1} << ((O*chute) + i));
 			}	}
 			return _;
-		}();
-		static constexpr T col = [](){
+		}()};
+		static inline const T col {[]{
 			T _ {0};
 			for (unsigned chute {0}; chute < O; ++chute) {
 				for (unsigned i {0}; i < O; ++i) {
-					_[chute] |= static_cast<M>(1 << ((O*i) + chute));
+					_[chute] |= static_cast<M>(M{1} << ((O*i) + chute));
 			}	}
 			return _;
-		}();
+		}()};
 	};
 
 

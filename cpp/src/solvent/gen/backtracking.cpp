@@ -137,7 +137,8 @@ namespace solvent::gen::bt {
 		Cell& cell = cells_[progress_];
 		if (backtracked) [[unlikely]]/* average direction is forward */ {
 			// Clear the current value from all masks:
-			const has_mask_t erase_mask = static_cast<has_mask_t>(~(1 << val_try_order[cell.try_index]));
+			// Note: the more readable way of writing this is less performant :/
+			const has_mask_t erase_mask {~(has_mask_t{1} << val_try_order[cell.try_index])};
 			row_has &= erase_mask;
 			col_has &= erase_mask;
 			blk_has &= erase_mask;
@@ -145,19 +146,20 @@ namespace solvent::gen::bt {
 			// Smart skip-backtracking:
 			// This optimization's degree of usefulness depends on the genpath and size.
 			if (!cells_share_house<O>(coord, prog_to_coord(backtrack_origin_))) [[unlikely]] {
-				// only likely when dealrwmj. dealrwmj is so slow already it doesn't
-				// feel worth slowing other genpaths down to microoptimize.
+				// only likely when deal_row_major. deal_row_major is so slow already
+				// it doesn't feel worth slowing other genpaths down to microoptimize.
 				cell.clear();
 				return Direction { .is_back = true, .is_back_skip = true };
 			}
 		}
 
-		const has_mask_t cell_has = (row_has | col_has | blk_has);
-		if (std::popcount(cell_has) != O2) [[likely]] {
+		const has_mask_t cell_has {row_has | col_has | blk_has};
+		if (!cell_has.all()) [[likely]] {
 			// The above optimization comes into effect ~1/5 of the time for size 5.
 			for (ord2i_t try_i {static_cast<ord2i_t>((cell.try_index+1u) % (O2+1))}; try_i < O2; ++try_i) [[likely]] {
+				// Note: the more readable way of writing this is less performant :/
 				const has_mask_t try_val_mask = has_mask_t{1} << val_try_order[try_i];
-				if (!(cell_has & try_val_mask)) [[unlikely]] {
+				if ((cell_has & try_val_mask).none()) [[unlikely]] {
 					// A valid value was found:
 					row_has |= try_val_mask;
 					col_has |= try_val_mask;

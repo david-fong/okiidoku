@@ -6,7 +6,7 @@ namespace solvent {
 	bool is_sudoku_valid(const grid_const_span_t<O> grid) noexcept {
 		using ord2i_t = typename size<O>::ord2i_t;
 		using has_mask_t = typename size<O>::O2_mask_fast_t;
-		static constexpr ord2i_t O2 = O*O;
+		static constexpr ord2i_t O2 {O*O};
 
 		std::array<has_mask_t, O2> rows_has_ {0};
 		std::array<has_mask_t, O2> cols_has_ {0};
@@ -18,11 +18,11 @@ namespace solvent {
 				auto& col_has = cols_has_[col];
 				auto& blk_has = blks_has_[rmi_to_blk<O>(row, col)];
 
-				const auto val = grid[(O2*row) + col];
+				const auto val {grid[(O2*row) + col]};
 				if (val == O2) { continue; }
-				const has_mask_t try_val_mask = has_mask_t(1) << val;
-				const has_mask_t t_has = (row_has | col_has | blk_has);
-				if (t_has & try_val_mask) [[unlikely]] {
+				const has_mask_t try_val_mask {has_mask_t{1} << val};
+				const has_mask_t t_has {row_has | col_has | blk_has};
+				if ((t_has & try_val_mask).any()) [[unlikely]] {
 					return false;
 				} else {
 					row_has |= try_val_mask;
