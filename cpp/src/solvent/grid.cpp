@@ -8,9 +8,9 @@ namespace solvent {
 		using has_mask_t = typename size<O>::O2_mask_fast_t;
 		static constexpr ord2i_t O2 {O*O};
 
-		std::array<has_mask_t, O2> rows_has_ {0};
-		std::array<has_mask_t, O2> cols_has_ {0};
-		std::array<has_mask_t, O2> blks_has_ {0};
+		std::array<has_mask_t, O2> rows_has_ {};
+		std::array<has_mask_t, O2> cols_has_ {};
+		std::array<has_mask_t, O2> blks_has_ {};
 
 		for (ord2i_t row {0}; row < O2; ++row) {
 			for (ord2i_t col {0}; col < O2; ++col) {
