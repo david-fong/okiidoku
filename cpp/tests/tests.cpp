@@ -61,6 +61,9 @@ unsigned test_morph_O(const unsigned num_rounds) {
 	}
 	std::clog.flush();
 	std::cout << "\ncount bad: " << count_bad << " / " << num_rounds;
+	if (count_bad > 0) {
+		std::cerr << "\nerrors when testing order " << O;
+	}
 	return count_bad;
 }
 
@@ -88,8 +91,16 @@ int main(const int argc, char const *const argv[]) {
 	// Scramble the random number generators:
 	solvent::seed_rng(srand_key);
 
-	// TODO change the test to try out all orders.
 	if (test_morph_O<3>(num_rounds)) {
+		return 1;
+	}
+	if (test_morph_O<4>(num_rounds)) {
+		return 1;
+	}
+	if (test_morph_O<5>(num_rounds)) {
+		return 1;
+	}
+	if (test_morph_O<10>(num_rounds)) {
 		return 1;
 	}
 

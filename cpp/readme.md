@@ -5,7 +5,7 @@
 
 Building solvent requires CMake (with [the minimum specified version](./CMakeLists.txt)), a C++ compiler [supporting C++20](https://en.cppreference.com/w/cpp/compiler_support), and a build system like Make or Ninja.
 
-As for actually linking to the dynamic library, ¯\\\_(ツ)\_/¯. I don't really know how this stuff works. See [solvent\_cli's CMakeLists.txt](./src/solvent_cli/CMakeLists.txt) for inspiration. If you have a link to some really good educative writing concerning this, make a PR and I can add it here.
+As for actually linking to the dynamic library, ¯\\\_(ツ)\_/¯. I don't really know how this stuff works. See [solvent\_cli's CMakeLists.txt](./src/solvent_cli/CMakeLists.txt) for inspiration. Maybe this will help: [https://tldp.org/HOWTO/Program-Library-HOWTO/shared-libraries.html](tldp.org on shared libraries)
 
 - Make sure to read and follow the api contracts documented in the headers. Exceptions are intentionally not thrown for precondition violations.
 

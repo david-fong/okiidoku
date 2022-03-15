@@ -40,7 +40,7 @@ namespace solvent {
 		return static_cast<size<O>::ord2i_t>((row / O) * O) + (col / O);
 	}
 	template<Order O> [[nodiscard, gnu::const]]
-	SOLVENT_EXPORT inline constexpr typename size<O>::ord2i_t rmi_to_blk(const typename size<O>::ord4i_t index) noexcept {
+	SOLVENT_EXPORT constexpr typename size<O>::ord2i_t rmi_to_blk(const typename size<O>::ord4i_t index) noexcept {
 		return rmi_to_blk<O>(rmi_to_row<O>(index), rmi_to_col<O>(index));
 	}
 

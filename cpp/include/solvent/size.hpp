@@ -40,8 +40,8 @@ namespace solvent {
 	private:
 		template<bool use_fast>
 		class O2_mask_t {
-			static constexpr bool use_int = O <= 8;
-			using val_t = std::conditional_t<use_int,
+			static constexpr bool use_int_ = O <= 8;
+			using val_t = std::conditional_t<use_int_,
 				std::conditional_t<use_fast,
 					uint_fastN_t<O*O>,
 					uint_leastN_t<O*O>
@@ -57,17 +57,17 @@ namespace solvent {
 			constexpr O2_mask_t(val_t val): val_{val} {}
 
 			[[nodiscard, gnu::pure]] typename size<O>::ord2x_t count() const noexcept {
-				if constexpr (use_int) { return static_cast<ord2x_t>(std::popcount(val_)); }
+				if constexpr (use_int_) { return static_cast<ord2x_t>(std::popcount(val_)); }
 				else { return static_cast<ord2x_t>(val_.count()); }
 			}
 			[[nodiscard, gnu::pure]] bool all() const noexcept {
-				if constexpr (use_int) { return std::popcount(val_) == O*O; } else { return val_.all(); }
+				if constexpr (use_int_) { return std::popcount(val_) == O*O; } else { return val_.all(); }
 			}
 			[[nodiscard, gnu::pure]] bool any() const noexcept {
-				if constexpr (use_int) { return val_ != 0; } else { return val_.any(); }
+				if constexpr (use_int_) { return val_ != 0; } else { return val_.any(); }
 			}
 			[[nodiscard, gnu::pure]] bool none() const noexcept {
-				if constexpr (use_int) { return val_ == 0; } else { return val_.none(); }
+				if constexpr (use_int_) { return val_ == 0; } else { return val_.none(); }
 			}
 			[[nodiscard, gnu::pure]] O2_mask_t operator~() const noexcept {
 				return ~val_;

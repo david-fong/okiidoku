@@ -1,7 +1,6 @@
 #include "solvent/gen/batch.hpp"
 #include "solvent_util/str.hpp"
 
-#include <iostream>
 #include <iomanip>
 #include <string_view>
 

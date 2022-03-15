@@ -169,7 +169,7 @@ namespace solvent::morph {
 							return cmp == std::partial_ordering::less;
 						}
 					}
-					std::clog << "\n! equivalent rel encountered." << std::flush;
+					std::clog << "\n! equivalent rel encountered.";
 					return false;
 				});
 				std::array<ord2x_t, O2> _;
