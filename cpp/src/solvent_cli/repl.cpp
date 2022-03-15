@@ -128,10 +128,10 @@ namespace solvent::cli {
 
 
 	void Repl::gen_multiple(
-		const gen::batch::trials_t stop_after,
+		const gen::bt::batch::trials_t stop_after,
 		const bool only_count_oks
 	) {
-		gen::batch::Params params{
+		gen::bt::batch::Params params{
 			.gen_params {
 				.path_kind = config_.path_kind(),
 				.max_dead_ends = config_.max_dead_ends(),
@@ -139,7 +139,7 @@ namespace solvent::cli {
 			.only_count_oks = only_count_oks,
 			.stop_after = stop_after
 		};
-		const gen::batch::BatchReport batch_report = gen::batch::batch(config_.order(), params,
+		const gen::bt::batch::BatchReport batch_report = gen::bt::batch::batch(config_.order(), params,
 			[this](const gen::bt::Generator& result) {
 				if ((config_.verbosity() == verbosity::E::full)
 				|| ((config_.verbosity() == verbosity::E::quiet_aborts) && (result.status_is_ok()))
@@ -193,7 +193,7 @@ namespace solvent::cli {
 		const std::string_view stop_after_str,
 		const bool only_count_oks
 	) {
-		gen::batch::trials_t stop_by_value;
+		gen::bt::batch::trials_t stop_by_value;
 		const auto parse_result = std::from_chars(stop_after_str.begin(), stop_after_str.end(), stop_by_value);
 		if (parse_result.ec == std::errc{}) {
 			if (stop_by_value <= 0) {

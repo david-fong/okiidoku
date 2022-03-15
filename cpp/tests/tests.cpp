@@ -1,6 +1,6 @@
-#include "solvent/gen/backtracking.hpp"
+#include "solvent/gen/bt/batch.hpp"
+#include "solvent/gen/bt/generator.hpp"
 #include "solvent/gen/stochastic.hpp"
-#include "solvent/gen/batch.hpp"
 #include "solvent/morph/canon.hpp"
 #include "solvent/morph/scramble.hpp"
 #include "solvent/print.hpp"
@@ -105,8 +105,8 @@ int main(const int argc, char const *const argv[]) {
 	}
 
 
-	// using solvent::gen::batch::batch;
-	// auto params = solvent::gen::batch::Params {
+	// using solvent::gen::bt::batch::batch;
+	// auto params = solvent::gen::bt::batch::Params {
 	// 	.gen_params{}, .only_count_oks=true, .stop_after=100
 	// };
 	// batch<3>(params, [](typename solvent::gen::Generator<3>::ResultView result){

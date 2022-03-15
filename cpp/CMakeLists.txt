@@ -23,7 +23,7 @@ else()
 		-Wconversion # -Wsign-conversion
 		-Wimplicit-fallthrough=5
 		-Wshadow -Woverloaded-virtual
-		-march=native
+		-march=native # generated code meant only to run on compiling machine. for the speedup.
 	)
 endif()
 

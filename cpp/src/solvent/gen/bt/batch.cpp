@@ -1,4 +1,4 @@
-#include "solvent/gen/batch.hpp"
+#include "solvent/gen/bt/batch.hpp"
 
 #include <thread>
 #include <mutex>
@@ -6,7 +6,7 @@
 #include <limits>
 #include <cassert>
 
-namespace solvent::gen::batch {
+namespace solvent::gen::bt::batch {
 
 	unsigned default_num_threads(const Order O) {
 		const unsigned hwc = std::thread::hardware_concurrency();

@@ -1,7 +1,7 @@
 #ifndef HPP_SOLVENT__GEN__BATCH
 #define HPP_SOLVENT__GEN__BATCH
 
-#include "solvent/gen/backtracking.hpp"
+#include "solvent/gen/bt/generator.hpp"
 #include "solvent_util/timer.hpp"
 #include "solvent_export.h"
 
@@ -10,7 +10,7 @@
 #include <vector>
 #include <optional>
 
-namespace solvent::gen::batch {
+namespace solvent::gen::bt::batch {
 
 	using trials_t = unsigned long;
 

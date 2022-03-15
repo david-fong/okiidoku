@@ -1,5 +1,5 @@
 
-#include "solvent/gen/backtracking.hpp"
+#include "solvent/gen/bt/generator.hpp"
 
 #include <emscripten/bind.h>
 

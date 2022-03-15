@@ -2,8 +2,7 @@
 #define HPP_SOLVENT_CLI__CONFIG
 
 #include "solvent_cli/enum.hpp"
-// #include "solvent/gen/batch.hpp"
-#include "solvent/gen/backtracking.hpp"
+#include "solvent/gen/bt/generator.hpp"
 #include "solvent/size.hpp"
 
 #include <map>

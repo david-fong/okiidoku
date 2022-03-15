@@ -29,7 +29,7 @@ Below is a screenshot of what you might see after running `./solvent_cli 5` and 
 
 Below is a screenshot of what you might see after running `./solvent_cli 4`, then `gen_ok 100000` to generate solutions until 100000 have completed successfully.
 
-![](../sample-output/strials_example.png)
+![](../sample-output/gen_ok_example.png)
 
 ## Issue Procedure
 

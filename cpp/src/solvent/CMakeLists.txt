@@ -7,10 +7,10 @@ add_library(solvent SHARED
 	morph/canon.cpp
 	morph/scramble.cpp
 	gen/path.cpp
-	gen/backtracking.cpp
+	gen/bt/generator.cpp
 	gen/stochastic.cpp
-	gen/batch.cpp
-	gen/batch_print.cpp
+	gen/bt/batch.cpp
+	gen/bt/batch_print.cpp
 )
 # https://tldp.org/HOWTO/Program-Library-HOWTO/shared-libraries.html
 

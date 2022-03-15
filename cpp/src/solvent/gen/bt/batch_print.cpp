@@ -1,10 +1,10 @@
-#include "solvent/gen/batch.hpp"
+#include "solvent/gen/bt/batch.hpp"
 #include "solvent_util/str.hpp"
 
 #include <iomanip>
 #include <string_view>
 
-namespace solvent::gen::batch {
+namespace solvent::gen::bt::batch {
 
 	static constexpr std::string_view throughput_bar_str {"-------------------------"};
 	static constexpr std::string_view table_separator {
@@ -76,7 +76,7 @@ namespace solvent::gen::batch {
 			if (&sample != &best_sample) os << util::str::dim.off;
 		}
 		os << table_separator;
-		if (total_oks < max_dead_end_samples.size() * gen::batch::BatchReport::recommended_oks_per_sample) {
+		if (total_oks < max_dead_end_samples.size() * gen::bt::batch::BatchReport::recommended_oks_per_sample) {
 			os << "\nexercise caution against small datasets!" << std::endl;
 		}
 		os.flags(prev_fmtflags);

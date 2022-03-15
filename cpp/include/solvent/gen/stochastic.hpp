@@ -19,7 +19,7 @@ namespace solvent::gen::ss {
 	// SOLVENT_EXPORT extern unsigned long long true_;
 
 	enum class SOLVENT_EXPORT ExitStatus : std::uint8_t {
-		Ok, Abort, // Exhausted,
+		Ok, Abort,
 	};
 
 

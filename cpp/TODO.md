@@ -10,6 +10,7 @@
     - The backtracking implementation could then just be used as a reference for a more complicated deductive reasoning solver when deductive reasoning can't further progress by deductive reasoning.
       - The path would prioritize the parts of the puzzle that the deductive reasoning knows the least about (the parts that are likely to result in large chain of new possible deductions when filled).
     - If way worse than backtracking for some orders, decide what best to do then. It would be a real pain to create an interface that somehow supports their differences in behaviours and parameter/result types...
+  - if the stochastic search is made more generic to also solve puzzles,... it would either need to detect unsolvable puzzles (a naive implementation would never terminate if unsolvable.) And it would only be probabilistically able to detect if there are multiple solutions.
 
 - after experimenting with different stochastic implementations, try implementing an opencl program. The minstd_rand rng is very simple to implement. I think the stochastic algorithm is data-parallelizable.
   - I wonder if there's a bitset implementation for opencl...
@@ -42,12 +43,12 @@
     - The cohabitation table can be tiled; a coordinate's vertical or horizontal distance (these are the same, since relabelling moves both the col and row together) from the closest tiling of the main diagonal represents the distance of the labels from each other.
     - For each label, make an array where each index represents another label, and the value is an object containing the left and right distances between them, and the cohabitation count.
     - Hm. So far this seems to suggest a hill-climbing / brute-force-type solution...
-    - OR... make an empty commit saying that a solution was implemented using the [Ostritch Alorithm](https://en.wikipedia.org/wiki/Ostrich_algorithm)
+    - OR... make an empty commit saying that a solution was implemented using the [Ostrich Algorithm](https://en.wikipedia.org/wiki/Ostrich_algorithm)
 
 - some diagnostics to try rendering:
   - A scatter chart showing max-dead-ends vs. num operations. (only caring about success results)
   - a bar graph where each bar counts the number of ResultViews that had a progress (or a furthest coord with a non-zero backtrack count) within the range for that bar's "bin". (to see "how far" aborted generations usually get).
-  - comparing the average heatmaps of aborted vs successful generations.
+  - comparing the average heatmap of aborted vs successful generations.
     - See if there are clear differences/patterns in where they usually spike in backtracking. Perhaps this can be used to inform more sophisticated thresholds for each genpath.
 
 - ? Refactor names to use terminology suitable for more than just 2 dimensions? Ex. in 2D: row -> `d0i` (as in "dimension-zero index"), col -> `d1i`. But doing so would imply that I'm going to support multiple dimensions... and that's a huge can of worms.

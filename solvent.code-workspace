@@ -55,11 +55,5 @@
 		"[css]": {
 			"editor.insertSpaces": false,
 		},
-		"cSpell.words": [
-			"Canonicalizer",
-			"mutex",
-			"solven't",
-			"struct"
-		],
 	},
 }
