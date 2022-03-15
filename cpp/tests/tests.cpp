@@ -38,11 +38,11 @@ unsigned test_morph_O(const unsigned num_rounds) {
 			continue;
 		}
 
-		std::array<typename solvent::size<O>::ord2i_t, O4> gen_grid;
+		std::array<typename solvent::size<O>::ord2x_t, O4> gen_grid;
 		g.write_to_(std::span(gen_grid));
 		morph::canonicalize<O>(gen_grid);
 
-		std::array<typename solvent::size<O>::ord2i_t, O4> canon_grid = gen_grid;
+		std::array<typename solvent::size<O>::ord2x_t, O4> canon_grid = gen_grid;
 		morph::scramble<O>(canon_grid);
 		morph::canonicalize<O>(canon_grid);
 
@@ -89,7 +89,7 @@ int main(const int argc, char const *const argv[]) {
 	solvent::seed_rng(srand_key);
 
 	// TODO change the test to try out all orders.
-	if (test_morph_O<5>(num_rounds)) {
+	if (test_morph_O<3>(num_rounds)) {
 		return 1;
 	}
 

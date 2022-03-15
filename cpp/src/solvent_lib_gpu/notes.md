@@ -1,5 +1,7 @@
+
+
 - https://github.com/vduan/parallel-sudoku-solver
-  - some good writing on why sudoku is not very data-parallel, and effective data-parallel approaches
+  - a project implementing data-parallel backtracking?
 
 - https://community.khronos.org/t/backtracking-algorithm-and-opencl/1627
   - gpu threading not good for algorithms that don't have high data-parallelism. backtracking algorithm has lots of control flow branching. ("instruction divergence" / "kernel divergence")

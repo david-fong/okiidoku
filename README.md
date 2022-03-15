@@ -21,4 +21,4 @@ I work on this project for fun. I like sudoku. I want to learn how to develop hi
 
 ## My Past and Future Related Works
 
-Sudoku is a favourite puzzle game of mine. After I took an intro to programming course in my first year of university, one of my first personal projects was a solution generator in C. The code was terrible, but I still remember the feelings of excitement and enjoyment that I felt. I reworked it after learning Java (dusty private repo), then later started this. I've attempted a [hardware implementation using SystemVerilog](https://github.com/david-fong/Sudoku-SV), which so far has been a failure.
+Sudoku is a favourite puzzle game of mine. After I took an intro to programming course in my first year of university, one of my first personal projects was a solution generator in C. The code was terrible, but I still remember the feelings of excitement and enjoyment that I felt. I reworked it after learning Java (private repo), then later started this. I've attempted a [hardware implementation using SystemVerilog](https://github.com/david-fong/Sudoku-SV), which so far has been a failure (probably due to too many wires).

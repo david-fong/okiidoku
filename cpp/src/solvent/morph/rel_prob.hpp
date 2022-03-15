@@ -3,6 +3,7 @@
 
 #include "solvent/order.hpp"
 #include "solvent_util/math.hpp"
+
 #include <array>
 #include <cmath>
 
@@ -23,7 +24,8 @@ namespace solvent::morph {
 				_[i] = (static_cast<double>(n_choose_r(O2, i)) * std::pow(2,i) * std::pow(O1-1, O2-i)) / std::pow(O1+1, O2); }
 			return _;
 		}()};
-		static constexpr double all_E = O2 * (2.0/(O+1));
+
+		static constexpr double all_e = O2 * (2.0/(O+1));
 
 		static constexpr std::array<double, O2+1> polar {[]{
 			std::array<double, O2+1> _;
@@ -31,6 +33,7 @@ namespace solvent::morph {
 				_[i] = (static_cast<double>(n_choose_r(O2, i)) * std::pow(O1, O2-i)) / std::pow(O1+1, O2); }
 			return _;
 		}()};
+
 		static constexpr double polar_e = O2 * (1.0/(O+1));
 	};
 }

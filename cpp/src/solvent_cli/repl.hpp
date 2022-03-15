@@ -32,8 +32,8 @@ namespace solvent::cli {
 		const std::map<std::string_view, Command::E> enum_str_to_enum {
 			{ "help",         E::help },
 			{ "quit",         E::quit },
-			{ "verbosity",    E::config_print_level },
 			{ "order",        E::config_order },
+			{ "verbosity",    E::config_print_level },
 			{ "genpath",      E::config_gen_path },
 			{ "maxdeadends",  E::config_gen_max_dead_ends },
 			{ "canonicalize", E::config_auto_canonicalize },

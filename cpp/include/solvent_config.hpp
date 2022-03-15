@@ -7,7 +7,7 @@
 #endif
 
 // apologies for the macros. they're used to selectively instantiate templates,
-// which allow allocating important data on the stack instead of the heap.
+// which allow allocating frequently-used data on the stack instead of the heap.
 
 #ifndef M_SOLVENT_INCLUDE_ORDER_2
 #define M_SOLVENT_INCLUDE_ORDER_2 false
@@ -50,7 +50,7 @@
 #endif
 
 #ifndef M_SOLVENT_INCLUDE_ORDER_12
-#define M_SOLVENT_INCLUDE_ORDER_12 false // currently unsupported :/
+#define M_SOLVENT_INCLUDE_ORDER_12 false
 #endif
 
 #ifndef M_SOLVENT_DEFAULT_ORDER
@@ -159,9 +159,10 @@
 // Can be used to instantiate templates.
 // Must include `M_SOLVENT_DEFAULT_ORDER`.
 // At usage sites, first #define M_SOLVENT_TEMPL_TEMPL and then #undef it right after.
-// TODO this seems to violate pitchfork library spec:
+// Note: This _seems_ to violate pitchfork library spec:
 //  "A library should not offer the user controls for tweaking its public interface."...
 //  https://api.csswg.org/bikeshed/?force=1&url=https://raw.githubusercontent.com/vector-of-bool/pitchfork/develop/data/spec.bs#libraries
+//  But I think it's okay. Each order could be technically be treated as its own standalone API.
 #define M_SOLVENT_INSTANTIATE_ORDER_TEMPLATES \
 M_SOLVENT_TEMPL_TEMPL_2_ \
 M_SOLVENT_TEMPL_TEMPL_3_ \

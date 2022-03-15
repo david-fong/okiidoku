@@ -5,9 +5,9 @@
 
 Building solvent requires CMake (with [the minimum specified version](./CMakeLists.txt)), a C++ compiler [supporting C++20](https://en.cppreference.com/w/cpp/compiler_support), and a build system like Make or Ninja.
 
-As for actually linking to the dynamic library, ¯\\\_(ツ)\_/¯ See [solvent\_cli's CMakeLists.txt](./src/solvent_cli/CMakeLists.txt) for inspiration. I'm new to CMake and I have no idea how to properly make distributable libraries. If you have experience doing that stuff, a PR updating these instructions and fixing any of my noob CMakeLists.txt mistakes would be much appreciated. Bonus points if you link me docs to learn more about this.
+As for actually linking to the dynamic library, ¯\\\_(ツ)\_/¯. I don't really know how this stuff works. See [solvent\_cli's CMakeLists.txt](./src/solvent_cli/CMakeLists.txt) for inspiration. If you have a link to some really good educative writing concerning this, make a PR and I can add it here.
 
-- Make sure to read and follow the api contracts documented in the headers. Exceptions are intentionally not used to check preconditions.
+- Make sure to read and follow the api contracts documented in the headers. Exceptions are intentionally not thrown for precondition violations.
 
 - To change the supported grid sizes that get compiled, create a [tweak header](https://vector-of-bool.github.io/2020/10/04/lib-configuration.html#providing-a-tweak-header) for [`include/solvent_config.hpp`](include/solvent_config.hpp).
 
@@ -36,3 +36,5 @@ Below is a screenshot of what you might see after running `./solvent_cli 4`, the
 If you encounter an issue or seemingly problematic behaviour,
 
 1. If it's an obvious problem due to something like a beginner's mistake in using CMake, please 
+
+TODO

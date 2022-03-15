@@ -164,13 +164,16 @@ namespace solvent::morph {
 					for (ord2i_t layer {0}; layer < O2; ++layer) {
 						const RelPlaceless& a = rel_cmp_layers[layer][a_orig_label];
 						const RelPlaceless& b = rel_cmp_layers[layer][b_orig_label];
-						return (a <=> b) == std::partial_ordering::less;
+						const auto cmp = a <=> b;
+						if (cmp != std::partial_ordering::equivalent) {
+							return cmp == std::partial_ordering::less;
+						}
 					}
-					std::clog << "\n! equivalent rel encountered.";
+					std::clog << "\n! equivalent rel encountered." << std::flush;
 					return false;
 				});
-				std::array<ord2i_t, O2> _;
-				for (ord2i_t i_canon {0}; i_canon < O2; ++i_canon) {
+				std::array<ord2x_t, O2> _;
+				for (ord2x_t i_canon {0}; i_canon < O2; ++i_canon) {
 					_[label_canon2orig[i_canon]] = i_canon;
 				}
 				return _;

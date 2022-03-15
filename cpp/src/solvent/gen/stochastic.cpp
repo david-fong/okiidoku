@@ -58,7 +58,13 @@ namespace solvent::gen::ss {
 		because sometimes what would be excluded would have a faster path to validity. */
 		using chute_has_counts_t = std::array<std::array<ord2x_t, O2>, O1>;
 		// unsigned long long op_count = 0;
+		/* Using this counter, I found that it took fewer operations to go from having
+		one polarity of lines valid to also having blocks valid than from having only
+		blocks valid and then getting one polarity of lines to also be valid. Ie. It
+		should be less optimal to start only with valid blocks (and then get both cols
+		and rows valid). */
 
+		// Get valid blocks.
 		for (ord2i_t h_chute {0}; h_chute < O2; h_chute += O1) {
 			chute_has_counts_t blks_has {{0}};
 			for (ord2i_t row {h_chute}; row < h_chute+O1; ++row) {
@@ -99,6 +105,7 @@ namespace solvent::gen::ss {
 		// std::cout << "\n" << op_count << ", ";
 		// op_count = 0;
 
+		// Get valid columns:
 		for (ord2i_t v_chute {0}; v_chute < O2; v_chute += O1) {
 			chute_has_counts_t cols_has {{0}};
 			for (ord2i_t row {0}; row < O2; ++row) {
@@ -136,6 +143,7 @@ namespace solvent::gen::ss {
 		}
 		// std::cout << op_count;
 		is_done_ = true;
+
 		#ifndef NDEBUG
 		std::array<ord2i_t, O4> grid;
 		this->write_to_(std::span(grid));
