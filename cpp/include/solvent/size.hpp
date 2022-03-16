@@ -19,9 +19,9 @@ namespace solvent {
 		std::conditional_t<(N <=  16), std::uint_fast16_t,
 		std::conditional_t<(N <=  32), std::uint_fast32_t,
 		std::conditional_t<(N <=  64), std::uint_fast64_t,
-		std::conditional_t<(N <= 128), __uint128_t, // TODO this won't work with MSVC :/
+		// std::conditional_t<(N <= 128), __uint128_t, // currently unused. Note: won't work with MSVC
 		void
-	>>>>>;
+	>>>>;
 
 	template<int N>
 	using uint_leastN_t = 
@@ -29,20 +29,20 @@ namespace solvent {
 		std::conditional_t<(N <=  16), std::uint_least16_t,
 		std::conditional_t<(N <=  32), std::uint_least32_t,
 		std::conditional_t<(N <=  64), std::uint_least64_t,
-		std::conditional_t<(N <= 128), __uint128_t,
+		// std::conditional_t<(N <= 128), __uint128_t,
 		void
-	>>>>>;
+	>>>>;
 
 
 	// Note: when printing, make sure to cast uint8_t to int.
 	template<Order O>
 	struct size final {
 	private:
-		template<bool use_fast>
+		template<bool F/* AKA: use_fast */>
 		class O2_mask_t {
 			static constexpr bool use_int_ = O <= 8;
 			using val_t = std::conditional_t<use_int_,
-				std::conditional_t<use_fast,
+				std::conditional_t<F,
 					uint_fastN_t<O*O>,
 					uint_leastN_t<O*O>
 				>,
@@ -69,26 +69,26 @@ namespace solvent {
 			[[nodiscard, gnu::pure]] bool none() const noexcept {
 				if constexpr (use_int_) { return val_ == 0; } else { return val_.none(); }
 			}
-			[[nodiscard, gnu::pure]] O2_mask_t operator~() const noexcept {
+			[[nodiscard, gnu::pure]] O2_mask_t<F> operator~() const noexcept {
 				return ~val_;
 			}
 
-			O2_mask_t& operator&=(const O2_mask_t& rhs) noexcept {
+			O2_mask_t<F>& operator&=(const O2_mask_t<F>& rhs) noexcept {
 				val_ &= rhs.val_; return *this;
 			}
-			O2_mask_t& operator|=(const O2_mask_t& rhs) noexcept {
+			O2_mask_t<F>& operator|=(const O2_mask_t<F>& rhs) noexcept {
 				val_ |= rhs.val_; return *this;
 			}
-			O2_mask_t& operator<<=(const unsigned rhs) noexcept {
+			O2_mask_t<F>& operator<<=(const size_t rhs) noexcept {
 				val_ <<= rhs; return *this;
 			}
-			[[nodiscard, gnu::pure]] friend O2_mask_t operator&(O2_mask_t lhs, const O2_mask_t& rhs) noexcept {
+			[[nodiscard, gnu::pure]] friend O2_mask_t<F> operator&(O2_mask_t<F> lhs, const O2_mask_t<F>& rhs) noexcept {
 				lhs &= rhs; return lhs;
 			}
-			[[nodiscard, gnu::pure]] friend O2_mask_t operator|(O2_mask_t lhs, const O2_mask_t& rhs) noexcept {
+			[[nodiscard, gnu::pure]] friend O2_mask_t<F> operator|(O2_mask_t<F> lhs, const O2_mask_t<F>& rhs) noexcept {
 				lhs |= rhs; return lhs;
 			}
-			[[nodiscard, gnu::pure]] friend O2_mask_t operator<<(O2_mask_t lhs, const unsigned rhs) noexcept {
+			[[nodiscard, gnu::pure]] friend O2_mask_t<F> operator<<(O2_mask_t<F> lhs, const size_t rhs) noexcept {
 				lhs <<= rhs; return lhs;
 			}
 		};

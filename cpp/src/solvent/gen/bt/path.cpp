@@ -1,6 +1,6 @@
-#include "solvent/gen/path.hpp"
+#include "solvent/gen/bt/path.hpp"
 
-namespace solvent::gen::path {
+namespace solvent::gen::bt::path {
 
 	std::ostream& operator<<(std::ostream& os, const E path_kind) {
 		return os << names[static_cast<size_t>(path_kind)];

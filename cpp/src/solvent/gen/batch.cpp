@@ -66,6 +66,7 @@ namespace solvent::gen::ss::batch {
 		ThreadSharedData sd {.params {params}};
 
 		std::vector<std::thread> threads;
+		threads.reserve(params.num_threads);
 		for (unsigned i {0}; i < params.num_threads; ++i) {
 			threads.push_back(mk_thread(sd, sd_mutex));
 		}

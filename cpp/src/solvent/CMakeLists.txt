@@ -10,7 +10,7 @@ add_library(solvent SHARED
 	gen/batch.cpp
 
 	# deprecated:
-	# gen/path.cpp
+	# gen/bt/path.cpp
 	# gen/bt/generator.cpp
 	# gen/bt/batch.cpp
 	# gen/bt/batch_print.cpp

@@ -2,6 +2,11 @@
 
 ## Higher Priority
 
+- update the print function to work for large grids. USE EMOJIS :DDDDD
+- make some grid things for binary and text serdes.
+  - rename `print.hpp` to `serdes.hpp`
+  - this can be useful for gathering up a dataset of order-5 grids for future experimentation and benchmarking/testing of the non-generation parts of this library (scramble, canonicalize).
+
 - using stochastic search:
   - compare intrinsic statistical properties of grids generated (the things currently used in canon\_label).
   - If always better than backtracking, just stop using backtracking. Consider even deleting the batching implementation? Or just removing it from the library api.
@@ -11,8 +16,6 @@
 
 - after experimenting with different stochastic implementations, try implementing an opencl program. The minstd_rand rng is very simple to implement. I think the stochastic algorithm is data-parallelizable.
   - I wonder if there's a bitset implementation for opencl...
-
-- update the print function to work for large grids. USE EMOJIS :DDDDD
 
 - experiment with the option of making each order be its own dynamic library.
   - Is there anything that would currently make this option wasteful in terms of binary size?
@@ -24,10 +27,6 @@
 - make a buffering adapter for batch callbacks.
   - use destructor to flush
 - the opcount diagnostics shouldn't be taken seriously. opcount itself currently isn't very representative of effort expended since it doesn't count iterations of the try_val loop.
-
-- make some grid things for binary and text serdes.
-  - rename `print.hpp` to `serdes.hpp`
-  - this can be useful for gathering up a dataset of order-5 grids for future experimentation and benchmarking/testing of the non-generation parts of this library (scramble, canonicalize).
 
 - adapt canonicalization to work on puzzles (incomplete grids).
   - this would allow checking if puzzles are equivalent.
