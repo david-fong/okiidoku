@@ -1,5 +1,5 @@
-#ifndef HPP_SOLVENT__GEN__BATCH
-#define HPP_SOLVENT__GEN__BATCH
+#ifndef HPP_SOLVENT__GEN__BT__BATCH
+#define HPP_SOLVENT__GEN__BT__BATCH
 
 #include "solvent/gen/bt/generator.hpp"
 #include "solvent_util/timer.hpp"

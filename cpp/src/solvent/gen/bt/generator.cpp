@@ -60,7 +60,7 @@ namespace solvent::gen::bt {
 
 	template<Order O>
 	void GeneratorO<O>::continue_prev() {
-		if (this->status() == ExitStatus::Exhausted) [[unlikely]] {
+		if (this->status() == ExitStatus::exhausted) [[unlikely]] {
 			return;
 		}
 		dead_ends_.fill(0); // Do not carry over previous dead_ends counters.

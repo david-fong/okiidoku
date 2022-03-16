@@ -1,3 +1,4 @@
+# Generator Notes
 
 ## Misc Existing Literature
 
@@ -18,6 +19,7 @@
   - very slow for larger order grids
 
 - stochastic search
-  - scales well for large grids
+  - scales well for large grids for generator purposes.
   - I have no clue as to whether it is guaranteed to terminate. could it get stuck in a local optima? If so, how often does that happen (probability)?
   - naively extending the current implementation to solve puzzles will not terminate if the puzzle is not solvable.
+  - if used for solving, must be the final step in a "hybrid solver" pipeline (even if used as an intermediate step as a brute force part, it wouldn't be deterministic, and can hardly be controlled), which may not be the most optimal approach compared to combining deductive reasoning with backtracking. It is also unable to measure "difficulty" of a puzzle according to deductive reasoning techniques.

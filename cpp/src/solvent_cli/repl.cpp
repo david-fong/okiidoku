@@ -121,7 +121,7 @@ namespace solvent::cli {
 			<< "\nnum operations: " << gen_->get_op_count()
 			<< "\nmax dead ends:  " << gen_->get_most_dead_ends_seen()
 			<< "\nstatus:         " << ((gen_->status_is_ok()) ? "ok"
-				: (gen_->status() == gen::bt::ExitStatus::Abort) ? "abort" : "generator exhausted")
+				: (gen_->status() == gen::bt::ExitStatus::abort) ? "abort" : "generator exhausted")
 			;
 		std::cout << std::endl;
 	}

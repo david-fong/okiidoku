@@ -8,9 +8,10 @@ add_library(solvent SHARED
 	morph/scramble.cpp
 	gen/path.cpp
 	gen/bt/generator.cpp
-	gen/stochastic.cpp
 	gen/bt/batch.cpp
 	gen/bt/batch_print.cpp
+	gen/stochastic.cpp
+	gen/batch.cpp
 )
 # https://tldp.org/HOWTO/Program-Library-HOWTO/shared-libraries.html
 

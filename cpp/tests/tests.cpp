@@ -29,14 +29,14 @@ unsigned test_morph_O(const unsigned num_rounds) {
 	for (unsigned round {0}; round < num_rounds; ) {
 		gen::ss::GeneratorO<O> g {};
 		g(/* {} */);
-		if (!g.status_is_ok()) {
-			// std::array<typename solvent::size<O>::ord2i_t, O4> gen_grid;
-			// g.write_to_(std::span(gen_grid));
-			// std::clog << "bad: ";
-			// print::text(std::clog, O, gen_grid);
-			std::clog << "x"/*  << std::flush */;
-			continue;
-		}
+		// if (!g.status_is_ok()) {
+		// 	// std::array<typename solvent::size<O>::ord2i_t, O4> gen_grid;
+		// 	// g.write_to_(std::span(gen_grid));
+		// 	// std::clog << "bad: ";
+		// 	// print::text(std::clog, O, gen_grid);
+		// 	std::clog << "x"/*  << std::flush */;
+		// 	continue;
+		// }
 
 		std::array<typename solvent::size<O>::ord2x_t, O4> gen_grid;
 		g.write_to_(std::span(gen_grid));

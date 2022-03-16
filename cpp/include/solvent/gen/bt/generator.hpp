@@ -1,5 +1,5 @@
-#ifndef HPP_SOLVENT__GEN__BACKTRACKING
-#define HPP_SOLVENT__GEN__BACKTRACKING
+#ifndef HPP_SOLVENT__GEN__BT__GENERATOR
+#define HPP_SOLVENT__GEN__BT__GENERATOR
 
 #include "solvent/gen/path.hpp"
 #include "solvent/grid.hpp"
@@ -61,7 +61,7 @@ namespace solvent::gen::bt {
 
 	//
 	enum class SOLVENT_EXPORT ExitStatus : std::uint8_t {
-		Ok, Abort, Exhausted,
+		ok, abort, exhausted,
 	};
 
 	// Container for a very large number.
@@ -146,9 +146,9 @@ namespace solvent::gen::bt {
 		[[nodiscard]] constexpr const Params& get_params() const noexcept { return params_; }
 		[[nodiscard]] constexpr ExitStatus status() const noexcept {
 			switch (progress_) {
-				case O4-1: return ExitStatus::Ok;
-				case O4:   return ExitStatus::Exhausted;
-				default:   return ExitStatus::Abort;
+				case O4-1: return ExitStatus::ok;
+				case O4:   return ExitStatus::exhausted;
+				default:   return ExitStatus::abort;
 			}
 		}
 		[[nodiscard]] constexpr bool status_is_ok() const noexcept { return progress_ == O4-1; }

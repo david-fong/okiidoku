@@ -42,7 +42,6 @@ namespace solvent::gen::bt::batch {
 	//
 	template<Order O>
 	struct ThreadFunc final {
-		static_assert(O > 0);
 		void operator()();
 
 		trials_t get_progress(void) const noexcept {

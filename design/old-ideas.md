@@ -29,4 +29,4 @@ These didn't end up doing the thing I wanted / thought might happen.
 
 ### config_auto_canonicalizer
 
-- See [the bottom of the canonicalization readme](./src/solvent/morph/readme.md)
+- See [the bottom of the canonicalization readme](./morph.md)

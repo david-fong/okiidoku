@@ -31,16 +31,6 @@ namespace solvent::gen::ss {
 			}
 			// TODO should the shuffle just use `rng_`? The data-parallel implementation would be much better that way.
 		}
-		is_done_ = false;
-		this->generate_();
-	}
-
-
-	template<Order O>
-	void GeneratorO<O>::continue_prev() {
-		if (this->status() == ExitStatus::Ok) /* [[unlikely]] */ {
-			return;
-		}
 		this->generate_();
 	}
 
@@ -142,7 +132,6 @@ namespace solvent::gen::ss {
 			}
 		}
 		// std::cout << op_count;
-		is_done_ = true;
 
 		#ifndef NDEBUG
 		std::array<ord2i_t, O4> grid;

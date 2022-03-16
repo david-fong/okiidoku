@@ -6,11 +6,10 @@
   - implement batching for stochastic search. duplicate code is fine.
   - Switch repl to use stochastic search implementations.
   - benchmark for various orders _and_ compare intrinsic statistical properties of grids generated (the things currently used in canon\_label).
-  - If always better than backtracking, just stop using backtracking. Consider even deleting the batching implementation? Or just removing it from the library api.
+  - If always better than backtracking, just stop using backtracking. Consider even deleting the batching implementation? Or just removing it from the library api. Please name that commit "Friendship ended with backtracker. Stochastic method is now my best friend."
     - The backtracking implementation could then just be used as a reference for a more complicated deductive reasoning solver when deductive reasoning can't further progress by deductive reasoning.
       - The path would prioritize the parts of the puzzle that the deductive reasoning knows the least about (the parts that are likely to result in large chain of new possible deductions when filled).
     - If way worse than backtracking for some orders, decide what best to do then. It would be a real pain to create an interface that somehow supports their differences in behaviours and parameter/result types...
-  - if the stochastic search is made more generic to also solve puzzles,... it would either need to detect unsolvable puzzles (a naive implementation would never terminate if unsolvable.) And it would only be probabilistically able to detect if there are multiple solutions.
 
 - after experimenting with different stochastic implementations, try implementing an opencl program. The minstd_rand rng is very simple to implement. I think the stochastic algorithm is data-parallelizable.
   - I wonder if there's a bitset implementation for opencl...
@@ -30,6 +29,7 @@
 - the opcount diagnostics shouldn't be taken seriously. opcount itself currently isn't very representative of effort expended since it doesn't count iterations of the try_val loop.
 
 - make some grid things for binary and text serdes.
+  - rename `print.hpp` to `serdes.hpp`
   - this can be useful for gathering up a dataset of order-5 grids for future experimentation and benchmarking/testing of the non-generation parts of this library (scramble, canonicalize).
 
 - adapt canonicalization to work on puzzles (incomplete grids).
