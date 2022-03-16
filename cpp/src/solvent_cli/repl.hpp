@@ -3,8 +3,8 @@
 
 #include "solvent_cli/config.hpp"
 #include "solvent_cli/enum.hpp"
-#include "solvent/gen/bt/batch.hpp"
-#include "solvent/gen/bt/generator.hpp"
+#include "solvent/gen/batch.hpp"
+#include "solvent/gen/stochastic.hpp"
 #include "solvent/size.hpp"
 
 #include <map>
@@ -75,12 +75,12 @@ namespace solvent::cli {
 
 	private:
 		Config config_;
-		std::unique_ptr<gen::bt::Generator> gen_;
+		std::unique_ptr<gen::ss::Generator> gen_;
 
 		// Return false if command is to exit the program:
 		void gen_single(bool contPrev = false);
 
-		void gen_multiple(gen::bt::batch::trials_t stop_after, bool only_count_oks);
+		void gen_multiple(gen::ss::batch::trials_t stop_after, bool only_count_oks);
 		void gen_multiple(std::string_view, bool only_count_oks);
 	};
 }

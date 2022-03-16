@@ -34,8 +34,8 @@ namespace solvent {
 	template<Order O> SOLVENT_EXPORT [[nodiscard]] bool is_sudoku_valid(grid_const_span_t<O>) noexcept;
 
 
-	template<Order O> SOLVENT_EXPORT [[nodiscard, gnu::const]] constexpr typename size<O>::ord2i_t rmi_to_row(const typename size<O>::ord4i_t index) noexcept { return static_cast<size<O>::ord2i_t>(index / (O*O)); } // I love c++ :')
-	template<Order O> SOLVENT_EXPORT [[nodiscard, gnu::const]] constexpr typename size<O>::ord2i_t rmi_to_col(const typename size<O>::ord4i_t index) noexcept { return static_cast<size<O>::ord2i_t>(index % (O*O)); } // whyyyyyyyyyy
+	template<Order O> SOLVENT_EXPORT [[nodiscard, gnu::const]] constexpr typename size<O>::ord2i_t rmi_to_row(const typename size<O>::ord4i_t index) noexcept { return static_cast<size<O>::ord2i_t>(index / (O*O)); }
+	template<Order O> SOLVENT_EXPORT [[nodiscard, gnu::const]] constexpr typename size<O>::ord2i_t rmi_to_col(const typename size<O>::ord4i_t index) noexcept { return static_cast<size<O>::ord2i_t>(index % (O*O)); }
 	template<Order O> SOLVENT_EXPORT [[nodiscard, gnu::const]] constexpr typename size<O>::ord2i_t rmi_to_blk(const typename size<O>::ord2i_t row, const typename size<O>::ord2i_t col) noexcept {
 		return static_cast<size<O>::ord2i_t>((row / O) * O) + (col / O);
 	}

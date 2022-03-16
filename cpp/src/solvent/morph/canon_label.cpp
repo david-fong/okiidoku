@@ -10,7 +10,7 @@
 namespace solvent::morph {
 
 	template<Order O>
-	requires ((O > 0) && (O <= O_MAX))
+	requires (is_order_compiled(O))
 	class CanonLabel final {
 		using has_mask_t = size<O>::O2_mask_least_t;
 		using ord1i_t = size<O>::ord1i_t;

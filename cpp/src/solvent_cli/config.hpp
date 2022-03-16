@@ -5,7 +5,6 @@
 #include "solvent/gen/bt/generator.hpp"
 #include "solvent/size.hpp"
 
-#include <map>
 #include <string_view>
 #include <array>
 

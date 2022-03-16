@@ -124,7 +124,7 @@ namespace solvent::gen::bt {
 
 	//
 	template<Order O>
-	requires ((O > 0) && (O <= O_MAX) /* && (O < 6) */) // added <6 restriction for sanity
+	requires (is_order_compiled(O) /* && (O < 6) */) // added <6 restriction for sanity
 	class SOLVENT_EXPORT GeneratorO final : public Generator {
 	public:
 		using has_mask_t = size<O>::O2_mask_least_t; // perf seemed similar and slightly better compared to fast_t

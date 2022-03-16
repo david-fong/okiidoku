@@ -54,7 +54,7 @@ namespace solvent::gen::ss {
 
 	//
 	template<Order O>
-	requires ((O > 0) && (O <= O_MAX))
+	requires (is_order_compiled(O))
 	class SOLVENT_EXPORT GeneratorO final : public Generator {
 	public:
 		using ord1i_t = size<O>::ord1i_t;
