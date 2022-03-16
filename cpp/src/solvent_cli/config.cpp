@@ -10,8 +10,6 @@ namespace solvent::cli {
 
 	namespace str = solvent::util::str;
 
-	using pathkind_t = gen::path::E;
-
 
 	void Config::verbosity(verbosity::E verbosity) {
 		verbosity_ = verbosity;
@@ -61,52 +59,6 @@ namespace solvent::cli {
 			M_SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 			#undef M_SOLVENT_TEMPL_TEMPL
 			std::cout << std::endl;
-	}
-
-
-	void Config::path_kind(const pathkind_t new_path_kind) noexcept {
-		path_kind_ = new_path_kind;
-	}
-
-	void Config::path_kind(const std::string_view new_path_kind_str) noexcept {
-		if (new_path_kind_str.empty()) {
-			std::cout << "is: " << path_kind() << std::endl;
-			return;
-		}
-		for (unsigned i {0}; i < gen::path::num_kinds; ++i) {
-			if (new_path_kind_str.compare(gen::path::names[i]) == 0) {
-				path_kind(pathkind_t(i));
-				return;
-			}
-		}
-		std::cout
-			<< str::red.on << '"' << new_path_kind_str << "\" is not a valid generator path name.\n" << str::red.off
-			<< gen::path::options_menu_str << std::endl;
-		return;
-	}
-
-
-	void Config::max_dead_ends(unsigned long long max_dead_ends) {
-		max_dead_ends_ = max_dead_ends;
-	}
-
-	void Config::max_dead_ends(const std::string_view new_max_dead_ends_str) {
-		if (new_max_dead_ends_str.empty()) {
-			std::cout << "is: " << max_dead_ends()
-				<< "\nsetting to zero will default to " << gen::bt::cell_dead_ends::limit_default[order_]
-				<< "\nvalues above " << gen::bt::cell_dead_ends::limit_i_max[order_] << " will be clamped"
-				<< std::endl;
-			return;
-		}
-		unsigned long long new_max_dead_ends {};
-		const auto parse_result = std::from_chars(new_max_dead_ends_str.begin(), new_max_dead_ends_str.end(), new_max_dead_ends);
-		if (parse_result.ec == std::errc{}) {
-			max_dead_ends(new_max_dead_ends);
-			// TODO.impl handle negative numbers being parsed as uints
-		}
-		std::cout << max_dead_ends() << " (unchanged).\n"
-			<< str::red.on << '"' << new_max_dead_ends_str << "\" is not a valid value.\n" << str::red.off
-			<< verbosity::options_menu_str << std::endl;
 	}
 
 

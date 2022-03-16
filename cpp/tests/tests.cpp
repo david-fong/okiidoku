@@ -1,5 +1,4 @@
-#include "solvent/gen/bt/batch.hpp"
-#include "solvent/gen/bt/generator.hpp"
+#include "solvent/gen/batch.hpp"
 #include "solvent/gen/stochastic.hpp"
 #include "solvent/morph/canon.hpp"
 #include "solvent/morph/scramble.hpp"
@@ -28,15 +27,7 @@ unsigned test_morph_O(const unsigned num_rounds) {
 	unsigned int count_bad {0};
 	for (unsigned round {0}; round < num_rounds; ) {
 		gen::ss::GeneratorO<O> g {};
-		g(/* {} */);
-		// if (!g.status_is_ok()) {
-		// 	// std::array<typename solvent::size<O>::ord2i_t, O4> gen_grid;
-		// 	// g.write_to_(std::span(gen_grid));
-		// 	// std::clog << "bad: ";
-		// 	// print::text(std::clog, O, gen_grid);
-		// 	std::clog << "x"/*  << std::flush */;
-		// 	continue;
-		// }
+		g();
 
 		std::array<typename solvent::size<O>::ord2x_t, O4> gen_grid;
 		g.write_to_(std::span(gen_grid));
@@ -103,24 +94,6 @@ int main(const int argc, char const *const argv[]) {
 	if (test_morph_O<10>(num_rounds)) {
 		return 1;
 	}
-
-
-	// using solvent::gen::bt::batch::batch;
-	// auto params = solvent::gen::bt::batch::Params {
-	// 	.gen_params{}, .only_count_oks=true, .stop_after=100
-	// };
-	// batch<3>(params, [](typename solvent::gen::Generator<3>::ResultView result){
-	// 	std::cout << "\nhi";
-	// 	result.to_generic().print_pretty(std::cout);
-	// }).print(std::cout, 3);
-
-	// playing with ranges
-	/* using namespace solvent;
-	std::cout << "\n";
-	gen::GeneratorO<3> g {};
-	g({});
-	g.print_pretty(std::cout);
-	std::cout << "\n"; */
 
 	// std::cout << "\ntotal: " << solvent::gen::ss::total;
 	// std::cout << "\ntrue_: " << solvent::gen::ss::true_ << std::endl;

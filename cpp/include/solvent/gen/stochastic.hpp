@@ -67,8 +67,6 @@ namespace solvent::gen::ss {
 		SOLVENT_NO_EXPORT static constexpr ord2i_t O2 = O*O;
 		SOLVENT_NO_EXPORT static constexpr ord4i_t O4 = O*O*O*O;
 
-		using has_count_t = std::array<ord2i_t, O2>;
-
 		void operator()() override;
 
 		[[nodiscard]] constexpr Order get_order() const noexcept { return O; }

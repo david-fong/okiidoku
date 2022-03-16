@@ -1,5 +1,5 @@
 
-#include "solvent/gen/bt/generator.hpp"
+#include "solvent/gen/generator.hpp"
 
 #include <emscripten/bind.h>
 

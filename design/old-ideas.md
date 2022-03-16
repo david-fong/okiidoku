@@ -1,5 +1,13 @@
 # Old Ideas
 
+## Never Got Around To These
+
+- (switched to using stochastic search generator before trying these) some diagnostics to try rendering:
+  - A scatter chart showing max-dead-ends vs. num operations. (only caring about success results)
+  - a bar graph where each bar counts the number of ResultViews that had a progress (or a furthest coord with a non-zero backtrack count) within the range for that bar's "bin". (to see "how far" aborted generations usually get).
+  - comparing the average heatmap of aborted vs successful generations.
+    - See if there are clear differences/patterns in where they usually spike in backtracking. Perhaps this can be used to inform more sophisticated thresholds for each genpath.
+
 ## No Longer Needed
 
 - "smarter"/greedier backtracking: backtracking may be occurring frequently at a coord because of values much earlier in the genpath progress.

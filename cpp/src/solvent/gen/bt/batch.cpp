@@ -44,7 +44,7 @@ namespace solvent::gen::bt::batch {
 	struct ThreadFunc final {
 		void operator()();
 
-		trials_t get_progress(void) const noexcept {
+		trials_t get_progress() const noexcept {
 			if (sd_.params.only_count_oks) {
 				return sd_.report.total_oks;
 			} else {

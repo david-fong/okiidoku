@@ -19,7 +19,7 @@ std::optional<UINT> old_con_output_codepage {std::nullopt};
 namespace solvent::util {
 
 	struct MyNumPunct final : std::numpunct<char> {
-		std::string do_grouping(void) const {
+		std::string do_grouping() const {
 			return "\03";
 		}
 	};

@@ -6,12 +6,14 @@ add_library(solvent SHARED
 	morph/canon_place.cpp
 	morph/canon.cpp
 	morph/scramble.cpp
-	gen/path.cpp
-	gen/bt/generator.cpp
-	gen/bt/batch.cpp
-	gen/bt/batch_print.cpp
 	gen/stochastic.cpp
 	gen/batch.cpp
+
+	# deprecated:
+	# gen/path.cpp
+	# gen/bt/generator.cpp
+	# gen/bt/batch.cpp
+	# gen/bt/batch_print.cpp
 )
 # https://tldp.org/HOWTO/Program-Library-HOWTO/shared-libraries.html
 
