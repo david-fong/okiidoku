@@ -53,8 +53,8 @@
 #define M_SOLVENT_INCLUDE_ORDER_12 false
 #endif
 
-#ifndef M_SOLVENT_INCLUDE_ORDER_15
-#define M_SOLVENT_INCLUDE_ORDER_15 true
+#ifndef M_SOLVENT_INCLUDE_ORDER_16
+#define M_SOLVENT_INCLUDE_ORDER_16 true
 #endif
 
 #ifndef M_SOLVENT_DEFAULT_ORDER
@@ -161,14 +161,14 @@
 #define M_SOLVENT_TEMPL_TEMPL_12_
 #endif
 
-#if M_SOLVENT_INCLUDE_ORDER_15
+#if M_SOLVENT_INCLUDE_ORDER_16
 #undef  M_SOLVENT_O_MAX
-#define M_SOLVENT_O_MAX 15
-#define M_SOLVENT_TEMPL_TEMPL_15_ M_SOLVENT_TEMPL_TEMPL(15)
+#define M_SOLVENT_O_MAX 16
+#define M_SOLVENT_TEMPL_TEMPL_16_ M_SOLVENT_TEMPL_TEMPL(16)
 #else
-#define M_SOLVENT_TEMPL_TEMPL_15_
+#define M_SOLVENT_TEMPL_TEMPL_16_
 #endif
-// TODO fix the compilation errors for order 16
+// TODO.high fix the compilation errors for order 16
 
 
 // Can be used to instantiate templates.
@@ -190,7 +190,7 @@ M_SOLVENT_TEMPL_TEMPL_9_ \
 M_SOLVENT_TEMPL_TEMPL_10_ \
 M_SOLVENT_TEMPL_TEMPL_11_ \
 M_SOLVENT_TEMPL_TEMPL_12_ \
-M_SOLVENT_TEMPL_TEMPL_15_
+M_SOLVENT_TEMPL_TEMPL_16_
 
 
 

@@ -1,6 +1,6 @@
 #include "solvent/morph/canon.hpp"
 
-// #include <cassert>
+#include <cassert>
 
 namespace solvent::morph {
 
@@ -12,7 +12,8 @@ namespace solvent::morph {
 
 	template<Order O>
 	void canonicalize(const grid_span_t<O> orig_grid) {
-		// TODO assert that is a complete, valid sudoku?
+		assert(is_sudoku_filled<O>(orig_grid));
+		assert(is_sudoku_valid<O>(orig_grid));
 		canon_label<O>(orig_grid);
 		canon_place<O>(orig_grid);
 	}
@@ -27,7 +28,7 @@ namespace solvent::morph {
 		#define M_SOLVENT_TEMPL_TEMPL(O_) \
 			case O_: { \
 				constexpr unsigned O4 = O_*O_*O_*O_; \
-				using val_t = size<O_>::ord2i_t; \
+				using val_t = size<O_>::ord2i_least_t; \
 				std::array<val_t,O4> grid_resize; \
 				for (unsigned i {0}; i < O4; ++i) { grid_resize[i] = static_cast<val_t>(grid[i]); } \
 				canonicalize<O_>(std::span(grid_resize)); \
@@ -46,5 +47,5 @@ namespace solvent::morph {
 	M_SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 	#undef M_SOLVENT_TEMPL_TEMPL
 
-	template void canonicalize<size<O_MAX>::ord2i_t>(Order O, std::span<size<O_MAX>::ord2i_t>);
+	template void canonicalize<size<O_MAX>::ord2i_least_t>(Order O, std::span<size<O_MAX>::ord2i_least_t>);
 }

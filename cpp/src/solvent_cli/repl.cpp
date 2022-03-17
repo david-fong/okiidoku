@@ -1,7 +1,8 @@
 #include "solvent_cli/repl.hpp"
 
 #include "solvent/morph/canon.hpp"
-#include "solvent/print.hpp"
+#include "solvent/print_2d.hpp"
+#include "solvent/serdes.hpp"
 #include "solvent_util/timer.hpp"
 #include "solvent_util/str.hpp"
 
@@ -67,7 +68,7 @@ namespace solvent::cli {
 				break;
 			case E::quit:
 				return false;
-			case E::config_order:       config_.order(cmd_args); gen_ = gen::ss::Generator::create(config_.order()); break; // TODO only call if order has changed
+			case E::config_order:       config_.order(cmd_args); gen_ = gen::ss::Generator::create(config_.order()); break; // TODO.mid only call if order has changed
 			case E::config_print_level: config_.verbosity(cmd_args); break;
 			case E::config_auto_canonicalize: config_.canonicalize(cmd_args); break;
 			case E::gen_single:   gen_single(); break;
@@ -87,14 +88,15 @@ namespace solvent::cli {
 			gen_->write_to(std::span<val_t>(grid));
 			if (config_.canonicalize()) {
 				morph::canonicalize<val_t>(gen_->get_order(), std::span(grid)); // should we make a copy and print as a second grid image?
+				// TODO.high can the above use of span constructor just use a brace initializer list?
 			}
 			
-			const std::array<print::print_grid_t, 1> grid_accessors {
-				print::print_grid_t([&](std::ostream& _os, uint16_t coord) {
-					_os << ' '; print::val_to_str(_os, config_.order(), grid[coord]);
+			const std::array<print_2d_palette, 1> grid_accessors {
+				print_2d_palette([&](auto& _os, auto coord) {
+					_os << ' '; serdes::val_to_str(_os, config_.order(), static_cast<uint8_t>(grid[coord])); // TODO.high cast is _bad_
 				}),
 			};
-			print::pretty(std::cout, config_.order(), grid_accessors);
+			print_2d(std::cout, config_.order(), grid_accessors);
 		}
 		std::cout << std::setprecision(4)
 			<< "\nprocessor time: " << processor_time << " seconds"
@@ -105,9 +107,7 @@ namespace solvent::cli {
 
 
 	void Repl::gen_multiple(const gen::ss::batch::trials_t stop_after) {
-		gen::ss::batch::Params params {
-			.stop_after = stop_after
-		};
+		gen::ss::batch::Params params {.stop_after {stop_after}};
 		const gen::ss::batch::BatchReport batch_report = gen::ss::batch::batch(config_.order(), params,
 			[this](const gen::ss::Generator& result) {
 				if ((config_.verbosity() == verbosity::E::full)) {
@@ -117,13 +117,13 @@ namespace solvent::cli {
 					if (config_.canonicalize()) {
 						morph::canonicalize<val_t>(result.get_order(), std::span(grid));
 					}
-					print::text(std::cout, result.get_order(), grid);
-					std::cout << '\n';
+					serdes::print(of, result.get_order(), grid);
+					// std::cout << '\n';
 					if (result.get_order() > 4) {
 						std::cout.flush();
 					}
 				} else if (config_.verbosity() == verbosity::E::quiet) {
-					// TODO.impl print a progress bar
+					// TODO.mid print a progress bar
 				}
 			}
 		);

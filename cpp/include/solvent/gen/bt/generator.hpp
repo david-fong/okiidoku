@@ -19,7 +19,7 @@ namespace solvent::gen::bt {
 	// extern long long true_;
 
 	namespace cell_dead_ends {
-		// TODO these values are tuned for genpath=row_major. make one for each genpath? :/
+		// TODO.low these values are tuned for genpath=row_major. make one for each genpath? :/
 		constexpr unsigned long long limit_default[]{ 0, 0, 3,
 			/*3*/30,
 			/*4*/700,
@@ -63,7 +63,7 @@ namespace solvent::gen::bt {
 	public:
 		using val_t = size<O_MAX>::ord2i_t;
 		using coord_t = size<O_MAX>::ord4x_t;
-		using dead_ends_t = float; // TODO is this okay?
+		using dead_ends_t = float; // TODO.mid is this okay?
 		using backtrack_origin_t = size<O_MAX>::ord4x_least_t;
 
 		// contract: GeneratorO<O> is compiled
@@ -89,26 +89,27 @@ namespace solvent::gen::bt {
 		[[nodiscard]] virtual val_t extract_val_at(coord_t) const noexcept = 0;
 		[[nodiscard]] virtual dead_ends_t extract_dead_ends_at(coord_t) const noexcept = 0;
 
+		// contract: `sink.size() >= O4`.
 		// this cannot statically check that T is wide enough. uses static_cast<T>.
 		// ie. it is your job to make sure T does not lose precision.
 		template<class T>
 		requires std::is_integral_v<T> && (!std::is_const_v<T>)
-		void write_to(std::span<T> sink) const {
+		void write_to(std::span<T> sink) const noexcept {
 			const unsigned O4 = get_order4();
 			assert(sink.size() >= O4);
 			for (unsigned i {0}; i < O4; ++i) { sink[i] = static_cast<T>(extract_val_at(i)); }
 		}
 
+		// contract: `sink.size() >= O4`.
 		// this cannot statically check that T is wide enough. uses static_cast<T>.
 		// ie. it is your job to make sure T does not lose precision.
 		template<class T>
 		requires std::is_arithmetic_v<T> && (!std::is_const_v<T>)
-		void write_dead_ends_to(std::span<T> sink) const {
+		void write_dead_ends_to(std::span<T> sink) const noexcept {
 			const unsigned O4 = get_order4();
 			assert(sink.size() >= O4);
 			for (unsigned i {0}; i < O4; ++i) { sink[i] = static_cast<T>(extract_dead_ends_at(i)); }
 		}
-		// TODO change the above to not require contiguous layout? Used span because I don't know how to make it take an output_range
 	};
 
 

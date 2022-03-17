@@ -2,7 +2,7 @@
 #include "solvent/gen/stochastic.hpp"
 #include "solvent/morph/canon.hpp"
 #include "solvent/morph/scramble.hpp"
-#include "solvent/print.hpp"
+#include "solvent/serdes.hpp"
 #include "solvent/grid.hpp"
 #include "solvent/rng.hpp"
 
@@ -14,15 +14,15 @@
 #include <array>
 
 
-// TODO experiment with effect of batching gen and then doing canon on that batch for perf
-// TODO it should probably just return right away if it encounters any failure.
+// TODO.low experiment with effect of batching gen and then doing canon on that batch for perf
+// TODO.high it should probably just return right away if it encounters any failure.
 // returns the number of failures
 template<solvent::Order O>
 unsigned test_morph_O(const unsigned num_rounds) {
 	using namespace solvent;
 	constexpr unsigned O4 {O*O*O*O};
 	std::cout << "\n\ntesting for order " << O << std::endl;
-	// TODO: assert that paths are valid.
+	// Note: if gen_path gets un-deprecated, assert that paths are valid.
 
 	unsigned int count_bad {0};
 	for (unsigned round {0}; round < num_rounds; ) {
@@ -39,11 +39,10 @@ unsigned test_morph_O(const unsigned num_rounds) {
 
 		if (gen_grid != canon_grid) {
 			++count_bad;
-			// TODO
 			std::clog << "\n!bad\n";
-			print::text(std::clog, O, gen_grid);
+			serdes::text(std::clog, O, gen_grid);
 			std::clog << "\n";
-			print::text(std::clog, O, canon_grid);
+			serdes::text(std::clog, O, canon_grid);
 			std::clog << "\n==========\n";
 		} else {
 			std::clog << ".";

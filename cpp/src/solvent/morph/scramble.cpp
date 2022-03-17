@@ -9,24 +9,25 @@ namespace solvent::morph {
 
 	template<Order O>
 	void scramble(const grid_span_t<O> grid) {
+		using val_t = size<O>::ord2x_least_t;
 		using ord1i_t = size<O>::ord1i_t;
+		using ord2i_least_t = size<O>::ord2i_least_t;
 		using ord2i_t = size<O>::ord2i_t;
-		using ord2x_t = size<O>::ord2x_t;
 		static constexpr ord1i_t O1 = O;
 		static constexpr ord2i_t O2 = O*O;
 		static constexpr typename size<O>::ord4i_t O4 = O*O*O*O;
-		std::array<ord2i_t, O4> orig_grid;
+		std::array<ord2i_least_t, O4> orig_grid;
 		std::copy(grid.begin(), grid.end(), orig_grid.begin());
 
-		std::array<ord2x_t, O2> label_map;
+		std::array<val_t, O2> label_map;
 		bool transpose = false;
-		std::array<std::array<ord1i_t, O1>, O1> row_map;
-		std::array<std::array<ord1i_t, O1>, O1> col_map;
+		std::array<std::array<val_t, O1>, O1> row_map;
+		std::array<std::array<val_t, O1>, O1> col_map;
 
 		for (ord2i_t i {0}; i < O2; ++i) {
-			label_map[i] = i;
-			row_map[i/O1][i%O1] = i;
-			col_map[i/O1][i%O1] = i;
+			label_map[i]        = static_cast<val_t>(i);
+			row_map[i/O1][i%O1] = static_cast<val_t>(i);
+			col_map[i/O1][i%O1] = static_cast<val_t>(i);
 		}
 		std::ranges::shuffle(label_map, shared_mt_rng_);
 		// std::ranges::shuffle(row_map, shared_mt_rng_);
@@ -36,7 +37,7 @@ namespace solvent::morph {
 		// 	std::ranges::shuffle(col_map[chute], shared_mt_rng_);
 		// }
 		// transpose = static_cast<bool>(shared_mt_rng_() % 2);
-		// TODO uncomment once canon_label seems to be working.
+		// TODO.high uncomment once canon_label seems to be working.
 		
 		for (ord2i_t row {0}; row < O2; ++row) {
 			for (ord2i_t col {0}; col < O2; ++col) {
@@ -51,6 +52,7 @@ namespace solvent::morph {
 	}
 
 
+	// Note: this is currently not used anywhere and has no explicit template expansions.
 	template<class T>
 	requires std::is_integral_v<T>
 	void scramble(Order order, std::span<T> grid) {
@@ -60,7 +62,7 @@ namespace solvent::morph {
 		#define M_SOLVENT_TEMPL_TEMPL(O_) \
 			case O_: { \
 				constexpr unsigned O4 = O_*O_*O_*O_; \
-				using val_t = size<O_>::ord2i_t; \
+				using val_t = size<O_>::ord2i_least_t; \
 				std::array<val_t,O4> grid_resize; \
 				for (unsigned i {0}; i < O4; ++i) { grid_resize[i] = static_cast<val_t>(grid[i]); } \
 				scramble<O_>(std::span(grid_resize)); \

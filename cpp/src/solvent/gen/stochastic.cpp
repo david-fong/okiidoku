@@ -29,14 +29,14 @@ namespace solvent::gen::ss {
 			for (auto& row : cells_) {
 				std::shuffle(row.begin(), row.end(), shared_mt_rng_);
 			}
-			// TODO should the shuffle just use `rng_`? The data-parallel implementation would be much better that way.
+			// TODO.try should the shuffle just use `rng_`? The data-parallel implementation would be much better that way.
 		}
 		this->generate_();
 	}
 
 
 	template<Order O>
-	GeneratorO<O>::ord2i_t GeneratorO<O>::get_val_at_(const GeneratorO<O>::ord4x_t coord) const noexcept {
+	GeneratorO<O>::val_t GeneratorO<O>::get_val_at_(const GeneratorO<O>::ord4x_t coord) const noexcept {
 		return cells_[coord/O2][coord%O2];
 	}
 
@@ -46,7 +46,7 @@ namespace solvent::gen::ss {
 		/* Note: wherever you see `% .../\* -1 *\/`, that's a place where the algorithm
 		would still work if it wasn't commented out, but commeting it out makes it slower
 		because sometimes what would be excluded would have a faster path to validity. */
-		using chute_has_counts_t = std::array<std::array<ord2x_t, O2>, O1>;
+		using chute_has_counts_t = grid_arr_t<O, val_t>;
 		// unsigned long long op_count = 0;
 		/* Using this counter, I found that it took fewer operations to go from having
 		one polarity of lines valid to also having blocks valid than from having only
@@ -54,7 +54,7 @@ namespace solvent::gen::ss {
 		should be less optimal to start only with valid blocks (and then get both cols
 		and rows valid). */
 
-		// Get valid blocks.
+		// Make blocks valid:
 		for (ord2i_t h_chute {0}; h_chute < O2; h_chute += O1) {
 			chute_has_counts_t blks_has {{0}};
 			for (ord2i_t row {h_chute}; row < h_chute+O1; ++row) {
@@ -81,7 +81,7 @@ namespace solvent::gen::ss {
 					(blks_has[b_blk][b_cell] == 1 ?  1 : 0) +
 					(blks_has[b_blk][a_cell] == 0 ? -1 : 0)
 				};
-				if (has_nots_diff <= 0) [[unlikely]] { // TODO.minor for fun: find out on average at what op_count it starts being unlikely
+				if (has_nots_diff <= 0) [[unlikely]] { // TODO.low for fun: find out on average at what op_count it starts being unlikely
 					has_nots += has_nots_diff;
 					--blks_has[a_blk][a_cell];
 					++blks_has[a_blk][b_cell];
@@ -95,7 +95,7 @@ namespace solvent::gen::ss {
 		// std::cout << "\n" << op_count << ", ";
 		// op_count = 0;
 
-		// Get valid columns:
+		// Make columns valid:
 		for (ord2i_t v_chute {0}; v_chute < O2; v_chute += O1) {
 			chute_has_counts_t cols_has {{0}};
 			for (ord2i_t row {0}; row < O2; ++row) {

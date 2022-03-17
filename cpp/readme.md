@@ -7,7 +7,7 @@ Building solvent requires CMake (with [the minimum specified version](./CMakeLis
 
 As for actually linking to the dynamic library, ¯\\\_(ツ)\_/¯. I don't really know how this stuff works. See [solvent\_cli's CMakeLists.txt](./src/solvent_cli/CMakeLists.txt) for inspiration. Maybe this will help: [tldp.org on shared libraries](https://tldp.org/HOWTO/Program-Library-HOWTO/shared-libraries.html)
 
-- Make sure to read and follow the api contracts documented in the headers. Exceptions are intentionally not thrown for precondition violations.
+- Make sure to read and follow the api contracts documented in the headers. Exceptions are intentionally not thrown for precondition violations. If you would like to run against a build of libsolvent with assertions, create and use a build of libsolvent with `-DCMAKE_BUILD_TYPE=Debug`.
 
 - To change the supported grid sizes that get compiled, create a [tweak header](https://vector-of-bool.github.io/2020/10/04/lib-configuration.html#providing-a-tweak-header) for [`include/solvent_config.hpp`](include/solvent_config.hpp).
 
@@ -27,9 +27,9 @@ Below is a screenshot of what you might see after running `./solvent_cli 5` and 
 
 ![](../sample-output/25x25_example.png)
 
-Below is a screenshot of what you might see after running `./solvent_cli 4`, then `gen_ok 100000` to generate solutions until 100000 have completed successfully.
+## Navigating the Source Code
 
-![](../sample-output/gen_ok_example.png)
+The project is generally structured following [pitchfork layout conventions](https://api.csswg.org/bikeshed/?force=1&url=https://raw.githubusercontent.com/vector-of-bool/pitchfork/develop/data/spec.bs).
 
 ## Issue Procedure
 

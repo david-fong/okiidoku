@@ -1,7 +1,7 @@
 #include "solvent/grid.hpp"
 #include "solvent/morph/rel_prob.hpp"
 
-#include <iostream> // TODO remove
+#include <iostream> // TODO.wait remove
 #include <algorithm> // swap, sort
 #include <numeric>   // iota, abs
 #include <compare>   // partial_ordering, is_eq, etc.
@@ -13,9 +13,10 @@ namespace solvent::morph {
 	requires (is_order_compiled(O))
 	class CanonLabel final {
 		using has_mask_t = size<O>::O2_mask_least_t;
+		using val_t = size<O>::ord2i_least_t;
 		using ord1i_t = size<O>::ord1i_t;
-		using ord2i_t = size<O>::ord2i_t;
 		using ord2x_t = size<O>::ord2x_t;
+		using ord2i_t = size<O>::ord2i_t;
 		using ord4i_t = size<O>::ord4i_t;
 		using ord6i_t = size<O>::ord6i_t;
 	public:
@@ -31,7 +32,7 @@ namespace solvent::morph {
 			has_mask_t blocks_v;
 		};
 		static grid_arr_t<O, RelMask> make_rel_masks_(const grid_const_span_t<O> grid_span) noexcept {
-			grid_span2d_t<O, const ord2i_t> grid(grid_span);
+			grid_span2d_t<O, const val_t> grid(grid_span);
 			grid_arr_t<O, RelMask> masks{}; // zero initialize
 			for (ord2i_t line {0}; line < O2; ++line) {
 				for (ord2i_t atom {0}; atom < O2; atom += O1) {
@@ -39,14 +40,14 @@ namespace solvent::morph {
 					for (ord1i_t i {0}; i < O1 - 1; ++i) {
 						for (ord1i_t j = i + 1; j < O1; ++j) {
 							{ // boxrow
-								const ord2i_t i_val = grid.at(line, atom+i), j_val = grid.at(line, atom+j);
-								const has_mask_t blk_mask_bit = 1 << rmi_to_blk<O>(line, atom);
+								const val_t i_val = grid.at(line, atom+i), j_val = grid.at(line, atom+j);
+								const has_mask_t blk_mask_bit = has_mask_t{1} << rmi_to_blk<O>(line, atom);
 								masks[i_val][j_val].blocks_h |= blk_mask_bit;
 								masks[j_val][i_val].blocks_h |= blk_mask_bit;
 							}
 							{ // boxcol
-								const ord2i_t i_val = grid.at(atom+i, line), j_val = grid.at(atom+j, line);
-								const has_mask_t blk_mask_bit = 1 << rmi_to_blk<O>(atom, line);
+								const val_t i_val = grid.at(atom+i, line), j_val = grid.at(atom+j, line);
+								const has_mask_t blk_mask_bit = has_mask_t{1} << rmi_to_blk<O>(atom, line);
 								masks[i_val][j_val].blocks_v |= blk_mask_bit;
 								masks[j_val][i_val].blocks_v |= blk_mask_bit;
 							}
@@ -69,7 +70,7 @@ namespace solvent::morph {
 				// comments show percentage ties unbroken after try for O = 3.
 				/* 50.0% */ try_else(polar_a_p)
 				/* 5.00% */ try_else(polar_b_p)
-				/* 1.80% */ try_else(all_chute_a_occ) // TODO this might be okay to take out for O>3? needs much more testing. in which case, use conditional_t for the struct fields
+				/* 1.80% */ try_else(all_chute_a_occ) // TODO.try this might be okay to take out for O>3? needs much more testing. in which case, use conditional_t for the struct fields
 				/* 1.25% */ try_else(all_chute_b_occ)
 				/* 0.95% */ return cmp;
 			}
@@ -144,7 +145,7 @@ namespace solvent::morph {
 					row[i-1].polar_a_p *= row[i].polar_a_p;
 					row[i-1].polar_b_p *= row[i].polar_b_p;
 			}	}
-			// TODO do more benchmarking comparing perf with or without transpose.
+			// TODO.try do more benchmarking comparing perf with or without transpose.
 			//   some rough benchmarking on O=4 seems to indicate some benefit.
 			grid_arr_t<O, RelPlaceless> cmp_layers;
 			for (ord2i_t i {0}; i < O2; ++i) { for (ord2i_t j {0}; j < O2; ++j) {
@@ -180,7 +181,7 @@ namespace solvent::morph {
 			}(make_rel_cmp_layers_(make_rel_placeless_(make_rel_masks_(grid))));
 
 			for (ord4i_t i {0}; i < O4; ++i) {
-				grid[i] = label_orig2canon[grid[i]];
+				grid[i] = static_cast<val_t>(label_orig2canon[grid[i]]);
 			}
 			assert(is_sudoku_valid<O>(grid));
 		}

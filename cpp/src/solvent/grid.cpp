@@ -14,12 +14,14 @@ namespace solvent {
 
 		for (ord2i_t row {0}; row < O2; ++row) {
 			for (ord2i_t col {0}; col < O2; ++col) {
+				const auto val {grid[(O2*row) + col]};
+				assert(val <= O2);
+				if (val == O2) { continue; }
+
 				auto& row_has = rows_has_[row];
 				auto& col_has = cols_has_[col];
 				auto& blk_has = blks_has_[rmi_to_blk<O>(row, col)];
 
-				const auto val {grid[(O2*row) + col]};
-				if (val == O2) { continue; }
 				const has_mask_t try_val_mask {has_mask_t{1} << val};
 				const has_mask_t t_has {row_has | col_has | blk_has};
 				if ((t_has & try_val_mask).any()) [[unlikely]] {
@@ -30,6 +32,17 @@ namespace solvent {
 					blk_has |= try_val_mask;
 				}
 		}	}
+		return true;
+	}
+
+
+	template<Order O>
+	bool is_sudoku_filled(const grid_const_span_t<O> grid) noexcept {
+		static constexpr typename size<O>::ord2i_t O2 {O*O};
+		for (auto val : grid) {
+			assert(val <= O2);
+			if (val >= O2) { return false; }
+		}
 		return true;
 	}
 

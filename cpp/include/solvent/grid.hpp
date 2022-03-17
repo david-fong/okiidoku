@@ -12,8 +12,8 @@
 namespace solvent {
 
 	template<Order O, typename T=size<O>::ord2i_t> using grid_arr_t = std::array<std::array<T, O*O>, O*O>;
-	template<Order O, typename T=size<O>::ord2i_t> using grid_const_span_t = std::span<const T, O*O*O*O>;
-	template<Order O, typename T=size<O>::ord2i_t> using grid_span_t = std::span<T, O*O*O*O>;
+	template<Order O, typename T=size<O>::ord2i_least_t> using grid_const_span_t = std::span<const T, O*O*O*O>;
+	template<Order O, typename T=size<O>::ord2i_least_t> using grid_span_t = std::span<T, O*O*O*O>;
 
 	// A thin wrapper over a span.
 	template<Order O, typename T=size<O>::ord2i_t>
@@ -31,7 +31,12 @@ namespace solvent {
 
 	// Returns false if any cells in a same house contain the same value.
 	// Can be used with incomplete grids.
+	// contract: entries of input are in the range [0, O2].
 	template<Order O> SOLVENT_EXPORT [[nodiscard]] bool is_sudoku_valid(grid_const_span_t<O>) noexcept;
+
+	// Returns true if none of the cells are empty (equal to O2). Does _not_ check if sudoku is valid.
+	// contract: entries of input are in the range [0, O2].
+	template<Order O> SOLVENT_EXPORT [[nodiscard]] bool is_sudoku_filled(grid_const_span_t<O>) noexcept;
 
 
 	template<Order O> SOLVENT_EXPORT [[nodiscard, gnu::const]] constexpr typename size<O>::ord2i_t rmi_to_row(const typename size<O>::ord4i_t index) noexcept { return static_cast<size<O>::ord2i_t>(index / (O*O)); }
@@ -57,7 +62,7 @@ namespace solvent {
 	struct SOLVENT_EXPORT chute_blk_masks {
 		using M = size<O>::O2_mask_least_t;
 		using T = std::array<M, O>;
-		static inline const T row {[]{ // TODO re-constexpr this when bitset gets constexpr :/ https://github.com/cplusplus/papers/issues/1087
+		static inline const T row {[]{ // TODO.wait re-constexpr this when bitset gets constexpr :/ https://github.com/cplusplus/papers/issues/1087
 			T _ {0};
 			for (unsigned chute {0}; chute < O; ++chute) {
 				for (unsigned i {0}; i < O; ++i) {

@@ -17,8 +17,11 @@
 		"todo-tree.filtering.useBuiltInExcludes": "file excludes",
 		"todo-tree.general.statusBar": "total",
 		"todo-tree.general.tags": [
-			"TODO.learn" ,
-			"TODO.design",
+			"TODO.low",
+			"TODO.mid",
+			"TODO.high",
+			"TODO.try",
+			"TODO.wait",
 			"TODO.doc"   ,
 			"TODO.impl"  ,
 			"TODO.test"  ,
@@ -56,5 +59,8 @@
 		"[css]": {
 			"editor.insertSpaces": false,
 		},
+		"cSpell.words": [
+			"Deserialization"
+		],
 	},
 }

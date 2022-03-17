@@ -1,10 +1,8 @@
-#include "solvent/print.hpp" // TODO remove after done implementing
 #include "solvent/grid.hpp"
 #include "solvent/size.hpp"
 #include "solvent/morph/rel_prob.hpp"
-#include "solvent_export.h"
 
-#include <iostream> // TODO remove after done implementing
+#include <iostream> // TODO.wait remove after done implementing
 #include <algorithm> // sort
 #include <compare>   // partial_ordering
 #include <cassert>
@@ -13,7 +11,7 @@ namespace solvent::morph {
 
 	template<Order O>
 	requires (is_order_compiled(O))
-	class SOLVENT_NO_EXPORT /* <- just in case. */ CanonPlace final {
+	class CanonPlace final {
 		using has_mask_t = size<O>::O2_mask_least_t;
 		using ord1i_t = size<O>::ord1i_t;
 		using ord2i_t = size<O>::ord2i_t;
@@ -112,7 +110,7 @@ namespace solvent::morph {
 			} else {
 				grid_ = canon_input;
 			} */
-			(void)grid; // TODO
+			(void)grid; // TODO.high
 			assert(is_sudoku_valid<O>(grid));
 		}
 	};

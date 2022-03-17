@@ -5,7 +5,6 @@ project(solvent)
 # https://cmake.org/cmake/help/latest/guide/tutorial/index.html
 # https://cliutils.gitlab.io/modern-cmake/
 # https://github.com/lefticus/cpp_weekly_game_project
-# https://api.csswg.org/bikeshed/?force=1&url=https://raw.githubusercontent.com/vector-of-bool/pitchfork/develop/data/spec.bs
 
 # cmake -S . -B build/release -DCMAKE_BUILD_TYPE=Release
 # cmake --build build/release

@@ -1,10 +1,9 @@
-#include "solvent/print.hpp"
+#include "solvent/print_2d.hpp"
 #include "solvent_util/str.hpp"
 
 #include <iostream>
-#include <cassert>
 
-namespace solvent::print {
+namespace solvent {
 
 	// value must not be greater than O^2.
 	void val_to_str(std::ostream& os, const solvent::Order O, const uint8_t value) noexcept {
@@ -24,15 +23,7 @@ namespace solvent::print {
 	}
 
 
-	void text(std::ostream& os, const solvent::Order O, const std::span<const std::uint8_t> grid_view) {
-		assert(grid_view.size() >= O*O*O*O);
-		for (unsigned i {0}; i < O*O*O*O; ++i) {
-			print::val_to_str(os, O, grid_view[i]);
-		}
-	}
-
-
-	void pretty(std::ostream& os, const Order O, const std::span<const print_grid_t> grid_views) {
+	void print_2d(std::ostream& os, const Order O, const std::span<const print_2d_palette> grid_views) {
 		namespace str = solvent::util::str;
 		using ord2i_t = std::uint16_t;
 

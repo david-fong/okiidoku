@@ -21,7 +21,12 @@ namespace solvent::morph {
 		static constexpr std::array<double, O2+1> all {[]{
 			std::array<double, O2+1> _;
 			for (unsigned i {0}; i < O2+1; ++i) {
-				_[i] = (static_cast<double>(n_choose_r(O2, i)) * std::pow(2,i) * std::pow(O1-1, O2-i)) / std::pow(O1+1, O2); }
+				_[i] = static_cast<double>(
+					static_cast<long double>(n_choose_r(O2, i))
+					* std::pow(static_cast<long double>(   2)/(O1+1),    i)
+					* std::pow(static_cast<long double>(O1-1)/(O1+1), O2-i)
+				);
+			}
 			return _;
 		}()};
 
@@ -30,7 +35,12 @@ namespace solvent::morph {
 		static constexpr std::array<double, O2+1> polar {[]{
 			std::array<double, O2+1> _;
 			for (unsigned i {0}; i < O2+1; ++i) {
-				_[i] = (static_cast<double>(n_choose_r(O2, i)) * std::pow(O1, O2-i)) / std::pow(O1+1, O2); }
+				_[i] = static_cast<double>(
+					static_cast<long double>(n_choose_r(O2, i))
+					* std::pow(static_cast<long double>( 1)/(O1+1),    i)
+					* std::pow(static_cast<long double>(O1)/(O1+1), O2-i)
+				);
+			}
 			return _;
 		}()};
 

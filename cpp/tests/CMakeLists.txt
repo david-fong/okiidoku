@@ -5,6 +5,8 @@ target_compile_options(solvent_test
 	# -fsanitize=address # ? https://youtu.be/4pKtPWcl1Go?t=12m49s
 )
 # target_include_directories(morph PRIVATE .)
-target_include_directories(solvent_test PUBLIC ../src)
-target_include_directories(solvent_test PUBLIC ../include)
+target_include_directories(solvent_test PRIVATE ../src)
+target_include_directories(solvent_test PRIVATE ../include)
 target_link_libraries(solvent_test PRIVATE solvent_util solvent)
+
+# add_test(NAME test COMMAND solvent_test)

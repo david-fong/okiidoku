@@ -20,6 +20,7 @@
 		"ctzll",
 		"emscripten",
 		"genpath",
+		"libsolvent",
 		"minlexing",
 		"opcount",
 		"popcount",

@@ -102,23 +102,25 @@ namespace solvent {
 		using O2_mask_least_t = O2_mask_t<false>;
 
 		// uint range [0, order].
-		using ord1i_t = std::uint_fast8_t;
+		using ord1i_t = uint_fastN_t<std::bit_width(O+1)>;
 
 		// uint range [0, order^2].
 		// O1:   2    3    4    5    6    7    8    9   10   11   12   13   14   15   16
 		// O2:   4    9   16   25   36   49   64   81  100  121  144  169  196  225  256
 		// bits: 3    3    5    5    6    6    7    7    7    7    8    8    8    8    9
-		using ord2i_t = uint_fastN_t<std::bit_width(O*O+1)>;
 		using ord2x_t = uint_fastN_t<std::bit_width(O*O)>;
+		using ord2i_t = uint_fastN_t<std::bit_width(O*O+1)>;
+		using ord2x_least_t = uint_leastN_t<std::bit_width(O*O)>;
+		using ord2i_least_t = uint_leastN_t<std::bit_width(O*O+1)>;
 
 		// uint range [0, order^4].
 		// O1:    2    3    4    5     6     7     8     9     10  ...     16
 		// O4:   16   81  256  625  1296  2401  4096  6561  10000  ...  65536
 		// bits:  5    7    9    9    11    12    13    13     14  ...     17
-		using ord4i_t = uint_fastN_t<std::bit_width(O*O*O*O+1)>;
 		using ord4x_t = uint_fastN_t<std::bit_width(O*O*O*O)>;
-		using ord4i_least_t = uint_leastN_t<std::bit_width(O*O*O*O+1)>;
+		using ord4i_t = uint_fastN_t<std::bit_width(O*O*O*O+1)>;
 		using ord4x_least_t = uint_leastN_t<std::bit_width(O*O*O*O)>;
+		using ord4i_least_t = uint_leastN_t<std::bit_width(O*O*O*O+1)>;
 
 		// uint range [0, order^5].
 		// O1:    2    3     4     5     6      7      8      9     10

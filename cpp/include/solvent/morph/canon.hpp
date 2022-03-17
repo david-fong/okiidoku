@@ -8,7 +8,7 @@
 
 namespace solvent::morph {
 
-	// contract: the span is a complete, valid grid.
+	// contract: the span is a _complete_, valid grid.
 	template<Order O>
 	SOLVENT_EXPORT void canonicalize(grid_span_t<O>);
 
