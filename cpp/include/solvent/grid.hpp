@@ -82,7 +82,8 @@ namespace solvent {
 
 
 	#define M_SOLVENT_TEMPL_TEMPL(O_) \
-		extern template bool is_sudoku_valid<O_>(grid_const_span_t<O_>) noexcept;
+		extern template bool is_sudoku_valid<O_>(grid_const_span_t<O_>) noexcept; \
+		extern template bool is_sudoku_filled<O_>(grid_const_span_t<O_>) noexcept;
 	M_SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 	#undef M_SOLVENT_TEMPL_TEMPL
 }

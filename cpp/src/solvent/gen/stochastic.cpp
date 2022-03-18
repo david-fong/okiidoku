@@ -46,7 +46,8 @@ namespace solvent::gen::ss {
 		/* Note: wherever you see `% .../\* -1 *\/`, that's a place where the algorithm
 		would still work if it wasn't commented out, but commeting it out makes it slower
 		because sometimes what would be excluded would have a faster path to validity. */
-		using chute_has_counts_t = grid_arr_t<O, val_t>;
+		using ord2i_least_t = size<O>::ord2i_least_t;
+		using chute_has_counts_t = std::array<std::array<ord2i_least_t, O2>, O1>;
 		// unsigned long long op_count = 0;
 		/* Using this counter, I found that it took fewer operations to go from having
 		one polarity of lines valid to also having blocks valid than from having only
@@ -134,9 +135,9 @@ namespace solvent::gen::ss {
 		// std::cout << op_count;
 
 		#ifndef NDEBUG
-		std::array<ord2i_t, O4> grid;
+		std::array<ord2i_least_t, O4> grid;
 		this->write_to_(std::span(grid));
-		assert(is_sudoku_valid<O>(grid));
+		assert(is_sudoku_valid<O>(std::span<const ord2i_least_t, O4>(grid)));
 		#endif
 	}
 

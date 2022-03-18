@@ -2,11 +2,14 @@
 
 #include "solvent/morph/canon.hpp"
 #include "solvent/print_2d.hpp"
+#include "solvent/emoji.hpp"
 #include "solvent/serdes.hpp"
 #include "solvent_util/timer.hpp"
 #include "solvent_util/str.hpp"
 
 #include <iostream> // cout, endl,
+#include <fstream>
+#include <filesystem>
 #include <iomanip>  // setw,
 #include <string>
 #include <charconv>
@@ -23,7 +26,7 @@ namespace solvent::cli {
 
 
 	Repl::Repl(const Order order_input): gen_(gen::ss::Generator::create(order_input)) {
-		const Order O = gen_->get_order();
+		const Order O {gen_->get_order()};
 		config_.order(O);
 		config_.verbosity(verbosity::E::quiet);
 	}
@@ -51,7 +54,7 @@ namespace solvent::cli {
 		const std::string_view cmd_name = cmd_line.substr(0, token_pos = cmd_line.find(" "));
 		const std::string_view cmd_args = (token_pos == std::string_view::npos)
 			? "" :  cmd_line.substr(token_pos + 1, std::string_view::npos);
-		const auto it = Command::enum_str_to_enum.find(cmd_name);
+		const auto it {Command::enum_str_to_enum.find(cmd_name)};
 		if (it == Command::enum_str_to_enum.end()) {
 			// No command name was matched.
 			std::cout << str::red.on << "command \"" << cmd_line << "\" not found."
@@ -79,21 +82,21 @@ namespace solvent::cli {
 
 
 	void Repl::gen_single() {
-		const clock_t clock_start = std::clock();
+		const clock_t clock_start {std::clock()};
 		gen_->operator()();
+		std::cout <<"hi"<<std::endl;
 		const double processor_time = (static_cast<double>(std::clock() - clock_start)) / CLOCKS_PER_SEC;
 		{
-			using val_t = gen::ss::Generator::val_t;
+			using val_t = size<O_MAX>::ord2i_least_t;
 			std::array<val_t, O4_MAX> grid;
 			gen_->write_to(std::span<val_t>(grid));
 			if (config_.canonicalize()) {
 				morph::canonicalize<val_t>(gen_->get_order(), std::span(grid)); // should we make a copy and print as a second grid image?
-				// TODO.high can the above use of span constructor just use a brace initializer list?
 			}
 			
 			const std::array<print_2d_palette, 1> grid_accessors {
-				print_2d_palette([&](auto& _os, auto coord) {
-					_os << ' '; serdes::val_to_str(_os, config_.order(), static_cast<uint8_t>(grid[coord])); // TODO.high cast is _bad_
+				print_2d_palette([&](auto& os, auto coord) {
+					os << emoji_sets.at(0).entries.at(grid.at(coord));
 				}),
 			};
 			print_2d(std::cout, config_.order(), grid_accessors);
@@ -108,17 +111,18 @@ namespace solvent::cli {
 
 	void Repl::gen_multiple(const gen::ss::batch::trials_t stop_after) {
 		gen::ss::batch::Params params {.stop_after {stop_after}};
+		// std::fstream of;
+		// of.open(std::string{"gen/"}+std::to_string(config_.order())+std::string{".txt"}, std::ios::binary|std::ios::out|std::ios::ate);
 		const gen::ss::batch::BatchReport batch_report = gen::ss::batch::batch(config_.order(), params,
-			[this](const gen::ss::Generator& result) {
+			[this/* , &of */](const gen::ss::Generator& result) mutable {
 				if ((config_.verbosity() == verbosity::E::full)) {
-					using val_t = gen::ss::Generator::val_t;
+					using val_t = size<O_MAX>::ord2i_least_t;
 					std::array<val_t, O4_MAX> grid;
 					result.write_to(std::span<val_t>(grid));
 					if (config_.canonicalize()) {
 						morph::canonicalize<val_t>(result.get_order(), std::span(grid));
 					}
-					serdes::print(of, result.get_order(), grid);
-					// std::cout << '\n';
+					// serdes::print(of, result.get_order(), std::span<const val_t>(grid));
 					if (result.get_order() > 4) {
 						std::cout.flush();
 					}
@@ -147,7 +151,7 @@ namespace solvent::cli {
 
 	void Repl::gen_multiple(const std::string_view stop_after_str) {
 		gen::ss::batch::trials_t stop_by_value;
-		const auto parse_result = std::from_chars(stop_after_str.begin(), stop_after_str.end(), stop_by_value);
+		const auto parse_result {std::from_chars(stop_after_str.begin(), stop_after_str.end(), stop_by_value)};
 		if (parse_result.ec == std::errc{}) {
 			if (stop_by_value <= 0) {
 				std::cout << str::red.on

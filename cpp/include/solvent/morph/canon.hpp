@@ -16,5 +16,7 @@ namespace solvent::morph {
 	template<class T>
 	requires std::is_integral_v<T>
 	SOLVENT_EXPORT void canonicalize(Order O, std::span<T>);
+
+	extern template void canonicalize<size<O_MAX>::ord2i_least_t>(Order O, std::span<size<O_MAX>::ord2i_least_t>);
 }
 #endif

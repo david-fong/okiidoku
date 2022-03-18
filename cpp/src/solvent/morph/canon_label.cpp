@@ -33,25 +33,25 @@ namespace solvent::morph {
 		};
 		static grid_arr_t<O, RelMask> make_rel_masks_(const grid_const_span_t<O> grid_span) noexcept {
 			grid_span2d_t<O, const val_t> grid(grid_span);
-			grid_arr_t<O, RelMask> masks{}; // zero initialize
+			grid_arr_t<O, RelMask> masks {};
 			for (ord2i_t line {0}; line < O2; ++line) {
-				for (ord2i_t atom {0}; atom < O2; atom += O1) {
-					// Go through all unique pairs in the atom:
-					for (ord1i_t i {0}; i < O1 - 1; ++i) {
-						for (ord1i_t j = i + 1; j < O1; ++j) {
-							{ // boxrow
-								const val_t i_val = grid.at(line, atom+i), j_val = grid.at(line, atom+j);
-								const has_mask_t blk_mask_bit = has_mask_t{1} << rmi_to_blk<O>(line, atom);
-								masks[i_val][j_val].blocks_h |= blk_mask_bit;
-								masks[j_val][i_val].blocks_h |= blk_mask_bit;
-							}
-							{ // boxcol
-								const val_t i_val = grid.at(atom+i, line), j_val = grid.at(atom+j, line);
-								const has_mask_t blk_mask_bit = has_mask_t{1} << rmi_to_blk<O>(atom, line);
-								masks[i_val][j_val].blocks_v |= blk_mask_bit;
-								masks[j_val][i_val].blocks_v |= blk_mask_bit;
-							}
-			}	}	}	}
+			for (ord2i_t atom {0}; atom < O2; atom += O1) {
+				// Go through all unique pairs in the atom:
+				for (ord1i_t i {0}; i < O1 - 1; ++i) {
+				for (ord1i_t j = i + 1; j < O1; ++j) {
+					{ // boxrow
+						const val_t i_val = grid.at(line, atom+i), j_val = grid.at(line, atom+j);
+						const has_mask_t blk_mask_bit = has_mask_t{1} << rmi_to_blk<O>(line, atom);
+						masks[i_val][j_val].blocks_h |= blk_mask_bit;
+						masks[j_val][i_val].blocks_h |= blk_mask_bit;
+					}
+					{ // boxcol
+						const val_t i_val = grid.at(atom+i, line), j_val = grid.at(atom+j, line);
+						const has_mask_t blk_mask_bit = has_mask_t{1} << rmi_to_blk<O>(atom, line);
+						masks[i_val][j_val].blocks_v |= blk_mask_bit;
+						masks[j_val][i_val].blocks_v |= blk_mask_bit;
+					}
+			}}	}}
 			return masks;
 		}
 
@@ -64,14 +64,14 @@ namespace solvent::morph {
 
 			std::partial_ordering operator<=>(const RelPlaceless& that) const {
 				std::partial_ordering cmp = all_p <=> that.all_p;
-				#define try_else(field) \
-				if (cmp != std::partial_ordering::equivalent) [[likely]] { return cmp; }\
+				#define M_TRY_ELSE(field) \
+				if (cmp != std::partial_ordering::equivalent) [[likely]] { return cmp; } \
 				cmp = field <=> that.field;
 				// comments show percentage ties unbroken after try for O = 3.
-				/* 50.0% */ try_else(polar_a_p)
-				/* 5.00% */ try_else(polar_b_p)
-				/* 1.80% */ try_else(all_chute_a_occ) // TODO.try this might be okay to take out for O>3? needs much more testing. in which case, use conditional_t for the struct fields
-				/* 1.25% */ try_else(all_chute_b_occ)
+				/* 50.0% */ M_TRY_ELSE(polar_a_p)
+				/* 5.00% */ M_TRY_ELSE(polar_b_p)
+				/* 1.80% */ M_TRY_ELSE(all_chute_a_occ) // TODO.try this might be okay to take out for O>3? needs much more testing. in which case, use conditional_t for the struct fields
+				/* 1.25% */ M_TRY_ELSE(all_chute_b_occ)
 				/* 0.95% */ return cmp;
 			}
 		};

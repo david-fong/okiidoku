@@ -72,10 +72,10 @@ namespace solvent::gen::ss {
 		[[nodiscard, gnu::hot]] val_t get_val_at_(ord4x_t coord) const noexcept;
 
 		template<class T>
-		requires std::is_integral_v<T> && (!std::is_const_v<T>) && (sizeof(T) >= sizeof(ord2i_t))
+		requires std::is_integral_v<T> && (!std::is_const_v<T>) && (sizeof(T) >= sizeof(val_t))
 		void write_to_(std::span<T, O4> sink) const {
 			assert(sink.size() >= O4);
-			for (ord4i_t i {0}; i < O4; ++i) { sink[i] = get_val_at_(i); }
+			for (ord4i_t i {0}; i < O4; ++i) { sink[i] = get_val_at_(static_cast<ord4x_t>(i)); }
 		}
 
 	private:

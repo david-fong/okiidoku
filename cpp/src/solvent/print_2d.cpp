@@ -5,32 +5,14 @@
 
 namespace solvent {
 
-	// value must not be greater than O^2.
-	void val_to_str(std::ostream& os, const solvent::Order O, const uint8_t value) noexcept {
-		if (value == O*O) [[unlikely]] {
-			os << ' ';
-		} else {
-			if (O < 4) {
-				os << static_cast<unsigned>(value);
-			} else if (O == 5) {
-				os << static_cast<char>('a' + value);
-			} else {
-				(value < 10)
-					? os << static_cast<unsigned>(value)
-					: os << static_cast<char>('a' + value - 10);
-			}
-		}
-	}
-
-
 	void print_2d(std::ostream& os, const Order O, const std::span<const print_2d_palette> grid_views) {
 		namespace str = solvent::util::str;
 		using ord2i_t = std::uint16_t;
 
 		const auto print_blk_row_sep_string_ = [&os, O](const unsigned border_i) -> void {
 			#define M_NOOK(NOOK_T, NOOK_C, NOOK_B) \
-			if      (border_i == 0) { os << NOOK_T; } \
-			else if (border_i == O) { os << NOOK_B; } \
+			if      (border_i == 0) [[unlikely]] { os << NOOK_T; } \
+			else if (border_i == O) [[unlikely]] { os << NOOK_B; } \
 			else                    { os << NOOK_C; }
 			M_NOOK(" ┌", " ├", " └")
 			for (unsigned blk_col {0}; blk_col < O; ++blk_col) {

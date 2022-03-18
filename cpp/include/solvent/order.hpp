@@ -4,7 +4,7 @@
 #include "solvent_config.hpp"
 #include "solvent_export.h"
 
-#include <cstdint>
+#include <bit>
 
 namespace solvent {
 
@@ -22,5 +22,9 @@ namespace solvent {
 		return false;
 	}
 	static_assert(is_order_compiled(M_SOLVENT_DEFAULT_ORDER));
+
+	SOLVENT_EXPORT constexpr unsigned get_min_bytes_to_store(const unsigned max_value) {
+		return (std::bit_width(max_value) + 7) / 8;
+	}
 }
 #endif

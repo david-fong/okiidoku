@@ -40,9 +40,9 @@ unsigned test_morph_O(const unsigned num_rounds) {
 		if (gen_grid != canon_grid) {
 			++count_bad;
 			std::clog << "\n!bad\n";
-			serdes::text(std::clog, O, gen_grid);
-			std::clog << "\n";
-			serdes::text(std::clog, O, canon_grid);
+			// serdes::text(std::clog, O, gen_grid);
+			// std::clog << "\n";
+			// serdes::text(std::clog, O, canon_grid);
 			std::clog << "\n==========\n";
 		} else {
 			std::clog << ".";
@@ -56,6 +56,9 @@ unsigned test_morph_O(const unsigned num_rounds) {
 	}
 	return count_bad;
 }
+
+
+// TODO.high test serdes
 
 
 /**

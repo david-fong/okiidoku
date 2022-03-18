@@ -168,7 +168,6 @@
 #else
 #define M_SOLVENT_TEMPL_TEMPL_16_
 #endif
-// TODO.high fix the compilation errors for order 16
 
 
 // Can be used to instantiate templates.
