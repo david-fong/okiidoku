@@ -2,7 +2,8 @@
 #include "solvent/gen/stochastic.hpp"
 #include "solvent/morph/canon.hpp"
 #include "solvent/morph/scramble.hpp"
-#include "solvent/serdes.hpp"
+#include "solvent/print_2d.hpp"
+#include "solvent/db/serdes.hpp"
 #include "solvent/grid.hpp"
 #include "solvent/rng.hpp"
 
@@ -40,9 +41,12 @@ unsigned test_morph_O(const unsigned num_rounds) {
 		if (gen_grid != canon_grid) {
 			++count_bad;
 			std::clog << "\n!bad\n";
-			// serdes::text(std::clog, O, gen_grid);
+			const std::array<print_2d_palette, 2> palette_ {
+				[&](auto coord){ return gen_grid[coord]; },
+				[&](auto coord){ return canon_grid[coord]; },
+			};
+			print_2d(std::clog, O, palette_);
 			// std::clog << "\n";
-			// serdes::text(std::clog, O, canon_grid);
 			std::clog << "\n==========\n";
 		} else {
 			std::clog << ".";

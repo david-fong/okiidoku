@@ -8,6 +8,15 @@
   - comparing the average heatmap of aborted vs successful generations.
     - See if there are clear differences/patterns in where they usually spike in backtracking. Perhaps this can be used to inform more sophisticated thresholds for each genpath.
 
+## Questionable API Design Goodness
+
+- giving the callback in batch a dedicated mutex, or no mutex at all and leaving it up to the caller. need to consider how likely it is that the bulk of a callback will need synchronization.
+  - somewhat against this idea because
+    - the new stochastic generator is so fast that I have a hard time seeing anyone wanting more optimization on top of it.
+    - not providing automatic mutex for the callback seems like a bit of an api footgun? I think in the average use-case it would probably be more of an annoyance than something desirable.
+  - another idea I had along the same lines: make a buffering adapter for batch callbacks. use destructor to flush.
+    - If a user wants this, they can still write it themselves.
+
 ## No Longer Needed
 
 - "smarter"/greedier backtracking: backtracking may be occurring frequently at a coord because of values much earlier in the genpath progress.

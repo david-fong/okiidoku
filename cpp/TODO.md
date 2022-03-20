@@ -1,8 +1,17 @@
 # Things To Do
 
+## Big Strokes
+
+- compare backtracking and stochastic search statistics
+- fix canonicalization for order 3
+- minlexing canonicalization
+- compare canonicalization methods (performance / time-complexity)
+- database
+- deductive reasoning + backtracking solver
+- puzzle creation experiments (see [bottom section](#interesting-questions-for-further-research))
+
 ## Higher Priority
 
-- update the print function to work for large grids.
 - make some grid things for binary and text serdes (and test please).
   - Implement a program in the tools folder to do format conversions.
 
@@ -18,10 +27,7 @@
   - see if it can improve switch case cover detection (I think not. I already have some enum-switch-returns that the current gcc warning flags complain about if I don't have a default case).
   - this may also make it possible to statically enforce contracts about orders for the non-template wrapper functions. If so, I will probably neither need to assert that the order is compiled, nor write vacuous default branches for their switch statements.
   - if this works out, make sure to update all the contract docs and remove relevant assertions.
-- consider giving the callback in batch a dedicated mutex, or no mutex at all and leaving it up to the caller. need to consider how likely it is that the bulk of a callback will need synchronization.
-- make a buffering adapter for batch callbacks.
-  - use destructor to flush
-- the opcount diagnostics shouldn't be taken seriously. opcount itself currently isn't very representative of effort expended since it doesn't count iterations of the try_val loop.
+- move the emoji definitions out of the program binary and externalize as a configurable data read in at runtime?
 
 - after experimenting with different stochastic implementations, try implementing an opencl program. The minstd_rand rng is very simple to implement. I think the stochastic algorithm is data-parallelizable.
   - I wonder if there's a bitset implementation for opencl...

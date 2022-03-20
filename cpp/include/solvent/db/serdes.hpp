@@ -1,5 +1,5 @@
-#ifndef HPP_SOLVENT__SERDES
-#define HPP_SOLVENT__SERDES
+#ifndef HPP_SOLVENT__DB__SERDES
+#define HPP_SOLVENT__DB__SERDES
 
 #include "solvent/order.hpp"
 #include "solvent_export.h"
@@ -8,7 +8,7 @@
 #include <span>
 #include <bit>
 
-namespace solvent::serdes {
+namespace solvent::serdes::db {
 
 	// writes the grid contents to the stream using a somewhat compact binary form.
 	// multi-byte entries are stored using little-endian.

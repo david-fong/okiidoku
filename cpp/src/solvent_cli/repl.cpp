@@ -2,7 +2,7 @@
 
 #include "solvent/morph/canon.hpp"
 #include "solvent/print_2d.hpp"
-#include "solvent/serdes.hpp"
+#include "solvent/db/serdes.hpp"
 #include "solvent_util/timer.hpp"
 #include "solvent_util/str.hpp"
 
@@ -92,10 +92,10 @@ namespace solvent::cli {
 				morph::canonicalize<val_t>(gen_->get_order(), std::span(grid)); // should we make a copy and print as a second grid image?
 			}
 			
-			const std::array<print_2d_palette, 1> grid_accessors {
-				print_2d_palette([&](auto coord) { return grid.at(coord); }),
+			const std::array<print_2d_palette, 1> palette_ {
+				print_2d_palette([&](auto coord){ return grid.at(coord); }),
 			};
-			print_2d(std::cout, config_.order(), grid_accessors);
+			print_2d(std::cout, config_.order(), palette_);
 		}
 		std::cout << std::setprecision(4)
 			<< "\nprocessor time: " << processor_time << " seconds"
@@ -118,7 +118,7 @@ namespace solvent::cli {
 					if (config_.canonicalize()) {
 						morph::canonicalize<val_t>(result.get_order(), std::span(grid));
 					}
-					// serdes::print(of, result.get_order(), std::span<const val_t>(grid));
+					// db::serdes::print(of, result.get_order(), std::span<const val_t>(grid));
 					if (result.get_order() > 4) {
 						std::cout.flush();
 					}

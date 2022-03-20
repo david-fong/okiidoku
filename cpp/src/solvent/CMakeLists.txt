@@ -1,7 +1,7 @@
 add_library(solvent SHARED
 	rng.cpp
 	grid.cpp
-	serdes.cpp
+	db/serdes.cpp
 	emoji.cpp
 	print_2d.cpp
 	morph/canon_label.cpp

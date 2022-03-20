@@ -1,9 +1,9 @@
-#include "solvent/serdes.hpp"
+#include "solvent/db/serdes.hpp"
 
 #include <iostream>
 #include <cassert>
 
-namespace solvent::serdes {
+namespace solvent::serdes::db {
 
 	template<class T> requires (
 		(std::endian::native == std::endian::little)
