@@ -60,7 +60,8 @@
 			"editor.insertSpaces": false,
 		},
 		"cSpell.words": [
-			"Deserialization"
+			"Deserialization",
+			"desmos"
 		],
 	},
 }

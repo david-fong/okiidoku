@@ -6,11 +6,12 @@
 #include <vector>
 #include <string_view>
 
-namespace solvent {
-	struct EmojiSet {
+namespace solvent::emoji {
+	struct Set {
 		std::string_view name;
 		std::vector<std::string_view> entries;
 	};
-	SOLVENT_EXPORT extern const std::vector<EmojiSet> emoji_sets;
+	SOLVENT_EXPORT extern const std::vector<Set> sets;
+	extern const std::vector<size_t> top_set_preferences;
 }
 #endif

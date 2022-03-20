@@ -1,9 +1,47 @@
 #include "solvent/print_2d.hpp"
+#include "solvent/emoji.hpp"
 #include "solvent_util/str.hpp"
+#include "solvent/rng.hpp"
 
 #include <iostream>
+#include <algorithm>
+#include <vector>
+#include <cassert>
 
 namespace solvent {
+
+	// current implementation is pretty simple (dumb?)
+	std::vector<size_t> make_random_emoji_set(const Order O) {
+		assert(is_order_compiled(O));
+		const unsigned O2 = O*O;
+		const auto& prefs = emoji::top_set_preferences;
+		std::vector<size_t> shuffled_sets(emoji::sets.size());
+		std::iota(shuffled_sets.begin(), shuffled_sets.end(), 0);
+		{
+			std::lock_guard rng_guard_ {shared_mt_rng_mutex_};
+			for (
+				size_t b {0}, e_i_ {0}, e {prefs[e_i_]};
+				b != prefs.back();
+				b = e, ++e_i_, e = (e_i_ == prefs.size() ? emoji::sets.size() : prefs[e_i_])
+			) {
+				std::shuffle(shuffled_sets.begin() + b, shuffled_sets.begin() + e, shared_mt_rng_);
+			}
+		}
+		// first try to find a single set large enough:
+		for (
+			size_t b {0}, e_i_ {0}, e {prefs[e_i_]};
+			e != prefs.back(); // unlike before, don't use anything not in top prefs list here.
+			b = e, ++e_i_, e = prefs[e_i_]
+		) {
+			for (size_t i {b}; i < e; ++i) {
+				if (emoji::sets.at(shuffled_sets.at(i)).entries.size() >= O2) {
+					return {shuffled_sets.at(i)};
+			}	}
+		}
+		// otherwise just return everything:
+		return shuffled_sets;
+	}
+
 
 	void print_2d(std::ostream& os, const Order O, const std::span<const print_2d_palette> grid_views) {
 		namespace str = solvent::util::str;
@@ -33,6 +71,7 @@ namespace solvent {
 				print_blk_row_sep_string_(border_i);
 			}
 		};
+		const auto emoji_sets = make_random_emoji_set(O);
 
 		os << str::dim.on;
 		for (ord2i_t row {0}; row < O*O; ++row) {
@@ -43,7 +82,16 @@ namespace solvent {
 			for (unsigned grid_i {0}; grid_i < grid_views.size(); ++grid_i) {
 				for (ord2i_t col {0}; col < O*O; ++col) {
 					if ((col % O) == 0) { os << str::dim.on << " │" << str::dim.off; }
-					grid_views[grid_i](os, row * O*O + col);
+
+					auto val = size_t{grid_views[grid_i](row * O*O + col)};
+					for (const auto emoji_set_index : emoji_sets) {
+						const auto& set = emoji::sets.at(emoji_set_index).entries;
+						if (val < set.size()) {
+							os << set.at(val);
+							break;
+						} else {
+							val -= set.size();
+					}	}
 				}
 				os << str::dim.on << " │";
 				if (grid_i != grid_views.size() - 1) {

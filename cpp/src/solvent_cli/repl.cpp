@@ -2,7 +2,6 @@
 
 #include "solvent/morph/canon.hpp"
 #include "solvent/print_2d.hpp"
-#include "solvent/emoji.hpp"
 #include "solvent/serdes.hpp"
 #include "solvent_util/timer.hpp"
 #include "solvent_util/str.hpp"
@@ -84,7 +83,6 @@ namespace solvent::cli {
 	void Repl::gen_single() {
 		const clock_t clock_start {std::clock()};
 		gen_->operator()();
-		std::cout <<"hi"<<std::endl;
 		const double processor_time = (static_cast<double>(std::clock() - clock_start)) / CLOCKS_PER_SEC;
 		{
 			using val_t = size<O_MAX>::ord2i_least_t;
@@ -95,9 +93,7 @@ namespace solvent::cli {
 			}
 			
 			const std::array<print_2d_palette, 1> grid_accessors {
-				print_2d_palette([&](auto& os, auto coord) {
-					os << emoji_sets.at(0).entries.at(grid.at(coord));
-				}),
+				print_2d_palette([&](auto coord) { return grid.at(coord); }),
 			};
 			print_2d(std::cout, config_.order(), grid_accessors);
 		}

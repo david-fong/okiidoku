@@ -2,19 +2,15 @@
 
 ## Higher Priority
 
-- update the print function to work for large grids. USE EMOJIS :DDDDD
-- make some grid things for binary and text serdes.
-  - rename `print.hpp` to `serdes.hpp` and make a separate `print_2d.hpp`.
-  - this can be useful for gathering up a dataset of order-5 grids for future experimentation and benchmarking/testing of the non-generation parts of this library (scramble, canonicalize).
-  - Within this library, binary format (as opposed to utf8) is sufficient.
-    - Implement a program in the tools folder to do format conversions.
+- update the print function to work for large grids.
+- make some grid things for binary and text serdes (and test please).
+  - Implement a program in the tools folder to do format conversions.
 
 - using stochastic search:
   - compare intrinsic statistical properties of grids generated (the things currently used in canon\_label).
-  - If always better than backtracking, just stop using backtracking. Consider even deleting the batching implementation? Or just removing it from the library api (move headers to the src/ folder and don't compile the cpp files; maybe rename the bt/ folder to legacy\_bt/).
+  - Consider deleting the batching implementation? Or just removing it from the library api (move headers to the src/ folder and don't compile the cpp files; maybe rename the bt/ folder to legacy\_bt/).
     - The backtracking implementation could then just be used as a reference for a more complicated deductive reasoning solver when deductive reasoning can't further progress by deductive reasoning.
       - The path would prioritize the parts of the puzzle that the deductive reasoning knows the least about (the parts that are likely to result in large chain of new possible deductions when filled).
-    - If way worse than backtracking for some orders, decide what best to do then. It would be a real pain to create an interface that somehow supports their differences in behaviours and parameter/result types...
 
 - experiment with the option of making each order be its own dynamic library.
   - Is there anything that would currently make this option wasteful in terms of binary size?
@@ -71,10 +67,3 @@
   - What is the relationship between number of hints and puzzle difficulty?
   - What is the relationship between distribution of hints between houses/chutes and puzzle difficulty?
   - What is the relationship between the relationship between hints and cell relationships and puzzle difficulty?
-
-- Lossless Compression: What specific pattern of cells can always be removed from a solution while guaranteeing that the result is _trivial_ to restore to the full solution?
-  - One option:
-    - The blocks along a diagonal / shifted diagonal
-    - one cell in each remaining block?
-  - Usefulness:
-    - To reduce unnecessary bytes sent over network? simple compressed storage?
