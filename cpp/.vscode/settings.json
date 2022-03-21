@@ -8,6 +8,7 @@
 		// TODO the CMakeLists.txt has more. But do all compilers support those?
 	],
 	"C_Cpp.default.includePath": [
+		"${workspaceFolder}/tools", // TODO.mid is there a way to only include this for things inside tools?
 		"${workspaceFolder}/src",
 		"${workspaceFolder}/include",
 		"${workspaceFolder}/build/release/src/solvent",

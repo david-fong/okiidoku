@@ -2,7 +2,7 @@
 #include "solvent/morph/rel_prob.hpp"
 
 #include <iostream> // TODO.wait remove
-#include <algorithm> // swap, sort
+#include <algorithm> // swap, sort, ranges::next_permutation
 #include <numeric>   // iota, abs
 #include <compare>   // partial_ordering, is_eq, etc.
 #include <cassert>
@@ -59,8 +59,10 @@ namespace solvent::morph {
 		// Info is placement-independent.
 		struct RelPlaceless final {
 			double all_p;
-			float polar_a_p, polar_b_p;
-			ord2i_t all_chute_a_occ, all_chute_b_occ;
+			float polar_a_p;
+			float polar_b_p;
+			ord2i_t all_chute_a_occ;
+			ord2i_t all_chute_b_occ;
 
 			std::partial_ordering operator<=>(const RelPlaceless& that) const {
 				std::partial_ordering cmp = all_p <=> that.all_p;
@@ -75,7 +77,23 @@ namespace solvent::morph {
 				/* 0.95% */ return cmp;
 			}
 		};
-		static grid_arr_t<O, RelPlaceless> make_rel_placeless_(const grid_arr_t<O, RelMask>& masks) noexcept {
+		struct SortIngredients final {
+			grid_arr_t<O, RelPlaceless> cmp_layers;
+			grid_arr_t<O, double> prob_table;
+
+			std::partial_ordering cmp_labels(const ord2x_t a_orig_label, const ord2x_t b_orig_label) const {
+				for (ord2i_t layer {0}; layer < O2; ++layer) {
+					const RelPlaceless& a = cmp_layers[layer][a_orig_label];
+					const RelPlaceless& b = cmp_layers[layer][b_orig_label];
+					const auto cmp = a <=> b;
+					if (cmp != std::partial_ordering::equivalent) {
+						return cmp;
+					}
+				}
+				return std::partial_ordering::equivalent;
+			};
+		};
+		static SortIngredients make_rel_cmp_layers_(const grid_arr_t<O, RelMask>& masks) noexcept {
 			grid_arr_t<O, RelPlaceless> table;
 			for (ord2i_t r {0}; r < O2; ++r) { for (ord2i_t c {0}; c < O2; ++c) {
 				const RelMask& mask = masks[r][c];
@@ -127,18 +145,18 @@ namespace solvent::morph {
 					std::clog << "\n! tie between all rel polar stats.";
 				}
 			}
-			return table;
-		}
-
-
-		static grid_arr_t<O, RelPlaceless> make_rel_cmp_layers_(const grid_arr_t<O, RelPlaceless>& table) noexcept {
+			
+			SortIngredients sort_ingredients;
+			for (ord2i_t i {0}; i < O2; ++i) {
+			for (ord2i_t j {0}; j < O2; ++j) {
+				sort_ingredients.prob_table[i][j] = table[i][j].all_p;
+			}}
 			// sort, accumulate/ramp, transpose (for caching optimization)
-			grid_arr_t<O, RelPlaceless> pre_transpose = table;
-			for (auto& row : pre_transpose) {
+			for (auto& row : table) {
 				// put rare things at the back:
 				std::ranges::sort(row, std::greater{});
 			}
-			for (auto& row : pre_transpose) {
+			for (auto& row : table) {
 				for (ord2i_t i = O2-1; i > 0; i--) {
 					// Iterating forward progressively removes non-rare items:
 					row[i-1].all_p     *= row[i].all_p;
@@ -147,41 +165,93 @@ namespace solvent::morph {
 			}	}
 			// TODO.try do more benchmarking comparing perf with or without transpose.
 			//   some rough benchmarking on O=4 seems to indicate some benefit.
-			grid_arr_t<O, RelPlaceless> cmp_layers;
-			for (ord2i_t i {0}; i < O2; ++i) { for (ord2i_t j {0}; j < O2; ++j) {
-				cmp_layers[i][j] = pre_transpose[j][i];
+			for (ord2i_t i {0}; i < O2; ++i) {
+			for (ord2i_t j {0}; j < O2; ++j) {
+				sort_ingredients.cmp_layers[i][j] = table[j][i];
 			}}
-			return cmp_layers;
+			return sort_ingredients;
+		}
+
+
+		static void find_and_break_ties_(
+			const SortIngredients& sort_ingredients,
+			std::array<ord2x_t, O2>& canon_to_orig
+		) noexcept {
+			struct Range {
+				ord2x_t begin;
+				ord2i_t end;
+				ord2i_t size() const noexcept { return end - begin; };
+			};
+			std::vector<Range> tied_ranges; // entries are ranges of partially-canonical labels.
+
+			using tieless_mask_t = size<O>::O2_mask_fast_t;
+			tieless_mask_t tieless {0}; // bit places correspond to partially-canonical labels.
+
+			for (ord2i_t tie_begin {0}, canon_label {1}; canon_label <= O2; ++canon_label) {
+				if (canon_label == O2 || sort_ingredients.cmp_labels(canon_to_orig[tie_begin], canon_to_orig[canon_label]) != std::partial_ordering::equivalent) {
+					if (canon_label == tie_begin + 1) [[likely]] {
+						tieless |= tieless_mask_t{1} << tie_begin;
+					} else {
+						tied_ranges.push_back({static_cast<ord2x_t>(tie_begin), canon_label});
+					}
+					tie_begin = canon_label;
+				}
+			}
+			if (tied_ranges.empty()) [[likely]] {
+				return;
+			}
+			if (tieless.count() == 0) {
+				// TODO.high encountered the most canonical grid. :O not sure what to do here.
+				assert(tied_ranges.size() == 1);
+				assert(tied_ranges[0].size() == O2);
+				return;
+			}
+			for (const Range& tied_range : tied_ranges) {
+				struct BreakerProbs final {
+					ord2x_t partial_canon_label {};
+					std::vector<double> og_probs {}; // indexed by partially-canonical labels.
+				};
+				std::vector<BreakerProbs> tieless_prob_rows(tied_range.size());
+				for (ord2i_t i {0}; i < tied_range.size(); ++i) {
+					tieless_prob_rows[i].partial_canon_label = static_cast<ord2x_t>(i + tied_range.begin);
+					tieless_prob_rows[i].og_probs.resize(tieless.count());
+				}
+				for (ord2i_t canon_label {0}, tieless_i {0}; canon_label < O2; ++canon_label) {
+					if ((tieless & (tieless_mask_t{1} << canon_label)).any()) {
+						for (ord2i_t tied_label {tied_range.begin}; tied_label < tied_range.end; ++tied_label) {
+							tieless_prob_rows[tied_label - tied_range.begin].og_probs[tieless_i] = sort_ingredients.prob_table[canon_to_orig[tied_label]][canon_to_orig[canon_label]];
+						}
+						++tieless_i;
+				}	}
+				std::sort(tieless_prob_rows.begin(), tieless_prob_rows.end(), [](const auto& a, const auto& b){
+					return std::ranges::lexicographical_compare(a.og_probs, b.og_probs);
+				});
+				for (ord2i_t i {tied_range.begin}; i < tied_range.end; ++i) {
+					tieless |= tieless_mask_t{1} << i; // mark tie as resolved.
+					canon_to_orig[tieless_prob_rows[i - tied_range.begin].partial_canon_label] = static_cast<ord2x_t>(i);
+				}
+			}
 		}
 
 
 		//
 		static void do_it(const grid_span_t<O> grid) {
-			const std::array<ord2x_t, O2> label_orig2canon = [](const grid_arr_t<O, RelPlaceless> rel_cmp_layers){
-				std::array<ord2x_t, O2> label_canon2orig;
-				std::iota(label_canon2orig.begin(), label_canon2orig.end(), 0);
-
-				std::sort(label_canon2orig.begin(), label_canon2orig.end(), [&rel_cmp_layers](const ord2x_t& a_orig_label, const ord2x_t& b_orig_label){
-					for (ord2i_t layer {0}; layer < O2; ++layer) {
-						const RelPlaceless& a = rel_cmp_layers[layer][a_orig_label];
-						const RelPlaceless& b = rel_cmp_layers[layer][b_orig_label];
-						const auto cmp = a <=> b;
-						if (cmp != std::partial_ordering::equivalent) {
-							return cmp == std::partial_ordering::less;
-						}
-					}
-					std::clog << "\n! equivalent rel encountered.";
-					return false;
+			const std::array<ord2x_t, O2> label_orig_to_canon = [](const SortIngredients sort_ingredients){
+				std::array<ord2x_t, O2> canon_to_orig;
+				std::iota(canon_to_orig.begin(), canon_to_orig.end(), 0);
+				std::sort(canon_to_orig.begin(), canon_to_orig.end(), [&](auto a, auto b){
+					return sort_ingredients.cmp_labels(a, b) == std::partial_ordering::less;
 				});
+				find_and_break_ties_(sort_ingredients, canon_to_orig);
 				std::array<ord2x_t, O2> _;
 				for (ord2x_t i_canon {0}; i_canon < O2; ++i_canon) {
-					_[label_canon2orig[i_canon]] = i_canon;
+					_[canon_to_orig[i_canon]] = i_canon;
 				}
 				return _;
-			}(make_rel_cmp_layers_(make_rel_placeless_(make_rel_masks_(grid))));
+			}(make_rel_cmp_layers_(make_rel_masks_(grid)));
 
 			for (ord4i_t i {0}; i < O4; ++i) {
-				grid[i] = static_cast<val_t>(label_orig2canon[grid[i]]);
+				grid[i] = static_cast<val_t>(label_orig_to_canon[grid[i]]);
 			}
 			assert(is_sudoku_valid<O>(grid));
 		}

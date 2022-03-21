@@ -6,10 +6,10 @@
 #include "solvent_util/timer.hpp"
 #include "solvent_util/str.hpp"
 
-#include <iostream> // cout, endl,
+#include <iostream>   // cout, endl,
 #include <fstream>
-#include <filesystem>
-#include <iomanip>  // setw,
+#include <filesystem> // create_directories
+#include <iomanip>    // setw,
 #include <string>
 #include <charconv>
 
@@ -107,24 +107,26 @@ namespace solvent::cli {
 
 	void Repl::gen_multiple(const gen::ss::batch::trials_t stop_after) {
 		gen::ss::batch::Params params {.stop_after {stop_after}};
-		// std::fstream of;
-		// of.open(std::string{"gen/"}+std::to_string(config_.order())+std::string{".txt"}, std::ios::binary|std::ios::out|std::ios::ate);
+		std::filesystem::create_directories("gen");
+		std::string file_path = std::string{"gen/"} + std::to_string(config_.order()) + std::string{".bin"};
+		std::cout << "output file path: " << file_path << std::endl;
+		std::ofstream of(file_path, std::ios::binary|std::ios::ate);
+		// TODO.high change this to use the db operations.
+		// try {
+		// 	of.exceptions()
+		// } catch (const std::ios_base::failure& fail) {
+		// 	std::cout << str::red.on << fail.what() << str::red.off << std::endl;
+		// }
 		const gen::ss::batch::BatchReport batch_report = gen::ss::batch::batch(config_.order(), params,
-			[this/* , &of */](const gen::ss::Generator& result) mutable {
-				if ((config_.verbosity() == verbosity::E::full)) {
-					using val_t = size<O_MAX>::ord2i_least_t;
-					std::array<val_t, O4_MAX> grid;
-					result.write_to(std::span<val_t>(grid));
-					if (config_.canonicalize()) {
-						morph::canonicalize<val_t>(result.get_order(), std::span(grid));
-					}
-					// db::serdes::print(of, result.get_order(), std::span<const val_t>(grid));
-					if (result.get_order() > 4) {
-						std::cout.flush();
-					}
-				} else if (config_.verbosity() == verbosity::E::quiet) {
-					// TODO.mid print a progress bar
+			[this, &of](const gen::ss::Generator& result) mutable {
+				using val_t = size<O_MAX>::ord2i_least_t;
+				std::array<val_t, O4_MAX> grid;
+				result.write_to(std::span<val_t>(grid));
+				if (config_.canonicalize()) {
+					morph::canonicalize<val_t>(result.get_order(), std::span(grid));
 				}
+				db::serdes::print(of, result.get_order(), std::span<const val_t>(grid));
+				// TODO.mid print a progress bar
 			}
 		);
 

@@ -8,7 +8,7 @@
 #include <span>
 #include <bit>
 
-namespace solvent::serdes::db {
+namespace solvent::db::serdes {
 
 	// writes the grid contents to the stream using a somewhat compact binary form.
 	// multi-byte entries are stored using little-endian.

@@ -84,6 +84,10 @@ namespace solvent {
 					if ((col % O) == 0) { os << str::dim.on << " │" << str::dim.off; }
 
 					auto val = size_t{grid_views[grid_i](row * O*O + col)};
+					if (val == O*O) {
+						os << "  ";
+						continue;
+					}
 					for (const auto emoji_set_index : emoji_sets) {
 						const auto& set = emoji::sets.at(emoji_set_index).entries;
 						if (val < set.size()) {

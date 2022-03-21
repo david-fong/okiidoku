@@ -41,6 +41,8 @@ add_subdirectory(src/solvent)
 add_subdirectory(src/solvent_cli)
 # add_subdirectory(src/solvent_web)
 
+add_subdirectory(tools)
+
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND BUILD_TESTING)
 	add_subdirectory(tests)
 endif()

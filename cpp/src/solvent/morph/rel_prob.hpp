@@ -27,6 +27,12 @@ namespace solvent::morph {
 					* std::pow(static_cast<long double>(O1-1)/(O1+1), O2-i)
 				);
 			}
+			// TODO.mid the below fixes some times for order 3, but only some :/
+			// if constexpr (O == 3) {
+			// 	for (unsigned i {0}; i < O2+1; ++i) {
+			// 		_[i] *= 1.0 - (static_cast<double>(O2-i) / (O2 * 64));
+			// 	}
+			// }
 			return _;
 		}()};
 

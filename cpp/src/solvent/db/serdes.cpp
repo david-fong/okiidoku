@@ -3,7 +3,7 @@
 #include <iostream>
 #include <cassert>
 
-namespace solvent::serdes::db {
+namespace solvent::db::serdes {
 
 	template<class T> requires (
 		(std::endian::native == std::endian::little)

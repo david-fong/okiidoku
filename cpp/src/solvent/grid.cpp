@@ -37,7 +37,7 @@ namespace solvent {
 
 
 	template<Order O>
-	bool is_sudoku_filled(const grid_const_span_t<O> grid) noexcept {
+	bool is_sudoku_solved(const grid_const_span_t<O> grid) noexcept {
 		static constexpr typename size<O>::ord2i_t O2 {O*O};
 		for (auto val : grid) {
 			assert(val <= O2);
@@ -49,7 +49,7 @@ namespace solvent {
 
 	#define M_SOLVENT_TEMPL_TEMPL(O_) \
 		template bool is_sudoku_valid<O_>(grid_const_span_t<O_>) noexcept; \
-		template bool is_sudoku_filled<O_>(grid_const_span_t<O_>) noexcept;
+		template bool is_sudoku_solved<O_>(grid_const_span_t<O_>) noexcept;
 	M_SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 	#undef M_SOLVENT_TEMPL_TEMPL
 }
