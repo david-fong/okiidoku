@@ -36,7 +36,7 @@ namespace solvent {
 
 	// Returns true if none of the cells are empty (equal to O2). Does _not_ check if sudoku is valid.
 	// contract: entries of input are in the range [0, O2].
-	template<Order O> SOLVENT_EXPORT [[nodiscard]] bool is_sudoku_solved(grid_const_span_t<O>) noexcept;
+	template<Order O> SOLVENT_EXPORT [[nodiscard]] bool is_sudoku_filled(grid_const_span_t<O>) noexcept;
 
 
 	template<Order O> SOLVENT_EXPORT [[nodiscard, gnu::const]] constexpr typename size<O>::ord2i_t rmi_to_row(const typename size<O>::ord4i_t index) noexcept { return static_cast<size<O>::ord2i_t>(index / (O*O)); }
@@ -83,7 +83,7 @@ namespace solvent {
 
 	#define M_SOLVENT_TEMPL_TEMPL(O_) \
 		extern template bool is_sudoku_valid<O_>(grid_const_span_t<O_>) noexcept; \
-		extern template bool is_sudoku_solved<O_>(grid_const_span_t<O_>) noexcept;
+		extern template bool is_sudoku_filled<O_>(grid_const_span_t<O_>) noexcept;
 	M_SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 	#undef M_SOLVENT_TEMPL_TEMPL
 }

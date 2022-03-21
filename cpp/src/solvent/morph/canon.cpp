@@ -12,7 +12,7 @@ namespace solvent::morph {
 
 	template<Order O>
 	void canonicalize(const grid_span_t<O> orig_grid) {
-		assert(is_sudoku_solved<O>(orig_grid));
+		assert(is_sudoku_filled<O>(orig_grid));
 		assert(is_sudoku_valid<O>(orig_grid));
 		canon_label<O>(orig_grid);
 		canon_place<O>(orig_grid);

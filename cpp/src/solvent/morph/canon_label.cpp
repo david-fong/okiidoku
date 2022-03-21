@@ -86,6 +86,9 @@ namespace solvent::morph {
 					const RelPlaceless& a = cmp_layers[layer][a_orig_label];
 					const RelPlaceless& b = cmp_layers[layer][b_orig_label];
 					const auto cmp = a <=> b;
+					if (cmp == std::partial_ordering::unordered) {
+						assert(false); // wat
+					} // TODO.high delete if never observed to happen
 					if (cmp != std::partial_ordering::equivalent) {
 						return cmp;
 					}
@@ -207,28 +210,27 @@ namespace solvent::morph {
 				return;
 			}
 			for (const Range& tied_range : tied_ranges) {
-				struct BreakerProbs final {
-					ord2x_t partial_canon_label {};
+				std::clog << "\ntied range: " << int(tied_range.begin) << ", " << int(tied_range.end);
+				struct TieBreaker final {
+					ord2x_t og_label {};
 					std::vector<double> og_probs {}; // indexed by partially-canonical labels.
 				};
-				std::vector<BreakerProbs> tieless_prob_rows(tied_range.size());
-				for (ord2i_t i {0}; i < tied_range.size(); ++i) {
-					tieless_prob_rows[i].partial_canon_label = static_cast<ord2x_t>(i + tied_range.begin);
-					tieless_prob_rows[i].og_probs.resize(tieless.count());
+				std::vector<TieBreaker> tie_breakers(tied_range.size());
+				for (ord2i_t breaker_i {0}; breaker_i < tied_range.size(); ++breaker_i) {
+					auto& tie_breaker = tie_breakers[breaker_i];
+					tie_breaker.og_label = canon_to_orig[breaker_i + tied_range.begin];
+					tie_breaker.og_probs.reserve(tieless.count());
+					for (ord2i_t canon_label {0}; canon_label < O2; ++canon_label) {
+						if ((tieless & (tieless_mask_t{1} << canon_label)).any()) {
+							tie_breaker.og_probs.push_back(sort_ingredients.prob_table[canon_to_orig[breaker_i + tied_range.begin]][canon_to_orig[canon_label]]);
+					}	}
 				}
-				for (ord2i_t canon_label {0}, tieless_i {0}; canon_label < O2; ++canon_label) {
-					if ((tieless & (tieless_mask_t{1} << canon_label)).any()) {
-						for (ord2i_t tied_label {tied_range.begin}; tied_label < tied_range.end; ++tied_label) {
-							tieless_prob_rows[tied_label - tied_range.begin].og_probs[tieless_i] = sort_ingredients.prob_table[canon_to_orig[tied_label]][canon_to_orig[canon_label]];
-						}
-						++tieless_i;
-				}	}
-				std::sort(tieless_prob_rows.begin(), tieless_prob_rows.end(), [](const auto& a, const auto& b){
+				std::sort(tie_breakers.begin(), tie_breakers.end(), [](const auto& a, const auto& b){
 					return std::ranges::lexicographical_compare(a.og_probs, b.og_probs);
 				});
 				for (ord2i_t i {tied_range.begin}; i < tied_range.end; ++i) {
 					tieless |= tieless_mask_t{1} << i; // mark tie as resolved.
-					canon_to_orig[tieless_prob_rows[i - tied_range.begin].partial_canon_label] = static_cast<ord2x_t>(i);
+					canon_to_orig[i] = static_cast<ord2x_t>(tie_breakers[i - tied_range.begin].og_label);
 				}
 			}
 		}
@@ -242,7 +244,7 @@ namespace solvent::morph {
 				std::sort(canon_to_orig.begin(), canon_to_orig.end(), [&](auto a, auto b){
 					return sort_ingredients.cmp_labels(a, b) == std::partial_ordering::less;
 				});
-				find_and_break_ties_(sort_ingredients, canon_to_orig);
+				find_and_break_ties_(sort_ingredients, canon_to_orig); // TODO.high there are bugs that are even making the result an invalid grid D: please debug with gdb and backtrace to find the cause
 				std::array<ord2x_t, O2> _;
 				for (ord2x_t i_canon {0}; i_canon < O2; ++i_canon) {
 					_[canon_to_orig[i_canon]] = i_canon;
