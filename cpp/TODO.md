@@ -12,6 +12,8 @@
 
 ## Higher Priority
 
+- The batch headers use `solvent_util/timer.hpp`. That's not good because the util headers are supposed to be private. Either move timer into include/, or remove the timing capability from batch. I can even imagine a batch api that gives the caller control over when to stop.
+
 - make some grid things for binary and text serdes (and test please).
   - Implement a program in the tools folder to do format conversions.
 

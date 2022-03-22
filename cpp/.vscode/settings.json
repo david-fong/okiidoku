@@ -1,18 +1,17 @@
 {
+	// https://code.visualstudio.com/docs/cpp/faq-cpp
+
 	"C_Cpp.intelliSenseCacheSize": 0,
 
 	"C_Cpp.default.cStandard": "c17",
 	"C_Cpp.default.cppStandard": "c++20",
-	"C_Cpp.default.compilerArgs": [
-		"-Wall", "-Wextra", "-Wpedantic", "-Wimplicit-fallthrough=5",
-		// TODO the CMakeLists.txt has more. But do all compilers support those?
-	],
-	"C_Cpp.default.includePath": [
-		"${workspaceFolder}/tools", // TODO.mid is there a way to only include this for things inside tools?
-		"${workspaceFolder}/src",
-		"${workspaceFolder}/include",
-		"${workspaceFolder}/build/release/src/solvent",
-	],
+	"C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+	"C_Cpp.default.browse.limitSymbolsToIncludedHeaders": true,
+
+	// https://vector-of-bool.github.io/docs/vscode-cmake-tools/settings.html
+	// Note if you installed cmake via snap: https://github.com/microsoft/vscode-cmake-tools/issues/838#issuecomment-1035123514
+	"cmake.buildDirectory": "${workspaceRoot}/build/${buildType}",
+
 	"cSpell.enabledLanguageIds": [
 		"c",
 		"cpp",

@@ -4,11 +4,7 @@
 		{
 			"name": "Linux g++",
 			"intelliSenseMode": "gcc-x64",
-			"compilerPath": "/usr/bin/g++",
-			"browse": {
-				"path": [],
-				"limitSymbolsToIncludedHeaders": true
-			}
+			"compilerPath": "/usr/bin/g++"
 		},
 		{
 			"name": "MinGW x86_64",

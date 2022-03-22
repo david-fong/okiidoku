@@ -6,7 +6,7 @@
 
 ```sh
 # initialize cmake files for release build
-cmake -S . -B build/release -DCMAKE_BUILD_TYPE=Release
+cmake -S . -B build/Release -DCMAKE_BUILD_TYPE=Release
 
 # do these in a cmake build folder
 cmake --build .

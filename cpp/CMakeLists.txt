@@ -6,9 +6,6 @@ project(solvent)
 # https://cliutils.gitlab.io/modern-cmake/
 # https://github.com/lefticus/cpp_weekly_game_project
 
-# cmake -S . -B build/release -DCMAKE_BUILD_TYPE=Release
-# cmake --build build/release
-
 set(CMAKE_CXX_STANDARD 20 CACHE STRING "The C++ standard to use")
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_CXX_EXTENSIONS FALSE)

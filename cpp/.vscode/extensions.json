@@ -2,6 +2,7 @@
 	"recommendations": [
 		"ms-vscode.cpptools",
 		"twxs.cmake",
-		"galarius.vscode-opencl"
+		"ms-vscode.cmake-tools",
+		"galarius.vscode-opencl",
 	],
 }

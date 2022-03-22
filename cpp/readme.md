@@ -16,25 +16,15 @@ As for actually linking to the dynamic library, ¯\\\_(ツ)\_/¯. I don't really
 ## Building and Running solvent\_cli
 
 ```shell
-# cd into the cpp directory first
-cmake -S . -B build/release -DCMAKE_BUILD_TYPE=Release
-cd build/release
+# cd into the cpp directory of the repo first
+cmake -S . -B build/Release -DCMAKE_BUILD_TYPE=Release
+cd build/Release
 cmake --build . --config=Release
 ./src/solvent_cli/solvent_cli
 ```
-
-Below is a screenshot of what you might see after running `./solvent_cli 5` and running a couple generation attempts. The solver is tuned to give up in a way that optimizes throughput when generating batches of solutions, so you will notice _many_ attempts giving up for size 5 before getting one that works.
-
-![](../sample-output/25x25_example.png)
 
 ## Navigating the Source Code
 
 The project is generally structured following [pitchfork layout conventions](https://api.csswg.org/bikeshed/?force=1&url=https://raw.githubusercontent.com/vector-of-bool/pitchfork/develop/data/spec.bs).
 
-## Issue Procedure
-
-If you encounter an issue or seemingly problematic behaviour,
-
-1. If it's an obvious problem due to something like a beginner's mistake in using CMake, please 
-
-TODO
+The project is set up for use with VS Code. After enabling the recommended extensions, you will need to perform [some initial steps](https://code.visualstudio.com/docs/cpp/cmake-linux#_select-a-kit) to tell VS Code what specific build tools you want to use.
