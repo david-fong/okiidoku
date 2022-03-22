@@ -12,6 +12,6 @@ namespace solvent::emoji {
 		std::vector<std::string_view> entries;
 	};
 	SOLVENT_EXPORT extern const std::vector<Set> sets;
-	extern const std::vector<size_t> top_set_preferences;
+	SOLVENT_EXPORT extern const std::vector<size_t> top_set_preferences;
 }
 #endif

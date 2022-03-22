@@ -1,7 +1,9 @@
 #ifndef HPP_SOLVENT_UTIL__STR
 #define HPP_SOLVENT_UTIL__STR
 
-#include "solvent_config.hpp"
+// Whether or not ansi-escape sequences should be emitted within _CLI_
+// output to dim out harsh, non-essential text, etc.
+#define USE_ANSI_ESC true
 
 #include <array>
 #include <string_view>

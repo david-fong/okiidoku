@@ -61,10 +61,6 @@
 #define M_SOLVENT_DEFAULT_ORDER 4
 #endif
 
-// Whether or not ansi-escape sequences should be emitted within _CLI_
-// output to dim out harsh, non-essential text, etc.
-#define USE_ANSI_ESC true
-
 
 
 

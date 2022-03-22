@@ -13,6 +13,12 @@ cmake --build .
 nm -nCD src/solvent/libsolvent.so   # view public symbols of the shared library sorted by address
 ```
 
+## CMake Things
+
+- https://cmake.org/cmake/help/latest/guide/tutorial/index.html
+- https://cliutils.gitlab.io/modern-cmake/
+- https://github.com/lefticus/cpp_weekly_game_project
+
 ## things I got wrong before
 
 things I got wrong before which I couldn't understand based on gcc's error messages.

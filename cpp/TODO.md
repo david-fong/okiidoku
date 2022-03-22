@@ -12,6 +12,8 @@
 
 ## Higher Priority
 
+- previously changed all my includes to use quotes instead of angle brackets after reading [this from Jason Turner's cpp best practices](https://github.com/cpp-best-practices/cppbestpractices/blob/master/03-Style.md#use--for-including-local-files). But here in [cppCoreGuidelines](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#sf12-prefer-the-quoted-form-of-include-for-files-relative-to-the-including-file-and-the-angle-bracket-form-everywhere-else) says to use quotes only for relative path includes. Maybe I misinterpreted/over-interpreted Jason Turner's instructions. Either way, I like the cppCoreGuidelines rationale. Please change back to using it.
+
 - The batch headers use `solvent_util/timer.hpp`. That's not good because the util headers are supposed to be private. Either move timer into include/, or remove the timing capability from batch. I can even imagine a batch api that gives the caller control over when to stop.
 
 - make some grid things for binary and text serdes (and test please).
@@ -36,6 +38,12 @@
 
 - adapt canonicalization to work on puzzles (incomplete grids).
   - this would allow checking if puzzles are equivalent.
+
+- what's this?
+  - https://stackoverflow.com/questions/4977252/why-an-unnamed-namespace-is-a-superior-alternative-to-static
+
+- cmake things I can try out:
+  - versioning my targets https://cmake.org/cmake/help/latest/prop_tgt/VERSION.html#prop_tgt:VERSION
 
 - Go back and try the old canonicalization by rel row prob, but break ties by doing some brute force: try each tied permutation and valuate it according to some reduction of how it pushes rarer rel counts to the top left. Just be careful to shift to get rid of the main diagonal seam.
   - If there are multiple puddles of ties, the resolution of a puddle shouldn't depend on the resolution of any other puddle- only on the non-tied rows/columns. A consequence of this is that this resolution algorithm will not work if there are no non-tied rows/columns.

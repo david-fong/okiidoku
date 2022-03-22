@@ -1,11 +1,12 @@
 cmake_minimum_required(VERSION 3.16)
-project(solvent)
+project(solvent
+	VERSION 0.0.1
+	DESCRIPTION "sudoku solution generator and canonicalizer"
+	HOMEPAGE_URL "https://github.com/david-fong/solvent"
+	LANGUAGES CXX
+)
 
-# links to resources because I'm learning CMake
-# https://cmake.org/cmake/help/latest/guide/tutorial/index.html
-# https://cliutils.gitlab.io/modern-cmake/
-# https://github.com/lefticus/cpp_weekly_game_project
-
+include(GNUInstallDirs)
 set(CMAKE_CXX_STANDARD 20 CACHE STRING "The C++ standard to use")
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_CXX_EXTENSIONS FALSE)
@@ -43,3 +44,21 @@ add_subdirectory(tools)
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND BUILD_TESTING)
 	add_subdirectory(tests)
 endif()
+
+
+install(TARGETS solvent
+	EXPORT solventTargets
+	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+	INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+
+# Packaging support
+# https://cmake.org/cmake/help/latest/module/CPack.html
+set(CPACK_PACKAGE_VENDOR "david-fong")
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENCE")
+set(CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/readme.md")
+set(CPACK_SOURCE_GENERATOR "TGZ")
+include(CPack)

@@ -29,8 +29,13 @@ set_target_properties(solvent PROPERTIES
 
 find_package(Threads REQUIRED)
 
-target_include_directories(solvent PRIVATE ..)
-target_include_directories(solvent PUBLIC ../../include ${CMAKE_CURRENT_BINARY_DIR})
+target_include_directories(solvent
+	PRIVATE "${PROJECT_SOURCE_DIR}/src"
+	PUBLIC
+	$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+	$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+)
 
 # https://cmake.org/cmake/help/latest/command/target_precompile_headers.html
 # TODO.low find out why this sometimes/inconsistently errors when combined with `-march=native`
