@@ -3,7 +3,7 @@
 
 #include "solvent/grid.hpp"
 #include "solvent/size.hpp"
-#include "solvent_config.hpp"
+#include "solvent/solvent_config.hpp"
 #include "solvent_export.h"
 
 #include <random>  // minstd_rand
@@ -30,8 +30,6 @@ namespace solvent::gen::ss {
 		virtual void operator()() = 0;
 
 		[[nodiscard]] virtual Order get_order() const noexcept = 0;
-		[[nodiscard]] constexpr Order get_order2() const noexcept { return get_order()*get_order(); }
-		[[nodiscard]] constexpr Order get_order4() const noexcept { return get_order2()*get_order2(); }
 
 		[[nodiscard]] virtual val_t get_val_at(coord_t) const noexcept = 0;
 
@@ -41,11 +39,10 @@ namespace solvent::gen::ss {
 		template<class T>
 		requires std::is_integral_v<T> && (!std::is_const_v<T>)
 		void write_to(std::span<T> sink) const {
-			const unsigned O4 = get_order4();
+			const unsigned O4 = get_order()*get_order()*get_order()*get_order();
 			assert(sink.size() >= O4);
 			for (unsigned i {0}; i < O4; ++i) { sink[i] = static_cast<T>(get_val_at(i)); }
 		}
-		// TODO.mid change the above to not require contiguous layout? Used span because I don't know how to make it take an output_range
 	};
 
 
@@ -54,8 +51,8 @@ namespace solvent::gen::ss {
 	requires (is_order_compiled(O))
 	class SOLVENT_EXPORT GeneratorO final : public Generator {
 	public:
-		using ord2x_t = size<O>::ord2x_t;
 		using val_t = size<O>::ord2x_least_t;
+		using ord2x_t = size<O>::ord2x_t;
 		using ord2i_t = size<O>::ord2i_t;
 		using ord4x_t = size<O>::ord4x_t;
 		using ord4i_t = size<O>::ord4i_t;

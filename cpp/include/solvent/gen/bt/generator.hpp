@@ -4,7 +4,7 @@
 #include "solvent/gen/bt/path.hpp"
 #include "solvent/grid.hpp"
 #include "solvent/size.hpp"
-#include "solvent_config.hpp"
+#include "solvent/solvent_config.hpp"
 #include "solvent_export.h"
 
 #include <array>

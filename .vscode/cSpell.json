@@ -18,6 +18,7 @@
 		"cmake",
 		"cout",
 		"ctzll",
+		"distrib",
 		"emscripten",
 		"genpath",
 		"libsolvent",

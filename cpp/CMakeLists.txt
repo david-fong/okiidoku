@@ -6,7 +6,6 @@ project(solvent
 	LANGUAGES CXX
 )
 
-include(GNUInstallDirs)
 set(CMAKE_CXX_STANDARD 20 CACHE STRING "The C++ standard to use")
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_CXX_EXTENSIONS FALSE)
@@ -25,6 +24,8 @@ else()
 endif()
 
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+include(GNUInstallDirs)
+set(CMAKE_INSTALL_RPATH "$ORIGIN/../${CMAKE_INSTALL_LIBDIR}")
 
 # https://cliutils.gitlab.io/modern-cmake/chapters/testing.html
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
@@ -46,12 +47,13 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND BUILD_TESTING)
 endif()
 
 
-install(TARGETS solvent
-	EXPORT solventTargets
-	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-	INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+# try using FILE_SETs when more people have cmake 3.23
+install(DIRECTORY include/solvent DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(TARGETS solvent solvent_cli EXPORT solventTargets)
+install(EXPORT solventTargets
+	FILE solventTargets.cmake
+	NAMESPACE solvent::
+	DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/solvent
 )
 
 

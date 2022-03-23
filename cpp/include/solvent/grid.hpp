@@ -2,7 +2,7 @@
 #define HPP_SOLVENT__GRID
 
 #include "solvent/size.hpp"
-#include "solvent_config.hpp"
+#include "solvent/solvent_config.hpp"
 #include "solvent_export.h"
 
 #include <array>

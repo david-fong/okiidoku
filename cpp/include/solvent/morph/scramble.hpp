@@ -3,13 +3,14 @@
 
 #include "solvent/grid.hpp"
 #include "solvent/size.hpp"
-#include "solvent_config.hpp"
+#include "solvent/solvent_config.hpp"
 #include "solvent_export.h"
 
 namespace solvent::morph {
 
 	// contract: span is a valid grid (though it may be incomplete)
 	template<Order O>
+	requires (is_order_compiled(O))
 	SOLVENT_EXPORT void scramble(grid_span_t<O>);
 
 	// contract: T fits size<O>::ord2i_t and scramble<O> is compiled. also see scramble<O>'s contract.

@@ -1,7 +1,7 @@
 #ifndef HPP_SOLVENT__ORDER
 #define HPP_SOLVENT__ORDER
 
-#include "solvent_config.hpp"
+#include "solvent/solvent_config.hpp"
 #include "solvent_export.h"
 
 #include <bit>

@@ -9,7 +9,7 @@ As for actually linking to the dynamic library, ¯\\\_(ツ)\_/¯. I don't really
 
 - Make sure to read and follow the api contracts documented in the headers. Exceptions are intentionally not thrown for precondition violations. If you would like to run against a build of libsolvent with assertions, create and use a build of libsolvent with `-DCMAKE_BUILD_TYPE=Debug`.
 
-- To change the supported grid sizes that get compiled, create a [tweak header](https://vector-of-bool.github.io/2020/10/04/lib-configuration.html#providing-a-tweak-header) for [`include/solvent_config.hpp`](include/solvent_config.hpp).
+- To change the supported grid sizes that get compiled, create a [tweak header](https://vector-of-bool.github.io/2020/10/04/lib-configuration.html#providing-a-tweak-header) for [`include/solvent/solvent_config.hpp`](include/solvent/solvent_config.hpp).
 
 - It does not make any use of `printf` and friends, so it is safe to do [`std::ios_base::sync_with_stdio(false);`](https://en.cppreference.com/w/cpp/io/ios_base/sync_with_stdio).
 

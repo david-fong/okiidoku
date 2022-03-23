@@ -14,6 +14,8 @@
 
 - previously changed all my includes to use quotes instead of angle brackets after reading [this from Jason Turner's cpp best practices](https://github.com/cpp-best-practices/cppbestpractices/blob/master/03-Style.md#use--for-including-local-files). But here in [cppCoreGuidelines](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#sf12-prefer-the-quoted-form-of-include-for-files-relative-to-the-including-file-and-the-angle-bracket-form-everywhere-else) says to use quotes only for relative path includes. Maybe I misinterpreted/over-interpreted Jason Turner's instructions. Either way, I like the cppCoreGuidelines rationale. Please change back to using it.
 
+- how is vector-of-bool's tweak header thing supposed to work with installation? I don't know how to copy the tweak config to 
+
 - The batch headers use `solvent_util/timer.hpp`. That's not good because the util headers are supposed to be private. Either move timer into include/, or remove the timing capability from batch. I can even imagine a batch api that gives the caller control over when to stop.
 
 - make some grid things for binary and text serdes (and test please).
