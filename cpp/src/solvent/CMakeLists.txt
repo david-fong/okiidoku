@@ -4,6 +4,7 @@ add_library(solvent SHARED
 	db/serdes.cpp
 	emoji.cpp
 	print_2d.cpp
+	morph/rel_info.cpp
 	morph/canon_label.cpp
 	morph/canon_place.cpp
 	morph/canon.cpp
@@ -49,7 +50,7 @@ target_include_directories(solvent
 # 	<array> <span> <optional> # <vector>
 # 	<bit> <bitset> <cstdint>
 # 	<type_traits> <cassert>
-# 	# [["solvent_config.hpp"]]
+# 	# [["solvent/solvent_config.hpp"]]
 # 	# [["solvent/order.hpp"]]
 # 	# [["solvent/size.hpp"]]
 # 	# [["solvent/grid.hpp"]]

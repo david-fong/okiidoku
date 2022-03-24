@@ -18,10 +18,10 @@ namespace solvent::morph {
 		block is `p(n) = 2/(o+1)` (simplified from `2(o-1)/(o^2-1)`). The
 		probability of this ocurring k times in a grid is given by a binomial
 		distribution B(o^2, 2/(o+1)). */
-		static constexpr std::array<double, O2+1> all {[]{
-			std::array<double, O2+1> _;
+		static constexpr std::array<long double, O2+1> all {[]{
+			std::array<long double, O2+1> _;
 			for (unsigned i {0}; i < O2+1; ++i) {
-				_[i] = static_cast<double>(
+				_[i] = (
 					static_cast<long double>(n_choose_r(O2, i))
 					* std::pow(static_cast<long double>(   2)/(O1+1),    i)
 					* std::pow(static_cast<long double>(O1-1)/(O1+1), O2-i)
@@ -38,10 +38,10 @@ namespace solvent::morph {
 
 		static constexpr double all_e = O2 * (2.0/(O+1));
 
-		static constexpr std::array<double, O2+1> polar {[]{
-			std::array<double, O2+1> _;
+		static constexpr std::array<long double, O2+1> polar {[]{
+			std::array<long double, O2+1> _;
 			for (unsigned i {0}; i < O2+1; ++i) {
-				_[i] = static_cast<double>(
+				_[i] = (
 					static_cast<long double>(n_choose_r(O2, i))
 					* std::pow(static_cast<long double>( 1)/(O1+1),    i)
 					* std::pow(static_cast<long double>(O1)/(O1+1), O2-i)

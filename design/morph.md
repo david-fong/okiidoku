@@ -53,11 +53,15 @@ I was surprised to find so many.
 
 - For canonicalization of labelling, I am only looking at the counts of relationships between labels- which only makes use of the first "scrambling-cannot" bullet. The combination of all the bullets would be, for each relationship between two labels, to gather a trinary "mask", where each digit corresponds to one of the blocks, and the value of the digit is either "no relationship", "horizontal atom relationship", or "vertical atom relationship". This mask cannot be used raw, since the repositioning of chutes will reorder digits, and transposition of the grid will swap the orientation of atoms. The mask itself must be canonicalized in terms of placement (unless placement canonicalization has already been performed, but I'm not sure if that's possible to achieve). I am currently using the horizontal and vertical masks OR-ed together.
 
+### Partial Imbalance Analysis
+
+Once source of chute_imbalance is in the distribution of same-atom relations between horizontal or vertical chutes. If such a same-atom relation happens `N` times, the most evenly distributed way for them to occur across one polarity of chute can be represented by creating an array of length `O` containing numbers in `[0, IMBALANCE_MAX]`. `IMBALANCE_MAX` is equal to `2 * (O floor_div 2) * (O - (O floor_div 2))`. Cycle over the entries decrementing a counter from `N` each iteration and incrementing the entry. Imbalance can then be calculated by counting the number of times the relation occurs in each chute, sorting in decreasing order, and then summing the differences between the result and the balanced version.
+
 ## My Canonicalization Algorithm
 
 ### High Level Approach
 
-- base the canonicalization on comparing measures of imbalance in the grid's scramble-invariant properties.
+- base the canonicalization on comparing measures of chute_imbalance in the grid's scramble-invariant properties.
 
 - default to factoring as many cells as possible into the sorting bases, and only factoring them out when necessary to break ties instead of vice versa.
 

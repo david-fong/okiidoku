@@ -8,6 +8,7 @@
 namespace solvent::morph {
 
 	template<Order O>
+	requires (is_order_compiled(O))
 	void scramble(const grid_span_t<O> grid) {
 		using val_t = size<O>::ord2x_least_t;
 		using ord1i_t = size<O>::ord1i_t;
