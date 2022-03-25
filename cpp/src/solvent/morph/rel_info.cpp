@@ -47,7 +47,7 @@ namespace solvent::morph {
 
 	template<Order O>
 	requires (is_order_compiled(O))
-	grid_arr_t<O, Rel<O>> get_rel_table(const grid_const_span_t<O> grid_in) {
+	grid_arr_t<O, Rel<O>> make_rel_table(const grid_const_span_t<O> grid_in) {
 		using has_mask_t = size<O>::O2_mask_least_t;
 		using ord1i_t = size<O>::ord1i_t;
 		using ord2i_t = size<O>::ord2i_t;
@@ -121,7 +121,7 @@ namespace solvent::morph {
 
 	#define M_SOLVENT_TEMPL_TEMPL(O_) \
 		template struct Rel<O_>; \
-		template grid_arr_t<O_, Rel<O_>> get_rel_table<O_>(grid_const_span_t<O_>);
+		template grid_arr_t<O_, Rel<O_>> make_rel_table<O_>(grid_const_span_t<O_>);
 	M_SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 	#undef M_SOLVENT_TEMPL_TEMPL
 }

@@ -30,7 +30,7 @@
 - experiment with the option of making each order be its own dynamic library.
   - Is there anything that would currently make this option wasteful in terms of binary size?
 - try making Order an enum
-  - see if it can improve switch case cover detection (I think not. I already have some enum-switch-returns that the current gcc warning flags complain about if I don't have a default case).
+  - see if it can improve switch case cover detection (I think not. I already have some enum-switch-returns that the current gcc warning flags complain about if I don't have a default case). When c++23 comes, we can use `std::unreachable`.
   - this may also make it possible to statically enforce contracts about orders for the non-template wrapper functions. If so, I will probably neither need to assert that the order is compiled, nor write vacuous default branches for their switch statements.
   - if this works out, make sure to update all the contract docs and remove relevant assertions.
 - move the emoji definitions out of the program binary and externalize as a configurable data read in at runtime?

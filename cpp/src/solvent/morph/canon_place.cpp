@@ -82,7 +82,7 @@ namespace solvent::morph {
 
 
 		static void do_it(const grid_span_t<O> grid_) {
-			const auto rel_table = get_rel_table<O>(grid_);
+			const auto rel_table = make_rel_table<O>(grid_);
 			const GridSortEntry grid_slide = GridSortEntry::build(rel_table, grid_);
 			const GridSortEntry transposed_grid_slide = [&](){
 				std::array<ord2i_least_t, O4> transposed_input;

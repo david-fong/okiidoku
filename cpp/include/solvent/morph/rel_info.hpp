@@ -35,7 +35,7 @@ namespace solvent::morph {
 	// contract: span is a valid grid (though it may be incomplete)
 	template<Order O>
 	requires (is_order_compiled(O))
-	SOLVENT_EXPORT grid_arr_t<O, Rel<O>> get_rel_table(grid_const_span_t<O>);
+	SOLVENT_EXPORT grid_arr_t<O, Rel<O>> make_rel_table(grid_const_span_t<O>);
 
 
 	#define M_SOLVENT_TEMPL_TEMPL(O_) \

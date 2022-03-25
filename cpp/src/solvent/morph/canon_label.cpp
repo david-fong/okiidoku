@@ -3,7 +3,7 @@
 
 #include <iostream> // TODO.wait remove
 #include <algorithm> // sort
-#include <vector>
+#include <array>
 #include <numeric>   // iota
 #include <compare>   // strong_ordering, is_eq, etc.
 #include <cassert>
@@ -23,95 +23,62 @@ namespace solvent::morph {
 		static constexpr ord2i_t O2 = O*O;
 		static constexpr ord4i_t O4 = O*O*O*O;
 
-		// Info is placement-independent.
-		struct NonCanonRelInfo final {
-			grid_arr_t<O, Rel<O>> table;
-			grid_arr_t<O, Rel<O>> cmp_layers; // sort rows of table and then transpose.
 
-			std::strong_ordering cmp_labels(const ord2x_t a_og_label, const ord2x_t b_og_label) const {
-				for (ord2i_t layer {0}; layer < O2; ++layer) {
-					const Rel<O>& a = cmp_layers[layer][a_og_label];
-					const Rel<O>& b = cmp_layers[layer][b_og_label];
-					const auto cmp = a <=> b;
-					if (cmp != std::strong_ordering::equivalent) {
-						return cmp;
-					}
-				}
-				return std::strong_ordering::equivalent;
-			};
-		};
-		static NonCanonRelInfo make_rel_cmp_layers_(const grid_const_span_t<O> grid_in) noexcept {
-			NonCanonRelInfo non_canon;
-			grid_arr_t<O, Rel<O>> table_rows_sorted = non_canon.table = get_rel_table<O>(grid_in);
-			// sort, transpose (for caching optimization)
-			for (auto& row : table_rows_sorted) {
-				// put imbalanced things at the front:
-				std::ranges::sort(row, std::less{});
-			}
-			// TODO.try do more benchmarking comparing perf with or without transpose.
-			//   some rough benchmarking on O=4 seems to indicate some benefit.
-			for (ord2i_t i {0}; i < O2; ++i) {
-			for (ord2i_t j {0}; j < O2; ++j) {
-				non_canon.cmp_layers[i][j] = table_rows_sorted[j][i];
-			}}
-			return non_canon;
-		}
-
-
-		static void find_and_break_ties_(
-			const NonCanonRelInfo& non_canon,
+		static void do_a_pass_(
+			grid_arr_t<O, Rel<O>>& rel_table,
+			std::array<ord2i_t, O2>& tie_links, 
 			std::array<ord2x_t, O2>& canon_to_og
 		) noexcept {
-			struct Range {
-				ord2x_t begin;
-				ord2i_t end;
-				ord2i_t size() const noexcept { return end - begin; };
-			};
-			std::vector<Range> tied_ranges; // entries are ranges of partially-canonical labels.
+			grid_arr_t<O, Rel<O>> scratch;
 
-			using tieless_mask_t = size<O>::O2_mask_fast_t;
-			tieless_mask_t tieless {0}; // bit places correspond to partially-canonical labels.
-
-			for (ord2i_t tie_begin {0}, canon_i {1}; canon_i <= O2; ++canon_i) {
-				if (canon_i == O2 || std::is_neq(non_canon.cmp_labels(canon_to_og[tie_begin], canon_to_og[canon_i]))) {
-					if (canon_i == tie_begin + 1) [[likely]] {
-						tieless |= tieless_mask_t{1} << tie_begin;
-					} else {
-						tied_ranges.push_back({static_cast<ord2x_t>(tie_begin), canon_i});
+			std::array<ord2x_t, O2> canon_to_tied;
+			std::iota(canon_to_tied.begin(), canon_to_tied.end(), 0);
+			for (ord2i_t tie_begin {0}; tie_begin != O2; tie_begin = tie_links[tie_begin]) {
+				ord2i_t tie_end = tie_links[tie_begin];
+				if (tie_begin + 1 == tie_end) [[likely]] {
+					continue; // not a tie.
+				}
+				if (!((tie_begin == 0) && (tie_end == O2))) {
+					std::clog << "\ntied range: [" << int(tie_begin) << ", " << int(tie_end - 1) << "]";
+				}
+				for (ord2i_t i {tie_begin}; i < tie_end; ++i) {
+					auto& row = scratch[i];
+					row = rel_table[i];
+					for (ord2i_t other_begin {0}; other_begin != O2; other_begin = tie_links[other_begin]) {
+						ord2i_t other_end = tie_links[other_begin];
+						std::sort(row.begin()+other_begin, row.begin()+other_end, std::less{});
+						// if (other_begin == tie_begin) {
+						// } else {
+						// 	; // TODO try sorting preserving vertical slices across rows
+						// }
 					}
-					tie_begin = canon_i;
 				}
-			}
-			if (tied_ranges.empty()) [[likely]] {
-				return;
-			}
-			if ((tieless.count() == 0) && (tied_ranges.size() == 1)) {
-				// TODO.high encountered the most canonical grid. :O not sure what to do here.
-				assert(tied_ranges[0].size() == O2);
-				return;
-			}
-			for (const Range& tied_range : tied_ranges) {
-				std::clog << "\ntied range: [" << int(tied_range.begin) << ", " << int(tied_range.end - 1) << "]";
-				struct TieBreaker final {
-					ord2x_t og_label {};
-					std::vector<Rel<O>> rels {}; // indexed by partially-canonical labels.
-				};
-				std::vector<TieBreaker> tie_breakers(tied_range.size());
-				for (ord2i_t breaker_i {0}; breaker_i < tied_range.size(); ++breaker_i) {
-					auto& tie_breaker = tie_breakers[breaker_i];
-					tie_breaker.og_label = canon_to_og[breaker_i + tied_range.begin];
-					tie_breaker.rels.reserve(tieless.count());
-					for (ord2i_t canon_i {0}; canon_i < O2; ++canon_i) {
-						if ((tieless & (tieless_mask_t{1} << canon_i)).any()) {
-							tie_breaker.rels.push_back(non_canon.table[tie_breaker.og_label][canon_to_og[canon_i]]);
-					}	}
-				}
-				std::sort(tie_breakers.begin(), tie_breakers.end(), [](const auto& a, const auto& b){
-					return a.rels < b.rels; // std::vector lexicographical comparison
+				std::sort(canon_to_tied.begin()+tie_begin, canon_to_tied.begin()+tie_end, [&](auto a, auto b){ // TODO does this need stable_sort?
+					return std::is_lt(scratch[a] <=> scratch[b]);
 				});
-				for (ord2i_t i {tied_range.begin}; i < tied_range.end; ++i) {
-					tieless |= tieless_mask_t{1} << i; // mark tie as resolved.
-					canon_to_og[i] = tie_breakers[i - tied_range.begin].og_label;
+			}
+
+			{
+				// update tie_links:
+				ord2i_t begin {0};
+				for (ord2i_t canon_i {1}; canon_i < O2; ++canon_i) {
+					if (std::is_neq(scratch[canon_to_tied[canon_i - 1]] <=> scratch[canon_to_tied[canon_i]])) {
+						tie_links[begin] = canon_i;
+						begin = canon_i;
+				}	}
+				tie_links[begin] = O2;
+			}
+			// update rel_table (optimized version of doing get_rel_table again)
+			scratch = rel_table;
+			for (ord2i_t i {0}; i < O2; ++i) {
+			for (ord2i_t j {0}; j < O2; ++j) {
+				rel_table[i][j] = scratch[canon_to_tied[i]][canon_to_tied[j]];
+			}}
+			{
+				// update canon_to_og:
+				std::array<ord2x_t, O2> tied_canon_to_og {canon_to_og};
+				for (ord2i_t i {0}; i < O2; ++i) {
+					canon_to_og[i] = tied_canon_to_og[canon_to_tied[i]];
 				}
 			}
 		}
@@ -119,19 +86,32 @@ namespace solvent::morph {
 
 		//
 		static void do_it(const grid_span_t<O> grid) {
-			const std::array<ord2x_t, O2> label_og_to_canon = [](const NonCanonRelInfo non_canon){
+			const std::array<ord2x_t, O2> label_og_to_canon = [&](){
+				auto rel_table {make_rel_table<O>(grid)};
+				std::array<ord2i_t, O2> tie_links {0};
+				tie_links[0] = O2;
 				std::array<ord2x_t, O2> canon_to_og;
 				std::iota(canon_to_og.begin(), canon_to_og.end(), 0);
-				std::sort(canon_to_og.begin(), canon_to_og.end(), [&](auto a, auto b){
-					return std::is_lt(non_canon.cmp_labels(a, b));
-				});
-				find_and_break_ties_(non_canon, canon_to_og);
+				while (std::ranges::any_of(tie_links, [](auto link){ return link == 0; })) {
+					std::array<ord2i_t, O2> old_tie_links {tie_links};
+					do_a_pass_(rel_table, tie_links, canon_to_og);
+					if (tie_links[0] == O2) {
+						// TODO.high encountered the most canonical grid. :O not sure what to do here.
+						assert(false);
+						break;
+					}
+					if (old_tie_links == tie_links) {
+						// stalemate... current design insufficient?
+						break;
+					}
+				}
+
 				std::array<ord2x_t, O2> _;
 				for (ord2x_t canon_i {0}; canon_i < O2; ++canon_i) {
 					_[canon_to_og[canon_i]] = canon_i;
 				}
 				return _;
-			}(make_rel_cmp_layers_(grid));
+			}();
 
 			for (ord4i_t i {0}; i < O4; ++i) {
 				grid[i] = static_cast<val_t>(label_og_to_canon[grid[i]]);
