@@ -62,7 +62,7 @@ namespace solvent::morph {
 			const RelMasks<O>& mask = masks[r][c];
 			Rel<O>& rel = table[r][c];
 			if (r == c) {
-				rel = {0,O2/2,0,0};
+				rel = {0,(O2/2),0,0};
 				continue;
 			}
 			const has_mask_t non_polar_mask = mask.blocks_h | mask.blocks_v;

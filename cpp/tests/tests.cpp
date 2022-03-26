@@ -1,4 +1,4 @@
-#include "solvent/gen/batch.hpp"
+// #include "solvent/gen/batch.hpp"
 #include "solvent/gen/stochastic.hpp"
 #include "solvent/morph/canon.hpp"
 #include "solvent/morph/scramble.hpp"
@@ -89,16 +89,16 @@ int main(const int argc, char const *const argv[]) {
 	solvent::seed_rng(srand_key);
 
 	if (test_morph_O<3>(num_rounds)) {
-		return 1;
+		// return 1;
 	}
 	if (test_morph_O<4>(num_rounds)) {
-		return 1;
+		// return 1;
 	}
 	if (test_morph_O<5>(num_rounds)) {
-		return 1;
+		// return 1;
 	}
 	if (test_morph_O<10>(num_rounds)) {
-		return 1;
+		// return 1;
 	}
 
 	// std::cout << "\ntotal: " << solvent::gen::ss::total;

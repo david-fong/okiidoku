@@ -1,7 +1,7 @@
 #include "solvent/morph/rel_info.hpp"
 #include "solvent/grid.hpp"
 
-#include <iostream> // TODO.wait remove
+// #include <iostream> // TODO.wait remove
 #include <algorithm> // sort
 #include <array>
 #include <numeric>   // iota
@@ -29,7 +29,7 @@ namespace solvent::morph {
 			std::array<ord2i_t, O2>& tie_links, 
 			std::array<ord2x_t, O2>& canon_to_og
 		) noexcept {
-			grid_arr_t<O, Rel<O>> scratch;
+			grid_arr_t<O, Rel<O>> scratch {rel_table};
 
 			std::array<ord2x_t, O2> canon_to_tied;
 			std::iota(canon_to_tied.begin(), canon_to_tied.end(), 0);
@@ -38,12 +38,11 @@ namespace solvent::morph {
 				if (tie_begin + 1 == tie_end) [[likely]] {
 					continue; // not a tie.
 				}
-				if (!((tie_begin == 0) && (tie_end == O2))) {
-					std::clog << "\ntied range: [" << int(tie_begin) << ", " << int(tie_end - 1) << "]";
-				}
+				// if (!((tie_begin == 0) && (tie_end == O2))) {
+				// 	std::clog << "\ntied range: [" << int(tie_begin) << ", " << int(tie_end - 1) << "]";
+				// }
 				for (ord2i_t i {tie_begin}; i < tie_end; ++i) {
 					auto& row = scratch[i];
-					row = rel_table[i];
 					for (ord2i_t other_begin {0}; other_begin != O2; other_begin = tie_links[other_begin]) {
 						ord2i_t other_end = tie_links[other_begin];
 						std::sort(row.begin()+other_begin, row.begin()+other_end, std::less{});
@@ -53,7 +52,7 @@ namespace solvent::morph {
 						// }
 					}
 				}
-				std::sort(canon_to_tied.begin()+tie_begin, canon_to_tied.begin()+tie_end, [&](auto a, auto b){ // TODO does this need stable_sort?
+				std::sort(canon_to_tied.begin()+tie_begin, canon_to_tied.begin()+tie_end, [&](auto a, auto b){
 					return std::is_lt(scratch[a] <=> scratch[b]);
 				});
 			}

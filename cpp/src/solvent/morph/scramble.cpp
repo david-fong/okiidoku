@@ -30,15 +30,17 @@ namespace solvent::morph {
 			row_map[i/O1][i%O1] = static_cast<val_t>(i);
 			col_map[i/O1][i%O1] = static_cast<val_t>(i);
 		}
-		std::ranges::shuffle(label_map, shared_mt_rng_);
-		// std::ranges::shuffle(row_map, shared_mt_rng_);
-		// std::ranges::shuffle(col_map, shared_mt_rng_);
-		// for (ord1i_t chute {0}; chute < O1; ++chute) {
-		// 	std::ranges::shuffle(row_map[chute], shared_mt_rng_);
-		// 	std::ranges::shuffle(col_map[chute], shared_mt_rng_);
-		// }
-		// transpose = static_cast<bool>(shared_mt_rng_() % 2);
-		// TODO.high uncomment once canon_label seems to be working.
+		{
+			std::lock_guard lock_guard_{shared_mt_rng_mutex_};
+			std::ranges::shuffle(label_map, shared_mt_rng_);
+			std::ranges::shuffle(row_map, shared_mt_rng_);
+			std::ranges::shuffle(col_map, shared_mt_rng_);
+			for (ord1i_t chute {0}; chute < O1; ++chute) {
+				std::ranges::shuffle(row_map[chute], shared_mt_rng_);
+				std::ranges::shuffle(col_map[chute], shared_mt_rng_);
+			}
+			transpose = static_cast<bool>(shared_mt_rng_() % 2);
+		}
 		
 		for (ord2i_t row {0}; row < O2; ++row) {
 			for (ord2i_t col {0}; col < O2; ++col) {
