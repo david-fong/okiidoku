@@ -21,7 +21,7 @@ namespace solvent::morph {
 		static constexpr ord1i_t O1 = O;
 		static constexpr ord2i_t O2 = O*O;
 
-		grid_span2d_t<O, const val_t> grid(grid_span);
+		GridSpan2D<O, const val_t> grid(grid_span);
 		grid_arr_t<O, RelMasks<O>> masks {};
 		for (ord2i_t line {0}; line < O2; ++line) {
 		for (ord2i_t atom {0}; atom < O2; atom += O1) {

@@ -26,13 +26,13 @@ namespace solvent::morph {
 			#define M_RETURN_IF_NEQ if (std::is_neq(cmp)) [[likely]] { return cmp; }
 			std::strong_ordering cmp = that.count <=> count;
 			M_RETURN_IF_NEQ; cmp = polar_count_lesser <=> that.polar_count_lesser;
-			M_RETURN_IF_NEQ; cmp = that.chute_imbalance_a <=> chute_imbalance_a; // TODO.try could these be omitted from use above a certain order?
+			M_RETURN_IF_NEQ; cmp = that.chute_imbalance_a <=> chute_imbalance_a;
 			M_RETURN_IF_NEQ; cmp = that.chute_imbalance_b <=> chute_imbalance_b;
 			return cmp;
 		}
 	};
 
-	// contract: span is a valid grid (though it may be incomplete)
+	// contract: the span is a _complete_, valid grid.
 	template<Order O>
 	requires (is_order_compiled(O))
 	SOLVENT_EXPORT grid_arr_t<O, Rel<O>> make_rel_table(grid_const_span_t<O>);

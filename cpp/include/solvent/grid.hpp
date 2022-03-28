@@ -17,10 +17,10 @@ namespace solvent {
 
 	// A thin wrapper over a span.
 	template<Order O, typename T=size<O>::ord2i_t>
-	class grid_span2d_t final {
+	class GridSpan2D final {
 		grid_span_t<O, T> span_;
 	public:
-		grid_span2d_t(grid_span_t<O, T> span): span_{span} {};
+		GridSpan2D(grid_span_t<O, T> span): span_{span} {};
 		// contract: row and col must be in [0,O2).
 		T& at(size<O>::ord2i_t row, size<O>::ord2i_t col) const noexcept {
 			assert(row < O*O && col < O*O);
@@ -32,11 +32,13 @@ namespace solvent {
 	// Returns false if any cells in a same house contain the same value.
 	// Can be used with incomplete grids.
 	// contract: entries of input are in the range [0, O2].
-	template<Order O> SOLVENT_EXPORT [[nodiscard]] bool is_sudoku_valid(grid_const_span_t<O>) noexcept;
+	template<Order O> requires(is_order_compiled(O)) SOLVENT_EXPORT [[nodiscard]]
+	bool is_sudoku_valid(grid_const_span_t<O>) noexcept;
 
 	// Returns true if none of the cells are empty (equal to O2). Does _not_ check if sudoku is valid.
 	// contract: entries of input are in the range [0, O2].
-	template<Order O> SOLVENT_EXPORT [[nodiscard]] bool is_sudoku_filled(grid_const_span_t<O>) noexcept;
+	template<Order O> requires(is_order_compiled(O)) SOLVENT_EXPORT [[nodiscard]]
+	bool is_sudoku_filled(grid_const_span_t<O>) noexcept;
 
 
 	template<Order O> SOLVENT_EXPORT [[nodiscard, gnu::const]] constexpr typename size<O>::ord2i_t rmi_to_row(const typename size<O>::ord4i_t index) noexcept { return static_cast<size<O>::ord2i_t>(index / (O*O)); }

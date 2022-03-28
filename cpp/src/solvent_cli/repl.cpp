@@ -107,28 +107,30 @@ namespace solvent::cli {
 
 	void Repl::gen_multiple(const gen::ss::batch::trials_t stop_after) {
 		gen::ss::batch::Params params {.stop_after {stop_after}};
-		std::filesystem::create_directories("gen");
-		std::string file_path = std::string{"gen/"} + std::to_string(config_.order()) + std::string{".bin"};
-		std::cout << "output file path: " << file_path << std::endl;
-		std::ofstream of(file_path, std::ios::binary|std::ios::ate);
-		// TODO.high change this to use the db operations.
-		// try {
-		// 	of.exceptions()
-		// } catch (const std::ios_base::failure& fail) {
-		// 	std::cout << str::red.on << fail.what() << str::red.off << std::endl;
-		// }
-		const gen::ss::batch::BatchReport batch_report = gen::ss::batch::batch(config_.order(), params,
-			[this, &of](const gen::ss::Generator& result) mutable {
-				using val_t = size<O_MAX>::ord2i_least_t;
-				std::array<val_t, O4_MAX> grid;
-				result.write_to(std::span<val_t>(grid));
-				if (config_.canonicalize()) {
-					morph::canonicalize<val_t>(result.get_order(), std::span(grid));
+		const gen::ss::batch::BatchReport batch_report {[&]{
+			std::filesystem::create_directories("gen");
+			std::string file_path = std::string{"gen/"} + std::to_string(config_.order()) + std::string{".bin"};
+			std::cout << "output file path: " << file_path << std::endl;
+			std::ofstream of(file_path, std::ios::binary|std::ios::ate);
+			// TODO.high change this to use the db operations.
+			// try {
+			// 	of.exceptions()
+			// } catch (const std::ios_base::failure& fail) {
+			// 	std::cout << str::red.on << fail.what() << str::red.off << std::endl;
+			// }
+			return gen::ss::batch::batch(config_.order(), params,
+				[this, &of](const gen::ss::Generator& result) mutable {
+					using val_t = size<O_MAX>::ord2i_least_t;
+					std::array<val_t, O4_MAX> grid;
+					result.write_to(std::span<val_t>(grid));
+					if (config_.canonicalize()) {
+						morph::canonicalize<val_t>(result.get_order(), std::span(grid));
+					}
+					db::serdes::print(of, result.get_order(), std::span<const val_t>(grid));
+					// TODO.mid print a progress bar
 				}
-				db::serdes::print(of, result.get_order(), std::span<const val_t>(grid));
-				// TODO.mid print a progress bar
-			}
-		);
+			);
+		}()};
 
 		static const std::string seconds_units = std::string{} + str::dim.on + " seconds (with I/O)" + str::dim.off;
 		std::cout << std::setprecision(4)

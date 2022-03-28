@@ -112,6 +112,7 @@ namespace solvent {
 		using O2_mask_least_t = O2_mask_t<false>;
 
 		// uint range [0, order].
+		using ord1x_t = uint_fastN_t<std::bit_width(O)>;
 		using ord1i_t = uint_fastN_t<std::bit_width(O)>;
 
 		// uint range [0, order^2].

@@ -74,6 +74,9 @@
   - A web interface would be really nice.
 - C++20
   - `using enum`. Might want to wait for CLANG to support?
+- C++23
+  - `std::unreachable()`
+  - `std::ranges::iota()`
 - CLI
   - implement `-h` and `--help` CLI argument.
   - give a red message when trying to continue and nothing is left to be found.

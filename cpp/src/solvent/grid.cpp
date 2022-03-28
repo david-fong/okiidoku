@@ -3,6 +3,7 @@
 namespace solvent {
 
 	template<Order O>
+	requires(is_order_compiled(O))
 	bool is_sudoku_valid(const grid_const_span_t<O> grid) noexcept {
 		using ord2i_t = typename size<O>::ord2i_t;
 		using has_mask_t = typename size<O>::O2_mask_fast_t;
@@ -37,6 +38,7 @@ namespace solvent {
 
 
 	template<Order O>
+	requires(is_order_compiled(O))
 	bool is_sudoku_filled(const grid_const_span_t<O> grid) noexcept {
 		static constexpr typename size<O>::ord2i_t O2 {O*O};
 		for (auto val : grid) {

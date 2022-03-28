@@ -4,6 +4,7 @@ add_library(solvent SHARED
 	db/serdes.cpp
 	emoji.cpp
 	print_2d.cpp
+	morph/transform.cpp
 	morph/rel_info.cpp
 	morph/canon_label.cpp
 	morph/canon_place.cpp

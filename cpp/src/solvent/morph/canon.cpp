@@ -1,22 +1,29 @@
 #include "solvent/morph/canon.hpp"
+#include "solvent/morph/transform.hpp"
 
 #include <cassert>
 
 namespace solvent::morph {
 
+	// contract: the span is a _complete_, valid grid.
 	template<Order O>
-	void canon_label(grid_span_t<O>);
+	requires (is_order_compiled(O))
+	Transformation<O>::label_map_t canon_label(grid_span_t<O>);
 
+	// contract: the span is a _complete_, valid grid.
 	template<Order O>
-	void canon_place(grid_span_t<O>);
+	requires (is_order_compiled(O))
+	Transformation<O> canon_place(grid_span_t<O>);
 
 	template<Order O>
 	requires (is_order_compiled(O))
-	void canonicalize(const grid_span_t<O> orig_grid) {
+	Transformation<O> canonicalize(const grid_span_t<O> orig_grid) {
 		assert(is_sudoku_filled<O>(orig_grid));
 		assert(is_sudoku_valid<O>(orig_grid));
-		canon_label<O>(orig_grid);
-		canon_place<O>(orig_grid);
+		const auto label_map = canon_label<O>(orig_grid);
+		auto place_map = canon_place<O>(orig_grid);
+		place_map.label_map = label_map;
+		return place_map;
 	}
 
 
@@ -32,7 +39,7 @@ namespace solvent::morph {
 				using val_t = size<O_>::ord2i_least_t; \
 				std::array<val_t,O4> grid_resize; \
 				for (unsigned i {0}; i < O4; ++i) { grid_resize[i] = static_cast<val_t>(grid[i]); } \
-				canonicalize<O_>(std::span(grid_resize)); \
+				canonicalize<O_>(std::span<val_t, O4>(grid_resize)); \
 				for (unsigned i {0}; i < O4; ++i) { grid[i] = static_cast<T>(grid_resize[i]); } \
 				break; \
 			}
@@ -42,9 +49,9 @@ namespace solvent::morph {
 	}
 
 	#define M_SOLVENT_TEMPL_TEMPL(O_) \
-		extern template void canon_label<O_>(grid_span_t<O_>); \
-		extern template void canon_place<O_>(grid_span_t<O_>); \
-		template void canonicalize<O_>(grid_span_t<O_>);
+		extern template typename Transformation<O_>::label_map_t canon_label<O_>(grid_span_t<O_>); \
+		extern template Transformation<O_> canon_place<O_>(grid_span_t<O_>); \
+		template Transformation<O_> canonicalize<O_>(grid_span_t<O_>);
 	M_SOLVENT_INSTANTIATE_ORDER_TEMPLATES
 	#undef M_SOLVENT_TEMPL_TEMPL
 
