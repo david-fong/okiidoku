@@ -10,6 +10,8 @@
 namespace solvent::morph {
 
 	// contract: the span is a _complete_, valid grid.
+	// If you want to canonicalize a puzzle, first solve it, then canonicalize
+	// the solution, and then apply the returned transformation to the puzzle.
 	template<Order O>
 	requires (is_order_compiled(O))
 	SOLVENT_EXPORT Transformation<O> canonicalize(grid_span_t<O>);

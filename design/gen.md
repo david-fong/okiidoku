@@ -23,3 +23,4 @@
   - I have no clue as to whether it is guaranteed to terminate. could it get stuck in a local optima? If so, how often does that happen (probability)?
   - naively extending the current implementation to solve puzzles will not terminate if the puzzle is not solvable.
   - if used for solving, must be the final step in a "hybrid solver" pipeline (even if used as an intermediate step as a brute force part, it wouldn't be deterministic, and can hardly be controlled), which may not be the most optimal approach compared to combining deductive reasoning with backtracking. It is also unable to measure "difficulty" of a puzzle according to deductive reasoning techniques.
+  - see [here](http://forum.enjoysudoku.com/giant-sudoku-s-16x16-25x25-36x36-100x100-t6578-150.html#p318577) for my post on a high-level algorithm description

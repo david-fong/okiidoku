@@ -59,6 +59,8 @@ Once source of chute_imbalance is in the distribution of same-atom relations bet
 
 ## My Canonicalization Algorithm
 
+I decided not to try to support direct canonicalization of puzzles. I don't know how much time it would take to adapt the current algorithm to work for that, and there's another way to do it which is much simpler to _understand_: simply solve the puzzle, canonicalize the solution, and apply the same canonicalizing transformations to the puzzle. While it comes with the cost of solving, there is elegance in that this approach is easy to implement outside of any canonicalization algorithm's specific implementation details.
+
 ### High Level Approach
 
 - base the canonicalization on comparing measures of chute_imbalance in the grid's scramble-invariant properties.

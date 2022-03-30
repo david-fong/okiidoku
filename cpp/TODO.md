@@ -12,6 +12,8 @@
 
 ## Higher Priority
 
+- rebrand: rename project from "solvent" to "ookiidoku"
+
 - previously changed all my includes to use quotes instead of angle brackets after reading [this from Jason Turner's cpp best practices](https://github.com/cpp-best-practices/cppbestpractices/blob/master/03-Style.md#use--for-including-local-files). But here in [cppCoreGuidelines](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#sf12-prefer-the-quoted-form-of-include-for-files-relative-to-the-including-file-and-the-angle-bracket-form-everywhere-else) says to use quotes only for relative path includes. Maybe I misinterpreted/over-interpreted Jason Turner's instructions. Either way, I like the cppCoreGuidelines rationale. Please change back to using it.
 
 - how is vector-of-bool's tweak header thing supposed to work with installation? I don't know how to copy the tweak config to 
@@ -30,16 +32,12 @@
 - experiment with the option of making each order be its own dynamic library.
   - Is there anything that would currently make this option wasteful in terms of binary size?
 - try making Order an enum
-  - see if it can improve switch case cover detection (I think not. I already have some enum-switch-returns that the current gcc warning flags complain about if I don't have a default case). When c++23 comes, we can use `std::unreachable`.
-  - this may also make it possible to statically enforce contracts about orders for the non-template wrapper functions. If so, I will probably neither need to assert that the order is compiled, nor write vacuous default branches for their switch statements.
+  - see if it can improve switch case cover detection (I think not. I already have some enum-switch-returns that the current gcc warning flags complain about if I don't have a default case).
   - if this works out, make sure to update all the contract docs and remove relevant assertions.
 - move the emoji definitions out of the program binary and externalize as a configurable data read in at runtime?
 
 - after experimenting with different stochastic implementations, try implementing an opencl program. The minstd_rand rng is very simple to implement. I think the stochastic algorithm is data-parallelizable.
   - I wonder if there's a bitset implementation for opencl...
-
-- adapt canonicalization to work on puzzles (incomplete grids).
-  - this would allow checking if puzzles are equivalent.
 
 - what's this?
   - https://stackoverflow.com/questions/4977252/why-an-unnamed-namespace-is-a-superior-alternative-to-static
