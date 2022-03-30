@@ -12,12 +12,6 @@ add_library(ookiidoku SHARED
 	morph/scramble.cpp
 	gen/stochastic.cpp
 	gen/batch.cpp
-
-	# deprecated:
-	# gen/bt/path.cpp
-	# gen/bt/generator.cpp
-	# gen/bt/batch.cpp
-	# gen/bt/batch_print.cpp
 )
 # https://tldp.org/HOWTO/Program-Library-HOWTO/shared-libraries.html
 

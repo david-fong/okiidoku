@@ -1,7 +1,7 @@
 #ifndef HPP_OOKIIDOKU__GEN__BT__GENERATOR
 #define HPP_OOKIIDOKU__GEN__BT__GENERATOR
 
-#include <ookiidoku/gen/bt/path.hpp>
+#include <ookiidoku/gen/deprecated_bt/path.hpp>
 #include <ookiidoku/grid.hpp>
 #include <ookiidoku/size.hpp>
 #include <ookiidoku/ookiidoku_config.hpp>

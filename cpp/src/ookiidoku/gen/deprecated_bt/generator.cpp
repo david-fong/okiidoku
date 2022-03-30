@@ -1,4 +1,4 @@
-#include <ookiidoku/gen/bt/generator.hpp>
+#include <ookiidoku/gen/deprecated_bt/generator.hpp>
 #include <ookiidoku/rng.hpp>
 
 #include <algorithm> // shuffle

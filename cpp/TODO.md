@@ -3,12 +3,13 @@
 ## Big Strokes
 
 - compare backtracking and stochastic search statistics
-- fix canonicalization for order 3
-- minlexing canonicalization
-- compare canonicalization methods (performance / time-complexity)
+- improve canonicalization for order 3
+- implement translator tool
 - database
 - deductive reasoning + backtracking solver
 - puzzle creation experiments (see [bottom section](#interesting-questions-for-further-research))
+- minlexing canonicalization
+- compare canonicalization methods (performance / time-complexity)
 
 ## Higher Priority
 

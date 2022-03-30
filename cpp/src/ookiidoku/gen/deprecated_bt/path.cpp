@@ -1,4 +1,4 @@
-#include <ookiidoku/gen/bt/path.hpp>
+#include <ookiidoku/gen/deprecated_bt/path.hpp>
 
 namespace ookiidoku::gen::bt::path {
 

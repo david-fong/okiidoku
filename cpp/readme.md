@@ -5,9 +5,9 @@
 
 Building ookiidoku requires CMake (with [the minimum specified version](./CMakeLists.txt)), a C++ compiler [supporting C++20](https://en.cppreference.com/w/cpp/compiler_support), and a build system like Make or Ninja.
 
-As for actually linking to the dynamic library, ¯\\\_(ツ)\_/¯. I don't really know how this stuff works. See [ookiidoku\_cli's CMakeLists.txt](./src/ookiidoku_cli/CMakeLists.txt) for inspiration. Maybe this will help: [tldp.org on shared libraries](https://tldp.org/HOWTO/Program-Library-HOWTO/shared-libraries.html)
+Refer to the [CMake guide](https://cmake.org/cmake/help/latest/guide/importing-exporting/index.html). This may also help: [tldp.org on shared libraries](https://tldp.org/HOWTO/Program-Library-HOWTO/shared-libraries.html)
 
-- Make sure to read and follow the api contracts documented in the headers. Exceptions are intentionally not thrown for precondition violations. If you would like to run against a build of libookiidoku with assertions, create and use a build of libookiidoku with `-DCMAKE_BUILD_TYPE=Debug`.
+- Make sure to read and follow the api contracts documented in the headers. Exceptions are intentionally not thrown for precondition violations. If you would like to run against a build of libookiidoku with assertions for debugging purposes, create and use a build of libookiidoku with `-DCMAKE_BUILD_TYPE=Debug`.
 
 - To change the supported grid sizes that get compiled, create a [tweak header](https://vector-of-bool.github.io/2020/10/04/lib-configuration.html#providing-a-tweak-header) for [`include/ookiidoku/ookiidoku_config.hpp`](include/ookiidoku/ookiidoku_config.hpp).
 
