@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.16)
-project(solvent
+project(ookiidoku
 	VERSION 0.0.1
 	DESCRIPTION "sudoku solution generator and canonicalizer"
-	HOMEPAGE_URL "https://github.com/david-fong/solvent"
+	HOMEPAGE_URL "https://github.com/david-fong/ookiidoku"
 	LANGUAGES CXX
 )
 
@@ -33,12 +33,12 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
 endif()
 
 
-add_subdirectory(src/solvent_util)
-add_subdirectory(src/solvent)
-# add_subdirectory(src/solvent_gpu)
+add_subdirectory(src/ookiidoku_util)
+add_subdirectory(src/ookiidoku)
+# add_subdirectory(src/ookiidoku_gpu)
 
-add_subdirectory(src/solvent_cli)
-# add_subdirectory(src/solvent_web)
+add_subdirectory(src/ookiidoku_cli)
+# add_subdirectory(src/ookiidoku_web)
 
 add_subdirectory(tools)
 
@@ -48,12 +48,12 @@ endif()
 
 
 # try using FILE_SETs when more people have cmake 3.23
-install(DIRECTORY include/solvent DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-install(TARGETS solvent solvent_cli EXPORT solventTargets)
-install(EXPORT solventTargets
-	FILE solventTargets.cmake
-	NAMESPACE solvent::
-	DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/solvent
+install(DIRECTORY include/ookiidoku DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(TARGETS ookiidoku ookiidoku_cli EXPORT ookiidokuTargets)
+install(EXPORT ookiidokuTargets
+	FILE ookiidokuTargets.cmake
+	NAMESPACE ookiidoku::
+	DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/ookiidoku
 )
 
 

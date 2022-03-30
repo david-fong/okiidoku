@@ -1,13 +1,13 @@
-// #include "solvent/gen/batch.hpp"
-#include "solvent/gen/stochastic.hpp"
-#include "solvent/morph/canon.hpp"
-#include "solvent/morph/scramble.hpp"
-#include "solvent/print_2d.hpp"
-#include "solvent/db/serdes.hpp"
-#include "solvent/grid.hpp"
-#include "solvent/rng.hpp"
+// #include <ookiidoku/gen/batch.hpp>
+#include <ookiidoku/gen/stochastic.hpp>
+#include <ookiidoku/morph/canon.hpp>
+#include <ookiidoku/morph/scramble.hpp>
+#include <ookiidoku/print_2d.hpp>
+#include <ookiidoku/db/serdes.hpp>
+#include <ookiidoku/grid.hpp>
+#include <ookiidoku/rng.hpp>
 
-#include "solvent_util/console_setup.hpp"
+#include <ookiidoku_util/console_setup.hpp>
 
 #include <iostream>  // cout,
 #include <string>
@@ -18,9 +18,9 @@
 // TODO.low experiment with effect of batching gen and then doing canon on that batch for perf
 // TODO.high it should probably just return right away if it encounters any failure.
 // returns the number of failures
-template<solvent::Order O>
+template<ookiidoku::Order O>
 unsigned test_morph_O(const unsigned num_rounds) {
-	using namespace solvent;
+	using namespace ookiidoku;
 	constexpr unsigned O4 {O*O*O*O};
 	std::cout << "\n\ntesting for order " << O << std::endl;
 	// Note: if gen_path gets un-deprecated, assert that paths are valid.
@@ -30,11 +30,11 @@ unsigned test_morph_O(const unsigned num_rounds) {
 		gen::ss::GeneratorO<O> g {};
 		g();
 
-		std::array<typename solvent::size<O>::ord2x_t, O4> gen_grid;
+		std::array<typename ookiidoku::size<O>::ord2x_t, O4> gen_grid;
 		g.write_to_(std::span(gen_grid));
 		morph::canonicalize<O>(gen_grid);
 
-		std::array<typename solvent::size<O>::ord2x_t, O4> canon_grid = gen_grid;
+		std::array<typename ookiidoku::size<O>::ord2x_t, O4> canon_grid = gen_grid;
 		morph::scramble<O>(canon_grid);
 		morph::canonicalize<O>(canon_grid);
 
@@ -68,7 +68,7 @@ unsigned test_morph_O(const unsigned num_rounds) {
 /**
 */
 int main(const int argc, char const *const argv[]) {
-	solvent::util::setup_console();
+	ookiidoku::util::setup_console();
 
 	std::uint_fast64_t srand_key;  // 1
 	unsigned int num_rounds; // 2
@@ -86,7 +86,7 @@ int main(const int argc, char const *const argv[]) {
 	<< std::endl;
 
 	// Scramble the random number generators:
-	solvent::seed_rng(srand_key);
+	ookiidoku::seed_rng(srand_key);
 
 	if (test_morph_O<3>(num_rounds)) {
 		// return 1;
@@ -101,7 +101,7 @@ int main(const int argc, char const *const argv[]) {
 		// return 1;
 	}
 
-	// std::cout << "\ntotal: " << solvent::gen::ss::total;
-	// std::cout << "\ntrue_: " << solvent::gen::ss::true_ << std::endl;
+	// std::cout << "\ntotal: " << ookiidoku::gen::ss::total;
+	// std::cout << "\ntrue_: " << ookiidoku::gen::ss::true_ << std::endl;
 	return 0;
 }

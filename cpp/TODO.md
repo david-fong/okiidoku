@@ -12,13 +12,7 @@
 
 ## Higher Priority
 
-- rebrand: rename project from "solvent" to "ookiidoku"
-
-- previously changed all my includes to use quotes instead of angle brackets after reading [this from Jason Turner's cpp best practices](https://github.com/cpp-best-practices/cppbestpractices/blob/master/03-Style.md#use--for-including-local-files). But here in [cppCoreGuidelines](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#sf12-prefer-the-quoted-form-of-include-for-files-relative-to-the-including-file-and-the-angle-bracket-form-everywhere-else) says to use quotes only for relative path includes. Maybe I misinterpreted/over-interpreted Jason Turner's instructions. Either way, I like the cppCoreGuidelines rationale. Please change back to using it.
-
 - how is vector-of-bool's tweak header thing supposed to work with installation? I don't know how to copy the tweak config to 
-
-- The batch headers use `solvent_util/timer.hpp`. That's not good because the util headers are supposed to be private. Either move timer into include/, or remove the timing capability from batch. I can even imagine a batch api that gives the caller control over when to stop.
 
 - make some grid things for binary and text serdes (and test please).
   - Implement a program in the tools folder to do format conversions.
@@ -35,6 +29,7 @@
   - see if it can improve switch case cover detection (I think not. I already have some enum-switch-returns that the current gcc warning flags complain about if I don't have a default case).
   - if this works out, make sure to update all the contract docs and remove relevant assertions.
 - move the emoji definitions out of the program binary and externalize as a configurable data read in at runtime?
+- Consider removing the timing capability from batch. I can even imagine a batch api that gives the caller control over when to stop.
 
 - after experimenting with different stochastic implementations, try implementing an opencl program. The minstd_rand rng is very simple to implement. I think the stochastic algorithm is data-parallelizable.
   - I wonder if there's a bitset implementation for opencl...

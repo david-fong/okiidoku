@@ -1,1 +1,1 @@
-add_subdirectory(solvent_translator)
+add_subdirectory(ookiidoku_translator)

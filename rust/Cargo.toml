@@ -1,8 +1,8 @@
 [package]
-name = "solvent"
+name = "ookiidoku"
 description = "A simple, fast, multi-threaded, variable-size sudoku solution generator and canonicalizer. Not a solver."
 license = "MIT"
-repository = "https://github.com/david-fong/solvent"
+repository = "https://github.com/david-fong/ookiidoku"
 version = "0.1.0"
 authors = ["david-fong <davidfong19@gmail.com>"]
 edition = "2018"
@@ -12,7 +12,7 @@ edition = "2018"
 [lib]
 
 [[bin]]
-name = "solvent"
+name = "ookiidoku"
 path = "src/main.rs"
 
 [dependencies]
