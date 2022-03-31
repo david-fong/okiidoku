@@ -119,7 +119,7 @@ namespace ookiidoku::gen::bt {
 			}
 		}
 		#ifndef NDEBUG
-		std::array<ord2i_t, O4> grid;
+		grid_arr_flat_t<O> grid;
 		this->write_to_(std::span(grid));
 		assert(is_sudoku_valid<O>(grid));
 		#endif

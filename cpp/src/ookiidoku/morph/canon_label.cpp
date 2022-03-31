@@ -31,10 +31,10 @@ namespace ookiidoku::morph {
 
 	private:
 		struct State final {
-			grid_arr_t<O, Rel<O>> rel_table;
+			grid_arr2d_t<O, Rel<O>> rel_table;
 			label_map_t<O> to_og;
 			std::array<ord2i_t, O2> tie_links {0};
-			explicit State(const grid_const_span_t<O> grid) noexcept: rel_table{make_rel_table<O>(grid)} {
+			explicit constexpr State(const grid_const_span_t<O> grid) noexcept: rel_table{make_rel_table<O>(grid)} {
 				std::iota(to_og.begin(), to_og.end(), 0);
 				tie_links[0] = O2;
 			}
@@ -51,7 +51,7 @@ namespace ookiidoku::morph {
 
 	template<Order O>
 	void CanonLabel<O>::do_a_pass_(CanonLabel<O>::State& s) noexcept {
-		grid_arr_t<O, Rel<O>> scratch;
+		grid_arr2d_t<O, Rel<O>> scratch;
 
 		label_map_t<O> to_tied;
 		std::iota(to_tied.begin(), to_tied.end(), 0);

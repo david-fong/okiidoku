@@ -5,18 +5,41 @@
 namespace ookiidoku::morph {
 
 	template<Order O>
-	void Transformation<O>::apply_to(const grid_span_t<O> grid) const noexcept {
-		std::array<typename size<O>::ord2i_least_t, O4> orig_grid;
-		std::copy(grid.begin(), grid.end(), orig_grid.begin());
-
-		for (ord2i_t og_row {0}; og_row < O2; ++og_row) {
-		for (ord2i_t og_col {0}; og_col < O2; ++og_col) {
-			ord2i_t mapped_row = row_map[og_row/O1][og_row%O1];
-			ord2i_t mapped_col = col_map[og_col/O1][og_col%O1];
-			if (transpose) { std::swap(mapped_row, mapped_col); }
-			auto orig_label = orig_grid[(O2*og_row)+og_col];
-			grid[(O2*mapped_row) + mapped_col] = (orig_label == O2) ? O2 : label_map[orig_label];
+	void Transformation<O>::apply_from_to(const grid_const_span_t<O> src_grid, const grid_span_t<O> dest_grid) const noexcept {
+		for (ord2i_t src_row {0}; src_row < O2; ++src_row) {
+		for (ord2i_t src_col {0}; src_col < O2; ++src_col) {
+			auto dest_row = row_map[src_row/O1][src_row%O1];
+			auto dest_col = col_map[src_col/O1][src_col%O1];
+			if (transpose) { std::swap(dest_row, dest_col); }
+			const auto src_label = src_grid[(O2*src_row)+src_col];
+			dest_grid[(O2*dest_row) + dest_col] = (src_label == O2) ? O2 : label_map[src_label];
 		}}
+	}
+
+
+	template<Order O>
+	void Transformation<O>::apply_in_place(const grid_span_t<O> grid) const noexcept {
+		grid_arr_flat_t<O> og_grid;
+		std::copy(grid.begin(), grid.end(), og_grid.begin());
+		apply_from_to(og_grid, grid);
+	}
+
+
+	template<Order O>
+	Transformation<O> Transformation<O>::inverted() const noexcept {
+		Transformation<O> _;
+		for (ord2i_t i {0}; i < O2; ++i) {
+			_.label_map[label_map[i]] = static_cast<mapping_t>(i);
+		}
+		for (ord2i_t i {0}; i < O2; ++i) {
+			auto row_inv = row_map[i/O1][i%O1];
+			auto col_inv = col_map[i/O1][i%O1];
+			_.row_map[row_inv/O1][row_inv%O1] = static_cast<mapping_t>(i);
+			_.col_map[col_inv/O1][col_inv%O1] = static_cast<mapping_t>(i);
+		}
+		_.transpose = transpose;
+		assert(_.inverted() == *this);
+		return _;
 	}
 
 

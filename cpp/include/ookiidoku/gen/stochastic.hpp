@@ -76,8 +76,8 @@ namespace ookiidoku::gen::ss {
 		}
 
 	private:
-		grid_arr_t<O, val_t> cells_ {[]{
-			grid_arr_t<O, val_t> _;
+		grid_arr2d_t<O, val_t> cells_ {[]() consteval {
+			grid_arr2d_t<O, val_t> _;
 			for (auto& vto : _) { for (ord2i_t i {0}; i < O2; ++i) { vto[i] = static_cast<val_t>(i); } }
 			// ^ didn't want to import <algorithm> just for std::iota
 			return _;

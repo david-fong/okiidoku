@@ -13,7 +13,7 @@ namespace ookiidoku::morph {
 		typename size<O>::O2_mask_least_t blocks_v;
 	};
 	template<Order O>
-	grid_arr_t<O, RelMasks<O>> make_rel_masks_(const grid_const_span_t<O> grid_span) noexcept {
+	grid_arr2d_t<O, RelMasks<O>> make_rel_masks_(const grid_const_span_t<O> grid_span) noexcept {
 		using has_mask_t = size<O>::O2_mask_least_t;
 		using val_t = size<O>::ord2i_least_t;
 		using ord1i_t = size<O>::ord1i_t;
@@ -22,7 +22,7 @@ namespace ookiidoku::morph {
 		static constexpr ord2i_t O2 = O*O;
 
 		GridSpan2D<O, const val_t> grid(grid_span);
-		grid_arr_t<O, RelMasks<O>> masks {};
+		grid_arr2d_t<O, RelMasks<O>> masks {};
 		for (ord2i_t line {0}; line < O2; ++line) {
 		for (ord2i_t atom {0}; atom < O2; atom += O1) {
 			// Go through all unique pairs in the atom:
@@ -47,7 +47,7 @@ namespace ookiidoku::morph {
 
 	template<Order O>
 	requires (is_order_compiled(O))
-	grid_arr_t<O, Rel<O>> make_rel_table(const grid_const_span_t<O> grid_in) {
+	grid_arr2d_t<O, Rel<O>> make_rel_table(const grid_const_span_t<O> grid_in) {
 		using has_mask_t = size<O>::O2_mask_least_t;
 		using ord1i_t = size<O>::ord1i_t;
 		using ord2i_t = size<O>::ord2i_t;
@@ -55,8 +55,8 @@ namespace ookiidoku::morph {
 		static constexpr ord1i_t O1 = O;
 		static constexpr ord2i_t O2 = O*O;
 
-		const grid_arr_t<O, RelMasks<O>> masks = make_rel_masks_<O>(grid_in);
-		grid_arr_t<O, Rel<O>> table; // uninitialized!
+		const grid_arr2d_t<O, RelMasks<O>> masks = make_rel_masks_<O>(grid_in);
+		grid_arr2d_t<O, Rel<O>> table; // uninitialized!
 		for (ord2i_t r {0}; r < O2; ++r) {
 		for (ord2i_t c {0}; c < O2; ++c) {
 			const RelMasks<O>& mask = masks[r][c];
@@ -121,7 +121,7 @@ namespace ookiidoku::morph {
 
 	#define M_OOKIIDOKU_TEMPL_TEMPL(O_) \
 		template struct Rel<O_>; \
-		template grid_arr_t<O_, Rel<O_>> make_rel_table<O_>(grid_const_span_t<O_>);
+		template grid_arr2d_t<O_, Rel<O_>> make_rel_table<O_>(grid_const_span_t<O_>);
 	M_OOKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 	#undef M_OOKIIDOKU_TEMPL_TEMPL
 }

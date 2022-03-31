@@ -1,6 +1,6 @@
 [package]
 name = "ookiidoku"
-description = "A simple, fast, multi-threaded, variable-size sudoku solution generator and canonicalizer. Not a solver."
+description = "A variable-size sudoku solution generator and canonicalizer."
 license = "MIT"
 repository = "https://github.com/david-fong/ookiidoku"
 version = "0.1.0"

@@ -41,9 +41,9 @@ namespace ookiidoku::morph {
 			std::array<ord2i_t, O2> line_tie_links {{0}};
 			std::array<ord1i_t, O1> chute_tie_links {0};
 
-			explicit PolarState() noexcept {
+			explicit constexpr PolarState() noexcept {
 				for (ord2i_t i {0}; i < O2; ++i) {
-					to_og[i/O2][i%O2] = static_cast<mapping_t>(i);
+					to_og[i/O1][i%O1] = static_cast<mapping_t>(i);
 				}
 				for (ord2i_t i {0}; i < O2; i += O1) {
 					line_tie_links[i] = i + O1;
@@ -58,7 +58,7 @@ namespace ookiidoku::morph {
 					|| std::ranges::any_of(chute_tie_links, [](auto link){ return link == 0; });
 			}
 
-			void do_a_pass(const grid_arr_t<O>&, atom_grid_t&, bool, const PolarState&);
+			void do_a_pass(grid_const_span_t<O>, bool, const PolarState&);
 		};
 
 	public:
@@ -68,17 +68,24 @@ namespace ookiidoku::morph {
 
 	template<Order O>
 	void CanonPlace<O>::PolarState::do_a_pass(
-		const grid_arr_t<O>& src_grid,
-		atom_grid_t& atom_grid,
+		const grid_const_span_t<O> src_grid,
 		const bool is_transpose,
 		const PolarState& ortho
 	) {
-		{
-			// TODO update atom grid:
+		grid_arr_flat_t<O> table_arr_; {
+			const auto t {Transformation<O>{
+				Transformation<O>::identity.label_map,
+				is_transpose ? ortho.to_og : to_og,
+				is_transpose ? to_og : ortho.to_og,
+				is_transpose,
+			}};
+			t.apply_from_to(src_grid, table_arr_);
 		}
-		line_map_t<O> to_tied;
+		const GridSpan2D<O> table {table_arr_};
+
+		std::array<mapping_t, O2> to_tied; // TODO change this back to line_map_t
 		for (ord2i_t i {0}; i < O2; ++i) {
-			to_og[i/O2][i%O2] = i;
+			to_tied[i] = static_cast<mapping_t>(i);
 		}
 		// loop over tied line ranges:
 		for (ord2i_t tie_begin {0}; tie_begin < O2; tie_begin = line_tie_links[tie_begin]) {
@@ -86,11 +93,25 @@ namespace ookiidoku::morph {
 			if ((tie_begin + 1) == tie_end) [[likely]] {
 				continue; // not a tie.
 			}
-			// loop over orthogonally resolved lines:
-			for (ord2i_t ortho_tie_begin {0}; ortho_tie_begin < O2; ortho_tie_begin = ortho.line_tie_links[ortho_tie_begin]) {
-				ord2i_t ortho_tie_end = ortho.line_tie_links[ortho_tie_begin];
-				// TODO.high
+			// loop over the tied line range:
+			for (ord2i_t rel_i {tie_begin}; rel_i < tie_end; ++rel_i) {
+				auto row = table[rel_i];
+				// loop over orthogonal partially-resolved line ranges:
+				for (ord2i_t ortho_tie_begin {0}; ortho_tie_begin < O2; ortho_tie_begin = ortho.line_tie_links[ortho_tie_begin]) {
+					ord2i_t ortho_tie_end = ortho.line_tie_links[ortho_tie_begin];
+					std::sort(
+						std::next(row.begin(), ortho_tie_begin),
+						std::next(row.begin(), ortho_tie_end),
+						std::less{}
+					);
+				}
 			}
+			std::sort(
+				std::next(to_tied.begin(), tie_begin),
+				std::next(to_tied.begin(), tie_end),
+				[&](auto a, auto b){ return std::ranges::lexicographical_compare(table[a], table[b]); }
+			);
+			// TODO.high this will never sort chute-groups of lines in to_og... :( needs refactoring and will probably get much more complicated			
 		}
 		// loop over tied chute ranges:
 		for (ord2i_t tie_begin {0}; tie_begin < O2; tie_begin = chute_tie_links[tie_begin]) {
@@ -100,53 +121,63 @@ namespace ookiidoku::morph {
 			}
 			// TODO
 		}
+
+		/* TODO.high for() */{
+			{
+				// update line_tie_links:
+				ord2i_t begin {tie_begin};
+				for (ord2i_t canon_i {static_cast<ord2i_t>(begin+1)}; canon_i < tie_end; ++canon_i) {
+					if (!std::ranges::equal(table[to_tied[canon_i - 1]], table[to_tied[canon_i]])) {
+						line_tie_links[begin] = canon_i;
+						begin = canon_i;
+				}	}
+				line_tie_links[begin] = tie_end;
+			}
+			// TODO.high update chute_tie_links:
+		}
+
+
+		{
+			// update s.to_og:
+			std::array<mapping_t, O2> tied_to_og {s.to_og};
+			for (ord2i_t i {0}; i < O2; ++i) {
+				s.to_og[i/O1][i%O1] = tied_to_og[to_tied[i]];
+			}
+		}
 	}
 
 
 	template<Order O>
 	Transformation<O> CanonPlace<O>::do_it(const grid_span_t<O> src_grid) {
-		PolarState h_state {};
-		PolarState v_state {};
-		atom_grid_t h_atom_grid;
-		atom_grid_t v_atom_grid; // TODO initialize
+		PolarState row_state {};
+		PolarState col_state {};
 
-		while (h_state.has_ties() || v_state.has_ties()) {
-			auto old_h_state {h_state};
-			auto old_v_to_og {v_state.to_og};
-			h_state.do_a_pass(src_grid, h_atom_grid, false, v_state);
-			v_state.do_a_pass(src_grid, v_atom_grid, true, old_h_state);
-		}
+		while (row_state.has_ties() || col_state.has_ties()) {
+			const auto old_row_state {row_state};
+			const auto old_col_state {col_state};
+			row_state.do_a_pass(src_grid, false, col_state);
+			col_state.do_a_pass(src_grid, true, old_row_state);
 
-		std::array<val_t, O4> canon_grid {O2};
-		for (ord2i_t canon_row {0}; canon_row < O2; ++canon_row) {
-			const ord2i_t orig_row = h_state.to_og[canon_row/O1][canon_row%O1];
-			for (ord2i_t canon_col {0}; canon_col < O2; ++canon_col) {
-				const ord2i_t orig_col = v_state.to_og[canon_row/O1][canon_row%O1];
-				canon_grid[(O2*canon_row)+canon_col] = src_grid[(O2*orig_row)+orig_col];
+			if (  old_row_state.line_tie_links  == row_state.line_tie_links
+				&& old_row_state.chute_tie_links == row_state.chute_tie_links
+				&& old_col_state.line_tie_links  == col_state.line_tie_links
+				&& old_col_state.chute_tie_links == col_state.chute_tie_links
+			) {
+				// TODO.mid stalemate... current design insufficient?
+				break;
 			}
 		}
-		bool transpose;
-		if (std::is_gt(h_atom_grid <=> v_atom_grid)) {
-			transpose = true;
-			for (ord2i_t i {0}; i < O2; ++i) {
-			for (ord2i_t j {0}; j < O2; ++j) {
-				src_grid[O2*i+j] = canon_grid[O2*j+i];
-			}}
-			std::swap(h_state, v_state);
-		} else {
-			transpose = false;
-			for (ord2i_t i {0}; i < O2; ++i) {
-			for (ord2i_t j {0}; j < O2; ++j) {
-				src_grid[O2*i+j] = canon_grid[O2*i+j];
-			}}
-		}
+
+		Transformation<O> transformation {Transformation<O>{
+			.label_map {Transformation<O>::identity.label_map},
+			.transpose {false},
+			.row_map {row_state.to_og},
+			.col_map {col_state.to_og}
+		}.inverted()};
+		// TODO use two iota views mapped one to src_grid and one to transposed view and lexicographical compare. if transposed less, edit transformation and apply a transpose_only transformation to src_grid in place.
+		transformation.apply_in_place(src_grid);
 		assert(is_sudoku_valid<O>(src_grid));
-		return Transformation<O>{
-			.label_map {},
-			.transpose {transpose},
-			.row_map {h_state.to_og},
-			.col_map {v_state.to_og}
-		};
+		return transformation;
 	}
 
 

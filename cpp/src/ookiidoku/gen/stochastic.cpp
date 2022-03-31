@@ -135,7 +135,7 @@ namespace ookiidoku::gen::ss {
 		// std::cout << op_count;
 
 		#ifndef NDEBUG
-		std::array<ord2i_least_t, O4> grid;
+		grid_arr_flat_t<O> grid;
 		this->write_to_(std::span(grid));
 		assert(is_sudoku_valid<O>(std::span<const ord2i_least_t, O4>(grid)));
 		#endif

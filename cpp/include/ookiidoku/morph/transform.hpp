@@ -23,12 +23,22 @@ namespace ookiidoku::morph {
 		using label_map_t = std::array<mapping_t, O2>;
 		using line_map_t = std::array<std::array<mapping_t, O1>, O1>;
 
-		label_map_t label_map {[]{ label_map_t _; for (ord2i_t i {0}; i < O2; ++i) { _[i] = static_cast<mapping_t>(i); } return _; }()};
-		bool transpose {false};
-		line_map_t row_map {[]{ line_map_t _; for (ord2i_t i {0}; i < O2; ++i) { _[i/O1][i%O1] = static_cast<mapping_t>(i); } return _; }()};
-		line_map_t col_map {[]{ line_map_t _; for (ord2i_t i {0}; i < O2; ++i) { _[i/O1][i%O1] = static_cast<mapping_t>(i); } return _; }()};
+		label_map_t label_map {identity.label_map};
+		line_map_t row_map {identity.row_map};
+		line_map_t col_map {identity.col_map};
+		bool transpose {identity.transpose};
 
-		void apply_to(grid_span_t<O>) const noexcept;
+		static constexpr Transformation<O> identity {
+			.label_map {[]{ label_map_t _; for (ord2i_t i {0}; i < O2; ++i) { _[i] = static_cast<mapping_t>(i); } return _; }()},
+			.row_map {[]{ line_map_t _; for (ord2i_t i {0}; i < O2; ++i) { _[i/O1][i%O1] = static_cast<mapping_t>(i); } return _; }()},
+			.col_map {[]{ line_map_t _; for (ord2i_t i {0}; i < O2; ++i) { _[i/O1][i%O1] = static_cast<mapping_t>(i); } return _; }()},
+			.transpose {false},
+		};
+
+		bool operator==(const Transformation<O>&) const = default;
+		void apply_from_to(grid_const_span_t<O> src, grid_span_t<O> dest) const noexcept;
+		void apply_in_place(grid_span_t<O>) const noexcept;
+		Transformation<O> inverted() const noexcept;
 	};
 
 

@@ -21,7 +21,6 @@
 template<ookiidoku::Order O>
 unsigned test_morph_O(const unsigned num_rounds) {
 	using namespace ookiidoku;
-	constexpr unsigned O4 {O*O*O*O};
 	std::cout << "\n\ntesting for order " << O << std::endl;
 	// Note: if gen_path gets un-deprecated, assert that paths are valid.
 
@@ -30,11 +29,11 @@ unsigned test_morph_O(const unsigned num_rounds) {
 		gen::ss::GeneratorO<O> g {};
 		g();
 
-		std::array<typename ookiidoku::size<O>::ord2x_t, O4> gen_grid;
+		grid_arr_flat_t<O> gen_grid;
 		g.write_to_(std::span(gen_grid));
 		morph::canonicalize<O>(gen_grid);
 
-		std::array<typename ookiidoku::size<O>::ord2x_t, O4> canon_grid = gen_grid;
+		grid_arr_flat_t<O> canon_grid = gen_grid;
 		morph::scramble<O>(canon_grid);
 		morph::canonicalize<O>(canon_grid);
 

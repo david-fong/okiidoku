@@ -11,10 +11,10 @@
 
 namespace ookiidoku::db {
 
-	class Db {
+	class Db final {
 		;
 	};
-	struct Header {
+	struct Header final {
 		bool is_locked; // true if another operation is currently using this Db already.
 		std::uint8_t order;
 		bool is_solved;

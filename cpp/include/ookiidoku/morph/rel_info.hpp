@@ -35,7 +35,7 @@ namespace ookiidoku::morph {
 	// contract: the span is a _complete_, valid grid.
 	template<Order O>
 	requires (is_order_compiled(O))
-	OOKIIDOKU_EXPORT grid_arr_t<O, Rel<O>> make_rel_table(grid_const_span_t<O>);
+	OOKIIDOKU_EXPORT grid_arr2d_t<O, Rel<O>> make_rel_table(grid_const_span_t<O>);
 
 
 	#define M_OOKIIDOKU_TEMPL_TEMPL(O_) \

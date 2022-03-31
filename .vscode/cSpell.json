@@ -18,6 +18,8 @@
 		"cmake",
 		"cout",
 		"ctzll",
+		"deserialization",
+		"desmos",
 		"distrib",
 		"emscripten",
 		"genpath",

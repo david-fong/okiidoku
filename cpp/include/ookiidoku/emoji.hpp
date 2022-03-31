@@ -7,7 +7,7 @@
 #include <string_view>
 
 namespace ookiidoku::emoji {
-	struct Set {
+	struct Set final {
 		std::string_view name;
 		std::vector<std::string_view> entries;
 	};

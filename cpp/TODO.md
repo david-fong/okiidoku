@@ -2,14 +2,16 @@
 
 ## Big Strokes
 
+- refactor and improve canonicalization
 - compare backtracking and stochastic search statistics
-- improve canonicalization for order 3
-- implement translator tool
+- implement grid-serdes translator tool
 - database
 - deductive reasoning + backtracking solver
+- emscripten build and website
 - puzzle creation experiments (see [bottom section](#interesting-questions-for-further-research))
 - minlexing canonicalization
 - compare canonicalization methods (performance / time-complexity)
+- opencl stochastic generator
 
 ## Higher Priority
 
@@ -26,6 +28,8 @@
 
 - experiment with the option of making each order be its own dynamic library.
   - Is there anything that would currently make this option wasteful in terms of binary size?
+    - emojis are currently hardcoded in-source.
+    - each mersenne twister in rng.cpp.
 - try making Order an enum
   - see if it can improve switch case cover detection (I think not. I already have some enum-switch-returns that the current gcc warning flags complain about if I don't have a default case).
   - if this works out, make sure to update all the contract docs and remove relevant assertions.
@@ -82,3 +86,7 @@
   - What is the relationship between number of hints and puzzle difficulty?
   - What is the relationship between distribution of hints between houses/chutes and puzzle difficulty?
   - What is the relationship between the relationship between hints and cell relationships and puzzle difficulty?
+
+- Since the stochastic generator cannot deterministically traverse all possible outputs, could it be possible that at a certain point, it becomes easier to find more unique (non-equivalent to previously found) puzzles by continuing a backtracking generator from the output of a stochastic generator's output?
+
+- How does the average number of swaps / swaps-attempts required for the stochastic generator to generate a solution scale with size? what is the distribution of the observed complexity in terms of number of swaps / swap-attempts?

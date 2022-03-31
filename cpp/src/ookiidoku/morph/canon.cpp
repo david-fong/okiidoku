@@ -17,11 +17,11 @@ namespace ookiidoku::morph {
 
 	template<Order O>
 	requires (is_order_compiled(O))
-	Transformation<O> canonicalize(const grid_span_t<O> orig_grid) {
-		assert(is_sudoku_filled<O>(orig_grid));
-		assert(is_sudoku_valid<O>(orig_grid));
-		const auto label_map = canon_label<O>(orig_grid);
-		auto place_map = canon_place<O>(orig_grid);
+	Transformation<O> canonicalize(const grid_span_t<O> og_grid) {
+		assert(is_sudoku_filled<O>(og_grid));
+		assert(is_sudoku_valid<O>(og_grid));
+		const auto label_map = canon_label<O>(og_grid);
+		auto place_map = canon_place<O>(og_grid);
 		place_map.label_map = label_map;
 		return place_map;
 	}

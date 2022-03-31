@@ -5,10 +5,10 @@
 
 namespace ookiidoku {
 	//
-	struct Timer {
+	struct Timer final {
 		using time_point = std::chrono::steady_clock::time_point;
 
-		struct Elapsed {
+		struct Elapsed final {
 			double proc_seconds;
 			double wall_seconds;
 		};

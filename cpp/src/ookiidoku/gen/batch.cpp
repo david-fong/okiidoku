@@ -28,7 +28,7 @@ namespace ookiidoku::gen::ss::batch {
 	}
 
 
-	struct ThreadSharedData {
+	struct ThreadSharedData final {
 		const Params params;
 		BatchReport report {};
 	};

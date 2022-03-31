@@ -11,20 +11,24 @@
 
 namespace ookiidoku {
 
-	template<Order O, typename T=size<O>::ord2i_t> using grid_arr_t = std::array<std::array<T, O*O>, O*O>;
+	template<Order O, typename T=size<O>::ord2i_least_t> using grid_arr2d_t = std::array<std::array<T, O*O>, O*O>;
+	template<Order O, typename T=size<O>::ord2i_least_t> using grid_arr_flat_t = std::array<T, O*O*O*O>;
 	template<Order O, typename T=size<O>::ord2i_least_t> using grid_const_span_t = std::span<const T, O*O*O*O>;
 	template<Order O, typename T=size<O>::ord2i_least_t> using grid_span_t = std::span<T, O*O*O*O>;
 
 	// A thin wrapper over a span.
-	template<Order O, typename T=size<O>::ord2i_t>
+	template<Order O, typename T=size<O>::ord2i_least_t>
 	class GridSpan2D final {
 		grid_span_t<O, T> span_;
 	public:
-		GridSpan2D(grid_span_t<O, T> span): span_{span} {};
+		constexpr GridSpan2D(grid_span_t<O, T> span): span_{span} {};
 		// contract: row and col must be in [0,O2).
 		T& at(size<O>::ord2i_t row, size<O>::ord2i_t col) const noexcept {
 			assert(row < O*O && col < O*O);
 			return span_[(O*O*row) + col];
+		}
+		std::span<T, O*O> operator[](size<O>::ord2i_t row) const noexcept {
+			return static_cast<std::span<T, O*O>>(span_.subspan(O*O * row, O*O));
 		}
 	};
 
@@ -61,7 +65,7 @@ namespace ookiidoku {
 	
 
 	template<Order O>
-	struct OOKIIDOKU_EXPORT chute_blk_masks {
+	struct OOKIIDOKU_EXPORT chute_blk_masks final {
 		using M = size<O>::O2_mask_least_t;
 		using T = std::array<M, O>;
 		static inline const T row {[]{ // TODO.wait re-constexpr this when bitset gets constexpr :/ https://github.com/cplusplus/papers/issues/1087

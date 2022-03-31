@@ -59,9 +59,5 @@
 		"[css]": {
 			"editor.insertSpaces": false,
 		},
-		"cSpell.words": [
-			"Deserialization",
-			"desmos"
-		],
 	},
 }

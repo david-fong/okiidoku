@@ -23,7 +23,7 @@ namespace ookiidoku::morph {
 			}
 			t.transpose = static_cast<bool>(shared_mt_rng_() % 2);
 		}
-		t.apply_to(grid);
+		t.apply_in_place(grid);
 		assert(is_sudoku_valid<O>(grid));
 	}
 

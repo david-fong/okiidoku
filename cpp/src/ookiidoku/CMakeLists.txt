@@ -13,7 +13,6 @@ add_library(ookiidoku SHARED
 	gen/stochastic.cpp
 	gen/batch.cpp
 )
-# https://tldp.org/HOWTO/Program-Library-HOWTO/shared-libraries.html
 
 # https://cmake.org/cmake/help/latest/module/GenerateExportHeader.html
 include(GenerateExportHeader)

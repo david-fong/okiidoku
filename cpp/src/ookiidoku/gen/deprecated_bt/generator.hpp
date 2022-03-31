@@ -41,7 +41,7 @@ namespace ookiidoku::gen::bt {
 
 
 	//
-	struct OOKIIDOKU_EXPORT Params {
+	struct OOKIIDOKU_EXPORT Params final {
 		path::E path_kind {path::E::row_major};
 		std::uint_fast64_t max_dead_ends {0}; // Defaulted if zero.
 
@@ -175,8 +175,8 @@ namespace ookiidoku::gen::bt {
 		ord4i_t progress_ {0};
 
 		// indexed by `progress_ // O2`
-		grid_arr_t<O, ord2x_t> val_try_orders_ {[]{
-			grid_arr_t<O, ord2x_t> _;
+		grid_arr2d_t<O, ord2x_t> val_try_orders_ {[]{
+			grid_arr2d_t<O, ord2x_t> _;
 			for (auto& vto : _) { for (ord2i_t i {0}; i < O2; ++i) { vto[i] = i; } }
 			return _;
 		}()};
