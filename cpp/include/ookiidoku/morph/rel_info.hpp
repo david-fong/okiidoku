@@ -23,6 +23,7 @@ namespace ookiidoku::morph {
 		chute_imbalance_t<O> chute_imbalance_b;
 
 		std::strong_ordering operator<=>(const Rel<O>& that) const {
+			// TODO.mid could maybe use std::tie here https://en.cppreference.com/w/cpp/utility/tuple/tie
 			#define M_RETURN_IF_NEQ if (std::is_neq(cmp)) [[likely]] { return cmp; }
 			std::strong_ordering cmp = that.count <=> count;
 			M_RETURN_IF_NEQ; cmp = polar_count_lesser <=> that.polar_count_lesser;

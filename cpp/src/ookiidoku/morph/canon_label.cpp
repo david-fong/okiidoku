@@ -65,7 +65,7 @@ namespace ookiidoku::morph {
 			for (ord2i_t rel_i {tie_begin}; rel_i < tie_end; ++rel_i) {
 				auto& row = scratch[rel_i];
 				row = s.rel_table[rel_i];
-				// sort each tied slice for later lexicographical comparison:
+				// normalize tied slice for later sorting:
 				for (ord2i_t t_begin {0}; t_begin != O2; t_begin = s.tie_links[t_begin]) {
 					const ord2i_t t_end = s.tie_links[t_begin];
 					std::sort(

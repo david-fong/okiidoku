@@ -73,8 +73,12 @@
 - C++20
   - `using enum`. Might want to wait for CLANG to support?
 - C++23
+  - http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/p2214r0.html#does-adjacent-mean-2-or-n
   - `std::unreachable()`
   - `std::ranges::iota()`
+  - `std::views::chunk()`
+    - will be useful for `canon_place`
+    - currently added a dep on range-v3 just for this. Then had to pull in conan. Glad for the opportunity to learn something new, but if I can get rid of this in the future (the weight upon anybody who wishes to try building the project and is new-ish to C++), I'd really like to.
 - CLI
   - implement `-h` and `--help` CLI argument.
   - give a red message when trying to continue and nothing is left to be found.

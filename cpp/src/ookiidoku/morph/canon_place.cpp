@@ -3,6 +3,8 @@
 #include <ookiidoku/size.hpp>
 #include <ookiidoku/morph/rel_info.hpp>
 
+#include <range/v3/view/chunk.hpp>
+
 #include <iostream> // TODO.wait remove after done implementing
 #include <algorithm> // sort
 #include <numeric>   // iota
@@ -83,43 +85,61 @@ namespace ookiidoku::morph {
 		}
 		const GridSpan2D<O> table {table_arr_};
 
-		std::array<mapping_t, O2> to_tied; // TODO change this back to line_map_t
+		line_map_t<O> to_tied;
 		for (ord2i_t i {0}; i < O2; ++i) {
-			to_tied[i] = static_cast<mapping_t>(i);
+			to_tied[i/O1][i%O1] = static_cast<mapping_t>(i);
 		}
 		// loop over tied line ranges:
 		for (ord2i_t tie_begin {0}; tie_begin < O2; tie_begin = line_tie_links[tie_begin]) {
-			ord2i_t tie_end = line_tie_links[tie_begin];
+			const ord2i_t tie_end = line_tie_links[tie_begin];
 			if ((tie_begin + 1) == tie_end) [[likely]] {
 				continue; // not a tie.
 			}
 			// loop over the tied line range:
 			for (ord2i_t rel_i {tie_begin}; rel_i < tie_end; ++rel_i) {
 				auto row = table[rel_i];
-				// loop over orthogonal partially-resolved line ranges:
-				for (ord2i_t ortho_tie_begin {0}; ortho_tie_begin < O2; ortho_tie_begin = ortho.line_tie_links[ortho_tie_begin]) {
-					ord2i_t ortho_tie_end = ortho.line_tie_links[ortho_tie_begin];
+				// loop over orthogonal partially-resolved line ranges to normalize:
+				for (ord2i_t ortho_l_t_begin {0}; ortho_l_t_begin < O2; ortho_l_t_begin = ortho.line_tie_links[ortho_l_t_begin]) {
+					const ord2i_t ortho_l_t_end = ortho.line_tie_links[ortho_l_t_begin];
 					std::sort(
-						std::next(row.begin(), ortho_tie_begin),
-						std::next(row.begin(), ortho_tie_end),
+						std::next(row.begin(), ortho_l_t_begin),
+						std::next(row.begin(), ortho_l_t_end),
 						std::less{}
+					);
+				}
+				// loop over orthogonal partially-resolved chute ranges to normalize:
+				for (ord1i_t ortho_c_t_begin {0}; ortho_c_t_begin < O2; ortho_c_t_begin = ortho.chute_tie_links[ortho_c_t_begin]) {
+					const ord1i_t ortho_c_t_end = chute_tie_links[ortho_c_t_begin];
+					std::sort(
+						std::next(row.begin(), ortho_c_t_begin),
+						std::next(row.begin(), ortho_c_t_end),
+						[&](auto& a, auto& b){ return std::ranges::lexicographical_compare(
+							std::views::transform(a, [&](auto i) { return table[i]; }),
+							std::views::transform(b, [&](auto i) { return table[i]; })
+						); }
 					);
 				}
 			}
 			std::sort(
-				std::next(to_tied.begin(), tie_begin),
-				std::next(to_tied.begin(), tie_end),
+				std::next(to_tied[tie_begin/O1].begin(), tie_begin%O1),
+				std::next(to_tied[tie_begin/O1].begin(), tie_end  %O1),
 				[&](auto a, auto b){ return std::ranges::lexicographical_compare(table[a], table[b]); }
 			);
-			// TODO.high this will never sort chute-groups of lines in to_og... :( needs refactoring and will probably get much more complicated			
 		}
 		// loop over tied chute ranges:
-		for (ord2i_t tie_begin {0}; tie_begin < O2; tie_begin = chute_tie_links[tie_begin]) {
-			ord2i_t tie_end = chute_tie_links[tie_begin];
+		for (ord1i_t tie_begin {0}; tie_begin < O2; tie_begin = chute_tie_links[tie_begin]) {
+			const ord1i_t tie_end = chute_tie_links[tie_begin];
 			if ((tie_begin + 1) == tie_end) [[likely]] {
 				continue; // not a tie.
 			}
-			// TODO
+			std::sort(
+				std::next(to_tied.begin(), tie_begin),
+				std::next(to_tied.begin(), tie_end),
+				[&](auto& a, auto& b){ return std::ranges::lexicographical_compare(
+					std::views::transform(a, [&](auto i) { return table[i]; }),
+					std::views::transform(b, [&](auto i) { return table[i]; })
+				); }
+			);
 		}
 
 		/* TODO.high for() */{
@@ -139,9 +159,9 @@ namespace ookiidoku::morph {
 
 		{
 			// update s.to_og:
-			std::array<mapping_t, O2> tied_to_og {s.to_og};
+			line_map_t<O> tied_to_og {to_og};
 			for (ord2i_t i {0}; i < O2; ++i) {
-				s.to_og[i/O1][i%O1] = tied_to_og[to_tied[i]];
+				to_og[i/O1][i%O1] = tied_to_og[to_tied[i]/O1][to_tied[i]%O1];
 			}
 		}
 	}
@@ -168,12 +188,13 @@ namespace ookiidoku::morph {
 			}
 		}
 
-		Transformation<O> transformation {Transformation<O>{
+		auto transformation = Transformation<O>{
 			.label_map {Transformation<O>::identity.label_map},
-			.transpose {false},
 			.row_map {row_state.to_og},
 			.col_map {col_state.to_og}
-		}.inverted()};
+			.transpose {false},
+		};
+		transformation = transformation.inverted();
 		// TODO use two iota views mapped one to src_grid and one to transposed view and lexicographical compare. if transposed less, edit transformation and apply a transpose_only transformation to src_grid in place.
 		transformation.apply_in_place(src_grid);
 		assert(is_sudoku_valid<O>(src_grid));
@@ -189,8 +210,8 @@ namespace ookiidoku::morph {
 
 
 	#define M_OOKIIDOKU_TEMPL_TEMPL(O_) \
-		template Transformation<O_> canon_place<O_>(grid_span_t<O_>); \
-		template class CanonPlace<O_>;
+		template class CanonPlace<O_>; \
+		template Transformation<O_> canon_place<O_>(grid_span_t<O_>);
 	M_OOKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 	#undef M_OOKIIDOKU_TEMPL_TEMPL
 }

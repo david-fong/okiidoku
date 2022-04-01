@@ -50,5 +50,6 @@ target_include_directories(ookiidoku
 # 	# [["ookiidoku/grid.hpp"]]
 # )
 
+target_link_libraries(ookiidoku PRIVATE CONAN_PKG::range-v3) # TODO.low private? public?
 target_link_libraries(ookiidoku PUBLIC Threads::Threads)
 target_link_libraries(ookiidoku PRIVATE ookiidoku_util)

@@ -72,7 +72,7 @@ namespace ookiidoku {
 			T _ {0};
 			for (unsigned chute {0}; chute < O; ++chute) {
 				for (unsigned i {0}; i < O; ++i) {
-					_[chute] |= static_cast<M>(M{1} << ((O*chute) + i));
+					_[chute] |= M{1} << ((O*chute) + i);
 			}	}
 			return _;
 		}()};
@@ -80,7 +80,7 @@ namespace ookiidoku {
 			T _ {0};
 			for (unsigned chute {0}; chute < O; ++chute) {
 				for (unsigned i {0}; i < O; ++i) {
-					_[chute] |= static_cast<M>(M{1} << ((O*i) + chute));
+					_[chute] |= M{1} << ((O*i) + chute);
 			}	}
 			return _;
 		}()};

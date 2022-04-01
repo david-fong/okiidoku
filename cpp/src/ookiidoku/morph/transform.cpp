@@ -32,8 +32,8 @@ namespace ookiidoku::morph {
 			_.label_map[label_map[i]] = static_cast<mapping_t>(i);
 		}
 		for (ord2i_t i {0}; i < O2; ++i) {
-			auto row_inv = row_map[i/O1][i%O1];
-			auto col_inv = col_map[i/O1][i%O1];
+			const auto row_inv = row_map[i/O1][i%O1];
+			const auto col_inv = col_map[i/O1][i%O1];
 			_.row_map[row_inv/O1][row_inv%O1] = static_cast<mapping_t>(i);
 			_.col_map[col_inv/O1][col_inv%O1] = static_cast<mapping_t>(i);
 		}

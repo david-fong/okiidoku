@@ -5,9 +5,6 @@
 ## Snippets
 
 ```sh
-# initialize cmake files for release build
-cmake -S . -B build/Release -DCMAKE_BUILD_TYPE=Release
-
 # do these in a cmake build folder
 cmake --build .
 nm -nCD src/ookiidoku/libookiidoku.so   # view public symbols of the shared library sorted by address
