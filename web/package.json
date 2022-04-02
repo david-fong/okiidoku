@@ -1,6 +1,6 @@
 {
   "private": true,
-  "name": "ookiidoku",
+  "name": "okiidoku",
   "version": "0.1.0",
   "description": "A Sudoku solution generator. Fast and variable size.",
   "keywords": [
@@ -8,7 +8,7 @@
   ],
   "license": "MIT",
   "author": "David Fong (https://github.com/david-fong)",
-  "repository": "github:david-fong/ookiidoku",
+  "repository": "github:david-fong/okiidoku",
   "type": "module",
   "files": [],
   "sideEffects": [

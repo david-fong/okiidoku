@@ -1,1 +1,1 @@
-add_subdirectory(ookiidoku_translator)
+add_subdirectory(okiidoku_translator)

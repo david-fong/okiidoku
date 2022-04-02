@@ -7,7 +7,7 @@
 ```sh
 # do these in a cmake build folder
 cmake --build .
-nm -nCD src/ookiidoku/libookiidoku.so   # view public symbols of the shared library sorted by address
+nm -nCD src/okiidoku/libokiidoku.so   # view public symbols of the shared library sorted by address
 ```
 
 ## CMake Things

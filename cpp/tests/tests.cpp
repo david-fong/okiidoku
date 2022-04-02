@@ -1,13 +1,13 @@
-// #include <ookiidoku/gen/batch.hpp>
-#include <ookiidoku/gen/stochastic.hpp>
-#include <ookiidoku/morph/canon.hpp>
-#include <ookiidoku/morph/scramble.hpp>
-#include <ookiidoku/print_2d.hpp>
-#include <ookiidoku/db/serdes.hpp>
-#include <ookiidoku/grid.hpp>
-#include <ookiidoku/rng.hpp>
+// #include <okiidoku/gen/batch.hpp>
+#include <okiidoku/gen/stochastic.hpp>
+#include <okiidoku/morph/canon.hpp>
+#include <okiidoku/morph/scramble.hpp>
+#include <okiidoku/print_2d.hpp>
+#include <okiidoku/db/serdes.hpp>
+#include <okiidoku/grid.hpp>
+#include <okiidoku/rng.hpp>
 
-#include <ookiidoku_util/console_setup.hpp>
+#include <okiidoku_util/console_setup.hpp>
 
 #include <iostream>  // cout,
 #include <string>
@@ -18,9 +18,9 @@
 // TODO.low experiment with effect of batching gen and then doing canon on that batch for perf
 // TODO.high it should probably just return right away if it encounters any failure.
 // returns the number of failures
-template<ookiidoku::Order O>
+template<okiidoku::Order O>
 unsigned test_morph_O(const unsigned num_rounds) {
-	using namespace ookiidoku;
+	using namespace okiidoku;
 	std::cout << "\n\ntesting for order " << O << std::endl;
 	// Note: if gen_path gets un-deprecated, assert that paths are valid.
 
@@ -67,7 +67,7 @@ unsigned test_morph_O(const unsigned num_rounds) {
 /**
 */
 int main(const int argc, char const *const argv[]) {
-	ookiidoku::util::setup_console();
+	okiidoku::util::setup_console();
 
 	std::uint_fast64_t srand_key;  // 1
 	unsigned int num_rounds; // 2
@@ -85,7 +85,7 @@ int main(const int argc, char const *const argv[]) {
 	<< std::endl;
 
 	// Scramble the random number generators:
-	ookiidoku::seed_rng(srand_key);
+	okiidoku::seed_rng(srand_key);
 
 	if (test_morph_O<3>(num_rounds)) {
 		// return 1;
@@ -100,7 +100,7 @@ int main(const int argc, char const *const argv[]) {
 		// return 1;
 	}
 
-	// std::cout << "\ntotal: " << ookiidoku::gen::ss::total;
-	// std::cout << "\ntrue_: " << ookiidoku::gen::ss::true_ << std::endl;
+	// std::cout << "\ntotal: " << okiidoku::gen::ss::total;
+	// std::cout << "\ntrue_: " << okiidoku::gen::ss::true_ << std::endl;
 	return 0;
 }

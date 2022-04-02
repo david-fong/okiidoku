@@ -1,8 +1,8 @@
 [package]
-name = "ookiidoku"
+name = "okiidoku"
 description = "A variable-size sudoku solution generator and canonicalizer."
 license = "MIT"
-repository = "https://github.com/david-fong/ookiidoku"
+repository = "https://github.com/david-fong/okiidoku"
 version = "0.1.0"
 authors = ["david-fong <davidfong19@gmail.com>"]
 edition = "2018"
@@ -12,7 +12,7 @@ edition = "2018"
 [lib]
 
 [[bin]]
-name = "ookiidoku"
+name = "okiidoku"
 path = "src/main.rs"
 
 [dependencies]

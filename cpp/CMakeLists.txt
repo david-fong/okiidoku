@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.16)
-project(ookiidoku
+project(okiidoku
 	VERSION 0.0.1
 	DESCRIPTION "sudoku solution generator and canonicalizer"
-	HOMEPAGE_URL "https://github.com/david-fong/ookiidoku"
+	HOMEPAGE_URL "https://github.com/david-fong/okiidoku"
 	LANGUAGES CXX
 )
 
@@ -37,12 +37,12 @@ endif()
 # include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake) # Include Conan-generated file
 # conan_basic_setup(TARGETS) # Introduce Conan-generated targets
 
-add_subdirectory(src/ookiidoku_util)
-add_subdirectory(src/ookiidoku)
-# add_subdirectory(src/ookiidoku_gpu)
+add_subdirectory(src/okiidoku_util)
+add_subdirectory(src/okiidoku)
+# add_subdirectory(src/okiidoku_gpu)
 
-add_subdirectory(src/ookiidoku_cli)
-# add_subdirectory(src/ookiidoku_web)
+add_subdirectory(src/okiidoku_cli)
+# add_subdirectory(src/okiidoku_web)
 
 add_subdirectory(tools)
 
@@ -52,12 +52,12 @@ endif()
 
 
 # try using FILE_SETs when more people have cmake 3.23
-install(DIRECTORY include/ookiidoku DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-install(TARGETS ookiidoku ookiidoku_cli EXPORT ookiidokuTargets)
-install(EXPORT ookiidokuTargets
-	FILE ookiidokuTargets.cmake
-	NAMESPACE ookiidoku::
-	DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/ookiidoku
+install(DIRECTORY include/okiidoku DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(TARGETS okiidoku okiidoku_cli EXPORT okiidokuTargets)
+install(EXPORT okiidokuTargets
+	FILE okiidokuTargets.cmake
+	NAMESPACE okiidoku::
+	DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/okiidoku
 )
 
 

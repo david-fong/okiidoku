@@ -1,19 +1,19 @@
 
-# C++ Ookiidoku
+# C++ Okiidoku
 
 ## Using the Dynamic Library
 
-Building ookiidoku requires CMake (with [the minimum specified version](./CMakeLists.txt)), a C++ compiler [supporting C++20](https://en.cppreference.com/w/cpp/compiler_support), a build system like Make or Ninja, and Conan.
+Building okiidoku requires CMake (with [the minimum specified version](./CMakeLists.txt)), a C++ compiler [supporting C++20](https://en.cppreference.com/w/cpp/compiler_support), a build system like Make or Ninja, and Conan.
 
 Refer to the [CMake guide](https://cmake.org/cmake/help/latest/guide/importing-exporting/index.html). This may also help: [tldp.org on shared libraries](https://tldp.org/HOWTO/Program-Library-HOWTO/shared-libraries.html)
 
-- Make sure to read and follow the api contracts documented in the headers. Exceptions are intentionally not thrown for precondition violations. If you would like to run against a build of libookiidoku with assertions for debugging purposes, create and use a build of libookiidoku with `-DCMAKE_BUILD_TYPE=Debug`.
+- Make sure to read and follow the api contracts documented in the headers. Exceptions are intentionally not thrown for precondition violations. If you would like to run against a build of libokiidoku with assertions for debugging purposes, create and use a build of libokiidoku with `-DCMAKE_BUILD_TYPE=Debug`.
 
-- To change the supported grid sizes that get compiled, create a [tweak header](https://vector-of-bool.github.io/2020/10/04/lib-configuration.html#providing-a-tweak-header) for [`include/ookiidoku/ookiidoku_config.hpp`](include/ookiidoku/ookiidoku_config.hpp).
+- To change the supported grid sizes that get compiled, create a [tweak header](https://vector-of-bool.github.io/2020/10/04/lib-configuration.html#providing-a-tweak-header) for [`include/okiidoku/okiidoku_config.hpp`](include/okiidoku/okiidoku_config.hpp).
 
 - It does not make any use of `printf` and friends, so it is safe to do [`std::ios_base::sync_with_stdio(false);`](https://en.cppreference.com/w/cpp/io/ios_base/sync_with_stdio).
 
-## Building and Running ookiidoku\_cli
+## Building and Running okiidoku\_cli
 
 ```shell
 # cd into the cpp directory of the repo first
@@ -24,7 +24,7 @@ popd
 cmake -S . -B build/Release -DCMAKE_BUILD_TYPE=Release
 cd build/Release
 cmake --build . --config=Release
-./src/ookiidoku_cli/ookiidoku_cli
+./src/okiidoku_cli/okiidoku_cli
 ```
 
 ## Navigating the Source Code
