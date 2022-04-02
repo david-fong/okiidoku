@@ -24,7 +24,7 @@ namespace ookiidoku::morph {
 			t.transpose = static_cast<bool>(shared_mt_rng_() % 2);
 		}
 		t.apply_in_place(grid);
-		assert(is_sudoku_valid<O>(grid));
+		assert(grid_follows_rule<O>(grid));
 	}
 
 
@@ -38,7 +38,7 @@ namespace ookiidoku::morph {
 		#define M_OOKIIDOKU_TEMPL_TEMPL(O_) \
 			case O_: { \
 				constexpr unsigned O4 = O_*O_*O_*O_; \
-				using val_t = size<O_>::ord2i_least_t; \
+				using val_t = traits<O_>::o2i_smol_t; \
 				std::array<val_t,O4> grid_resize; \
 				for (unsigned i {0}; i < O4; ++i) { grid_resize[i] = static_cast<val_t>(grid[i]); } \
 				scramble<O_>(std::span(grid_resize)); \

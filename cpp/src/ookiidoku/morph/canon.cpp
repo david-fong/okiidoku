@@ -18,10 +18,11 @@ namespace ookiidoku::morph {
 	template<Order O>
 	requires (is_order_compiled(O))
 	Transformation<O> canonicalize(const grid_span_t<O> og_grid) {
-		assert(is_sudoku_filled<O>(og_grid));
-		assert(is_sudoku_valid<O>(og_grid));
+		assert(grid_is_filled<O>(og_grid));
+		assert(grid_follows_rule<O>(og_grid));
 		const auto label_map = canon_label<O>(og_grid);
-		auto place_map = canon_place<O>(og_grid);
+		// auto place_map = canon_place<O>(og_grid);
+		Transformation<O> place_map{};
 		place_map.label_map = label_map;
 		return place_map;
 	}
@@ -36,7 +37,7 @@ namespace ookiidoku::morph {
 		#define M_OOKIIDOKU_TEMPL_TEMPL(O_) \
 			case O_: { \
 				constexpr unsigned O4 = O_*O_*O_*O_; \
-				using val_t = size<O_>::ord2i_least_t; \
+				using val_t = traits<O_>::o2i_smol_t; \
 				std::array<val_t,O4> grid_resize; \
 				for (unsigned i {0}; i < O4; ++i) { grid_resize[i] = static_cast<val_t>(grid[i]); } \
 				canonicalize<O_>(std::span<val_t, O4>(grid_resize)); \
@@ -55,5 +56,5 @@ namespace ookiidoku::morph {
 	M_OOKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 	#undef M_OOKIIDOKU_TEMPL_TEMPL
 
-	template void canonicalize<size<O_MAX>::ord2i_least_t>(Order O, std::span<size<O_MAX>::ord2i_least_t>);
+	template void canonicalize<traits<O_MAX>::o2i_smol_t>(Order O, std::span<traits<O_MAX>::o2i_smol_t>);
 }

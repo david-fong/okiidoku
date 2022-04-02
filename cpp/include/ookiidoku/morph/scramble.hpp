@@ -2,7 +2,7 @@
 #define HPP_OOKIIDOKU__MORPH__SCRAMBLE
 
 #include <ookiidoku/grid.hpp>
-#include <ookiidoku/size.hpp>
+#include <ookiidoku/traits.hpp>
 #include <ookiidoku/ookiidoku_config.hpp>
 #include <ookiidoku_export.h>
 
@@ -13,7 +13,7 @@ namespace ookiidoku::morph {
 	requires (is_order_compiled(O))
 	OOKIIDOKU_EXPORT void scramble(grid_span_t<O>);
 
-	// contract: T fits size<O>::ord2i_t and scramble<O> is compiled. also see scramble<O>'s contract.
+	// contract: T fits traits<O>::o2i_t and scramble<O> is compiled. also see scramble<O>'s contract.
 	template<class T>
 	requires std::is_integral_v<T>
 	OOKIIDOKU_EXPORT void scramble(Order O, std::span<T>);

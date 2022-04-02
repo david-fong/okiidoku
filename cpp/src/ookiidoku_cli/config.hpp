@@ -2,7 +2,8 @@
 #define HPP_OOKIIDOKU_CLI__CONFIG
 
 #include <ookiidoku_cli/enum.hpp>
-#include <ookiidoku/size.hpp>
+#include <ookiidoku/traits.hpp>
+#include <ookiidoku/order.hpp>
 
 #include <string_view>
 #include <array>

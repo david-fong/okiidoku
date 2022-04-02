@@ -3,7 +3,7 @@
 
 #include <ookiidoku/gen/deprecated_bt/path.hpp>
 #include <ookiidoku/grid.hpp>
-#include <ookiidoku/size.hpp>
+#include <ookiidoku/traits.hpp>
 #include <ookiidoku/ookiidoku_config.hpp>
 #include <ookiidoku_export.h>
 
@@ -36,7 +36,7 @@ namespace ookiidoku::gen::bt {
 			/*7*/1'000'000'000'000ull, // <- not tested AT ALL ...
 		};
 		template<Order O>
-		using t = uint_leastN_t<std::bit_width(limit_i_max[O])>;
+		using t = uint_smolN_t<std::bit_width(limit_i_max[O])>;
 	};
 
 
@@ -61,10 +61,10 @@ namespace ookiidoku::gen::bt {
 
 	class OOKIIDOKU_EXPORT Generator {
 	public:
-		using val_t = size<O_MAX>::ord2i_t;
-		using coord_t = size<O_MAX>::ord4x_t;
+		using val_t = traits<O_MAX>::o2i_t;
+		using coord_t = traits<O_MAX>::o4x_t;
 		using dead_ends_t = float; // TODO.mid is this okay?
-		using backtrack_origin_t = size<O_MAX>::ord4x_least_t;
+		using backtrack_origin_t = traits<O_MAX>::o4x_smol_t;
 
 		// contract: GeneratorO<O> is compiled
 		static std::unique_ptr<Generator> create(Order O);
@@ -118,17 +118,17 @@ namespace ookiidoku::gen::bt {
 	requires (is_order_compiled(O) /* && (O < 6) */) // added <6 restriction for sanity
 	class OOKIIDOKU_EXPORT GeneratorO final : public Generator {
 	public:
-		using has_mask_t = size<O>::O2_mask_least_t; // perf seemed similar and slightly better compared to fast_t
-		using ord1i_t = size<O>::ord1i_t;
-		using ord2x_t = size<O>::ord2x_t;
-		using ord2i_t = size<O>::ord2i_t;
-		using ord4x_t = size<O>::ord4x_t;
-		using ord4i_t = size<O>::ord4i_t;
+		using has_mask_t = traits<O>::o2_bits_smol; // perf seemed similar and slightly better compared to fast_t
+		using o1i_t = traits<O>::o1i_t;
+		using o2x_t = traits<O>::o2x_t;
+		using o2i_t = traits<O>::o2i_t;
+		using o4x_t = traits<O>::o4x_t;
+		using o4i_t = traits<O>::o4i_t;
 		using dead_ends_t = cell_dead_ends::t<O>;
 
-		OOKIIDOKU_NO_EXPORT static constexpr ord1i_t O1 = O;
-		OOKIIDOKU_NO_EXPORT static constexpr ord2i_t O2 = O*O;
-		OOKIIDOKU_NO_EXPORT static constexpr ord4i_t O4 = O*O*O*O;
+		OOKIIDOKU_NO_EXPORT static constexpr o1i_t O1 = O;
+		OOKIIDOKU_NO_EXPORT static constexpr o2i_t O2 = O*O;
+		OOKIIDOKU_NO_EXPORT static constexpr o4i_t O4 = O*O*O*O;
 
 		void operator()(Params) override;
 		void continue_prev() override;
@@ -146,24 +146,24 @@ namespace ookiidoku::gen::bt {
 		[[nodiscard]] constexpr Generator::backtrack_origin_t get_backtrack_origin() const noexcept { return static_cast<Generator::backtrack_origin_t>(backtrack_origin_); }
 		[[nodiscard]] constexpr Generator::dead_ends_t get_most_dead_ends_seen() const noexcept { return static_cast<Generator::dead_ends_t>(most_dead_ends_seen_); }
 		[[nodiscard]] constexpr opcount_t get_op_count() const noexcept { return op_count_; }
-		[[nodiscard, gnu::hot]] Generator::val_t extract_val_at(Generator::coord_t coord) const noexcept { return static_cast<Generator::val_t>(extract_val_at_(static_cast<ord4x_t>(coord))); }
-		[[nodiscard]] Generator::dead_ends_t extract_dead_ends_at(Generator::coord_t coord) const noexcept { return static_cast<Generator::dead_ends_t>(extract_dead_ends_at_(static_cast<ord4x_t>(coord))); }
+		[[nodiscard, gnu::hot]] Generator::val_t extract_val_at(Generator::coord_t coord) const noexcept { return static_cast<Generator::val_t>(extract_val_at_(static_cast<o4x_t>(coord))); }
+		[[nodiscard]] Generator::dead_ends_t extract_dead_ends_at(Generator::coord_t coord) const noexcept { return static_cast<Generator::dead_ends_t>(extract_dead_ends_at_(static_cast<o4x_t>(coord))); }
 
 		[[nodiscard]] constexpr const auto& get_backtrack_origin_() const noexcept { return backtrack_origin_; }
 		[[nodiscard]] constexpr const auto& get_most_dead_ends_seen_() const noexcept { return most_dead_ends_seen_; }
-		[[nodiscard, gnu::hot]] ord2i_t extract_val_at_(ord4x_t coord) const noexcept;
-		[[nodiscard]] dead_ends_t extract_dead_ends_at_(ord4x_t coord) const noexcept;
+		[[nodiscard, gnu::hot]] o2i_t extract_val_at_(o4x_t coord) const noexcept;
+		[[nodiscard]] dead_ends_t extract_dead_ends_at_(o4x_t coord) const noexcept;
 
 		template<class T>
-		requires std::is_integral_v<T> && (!std::is_const_v<T>) && (sizeof(T) >= sizeof(ord2i_t))
+		requires std::is_integral_v<T> && (!std::is_const_v<T>) && (sizeof(T) >= sizeof(o2i_t))
 		void write_to_(std::span<T, O4> sink) const {
 			assert(sink.size() >= O4);
-			for (ord4i_t i {0}; i < O4; ++i) { sink[i] = extract_val_at_(i); }
+			for (o4i_t i {0}; i < O4; ++i) { sink[i] = extract_val_at_(i); }
 		}
 
 	private:
 		struct Cell final {
-			ord2i_t try_index; // Index into val_try_orders_. O2 if clear.
+			o2i_t try_index; // Index into val_try_orders_. O2 if clear.
 			OOKIIDOKU_NO_EXPORT void clear() noexcept { try_index = O2; }
 			OOKIIDOKU_NO_EXPORT [[nodiscard, gnu::pure]] bool is_clear() const noexcept { return try_index == O2; }
 		};
@@ -172,12 +172,12 @@ namespace ookiidoku::gen::bt {
 			bool is_back_skip; // only meaningful when is_back is true.
 		};
 		Params params_;
-		ord4i_t progress_ {0};
+		o4i_t progress_ {0};
 
 		// indexed by `progress_ // O2`
-		grid_arr2d_t<O, ord2x_t> val_try_orders_ {[]{
-			grid_arr2d_t<O, ord2x_t> _;
-			for (auto& vto : _) { for (ord2i_t i {0}; i < O2; ++i) { vto[i] = i; } }
+		grid_arr2d_t<O, o2x_t> val_try_orders_ {[]{
+			grid_arr2d_t<O, o2x_t> _;
+			for (auto& vto : _) { for (o2i_t i {0}; i < O2; ++i) { vto[i] = i; } }
 			return _;
 		}()};
 
@@ -192,7 +192,7 @@ namespace ookiidoku::gen::bt {
 		opcount_t op_count_ {0};
 
 		OOKIIDOKU_NO_EXPORT [[gnu::hot]] void generate_();
-		OOKIIDOKU_NO_EXPORT [[gnu::hot]] Direction set_next_valid_(path::coord_converter_t<O>, bool backtracked) noexcept;
+		OOKIIDOKU_NO_EXPORT [[gnu::hot]] Direction set_next_valid_(path::coord_converter<O>, bool backtracked) noexcept;
 	};
 
 

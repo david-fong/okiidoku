@@ -1,7 +1,7 @@
 #ifndef HPP_OOKIIDOKU__GEN__PATH
 #define HPP_OOKIIDOKU__GEN__PATH
 
-#include <ookiidoku/size.hpp>
+#include <ookiidoku/traits.hpp>
 #include <ookiidoku/ookiidoku_config.hpp>
 #include <ookiidoku_export.h>
 
@@ -33,12 +33,12 @@ namespace ookiidoku::gen::bt::path {
 
 
 	template<ookiidoku::Order O>
-	using coord_converter_t = [[gnu::const]] typename size<O>::ord4x_t (&)(typename size<O>::ord4x_t) noexcept;
+	using coord_converter = [[gnu::const]] typename traits<O>::o4x_t (&)(typename traits<O>::o4x_t) noexcept;
 
 	template<ookiidoku::Order O> [[nodiscard, gnu::const]]
-	OOKIIDOKU_EXPORT coord_converter_t<O> get_prog_to_coord_converter(E) noexcept;
+	OOKIIDOKU_EXPORT coord_converter<O> get_prog_to_coord_converter(E) noexcept;
 
 	template<ookiidoku::Order O> [[nodiscard, gnu::const]]
-	OOKIIDOKU_EXPORT coord_converter_t<O> get_coord_to_prog_converter(E) noexcept;
+	OOKIIDOKU_EXPORT coord_converter<O> get_coord_to_prog_converter(E) noexcept;
 }
 #endif

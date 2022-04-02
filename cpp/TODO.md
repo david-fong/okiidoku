@@ -15,7 +15,7 @@
 
 ## Higher Priority
 
-- consider renaming "block" to "box", since most online resources seem to prefer "box".
+- try adding shortcuts to std::views::iota(0,N) and use them instead of all the raw loops. see how it impacts performance. Don't know if compilers will still do all their optimizations (simd, unrolling, etc.).
 
 - how is vector-of-bool's tweak header thing supposed to work with installation? I don't know how to copy the tweak config to 
 
@@ -40,6 +40,8 @@
 
 - after experimenting with different stochastic implementations, try implementing an opencl program. The minstd_rand rng is very simple to implement. I think the stochastic algorithm is data-parallelizable.
   - I wonder if there's a bitset implementation for opencl...
+
+- consider renaming "block" to "box", since most online resources seem to prefer "box"? I actually considered this in the past but didn't like that "boxes" has more letters than "rows" and "cols". Very petty- I know.
 
 - what's this?
   - https://stackoverflow.com/questions/4977252/why-an-unnamed-namespace-is-a-superior-alternative-to-static

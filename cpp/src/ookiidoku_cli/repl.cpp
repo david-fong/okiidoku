@@ -85,7 +85,7 @@ namespace ookiidoku::cli {
 		gen_->operator()();
 		const double processor_time = (static_cast<double>(std::clock() - clock_start)) / CLOCKS_PER_SEC;
 		{
-			using val_t = size<O_MAX>::ord2i_least_t;
+			using val_t = traits<O_MAX>::o2i_smol_t;
 			std::array<val_t, O4_MAX> grid;
 			gen_->write_to(std::span<val_t>(grid));
 			if (config_.canonicalize()) {
@@ -93,7 +93,7 @@ namespace ookiidoku::cli {
 			}
 			
 			const auto palette_ = std::to_array({
-				print_2d_palette([&](auto coord){ return grid.at(coord); }),
+				print_2d_grid_view([&](auto coord){ return grid.at(coord); }),
 			}); // TODO.low can this just be passed inline to the printer?
 			print_2d(std::cout, config_.order(), palette_);
 		}
@@ -120,7 +120,7 @@ namespace ookiidoku::cli {
 			// }
 			return gen::ss::batch::batch(config_.order(), params,
 				[this, &of](const gen::ss::Generator& result) mutable {
-					using val_t = size<O_MAX>::ord2i_least_t;
+					using val_t = traits<O_MAX>::o2i_smol_t;
 					std::array<val_t, O4_MAX> grid;
 					result.write_to(std::span<val_t>(grid));
 					if (config_.canonicalize()) {

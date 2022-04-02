@@ -11,8 +11,7 @@
 namespace ookiidoku {
 
 	// current implementation is pretty simple (dumb?)
-	std::vector<size_t> make_random_emoji_set(const Order O) {
-		assert(is_order_compiled(O));
+	std::vector<size_t> make_random_emoji_set(const unsigned O) {
 		const unsigned O2 = O*O;
 		const auto& prefs = emoji::top_set_preferences;
 		std::vector<size_t> shuffled_sets(emoji::sets.size());
@@ -43,9 +42,9 @@ namespace ookiidoku {
 	}
 
 
-	void print_2d(std::ostream& os, const Order O, const std::span<const print_2d_palette> grid_views) {
+	void print_2d(std::ostream& os, const unsigned O, const std::span<const print_2d_grid_view> grid_views) {
 		namespace str = ookiidoku::util::str;
-		using ord2i_t = std::uint16_t;
+		using o2i_t = std::uint16_t;
 
 		const auto print_blk_row_sep_string_ = [&os, O](const unsigned border_i) -> void {
 			#define M_NOOK(NOOK_T, NOOK_C, NOOK_B) \
@@ -74,13 +73,13 @@ namespace ookiidoku {
 		const auto emoji_sets = make_random_emoji_set(O);
 
 		os << str::dim.on;
-		for (ord2i_t row {0}; row < O*O; ++row) {
+		for (o2i_t row {0}; row < O*O; ++row) {
 			if (row % O == 0) {
 				print_blk_row_sep_strings(row / O);
 			}
 			os << '\n';
 			for (unsigned grid_i {0}; grid_i < grid_views.size(); ++grid_i) {
-				for (ord2i_t col {0}; col < O*O; ++col) {
+				for (o2i_t col {0}; col < O*O; ++col) {
 					if ((col % O) == 0) { os << str::dim.on << " │" << str::dim.off; }
 
 					auto val = size_t{grid_views[grid_i](row * O*O + col)};

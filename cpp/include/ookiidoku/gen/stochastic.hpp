@@ -2,7 +2,7 @@
 #define HPP_OOKIIDOKU__GEN__STOCHASTIC
 
 #include <ookiidoku/grid.hpp>
-#include <ookiidoku/size.hpp>
+#include <ookiidoku/traits.hpp>
 #include <ookiidoku/ookiidoku_config.hpp>
 #include <ookiidoku_export.h>
 
@@ -21,8 +21,8 @@ namespace ookiidoku::gen::ss {
 
 	class OOKIIDOKU_EXPORT Generator {
 	public:
-		using val_t = size<O_MAX>::ord2x_least_t;
-		using coord_t = size<O_MAX>::ord4x_t;
+		using val_t = traits<O_MAX>::o2x_smol_t;
+		using coord_t = traits<O_MAX>::o4x_t;
 
 		// contract: GeneratorO<O> is compiled
 		static std::unique_ptr<Generator> create(Order O);
@@ -51,34 +51,27 @@ namespace ookiidoku::gen::ss {
 	requires (is_order_compiled(O))
 	class OOKIIDOKU_EXPORT GeneratorO final : public Generator {
 	public:
-		using val_t = size<O>::ord2x_least_t;
-		using ord2x_t = size<O>::ord2x_t;
-		using ord2i_t = size<O>::ord2i_t;
-		using ord4x_t = size<O>::ord4x_t;
-		using ord4i_t = size<O>::ord4i_t;
-
-		static constexpr size<O>::ord1i_t O1 = O;
-		static constexpr ord2i_t O2 = O*O;
-		static constexpr ord4i_t O4 = O*O*O*O;
+		using T = traits<O>;
+		using val_t = T::o2x_smol_t;
 
 		void operator()() override;
 
 		[[nodiscard]] constexpr Order get_order() const noexcept { return O; }
-		[[nodiscard, gnu::hot]] Generator::val_t get_val_at(Generator::coord_t coord) const noexcept { return static_cast<Generator::val_t>(get_val_at_(static_cast<ord4x_t>(coord))); }
+		[[nodiscard, gnu::hot]] Generator::val_t get_val_at(Generator::coord_t coord) const noexcept { return static_cast<Generator::val_t>(get_val_at_(static_cast<T::o4x_t>(coord))); }
 
-		[[nodiscard, gnu::hot]] val_t get_val_at_(ord4x_t coord) const noexcept;
+		[[nodiscard, gnu::hot]] val_t get_val_at_(T::o4x_t coord) const noexcept;
 
-		template<class T>
-		requires std::is_integral_v<T> && (!std::is_const_v<T>) && (sizeof(T) >= sizeof(val_t))
-		void write_to_(std::span<T, O4> sink) const {
-			assert(sink.size() >= O4);
-			for (ord4i_t i {0}; i < O4; ++i) { sink[i] = get_val_at_(static_cast<ord4x_t>(i)); }
+		template<class V>
+		requires std::is_integral_v<V> && (!std::is_const_v<V>) && (sizeof(V) >= sizeof(val_t))
+		void write_to_(std::span<V, T::O4> sink) const {
+			assert(sink.size() >= T::O4);
+			for (typename T::o4i_t i {0}; i < T::O4; ++i) { sink[i] = get_val_at_(static_cast<T::o4x_t>(i)); }
 		}
 
 	private:
-		grid_arr2d_t<O, val_t> cells_ {[]() consteval {
-			grid_arr2d_t<O, val_t> _;
-			for (auto& vto : _) { for (ord2i_t i {0}; i < O2; ++i) { vto[i] = static_cast<val_t>(i); } }
+		grid_arr2d_t<T::O1, val_t> cells_ {[]() consteval {
+			grid_arr2d_t<T::O1, val_t> _;
+			for (auto& vto : _) { for (typename T::o2i_t i {0}; i < T::O2; ++i) { vto[i] = static_cast<val_t>(i); } }
 			// ^ didn't want to import <algorithm> just for std::iota
 			return _;
 		}()};

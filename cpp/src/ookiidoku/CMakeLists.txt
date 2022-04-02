@@ -7,7 +7,7 @@ add_library(ookiidoku SHARED
 	morph/transform.cpp
 	morph/rel_info.cpp
 	morph/canon_label.cpp
-	morph/canon_place.cpp
+	# morph/canon_place.cpp
 	morph/canon.cpp
 	morph/scramble.cpp
 	gen/stochastic.cpp
@@ -46,7 +46,7 @@ target_include_directories(ookiidoku
 # 	<type_traits> <cassert>
 # 	# [["ookiidoku/ookiidoku_config.hpp"]]
 # 	# [["ookiidoku/order.hpp"]]
-# 	# [["ookiidoku/size.hpp"]]
+# 	# [["ookiidoku/traits.hpp"]]
 # 	# [["ookiidoku/grid.hpp"]]
 # )
 

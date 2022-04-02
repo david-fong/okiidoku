@@ -10,9 +10,9 @@ namespace ookiidoku {
 
 	using Order = unsigned;
 
-	constexpr Order O_MAX = M_OOKIIDOKU_O_MAX;
-	constexpr Order O2_MAX = O_MAX * O_MAX;
-	constexpr Order O4_MAX = O2_MAX * O2_MAX;
+	constexpr unsigned O_MAX = M_OOKIIDOKU_O_MAX;
+	constexpr unsigned O2_MAX = O_MAX * O_MAX;
+	constexpr unsigned O4_MAX = O2_MAX * O2_MAX;
 
 	OOKIIDOKU_EXPORT constexpr bool is_order_compiled(Order O) {
 		#define M_OOKIIDOKU_TEMPL_TEMPL(O_) \

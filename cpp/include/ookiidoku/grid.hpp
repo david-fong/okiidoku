@@ -1,7 +1,8 @@
 #ifndef HPP_OOKIIDOKU__GRID
 #define HPP_OOKIIDOKU__GRID
 
-#include <ookiidoku/size.hpp>
+#include <ookiidoku/traits.hpp>
+#include <ookiidoku/order.hpp>
 #include <ookiidoku/ookiidoku_config.hpp>
 #include <ookiidoku_export.h>
 
@@ -11,24 +12,24 @@
 
 namespace ookiidoku {
 
-	template<Order O, typename T=size<O>::ord2i_least_t> using grid_arr2d_t = std::array<std::array<T, O*O>, O*O>;
-	template<Order O, typename T=size<O>::ord2i_least_t> using grid_arr_flat_t = std::array<T, O*O*O*O>;
-	template<Order O, typename T=size<O>::ord2i_least_t> using grid_const_span_t = std::span<const T, O*O*O*O>;
-	template<Order O, typename T=size<O>::ord2i_least_t> using grid_span_t = std::span<T, O*O*O*O>;
+	template<Order O, typename V=traits<O>::o2i_smol_t> using grid_arr2d_t = std::array<std::array<V, O*O>, O*O>;
+	template<Order O, typename V=traits<O>::o2i_smol_t> using grid_arr_flat_t = std::array<V, O*O*O*O>;
+	template<Order O, typename V=traits<O>::o2i_smol_t> using grid_const_span_t = std::span<const V, O*O*O*O>;
+	template<Order O, typename V=traits<O>::o2i_smol_t> using grid_span_t = std::span<V, O*O*O*O>;
 
 	// A thin wrapper over a span.
-	template<Order O, typename T=size<O>::ord2i_least_t>
+	template<Order O, typename V=traits<O>::o2i_smol_t>
 	class GridSpan2D final {
-		grid_span_t<O, T> span_;
+		grid_span_t<O, V> span_;
 	public:
-		constexpr GridSpan2D(grid_span_t<O, T> span): span_{span} {};
+		constexpr GridSpan2D(grid_span_t<O, V> span): span_{span} {};
 		// contract: row and col must be in [0,O2).
-		T& at(size<O>::ord2i_t row, size<O>::ord2i_t col) const noexcept {
+		V& at(traits<O>::o2i_t row, traits<O>::o2i_t col) const noexcept {
 			assert(row < O*O && col < O*O);
 			return span_[(O*O*row) + col];
 		}
-		std::span<T, O*O> operator[](size<O>::ord2i_t row) const noexcept {
-			return static_cast<std::span<T, O*O>>(span_.subspan(O*O * row, O*O));
+		std::span<V, O*O> operator[](traits<O>::o2i_t row) const noexcept {
+			return static_cast<std::span<V, O*O>>(span_.subspan(O*O * row, O*O));
 		}
 	};
 
@@ -37,26 +38,26 @@ namespace ookiidoku {
 	// Can be used with incomplete grids.
 	// contract: entries of input are in the range [0, O2].
 	template<Order O> requires(is_order_compiled(O)) OOKIIDOKU_EXPORT [[nodiscard]]
-	bool is_sudoku_valid(grid_const_span_t<O>) noexcept;
+	bool grid_follows_rule(grid_const_span_t<O>) noexcept;
 
 	// Returns true if none of the cells are empty (equal to O2). Does _not_ check if sudoku is valid.
 	// contract: entries of input are in the range [0, O2].
 	template<Order O> requires(is_order_compiled(O)) OOKIIDOKU_EXPORT [[nodiscard]]
-	bool is_sudoku_filled(grid_const_span_t<O>) noexcept;
+	bool grid_is_filled(grid_const_span_t<O>) noexcept;
 
 
-	template<Order O> OOKIIDOKU_EXPORT [[nodiscard, gnu::const]] constexpr typename size<O>::ord2i_t rmi_to_row(const typename size<O>::ord4i_t index) noexcept { return static_cast<size<O>::ord2i_t>(index / (O*O)); }
-	template<Order O> OOKIIDOKU_EXPORT [[nodiscard, gnu::const]] constexpr typename size<O>::ord2i_t rmi_to_col(const typename size<O>::ord4i_t index) noexcept { return static_cast<size<O>::ord2i_t>(index % (O*O)); }
-	template<Order O> OOKIIDOKU_EXPORT [[nodiscard, gnu::const]] constexpr typename size<O>::ord2i_t rmi_to_blk(const typename size<O>::ord2i_t row, const typename size<O>::ord2i_t col) noexcept {
-		return static_cast<size<O>::ord2i_t>((row / O) * O) + (col / O);
+	template<Order O> OOKIIDOKU_EXPORT [[nodiscard, gnu::const]] constexpr typename traits<O>::o2i_t rmi_to_row(const typename traits<O>::o4i_t index) noexcept { return static_cast<traits<O>::o2i_t>(index / (O*O)); }
+	template<Order O> OOKIIDOKU_EXPORT [[nodiscard, gnu::const]] constexpr typename traits<O>::o2i_t rmi_to_col(const typename traits<O>::o4i_t index) noexcept { return static_cast<traits<O>::o2i_t>(index % (O*O)); }
+	template<Order O> OOKIIDOKU_EXPORT [[nodiscard, gnu::const]] constexpr typename traits<O>::o2i_t rmi_to_blk(const typename traits<O>::o2i_t row, const typename traits<O>::o2i_t col) noexcept {
+		return static_cast<traits<O>::o2i_t>((row / O) * O) + (col / O);
 	}
 	template<Order O> [[nodiscard, gnu::const]]
-	OOKIIDOKU_EXPORT constexpr typename size<O>::ord2i_t rmi_to_blk(const typename size<O>::ord4i_t index) noexcept {
+	OOKIIDOKU_EXPORT constexpr typename traits<O>::o2i_t rmi_to_blk(const typename traits<O>::o4i_t index) noexcept {
 		return rmi_to_blk<O>(rmi_to_row<O>(index), rmi_to_col<O>(index));
 	}
 
 	template<Order O> OOKIIDOKU_EXPORT [[nodiscard, gnu::const]]
-	constexpr bool cells_share_house(typename size<O>::ord4i_t c1, typename size<O>::ord4i_t c2) noexcept {
+	constexpr bool cells_share_house(typename traits<O>::o4i_t c1, typename traits<O>::o4i_t c2) noexcept {
 		return (rmi_to_row<O>(c1) == rmi_to_row<O>(c2))
 			||  (rmi_to_col<O>(c1) == rmi_to_col<O>(c2))
 			||  (rmi_to_blk<O>(c1) == rmi_to_blk<O>(c2));
@@ -66,7 +67,7 @@ namespace ookiidoku {
 
 	template<Order O>
 	struct OOKIIDOKU_EXPORT chute_blk_masks final {
-		using M = size<O>::O2_mask_least_t;
+		using M = traits<O>::o2_bits_smol;
 		using T = std::array<M, O>;
 		static inline const T row {[]{ // TODO.wait re-constexpr this when bitset gets constexpr :/ https://github.com/cplusplus/papers/issues/1087
 			T _ {0};
@@ -88,8 +89,8 @@ namespace ookiidoku {
 
 
 	#define M_OOKIIDOKU_TEMPL_TEMPL(O_) \
-		extern template bool is_sudoku_valid<O_>(grid_const_span_t<O_>) noexcept; \
-		extern template bool is_sudoku_filled<O_>(grid_const_span_t<O_>) noexcept;
+		extern template bool grid_follows_rule<O_>(grid_const_span_t<O_>) noexcept; \
+		extern template bool grid_is_filled<O_>(grid_const_span_t<O_>) noexcept;
 	M_OOKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 	#undef M_OOKIIDOKU_TEMPL_TEMPL
 }

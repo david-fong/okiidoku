@@ -36,8 +36,8 @@ namespace ookiidoku::gen::ss {
 
 
 	template<Order O>
-	GeneratorO<O>::val_t GeneratorO<O>::get_val_at_(const GeneratorO<O>::ord4x_t coord) const noexcept {
-		return cells_[coord/O2][coord%O2];
+	GeneratorO<O>::val_t GeneratorO<O>::get_val_at_(const GeneratorO<O>::T::o4x_t coord) const noexcept {
+		return cells_[coord/T::O2][coord%T::O2];
 	}
 
 
@@ -46,8 +46,7 @@ namespace ookiidoku::gen::ss {
 		/* Note: wherever you see `% .../\* -1 *\/`, that's a place where the algorithm
 		would still work if it wasn't commented out, but commeting it out makes it slower
 		because sometimes what would be excluded would have a faster path to validity. */
-		using ord2i_least_t = size<O>::ord2i_least_t;
-		using chute_has_counts_t = std::array<std::array<ord2i_least_t, O2>, O1>;
+		using chute_has_counts_t = std::array<std::array<typename T::o2i_smol_t, T::O2>, T::O1>;
 		// unsigned long long op_count = 0;
 		/* Using this counter, I found that it took fewer operations to go from having
 		one polarity of lines valid to also having blocks valid than from having only
@@ -56,24 +55,24 @@ namespace ookiidoku::gen::ss {
 		and rows valid). */
 
 		// Make blocks valid:
-		for (ord2i_t h_chute {0}; h_chute < O2; h_chute += O1) {
+		for (typename T::o2i_t h_chute {0}; h_chute < T::O2; h_chute += T::O1) {
 			chute_has_counts_t blks_has {{0}};
-			for (ord2i_t row {h_chute}; row < h_chute+O1; ++row) {
-				for (ord2i_t col {0}; col < O2; ++col) {
-					++(blks_has[col/O1][cells_[row][col]]);
-			}	}
+			for (typename T::o2i_t row {h_chute}; row < h_chute+T::O1; ++row) {
+			for (typename T::o2i_t col {0}; col < T::O2; ++col) {
+				++(blks_has[col/T::O1][cells_[row][col]]);
+			}}
 			int has_nots {0};
 			for (const auto& blk_has : blks_has) {
 				for (const auto& val_count : blk_has) {
 					if (val_count == 0) { ++has_nots; }
 			}	}
 			while (has_nots != 0) [[likely]] {
-				const ord2x_t a_col {static_cast<ord2x_t>((rng_() - rng_.min()) % O2)};
-				const ord2x_t b_col {static_cast<ord2x_t>((rng_() - rng_.min()) % O2)};
-				const ord2x_t a_blk {static_cast<ord2x_t>(a_col/O1)};
-				const ord2x_t b_blk {static_cast<ord2x_t>(b_col/O1)};
+				const auto a_col {static_cast<T::o2x_t>((rng_() - rng_.min()) % T::O2)};
+				const auto b_col {static_cast<T::o2x_t>((rng_() - rng_.min()) % T::O2)};
+				const auto a_blk {static_cast<T::o2x_t>(a_col/T::O1)};
+				const auto b_blk {static_cast<T::o2x_t>(b_col/T::O1)};
 				if (a_blk == b_blk) [[unlikely]] { continue; }
-				const ord2x_t row {static_cast<ord2x_t>(h_chute + ((rng_() - rng_.min()) % (O1/* -1 */)))};
+				const auto row {static_cast<T::o2x_t>(h_chute + ((rng_() - rng_.min()) % (T::O1/* -1 */)))};
 				auto& a_cell = cells_[row][a_col];
 				auto& b_cell = cells_[row][b_col];
 				const int has_nots_diff {
@@ -97,22 +96,22 @@ namespace ookiidoku::gen::ss {
 		// op_count = 0;
 
 		// Make columns valid:
-		for (ord2i_t v_chute {0}; v_chute < O2; v_chute += O1) {
+		for (typename T::o2i_t v_chute {0}; v_chute < T::O2; v_chute += T::O1) {
 			chute_has_counts_t cols_has {{0}};
-			for (ord2i_t row {0}; row < O2; ++row) {
-				for (ord2i_t blk_col {0}; blk_col < O1; ++blk_col) {
-					++(cols_has[blk_col][cells_[row][v_chute+blk_col]]);
-			}	}
+			for (typename T::o2i_t row {0}; row < T::O2; ++row) {
+			for (typename T::o2i_t blk_col {0}; blk_col < T::O1; ++blk_col) {
+				++(cols_has[blk_col][cells_[row][v_chute+blk_col]]);
+			}}
 			int has_nots {0};
 			for (const auto& col_has : cols_has) {
 				for (const auto& val_count : col_has) {
 					if (val_count == 0) { ++has_nots; }
 			}	}
 			while (has_nots != 0) [[likely]] {
-				const ord2x_t a_col {static_cast<ord2x_t>((rng_() - rng_.min()) % O1)};
-				const ord2x_t b_col {static_cast<ord2x_t>((rng_() - rng_.min()) % O1)};
+				const auto a_col {static_cast<T::o2x_t>((rng_() - rng_.min()) % T::O1)};
+				const auto b_col {static_cast<T::o2x_t>((rng_() - rng_.min()) % T::O1)};
 				if (a_col == b_col) [[unlikely]] { continue; }
-				const ord2x_t row {static_cast<ord2x_t>((rng_() - rng_.min()) % (O1*(O1/* -1 */)))};
+				const auto row {static_cast<T::o2x_t>((rng_() - rng_.min()) % (T::O1*(T::O1/* -1 */)))};
 				auto& a_cell = cells_[row][v_chute + a_col];
 				auto& b_cell = cells_[row][v_chute + b_col];
 				const int has_nots_diff {
@@ -137,13 +136,13 @@ namespace ookiidoku::gen::ss {
 		#ifndef NDEBUG
 		grid_arr_flat_t<O> grid;
 		this->write_to_(std::span(grid));
-		assert(is_sudoku_valid<O>(std::span<const ord2i_least_t, O4>(grid)));
+		assert(grid_follows_rule<O>(std::span(grid)));
 		#endif
 	}
 
 
-	#define M_OOKIIDOKU_TEMPL_TEMPL(O_) \
-		template class GeneratorO<O_>;
+	#define M_OOKIIDOKU_TEMPL_TEMPL(O) \
+		template class GeneratorO<O>;
 	M_OOKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 	#undef M_OOKIIDOKU_TEMPL_TEMPL
 }

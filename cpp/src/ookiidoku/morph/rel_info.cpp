@@ -9,25 +9,25 @@ namespace ookiidoku::morph {
 	// Does not include self-to-self relationship bit for main diagonal entries.
 	template<Order O>
 	struct RelMasks final {
-		typename size<O>::O2_mask_least_t blocks_h;
-		typename size<O>::O2_mask_least_t blocks_v;
+		typename traits<O>::o2_bits_smol blocks_h;
+		typename traits<O>::o2_bits_smol blocks_v;
 	};
 	template<Order O>
 	grid_arr2d_t<O, RelMasks<O>> make_rel_masks_(const grid_const_span_t<O> grid_span) noexcept {
-		using has_mask_t = size<O>::O2_mask_least_t;
-		using val_t = size<O>::ord2i_least_t;
-		using ord1i_t = size<O>::ord1i_t;
-		using ord2i_t = size<O>::ord2i_t;
-		static constexpr ord1i_t O1 = O;
-		static constexpr ord2i_t O2 = O*O;
+		using has_mask_t = traits<O>::o2_bits_smol;
+		using val_t = traits<O>::o2i_smol_t;
+		using o1i_t = traits<O>::o1i_t;
+		using o2i_t = traits<O>::o2i_t;
+		static constexpr o1i_t O1 = O;
+		static constexpr o2i_t O2 = O*O;
 
 		GridSpan2D<O, const val_t> grid(grid_span);
 		grid_arr2d_t<O, RelMasks<O>> masks {};
-		for (ord2i_t line {0}; line < O2; ++line) {
-		for (ord2i_t atom {0}; atom < O2; atom += O1) {
+		for (o2i_t line {0}; line < O2; ++line) {
+		for (o2i_t atom {0}; atom < O2; atom += O1) {
 			// Go through all unique pairs in the atom:
-			for (ord1i_t i {0}; i < O1 - 1; ++i) {
-			for (ord1i_t j = i + 1; j < O1; ++j) {
+			for (o1i_t i {0}; i < O1 - 1; ++i) {
+			for (o1i_t j = i + 1; j < O1; ++j) {
 				{ // boxrow
 					const val_t i_val = grid.at(line, atom+i), j_val = grid.at(line, atom+j);
 					const has_mask_t blk_mask_bit = has_mask_t{1} << rmi_to_blk<O>(line, atom);
@@ -48,17 +48,17 @@ namespace ookiidoku::morph {
 	template<Order O>
 	requires (is_order_compiled(O))
 	grid_arr2d_t<O, Rel<O>> make_rel_table(const grid_const_span_t<O> grid_in) {
-		using has_mask_t = size<O>::O2_mask_least_t;
-		using ord1i_t = size<O>::ord1i_t;
-		using ord2i_t = size<O>::ord2i_t;
+		using has_mask_t = traits<O>::o2_bits_smol;
+		using o1i_t = traits<O>::o1i_t;
+		using o2i_t = traits<O>::o2i_t;
 		using chute_imbalance_t = chute_imbalance_t<O>;
-		static constexpr ord1i_t O1 = O;
-		static constexpr ord2i_t O2 = O*O;
+		static constexpr o1i_t O1 = O;
+		static constexpr o2i_t O2 = O*O;
 
 		const grid_arr2d_t<O, RelMasks<O>> masks = make_rel_masks_<O>(grid_in);
 		grid_arr2d_t<O, Rel<O>> table; // uninitialized!
-		for (ord2i_t r {0}; r < O2; ++r) {
-		for (ord2i_t c {0}; c < O2; ++c) {
+		for (o2i_t r {0}; r < O2; ++r) {
+		for (o2i_t c {0}; c < O2; ++c) {
 			const RelMasks<O>& mask = masks[r][c];
 			Rel<O>& rel = table[r][c];
 			if (r == c) {
@@ -67,12 +67,12 @@ namespace ookiidoku::morph {
 			}
 			const has_mask_t non_polar_mask = mask.blocks_h | mask.blocks_v;
 			const unsigned count = non_polar_mask.count();
-			rel.count = static_cast<size<O>::ord2i_least_t>(count);
+			rel.count = static_cast<traits<O>::o2i_smol_t>(count);
 			rel.polar_count_lesser = static_cast<Rel<O>::polar_count_lesser_t>(std::min(mask.blocks_h.count(), mask.blocks_v.count()));
 
 			std::array<chute_imbalance_t, O1> h_chute_imbalance;
 			std::array<chute_imbalance_t, O1> v_chute_imbalance;
-			for (ord1i_t chute {0}; chute < O1; ++chute) {
+			for (o1i_t chute {0}; chute < O1; ++chute) {
 				h_chute_imbalance[chute] = static_cast<chute_imbalance_t>((chute_blk_masks<O>::row[chute] & non_polar_mask).count());
 				v_chute_imbalance[chute] = static_cast<chute_imbalance_t>((chute_blk_masks<O>::col[chute] & non_polar_mask).count());
 			}
@@ -80,7 +80,7 @@ namespace ookiidoku::morph {
 			std::ranges::sort(v_chute_imbalance, std::greater{});
 			rel.chute_imbalance_a = 0;
 			rel.chute_imbalance_b = 0;
-			for (ord1i_t i {0}; i < O1; ++i) {
+			for (o1i_t i {0}; i < O1; ++i) {
 				const chute_imbalance_t expected_count = static_cast<chute_imbalance_t>((count / O1) + ((i < count % O1) ? 1 : 0));
 				rel.chute_imbalance_a += static_cast<chute_imbalance_t>(std::abs(h_chute_imbalance[i] - expected_count));
 				rel.chute_imbalance_b += static_cast<chute_imbalance_t>(std::abs(v_chute_imbalance[i] - expected_count));
@@ -94,7 +94,7 @@ namespace ookiidoku::morph {
 		{
 			// normalize polar fields
 			// long double h_p = 1.0, v_p = 1.0;
-			// ord6i_t h_occ_dev {0}, v_occ_dev {0};
+			// o6i_t h_occ_dev {0}, v_occ_dev {0};
 			// for (const auto& row : table) { for (const Rel& rel : row) {
 			// 	h_p *= rel.polar_a_p;
 			// 	v_p *= rel.polar_b_p;

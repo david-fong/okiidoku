@@ -5,7 +5,7 @@
 #include <ookiidoku_cli/enum.hpp>
 #include <ookiidoku/gen/batch.hpp>
 #include <ookiidoku/gen/stochastic.hpp>
-#include <ookiidoku/size.hpp>
+#include <ookiidoku/traits.hpp>
 
 #include <map>
 #include <string_view>

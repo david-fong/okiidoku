@@ -6,8 +6,8 @@ namespace ookiidoku::morph {
 
 	template<Order O>
 	void Transformation<O>::apply_from_to(const grid_const_span_t<O> src_grid, const grid_span_t<O> dest_grid) const noexcept {
-		for (ord2i_t src_row {0}; src_row < O2; ++src_row) {
-		for (ord2i_t src_col {0}; src_col < O2; ++src_col) {
+		for (o2i_t src_row {0}; src_row < O2; ++src_row) {
+		for (o2i_t src_col {0}; src_col < O2; ++src_col) {
 			auto dest_row = row_map[src_row/O1][src_row%O1];
 			auto dest_col = col_map[src_col/O1][src_col%O1];
 			if (transpose) { std::swap(dest_row, dest_col); }
@@ -28,10 +28,10 @@ namespace ookiidoku::morph {
 	template<Order O>
 	Transformation<O> Transformation<O>::inverted() const noexcept {
 		Transformation<O> _;
-		for (ord2i_t i {0}; i < O2; ++i) {
+		for (o2i_t i {0}; i < O2; ++i) {
 			_.label_map[label_map[i]] = static_cast<mapping_t>(i);
 		}
-		for (ord2i_t i {0}; i < O2; ++i) {
+		for (o2i_t i {0}; i < O2; ++i) {
 			const auto row_inv = row_map[i/O1][i%O1];
 			const auto col_inv = col_map[i/O1][i%O1];
 			_.row_map[row_inv/O1][row_inv%O1] = static_cast<mapping_t>(i);

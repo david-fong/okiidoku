@@ -70,7 +70,7 @@ namespace ookiidoku::gen::bt {
 
 
 	template<Order O>
-	GeneratorO<O>::ord2i_t GeneratorO<O>::extract_val_at_(const GeneratorO<O>::ord4x_t coord) const noexcept {
+	GeneratorO<O>::o2i_t GeneratorO<O>::extract_val_at_(const GeneratorO<O>::o4x_t coord) const noexcept {
 		const auto p = path::get_coord_to_prog_converter<O>(params_.path_kind)(coord);
 		const auto try_index = cells_[p].try_index;
 		if (try_index == O2) { return O2; }
@@ -79,7 +79,7 @@ namespace ookiidoku::gen::bt {
 
 
 	template<Order O>
-	GeneratorO<O>::dead_ends_t GeneratorO<O>::extract_dead_ends_at_(const ord4x_t coord) const noexcept {
+	GeneratorO<O>::dead_ends_t GeneratorO<O>::extract_dead_ends_at_(const o4x_t coord) const noexcept {
 		return dead_ends_[path::get_coord_to_prog_converter<O>(params_.path_kind)(coord)];
 	}
 
@@ -87,7 +87,7 @@ namespace ookiidoku::gen::bt {
 	template<Order O>
 	void GeneratorO<O>::generate_() {
 		// see the inline-brute-force-func git branch for experimenting with manually inlining set_next_valid_
-		const path::coord_converter_t<O> prog_to_coord = path::get_prog_to_coord_converter<O>(params_.path_kind);
+		const path::coord_converter<O> prog_to_coord = path::get_prog_to_coord_converter<O>(params_.path_kind);
 
 		bool backtracked = op_count_ != 0;
 		while (true) [[likely]] {
@@ -121,14 +121,14 @@ namespace ookiidoku::gen::bt {
 		#ifndef NDEBUG
 		grid_arr_flat_t<O> grid;
 		this->write_to_(std::span(grid));
-		assert(is_sudoku_valid<O>(grid));
+		assert(grid_follows_rule<O>(grid));
 		#endif
 	}
 
 
 	template<Order O>
-	GeneratorO<O>::Direction GeneratorO<O>::set_next_valid_(path::coord_converter_t<O> prog_to_coord, const bool backtracked) noexcept {
-		const ord4x_t coord = prog_to_coord(progress_);
+	GeneratorO<O>::Direction GeneratorO<O>::set_next_valid_(path::coord_converter<O> prog_to_coord, const bool backtracked) noexcept {
+		const o4x_t coord = prog_to_coord(progress_);
 		has_mask_t& row_has = rows_has_[rmi_to_row<O>(coord)];
 		has_mask_t& col_has = cols_has_[rmi_to_col<O>(coord)];
 		has_mask_t& blk_has = blks_has_[rmi_to_blk<O>(coord)];
@@ -156,7 +156,7 @@ namespace ookiidoku::gen::bt {
 		const has_mask_t cell_has {row_has | col_has | blk_has};
 		if (!cell_has.all()) [[likely]] {
 			// The above optimization comes into effect ~1/5 of the time for size 5.
-			for (ord2i_t try_i {static_cast<ord2i_t>((cell.try_index+1u) % (O2+1))}; try_i < O2; ++try_i) [[likely]] {
+			for (o2i_t try_i {static_cast<o2i_t>((cell.try_index+1u) % (O2+1))}; try_i < O2; ++try_i) [[likely]] {
 				// Note: the more readable way of writing this is less performant :/
 				const has_mask_t try_val_mask = has_mask_t{1} << val_try_order[try_i];
 				if ((cell_has & try_val_mask).none()) [[unlikely]] {

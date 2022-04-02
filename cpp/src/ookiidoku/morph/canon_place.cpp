@@ -1,6 +1,6 @@
 #include <ookiidoku/morph/transform.hpp>
 #include <ookiidoku/grid.hpp>
-#include <ookiidoku/size.hpp>
+#include <ookiidoku/traits.hpp>
 #include <ookiidoku/morph/rel_info.hpp>
 
 #include <iostream> // TODO.wait remove after done implementing
@@ -18,18 +18,18 @@ namespace ookiidoku::morph {
 	template<Order O>
 	requires (is_order_compiled(O))
 	class CanonPlace final {
-		using val_t = size<O>::ord2i_least_t;
+		using val_t = traits<O>::o2i_smol_t;
 		using mapping_t = Transformation<O>::mapping_t;
-		using ord1i_t = size<O>::ord1i_t;
-		using ord2i_t = size<O>::ord2i_t;
-		using ord4i_t = size<O>::ord4i_t;
+		using o1i_t = traits<O>::o1i_t;
+		using o2i_t = traits<O>::o2i_t;
+		using o4i_t = traits<O>::o4i_t;
 		using atom_grid_t = std::array<std::array<std::array<val_t, O>, O>, O*O>;
 
 	public:
-		static constexpr ord1i_t O1 = O;
-		static constexpr ord2i_t O2 = O*O;
-		static constexpr ord4i_t O3 = O*O*O;
-		static constexpr ord4i_t O4 = O*O*O*O;
+		static constexpr o1i_t O1 = O;
+		static constexpr o2i_t O2 = O*O;
+		static constexpr o4i_t O3 = O*O*O;
+		static constexpr o4i_t O4 = O*O*O*O;
 
 		explicit CanonPlace(const grid_span_t<O> grid): src_grid{grid} {}
 
@@ -38,19 +38,19 @@ namespace ookiidoku::morph {
 
 		struct PolarState final {
 			line_map_t<O> to_og;
-			std::array<ord2i_t, O2> line_tie_links {{0}};
-			std::array<ord1i_t, O1> chute_tie_links {0};
+			std::array<o2i_t, O2> line_tie_links {{0}};
+			std::array<o1i_t, O1> chute_tie_links {0};
 
 			explicit constexpr PolarState() noexcept {
-				for (ord2i_t i {0}; i < O2; ++i) {
+				for (o2i_t i {0}; i < O2; ++i) {
 					to_og[i/O1][i%O1] = static_cast<mapping_t>(i);
 				}
-				for (ord2i_t i {0}; i < O2; i += O1) {
+				for (o2i_t i {0}; i < O2; i += O1) {
 					line_tie_links[i] = i + O1;
 				}
 				chute_tie_links[0] = O1;
 			}
-			ord2i_t to_og_at(ord2i_t canon_i) const {
+			o2i_t to_og_at(o2i_t canon_i) const {
 				return to_og[canon_i/O1][canon_i%O1];
 			}
 			bool has_ties() const {
@@ -84,21 +84,21 @@ namespace ookiidoku::morph {
 		const GridSpan2D<O> table {table_arr_};
 
 		line_map_t<O> to_tied;
-		for (ord2i_t i {0}; i < O2; ++i) {
+		for (o2i_t i {0}; i < O2; ++i) {
 			to_tied[i/O1][i%O1] = static_cast<mapping_t>(i);
 		}
 		// loop over tied line ranges:
-		for (ord2i_t tie_begin {0}; tie_begin < O2; tie_begin = line_tie_links[tie_begin]) {
-			const ord2i_t tie_end = line_tie_links[tie_begin];
+		for (o2i_t tie_begin {0}; tie_begin < O2; tie_begin = line_tie_links[tie_begin]) {
+			const o2i_t tie_end = line_tie_links[tie_begin];
 			if ((tie_begin + 1) == tie_end) [[likely]] {
 				continue; // not a tie.
 			}
 			// loop over the tied line range:
-			for (ord2i_t rel_i {tie_begin}; rel_i < tie_end; ++rel_i) {
+			for (o2i_t rel_i {tie_begin}; rel_i < tie_end; ++rel_i) {
 				auto row = table[rel_i];
 				// loop over orthogonal partially-resolved line ranges to normalize:
-				for (ord2i_t ortho_l_t_begin {0}; ortho_l_t_begin < O2; ortho_l_t_begin = ortho.line_tie_links[ortho_l_t_begin]) {
-					const ord2i_t ortho_l_t_end = ortho.line_tie_links[ortho_l_t_begin];
+				for (o2i_t ortho_l_t_begin {0}; ortho_l_t_begin < O2; ortho_l_t_begin = ortho.line_tie_links[ortho_l_t_begin]) {
+					const o2i_t ortho_l_t_end = ortho.line_tie_links[ortho_l_t_begin];
 					std::sort(
 						std::next(row.begin(), ortho_l_t_begin),
 						std::next(row.begin(), ortho_l_t_end),
@@ -106,8 +106,8 @@ namespace ookiidoku::morph {
 					);
 				}
 				// loop over orthogonal partially-resolved chute ranges to normalize:
-				for (ord1i_t ortho_c_t_begin {0}; ortho_c_t_begin < O2; ortho_c_t_begin = ortho.chute_tie_links[ortho_c_t_begin]) {
-					const ord1i_t ortho_c_t_end = chute_tie_links[ortho_c_t_begin];
+				for (o1i_t ortho_c_t_begin {0}; ortho_c_t_begin < O2; ortho_c_t_begin = ortho.chute_tie_links[ortho_c_t_begin]) {
+					const o1i_t ortho_c_t_end = chute_tie_links[ortho_c_t_begin];
 					std::sort(
 						std::next(row.begin(), ortho_c_t_begin),
 						std::next(row.begin(), ortho_c_t_end),
@@ -125,8 +125,8 @@ namespace ookiidoku::morph {
 			);
 		}
 		// loop over tied chute ranges:
-		for (ord1i_t tie_begin {0}; tie_begin < O2; tie_begin = chute_tie_links[tie_begin]) {
-			const ord1i_t tie_end = chute_tie_links[tie_begin];
+		for (o1i_t tie_begin {0}; tie_begin < O2; tie_begin = chute_tie_links[tie_begin]) {
+			const o1i_t tie_end = chute_tie_links[tie_begin];
 			if ((tie_begin + 1) == tie_end) [[likely]] {
 				continue; // not a tie.
 			}
@@ -143,8 +143,8 @@ namespace ookiidoku::morph {
 		/* TODO.high for() */{
 			{
 				// update line_tie_links:
-				ord2i_t begin {tie_begin};
-				for (ord2i_t canon_i {static_cast<ord2i_t>(begin+1)}; canon_i < tie_end; ++canon_i) {
+				o2i_t begin {tie_begin};
+				for (o2i_t canon_i {static_cast<o2i_t>(begin+1)}; canon_i < tie_end; ++canon_i) {
 					if (!std::ranges::equal(table[to_tied[canon_i - 1]], table[to_tied[canon_i]])) {
 						line_tie_links[begin] = canon_i;
 						begin = canon_i;
@@ -158,7 +158,7 @@ namespace ookiidoku::morph {
 		{
 			// update s.to_og:
 			line_map_t<O> tied_to_og {to_og};
-			for (ord2i_t i {0}; i < O2; ++i) {
+			for (o2i_t i {0}; i < O2; ++i) {
 				to_og[i/O1][i%O1] = tied_to_og[to_tied[i]/O1][to_tied[i]%O1];
 			}
 		}
@@ -195,7 +195,7 @@ namespace ookiidoku::morph {
 		transformation = transformation.inverted();
 		// TODO use two iota views mapped one to src_grid and one to transposed view and lexicographical compare. if transposed less, edit transformation and apply a transpose_only transformation to src_grid in place.
 		transformation.apply_in_place(src_grid);
-		assert(is_sudoku_valid<O>(src_grid));
+		assert(grid_follows_rule<O>(src_grid));
 		return transformation;
 	}
 

@@ -40,7 +40,7 @@ unsigned test_morph_O(const unsigned num_rounds) {
 		if (gen_grid != canon_grid) {
 			++count_bad;
 			std::clog << "\n!bad\n";
-			const std::array<print_2d_palette, 2> palette_ {
+			const std::array<print_2d_grid_view, 2> palette_ {
 				[&](auto coord){ return gen_grid[coord]; },
 				[&](auto coord){ return canon_grid[coord]; },
 			};
