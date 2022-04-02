@@ -33,8 +33,9 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
 endif()
 
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake) # Include Conan-generated file
-conan_basic_setup(TARGETS) # Introduce Conan-generated targets
+# TODO.low https://docs.conan.io/en/latest/howtos/cmake_launch.html
+# include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake) # Include Conan-generated file
+# conan_basic_setup(TARGETS) # Introduce Conan-generated targets
 
 add_subdirectory(src/ookiidoku_util)
 add_subdirectory(src/ookiidoku)

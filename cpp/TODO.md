@@ -15,6 +15,8 @@
 
 ## Higher Priority
 
+- consider renaming "block" to "box", since most online resources seem to prefer "box".
+
 - how is vector-of-bool's tweak header thing supposed to work with installation? I don't know how to copy the tweak config to 
 
 - make some grid things for binary and text serdes (and test please).
@@ -77,11 +79,12 @@
   - `std::unreachable()`
   - `std::ranges::iota()`
   - `std::views::chunk()`
-    - will be useful for `canon_place`
-    - currently added a dep on range-v3 just for this. Then had to pull in conan. Glad for the opportunity to learn something new, but if I can get rid of this in the future (the weight upon anybody who wishes to try building the project and is new-ish to C++), I'd really like to.
+    - could this be useful for `canon_place`? I tried messing around with range-v3 on compiler explorer and had trouble with the whole action vs algorithm, container vs view thing. Didn't know what I was doing and could achieve what I wanted.
 - CLI
   - implement `-h` and `--help` CLI argument.
   - give a red message when trying to continue and nothing is left to be found.
+- do I want to generate doxygen docs?
+  - https://jothepro.github.io/doxygen-awesome-css/index.html
 
 ## Interesting Questions for Further Research
 

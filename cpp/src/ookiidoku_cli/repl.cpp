@@ -92,9 +92,9 @@ namespace ookiidoku::cli {
 				morph::canonicalize<val_t>(gen_->get_order(), std::span(grid)); // should we make a copy and print as a second grid image?
 			}
 			
-			const std::array<print_2d_palette, 1> palette_ {
+			const auto palette_ = std::to_array({
 				print_2d_palette([&](auto coord){ return grid.at(coord); }),
-			};
+			}); // TODO.low can this just be passed inline to the printer?
 			print_2d(std::cout, config_.order(), palette_);
 		}
 		std::cout << std::setprecision(4)

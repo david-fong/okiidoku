@@ -28,6 +28,7 @@
 			"TODO.build" ,
 			"TODO",
 		],
+		"cmake.configureOnOpen": false,
 
 		"files.associations": {
 			"**/gcc/**": "cpp",

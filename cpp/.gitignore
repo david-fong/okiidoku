@@ -1,6 +1,5 @@
 
 # Build
 /build/
-/*.exe
 .profile/
 gmon.out

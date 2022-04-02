@@ -3,8 +3,6 @@
 #include <ookiidoku/size.hpp>
 #include <ookiidoku/morph/rel_info.hpp>
 
-#include <range/v3/view/chunk.hpp>
-
 #include <iostream> // TODO.wait remove after done implementing
 #include <algorithm> // sort
 #include <numeric>   // iota
