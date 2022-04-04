@@ -1,11 +1,12 @@
 # Things To Do
 
-## Big Strokes
+## Roadmap
 
 - refactor and improve canonicalization
 - compare backtracking and stochastic search statistics
 - implement grid-serdes translator tool
 - database
+- create a separate github repo for data. add as submodule?
 - deductive reasoning + backtracking solver
 - emscripten build and website
 - puzzle creation experiments (see [bottom section](#interesting-questions-for-further-research))
@@ -13,9 +14,7 @@
 - compare canonicalization methods (performance / time-complexity)
 - opencl stochastic generator
 
-## Higher Priority
-
-- try adding shortcuts to std::views::iota(0,N) and use them instead of all the raw loops. see how it impacts performance. Don't know if compilers will still do all their optimizations (simd, unrolling, etc.).
+## Misc List
 
 - how is vector-of-bool's tweak header thing supposed to work with installation? I don't know how to copy the tweak config to 
 
@@ -24,7 +23,7 @@
 
 - using stochastic search:
   - compare intrinsic statistical properties of grids generated (the things currently used in canon\_label).
-  - Consider deleting the batching implementation? Or just removing it from the library api (move headers to the src/ folder and don't compile the cpp files; maybe rename the bt/ folder to legacy\_bt/).
+  - Consider deleting the backtracking implementation? Or just removing it from the library api (move headers to the src/ folder and don't compile the cpp files; maybe rename the bt/ folder to legacy\_bt/).
     - The backtracking implementation could then just be used as a reference for a more complicated deductive reasoning solver when deductive reasoning can't further progress by deductive reasoning.
       - The path would prioritize the parts of the puzzle that the deductive reasoning knows the least about (the parts that are likely to result in large chain of new possible deductions when filled).
 
@@ -48,6 +47,8 @@
 
 - cmake things I can try out:
   - versioning my targets https://cmake.org/cmake/help/latest/prop_tgt/VERSION.html#prop_tgt:VERSION
+
+- try adding shortcuts to std::views::iota(0,N) and use them instead of all the raw loops. see how it impacts performance. Don't know if compilers will still do all their optimizations (simd, unrolling, etc.).
 
 - Go back and try the old canonicalization by rel row prob, but break ties by doing some brute force: try each tied permutation and valuate it according to some reduction of how it pushes rarer rel counts to the top left. Just be careful to shift to get rid of the main diagonal seam.
   - If there are multiple puddles of ties, the resolution of a puddle shouldn't depend on the resolution of any other puddle- only on the non-tied rows/columns. A consequence of this is that this resolution algorithm will not work if there are no non-tied rows/columns.

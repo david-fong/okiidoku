@@ -1,5 +1,4 @@
 #include <okiidoku/morph/scramble.hpp>
-#include <okiidoku/morph/transform.hpp>
 #include <okiidoku/rng.hpp>
 
 #include <array>
@@ -10,7 +9,7 @@ namespace okiidoku::morph {
 
 	template<Order O>
 	requires (is_order_compiled(O))
-	void scramble(const grid_span_t<O> grid) {
+	Transformation<O> scramble(const grid_span_t<O> grid) {
 		Transformation<O> t {};
 		{
 			std::lock_guard lock_guard_{shared_mt_rng_mutex_};
@@ -21,10 +20,11 @@ namespace okiidoku::morph {
 				std::ranges::shuffle(t.row_map[chute], shared_mt_rng_);
 				std::ranges::shuffle(t.col_map[chute], shared_mt_rng_);
 			}
-			t.transpose = static_cast<bool>(shared_mt_rng_() % 2);
+			// t.transpose = static_cast<bool>(shared_mt_rng_() % 2); // TODO
 		}
 		t.apply_in_place(grid);
 		assert(grid_follows_rule<O>(grid));
+		return t;
 	}
 
 
@@ -52,7 +52,7 @@ namespace okiidoku::morph {
 
 
 	#define M_OKIIDOKU_TEMPL_TEMPL(O_) \
-		template void scramble<O_>(const grid_span_t<O_>);
+		template Transformation<O_> scramble<O_>(const grid_span_t<O_>);
 	M_OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 	#undef M_OKIIDOKU_TEMPL_TEMPL
 }

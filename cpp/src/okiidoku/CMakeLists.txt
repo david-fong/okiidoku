@@ -7,7 +7,7 @@ add_library(okiidoku SHARED
 	morph/transform.cpp
 	morph/rel_info.cpp
 	morph/canon_label.cpp
-	# morph/canon_place.cpp
+	morph/canon_place.cpp
 	morph/canon.cpp
 	morph/scramble.cpp
 	gen/stochastic.cpp

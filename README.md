@@ -1,6 +1,6 @@
 # ōkiidoku
 
-The project currently provides two utilities: a _solution_ generator, and a canonicalizer. It is _not_ a solver or even a _puzzle_ generator, although I will likely try my hand at those in the future. It supports parametric grid size which many other sudoku projects do not. The generator uses a [stochastic search](https://en.wikipedia.org/wiki/Sudoku_solving_algorithms#Stochastic_search_/_optimization_methods) algorithm, which was found to scale much better than a backtracking algorithm for very large grid sizes. The canonicalizer is currently under progress; I am experimenting with a novel approach using intrinsic statistics/characteristics of grids. I will likely implement a minlexing algorithm in the future to compare the two methods.
+The project currently provides two utilities: a _solution_ generator, and a canonicalizer. It is _not_ a solver or even a _puzzle_ generator, although I will likely try my hand at those in the future. It supports parametric grid size which many other sudoku projects do not. The generator uses a [stochastic search](https://en.wikipedia.org/wiki/Sudoku_solving_algorithms#Stochastic_search_/_optimization_methods) algorithm, which was found to scale much better than a backtracking algorithm for very large grid sizes. The canonicalizer is currently under progress; I am experimenting with a novel approach using intrinsic statistics/characteristics of grids.
 
 Language-implementation independent design notes can be found in the [design folder](./design/).
 

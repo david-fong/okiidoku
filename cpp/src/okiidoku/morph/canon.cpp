@@ -21,8 +21,8 @@ namespace okiidoku::morph {
 		assert(grid_is_filled<O>(og_grid));
 		assert(grid_follows_rule<O>(og_grid));
 		const auto label_map = canon_label<O>(og_grid);
-		// auto place_map = canon_place<O>(og_grid);
-		Transformation<O> place_map{};
+		auto place_map = canon_place<O>(og_grid);
+		// Transformation<O> place_map{};
 		place_map.label_map = label_map;
 		return place_map;
 	}

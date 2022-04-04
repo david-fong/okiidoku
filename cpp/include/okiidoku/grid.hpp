@@ -24,11 +24,11 @@ namespace okiidoku {
 	public:
 		constexpr GridSpan2D(grid_span_t<O, V> span): span_{span} {};
 		// contract: row and col must be in [0,O2).
-		V& at(traits<O>::o2i_t row, traits<O>::o2i_t col) const noexcept {
+		constexpr V& at(traits<O>::o2i_t row, traits<O>::o2i_t col) const noexcept {
 			assert(row < O*O && col < O*O);
 			return span_[(O*O*row) + col];
 		}
-		std::span<V, O*O> operator[](traits<O>::o2i_t row) const noexcept {
+		constexpr std::span<V, O*O> operator[](traits<O>::o2i_t row) const noexcept {
 			return static_cast<std::span<V, O*O>>(span_.subspan(O*O * row, O*O));
 		}
 	};

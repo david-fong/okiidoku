@@ -88,7 +88,7 @@ int main(const int argc, char const *const argv[]) {
 	okiidoku::seed_rng(srand_key);
 
 	if (test_morph_O<3>(num_rounds)) {
-		// return 1;
+		return 1;
 	}
 	if (test_morph_O<4>(num_rounds)) {
 		// return 1;

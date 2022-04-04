@@ -3,7 +3,7 @@
 #include <okiidoku/traits.hpp>
 #include <okiidoku/morph/rel_info.hpp>
 
-#include <iostream> // TODO.wait remove after done implementing
+#include <ranges>
 #include <algorithm> // sort
 #include <numeric>   // iota
 #include <compare>   // weak_ordering
@@ -23,7 +23,6 @@ namespace okiidoku::morph {
 		using o1i_t = traits<O>::o1i_t;
 		using o2i_t = traits<O>::o2i_t;
 		using o4i_t = traits<O>::o4i_t;
-		using atom_grid_t = std::array<std::array<std::array<val_t, O>, O>, O*O>;
 
 	public:
 		static constexpr o1i_t O1 = O;
@@ -50,9 +49,6 @@ namespace okiidoku::morph {
 				}
 				chute_tie_links[0] = O1;
 			}
-			o2i_t to_og_at(o2i_t canon_i) const {
-				return to_og[canon_i/O1][canon_i%O1];
-			}
 			bool has_ties() const {
 				return std::ranges::any_of(line_tie_links, [](auto link){ return link == 0; })
 					|| std::ranges::any_of(chute_tie_links, [](auto link){ return link == 0; });
@@ -68,25 +64,28 @@ namespace okiidoku::morph {
 
 	template<Order O>
 	void CanonPlace<O>::PolarState::do_a_pass(
-		const grid_const_span_t<O> src_grid,
+		const grid_const_span_t<O> og_grid,
 		const bool is_transpose,
 		const PolarState& ortho
 	) {
-		grid_arr_flat_t<O> table_arr_; {
-			const auto t {Transformation<O>{
-				Transformation<O>::identity.label_map,
-				is_transpose ? ortho.to_og : to_og,
-				is_transpose ? to_og : ortho.to_og,
-				is_transpose,
-			}};
-			t.apply_from_to(src_grid, table_arr_);
+		// I really dislike how complicated this is, but I currently
+		// don't know how to simplify it or ease readability.
+		std::array<line_map_t<O>, O2> table; {
+			grid_arr_flat_t<O> table_arr; {
+				const auto t {Transformation<O>{
+					Transformation<O>::identity.label_map,
+					is_transpose ? ortho.to_og : to_og,
+					is_transpose ? to_og : ortho.to_og,
+					is_transpose,
+				}};
+				t.inverted().apply_from_to(og_grid, table_arr);
+			}
+			for (o4i_t i {0}; i < O4; ++i) {
+				table[i/O2][(i%O2)/O1][i%O1] = static_cast<mapping_t>(table_arr[i]);
+			}
 		}
-		const GridSpan2D<O> table {table_arr_};
 
-		line_map_t<O> to_tied;
-		for (o2i_t i {0}; i < O2; ++i) {
-			to_tied[i/O1][i%O1] = static_cast<mapping_t>(i);
-		}
+		line_map_t<O> to_tied {Transformation<O>::identity.row_map};
 		// loop over tied line ranges:
 		for (o2i_t tie_begin {0}; tie_begin < O2; tie_begin = line_tie_links[tie_begin]) {
 			const o2i_t tie_end = line_tie_links[tie_begin];
@@ -95,71 +94,84 @@ namespace okiidoku::morph {
 			}
 			// loop over the tied line range:
 			for (o2i_t rel_i {tie_begin}; rel_i < tie_end; ++rel_i) {
-				auto row = table[rel_i];
+				auto& boxrows = table[rel_i];
 				// loop over orthogonal partially-resolved line ranges to normalize:
-				for (o2i_t ortho_l_t_begin {0}; ortho_l_t_begin < O2; ortho_l_t_begin = ortho.line_tie_links[ortho_l_t_begin]) {
-					const o2i_t ortho_l_t_end = ortho.line_tie_links[ortho_l_t_begin];
+				for (o2i_t t_begin {0}; t_begin < O2; t_begin = ortho.line_tie_links[t_begin]) {
+					const o2i_t t_end = ortho.line_tie_links[t_begin];
 					std::sort(
-						std::next(row.begin(), ortho_l_t_begin),
-						std::next(row.begin(), ortho_l_t_end),
+						std::next(boxrows[t_begin/O1].begin(), t_begin %O1),
+						std::next(boxrows[t_begin/O1].begin(), t_end   %O1), // TODO this mod is bad
 						std::less{}
 					);
 				}
 				// loop over orthogonal partially-resolved chute ranges to normalize:
-				for (o1i_t ortho_c_t_begin {0}; ortho_c_t_begin < O2; ortho_c_t_begin = ortho.chute_tie_links[ortho_c_t_begin]) {
-					const o1i_t ortho_c_t_end = chute_tie_links[ortho_c_t_begin];
+				for (o1i_t t_begin {0}; t_begin < O1; t_begin = ortho.chute_tie_links[t_begin]) {
+					const o1i_t t_end = ortho.chute_tie_links[t_begin];
 					std::sort(
-						std::next(row.begin(), ortho_c_t_begin),
-						std::next(row.begin(), ortho_c_t_end),
-						[&](auto& a, auto& b){ return std::ranges::lexicographical_compare(
-							std::views::transform(a, [&](auto i) { return table[i]; }),
-							std::views::transform(b, [&](auto i) { return table[i]; })
-						); }
+						std::next(boxrows.begin(), t_begin),
+						std::next(boxrows.begin(), t_end),
+						std::less{}
 					);
 				}
 			}
 			std::sort(
-				std::next(to_tied[tie_begin/O1].begin(), tie_begin%O1),
-				std::next(to_tied[tie_begin/O1].begin(), tie_end  %O1),
-				[&](auto a, auto b){ return std::ranges::lexicographical_compare(table[a], table[b]); }
+				std::next(to_tied[tie_begin/O1].begin(), tie_begin %O1),
+				std::next(to_tied[tie_begin/O1].begin(), tie_end   %O1), // TODO this mod is bad
+				[&](auto a, auto b){ return std::ranges::lexicographical_compare(table[a], table[b]); } // TODO.try can this be changed to just use array "<" operator?
 			);
 		}
 		// loop over tied chute ranges:
-		for (o1i_t tie_begin {0}; tie_begin < O2; tie_begin = chute_tie_links[tie_begin]) {
+		for (o1i_t tie_begin {0}; tie_begin < O1; tie_begin = chute_tie_links[tie_begin]) {
 			const o1i_t tie_end = chute_tie_links[tie_begin];
 			if ((tie_begin + 1) == tie_end) [[likely]] {
 				continue; // not a tie.
 			}
+			// try to resolve tied chute ranges:
 			std::sort(
 				std::next(to_tied.begin(), tie_begin),
 				std::next(to_tied.begin(), tie_end),
 				[&](auto& a, auto& b){ return std::ranges::lexicographical_compare(
-					std::views::transform(a, [&](auto i) { return table[i]; }),
-					std::views::transform(b, [&](auto i) { return table[i]; })
+					std::views::transform(a, [&](auto i) -> const auto& { return table[i]; }), // TODO can this be something like `table::operator[]`?
+					std::views::transform(b, [&](auto i) -> const auto& { return table[i]; })
 				); }
 			);
 		}
 
-		/* TODO.high for() */{
-			{
-				// update line_tie_links:
-				o2i_t begin {tie_begin};
-				for (o2i_t canon_i {static_cast<o2i_t>(begin+1)}; canon_i < tie_end; ++canon_i) {
-					if (!std::ranges::equal(table[to_tied[canon_i - 1]], table[to_tied[canon_i]])) {
-						line_tie_links[begin] = canon_i;
-						begin = canon_i;
-				}	}
-				line_tie_links[begin] = tie_end;
-			}
-			// TODO.high update chute_tie_links:
+		// update line_tie_links:
+		for (o2i_t tie_begin {0}; tie_begin < O2; tie_begin = line_tie_links[tie_begin]) {
+			const o2i_t tie_end = line_tie_links[tie_begin];
+			o2i_t begin {tie_begin};
+			for (o2i_t i {static_cast<o2i_t>(begin+1)}; i < tie_end; ++i) {
+				if (!std::ranges::equal(table[to_tied[(i-1)/O1][(i-1)%O1]], table[to_tied[i/O1][i%O1]])) {
+					line_tie_links[begin] = i;
+					begin = i;
+			}	}
+			line_tie_links[begin] = tie_end;
+		}
+		// update chute_tie_links:
+		for (o1i_t tie_begin {0}; tie_begin < O1; tie_begin = chute_tie_links[tie_begin]) {
+			const o1i_t tie_end = chute_tie_links[tie_begin];
+			o1i_t begin {tie_begin};
+			for (o1i_t canon_i {static_cast<o1i_t>(begin+1)}; canon_i < tie_end; ++canon_i) {
+				if (!std::ranges::equal(
+					std::views::transform(to_tied[canon_i-1], [&](auto i) -> const auto& { return table[i]; }),
+					std::views::transform(to_tied[canon_i  ], [&](auto i) -> const auto& { return table[i]; })
+				)) {
+					chute_tie_links[begin] = canon_i;
+					begin = canon_i;
+			}	}
+			chute_tie_links[begin] = tie_end;
 		}
 
 
 		{
 			// update s.to_og:
-			line_map_t<O> tied_to_og {to_og};
+			std::array<mapping_t, O2> tied_to_og;
 			for (o2i_t i {0}; i < O2; ++i) {
-				to_og[i/O1][i%O1] = tied_to_og[to_tied[i]/O1][to_tied[i]%O1];
+				tied_to_og[i] = to_og[i/O1][i%O1];
+			}
+			for (o2i_t i {0}; i < O2; ++i) {
+				to_og[i/O1][i%O1] = tied_to_og[to_tied[i/O1][i%O1]];
 			}
 		}
 	}
@@ -184,16 +196,17 @@ namespace okiidoku::morph {
 				// TODO.mid stalemate... current design insufficient?
 				break;
 			}
+			// TODO.mid the above could be optimized to stop doing a polar once stable
 		}
 
-		auto transformation = Transformation<O>{
+		Transformation<O> transformation {
 			.label_map {Transformation<O>::identity.label_map},
 			.row_map {row_state.to_og},
-			.col_map {col_state.to_og}
+			.col_map {col_state.to_og},
 			.transpose {false},
 		};
 		transformation = transformation.inverted();
-		// TODO use two iota views mapped one to src_grid and one to transposed view and lexicographical compare. if transposed less, edit transformation and apply a transpose_only transformation to src_grid in place.
+		// TODO.high use two iota views mapped one to src_grid and one to transposed view and lexicographical compare. if transposed less, edit transformation and apply a transpose_only transformation to src_grid in place.
 		transformation.apply_in_place(src_grid);
 		assert(grid_follows_rule<O>(src_grid));
 		return transformation;

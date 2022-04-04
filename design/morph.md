@@ -2,30 +2,13 @@
 
 ## Background
 
-Two Sudokus are equivalent if some combination of validity-preserving transformations which do not change the interrelationships of labels in the Sudokus can cause them to become identical.
-
-Such transformations include:
-
-- shuffling rows/columns within row/column groups
-- shuffling row/column groups
-- mirroring along a diagonal
-- and shuffling labels (ie. numbers. ex. replacing all ones with twos and vice versa)
-- Note that rotation is included implicitly, since it can be performed by combinations of the other transformations.
-
-Other people have also written about this topic, but focusing mainly on _counting_ equivalent and non-equivalent Sudokus. I didn't read any before drafting the following parts of this writing, so the terminology I use later is not the same as the community standard.
-
+- [sudopedia.enjoysudoku.com](http://sudopedia.enjoysudoku.com/Canonical_Form.html)
 - [wikipedia.org](https://en.wikipedia.org/wiki/Mathematics_of_Sudoku#Essentially_different_solutions)
 - [pi.math.cornell.edu](https://pi.math.cornell.edu/~mec/Summer2009/Mahmood/Symmetry.html).
 - [handwiki.org](https://handwiki.org/wiki/Mathematics_of_Sudoku#Sudokus_of_other_sizes)
 
-There isn't an abundance of community discussion on the topic of equivalence checking:
-
-- [this math stack exchange post](https://math.stackexchange.com/questions/1903186/determining-if-two-sudoku-boards-are-in-the-same-equivalence-class/4135784#4135784)
-- [this math stack exchange post](https://math.stackexchange.com/questions/2791524/group-theory-and-sudoko)
-
 Discussions related to equivalence checking can be found by searching for "Sudoku Canonicalization". Equivalence can be checked by canonicalizing two sudokus and then checking if the results are identical.
 
-- [sudopedia.enjoysudoku.com](http://sudopedia.enjoysudoku.com/Canonical_Form.html)
 - [dobrichev/sudoku-minlexing-tool](https://github.com/dobrichev/sudoku-minlexing-tool)
 - [The rust Sudoku library](https://github.com/Emerentius/sudoku/blob/master/src/board/canonicalization.rs)
   - Uses the minlex approach.
@@ -42,24 +25,13 @@ Scrambling cannot:
 - Swap blocks between chutes.
 - Change the vertical/horizontal orientation of an atom without doing so for all atoms (transposing the grid).
 
-### A Bounty of Information
-
-I was surprised to find so many.
-
-- I am only looking at size-2 relationships between labels, but one can observe and use the nature and number of relationships of size up to the grid order (the size of an atom). I only look at size-2 because I'm not sure how to gather this information and retain the minimum necessary amount so that space usage doesn't get out of hand, since the size of the observed relationships determines of the number of dimensions of the multidimensional array, with each dimension having length `o^2`.
-  - Some observations:
-    - A grid has `2 * o^3` atoms. Analysis can be performed with relationships within atoms of sizes in `[2, o]`. For a size `s`, there are `nCr(o^2, s)` possible atoms.
-    - As the size of the grid increases, the 
-
-- For canonicalization of labelling, I am only looking at the counts of relationships between labels- which only makes use of the first "scrambling-cannot" bullet. The combination of all the bullets would be, for each relationship between two labels, to gather a trinary "mask", where each digit corresponds to one of the blocks, and the value of the digit is either "no relationship", "horizontal atom relationship", or "vertical atom relationship". This mask cannot be used raw, since the repositioning of chutes will reorder digits, and transposition of the grid will swap the orientation of atoms. The mask itself must be canonicalized in terms of placement (unless placement canonicalization has already been performed, but I'm not sure if that's possible to achieve). I am currently using the horizontal and vertical masks OR-ed together.
-
 ### Partial Imbalance Analysis
 
 Once source of chute_imbalance is in the distribution of same-atom relations between horizontal or vertical chutes. If such a same-atom relation happens `N` times, the most evenly distributed way for them to occur across one polarity of chute can be represented by creating an array of length `O` containing numbers in `[0, IMBALANCE_MAX]`. `IMBALANCE_MAX` is equal to `2 * (O floor_div 2) * (O - (O floor_div 2))`. Cycle over the entries decrementing a counter from `N` each iteration and incrementing the entry. Imbalance can then be calculated by counting the number of times the relation occurs in each chute, sorting in decreasing order, and then summing the differences between the result and the balanced version.
 
 ## My Canonicalization Algorithm
 
-I decided not to try to support direct canonicalization of puzzles. I don't know how much time it would take to adapt the current algorithm to work for that, and there's another way to do it which is much simpler to _understand_: simply solve the puzzle, canonicalize the solution, and apply the same canonicalizing transformations to the puzzle. While it comes with the cost of solving, there is elegance in that this approach is easy to implement outside of any canonicalization algorithm's specific implementation details.
+I decided not to try to support direct canonicalization of puzzles. I don't know how much time it would take to adapt the current algorithm to work for that, and there's another way to do it which is much simpler to _understand_: simply solve the puzzle, canonicalize the solution, and apply the same canonicalizing transformations to the puzzle. While it comes with the cost of solving, there is elegance in that this approach is easy to implement outside of any canonicalization algorithm's specific implementation details, and that when the puzzle is solved, the solution will be in canonical form.
 
 ### High Level Approach
 

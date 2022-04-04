@@ -38,7 +38,8 @@ namespace okiidoku::morph {
 			_.col_map[col_inv/T::O1][col_inv%T::O1] = static_cast<mapping_t>(i);
 		}
 		_.transpose = transpose;
-		assert(_.inverted() == *this);
+		// assert(this->operator==(_.inverted()));
+		// TODO.low do the assert without causing infinite recursion or move it to tests.cpp
 		return _;
 	}
 
