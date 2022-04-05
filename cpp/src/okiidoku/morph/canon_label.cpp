@@ -130,7 +130,7 @@ namespace okiidoku::morph {
 				}
 			}
 
-			std::array<o2x_t, O2> _;
+			label_map_t<O> _;
 			for (o2x_t canon_i {0}; canon_i < O2; ++canon_i) {
 				_[s.to_og[canon_i]] = canon_i;
 			}

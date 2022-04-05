@@ -1,7 +1,7 @@
 #include <okiidoku/morph/transform.hpp>
 #include <okiidoku/grid.hpp>
+#include <okiidoku/morph/canon_ties.hpp>
 #include <okiidoku/traits.hpp>
-#include <okiidoku/morph/rel_info.hpp>
 
 #include <ranges>
 #include <algorithm> // sort
@@ -70,58 +70,64 @@ namespace okiidoku::morph {
 	) {
 		// I really dislike how complicated this is, but I currently
 		// don't know how to simplify it or ease readability.
-		std::array<line_map_t<O>, O2> table; {
-			grid_arr_flat_t<O> table_arr; {
-				const auto t {Transformation<O>{
-					Transformation<O>::identity.label_map,
-					is_transpose ? ortho.to_og : to_og,
-					is_transpose ? to_og : ortho.to_og,
-					is_transpose,
-				}};
-				t.inverted().apply_from_to(og_grid, table_arr);
-			}
-			for (o4i_t i {0}; i < O4; ++i) {
-				table[i/O2][(i%O2)/O1][i%O1] = static_cast<mapping_t>(table_arr[i]);
-			}
+		grid_arr_flat_t<O> table_arr; {
+			const auto t {Transformation<O>{
+				Transformation<O>::identity.label_map,
+				is_transpose ? ortho.to_og : to_og,
+				is_transpose ? to_og : ortho.to_og,
+				is_transpose,
+			}};
+			t.inverted().apply_from_to(og_grid, table_arr);
 		}
+		GridSpan2D<O> table(table_arr);
 
-		line_map_t<O> to_tied {Transformation<O>::identity.row_map};
+		std::array<mapping_t, O2> to_tied;
+		std::iota(to_tied.begin(), to_tied.end(), 0);
 		// loop over tied line ranges:
-		for (o2i_t tie_begin {0}; tie_begin < O2; tie_begin = line_tie_links[tie_begin]) {
+		for (o2i_t tie_begin {0}; tie_begin < O2;) {
 			const o2i_t tie_end = line_tie_links[tie_begin];
-			if ((tie_begin + 1) == tie_end) [[likely]] {
-				continue; // not a tie.
-			}
+			// TODO note: do not skip ties here
 			// loop over the tied line range:
 			for (o2i_t rel_i {tie_begin}; rel_i < tie_end; ++rel_i) {
-				auto& boxrows = table[rel_i];
+				auto row = table[rel_i];
 				// loop over orthogonal partially-resolved line ranges to normalize:
-				for (o2i_t t_begin {0}; t_begin < O2; t_begin = ortho.line_tie_links[t_begin]) {
+				for (o2i_t t_begin {0}; t_begin < O2;) {
 					const o2i_t t_end = ortho.line_tie_links[t_begin];
 					std::sort(
-						std::next(boxrows[t_begin/O1].begin(), t_begin %O1),
-						std::next(boxrows[t_begin/O1].begin(), t_end   %O1), // TODO this mod is bad
+						std::next(row.begin(), t_begin),
+						std::next(row.begin(), t_end  ),
 						std::less{}
 					);
+					t_begin = t_end;
 				}
 				// loop over orthogonal partially-resolved chute ranges to normalize:
-				for (o1i_t t_begin {0}; t_begin < O1; t_begin = ortho.chute_tie_links[t_begin]) {
+				for (o1i_t t_begin {0}; t_begin < O1;) {
 					const o1i_t t_end = ortho.chute_tie_links[t_begin];
-					std::sort(
-						std::next(boxrows.begin(), t_begin),
-						std::next(boxrows.begin(), t_end),
-						std::less{}
-					);
+					std::array<o1i_t, O1> resolve;
+					std::iota(resolve.begin(), resolve.end(), 0);
+					std::ranges::sort(resolve, [&](auto a, auto b){
+						return std::ranges::lexicographical_compare(row.subspan(a*O1,O1), row.subspan(b*O1,O1));
+					});
+					std::array<val_t, O2> copy;
+					std::copy(row.begin(), row.end(), copy.begin());
+					for (o1i_t i {0}; i < O1; ++i) {
+						std::copy(
+							std::next(copy.begin(), i*O1), std::next(copy.begin(), (i+1)*O1),
+							std::next(row.begin(), i*O1)
+						);
+					}
+					t_begin = t_end;
 				}
 			}
 			std::sort(
-				std::next(to_tied[tie_begin/O1].begin(), tie_begin %O1),
-				std::next(to_tied[tie_begin/O1].begin(), tie_end   %O1), // TODO this mod is bad
+				std::next(to_tied.begin(), tie_begin),
+				std::next(to_tied.begin(), tie_end  ),
 				[&](auto a, auto b){ return std::ranges::lexicographical_compare(table[a], table[b]); } // TODO.try can this be changed to just use array "<" operator?
 			);
+			tie_begin = tie_end;
 		}
 		// loop over tied chute ranges:
-		for (o1i_t tie_begin {0}; tie_begin < O1; tie_begin = chute_tie_links[tie_begin]) {
+		for (o1i_t tie_begin {0}; tie_begin < O1;) {
 			const o1i_t tie_end = chute_tie_links[tie_begin];
 			if ((tie_begin + 1) == tie_end) [[likely]] {
 				continue; // not a tie.
@@ -135,32 +141,35 @@ namespace okiidoku::morph {
 					std::views::transform(b, [&](auto i) -> const auto& { return table[i]; })
 				); }
 			);
+			tie_begin = tie_end;
 		}
 
 		// update line_tie_links:
-		for (o2i_t tie_begin {0}; tie_begin < O2; tie_begin = line_tie_links[tie_begin]) {
+		for (o2i_t tie_begin {0}; tie_begin < O2;) {
 			const o2i_t tie_end = line_tie_links[tie_begin];
 			o2i_t begin {tie_begin};
 			for (o2i_t i {static_cast<o2i_t>(begin+1)}; i < tie_end; ++i) {
-				if (!std::ranges::equal(table[to_tied[(i-1)/O1][(i-1)%O1]], table[to_tied[i/O1][i%O1]])) {
+				if (!std::ranges::equal(table[to_tied[i-1], table[to_tied[i]])) {
 					line_tie_links[begin] = i;
 					begin = i;
 			}	}
 			line_tie_links[begin] = tie_end;
+			tie_begin = tie_end;
 		}
 		// update chute_tie_links:
-		for (o1i_t tie_begin {0}; tie_begin < O1; tie_begin = chute_tie_links[tie_begin]) {
+		for (o1i_t tie_begin {0}; tie_begin < O1;) {
 			const o1i_t tie_end = chute_tie_links[tie_begin];
 			o1i_t begin {tie_begin};
-			for (o1i_t canon_i {static_cast<o1i_t>(begin+1)}; canon_i < tie_end; ++canon_i) {
+			for (o1i_t a {static_cast<o1i_t>(begin+1)}; a < tie_end; ++a) {
 				if (!std::ranges::equal(
-					std::views::transform(to_tied[canon_i-1], [&](auto i) -> const auto& { return table[i]; }),
-					std::views::transform(to_tied[canon_i  ], [&](auto i) -> const auto& { return table[i]; })
+					std::views::transform(to_tied.subspan((a-1)*O1, (a  )*O1), [&](auto i) -> const auto& { return table[i]; }),
+					std::views::transform(to_tied.subspan((a  )*O1, (a+1)*O1), [&](auto i) -> const auto& { return table[i]; })
 				)) {
-					chute_tie_links[begin] = canon_i;
-					begin = canon_i;
+					chute_tie_links[begin] = a;
+					begin = a;
 			}	}
 			chute_tie_links[begin] = tie_end;
+			tie_begin = tie_end;
 		}
 
 
@@ -171,7 +180,7 @@ namespace okiidoku::morph {
 				tied_to_og[i] = to_og[i/O1][i%O1];
 			}
 			for (o2i_t i {0}; i < O2; ++i) {
-				to_og[i/O1][i%O1] = tied_to_og[to_tied[i/O1][i%O1]];
+				to_og[i/O1][i%O1] = tied_to_og[to_tied[i]];
 			}
 		}
 	}

@@ -30,6 +30,8 @@ things I got wrong before which I couldn't understand based on gcc's error messa
 
 - [file open mode shorthands](https://en.cppreference.com/w/cpp/io/basic_filebuf/open)
 
+- [modern iterators](https://www.internalpointers.com/post/writing-custom-iterators-modern-cpp)
+
 - on Template instantiation
   - https://gcc.gnu.org/onlinedocs/gcc/Template-Instantiation.html
   - https://arne-mertz.de/2019/02/extern-template-reduce-compile-times/
