@@ -25,7 +25,7 @@ namespace okiidoku::gen::bt::path {
 		"block_col",
 		"dealer_row_major",
 	};
-	OKIIDOKU_EXPORT extern std::ostream& operator<<(std::ostream& os, E path_kind);
+	OKIIDOKU_EXPORT std::ostream& operator<<(std::ostream& os, E path_kind);
 	constexpr std::string_view options_menu_str {"\nGEN-PATH OPTIONS:"
 		"\n- row_major          horizontal strips as wide as the grid one by one"
 		"\n- block_col          rowmajor, but broken into columns one block wide"

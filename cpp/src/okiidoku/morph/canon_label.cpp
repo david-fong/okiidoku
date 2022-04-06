@@ -1,13 +1,12 @@
 #include <okiidoku/morph/rel_info.hpp>
 #include <okiidoku/morph/transform.hpp>
+#include <okiidoku/morph/canon_ties.hpp>
 #include <okiidoku/grid.hpp>
 #include <okiidoku/traits.hpp>
 
-// #include <iostream>
 #include <algorithm> // sort
 #include <numeric>   // iota
-#include <array>
-#include <compare>   // strong_ordering, is_eq, etc.
+#include <compare>   // is_eq
 #include <cassert>
 
 namespace okiidoku::morph {
@@ -21,26 +20,20 @@ namespace okiidoku::morph {
 	class CanonLabel final {
 		using val_t = traits<O>::o2i_smol_t;
 		using o1i_t = traits<O>::o1i_t;
-		using o2x_t = traits<O>::o2x_t;
 		using o2i_t = traits<O>::o2i_t;
 		using o4i_t = traits<O>::o4i_t;
 	public:
-		static constexpr o1i_t O1 = O;
 		static constexpr o2i_t O2 = O*O;
-		static constexpr o4i_t O4 = O*O*O*O;
 
 	private:
 		struct State final {
 			grid_arr2d_t<O, Rel<O>> rel_table;
 			label_map_t<O> to_og;
-			std::array<o2i_t, O2> tie_links {0};
+			TieLinks<O, 2> ties {};
 			explicit constexpr State(const grid_const_span_t<O> grid) noexcept: rel_table{make_rel_table<O>(grid)} {
 				std::iota(to_og.begin(), to_og.end(), 0);
-				tie_links[0] = O2;
 			}
-			bool has_ties() const {
-				return std::ranges::any_of(tie_links, [](auto link){ return link == 0; });
-			}
+			bool has_ties() const { return ties.has_unresolved(); }
 		};
 		static void do_a_pass_(State& s) noexcept;
 
@@ -55,24 +48,14 @@ namespace okiidoku::morph {
 
 		label_map_t<O> to_tied;
 		std::iota(to_tied.begin(), to_tied.end(), 0);
-		// loop over tied ranges:
-		for (o2i_t tie_begin {0}; tie_begin != O2; tie_begin = s.tie_links[tie_begin]) {
-			const o2i_t tie_end = s.tie_links[tie_begin];
-			if ((tie_begin + 1) == tie_end) [[likely]] {
-				continue; // not a tie.
-			}
-			// loop over the tied range:
-			for (o2i_t rel_i {tie_begin}; rel_i < tie_end; ++rel_i) {
+		for (const auto tie : s.ties) {
+			if (tie.size() == 1) [[likely]] { continue; }
+			for (const auto rel_i : tie) {
 				auto& row = scratch[rel_i];
-				row = s.rel_table[rel_i];
+				row = s.rel_table[rel_i]; // populate
 				// normalize tied slice for later sorting:
-				for (o2i_t t_begin {0}; t_begin != O2; t_begin = s.tie_links[t_begin]) {
-					const o2i_t t_end = s.tie_links[t_begin];
-					std::sort(
-						std::next(row.begin(), t_begin),
-						std::next(row.begin(), t_end),
-						std::less{}
-					);
+				for (const auto [t_begin, t_end] : s.ties) {
+					std::sort(std::next(row.begin(), t_begin), std::next(row.begin(), t_end));
 					// if (t_begin == tie_begin) {
 					// } else {
 					// 	; // TODO try sorting preserving vertical slices across rows
@@ -80,21 +63,14 @@ namespace okiidoku::morph {
 				}
 			}
 			std::sort(
-				std::next(to_tied.begin(), tie_begin),
-				std::next(to_tied.begin(), tie_end),
+				std::next(to_tied.begin(), tie.begin_),
+				std::next(to_tied.begin(), tie.end_),
 				[&](auto a, auto b){ return std::is_lt(scratch[a] <=> scratch[b]); }
 			);
-			{
-				// update s.tie_links:
-				o2i_t begin {tie_begin};
-				for (o2i_t canon_i {static_cast<o2i_t>(begin+1)}; canon_i < tie_end; ++canon_i) {
-					if (std::is_neq(scratch[to_tied[canon_i - 1]] <=> scratch[to_tied[canon_i]])) {
-						s.tie_links[begin] = canon_i;
-						begin = canon_i;
-				}	}
-				s.tie_links[begin] = tie_end;
-			}
 		}
+		s.ties.update([&](auto a, auto b){
+			return std::is_eq(scratch[to_tied[a]] <=> scratch[to_tied[b]]);
+		});
 
 		{
 			// update s.to_og:
@@ -117,27 +93,27 @@ namespace okiidoku::morph {
 		const label_map_t<O> label_og_to_canon = [&](){
 			State s(grid);
 			while (s.has_ties()) {
-				std::array<o2i_t, O2> old_tie_links {s.tie_links};
+				auto old_ties {s.ties};
 				do_a_pass_(s);
-				if (s.tie_links[0] == O2) {
+				if (s.ties.is_completely_unresolved()) {
 					// TODO.high encountered the most canonical grid. :O not sure what to do here.
 					assert(false);
 					break;
 				}
-				if (old_tie_links == s.tie_links) {
+				if (old_ties == s.ties) {
 					// TODO.mid stalemate... current design insufficient?
 					break;
 				}
 			}
 
 			label_map_t<O> _;
-			for (o2x_t canon_i {0}; canon_i < O2; ++canon_i) {
-				_[s.to_og[canon_i]] = canon_i;
+			for (o2i_t canon_i {0}; canon_i < O2; ++canon_i) {
+				_[s.to_og[canon_i]] = static_cast<Transformation<O>::mapping_t>(canon_i);
 			}
 			return _;
 		}();
 
-		for (o4i_t i {0}; i < O4; ++i) {
+		for (o4i_t i {0}; i < grid.size(); ++i) {
 			grid[i] = static_cast<val_t>(label_og_to_canon[grid[i]]);
 		}
 		assert(grid_follows_rule<O>(grid));

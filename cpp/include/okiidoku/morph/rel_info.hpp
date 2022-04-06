@@ -6,7 +6,7 @@
 #include <okiidoku/okiidoku_config.hpp>
 #include <okiidoku_export.h>
 
-#include <compare>   // strong_ordering, is_eq, etc.
+#include <compare> // strong_ordering, is_eq, etc.
 
 namespace okiidoku::morph {
 

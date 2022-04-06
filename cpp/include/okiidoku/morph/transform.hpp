@@ -31,7 +31,7 @@ namespace okiidoku::morph {
 			.transpose {false},
 		};
 
-		bool operator==(const Transformation<O>&) const = default;
+		constexpr bool operator==(const Transformation<O>&) const = default;
 		void apply_from_to(grid_const_span_t<O> src, grid_span_t<O> dest) const noexcept;
 		void apply_in_place(grid_span_t<O>) const noexcept;
 		Transformation<O> inverted() const noexcept;

@@ -16,6 +16,8 @@
 
 ## Misc List
 
+- consider renaming "block" to "box", since most online resources seem to prefer "box"? I actually considered this in the past but didn't like that "boxes" has more letters than "rows" and "cols". Very petty- I know.
+
 - how is vector-of-bool's tweak header thing supposed to work with installation? I don't know how to copy the tweak config to 
 
 - make some grid things for binary and text serdes (and test please).
@@ -28,7 +30,7 @@
       - The path would prioritize the parts of the puzzle that the deductive reasoning knows the least about (the parts that are likely to result in large chain of new possible deductions when filled).
 
 - experiment with the option of making each order be its own dynamic library.
-  - Is there anything that would currently make this option wasteful in terms of binary size?
+  - Is there anything that would currently make this option wasteful in terms of binary size? (Ie. globals that aren't order-templated) Change those globals to be structs and make places that use them take references to them.
     - emojis are currently hardcoded in-source.
     - each mersenne twister in rng.cpp.
 - try making Order an enum
@@ -39,8 +41,6 @@
 
 - after experimenting with different stochastic implementations, try implementing an opencl program. The minstd_rand rng is very simple to implement. I think the stochastic algorithm is data-parallelizable.
   - I wonder if there's a bitset implementation for opencl...
-
-- consider renaming "block" to "box", since most online resources seem to prefer "box"? I actually considered this in the past but didn't like that "boxes" has more letters than "rows" and "cols". Very petty- I know.
 
 - what's this?
   - https://stackoverflow.com/questions/4977252/why-an-unnamed-namespace-is-a-superior-alternative-to-static
@@ -83,6 +83,7 @@
   - `std::ranges::iota()`
   - `std::views::chunk()`
     - could this be useful for `canon_place`? I tried messing around with range-v3 on compiler explorer and had trouble with the whole action vs algorithm, container vs view thing. Didn't know what I was doing and could achieve what I wanted.
+  - alternative to `std::chunk`, look into `mdspan` (multi-dimensional span). Seems like this is more of what I'm looking for.
 - CLI
   - implement `-h` and `--help` CLI argument.
   - give a red message when trying to continue and nothing is left to be found.

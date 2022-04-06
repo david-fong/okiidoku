@@ -1,5 +1,4 @@
 #include <okiidoku/morph/canon.hpp>
-#include <okiidoku/morph/transform.hpp>
 
 #include <cassert>
 
@@ -22,7 +21,7 @@ namespace okiidoku::morph {
 		assert(grid_follows_rule<O>(og_grid));
 		const auto label_map = canon_label<O>(og_grid);
 		auto place_map = canon_place<O>(og_grid);
-		// Transformation<O> place_map{};
+		// Transformation<O> place_map{}; // TODO.high delete when done canon_place
 		place_map.label_map = label_map;
 		return place_map;
 	}

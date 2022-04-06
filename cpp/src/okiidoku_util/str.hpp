@@ -38,7 +38,7 @@ namespace okiidoku::util::str {
 	 * See https://cppreference.com/w/cpp/language/sizeof...#Example
 	 * for an example utility function I can make to avoid this problem.
 	 */
-	inline constexpr std::array<std::string_view, 4> block_chars {
+	constexpr std::array<std::string_view, 4> block_chars {
 		#if USE_ANSI_ESC
 		"\u2591", "\u2592", "\u2593", "\u2588",
 		#else
@@ -46,7 +46,7 @@ namespace okiidoku::util::str {
 		#endif
 	};
 	template<class T>
-	requires std::is_integral_v<T> || std::is_floating_point_v<T>
+	requires std::is_arithmetic_v<T>
 	constexpr std::string_view get_block_char(T out_of, T count) {
 		assert(count <= out_of);
 		return (count == 0) ? " " : util::str::block_chars[static_cast<std::size_t>(

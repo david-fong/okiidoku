@@ -5,7 +5,7 @@
 
 namespace okiidoku::morph {
 
-	// Info not placement-independent.
+	// Info is placement-independent.
 	// Does not include self-to-self relationship bit for main diagonal entries.
 	template<Order O>
 	struct RelMasks final {
