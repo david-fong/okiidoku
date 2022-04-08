@@ -184,7 +184,7 @@ namespace okiidoku::gen::bt {
 		std::array<Cell, O4> cells_; // indexed by progress_
 		std::array<has_mask_t, O2> rows_has_;
 		std::array<has_mask_t, O2> cols_has_;
-		std::array<has_mask_t, O2> blks_has_;
+		std::array<has_mask_t, O2> boxes_has_;
 		std::array<dead_ends_t, O4> dead_ends_; // indexed by progress_
 
 		uint_fastN_t<std::bit_width(O4)> backtrack_origin_ {0};

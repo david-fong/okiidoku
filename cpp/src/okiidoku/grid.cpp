@@ -11,7 +11,7 @@ namespace okiidoku {
 
 		std::array<has_mask_t, O2> rows_has_ {};
 		std::array<has_mask_t, O2> cols_has_ {};
-		std::array<has_mask_t, O2> blks_has_ {};
+		std::array<has_mask_t, O2> boxes_has_ {};
 
 		for (o2i_t row {0}; row < O2; ++row) {
 		for (o2i_t col {0}; col < O2; ++col) {
@@ -21,16 +21,16 @@ namespace okiidoku {
 
 			auto& row_has = rows_has_[row];
 			auto& col_has = cols_has_[col];
-			auto& blk_has = blks_has_[rmi_to_blk<O>(row, col)];
+			auto& box_has = boxes_has_[rmi_to_box<O>(row, col)];
 
 			const has_mask_t try_val_mask {has_mask_t{1} << val};
-			const has_mask_t t_has {row_has | col_has | blk_has};
+			const has_mask_t t_has {row_has | col_has | box_has};
 			if ((t_has & try_val_mask).any()) [[unlikely]] {
 				return false;
 			} else {
 				row_has |= try_val_mask;
 				col_has |= try_val_mask;
-				blk_has |= try_val_mask;
+				box_has |= try_val_mask;
 			}
 		}}
 		return true;

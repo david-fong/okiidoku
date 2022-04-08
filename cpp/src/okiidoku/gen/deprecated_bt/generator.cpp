@@ -40,7 +40,7 @@ namespace okiidoku::gen::bt {
 		}
 		rows_has_.fill(0);
 		cols_has_.fill(0);
-		blks_has_.fill(0);
+		boxes_has_.fill(0);
 		dead_ends_.fill(0);
 
 		progress_ = 0;
@@ -131,7 +131,7 @@ namespace okiidoku::gen::bt {
 		const o4x_t coord = prog_to_coord(progress_);
 		has_mask_t& row_has = rows_has_[rmi_to_row<O>(coord)];
 		has_mask_t& col_has = cols_has_[rmi_to_col<O>(coord)];
-		has_mask_t& blk_has = blks_has_[rmi_to_blk<O>(coord)];
+		has_mask_t& box_has = boxes_has_[rmi_to_box<O>(coord)];
 		const auto& val_try_order = val_try_orders_[progress_ / O2];
 
 		Cell& cell = cells_[progress_];
@@ -141,7 +141,7 @@ namespace okiidoku::gen::bt {
 			const has_mask_t erase_mask {~(has_mask_t{1} << val_try_order[cell.try_index])};
 			row_has &= erase_mask;
 			col_has &= erase_mask;
-			blk_has &= erase_mask;
+			box_has &= erase_mask;
 
 			// Smart skip-backtracking:
 			// This optimization's degree of usefulness depends on the genpath and size.
@@ -153,7 +153,7 @@ namespace okiidoku::gen::bt {
 			}
 		}
 
-		const has_mask_t cell_has {row_has | col_has | blk_has};
+		const has_mask_t cell_has {row_has | col_has | box_has};
 		if (!cell_has.all()) [[likely]] {
 			// The above optimization comes into effect ~1/5 of the time for size 5.
 			for (o2i_t try_i {static_cast<o2i_t>((cell.try_index+1u) % (O2+1))}; try_i < O2; ++try_i) [[likely]] {
@@ -163,7 +163,7 @@ namespace okiidoku::gen::bt {
 					// A valid value was found:
 					row_has |= try_val_mask;
 					col_has |= try_val_mask;
-					blk_has |= try_val_mask;
+					box_has |= try_val_mask;
 					cell.try_index = try_i;
 					return Direction { .is_back = false, .is_back_skip = false };
 				}

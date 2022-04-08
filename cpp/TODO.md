@@ -16,8 +16,6 @@
 
 ## Misc List
 
-- consider renaming "block" to "box", since most online resources seem to prefer "box"? I actually considered this in the past but didn't like that "boxes" has more letters than "rows" and "cols". Very petty- I know.
-
 - how is vector-of-bool's tweak header thing supposed to work with installation? I don't know how to copy the tweak config to 
 
 - make some grid things for binary and text serdes (and test please).

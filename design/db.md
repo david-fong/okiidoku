@@ -2,9 +2,9 @@
 
 ## Compression for Serialization
 
-For full grids, the blocks along the main diagonal can be removed and are easy to restore.
+For full grids, the boxes along the main diagonal can be removed and are easy to restore.
 
-[Here's a desmos](https://www.desmos.com/calculator/gwydzevddo) comparing different levels of compression (including the omission of the main diagonal blocks). The first is where each row gets represented as a number, with each digit being in [0, O2]. The second is where each value takes the minimum bits required to store a number in [0, O2]. The last is where each value takes the minimum number of bytes to store a number in [0, O2]. The ratio between the first and second is fairly small. The first requires bigint support. The second requires parsing sub-byte/non-byte-aligned numbers. I feel like the second could perform faster (?) while still being somewhat simple to implement compared to the first option, and also being fairly more compact than option 3. Just use bitset as an intermediate representation for the serdes.
+[Here's a desmos](https://www.desmos.com/calculator/gwydzevddo) comparing different levels of compression (including the omission of the main diagonal boxes). The first is where each row gets represented as a number, with each digit being in [0, O2]. The second is where each value takes the minimum bits required to store a number in [0, O2]. The last is where each value takes the minimum number of bytes to store a number in [0, O2]. The ratio between the first and second is fairly small. The first requires bigint support. The second requires parsing sub-byte/non-byte-aligned numbers. I feel like the second could perform faster (?) while still being somewhat simple to implement compared to the first option, and also being fairly more compact than option 3. Just use bitset as an intermediate representation for the serdes.
 
 ### Compression by House
 

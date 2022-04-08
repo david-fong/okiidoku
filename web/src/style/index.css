@@ -13,7 +13,7 @@ body {
 	--grid-area:   calc(var(--grid-length) * var(--grid-length));
 
 	--border-radius: 0.5em;
-	--grid-block-spacing: 0.4em;
+	--grid-box-spacing: 0.4em;
 	--tile-width: 2em;
 	--tile-bd-width: 2px;
 
@@ -44,7 +44,7 @@ body > * {
 #sidebar, #sidebar > * {
 	box-sizing: border-box;
 	display: grid;
-	gap: var(--grid-block-spacing);
+	gap: var(--grid-box-spacing);
 }
 #sidebar > * > :not(legend) {
 	width: 100%;
@@ -89,12 +89,12 @@ legend {
 }
 .grid {
 	contain: content;
-	padding: var(--grid-block-spacing);
+	padding: var(--grid-box-spacing);
 	display: grid;
 	grid-template-columns: repeat(var(--grid-order), min-content);
-	gap: var(--grid-block-spacing);
+	gap: var(--grid-box-spacing);
 }
-.grid--block {
+.grid--box {
 	contain: strict;
 	border-radius: var(--border-radius);
 	border: var(--tile-bd-width) solid var(--colour-tile-bd);

@@ -12,7 +12,7 @@ class Generator {
 	private readonly grid: ReadonlyArray<Tile>;
 	private readonly rowsHas: Uint32Array;
 	private readonly colsHas: Uint32Array;
-	private readonly blksHas: Uint32Array;
+	private readonly boxesHas: Uint32Array;
 
 	private readonly valTryOrder: Array<Uint8Array>;
 	#genPath: Generator.GenPath;
@@ -37,17 +37,17 @@ class Generator {
 		document.body.style.setProperty("--grid-order", this.O1.toString());
 		this.gridElem = gridElem;
 
-		{const blockElems = [];
+		{const boxElems = [];
 		for (let i = 0; i < this.O2; ++i) {
-			const blockElem = document.createElement("div");
-			blockElem.classList.add("grid--block");
-			blockElems.push(blockElem);
-			gridElem.appendChild(blockElem);
+			const boxElem = document.createElement("div");
+			boxElem.classList.add("grid--box");
+			boxElems.push(boxElem);
+			gridElem.appendChild(boxElem);
 		}
 		for (let i = 0; i < this.O4; ++i) {
 			const tile = new Tile(this);
 			grid.push(tile);
-			blockElems[this.getBlk(i)]!.appendChild(tile.baseElem);
+			boxElems[this.getBox(i)]!.appendChild(tile.baseElem);
 		}}
 		this.grid = Object.freeze(grid);
 
@@ -62,14 +62,14 @@ class Generator {
 
 		// Note: Put the order-dependant types last as a JS engine shapes optimization.
 		// The types will be dependent once support for order 6 is added.
-		["row","col","blk"].forEach((type) => {
+		["row","col","box"].forEach((type) => {
 			((this as any)[type + "Has"] as Generator["rowsHas"]) = new Uint32Array(this.O2);
 		});
 	}
 
 	public clear(): void {
 		this.grid.forEach((tile) => tile.clear());
-		[this.rowsHas, this.colsHas, this.blksHas].forEach((masksArr) => {
+		[this.rowsHas, this.colsHas, this.boxesHas].forEach((masksArr) => {
 			for (let i = 0; i < this.O2; ++i) { masksArr[i] = 0; }
 		});
 		this.valTryOrder.forEach((tryOrder) => {
@@ -100,17 +100,17 @@ class Generator {
 		const tile = this.grid[index]!;
 		const row = this.getRow(index);
 		const col = this.getCol(index);
-		const blk = this.getBlk(index);
+		const box = this.getBox(index);
 		if (!(tile.isClear)) {
 			const eraseMask = ~(1 << tile.value);
 			this.rowsHas[row] &= eraseMask;
 			this.colsHas[col] &= eraseMask;
-			this.blksHas[blk] &= eraseMask;
+			this.boxesHas[box] &= eraseMask;
 		}
 		const invalidBin = (
 			this.rowsHas[row]! |
 			this.colsHas[col]! |
-			this.blksHas[blk]!
+			this.boxesHas[box]!
 		);
 		for (let tryIndex = tile.nextTryIndex; tryIndex < this.O2; ++tryIndex) {
 			const value = this.valTryOrder[this.getRow(index)]![tryIndex]!;
@@ -119,7 +119,7 @@ class Generator {
 				// If a valid value is found for this tile:
 				this.rowsHas[row] |= valueBit;
 				this.colsHas[col] |= valueBit;
-				this.blksHas[blk] |= valueBit;
+				this.boxesHas[box] |= valueBit;
 				tile.value = value;
 				tile.nextTryIndex = (tryIndex + 1);
 				++this.progress;
@@ -144,13 +144,13 @@ class Generator {
 				this.prog2coord[i] = i;
 			}
 			break; }
-		case Generator.GenPath.BLOCK_COL: {
+		case Generator.GenPath.BOX_COL: {
 			const order = this.O1;
 			let i = 0;
-			for (let blkCol = 0; blkCol < order; ++blkCol) {
+			for (let boxCol = 0; boxCol < order; ++boxCol) {
 				for (let row = 0; row < this.O2; ++row) {
 					for (let bCol = 0; bCol < order; ++bCol) {
-						this.prog2coord[i++] = (blkCol * order) + (row * this.O2) + (bCol);
+						this.prog2coord[i++] = (boxCol * order) + (row * this.O2) + (bCol);
 					}
 				}
 			}
@@ -160,8 +160,8 @@ class Generator {
 
 	public getRow(index: number): number { return Math.floor(index / this.O2); }
 	public getCol(index: number): number { return index % this.O2; }
-	public getBlk(index: number): number { return this.getBlk2(this.getRow(index), this.getCol(index)); }
-	public getBlk2(row: number, col: number): number {
+	public getBox(index: number): number { return this.getBox2(this.getRow(index), this.getCol(index)); }
+	public getBox2(row: number, col: number): number {
 		const order = this.O1;
 		return (Math.floor(row / order) * order) + Math.floor(col / order);
 	}
@@ -169,7 +169,7 @@ class Generator {
 namespace Generator {
 	export const enum GenPath {
 		ROW_MAJOR = "row-major",
-		BLOCK_COL = "block-col",
+		BOX_COL = "box-col",
 	};
 	export interface Direction {
 		isBack: boolean;

@@ -23,7 +23,7 @@ struct GenericGenerator<
 	path_val: [Ord2; O4],
 	rows_has: [Ord2; O2],
 	cols_has: [Ord2; O2],
-	blks_has: [OccMask; O2],
+	boxes_has: [OccMask; O2],
 
 	progress: Ord4,
 	/// Indexed by progress- not by coordinate (for better cache usage).
@@ -58,7 +58,7 @@ impl<
 			val: [Ord2::zero(); O4],
 			row_has: [Ord2::zero(); O2],
 			col_has: [Ord2::zero(); O2],
-			blk_has: [Ord2::zero(); O2],
+			box_has: [Ord2::zero(); O2],
 
 			progress: Ord4::zero(),
 			try_progress: [Ord2::zero(); O4],

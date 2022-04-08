@@ -9,8 +9,8 @@ namespace okiidoku::morph {
 	// Does not include self-to-self relationship bit for main diagonal entries.
 	template<Order O>
 	struct RelMasks final {
-		typename traits<O>::o2_bits_smol blocks_h;
-		typename traits<O>::o2_bits_smol blocks_v;
+		typename traits<O>::o2_bits_smol boxes_h;
+		typename traits<O>::o2_bits_smol boxes_v;
 	};
 	template<Order O>
 	grid_arr2d_t<O, RelMasks<O>> make_rel_masks_(const grid_const_span_t<O> grid_span) noexcept {
@@ -30,15 +30,15 @@ namespace okiidoku::morph {
 			for (o1i_t j = i + 1; j < O1; ++j) {
 				{ // boxrow
 					const val_t i_val = grid.at(line, atom+i), j_val = grid.at(line, atom+j);
-					const has_mask_t blk_mask_bit = has_mask_t{1} << rmi_to_blk<O>(line, atom);
-					masks[i_val][j_val].blocks_h |= blk_mask_bit;
-					masks[j_val][i_val].blocks_h |= blk_mask_bit;
+					const has_mask_t box_mask_bit = has_mask_t{1} << rmi_to_box<O>(line, atom);
+					masks[i_val][j_val].boxes_h |= box_mask_bit;
+					masks[j_val][i_val].boxes_h |= box_mask_bit;
 				}
 				{ // boxcol
 					const val_t i_val = grid.at(atom+i, line), j_val = grid.at(atom+j, line);
-					const has_mask_t blk_mask_bit = has_mask_t{1} << rmi_to_blk<O>(atom, line);
-					masks[i_val][j_val].blocks_v |= blk_mask_bit;
-					masks[j_val][i_val].blocks_v |= blk_mask_bit;
+					const has_mask_t box_mask_bit = has_mask_t{1} << rmi_to_box<O>(atom, line);
+					masks[i_val][j_val].boxes_v |= box_mask_bit;
+					masks[j_val][i_val].boxes_v |= box_mask_bit;
 				}
 		}}	}}
 		return masks;
@@ -65,16 +65,16 @@ namespace okiidoku::morph {
 				rel = {0,(O2/2),0,0};
 				continue;
 			}
-			const has_mask_t non_polar_mask = mask.blocks_h | mask.blocks_v;
+			const has_mask_t non_polar_mask = mask.boxes_h | mask.boxes_v;
 			const unsigned count = non_polar_mask.count();
 			rel.count = static_cast<traits<O>::o2i_smol_t>(count);
-			rel.polar_count_lesser = static_cast<Rel<O>::polar_count_lesser_t>(std::min(mask.blocks_h.count(), mask.blocks_v.count()));
+			rel.polar_count_lesser = static_cast<Rel<O>::polar_count_lesser_t>(std::min(mask.boxes_h.count(), mask.boxes_v.count()));
 
 			std::array<chute_imbalance_t, O1> h_chute_imbalance;
 			std::array<chute_imbalance_t, O1> v_chute_imbalance;
 			for (o1i_t chute {0}; chute < O1; ++chute) {
-				h_chute_imbalance[chute] = static_cast<chute_imbalance_t>((chute_blk_masks<O>::row[chute] & non_polar_mask).count());
-				v_chute_imbalance[chute] = static_cast<chute_imbalance_t>((chute_blk_masks<O>::col[chute] & non_polar_mask).count());
+				h_chute_imbalance[chute] = static_cast<chute_imbalance_t>((chute_box_masks<O>::row[chute] & non_polar_mask).count());
+				v_chute_imbalance[chute] = static_cast<chute_imbalance_t>((chute_box_masks<O>::col[chute] & non_polar_mask).count());
 			}
 			std::ranges::sort(h_chute_imbalance, std::greater{});
 			std::ranges::sort(v_chute_imbalance, std::greater{});

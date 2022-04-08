@@ -6,7 +6,7 @@ pub enum Path {
 	/// Goes through rows top to bottom, each row left to right.
 	row_major,
 	CardDeal,
-	block_col,
+	box_col,
 }
 
 impl<
@@ -38,18 +38,18 @@ impl<
 		let i: usize = 0;
 		/* for b_row in 0..ORD {
 			for b_col in 0..ORD {
-				for blk in 0..LEN {
-					let blk_addr = ((blk % ORD) * ORD) + (blk / ORD * ORD * LEN);
-					map[i] = blk_addr + (b_row * LEN) + b_col;
+				for box in 0..LEN {
+					let box_addr = ((box % ORD) * ORD) + (box / ORD * ORD * LEN);
+					map[i] = box_addr + (b_row * LEN) + b_col;
 				}
 			}
 		} */
 		let mut b_row = 0usize; while b_row < ORD {
 			let mut b_col = 0usize; while b_col < ORD {
-				let mut blk = 0usize; while blk < LEN {
-					let blk_addr = ((blk % ORD) * ORD) + (blk / ORD * ORD * LEN);
-					map[i] = <AreCount as From<usize>>::from(blk_addr + (b_row * LEN) + b_col);
-					blk += 1;
+				let mut box = 0usize; while box < LEN {
+					let box_addr = ((box % ORD) * ORD) + (box / ORD * ORD * LEN);
+					map[i] = <AreCount as From<usize>>::from(box_addr + (b_row * LEN) + b_col);
+					box += 1;
 				}
 				b_col += 1;
 			}
@@ -70,27 +70,27 @@ impl<
 	const ORD: usize,
 	const LEN: usize,
 	const ARE: usize,
-> GenericGenerator<OrdCount, LenCount, AreCount, LenField, ORD, LEN, ARE, {Path::block_col as usize}> {
+> GenericGenerator<OrdCount, LenCount, AreCount, LenField, ORD, LEN, ARE, {Path::box_col as usize}> {
 	const MAP: [AreCount; ARE] = Self::INIT_MAP();
 	const fn INIT_MAP() -> [AreCount; ARE] {
 		let mut map: [AreCount; ARE];
 		let i: usize = 0;
-		/* for blk_col in 0..ORD {
+		/* for box_col in 0..ORD {
 			for row in 0..LEN {
 				for b_col in 0..ORD {
-					map[i] = (blk_col * ORD) + (row * LEN) + (b_col);
+					map[i] = (box_col * ORD) + (row * LEN) + (b_col);
 				}
 			}
 		} */
-		let mut blk_col = 0usize; while blk_col < ORD {
+		let mut box_col = 0usize; while box_col < ORD {
 			let mut row = 0usize; while row < LEN {
 				let mut b_col = 0usize; while b_col < ORD {
-					map[i] = num::cast((blk_col * ORD) + (row * LEN) + (b_col)).unwrap();
+					map[i] = num::cast((box_col * ORD) + (row * LEN) + (b_col)).unwrap();
 					b_col += 1;
 				}
 				row += 1;
 			}
-			blk_col += 1;
+			box_col += 1;
 		}
 		return map;
 	}

@@ -46,28 +46,28 @@ namespace okiidoku {
 		namespace str = okiidoku::util::str;
 		using o2i_t = std::uint16_t;
 
-		const auto print_blk_row_sep_string_ = [&os, O](const unsigned border_i) -> void {
+		const auto print_box_row_sep_string_ = [&os, O](const unsigned border_i) -> void {
 			#define M_NOOK(NOOK_T, NOOK_C, NOOK_B) \
 			if      (border_i == 0) [[unlikely]] { os << NOOK_T; } \
 			else if (border_i == O) [[unlikely]] { os << NOOK_B; } \
 			else                    { os << NOOK_C; }
 			M_NOOK(" ┌", " ├", " └")
-			for (unsigned blk_col {0}; blk_col < O; ++blk_col) {
+			for (unsigned box_col {0}; box_col < O; ++box_col) {
 				for (unsigned i {0}; i < 1u + (2u * O); ++i) {
 					os << "─";
 				}
-				if (blk_col < O - 1u) { M_NOOK("┬", "┼", "┴") }
+				if (box_col < O - 1u) { M_NOOK("┬", "┼", "┴") }
 			}
 			M_NOOK("┐", "┤", "┘")
 			#undef M_NOOK
 		};
 
-		auto print_blk_row_sep_strings = [&](const unsigned border_i) mutable {
+		auto print_box_row_sep_strings = [&](const unsigned border_i) mutable {
 			os << '\n';
-			print_blk_row_sep_string_(border_i);
+			print_box_row_sep_string_(border_i);
 			for (unsigned i {1}; i < grid_views.size(); ++i) {
 				os << "   ";
-				print_blk_row_sep_string_(border_i);
+				print_box_row_sep_string_(border_i);
 			}
 		};
 		const auto emoji_sets = make_random_emoji_set(O);
@@ -75,7 +75,7 @@ namespace okiidoku {
 		os << str::dim.on;
 		for (o2i_t row {0}; row < O*O; ++row) {
 			if (row % O == 0) {
-				print_blk_row_sep_strings(row / O);
+				print_box_row_sep_strings(row / O);
 			}
 			os << '\n';
 			for (unsigned grid_i {0}; grid_i < grid_views.size(); ++grid_i) {
@@ -102,7 +102,7 @@ namespace okiidoku {
 				}
 			}
 		}
-		print_blk_row_sep_strings(O);
+		print_box_row_sep_strings(O);
 		os << str::dim.off;
 	}
 }

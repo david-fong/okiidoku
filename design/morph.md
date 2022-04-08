@@ -20,9 +20,9 @@ Discussions related to equivalence checking can be found by searching for "Sudok
 
 Scrambling cannot:
 
-- Swap cells between 1xO1 (vertical or horizontal) block-aligned slices (I will call this an "atom").
+- Swap cells between 1xO1 (vertical or horizontal) box-aligned slices (I will call this an "atom").
 - Swap cells or atoms between houses.
-- Swap blocks between chutes.
+- Swap boxes between chutes.
 - Change the vertical/horizontal orientation of an atom without doing so for all atoms (transposing the grid).
 
 ### Partial Imbalance Analysis

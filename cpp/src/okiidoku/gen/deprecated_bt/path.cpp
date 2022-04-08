@@ -43,21 +43,21 @@ namespace okiidoku::gen::bt::path {
 			if constexpr (PK == E::row_major) {
 				// std::iota(path.begin(), path.end(), 0);
 			}
-			else if constexpr (PK == E::block_col) {
+			else if constexpr (PK == E::box_col) {
 				o4i_t i {0};
-				for (o1i_t blk_col {0}; blk_col < O1; ++blk_col) {
+				for (o1i_t box_col {0}; box_col < O1; ++box_col) {
 					for (o2i_t row {0}; row < O2; ++row) {
 						for (o1i_t b_col {0}; b_col < O1; ++b_col) {
-							_[i++] = static_cast<o4x_smol_t>((blk_col * O1) + (row * O2) + (b_col));
+							_[i++] = static_cast<o4x_smol_t>((box_col * O1) + (row * O2) + (b_col));
 				}	}	}
 			}
 			else if constexpr (PK == E::dealer_row_major) {
 				o4i_t i {0};
 				for (o1i_t inside_b_row {0}; inside_b_row < O1; ++inside_b_row) {
 					for (o1i_t inside_b_col {0}; inside_b_col < O1; ++inside_b_col) {
-						for (o2i_t blk_i {0}; blk_i < O2; ++blk_i) {
-							const o4i_t blkaddr = static_cast<o4i_t>(((blk_i % O1) * O1) + (blk_i / O1 * O1 * O2));
-							_[i++] = static_cast<o4x_smol_t>(blkaddr + (inside_b_row * O2) + inside_b_col);
+						for (o2i_t box_i {0}; box_i < O2; ++box_i) {
+							const o4i_t boxaddr = static_cast<o4i_t>(((box_i % O1) * O1) + (box_i / O1 * O1 * O2));
+							_[i++] = static_cast<o4x_smol_t>(boxaddr + (inside_b_row * O2) + inside_b_col);
 				}	}	}
 			}
 			return _;
@@ -77,7 +77,7 @@ namespace okiidoku::gen::bt::path {
 
 	#define M_OKIIDOKU_TEMPL_TEMPL(O_) \
 		template struct PathCoords_<E::row_major, O_>; \
-		template struct PathCoords_<E::block_col, O_>; \
+		template struct PathCoords_<E::box_col, O_>; \
 		template struct PathCoords_<E::dealer_row_major, O_>;
 	M_OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 	#undef M_OKIIDOKU_TEMPL_TEMPL
@@ -87,7 +87,7 @@ namespace okiidoku::gen::bt::path {
 	coord_converter<O> get_prog_to_coord_converter(const E path_kind) noexcept {
 		switch (path_kind) {
 		case E::row_major: return PathCoords_<E::row_major, O>::prog_to_coord;
-		case E::block_col: return PathCoords_<E::block_col, O>::prog_to_coord;
+		case E::box_col: return PathCoords_<E::box_col, O>::prog_to_coord;
 		case E::dealer_row_major: return PathCoords_<E::dealer_row_major, O>::prog_to_coord;
 		default: return PathCoords_<E::row_major, O>::prog_to_coord; // never
 		}
@@ -97,7 +97,7 @@ namespace okiidoku::gen::bt::path {
 	coord_converter<O> get_coord_to_prog_converter(const E path_kind) noexcept {
 		switch (path_kind) {
 		case E::row_major: return PathCoords_<E::row_major, O>::coord_to_prog;
-		case E::block_col: return PathCoords_<E::block_col, O>::coord_to_prog;
+		case E::box_col: return PathCoords_<E::box_col, O>::coord_to_prog;
 		case E::dealer_row_major: return PathCoords_<E::dealer_row_major, O>::coord_to_prog;
 		default: return PathCoords_<E::row_major, O>::coord_to_prog; // never
 		}

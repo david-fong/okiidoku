@@ -13,7 +13,7 @@ namespace okiidoku::gen::bt::path {
 
 	enum class OKIIDOKU_EXPORT E : std::uint8_t {
 		row_major,
-		block_col,
+		box_col,
 		dealer_row_major,
 		max_ = dealer_row_major,
 	};
@@ -22,14 +22,14 @@ namespace okiidoku::gen::bt::path {
 	// literal values of their respective enums.
 	constexpr std::array<std::string_view, num_kinds> names {
 		"row_major",
-		"block_col",
+		"box_col",
 		"dealer_row_major",
 	};
 	OKIIDOKU_EXPORT std::ostream& operator<<(std::ostream& os, E path_kind);
 	constexpr std::string_view options_menu_str {"\nGEN-PATH OPTIONS:"
 		"\n- row_major          horizontal strips as wide as the grid one by one"
-		"\n- block_col          rowmajor, but broken into columns one block wide"
-		"\n- dealer_row_major   like dealing cards to each block using row-major"};
+		"\n- box_col          rowmajor, but broken into columns one box wide"
+		"\n- dealer_row_major   like dealing cards to each box using row-major"};
 
 
 	template<okiidoku::Order O>
