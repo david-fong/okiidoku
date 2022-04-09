@@ -40,10 +40,9 @@ namespace okiidoku {
 	template<Order O>
 	requires(is_order_compiled(O))
 	bool grid_is_filled(const grid_const_span_t<O> grid) noexcept {
-		static constexpr typename traits<O>::o2i_t O2 {O*O};
 		for (auto val : grid) {
-			assert(val <= O2);
-			if (val >= O2) { return false; }
+			assert(val <= traits<O>::O2);
+			if (val >= traits<O>::O2) { return false; }
 		}
 		return true;
 	}

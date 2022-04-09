@@ -8,6 +8,7 @@
 
 #include <array>
 #include <span>
+#include <variant>
 #include <cassert>
 
 namespace okiidoku {
@@ -16,6 +17,13 @@ namespace okiidoku {
 	template<Order O, typename V=traits<O>::o2i_smol_t> using grid_arr_flat_t = std::array<V, O*O*O*O>;
 	template<Order O, typename V=traits<O>::o2i_smol_t> using grid_const_span_t = std::span<const V, O*O*O*O>;
 	template<Order O, typename V=traits<O>::o2i_smol_t> using grid_span_t = std::span<V, O*O*O*O>;
+
+	template<Order O>
+	using grid_n = std::variant<
+	#define M_OKIIDOKU_TEMPL_TEMPL(O_) grid_arr_flat_t<O>,
+	M_OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
+	#undef M_OKIIDOKU_TEMPL_TEMPL
+	>;
 
 	// A thin wrapper over a span.
 	template<Order O, typename V=traits<O>::o2i_smol_t>

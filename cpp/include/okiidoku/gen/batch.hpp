@@ -29,7 +29,7 @@ namespace okiidoku::gen::ss::batch {
 	};
 
 
-	constexpr unsigned try_default_num_extra_threads_(const Order O) {
+	inline unsigned try_default_num_extra_threads_(const Order O) {
 		if (O < 4) { return 0; }
 		else if (O == 4) { return 1; }
 		else { return 2; }

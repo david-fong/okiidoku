@@ -126,7 +126,7 @@ namespace okiidoku::cli {
 					if (config_.canonicalize()) {
 						morph::canonicalize<val_t>(result.get_order(), std::span(grid));
 					}
-					db::serdes::print(of, result.get_order(), std::span<const val_t>(grid));
+					db::serdes::print(of, result.get_order(), std::span<const val_t>(grid), true);
 					// TODO.mid print a progress bar
 				}
 			);

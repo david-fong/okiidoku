@@ -35,7 +35,7 @@ namespace okiidoku::morph {
 			}
 			bool has_ties() const { return ties.has_unresolved(); }
 		};
-		static void do_a_pass_(State& s) noexcept;
+		static void do_a_pass_(State& s);
 
 	public:
 		static label_map_t<O> do_it(const grid_span_t<O> grid);
@@ -43,7 +43,7 @@ namespace okiidoku::morph {
 
 
 	template<Order O>
-	void CanonLabel<O>::do_a_pass_(CanonLabel<O>::State& s) noexcept {
+	void CanonLabel<O>::do_a_pass_(CanonLabel<O>::State& s) {
 		grid_arr2d_t<O, Rel<O>> scratch;
 
 		label_map_t<O> to_tied;

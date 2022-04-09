@@ -16,6 +16,10 @@
 
 ## Misc List
 
+- change RNGs to not use globals pls
+
+- change the size-variable versions of the library functions to use the visitor pattern? Need to create a common variant grid class.
+
 - how is vector-of-bool's tweak header thing supposed to work with installation? I don't know how to copy the tweak config to 
 
 - make some grid things for binary and text serdes (and test please).
