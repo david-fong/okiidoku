@@ -1,6 +1,7 @@
 # C++ Notes
 
-- https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines
+- [isocpp core guidelines](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines)
+- [pitchfork layout](https://api.csswg.org/bikeshed/?force=1&url=https://raw.githubusercontent.com/vector-of-bool/pitchfork/develop/data/spec.bs)
 
 ## Snippets
 

@@ -20,10 +20,13 @@ else()
 		-Wimplicit-fallthrough=5
 		-Wshadow -Woverloaded-virtual
 		-march=native # generated code meant only to run on compiling machine. for the speedup.
+		# TODO.low see https://gcc.gnu.org/gcc-12/changes.html#uninitialized
 	)
 endif()
 
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+set(CMAKE_VISIBILITY_INLINES_HIDDEN TRUE)
 include(GNUInstallDirs)
 # https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/RPATH-handling
 set(CMAKE_INSTALL_RPATH "\$ORIGIN/../${CMAKE_INSTALL_LIBDIR}")
@@ -38,26 +41,28 @@ endif()
 # include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake) # Include Conan-generated file
 # conan_basic_setup(TARGETS) # Introduce Conan-generated targets
 
-add_subdirectory(src/okiidoku_util)
-add_subdirectory(src/okiidoku)
-# add_subdirectory(src/okiidoku_gpu)
+add_subdirectory(libs/cli_utils)
+# add_subdirectory(libs/okiidoku_gpu)
+add_subdirectory(libs/base)
+add_subdirectory(libs/shared_rng)
+add_subdirectory(libs/mono)
+add_subdirectory(libs/visitor)
+add_subdirectory(libs/draw)
 
-add_subdirectory(src/okiidoku_cli)
-# add_subdirectory(src/okiidoku_web)
+add_subdirectory(apps/cli)
+# add_subdirectory(apps/web)
 
 add_subdirectory(tools)
 
-if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND BUILD_TESTING)
-	add_subdirectory(tests)
-endif()
 
-
-# try using FILE_SETs when more people have cmake 3.23
-install(DIRECTORY include/okiidoku DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-install(TARGETS okiidoku okiidoku_cli EXPORT okiidokuTargets)
+install(TARGETS
+	okiidoku_base okiidoku_shared_rng okiidoku_mono okiidoku_visitor okiidoku_draw okiidoku_cli
+	EXPORT okiidokuTargets
+	FILE_SET HEADERS
+)
 install(EXPORT okiidokuTargets
 	FILE okiidokuTargets.cmake
-	NAMESPACE okiidoku::
+	# NAMESPACE okiidoku::
 	DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/okiidoku
 )
 

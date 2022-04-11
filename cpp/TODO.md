@@ -2,6 +2,8 @@
 
 ## Roadmap
 
+- implement per-order dynamic libraries
+- compare monolithic vs per-order dynamic libraries pros and cons
 - refactor and improve canonicalization
 - compare backtracking and stochastic search statistics
 - implement grid-serdes translator tool
@@ -18,9 +20,9 @@
 
 - change RNGs to not use globals pls
 
-- change the size-variable versions of the library functions to use the visitor pattern? Need to create a common variant grid class.
+- Consider removing the timing capability from batch. I can even imagine a batch api that gives the caller control over when to stop.
 
-- how is vector-of-bool's tweak header thing supposed to work with installation? I don't know how to copy the tweak config to 
+- change the size-variable versions of the library functions to use the visitor pattern? Need to create a common variant grid class.
 
 - make some grid things for binary and text serdes (and test please).
   - Implement a program in the tools folder to do format conversions.
@@ -32,14 +34,29 @@
       - The path would prioritize the parts of the puzzle that the deductive reasoning knows the least about (the parts that are likely to result in large chain of new possible deductions when filled).
 
 - experiment with the option of making each order be its own dynamic library.
+  - https://github.com/vector-of-bool/pitchfork/issues/30
+  - how would this affect:
+    - build time?
+      - hypothesis: not sure.
+    - sum size of executables?
+      - hypothesis: slight increase if some stdlib things get bundled for each one, but this should be fixable.
+    - runtime performance?
+      - hypothesis: slight decrease due to more symbol table things?
+    - readability of compiler/linker errors? 
+      - compiler errors will hopefully be fewer at a time?
+    - complexity / confusing-ness of using the code / number ways to do something wrong.
+    - on the other hand, does it empower any valuable ways of using the library?
+      - one the template libraries are built, if one has multiple projects that depend on them, each one can cherry-pick which to load at runtime; may allow for optimizing runtime memory usage?
   - Is there anything that would currently make this option wasteful in terms of binary size? (Ie. globals that aren't order-templated) Change those globals to be structs and make places that use them take references to them.
     - emojis are currently hardcoded in-source.
     - each mersenne twister in rng.cpp.
+  - the visitor library can probably be static. can even consider making it a header-only library?
 - try making Order an enum
   - see if it can improve switch case cover detection (I think not. I already have some enum-switch-returns that the current gcc warning flags complain about if I don't have a default case).
   - if this works out, make sure to update all the contract docs and remove relevant assertions.
 - move the emoji definitions out of the program binary and externalize as a configurable data read in at runtime?
-- Consider removing the timing capability from batch. I can even imagine a batch api that gives the caller control over when to stop.
+
+- how is vector-of-bool's tweak header thing supposed to work with installation? I don't know how to copy the tweak config to 
 
 - after experimenting with different stochastic implementations, try implementing an opencl program. The minstd_rand rng is very simple to implement. I think the stochastic algorithm is data-parallelizable.
   - I wonder if there's a bitset implementation for opencl...

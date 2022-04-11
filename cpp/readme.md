@@ -3,7 +3,7 @@
 
 ## Using the Dynamic Library
 
-Building okiidoku requires CMake (with [the minimum specified version](./CMakeLists.txt)), a C++ compiler [supporting C++20](https://en.cppreference.com/w/cpp/compiler_support), a build system like Make or Ninja, and Conan.
+Building okiidoku requires CMake (with [the minimum specified version](./CMakeLists.txt)), a C++ compiler [supporting C++20](https://en.cppreference.com/w/cpp/compiler_support), and a build system like Make or Ninja.
 
 Refer to the [CMake guide](https://cmake.org/cmake/help/latest/guide/importing-exporting/index.html). This may also help: [tldp.org on shared libraries](https://tldp.org/HOWTO/Program-Library-HOWTO/shared-libraries.html)
 
@@ -17,15 +17,17 @@ Refer to the [CMake guide](https://cmake.org/cmake/help/latest/guide/importing-e
 
 ```shell
 # cd into the cpp directory of the repo first
-mkdir build/Release
-pushd build/Release
-conan install ../../ --build=missing
-popd
+# mkdir build/Release
+# pushd build/Release
+# conan install ../../ --build=missing
+# popd
 cmake -S . -B build/Release -DCMAKE_BUILD_TYPE=Release
 cd build/Release
 cmake --build . --config=Release
 ./src/okiidoku_cli/okiidoku_cli
 ```
+
+You can use `tput rmam` to disable the terminal's line wrapping, and `tput smam` to enable it again afterward.
 
 ## Navigating the Source Code
 
