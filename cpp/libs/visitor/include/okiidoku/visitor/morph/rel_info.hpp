@@ -4,8 +4,7 @@
 // TODO.mid not sure about whether to include this in visitor. not sure why it's even being exported in mono. was probably just in case. No real use-case thought of yet.
 
 #include <okiidoku/visitor/grid.hpp>
-#include <okiidoku/order.hpp>
-#include <okiidoku/okiidoku_config.hpp>
+#include <okiidoku/compiled_orders.hpp>
 #include <okiidoku_export.h>
 
 #include <compare> // strong_ordering, is_eq, etc.

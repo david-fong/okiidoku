@@ -1,7 +1,7 @@
 #ifndef HPP_OKIIDOKU__MONO__DB__MOD
 #define HPP_OKIIDOKU__MONO__DB__MOD
 
-#include <okiidoku/order.hpp>
+#include <okiidoku/compiled_orders.hpp>
 #include <okiidoku_export.h>
 
 #include <iosfwd>

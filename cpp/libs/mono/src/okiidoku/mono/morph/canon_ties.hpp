@@ -2,7 +2,7 @@
 #define HPP_OKIIDOKU__MONO__MORPH__TIES
 
 #include <okiidoku/traits.hpp>
-#include <okiidoku/order.hpp>
+#include <okiidoku/compiled_orders.hpp>
 
 #include <algorithm>
 #include <ranges>

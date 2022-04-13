@@ -8,15 +8,17 @@
 #ifdef _WIN32
 #include <windows.h>
 #include <optional>
-constexpr DWORD ENABLE_VIRTUAL_TERMINAL_PROCESSING {0x0004};
-std::optional<DWORD> old_con_mode {std::nullopt};
-std::optional<UINT> old_con_input_codepage {std::nullopt};
-std::optional<UINT> old_con_output_codepage {std::nullopt};
 #endif
 
 // https://docs.microsoft.com/en-us/windows/console/classic-vs-vt#exceptions-for-using-windows-console-apis
 
 namespace okiidoku::util {
+
+	#ifdef _WIN32
+	std::optional<DWORD> old_con_mode {std::nullopt};
+	std::optional<UINT> old_con_input_codepage {std::nullopt};
+	std::optional<UINT> old_con_output_codepage {std::nullopt};
+	#endif
 
 	struct MyNumPunct final : std::numpunct<char> {
 		std::string do_grouping() const {
@@ -26,9 +28,9 @@ namespace okiidoku::util {
 
 	void restore_console_config_() {
 		#ifdef _WIN32
-		if (old_con_mode) { SetConsoleMode(GetStdHandle(STD_OUTPUT_HANDLE), old_con_mode.value); }
-		if (old_con_input_codepage) { SetConsoleCP(old_con_input_codepage.value); }
-		if (old_con_output_codepage) { SetConsoleOutputCP(old_con_output_codepage.value); }
+		if (old_con_mode) { SetConsoleMode(GetStdHandle(STD_OUTPUT_HANDLE), old_con_mode.value()); }
+		if (old_con_input_codepage) { SetConsoleCP(old_con_input_codepage.value()); }
+		if (old_con_output_codepage) { SetConsoleOutputCP(old_con_output_codepage.value()); }
 		#endif
 	}
 

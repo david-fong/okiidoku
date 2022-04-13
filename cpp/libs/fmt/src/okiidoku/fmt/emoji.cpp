@@ -1,4 +1,4 @@
-#include <okiidoku/draw/emoji.hpp>
+#include <okiidoku/fmt/emoji.hpp>
 
 namespace okiidoku::emoji {
 

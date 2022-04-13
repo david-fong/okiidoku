@@ -1,8 +1,8 @@
+#include <okiidoku/fmt/print_2d.hpp>
 // #include <okiidoku/visitor/gen/batch.hpp>
 #include <okiidoku/visitor/gen/stochastic.hpp>
 #include <okiidoku/visitor/morph/canon.hpp>
 #include <okiidoku/visitor/morph/scramble.hpp>
-#include <okiidoku/visitor/print_2d.hpp>
 #include <okiidoku/visitor/db/serdes.hpp>
 #include <okiidoku/visitor/grid.hpp>
 #include <okiidoku/shared_rng.hpp>
@@ -14,7 +14,7 @@
 #include <random>    // random_device,
 #include <array>
 
-M_OKIIDOKU_DEFINE_MT19937_64
+// OKIIDOKU_DEFINE_MT19937_64
 
 
 // TODO.low experiment with effect of batching gen and then doing canon on that batch for perf
@@ -23,6 +23,7 @@ M_OKIIDOKU_DEFINE_MT19937_64
 template<okiidoku::Order O>
 unsigned test_morph_O(const unsigned num_rounds) {
 	using namespace okiidoku;
+	using namespace okiidoku::mono;
 	std::cout << "\n\ntesting for order " << O << std::endl;
 	// Note: if gen_path gets un-deprecated, assert that paths are valid.
 

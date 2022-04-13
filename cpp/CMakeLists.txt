@@ -10,7 +10,9 @@ set(CMAKE_CXX_STANDARD 20 CACHE STRING "The C++ standard to use")
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_CXX_EXTENSIONS FALSE)
 if(MSVC)
-	add_compile_options(/W4 /WX)
+	add_compile_options(/W4 /WX
+		/wd5030 # disable the "unrecognized attribute" warning. unfortunately needed or else MSVC warns for gnu-prefixed attributes.
+	)
 else()
 	add_compile_options(
 		-Wall -Wextra -Wpedantic -Werror
@@ -43,11 +45,11 @@ endif()
 
 add_subdirectory(libs/cli_utils)
 # add_subdirectory(libs/okiidoku_gpu)
-add_subdirectory(libs/base)
+add_subdirectory(libs/config)
 add_subdirectory(libs/shared_rng)
 add_subdirectory(libs/mono)
 add_subdirectory(libs/visitor)
-add_subdirectory(libs/draw)
+add_subdirectory(libs/fmt)
 
 add_subdirectory(apps/cli)
 # add_subdirectory(apps/web)
@@ -56,10 +58,12 @@ add_subdirectory(tools)
 
 
 install(TARGETS
-	okiidoku_base okiidoku_shared_rng okiidoku_mono okiidoku_visitor okiidoku_draw okiidoku_cli
+	compiled_orders okiidoku_shared_rng okiidoku_mono okiidoku_visitor okiidoku_fmt okiidoku_cli
 	EXPORT okiidokuTargets
-	FILE_SET HEADERS
+	FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/okiidoku
+	INCLUDES         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/okiidoku
 )
+# TODO.mid install one of the generated export header somehow
 install(EXPORT okiidokuTargets
 	FILE okiidokuTargets.cmake
 	# NAMESPACE okiidoku::

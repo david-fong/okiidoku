@@ -18,12 +18,13 @@ generate_export_header(okiidoku_mono BASE_NAME okiidoku)
 target_sources(okiidoku_mono PUBLIC FILE_SET HEADERS BASE_DIRS include)
 target_include_directories(okiidoku_mono
 	PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src"
-	PUBLIC
-	# $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+	PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
 )
 
 find_package(Threads REQUIRED)
 target_link_libraries(okiidoku_mono
+	PUBLIC compiled_orders
+	PUBLIC okiidoku_shared_rng
 	# PRIVATE CONAN_PKG::range-v3
 	PUBLIC Threads::Threads
 )

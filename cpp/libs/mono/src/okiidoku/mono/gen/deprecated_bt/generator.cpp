@@ -20,12 +20,12 @@ namespace okiidoku::mono::gen::bt {
 
 	std::unique_ptr<Generator> Generator::create(const Order order) {
 		switch (order) {
-			#define M_OKIIDOKU_TEMPL_TEMPL(O_) \
+			#define OKIIDOKU_FOR_COMPILED_O(O_) \
 			case O_: return std::make_unique<gen::bt::Generator<O_>>();
-			M_OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-			#undef M_OKIIDOKU_TEMPL_TEMPL
+			OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
+			#undef OKIIDOKU_FOR_COMPILED_O
 
-			default: return std::make_unique<gen::bt::Generator<M_OKIIDOKU_DEFAULT_ORDER>>();
+			default: return std::make_unique<gen::bt::Generator<OKIIDOKU_DEFAULT_ORDER>>();
 		}
 	}
 
@@ -176,8 +176,8 @@ namespace okiidoku::mono::gen::bt {
 	}
 
 
-	#define M_OKIIDOKU_TEMPL_TEMPL(O_) \
+	#define OKIIDOKU_FOR_COMPILED_O(O_) \
 		template class Generator<O_>;
-	M_OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-	#undef M_OKIIDOKU_TEMPL_TEMPL
+	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
+	#undef OKIIDOKU_FOR_COMPILED_O
 }

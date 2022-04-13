@@ -2,8 +2,7 @@
 #define HPP_OKIIDOKU__MONO__MORPH__REL_INFO
 
 #include <okiidoku/mono/grid.hpp>
-#include <okiidoku/order.hpp>
-#include <okiidoku/okiidoku_config.hpp>
+#include <okiidoku/compiled_orders.hpp>
 #include <okiidoku_export.h>
 
 #include <compare> // strong_ordering, is_eq, etc.
@@ -39,9 +38,9 @@ namespace okiidoku::mono::morph {
 	OKIIDOKU_EXPORT grid_arr2d_t<O, Rel<O>> make_rel_table(grid_const_span_t<O>);
 
 
-	#define M_OKIIDOKU_TEMPL_TEMPL(O_) \
+	#define OKIIDOKU_FOR_COMPILED_O(O_) \
 		extern template struct Rel<O_>;
-	M_OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-	#undef M_OKIIDOKU_TEMPL_TEMPL
+	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
+	#undef OKIIDOKU_FOR_COMPILED_O
 }
 #endif

@@ -1,9 +1,10 @@
 #ifndef HPP_OKIIDOKU__MONO__GEN__STOCHASTIC
 #define HPP_OKIIDOKU__MONO__GEN__STOCHASTIC
 
+#include <okiidoku/shared_rng.hpp>
 #include <okiidoku/mono/grid.hpp>
 #include <okiidoku/traits.hpp>
-#include <okiidoku/okiidoku_config.hpp>
+#include <okiidoku/compiled_orders.hpp>
 #include <okiidoku_export.h>
 
 #include <random>  // minstd_rand
@@ -31,7 +32,7 @@ namespace okiidoku::mono::gen::ss {
 		using o4x_t = T::o4x_t;
 		using o4i_t = T::o4i_t;
 
-		void operator()();
+		void operator()(SharedRng&);
 		void write_to(grid_span_t<O> sink) const;
 
 	private:
@@ -49,9 +50,9 @@ namespace okiidoku::mono::gen::ss {
 	};
 
 
-	#define M_OKIIDOKU_TEMPL_TEMPL(O_) \
+	#define OKIIDOKU_FOR_COMPILED_O(O_) \
 		extern template class Generator<O_>;
-	M_OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-	#undef M_OKIIDOKU_TEMPL_TEMPL
+	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
+	#undef OKIIDOKU_FOR_COMPILED_O
 }
 #endif

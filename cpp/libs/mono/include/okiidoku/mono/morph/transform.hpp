@@ -3,7 +3,7 @@
 
 #include <okiidoku/mono/grid.hpp>
 #include <okiidoku/traits.hpp>
-#include <okiidoku/okiidoku_config.hpp>
+#include <okiidoku/compiled_orders.hpp>
 #include <okiidoku_export.h>
 
 namespace okiidoku::mono::morph {
@@ -38,9 +38,9 @@ namespace okiidoku::mono::morph {
 	};
 
 
-	#define M_OKIIDOKU_TEMPL_TEMPL(O_) \
+	#define OKIIDOKU_FOR_COMPILED_O(O_) \
 		extern template struct Transformation<O_>;
-	M_OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-	#undef M_OKIIDOKU_TEMPL_TEMPL
+	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
+	#undef OKIIDOKU_FOR_COMPILED_O
 }
 #endif

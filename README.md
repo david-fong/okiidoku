@@ -2,7 +2,7 @@
 
 The project currently provides two utilities: a _solution_ generator, and a canonicalizer. It is _not_ a solver or even a _puzzle_ generator, although I will likely try my hand at those in the future. It supports parametric grid size which many other sudoku projects do not. The generator uses a [stochastic search](https://en.wikipedia.org/wiki/Sudoku_solving_algorithms#Stochastic_search_/_optimization_methods) algorithm, which was found to scale much better than a backtracking algorithm for very large grid sizes. The canonicalizer is currently under progress; I am experimenting with a novel approach using intrinsic statistics/characteristics of grids.
 
-The project is still in its early stages. It it not stable. If you are looking for something to use as part of your own project, this project is _not ready_. You can find [its roadmap here](./cpp/TODO.md). I have usage instructions, but that doesn't mean the project is ready for use.
+The project is still in its early stages. It it not stable. If you are looking for something to use as part of your own project, this project is _not ready_ (despite there being some usage instructions). You can find [its roadmap here](./cpp/TODO.md). While I'd like to have cross-platform support and support for most popular compilers, it's not one of my priorities. I also prioritize using modern technologies over supporting older ones.
 
 Language-implementation independent design notes can be found in the [design folder](./design/).
 

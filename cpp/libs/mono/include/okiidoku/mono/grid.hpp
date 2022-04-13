@@ -2,8 +2,7 @@
 #define HPP_OKIIDOKU__MONO__GRID
 
 #include <okiidoku/traits.hpp>
-#include <okiidoku/order.hpp>
-#include <okiidoku/okiidoku_config.hpp>
+#include <okiidoku/compiled_orders.hpp>
 #include <okiidoku_export.h>
 
 #include <array>
@@ -46,8 +45,8 @@ namespace okiidoku::mono {
 	bool grid_is_filled(grid_const_span_t<O>) noexcept;
 
 
-	template<Order O> OKIIDOKU_EXPORT [[nodiscard, gnu::const]] constexpr typename traits<O>::o2i_t rmi_to_row(const typename traits<O>::o4i_t index) noexcept { return static_cast<traits<O>::o2i_t>(index / (O*O)); }
-	template<Order O> OKIIDOKU_EXPORT [[nodiscard, gnu::const]] constexpr typename traits<O>::o2i_t rmi_to_col(const typename traits<O>::o4i_t index) noexcept { return static_cast<traits<O>::o2i_t>(index % (O*O)); }
+	template<Order O> OKIIDOKU_EXPORT [[nodiscard, gnu::const]] constexpr typename traits<O>::o2i_t rmi_to_row(const typename traits<O>::o4i_t index) noexcept { return static_cast<traits<O>::o2i_t>(index / (traits<O>::O2)); }
+	template<Order O> OKIIDOKU_EXPORT [[nodiscard, gnu::const]] constexpr typename traits<O>::o2i_t rmi_to_col(const typename traits<O>::o4i_t index) noexcept { return static_cast<traits<O>::o2i_t>(index % (traits<O>::O2)); }
 	template<Order O> OKIIDOKU_EXPORT [[nodiscard, gnu::const]] constexpr typename traits<O>::o2i_t rmi_to_box(const typename traits<O>::o2i_t row, const typename traits<O>::o2i_t col) noexcept {
 		return static_cast<traits<O>::o2i_t>((row / O) * O) + (col / O);
 	}
@@ -88,10 +87,10 @@ namespace okiidoku::mono {
 	};
 
 
-	#define M_OKIIDOKU_TEMPL_TEMPL(O_) \
+	#define OKIIDOKU_FOR_COMPILED_O(O_) \
 		extern template bool grid_follows_rule<O_>(grid_const_span_t<O_>) noexcept; \
 		extern template bool grid_is_filled<O_>(grid_const_span_t<O_>) noexcept;
-	M_OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-	#undef M_OKIIDOKU_TEMPL_TEMPL
+	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
+	#undef OKIIDOKU_FOR_COMPILED_O
 }
 #endif

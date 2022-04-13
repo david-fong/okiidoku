@@ -1,5 +1,4 @@
 #include <okiidoku/mono/morph/scramble.hpp>
-#include <okiidoku/shared_rng.hpp>
 
 #include <array>
 #include <algorithm> // shuffle
@@ -28,8 +27,8 @@ namespace okiidoku::mono::morph {
 	}
 
 
-	#define M_OKIIDOKU_TEMPL_TEMPL(O_) \
-		template Transformation<O_> scramble<O_>(const grid_span_t<O_>);
-	M_OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-	#undef M_OKIIDOKU_TEMPL_TEMPL
+	#define OKIIDOKU_FOR_COMPILED_O(O_) \
+		template Transformation<O_> scramble<O_>(const grid_span_t<O_>, SharedRng&);
+	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
+	#undef OKIIDOKU_FOR_COMPILED_O
 }

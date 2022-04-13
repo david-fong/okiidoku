@@ -1,5 +1,4 @@
 #include <okiidoku/mono/gen/stochastic.hpp>
-#include <okiidoku/shared_rng.hpp>
 
 #include <algorithm> // swap, copy, shuffle
 
@@ -10,7 +9,7 @@ namespace okiidoku::mono::gen::ss {
 
 
 	template<Order O>
-	void Generator<O>::operator(SharedRng& shared_rng)() {
+	void Generator<O>::operator()(SharedRng& shared_rng) {
 		{
 			std::lock_guard lock_guard {shared_rng.mutex};
 			rng_.seed(shared_rng.rng());
@@ -129,8 +128,8 @@ namespace okiidoku::mono::gen::ss {
 	}
 
 
-	#define M_OKIIDOKU_TEMPL_TEMPL(O_) \
+	#define OKIIDOKU_FOR_COMPILED_O(O_) \
 		template class Generator<O_>;
-	M_OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-	#undef M_OKIIDOKU_TEMPL_TEMPL
+	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
+	#undef OKIIDOKU_FOR_COMPILED_O
 }

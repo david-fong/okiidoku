@@ -8,5 +8,6 @@ target_include_directories(okiidoku_cli PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src
 
 target_link_libraries(okiidoku_cli
    PRIVATE okiidoku_cli_utils
-   PRIVATE okiidoku
+   PRIVATE okiidoku_fmt
+   PRIVATE okiidoku_visitor
 )

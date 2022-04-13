@@ -1,5 +1,5 @@
-#include <okiidoku/draw/print_2d.hpp>
-#include <okiidoku/draw/emoji.hpp>
+#include <okiidoku/fmt/print_2d.hpp>
+#include <okiidoku/fmt/emoji.hpp>
 #include <okiidoku/shared_rng.hpp>
 
 #include <iostream>

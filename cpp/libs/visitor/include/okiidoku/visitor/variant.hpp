@@ -1,7 +1,7 @@
 #ifndef HPP_OKIIDOKU__VISITOR__VARIANT
 #define HPP_OKIIDOKU__VISITOR__VARIANT
 
-#include <okiidoku/okiidoku_config.hpp>
+#include <okiidoku/compiled_orders.hpp>
 #include <okiidoku_export.h>
 
 #include <variant>

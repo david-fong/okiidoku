@@ -2,7 +2,7 @@
 #define HPP_OKIIDOKU__VISITOR__DB__MOD
 
 #include <okiidoku/mono/db.hpp>
-#include <okiidoku/order.hpp>
+#include <okiidoku/compiled_orders.hpp>
 #include <okiidoku_export.h>
 
 // #include <iosfwd>

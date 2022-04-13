@@ -4,7 +4,7 @@
 #include <okiidoku/mono/gen/deprecated_bt/path.hpp>
 #include <okiidoku/mono/grid.hpp>
 #include <okiidoku/traits.hpp>
-#include <okiidoku/okiidoku_config.hpp>
+#include <okiidoku/compiled_orders.hpp>
 #include <okiidoku_export.h>
 
 #include <array>
@@ -196,9 +196,9 @@ namespace okiidoku::mono::gen::bt {
 	};
 
 
-	#define M_OKIIDOKU_TEMPL_TEMPL(O_) \
+	#define OKIIDOKU_FOR_COMPILED_O(O_) \
 		extern template class Generator<O_>;
-	M_OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-	#undef M_OKIIDOKU_TEMPL_TEMPL
+	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
+	#undef OKIIDOKU_FOR_COMPILED_O
 }
 #endif

@@ -44,9 +44,9 @@ namespace okiidoku::mono::db::serdes {
 	}
 
 
-	#define M_OKIIDOKU_TEMPL_TEMPL(O_) \
+	#define OKIIDOKU_FOR_COMPILED_O(O_) \
 		template void print<O_>(std::ostream&, grid_const_span_t<O_>, bool); \
 		template void parse<O_>(std::istream&, grid_span_t<O_>, bool);
-	M_OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-	#undef M_OKIIDOKU_TEMPL_TEMPL
+	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
+	#undef OKIIDOKU_FOR_COMPILED_O
 }

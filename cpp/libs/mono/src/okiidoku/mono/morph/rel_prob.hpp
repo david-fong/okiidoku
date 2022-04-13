@@ -1,7 +1,7 @@
 #ifndef HPP_OKIIDOKU__MONO__MORPH__REL_PROB
 #define HPP_OKIIDOKU__MONO__MORPH__REL_PROB
 
-#include <okiidoku/order.hpp>
+#include <okiidoku/compiled_orders.hpp>
 #include <okiidoku/math.hpp>
 
 #include <array>

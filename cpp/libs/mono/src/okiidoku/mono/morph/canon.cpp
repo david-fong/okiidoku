@@ -26,10 +26,10 @@ namespace okiidoku::mono::morph {
 		return place_map;
 	}
 
-	#define M_OKIIDOKU_TEMPL_TEMPL(O_) \
+	#define OKIIDOKU_FOR_COMPILED_O(O_) \
 		extern template typename Transformation<O_>::label_map_t canon_label<O_>(grid_span_t<O_>); \
 		extern template Transformation<O_> canon_place<O_>(grid_span_t<O_>); \
 		template Transformation<O_> canonicalize<O_>(grid_span_t<O_>);
-	M_OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-	#undef M_OKIIDOKU_TEMPL_TEMPL
+	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
+	#undef OKIIDOKU_FOR_COMPILED_O
 }

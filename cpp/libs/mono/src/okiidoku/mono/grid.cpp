@@ -48,9 +48,9 @@ namespace okiidoku::mono {
 	}
 
 
-	#define M_OKIIDOKU_TEMPL_TEMPL(O_) \
+	#define OKIIDOKU_FOR_COMPILED_O(O_) \
 		template bool grid_follows_rule<O_>(grid_const_span_t<O_>) noexcept; \
 		template bool grid_is_filled<O_>(grid_const_span_t<O_>) noexcept;
-	M_OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-	#undef M_OKIIDOKU_TEMPL_TEMPL
+	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
+	#undef OKIIDOKU_FOR_COMPILED_O
 }

@@ -5,7 +5,6 @@
 #include <okiidoku_cli/enum.hpp>
 #include <okiidoku/visitor/gen/batch.hpp>
 #include <okiidoku/visitor/gen/stochastic.hpp>
-#include <okiidoku/traits.hpp>
 #include <okiidoku/shared_rng.hpp>
 
 #include <map>

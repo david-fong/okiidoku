@@ -1,18 +1,9 @@
-add_library(okiidoku_base INTERFACE)
+add_library(compiled_orders INTERFACE)
 
-add_custom_target(okiidoku_export_header)
 # https://cmake.org/cmake/help/latest/module/GenerateExportHeader.html
-include(GenerateExportHeader)
-generate_export_header(okiidoku_export_header BASE_NAME okiidoku)
-
-target_sources(okiidoku_base PUBLIC FILE_SET HEADERS BASE_DIRS include)
-target_include_directories(okiidoku_base
-	# PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src"
-	INTERFACE
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
-	# $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
-)
-
+# include(GenerateExportHeader)
+# generate_export_header(compiled_orders BASE_NAME okiidoku)
+target_sources(compiled_orders INTERFACE FILE_SET HEADERS BASE_DIRS include)
 
 
 # https://cmake.org/cmake/help/latest/command/target_precompile_headers.html
@@ -27,7 +18,7 @@ target_include_directories(okiidoku_base
 # 	<array> <span> <optional> # <vector>
 # 	<bit> <bitset> <cstdint>
 # 	<type_traits> <cassert>
-# 	# [["okiidoku/okiidoku_config.hpp"]]
+# 	# [["okiidoku/compiled_orders.hpp"]]
 # 	# [["okiidoku/order.hpp"]]
 # 	# [["okiidoku/traits.hpp"]]
 # 	# [["okiidoku/grid.hpp"]]

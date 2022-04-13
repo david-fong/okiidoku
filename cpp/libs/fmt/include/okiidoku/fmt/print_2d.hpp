@@ -1,5 +1,5 @@
-#ifndef HPP_OKIIDOKU__DRAW__PRINT_2D
-#define HPP_OKIIDOKU__DRAW__PRINT_2D
+#ifndef HPP_OKIIDOKU__FMT__PRINT_2D
+#define HPP_OKIIDOKU__FMT__PRINT_2D
 
 #include <okiidoku_export.h>
 
@@ -13,6 +13,6 @@ namespace okiidoku {
 
 	using print_2d_grid_view = std::function<size_t (size_t coord)>;
 	// contract: each grid view's domain is [0, O4), and range is [0, O2].
-	OKIIDOKU_EXPORT void print_2d(std::ostream&, unsigned, std::span<const print_2d_grid_view> grid_views);
+	OKIIDOKU_EXPORT void print_2d(std::ostream&, unsigned O, std::span<const print_2d_grid_view> grid_views);
 }
 #endif

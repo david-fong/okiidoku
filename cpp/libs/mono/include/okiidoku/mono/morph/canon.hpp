@@ -4,7 +4,7 @@
 #include <okiidoku/mono/morph/transform.hpp>
 #include <okiidoku/mono/grid.hpp>
 #include <okiidoku/traits.hpp>
-#include <okiidoku/okiidoku_config.hpp>
+#include <okiidoku/compiled_orders.hpp>
 #include <okiidoku_export.h>
 
 namespace okiidoku::mono::morph {

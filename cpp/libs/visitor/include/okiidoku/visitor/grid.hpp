@@ -2,8 +2,7 @@
 #define HPP_OKIIDOKU__VISITOR__GRID
 
 #include <okiidoku/traits.hpp>
-#include <okiidoku/order.hpp>
-#include <okiidoku/okiidoku_config.hpp>
+#include <okiidoku/compiled_orders.hpp>
 #include <okiidoku_export.h>
 
 #include <array>
@@ -20,9 +19,9 @@ namespace okiidoku::visitor {
 
 	using grid_n = std::variant<
 	std::monostate
-	#define M_OKIIDOKU_TEMPL_TEMPL(O_) ,grid_arr_flat_t<O>
-	M_OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-	#undef M_OKIIDOKU_TEMPL_TEMPL
+	#define OKIIDOKU_FOR_COMPILED_O(O_) ,grid_arr_flat_t<O_>
+	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
+	#undef OKIIDOKU_FOR_COMPILED_O
 	>;
 
 	// A thin wrapper over a span.
@@ -45,11 +44,11 @@ namespace okiidoku::visitor {
 	// Returns false if any cells in a same house contain the same value.
 	// Can be used with incomplete grids.
 	// contract: entries of input are in the range [0, O2]. requires(is_order_compiled(O)) OKIIDOKU_EXPORT [[nodiscard]]
-	bool grid_follows_rule(grid_const_span_t<O>) noexcept;
+	bool grid_follows_rule(grid_const_span_t) noexcept;
 
 	// Returns true if none of the cells are empty (equal to O2). Does _not_ check if sudoku is valid.
 	// contract: entries of input are in the range [0, O2]. requires(is_order_compiled(O)) OKIIDOKU_EXPORT [[nodiscard]]
-	bool grid_is_filled(grid_const_span_t<O>) noexcept;
+	bool grid_is_filled(grid_const_span_t) noexcept;
 
  OKIIDOKU_EXPORT [[nodiscard, gnu::const]] constexpr typename traits<O>::o2i_t rmi_to_row(const typename traits<O>::o4i_t index) noexcept { return static_cast<traits<O>::o2i_t>(index / (O*O)); } OKIIDOKU_EXPORT [[nodiscard, gnu::const]] constexpr typename traits<O>::o2i_t rmi_to_col(const typename traits<O>::o4i_t index) noexcept { return static_cast<traits<O>::o2i_t>(index % (O*O)); } OKIIDOKU_EXPORT [[nodiscard, gnu::const]] constexpr typename traits<O>::o2i_t rmi_to_box(const typename traits<O>::o2i_t row, const typename traits<O>::o2i_t col) noexcept {
 		return static_cast<traits<O>::o2i_t>((row / O) * O) + (col / O);

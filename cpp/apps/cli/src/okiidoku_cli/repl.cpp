@@ -2,8 +2,8 @@
 
 #include <okiidoku_cli/timer.hpp>
 #include <okiidoku_cli_utils/str.hpp>
+#include <okiidoku/fmt/print_2d.hpp>
 #include <okiidoku/visitor/morph/canon.hpp>
-#include <okiidoku/visitor/print_2d.hpp>
 #include <okiidoku/visitor/db/serdes.hpp>
 
 #include <iostream>   // cout, endl,
