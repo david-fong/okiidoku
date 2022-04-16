@@ -12,14 +12,13 @@
 
 namespace okiidoku::visitor {
 
-	template<Order O, typename V=traits<O>::o2i_smol_t> using grid_arr2d_t = std::array<std::array<V, O*O>, O*O>;
-	template<Order O, typename V=traits<O>::o2i_smol_t> using grid_arr_flat_t = std::array<V, O*O*O*O>;
+	template<Order O, typename V=traits<O>::o2i_smol_t> using grid_arr_t = std::array<V, O*O*O*O>;
 	template<Order O, typename V=traits<O>::o2i_smol_t> using grid_const_span_t = std::span<const V, O*O*O*O>;
 	template<Order O, typename V=traits<O>::o2i_smol_t> using grid_span_t = std::span<V, O*O*O*O>;
 
 	using grid_n = std::variant<
 	std::monostate
-	#define OKIIDOKU_FOR_COMPILED_O(O_) ,grid_arr_flat_t<O_>
+	#define OKIIDOKU_FOR_COMPILED_O(O_) ,grid_arr_t<O_>
 	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 	#undef OKIIDOKU_FOR_COMPILED_O
 	>;

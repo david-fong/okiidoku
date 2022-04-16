@@ -19,7 +19,7 @@ namespace okiidoku::mono::morph {
 
 	template<Order O>
 	void Transformation<O>::apply_in_place(const grid_span_t<O> grid) const noexcept {
-		grid_arr_flat_t<O> og_grid;
+		grid_arr_t<O> og_grid;
 		std::copy(grid.begin(), grid.end(), og_grid.begin());
 		apply_from_to(og_grid, grid);
 	}

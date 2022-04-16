@@ -27,7 +27,7 @@
 #endif
 
 #ifndef OKIIDOKU_COMPILE_O6
-#define OKIIDOKU_COMPILE_O6 false // I don't think a human will try this.
+#define OKIIDOKU_COMPILE_O6 false
 #endif
 
 #ifndef OKIIDOKU_COMPILE_O7

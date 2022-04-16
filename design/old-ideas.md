@@ -10,7 +10,7 @@
 
 ## Questionable API Design Goodness
 
-- giving the callback in batch a dedicated mutex, or no mutex at all and leaving it up to the caller. need to consider how likely it is that the bulk of a callback will need synchronization.
+- questionable idea: giving the callback in batch a dedicated mutex, or no mutex at all and leaving it up to the caller. need to consider how likely it is that the bulk of a callback will need synchronization.
   - somewhat against this idea because
     - the new stochastic generator is so fast that I have a hard time seeing anyone wanting more optimization on top of it.
     - not providing automatic mutex for the callback seems like a bit of an api footgun? I think in the average use-case it would probably be more of an annoyance than something desirable.
@@ -19,7 +19,7 @@
 
 ## No Longer Needed
 
-- "smarter"/greedier backtracking: backtracking may be occurring frequently at a coord because of values much earlier in the genpath progress.
+- "smarter"/greedier backtracking: backtracking may be occurring frequently at a coord because of values much earlier in the genpath progress. (wikipedia "backskipping")
   - (no longer needed because stochastic search generator is much faster than backtracking. Would be better to keep backtracking's basic implementation's quality of never skipping possible outcomes)
   - https://en.wikipedia.org/wiki/Backjumping
   - backtracking is less likely to occur when other coords in the same house as the stuck coord that have different house types have the same value (overlapping has_mask). Can make an array like a count version of has_mask counting the times a value is taken in each house seen by the stuck coord.
@@ -34,6 +34,10 @@ These didn't end up doing the thing I wanted / thought might happen.
 
 - refactor template expansions and tweak config header to co-locate same-order expansions while also giving a somewhat convenient way to control what library features to include? Or look into a way to get linker to automatically do this.
   - started the refactor and then decided to see if there was perf improvement when compiling for only one order. No improvement was observed. Refactoring effort abandoned for added complexity. If there is other merit found in the future, the work is stashed in the `collate-so-symbols` branch.
+
+- I noticed that the exported symbols of the dynamic library weren't getting grouped by order; I though this could be a bad thing for code locality.
+  - Tried out [this](https://stackoverflow.com/questions/6886567/how-does-gcc-decide-what-order-to-output-assembly-functions-in). Made a BIST function that calls all the things and see if it will cause monomorphic functions to get grouped together. See if exporting the BIST is required for the ordering to be done.
+  - It didn't work. Tried making the dynamic library static and it still didn't work. I think I should stop worrying about it (don't micro-optimize things that won't have noticeable effect).
 
 ### Generator
 

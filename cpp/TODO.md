@@ -5,10 +5,11 @@
 - implement per-order dynamic libraries
 - compare monolithic vs per-order dynamic libraries pros and cons
 - test CMake config with different compilers (gcc, clang, apple-clang, MSVC) and try to fix configuration issues
+- draft database
 - refactor and improve canonicalization
 - compare backtracking and stochastic search statistics
 - implement grid-serdes translator tool
-- database
+- refine database
 - create a separate github repo for data. add as submodule?
 - deductive reasoning + backtracking solver
 - emscripten build and website
@@ -21,18 +22,9 @@
 
 - make grid and grid_view classes that wrap array and span and provide subscript operator for flat and 2d access.
 
-- Consider a batch api that gives the caller control over the logic for when to stop.
+- try using the GCC "section" function attribute to put same-order code in the same section. Ex. "text-okiidoku-o3"
 
 - change the size-variable versions of the library functions to use the visitor pattern? Need to create a common variant grid class.
-
-- make some grid things for binary and text serdes (and test please).
-  - Implement a program in the tools folder to do format conversions.
-
-- using stochastic search:
-  - compare intrinsic statistical properties of grids generated (the things currently used in canon\_label).
-  - Consider deleting the backtracking implementation? Or just removing it from the library api (move headers to the src/ folder and don't compile the cpp files; maybe rename the bt/ folder to legacy\_bt/).
-    - The backtracking implementation could then just be used as a reference for a more complicated deductive reasoning solver when deductive reasoning can't further progress by deductive reasoning.
-      - The path would prioritize the parts of the puzzle that the deductive reasoning knows the least about (the parts that are likely to result in large chain of new possible deductions when filled).
 
 - experiment with the option of making each order be its own dynamic library.
   - https://github.com/vector-of-bool/pitchfork/issues/30
@@ -49,6 +41,14 @@
     - on the other hand, does it empower any valuable ways of using the library?
       - one the template libraries are built, if one has multiple projects that depend on them, each one can cherry-pick which to load at runtime; may allow for optimizing runtime memory usage?
   - the visitor library can probably be static. can even consider making it a header-only library?
+
+- using stochastic search:
+  - compare intrinsic statistical properties of grids generated (the things currently used in canon\_label).
+  - Consider deleting the backtracking implementation? Or just removing it from the library api (move headers to the src/ folder and don't compile the cpp files; maybe rename the bt/ folder to legacy\_bt/).
+    - The backtracking implementation could then just be used as a reference for a more complicated deductive reasoning solver when deductive reasoning can't further progress by deductive reasoning.
+      - The path would prioritize the parts of the puzzle that the deductive reasoning knows the least about (the parts that are likely to result in large chain of new possible deductions when filled).
+
+- Consider a batch api that gives the caller control over the logic for when to stop.
 
 - try making Order an enum
   - see if it can improve switch case cover detection (I think not. I already have some enum-switch-returns that the current gcc warning flags complain about if I don't have a default case).

@@ -11,25 +11,20 @@
 
 namespace okiidoku::mono {
 
-	template<Order O, typename V=traits<O>::o2i_smol_t> using grid_arr2d_t = std::array<std::array<V, traits<O>::O2>, traits<O>::O2>;
-	template<Order O, typename V=traits<O>::o2i_smol_t> using grid_arr_flat_t = std::array<V, traits<O>::O4>;
-	template<Order O, typename V=traits<O>::o2i_smol_t> using grid_const_span_t = std::span<const V, traits<O>::O4>;
-	template<Order O, typename V=traits<O>::o2i_smol_t> using grid_span_t = std::span<V, traits<O>::O4>;
+	template<Order O, class container_t>
+	struct GridBase {
+		;
+	};
 
-	// A thin wrapper over a span.
-	template<Order O, typename V=traits<O>::o2i_smol_t>
-	class GridSpan2D final {
-		grid_span_t<O, V> span_;
-	public:
-		constexpr GridSpan2D(grid_span_t<O, V> span): span_{span} {};
-		// contract: row and col must be in [0,O2).
-		constexpr V& at(traits<O>::o2i_t row, traits<O>::o2i_t col) const noexcept {
-			assert(row < O*O && col < O*O);
-			return span_[(O*O*row) + col];
-		}
-		constexpr std::span<V, O*O> operator[](traits<O>::o2i_t row) const noexcept {
-			return static_cast<std::span<V, O*O>>(span_.subspan(O*O * row, O*O));
-		}
+	template<Order O>
+	struct GridArr final {
+
+		[[nodiscard]] ;
+	};
+
+	template<Order O>
+	struct GridSpan final {
+		;
 	};
 
 

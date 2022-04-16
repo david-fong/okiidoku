@@ -121,7 +121,7 @@ namespace okiidoku::mono::gen::ss {
 		// std::cout << op_count;
 
 		#ifndef NDEBUG
-		grid_arr_flat_t<O> grid;
+		grid_arr_t<O> grid;
 		this->write_to(std::span(grid));
 		assert(grid_follows_rule<O>(std::span(grid)));
 		#endif

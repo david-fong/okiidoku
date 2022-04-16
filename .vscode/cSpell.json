@@ -12,6 +12,8 @@
 		"jsonc"
 	],
 	"words": [
+		"boxcol",
+		"boxrow",
 		"builtin",
 		"canonicalizer",
 		"chrono",

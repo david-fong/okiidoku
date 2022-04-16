@@ -48,7 +48,7 @@ namespace okiidoku::mono::morph {
 
 			void do_a_pass(grid_span_t<O> table);
 		};
-		static grid_arr_flat_t<O> make_table_for_a_pass(const grid_span_t<O> src_grid, bool is_transpose, const PolarState& row, const PolarState& col);
+		static grid_arr_t<O> make_table_for_a_pass(const grid_span_t<O> src_grid, bool is_transpose, const PolarState& row, const PolarState& col);
 
 	public:
 		static Transformation<O> do_it(const grid_span_t<O> src_grid);
@@ -56,13 +56,13 @@ namespace okiidoku::mono::morph {
 
 
 	template<Order O>
-	grid_arr_flat_t<O> CanonPlace<O>::make_table_for_a_pass(
+	grid_arr_t<O> CanonPlace<O>::make_table_for_a_pass(
 		const grid_span_t<O> src_grid,
 		const bool is_transpose,
 		const PolarState& row_state,
 		const PolarState& col_state
 	) {
-		grid_arr_flat_t<O> table_arr; {
+		grid_arr_t<O> table_arr; {
 			const auto t {Transformation<O>{
 				Transformation<O>::identity.label_map,
 				row_state.to_og,

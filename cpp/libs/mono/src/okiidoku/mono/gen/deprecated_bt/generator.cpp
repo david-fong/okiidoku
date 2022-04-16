@@ -119,7 +119,7 @@ namespace okiidoku::mono::gen::bt {
 			}
 		}
 		#ifndef NDEBUG
-		grid_arr_flat_t<O> grid;
+		grid_arr_t<O> grid;
 		this->write_to_(std::span(grid));
 		assert(grid_follows_rule<O>(grid));
 		#endif

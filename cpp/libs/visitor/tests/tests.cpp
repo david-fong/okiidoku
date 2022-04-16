@@ -32,11 +32,11 @@ unsigned test_morph_O(const unsigned num_rounds) {
 		gen::ss::Generator<O> g {};
 		g();
 
-		grid_arr_flat_t<O> gen_grid;
+		grid_arr_t<O> gen_grid;
 		g.write_to_(std::span(gen_grid));
 		morph::canonicalize<O>(gen_grid);
 
-		grid_arr_flat_t<O> canon_grid = gen_grid;
+		grid_arr_t<O> canon_grid = gen_grid;
 		morph::scramble<O>(canon_grid);
 		morph::canonicalize<O>(canon_grid);
 
