@@ -2,7 +2,6 @@
 	"folders": [
 		{ "path": "design" },
 		{ "path": "cpp" },
-		{ "path": "rust" },
 		{ "path": "web" },
 	],
 	"extensions": {

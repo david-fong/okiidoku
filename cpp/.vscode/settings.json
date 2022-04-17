@@ -13,6 +13,10 @@
 	"cmake.buildDirectory": "${workspaceRoot}/build/${buildType}",
 	"cmake.configureOnOpen": true,
 
+	"files.exclude": {
+		"build/": true,
+	},
+
 	"cSpell.enabledLanguageIds": [
 		"c",
 		"cpp",

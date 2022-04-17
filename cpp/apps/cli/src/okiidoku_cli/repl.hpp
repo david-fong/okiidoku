@@ -4,7 +4,7 @@
 #include <okiidoku_cli/config.hpp>
 #include <okiidoku_cli/enum.hpp>
 #include <okiidoku/visitor/gen/batch.hpp>
-#include <okiidoku/visitor/gen/stochastic.hpp>
+#include <okiidoku/visitor/gen.hpp>
 #include <okiidoku/shared_rng.hpp>
 
 #include <map>

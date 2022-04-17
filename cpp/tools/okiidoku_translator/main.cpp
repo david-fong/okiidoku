@@ -1,4 +1,4 @@
-#include <okiidoku/mono/db/serdes.hpp>
+#include <okiidoku/db/serdes.hpp>
 
 #include <okiidoku_cli_utils/console_setup.hpp>
 

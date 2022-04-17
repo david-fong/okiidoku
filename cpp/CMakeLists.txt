@@ -44,12 +44,7 @@ endif()
 # conan_basic_setup(TARGETS) # Introduce Conan-generated targets
 
 add_subdirectory(libs/cli_utils)
-# add_subdirectory(libs/okiidoku_gpu)
-add_subdirectory(libs/config)
-add_subdirectory(libs/shared_rng)
-add_subdirectory(libs/mono)
-add_subdirectory(libs/visitor)
-add_subdirectory(libs/fmt)
+add_subdirectory(libs/okiidoku)
 
 add_subdirectory(apps/cli)
 # add_subdirectory(apps/web)
@@ -58,7 +53,7 @@ add_subdirectory(tools)
 
 
 install(TARGETS
-	compiled_orders okiidoku_shared_rng okiidoku_mono okiidoku_visitor okiidoku_fmt okiidoku_cli
+	okiidoku okiidoku_cli
 	EXPORT okiidokuTargets
 	FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/okiidoku
 	INCLUDES         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/okiidoku

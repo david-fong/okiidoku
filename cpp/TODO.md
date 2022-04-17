@@ -17,12 +17,13 @@
 - minlexing canonicalization
 - compare canonicalization methods (performance / time-complexity)
 - opencl stochastic generator
+  - some template/starter code can be found at commit 5a8d4c0 (deleted)
 
 ## Misc List
 
-- make grid and grid_view classes that wrap array and span and provide subscript operator for flat and 2d access.
+- try using the GCC "section" function attribute to put same-order code in the same section. Ex. "text-okiidoku-o3". Test this on an older commit and see how it goes. May want to get rid of usages of `[[gnu::hot/cold]]`.
 
-- try using the GCC "section" function attribute to put same-order code in the same section. Ex. "text-okiidoku-o3"
+- make grid and grid_view classes that wrap array and span and provide subscript operator for flat and 2d access.
 
 - change the size-variable versions of the library functions to use the visitor pattern? Need to create a common variant grid class.
 

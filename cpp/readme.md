@@ -9,7 +9,7 @@ Refer to the [CMake guide](https://cmake.org/cmake/help/latest/guide/importing-e
 
 - Make sure to read and follow the api contracts documented in the headers. Exceptions are intentionally not thrown for precondition violations. If you would like to run against a build of libokiidoku with assertions for debugging purposes, create and use a build of libokiidoku with `-DCMAKE_BUILD_TYPE=Debug`.
 
-- To change the supported grid sizes that get compiled, create a [tweak header](https://vector-of-bool.github.io/2020/10/04/lib-configuration.html#providing-a-tweak-header) for [`include/okiidoku/compiled_orders.hpp`](include/okiidoku/compiled_orders.hpp).
+- To change the supported grid sizes that get compiled, create a [tweak header](https://vector-of-bool.github.io/2020/10/04/lib-configuration.html#providing-a-tweak-header) for [`include/okiidoku/prelude.hpp`](include/okiidoku/prelude.hpp).
 
 - It does not make any use of `printf` and friends, so it is safe to do [`std::ios_base::sync_with_stdio(false);`](https://en.cppreference.com/w/cpp/io/ios_base/sync_with_stdio).
 

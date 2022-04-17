@@ -1,5 +1,11 @@
 # Old Ideas
 
+## Things Tried that I Reverted
+
+- separating the monomorphic containers and algorithms each into their own dynamic library and making another separate library for the visitor pattern.
+  - It wasn't a bad idea. I just didn't like how it resulted in a bunch more files and made things harder for _myself_ to use within the project. Nobody is using this project right now; it doesn't make sense to me to inconvenience myself for the sake of nobody.
+  - If somebody in the future uses this project and wants this kind of change for a good reason and for _some_ reason I decide I want to support them, at least I know how to do it now.
+
 ## Never Got Around To These
 
 - (switched to using stochastic search generator before trying these) some diagnostics to try rendering:

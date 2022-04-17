@@ -1,3 +1,0 @@
-add_library(okiidoku_shared_rng INTERFACE)
-
-target_sources(okiidoku_shared_rng PUBLIC FILE_SET HEADERS BASE_DIRS include)
