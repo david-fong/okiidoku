@@ -32,7 +32,7 @@ namespace okiidoku::mono::morph {
 		};
 
 		constexpr bool operator==(const Transformation<O>&) const = default;
-		void apply_from_to(GridConstSpan_t<O> src, GridSpan<O> dest) const noexcept;
+		void apply_from_to(GridConstSpan<O> src, GridSpan<O> dest) const noexcept;
 		void apply_in_place(GridSpan<O>) const noexcept;
 		Transformation<O> inverted() const noexcept;
 	};

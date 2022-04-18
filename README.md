@@ -14,8 +14,6 @@ I work on this project for fun. I like sudoku. I want to learn how to develop hi
 
 See the readme in the [cpp](./cpp/readme.md) directory.
 
-The [rust](./rust/readme.md) implementation is a learning project for me, and is currently _not under development_.
-
 ## Other Existing Projects and Solvers
 
 [\*relevant meme](https://i.kym-cdn.com/photos/images/newsfeed/001/596/781/3b9.png)

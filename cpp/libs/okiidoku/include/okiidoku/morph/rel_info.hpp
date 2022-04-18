@@ -30,11 +30,12 @@ namespace okiidoku::mono::morph {
 			M_RETURN_IF_NEQ; cmp = that.chute_imbalance_b <=> chute_imbalance_b;
 			return cmp;
 		}
+		bool operator==(const Rel&) const = default;
 	};
 
 	// contract: the span is a _complete_, valid grid.
 	template<Order O>
 	requires (is_order_compiled(O))
-	OKIIDOKU_EXPORT grid_arr2d_t<O, Rel<O>> make_rel_table(GridConstSpan_t<O>);
+	OKIIDOKU_EXPORT GridArr<O, Rel<O>> make_rel_table(GridConstSpan<O>);
 }
 #endif

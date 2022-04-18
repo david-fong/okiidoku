@@ -48,7 +48,7 @@ namespace okiidoku::mono::morph {
 
 			void do_a_pass(GridSpan<O> table);
 		};
-		static grid_arr_t<O> make_table_for_a_pass(const GridSpan<O> src_grid, bool is_transpose, const PolarState& row, const PolarState& col);
+		static GridArr<O> make_table_for_a_pass(const GridSpan<O> src_grid, bool is_transpose, const PolarState& row, const PolarState& col);
 
 	public:
 		static Transformation<O> do_it(const GridSpan<O> src_grid);
@@ -56,25 +56,24 @@ namespace okiidoku::mono::morph {
 
 
 	template<Order O>
-	grid_arr_t<O> CanonPlace<O>::make_table_for_a_pass(
+	GridArr<O> CanonPlace<O>::make_table_for_a_pass(
 		const GridSpan<O> src_grid,
 		const bool is_transpose,
 		const PolarState& row_state,
 		const PolarState& col_state
 	) {
-		grid_arr_t<O> table_arr; {
+		GridArr<O> table; {
 			const auto t {Transformation<O>{
 				Transformation<O>::identity.label_map,
 				row_state.to_og,
 				col_state.to_og,
 				is_transpose,
 			}};
-			t.inverted().apply_from_to(src_grid, table_arr);
+			t.inverted().apply_from_to(src_grid, table);
 		}
 
-		GridSpan2D<O> table(table_arr);
 		for (o2i_t row_i {0}; row_i < O2; ++row_i) {
-			auto row = table[row_i];
+			auto row = table.row_at(row_i);
 			const auto& ortho {is_transpose ? row_state : col_state};
 			// loop over orthogonal partially-resolved line ranges to normalize:
 			for (const auto [t_begin, t_end] : ortho.line_ties) {
@@ -100,16 +99,14 @@ namespace okiidoku::mono::morph {
 				}
 			}
 		}
-		return table_arr;
+		return table;
 	}
 
 
 	template<Order O>
 	void CanonPlace<O>::PolarState::do_a_pass(
-		const GridSpan<O> table_arr_
+		const GridSpan<O> table
 	) {
-		GridSpan2D<O> table(table_arr_);
-
 		std::array<mapping_t, O2> to_tied;
 		std::iota(to_tied.begin(), to_tied.end(), 0);
 		for (const auto tie : line_ties) {
@@ -120,12 +117,12 @@ namespace okiidoku::mono::morph {
 			std::sort(
 				std::next(to_tied.begin(), tie.begin_),
 				std::next(to_tied.begin(), tie.end_),
-				[&](auto a, auto b){ return std::ranges::lexicographical_compare(table[a], table[b]); }
+				[&](auto a, auto b){ return std::ranges::lexicographical_compare(table.row_at(a), table.row_at(b)); }
 			);
 		}
 		const auto chute_tie_data {[&](o2i_t chute) {
 			namespace v = std::views;
-			return to_tied | v::drop(chute*O1) | v::take(O1) | v::transform([&](auto i){ return v::common(table[i]); }) | v::join;
+			return to_tied | v::drop(chute*O1) | v::take(O1) | v::transform([&](auto i){ return v::common(table.row_at(i)); }) | v::join;
 		}};
 		// try to resolve tied chute ranges:
 		for (const auto tie : chute_ties) {
@@ -140,7 +137,7 @@ namespace okiidoku::mono::morph {
 		}
 
 		line_ties.update([&](auto a, auto b){
-			return std::ranges::equal(table[to_tied[a]], table[to_tied[b]]);
+			return std::ranges::equal(table.row_at(to_tied[a]), table.row_at(to_tied[b]));
 		});
 		chute_ties.update([&](o1i_t a, o1i_t b){
 			return std::ranges::equal(chute_tie_data(a), chute_tie_data(b));

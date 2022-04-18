@@ -97,6 +97,7 @@
   - `std::views::chunk()`
     - could this be useful for `canon_place`? I tried messing around with range-v3 on compiler explorer and had trouble with the whole action vs algorithm, container vs view thing. Didn't know what I was doing and could achieve what I wanted.
   - alternative to `std::chunk`, look into `mdspan` (multi-dimensional span). Seems like this is more of what I'm looking for.
+  - multidimensional subscript operator
 - CLI
   - implement `-h` and `--help` CLI argument.
   - give a red message when trying to continue and nothing is left to be found.
@@ -110,6 +111,10 @@
   - What is the relationship between number of hints and puzzle difficulty?
   - What is the relationship between distribution of hints between houses/chutes and puzzle difficulty?
   - What is the relationship between the relationship between hints and cell relationships and puzzle difficulty?
+
+- Over all possible minimal puzzles for a given order size, what is the minimum and maximum number of remaining clues?
+  - The minimum number of remaining clues is interesting since it will likely correspond to more difficult puzzles (?)
+  - THe maximum number of remaining clues is interesting since it will likely be the worst case for compressed storage.
 
 - Since the stochastic generator cannot deterministically traverse all possible outputs, could it be possible that at a certain point, it becomes easier to find more unique (non-equivalent to previously found) puzzles by continuing a backtracking generator from the output of a stochastic generator's output?
 

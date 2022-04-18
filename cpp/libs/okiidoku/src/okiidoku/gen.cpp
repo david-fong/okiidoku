@@ -13,8 +13,8 @@ namespace okiidoku::mono::gen::ss {
 		{
 			std::lock_guard lock_guard {shared_rng.mutex};
 			rng_.seed(shared_rng.rng());
-			for (auto& row : cells_) {
-				std::shuffle(row.begin(), row.end(), shared_rng.rng);
+			for (auto row : cells_.rows()) {
+				std::ranges::shuffle(row, shared_rng.rng);
 			}
 			// TODO.try should the shuffle just use `rng_`? The data-parallel implementation would be much better that way.
 		}
@@ -24,7 +24,7 @@ namespace okiidoku::mono::gen::ss {
 
 	template<Order O>
 	void Generator<O>::write_to(GridSpan<O> sink) const {
-		for (o4i_t i {0}; i < T::O4; ++i) { sink[i] = cells_[i/T::O2][i%T::O2]; }
+		for (o4i_t i {0}; i < T::O4; ++i) { sink[i] = cells_[i]; }
 	}
 
 
@@ -33,6 +33,7 @@ namespace okiidoku::mono::gen::ss {
 		/* Note: wherever you see `% .../\* -1 *\/`, that's a place where the algorithm
 		would still work if it wasn't commented out, but commeting it out makes it slower
 		because sometimes what would be excluded would have a faster path to validity. */
+		// Outer array has an entry for each line in the chute.
 		using chute_has_counts_t = std::array<std::array<typename T::o2i_smol_t, T::O2>, T::O1>;
 		// unsigned long long op_count = 0;
 		/* Using this counter, I found that it took fewer operations to go from having
@@ -46,7 +47,7 @@ namespace okiidoku::mono::gen::ss {
 			chute_has_counts_t boxes_has {{0}};
 			for (o2i_t row {h_chute}; row < h_chute+T::O1; ++row) {
 			for (o2i_t col {0}; col < T::O2; ++col) {
-				++(boxes_has[col/T::O1][cells_[row][col]]);
+				++(boxes_has[col/T::O1][cells_.at(row,col)]);
 			}}
 			int has_nots {0};
 			for (const auto& box_has : boxes_has) {
@@ -60,8 +61,8 @@ namespace okiidoku::mono::gen::ss {
 				const auto b_box {static_cast<o2x_t>(b_col/T::O1)};
 				if (a_box == b_box) [[unlikely]] { continue; }
 				const auto row {static_cast<o2x_t>(h_chute + ((rng_() - rng_.min()) % (T::O1/* -1 */)))};
-				auto& a_cell = cells_[row][a_col];
-				auto& b_cell = cells_[row][b_col];
+				auto& a_cell = cells_.at(row,a_col);
+				auto& b_cell = cells_.at(row,b_col);
 				const int has_nots_diff {
 					(boxes_has[a_box][a_cell] == 1 ?  1 : 0) +
 					(boxes_has[a_box][b_cell] == 0 ? -1 : 0) +
@@ -87,7 +88,7 @@ namespace okiidoku::mono::gen::ss {
 			chute_has_counts_t cols_has {{0}};
 			for (o2i_t row {0}; row < T::O2; ++row) {
 			for (o2i_t box_col {0}; box_col < T::O1; ++box_col) {
-				++(cols_has[box_col][cells_[row][v_chute+box_col]]);
+				++(cols_has[box_col][cells_.at(row, v_chute+box_col)]);
 			}}
 			int has_nots {0};
 			for (const auto& col_has : cols_has) {
@@ -99,8 +100,8 @@ namespace okiidoku::mono::gen::ss {
 				const auto b_col {static_cast<o2x_t>((rng_() - rng_.min()) % T::O1)};
 				if (a_col == b_col) [[unlikely]] { continue; }
 				const auto row {static_cast<o2x_t>((rng_() - rng_.min()) % (T::O1*(T::O1/* -1 */)))};
-				auto& a_cell = cells_[row][v_chute + a_col];
-				auto& b_cell = cells_[row][v_chute + b_col];
+				auto& a_cell = cells_.at(row, v_chute + a_col);
+				auto& b_cell = cells_.at(row, v_chute + b_col);
 				const int has_nots_diff {
 					(cols_has[a_col][a_cell] == 1 ?  1 : 0) +
 					(cols_has[a_col][b_cell] == 0 ? -1 : 0) +
@@ -121,7 +122,7 @@ namespace okiidoku::mono::gen::ss {
 		// std::cout << op_count;
 
 		#ifndef NDEBUG
-		grid_arr_t<O> grid;
+		GridArr<O> grid;
 		this->write_to(std::span(grid));
 		assert(grid_follows_rule<O>(std::span(grid)));
 		#endif

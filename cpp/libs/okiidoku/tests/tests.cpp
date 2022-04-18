@@ -1,10 +1,10 @@
 #include <okiidoku/fmt/print_2d.hpp>
-// #include <okiidoku/visitor/gen/batch.hpp>
-#include <okiidoku/visitor/gen.hpp>
-#include <okiidoku/visitor/morph/canon.hpp>
-#include <okiidoku/visitor/morph/scramble.hpp>
-#include <okiidoku/visitor/db/serdes.hpp>
-#include <okiidoku/visitor/grid.hpp>
+// #include <okiidoku/gen/batch.hpp>
+#include <okiidoku/gen.hpp>
+#include <okiidoku/morph/canon.hpp>
+#include <okiidoku/morph/scramble.hpp>
+#include <okiidoku/db/serdes.hpp>
+#include <okiidoku/grid.hpp>
 #include <okiidoku/shared_rng.hpp>
 
 #include <okiidoku_cli_utils/console_setup.hpp>
@@ -23,7 +23,7 @@
 template<okiidoku::Order O>
 unsigned test_morph_O(const unsigned num_rounds) {
 	using namespace okiidoku;
-	using namespace okiidoku::mono;
+	using namespace okiidoku;
 	std::cout << "\n\ntesting for order " << O << std::endl;
 	// Note: if gen_path gets un-deprecated, assert that paths are valid.
 
@@ -32,11 +32,11 @@ unsigned test_morph_O(const unsigned num_rounds) {
 		gen::ss::Generator<O> g {};
 		g();
 
-		grid_arr_t<O> gen_grid;
+		GridArr<O> gen_grid;
 		g.write_to_(std::span(gen_grid));
 		morph::canonicalize<O>(gen_grid);
 
-		grid_arr_t<O> canon_grid = gen_grid;
+		GridArr<O> canon_grid = gen_grid;
 		morph::scramble<O>(canon_grid);
 		morph::canonicalize<O>(canon_grid);
 

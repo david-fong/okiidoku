@@ -13,7 +13,7 @@ namespace okiidoku::mono::morph {
 		typename traits<O>::o2_bits_smol boxes_v;
 	};
 	template<Order O>
-	grid_arr2d_t<O, RelMasks<O>> make_rel_masks_(const GridConstSpan_t<O> grid_span) noexcept {
+	GridArr<O, RelMasks<O>> make_rel_masks_(const GridConstSpan<O> grid) noexcept {
 		using has_mask_t = traits<O>::o2_bits_smol;
 		using val_t = traits<O>::o2i_smol_t;
 		using o1i_t = traits<O>::o1i_t;
@@ -21,8 +21,7 @@ namespace okiidoku::mono::morph {
 		static constexpr o1i_t O1 = O;
 		static constexpr o2i_t O2 = O*O;
 
-		GridSpan2D<O, const val_t> grid(grid_span);
-		grid_arr2d_t<O, RelMasks<O>> masks {};
+		GridArr<O, RelMasks<O>> masks {};
 		for (o2i_t line {0}; line < O2; ++line) {
 		for (o2i_t atom {0}; atom < O2; atom += O1) {
 			// Go through all unique pairs in the atom:
@@ -31,14 +30,14 @@ namespace okiidoku::mono::morph {
 				{ // boxrow
 					const val_t i_val = grid.at(line, atom+i), j_val = grid.at(line, atom+j);
 					const has_mask_t box_mask_bit = has_mask_t{1} << rmi_to_box<O>(line, atom);
-					masks[i_val][j_val].boxes_h |= box_mask_bit;
-					masks[j_val][i_val].boxes_h |= box_mask_bit;
+					masks.at(i_val,j_val).boxes_h |= box_mask_bit;
+					masks.at(j_val,i_val).boxes_h |= box_mask_bit;
 				}
 				{ // boxcol
 					const val_t i_val = grid.at(atom+i, line), j_val = grid.at(atom+j, line);
 					const has_mask_t box_mask_bit = has_mask_t{1} << rmi_to_box<O>(atom, line);
-					masks[i_val][j_val].boxes_v |= box_mask_bit;
-					masks[j_val][i_val].boxes_v |= box_mask_bit;
+					masks.at(i_val,j_val).boxes_v |= box_mask_bit;
+					masks.at(j_val,i_val).boxes_v |= box_mask_bit;
 				}
 		}}	}}
 		return masks;
@@ -47,7 +46,7 @@ namespace okiidoku::mono::morph {
 
 	template<Order O>
 	requires (is_order_compiled(O))
-	grid_arr2d_t<O, Rel<O>> make_rel_table(const GridConstSpan_t<O> grid_in) {
+	GridArr<O, Rel<O>> make_rel_table(const GridConstSpan<O> grid_in) {
 		using has_mask_t = traits<O>::o2_bits_smol;
 		using o1i_t = traits<O>::o1i_t;
 		using o2i_t = traits<O>::o2i_t;
@@ -55,12 +54,12 @@ namespace okiidoku::mono::morph {
 		static constexpr o1i_t O1 = O;
 		static constexpr o2i_t O2 = O*O;
 
-		const grid_arr2d_t<O, RelMasks<O>> masks = make_rel_masks_<O>(grid_in);
-		grid_arr2d_t<O, Rel<O>> table; // uninitialized!
+		const GridArr<O, RelMasks<O>> masks = make_rel_masks_<O>(grid_in);
+		GridArr<O, Rel<O>> table; // uninitialized!
 		for (o2i_t r {0}; r < O2; ++r) {
 		for (o2i_t c {0}; c < O2; ++c) {
-			const RelMasks<O>& mask = masks[r][c];
-			Rel<O>& rel = table[r][c];
+			const auto& mask = masks.at(r,c);
+			auto& rel = table.at(r,c);
 			if (r == c) {
 				rel = {0,(O2/2),0,0};
 				continue;
@@ -121,7 +120,7 @@ namespace okiidoku::mono::morph {
 
 	#define OKIIDOKU_FOR_COMPILED_O(O_) \
 		template struct Rel<O_>; \
-		template grid_arr2d_t<O_, Rel<O_>> make_rel_table<O_>(GridConstSpan_t<O_>);
+		template GridArr<O_, Rel<O_>> make_rel_table<O_>(GridConstSpan<O_>);
 	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 	#undef OKIIDOKU_FOR_COMPILED_O
 }

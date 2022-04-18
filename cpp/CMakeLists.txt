@@ -15,7 +15,7 @@ if(MSVC)
 	)
 else()
 	add_compile_options(
-		-Wall -Wextra -Wpedantic -Werror
+		-Wall -Wextra -Wpedantic -Werror -Wfatal-errors
 		-Wold-style-cast -Wcast-qual -Wcast-align -Wuseless-cast
 		-Wformat=2
 		-Wconversion # -Wsign-conversion
@@ -46,14 +46,14 @@ endif()
 add_subdirectory(libs/cli_utils)
 add_subdirectory(libs/okiidoku)
 
-add_subdirectory(apps/cli)
+# add_subdirectory(apps/cli) # TODO.high add this back once lib is ready
 # add_subdirectory(apps/web)
 
 add_subdirectory(tools)
 
 
 install(TARGETS
-	okiidoku okiidoku_cli
+	okiidoku #okiidoku_cli # TODO.high add this back once lib is ready
 	EXPORT okiidokuTargets
 	FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/okiidoku
 	INCLUDES         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/okiidoku

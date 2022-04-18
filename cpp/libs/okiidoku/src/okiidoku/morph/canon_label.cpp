@@ -27,10 +27,10 @@ namespace okiidoku::mono::morph {
 
 	private:
 		struct State final {
-			grid_arr2d_t<O, Rel<O>> rel_table;
+			GridArr<O, Rel<O>> rel_table;
 			label_map_t<O> to_og;
 			TieLinks<O, 2> ties {};
-			explicit constexpr State(const GridConstSpan_t<O> grid) noexcept: rel_table{make_rel_table<O>(grid)} {
+			explicit constexpr State(const GridConstSpan<O> grid) noexcept: rel_table{make_rel_table<O>(grid)} {
 				std::iota(to_og.begin(), to_og.end(), 0);
 			}
 			bool has_ties() const { return ties.has_unresolved(); }
@@ -44,15 +44,15 @@ namespace okiidoku::mono::morph {
 
 	template<Order O>
 	void CanonLabel<O>::do_a_pass_(CanonLabel<O>::State& s) {
-		grid_arr2d_t<O, Rel<O>> scratch;
+		GridArr<O, Rel<O>> scratch;
 
 		label_map_t<O> to_tied;
 		std::iota(to_tied.begin(), to_tied.end(), 0);
 		for (const auto tie : s.ties) {
 			if (tie.size() == 1) [[likely]] { continue; }
 			for (const auto rel_i : tie) {
-				auto& row = scratch[rel_i];
-				row = s.rel_table[rel_i]; // populate
+				auto row = scratch.row_at(rel_i);
+				{ auto src {s.rel_table.row_at(rel_i)}; std::copy(src.begin(), src.end(), row.begin()); }
 				// normalize tied slice for later sorting:
 				for (const auto [t_begin, t_end] : s.ties) {
 					std::sort(std::next(row.begin(), t_begin), std::next(row.begin(), t_end));
@@ -65,11 +65,15 @@ namespace okiidoku::mono::morph {
 			std::sort(
 				std::next(to_tied.begin(), tie.begin_),
 				std::next(to_tied.begin(), tie.end_),
-				[&](auto a, auto b){ return std::is_lt(scratch[a] <=> scratch[b]); }
+				[&](auto a, auto b){ return std::lexicographical_compare(
+					scratch.row_at(a).begin(), scratch.row_at(a).end(),
+					scratch.row_at(b).begin(), scratch.row_at(b).end()
+				); } // TODO.low why doesn't the ranges version work?
 			);
 		}
 		s.ties.update([&](auto a, auto b){
-			return std::is_eq(scratch[to_tied[a]] <=> scratch[to_tied[b]]);
+			auto a_row {scratch.row_at(to_tied[a])}, b_row {scratch.row_at(to_tied[b])};
+			return std::equal(a_row.begin(), a_row.end(), b_row.begin(), b_row.end());
 		});
 
 		{
@@ -83,7 +87,7 @@ namespace okiidoku::mono::morph {
 		scratch = s.rel_table;
 		for (o2i_t i {0}; i < O2; ++i) {
 		for (o2i_t j {0}; j < O2; ++j) {
-			s.rel_table[i][j] = scratch[to_tied[i]][to_tied[j]];
+			s.rel_table.at(i,j) = scratch.at(to_tied[i], to_tied[j]);
 		}}
 	}
 
@@ -113,7 +117,7 @@ namespace okiidoku::mono::morph {
 			return _;
 		}();
 
-		for (o4i_t i {0}; i < grid.size(); ++i) {
+		for (o4i_t i {0}; i < traits<O>::O4; ++i) {
 			grid[i] = static_cast<val_t>(label_og_to_canon[grid[i]]);
 		}
 		assert(grid_follows_rule<O>(grid));

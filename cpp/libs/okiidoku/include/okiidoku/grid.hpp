@@ -5,41 +5,75 @@
 #include <okiidoku/prelude.hpp>
 #include <okiidoku_export.h>
 
+#include <ranges>
 #include <array>
 #include <span>
 #include <cassert>
 
 namespace okiidoku::mono {
 
-	template<Order O, class container_t>
-	struct GridBase {
-		;
-	};
+	template<Order O, class V>
+	requires(is_order_compiled(O))
+	struct GridSpan;
 
-	template<Order O, class T=traits<O>::o2i_smol_t>
+	template<Order O, class V=traits<O>::o2i_smol_t>
+	requires(is_order_compiled(O))
+	using GridConstSpan = GridSpan<O, const V>;
+
+	template<Order O, class V_=traits<O>::o2i_smol_t>
+	requires(is_order_compiled(O))
 	struct GridArr final {
-		[[nodiscard]] T& operator[]() const noexcept;
+		using V = std::decay_t<V_>;
+		friend GridSpan<O, V>;
+		friend GridConstSpan<O, V>;
+		using T = traits<O>;
+		using o2x_t = T::o2i_t;
+		using o2i_t = T::o2i_t;
+		using o4x_t = T::o4i_t;
+		using o4i_t = T::o4i_t;
+		[[nodiscard]] static GridArr copy_from_span(GridConstSpan<O, V> src) noexcept;
+		[[nodiscard]] constexpr V& operator[](const o4x_t coord) noexcept { return cells_[coord]; }
+		[[nodiscard]] constexpr V& at(const o2x_t row, const o2x_t col) noexcept { return cells_[(T::O2*row)+col]; }
+		[[nodiscard]] constexpr std::span<V, T::O2> row_at(const o2x_t i) noexcept { return static_cast<std::span<V, T::O2>>(std::span(cells_).subspan(T::O2*i, T::O2)); }
+		[[nodiscard]] constexpr const V& operator[](const o4x_t coord) const noexcept { return cells_[coord]; }
+		[[nodiscard]] constexpr const V& at(const o2x_t row, const o2x_t col) const noexcept { return cells_[(T::O2*row)+col]; }
+		// [[nodiscard]] constexpr std::span<const V, T::O2> row_at(const o2x_t i) const noexcept { return static_cast<std::span<V, T::O2>>(std::span(cells_).subspan(T::O2*i, T::O2)); }
+		// [[nodiscard]] constexpr auto rows() const noexcept { namespace v = std::views; return v::iota(o2i_t{0}, T::O2) | v::transform([&](auto r){ return row_at(r); }); }
+		[[nodiscard]] constexpr auto rows() noexcept { namespace v = std::views; return v::iota(o2i_t{0}, T::O2) | v::transform([&](auto r){ return row_at(r); }); }
+	private:
+		std::array<V, T::O4> cells_;
 	};
 
-	template<Order O, class T=traits<O>::o2i_smol_t>
+	template<Order O, class V=traits<O>::o2i_smol_t>
+	requires(is_order_compiled(O))
 	struct GridSpan final {
-		[[nodiscard]] T& operator[]() const noexcept;
+		friend GridSpan<O, const V>;
+		using T = traits<O>;
+		using o2x_t = T::o2i_t;
+		using o2i_t = T::o2i_t;
+		using o4x_t = T::o4i_t;
+		using o4i_t = T::o4i_t;
+		constexpr GridSpan(GridArr<O, std::decay_t<V>>& arr) noexcept: cells_(arr.cells_) {}
+		constexpr GridSpan(const GridSpan<O, std::remove_const_t<V>>& other) noexcept: cells_(other.cells_) {}
+		[[nodiscard]] constexpr V& operator[](const o4x_t coord) const noexcept { return cells_[coord]; }
+		[[nodiscard]] constexpr V& at(const o2x_t row, const o2x_t col) const noexcept { return cells_[(T::O2*row)+col]; }
+		[[nodiscard]] constexpr std::span<V, T::O2> row_at(const o2x_t i) const noexcept { return static_cast<std::span<V, T::O2>>(cells_.subspan(T::O2*i, T::O2)); }
+		[[nodiscard]] constexpr auto rows() const noexcept { namespace v = std::views; return v::iota(0, T::O2) | v::transform([&](auto r){ return row_at(r); }); }
+	private:
+		std::span<V, T::O4> cells_;
 	};
-
-	template<Order O, class T=traits<O>::o2i_smol_t>
-	using GridConstSpan = GridSpan<O, const T>;
 
 
 	// Returns false if any cells in a same house contain the same value.
 	// Can be used with incomplete grids.
 	// contract: entries of input are in the range [0, O2].
 	template<Order O> requires(is_order_compiled(O)) OKIIDOKU_EXPORT [[nodiscard]]
-	bool grid_follows_rule(GridConstSpan_t<O>) noexcept;
+	bool grid_follows_rule(GridConstSpan<O>) noexcept;
 
 	// Returns true if none of the cells are empty (equal to O2). Does _not_ check if sudoku is valid.
 	// contract: entries of input are in the range [0, O2].
 	template<Order O> requires(is_order_compiled(O)) OKIIDOKU_EXPORT [[nodiscard]]
-	bool grid_is_filled(GridConstSpan_t<O>) noexcept;
+	bool grid_is_filled(GridConstSpan<O>) noexcept;
 
 
 	template<Order O> OKIIDOKU_EXPORT [[nodiscard, gnu::const]] constexpr typename traits<O>::o2i_t rmi_to_row(const typename traits<O>::o4i_t index) noexcept { return static_cast<traits<O>::o2i_t>(index / (traits<O>::O2)); }

@@ -38,7 +38,7 @@ namespace okiidoku::mono::gen::ss {
 	private:
 		GridArr<O, val_t> cells_ {[]() consteval {
 			GridArr<O, val_t> _;
-			for (auto& vto : _) { for (o2i_t i {0}; i < T::O2; ++i) { vto[i] = static_cast<val_t>(i); } }
+			for (auto vto : _.rows()) { for (o2i_t i {0}; i < T::O2; ++i) { vto[i] = static_cast<val_t>(i); } }
 			// ^ didn't want to import <algorithm> just for std::iota
 			return _;
 		}()};

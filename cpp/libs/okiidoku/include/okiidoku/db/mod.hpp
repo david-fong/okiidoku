@@ -9,7 +9,7 @@
 #include <span>
 #include <bit>
 
-namespace okiidoku::mono::db {
+namespace okiidoku::db {
 
 	class Db final {
 		;

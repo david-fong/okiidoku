@@ -19,7 +19,7 @@ namespace okiidoku::mono::db::serdes {
 	template<Order O> requires (
 		(std::endian::native == std::endian::little)
 	)
-	OKIIDOKU_EXPORT void print(std::ostream& os, GridConstSpan_t<O> grid_view, bool is_grid_filled);
+	OKIIDOKU_EXPORT void print(std::ostream& os, GridConstSpan<O> grid_view, bool is_grid_filled);
 
 	// reads the grid contents from the stream using the somewhat compact binary form.
 	// multi-byte entries are interpreted using little-endian.
