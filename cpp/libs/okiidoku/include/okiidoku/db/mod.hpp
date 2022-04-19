@@ -2,7 +2,6 @@
 #define HPP_OKIIDOKU__DB__MOD
 
 #include <okiidoku/prelude.hpp>
-#include <okiidoku_export.h>
 
 #include <iosfwd>
 #include <string_view>

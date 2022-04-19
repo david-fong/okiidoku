@@ -6,7 +6,6 @@
 #include <okiidoku/grid.hpp>
 #include <okiidoku/traits.hpp>
 #include <okiidoku/prelude.hpp>
-#include <okiidoku_export.h>
 
 namespace okiidoku::mono::morph {
 

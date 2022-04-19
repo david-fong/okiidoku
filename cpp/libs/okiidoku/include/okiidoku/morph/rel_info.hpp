@@ -3,7 +3,6 @@
 
 #include <okiidoku/grid.hpp>
 #include <okiidoku/prelude.hpp>
-#include <okiidoku_export.h>
 
 #include <compare> // strong_ordering, is_eq, etc.
 

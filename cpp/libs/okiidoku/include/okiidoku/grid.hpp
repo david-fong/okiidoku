@@ -3,7 +3,6 @@
 
 #include <okiidoku/traits.hpp>
 #include <okiidoku/prelude.hpp>
-#include <okiidoku_export.h>
 
 #include <ranges>
 #include <array>
@@ -81,6 +80,7 @@ namespace okiidoku::mono {
 	template<Order O> OKIIDOKU_EXPORT [[nodiscard, gnu::const]] constexpr typename traits<O>::o2i_t rmi_to_box(const typename traits<O>::o2i_t row, const typename traits<O>::o2i_t col) noexcept {
 		return static_cast<traits<O>::o2i_t>((row / O) * O) + (col / O);
 	}
+	// TODO.low consider changing the output to be o2x? then the input would have to be o4x...
 	template<Order O> [[nodiscard, gnu::const]]
 	OKIIDOKU_EXPORT constexpr typename traits<O>::o2i_t rmi_to_box(const typename traits<O>::o4i_t index) noexcept {
 		return rmi_to_box<O>(rmi_to_row<O>(index), rmi_to_col<O>(index));

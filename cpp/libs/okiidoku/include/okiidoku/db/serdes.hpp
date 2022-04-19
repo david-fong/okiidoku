@@ -3,7 +3,6 @@
 
 #include <okiidoku/grid.hpp>
 #include <okiidoku/prelude.hpp>
-#include <okiidoku_export.h>
 
 #include <iosfwd>
 #include <span>
@@ -15,18 +14,20 @@ namespace okiidoku::mono::db::serdes {
 		return (std::bit_width(max_value) + 7) / 8;
 	}
 
-	// writes the grid contents to the stream using a somewhat compact binary form.
-	template<Order O> requires (
-		(std::endian::native == std::endian::little)
-	)
-	OKIIDOKU_EXPORT void print(std::ostream& os, GridConstSpan<O> grid_view, bool is_grid_filled);
+	// contract: the grid is filled.
+	template<Order O>
+	OKIIDOKU_EXPORT void print_filled(std::ostream& os, GridConstSpan<O> grid_view);
 
-	// reads the grid contents from the stream using the somewhat compact binary form.
-	// multi-byte entries are interpreted using little-endian.
-	// contract: grid_view.size() >= O4.
-	template<Order O> requires (
-		(std::endian::native == std::endian::little)
-	)
-	OKIIDOKU_EXPORT void parse(std::istream& is, GridSpan<O> grid_view, bool is_grid_filled);
+	// contract: the grid is filled.
+	template<Order O>
+	OKIIDOKU_EXPORT void parse_filled(std::istream& is, GridSpan<O> grid_view);
+
+	// best used with sparse puzzles.
+	template<Order O>
+	OKIIDOKU_EXPORT void print_puzzle(std::ostream& os, GridConstSpan<O> grid_view);
+
+	// best used with sparse puzzles.
+	template<Order O>
+	OKIIDOKU_EXPORT void parse_puzzle(std::istream& is, GridSpan<O> grid_view);
 }
 #endif

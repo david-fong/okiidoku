@@ -47,6 +47,24 @@ namespace okiidoku {
 	// Note: when printing things, make sure to cast to int, since byte-like types will be interpreted as characters.
 	template<unsigned O>
 	struct traits final {
+
+		using o1x_t = uint_fastN_t<std::bit_width(O)>;
+		using o1i_t = uint_fastN_t<std::bit_width(O)>;
+
+		using o2x_t = uint_fastN_t<std::bit_width(O*O-1)>;
+		using o2i_t = uint_fastN_t<std::bit_width(O*O)>;
+		using o2x_smol_t = uint_smolN_t<std::bit_width(O*O-1)>;
+		using o2i_smol_t = uint_smolN_t<std::bit_width(O*O)>;
+
+		using o4x_t = uint_fastN_t<std::bit_width(O*O*O*O-1)>;
+		using o4i_t = uint_fastN_t<std::bit_width(O*O*O*O)>;
+		using o4x_smol_t = uint_smolN_t<std::bit_width(O*O*O*O-1)>;
+		using o4i_smol_t = uint_smolN_t<std::bit_width(O*O*O*O)>;
+
+		using o5i_t = uint_fastN_t<std::bit_width(O*O*O*O*O)>;
+
+		using o6i_t = uint_fastN_t<std::bit_width(O*O*O*O*O*O)>;
+
 	private:
 		template<bool F/* AKA: use_fast */>
 		class o2_bits {
@@ -84,6 +102,14 @@ namespace okiidoku {
 				return ~val_;
 			}
 
+			This& set(o2x_t at) noexcept {
+				if constexpr (use_int_) { val_ |= static_cast<val_t>(val_t{1} << at); return *this; }
+				else { val_.set(at); return *this; }
+			}
+			This& flip() noexcept {
+				if constexpr (use_int_) { val_ = static_cast<val_t>(~val_) & static_cast<val_t>((val_t{1}<<O*O)-1); return *this; }
+				else { val_.flip(); return *this; }
+			}
 			This& operator&=(const This& rhs) noexcept {
 				val_ &= rhs.val_; return *this;
 			}
@@ -92,6 +118,9 @@ namespace okiidoku {
 			}
 			This& operator<<=(const size_t rhs) noexcept {
 				val_ <<= rhs; return *this;
+			}
+			This& operator>>=(const size_t rhs) noexcept {
+				val_ >>= rhs; return *this;
 			}
 			[[nodiscard, gnu::pure]] friend This operator&(This lhs, const This& rhs) noexcept {
 				lhs &= rhs; return lhs;
@@ -102,27 +131,13 @@ namespace okiidoku {
 			[[nodiscard, gnu::pure]] friend This operator<<(This lhs, const size_t rhs) noexcept {
 				lhs <<= rhs; return lhs;
 			}
+			[[nodiscard, gnu::pure]] friend This operator>>(This lhs, const size_t rhs) noexcept {
+				lhs >>= rhs; return lhs;
+			}
 		};
 	public:
 		using o2_bits_fast = o2_bits<true>;
 		using o2_bits_smol = o2_bits<false>;
-
-		using o1x_t = uint_fastN_t<std::bit_width(O)>;
-		using o1i_t = uint_fastN_t<std::bit_width(O)>;
-
-		using o2x_t = uint_fastN_t<std::bit_width(O*O-1)>;
-		using o2i_t = uint_fastN_t<std::bit_width(O*O)>;
-		using o2x_smol_t = uint_smolN_t<std::bit_width(O*O-1)>;
-		using o2i_smol_t = uint_smolN_t<std::bit_width(O*O)>;
-
-		using o4x_t = uint_fastN_t<std::bit_width(O*O*O*O-1)>;
-		using o4i_t = uint_fastN_t<std::bit_width(O*O*O*O)>;
-		using o4x_smol_t = uint_smolN_t<std::bit_width(O*O*O*O-1)>;
-		using o4i_smol_t = uint_smolN_t<std::bit_width(O*O*O*O)>;
-
-		using o5i_t = uint_fastN_t<std::bit_width(O*O*O*O*O)>;
-
-		using o6i_t = uint_fastN_t<std::bit_width(O*O*O*O*O*O)>;
 
 		static constexpr o1i_t O1 {O};
 		static constexpr o2i_t O2 {O*O};
