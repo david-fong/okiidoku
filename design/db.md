@@ -14,7 +14,7 @@ For full grids, the boxes along the main diagonal can be removed and are easy to
 
 More improvement can actually be made by looking at intersections between houses and the "worst-case". If serdes traverses entries in row-major order, for some cell C at (row, col), in the "worst case" (where already seen parts of C's houses have maximum similarity), the number of candidates for C is reduced to the minimum of the number of candidates for each house based on the number of already serialized/deserialized cells in that house (O4 - num-cells-already-visited-in-house). For each order, a table can be precomputed of how many candidates remain for that cell. A trade-off can be made to have a compressed table which is slightly sub-optimal compared to the non-compressed table: Have a table with an entry for each boxrow storing a number in the range
 
-I did some experiments for different traversal paths with the main diagonal boxes removed. The script can be found [here](./db_paths_experiment.js). It turns out that row-major traversal isn't the best.
+I did some experiments for different traversal paths to compare them in terms of _space_. The script can be found [here](./db_paths_experiment.js). Out of the paths I tried, doing row major with blocks on the non-main diagonal removed was always the second best option by a close margin- the best being fairly more difficult to implement.
 
 ## For Puzzle Grids
 
