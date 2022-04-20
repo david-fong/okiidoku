@@ -22,7 +22,7 @@ else()
 		-Wimplicit-fallthrough=5
 		-Wshadow -Woverloaded-virtual
 		-march=native # generated code meant only to run on compiling machine. for the speedup.
-		# TODO.low see https://gcc.gnu.org/gcc-12/changes.html#uninitialized
+		# TODO.wait see https://gcc.gnu.org/gcc-12/changes.html#uninitialized
 	)
 endif()
 
@@ -58,7 +58,7 @@ install(TARGETS
 	FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/okiidoku
 	INCLUDES         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/okiidoku
 )
-# TODO.mid install one of the generated export header somehow
+# TODO.mid install the generated export header somehow
 install(EXPORT okiidokuTargets
 	FILE okiidokuTargets.cmake
 	# NAMESPACE okiidoku::
@@ -72,4 +72,4 @@ set(CPACK_PACKAGE_VENDOR "david-fong")
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENCE")
 set(CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/readme.md")
 set(CPACK_SOURCE_GENERATOR "TGZ")
-include(CPack)
+# include(CPack) # disabled since currently using GCC's "-march=native".

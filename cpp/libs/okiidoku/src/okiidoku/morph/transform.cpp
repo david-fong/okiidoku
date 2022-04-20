@@ -19,7 +19,7 @@ namespace okiidoku::mono::morph {
 
 	template<Order O>
 	void Transformation<O>::apply_in_place(const GridSpan<O> grid) const noexcept {
-		auto og_grid {GridArr<O>::copy_from_span(grid)};
+		auto og_grid {grid_arr_copy_from_span<O>(grid)};
 		apply_from_to(og_grid, grid);
 	}
 

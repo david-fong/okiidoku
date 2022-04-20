@@ -2,8 +2,7 @@
 #define HPP_OKIIDOKU__MORPH__TRANSFORM
 
 #include <okiidoku/grid.hpp>
-#include <okiidoku/traits.hpp>
-#include <okiidoku/prelude.hpp>
+#include <okiidoku/order_templates.hpp>
 #include <okiidoku_export.h>
 
 namespace okiidoku::mono::morph {
@@ -35,6 +34,26 @@ namespace okiidoku::mono::morph {
 		void apply_from_to(GridConstSpan<O> src, GridSpan<O> dest) const noexcept;
 		void apply_in_place(GridSpan<O>) const noexcept;
 		Transformation<O> inverted() const noexcept;
+	};
+}
+
+
+namespace okiidoku::visitor::morph {
+
+	namespace detail {
+		struct TransformationAdaptor final {
+			template<Order O>
+			using type = mono::morph::Transformation<O>;
+		};
+	}
+
+	struct OKIIDOKU_EXPORT Transformation final {
+		constexpr bool operator==(const Transformation&) const = default;
+		void apply_from_to(GridConstSpan<> src, GridSpan<> dest) const noexcept;
+		void apply_in_place(GridSpan<>) const noexcept;
+		Transformation inverted() const noexcept;
+	private:
+		OrderVariantFor<detail::TransformationAdaptor> var_;
 	};
 }
 #endif

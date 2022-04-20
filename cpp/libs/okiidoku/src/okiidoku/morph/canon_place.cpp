@@ -1,7 +1,6 @@
 #include <okiidoku/morph/transform.hpp>
 #include <okiidoku/morph/canon_ties.hpp>
 #include <okiidoku/grid.hpp>
-#include <okiidoku/traits.hpp>
 
 #include <ranges>
 #include <algorithm> // sort
@@ -17,18 +16,14 @@ namespace okiidoku::mono::morph {
 	template<Order O>
 	requires (is_order_compiled(O))
 	class CanonPlace final {
-		using val_t = traits<O>::o2i_smol_t;
+		using T = traits<O>;
+		using val_t = T::o2i_smol_t;
 		using mapping_t = Transformation<O>::mapping_t;
-		using o1i_t = traits<O>::o1i_t;
-		using o2i_t = traits<O>::o2i_t;
-		using o4i_t = traits<O>::o4i_t;
+		using o1i_t = T::o1i_t;
+		using o2i_t = T::o2i_t;
+		using o4i_t = T::o4i_t;
 
 	public:
-		static constexpr o1i_t O1 = O;
-		static constexpr o2i_t O2 = O*O;
-		static constexpr o4i_t O3 = O*O*O;
-		static constexpr o4i_t O4 = O*O*O*O;
-
 		// explicit CanonPlace(const GridSpan<O> grid): src_grid{grid} {}
 
 	private:
@@ -41,7 +36,7 @@ namespace okiidoku::mono::morph {
 
 			explicit constexpr PolarState() noexcept {
 				line_ties.update([](auto a, auto b){
-					return (a%O1) == (b%O1);
+					return (a%T::O1) == (b%T::O1);
 				});
 			}
 			bool has_ties() const { return line_ties.has_unresolved() || chute_ties.has_unresolved(); }
@@ -72,7 +67,7 @@ namespace okiidoku::mono::morph {
 			t.inverted().apply_from_to(src_grid, table);
 		}
 
-		for (o2i_t row_i {0}; row_i < O2; ++row_i) {
+		for (o2i_t row_i {0}; row_i < T::O2; ++row_i) {
 			auto row = table.row_at(row_i);
 			const auto& ortho {is_transpose ? row_state : col_state};
 			// loop over orthogonal partially-resolved line ranges to normalize:
@@ -81,20 +76,20 @@ namespace okiidoku::mono::morph {
 			}
 			// loop over orthogonal partially-resolved chute ranges to normalize:
 			{
-				std::array<o1i_t, O1> resolve;
+				std::array<o1i_t, T::O1> resolve;
 				std::iota(resolve.begin(), resolve.end(), 0);
 				for (const auto t : ortho.chute_ties) {
 					namespace v = std::views;
 					std::ranges::sort(resolve | v::drop(t.begin_) | v::take(t.size()), [&](auto a, auto b){
-						return std::ranges::lexicographical_compare(row.subspan(a*O1,O1), row.subspan(b*O1,O1));
+						return std::ranges::lexicographical_compare(row.subspan(a*T::O1,T::O1), row.subspan(b*T::O1,T::O1));
 					});
 				}
-				std::array<val_t, O2> copy;
+				std::array<val_t, T::O2> copy;
 				std::copy(row.begin(), row.end(), copy.begin());
-				for (o1i_t i {0}; i < O1; ++i) {
+				for (o1i_t i {0}; i < T::O1; ++i) {
 					std::copy(
-						std::next(copy.begin(), i*O1), std::next(copy.begin(), (i+1)*O1),
-						std::next(row.begin(), i*O1)
+						std::next(copy.begin(), i*T::O1), std::next(copy.begin(), (i+1)*T::O1),
+						std::next(row.begin(), i*T::O1)
 					);
 				}
 			}
@@ -107,7 +102,7 @@ namespace okiidoku::mono::morph {
 	void CanonPlace<O>::PolarState::do_a_pass(
 		const GridSpan<O> table
 	) {
-		std::array<mapping_t, O2> to_tied;
+		std::array<mapping_t, T::O2> to_tied;
 		std::iota(to_tied.begin(), to_tied.end(), 0);
 		for (const auto tie : line_ties) {
 			// note: intentionally do not skip ties here since updated table
@@ -122,7 +117,7 @@ namespace okiidoku::mono::morph {
 		}
 		const auto chute_tie_data {[&](o2i_t chute) {
 			namespace v = std::views;
-			return to_tied | v::drop(chute*O1) | v::take(O1) | v::transform([&](auto i){ return v::common(table.row_at(i)); }) | v::join;
+			return to_tied | v::drop(chute*T::O1) | v::take(T::O1) | v::transform([&](auto i){ return v::common(table.row_at(i)); }) | v::join;
 		}};
 		// try to resolve tied chute ranges:
 		for (const auto tie : chute_ties) {
@@ -146,12 +141,12 @@ namespace okiidoku::mono::morph {
 
 		{
 			// update s.to_og:
-			std::array<mapping_t, O2> tied_to_og;
-			for (o2i_t i {0}; i < O2; ++i) {
-				tied_to_og[i] = to_og[i/O1][i%O1];
+			std::array<mapping_t, T::O2> tied_to_og;
+			for (o2i_t i {0}; i < T::O2; ++i) {
+				tied_to_og[i] = to_og[i/T::O1][i%T::O1];
 			}
-			for (o2i_t i {0}; i < O2; ++i) {
-				to_og[i/O1][i%O1] = tied_to_og[to_tied[i]];
+			for (o2i_t i {0}; i < T::O2; ++i) {
+				to_og[i/T::O1][i%T::O1] = tied_to_og[to_tied[i]];
 			}
 		}
 	}

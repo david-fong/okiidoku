@@ -1,5 +1,11 @@
 # Old Ideas
 
+## Not Possible (?)
+
+- what: try using the GCC "section" function attribute to put same-order code in the same section. Ex. "text-okiidoku-o3". Test this on an older commit and see how it goes. May want to get rid of usages of `[[gnu::hot/cold]]`.
+  - motivation: code locality.
+  - why it doesn't work: can't use template arguments in attribute string-argument values. :(
+
 ## Things Tried that I Reverted
 
 - separating the monomorphic containers and algorithms each into their own dynamic library and making another separate library for the visitor pattern.

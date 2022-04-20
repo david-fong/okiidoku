@@ -28,7 +28,7 @@ namespace okiidoku::mono::morph {
 
 
 	#define OKIIDOKU_FOR_COMPILED_O(O_) \
-		template Transformation<O_> scramble<O_>(const GridSpan<O_>, SharedRng&);
+		template Transformation<O_> scramble<O_>(GridSpan<O_>, SharedRng&);
 	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 	#undef OKIIDOKU_FOR_COMPILED_O
 }

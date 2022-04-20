@@ -2,8 +2,8 @@
 
 ## Roadmap
 
-- implement per-order dynamic libraries
-- compare monolithic vs per-order dynamic libraries pros and cons
+- visitor pattern
+- see where template deduction guides can make the mono interfaces nicer to use
 - test CMake config with different compilers (gcc, clang, apple-clang, MSVC) and try to fix configuration issues
 - draft database
 - refactor and improve canonicalization
@@ -21,27 +21,9 @@
 
 ## Misc List
 
-- try using the GCC "section" function attribute to put same-order code in the same section. Ex. "text-okiidoku-o3". Test this on an older commit and see how it goes. May want to get rid of usages of `[[gnu::hot/cold]]`.
-
-- make grid and grid_view classes that wrap array and span and provide subscript operator for flat and 2d access.
+- now that the batch function is deleted, the mutex for shared_rng is technically not needed for my personal use... hm. I think I should still keep it though...
 
 - change the size-variable versions of the library functions to use the visitor pattern? Need to create a common variant grid class.
-
-- experiment with the option of making each order be its own dynamic library.
-  - https://github.com/vector-of-bool/pitchfork/issues/30
-  - how would this affect:
-    - build time?
-      - hypothesis: not sure.
-    - sum size of executables?
-      - hypothesis: slight increase if some stdlib things get bundled for each one, but this should be fixable.
-    - runtime performance?
-      - hypothesis: slight decrease due to more symbol table things?
-    - readability of compiler/linker errors? 
-      - compiler errors will hopefully be fewer at a time?
-    - complexity / confusing-ness of using the code / number ways to do something wrong.
-    - on the other hand, does it empower any valuable ways of using the library?
-      - one the template libraries are built, if one has multiple projects that depend on them, each one can cherry-pick which to load at runtime; may allow for optimizing runtime memory usage?
-  - the visitor library can probably be static. can even consider making it a header-only library?
 
 - using stochastic search:
   - compare intrinsic statistical properties of grids generated (the things currently used in canon\_label).

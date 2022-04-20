@@ -1,35 +1,39 @@
 #include <okiidoku/gen.hpp>
 
+#include <random>    // minstd_rand
 #include <algorithm> // swap, copy, shuffle
+#include <numeric>   // iota
+#include <array>
+#include <cassert>
 
-namespace okiidoku::mono::gen::ss {
-
-	// unsigned long long total = 0;
-	// unsigned long long true_ = 0;
-
+namespace okiidoku::mono {
 
 	template<Order O>
-	void Generator<O>::operator()(SharedRng& shared_rng) {
+	requires (is_order_compiled(O))
+	void generate(SharedRng& shared_rng, const GridSpan<O> grid) {
+		using T = traits<O>;
+		// using val_t = T::o2x_smol_t;
+		using o2x_t = T::o2x_t;
+		using o2i_t = T::o2i_t;
+		{
+			std::array<default_grid_val_t<O>, T::O2> example_row;
+			std::iota(example_row.begin(), example_row.end(), 0); // TODO.wait c++23 ranges::iota
+			for (o2i_t row {0}; row < T::O2; ++row) {
+				const auto span {grid.row_at(row)};
+				std::copy(example_row.cbegin(), example_row.cend(), span.begin());
+			}
+		}
+
+		std::minstd_rand rng_; // other good LCG parameters https://arxiv.org/pdf/2001.05304v3.pdf
+		// TODO.try using mt19937_64 isn't much slower... could it be okay to use?
 		{
 			std::lock_guard lock_guard {shared_rng.mutex};
 			rng_.seed(shared_rng.rng());
-			for (auto row : cells_.rows()) {
+			for (auto row : grid.rows()) {
 				std::ranges::shuffle(row, shared_rng.rng);
 			}
 			// TODO.try should the shuffle just use `rng_`? The data-parallel implementation would be much better that way.
 		}
-		this->generate_();
-	}
-
-
-	template<Order O>
-	void Generator<O>::write_to(GridSpan<O> sink) const {
-		for (o4i_t i {0}; i < T::O4; ++i) { sink[i] = cells_[i]; }
-	}
-
-
-	template<Order O>
-	void Generator<O>::generate_() {
 		/* Note: wherever you see `% .../\* -1 *\/`, that's a place where the algorithm
 		would still work if it wasn't commented out, but commeting it out makes it slower
 		because sometimes what would be excluded would have a faster path to validity. */
@@ -47,7 +51,7 @@ namespace okiidoku::mono::gen::ss {
 			chute_has_counts_t boxes_has {{0}};
 			for (o2i_t row {h_chute}; row < h_chute+T::O1; ++row) {
 			for (o2i_t col {0}; col < T::O2; ++col) {
-				++(boxes_has[col/T::O1][cells_.at(row,col)]);
+				++(boxes_has[col/T::O1][grid.at(row,col)]);
 			}}
 			int has_nots {0};
 			for (const auto& box_has : boxes_has) {
@@ -61,8 +65,8 @@ namespace okiidoku::mono::gen::ss {
 				const auto b_box {static_cast<o2x_t>(b_col/T::O1)};
 				if (a_box == b_box) [[unlikely]] { continue; }
 				const auto row {static_cast<o2x_t>(h_chute + ((rng_() - rng_.min()) % (T::O1/* -1 */)))};
-				auto& a_cell = cells_.at(row,a_col);
-				auto& b_cell = cells_.at(row,b_col);
+				auto& a_cell = grid.at(row,a_col);
+				auto& b_cell = grid.at(row,b_col);
 				const int has_nots_diff {
 					(boxes_has[a_box][a_cell] == 1 ?  1 : 0) +
 					(boxes_has[a_box][b_cell] == 0 ? -1 : 0) +
@@ -88,7 +92,7 @@ namespace okiidoku::mono::gen::ss {
 			chute_has_counts_t cols_has {{0}};
 			for (o2i_t row {0}; row < T::O2; ++row) {
 			for (o2i_t box_col {0}; box_col < T::O1; ++box_col) {
-				++(cols_has[box_col][cells_.at(row, v_chute+box_col)]);
+				++(cols_has[box_col][grid.at(row, v_chute + box_col)]);
 			}}
 			int has_nots {0};
 			for (const auto& col_has : cols_has) {
@@ -100,8 +104,8 @@ namespace okiidoku::mono::gen::ss {
 				const auto b_col {static_cast<o2x_t>((rng_() - rng_.min()) % T::O1)};
 				if (a_col == b_col) [[unlikely]] { continue; }
 				const auto row {static_cast<o2x_t>((rng_() - rng_.min()) % (T::O1*(T::O1/* -1 */)))};
-				auto& a_cell = cells_.at(row, v_chute + a_col);
-				auto& b_cell = cells_.at(row, v_chute + b_col);
+				auto& a_cell = grid.at(row, v_chute + a_col);
+				auto& b_cell = grid.at(row, v_chute + b_col);
 				const int has_nots_diff {
 					(cols_has[a_col][a_cell] == 1 ?  1 : 0) +
 					(cols_has[a_col][b_cell] == 0 ? -1 : 0) +
@@ -121,16 +125,21 @@ namespace okiidoku::mono::gen::ss {
 		}
 		// std::cout << op_count;
 
-		#ifndef NDEBUG
-		GridArr<O> grid;
-		this->write_to(std::span(grid));
-		assert(grid_follows_rule<O>(std::span(grid)));
-		#endif
+		assert(grid_follows_rule<O>(grid));
 	}
 
 
 	#define OKIIDOKU_FOR_COMPILED_O(O_) \
-		template class Generator<O_>;
+		template void generate<O_>(SharedRng&, GridSpan<O_>);
 	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 	#undef OKIIDOKU_FOR_COMPILED_O
+}
+
+
+namespace okiidoku::visitor {
+
+	void generate(SharedRng& shared_rng, const GridSpan<> sink) {
+		return std::visit([](auto& s_rng_, auto& sink_) -> void { return mono::generate(s_rng_, sink_); }, shared_rng, sink);
+		// return mono::generate(shared_rng, sink);
+	}
 }

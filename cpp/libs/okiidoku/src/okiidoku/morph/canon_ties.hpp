@@ -2,7 +2,7 @@
 #define HPP_OKIIDOKU__MORPH__TIES
 
 #include <okiidoku/traits.hpp>
-#include <okiidoku/prelude.hpp>
+#include <okiidoku/order_templates.hpp>
 
 #include <algorithm>
 #include <ranges>

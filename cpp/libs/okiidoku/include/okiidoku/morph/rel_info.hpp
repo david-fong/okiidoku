@@ -2,7 +2,7 @@
 #define HPP_OKIIDOKU__MORPH__REL_INFO
 
 #include <okiidoku/grid.hpp>
-#include <okiidoku/prelude.hpp>
+#include <okiidoku/order_templates.hpp>
 
 #include <compare> // strong_ordering, is_eq, etc.
 

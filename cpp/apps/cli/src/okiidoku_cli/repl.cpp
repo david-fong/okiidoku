@@ -103,7 +103,7 @@ namespace okiidoku::cli {
 	}
 
 
-	void Repl::gen_multiple(const gen::ss::batch::trials_t stop_after) {
+	void Repl::gen_multiple(unsigned long long stop_after) {
 		gen::ss::batch::Params params {.stop_after {stop_after}};
 		const Timer timer{};
 		const auto batch_report {[&]{
@@ -150,7 +150,7 @@ namespace okiidoku::cli {
 
 
 	void Repl::gen_multiple(const std::string_view stop_after_str) {
-		gen::ss::batch::trials_t stop_by_value;
+		unsigned long long stop_by_value;
 		const auto parse_result {std::from_chars(stop_after_str.begin(), stop_after_str.end(), stop_by_value)};
 		if (parse_result.ec == std::errc{}) {
 			if (stop_by_value <= 0) {

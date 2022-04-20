@@ -97,7 +97,7 @@ namespace okiidoku::mono::db::serdes {
 
 	template<Order O>
 	OKIIDOKU_EXPORT void parse_filled(std::istream& is, const GridSpan<O> grid) {
-		(void)is; (void)grid;
+		(void)is; (void)grid; // TODO.high
 
 		// will need some bit parallel deposit for the deserialization
 	}
@@ -105,15 +105,13 @@ namespace okiidoku::mono::db::serdes {
 
 	template<Order O>
 	OKIIDOKU_EXPORT void print_puzzle(std::ostream& os, const GridConstSpan<O> grid) {
-		(void)os; (void)grid;
+		(void)os; (void)grid; // TODO.high
 	}
 
 
 	template<Order O>
 	OKIIDOKU_EXPORT void parse_puzzle(std::istream& is, const GridSpan<O> grid) {
-		(void)is; (void)grid;
-
-		// will need some bit parallel deposit for the deserialization
+		(void)is; (void)grid; // TODO.high
 	}
 
 

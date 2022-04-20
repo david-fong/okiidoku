@@ -63,11 +63,10 @@ namespace okiidoku::cli {
 	private:
 		SharedRng& shared_rng_;
 		Config config_;
-		std::unique_ptr<visitor::gen::ss::Generator> gen_;
 
 		void gen_single();
 
-		void gen_multiple(visitor::gen::ss::batch::trials_t stop_after);
+		void gen_multiple(unsigned long long stop_after);
 		void gen_multiple(std::string_view);
 	};
 }

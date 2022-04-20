@@ -3,7 +3,7 @@
 // Note: the byte width type logic could be done with boost, but I don't
 // have any other reason to add boost as a dependency, so I won't.
 
-#include <okiidoku/prelude.hpp>
+#include <okiidoku/order_templates.hpp> // largest_compiled_order
 
 #include <bit>
 #include <bitset> // TODO.mid could this be excluded if (O_MAX <= 8) ?
@@ -43,6 +43,10 @@ namespace okiidoku {
 		void
 	>>>>;
 
+}
+
+
+namespace okiidoku::mono {
 
 	// Note: when printing things, make sure to cast to int, since byte-like types will be interpreted as characters.
 	template<unsigned O>
@@ -66,6 +70,9 @@ namespace okiidoku {
 		using o6i_t = uint_fastN_t<std::bit_width(O*O*O*O*O*O)>;
 
 	private:
+		// TODO consider moving this to its own header?
+		// Note: this class exists instead of just using bitset because it was
+		// found to have noticeably better performance for small orders.
 		template<bool F/* AKA: use_fast */>
 		class o2_bits {
 			static constexpr bool use_int_ = O <= 8;
@@ -144,5 +151,36 @@ namespace okiidoku {
 		static constexpr o4i_t O3 {O*O*O};
 		static constexpr o4i_t O4 {O*O*O*O};
 	};
+
+
+	template<unsigned O>
+	using default_grid_val_t = traits<O>::o2i_smol_t;
+}
+
+
+namespace okiidoku::visitor {
+
+	namespace traits {
+		using o1x_t = mono::traits<largest_compiled_order>::o1x_t;
+		using o1i_t = mono::traits<largest_compiled_order>::o1i_t;
+
+		using o2x_t = mono::traits<largest_compiled_order>::o2x_t;
+		using o2i_t = mono::traits<largest_compiled_order>::o2i_t;
+		using o2x_smol_t = mono::traits<largest_compiled_order>::o2x_smol_t;
+		using o2i_smol_t = mono::traits<largest_compiled_order>::o2i_smol_t;
+
+		using o4x_t = mono::traits<largest_compiled_order>::o4x_t;
+		using o4i_t = mono::traits<largest_compiled_order>::o4i_t;
+		using o4x_smol_t = mono::traits<largest_compiled_order>::o4x_smol_t;
+		using o4i_smol_t = mono::traits<largest_compiled_order>::o4i_smol_t;
+
+		using o5i_t = mono::traits<largest_compiled_order>::o5i_t;
+
+		using o6i_t = mono::traits<largest_compiled_order>::o6i_t;
+
+		using o2_bits_fast = mono::traits<largest_compiled_order>::o2_bits_fast;
+		using o2_bits_smol = mono::traits<largest_compiled_order>::o2_bits_smol;
+	}
+	using default_grid_val_t = mono::default_grid_val_t<largest_compiled_order>;
 }
 #endif

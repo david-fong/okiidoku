@@ -2,7 +2,6 @@
 #include <okiidoku/morph/transform.hpp>
 #include <okiidoku/morph/canon_ties.hpp>
 #include <okiidoku/grid.hpp>
-#include <okiidoku/traits.hpp>
 
 #include <algorithm> // sort
 #include <numeric>   // iota
@@ -18,10 +17,11 @@ namespace okiidoku::mono::morph {
 	template<Order O>
 	requires (is_order_compiled(O))
 	class CanonLabel final {
-		using val_t = traits<O>::o2i_smol_t;
-		using o1i_t = traits<O>::o1i_t;
-		using o2i_t = traits<O>::o2i_t;
-		using o4i_t = traits<O>::o4i_t;
+		using T = traits<O>;
+		using val_t = T::o2i_smol_t;
+		using o1i_t = T::o1i_t;
+		using o2i_t = T::o2i_t;
+		using o4i_t = T::o4i_t;
 	public:
 		static constexpr o2i_t O2 = O*O;
 

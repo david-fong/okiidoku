@@ -17,20 +17,19 @@
 // OKIIDOKU_DEFINE_MT19937_64
 
 
-// TODO.low experiment with effect of batching gen and then doing canon on that batch for perf
 // TODO.high it should probably just return right away if it encounters any failure.
 // returns the number of failures
 template<okiidoku::Order O>
-unsigned test_morph_O(const unsigned num_rounds) {
+unsigned test_morph_O(SharedRng& shared_rng, const unsigned num_rounds) {
 	using namespace okiidoku;
-	using namespace okiidoku;
+	using namespace okiidoku::mono;
 	std::cout << "\n\ntesting for order " << O << std::endl;
 	// Note: if gen_path gets un-deprecated, assert that paths are valid.
 
 	unsigned int count_bad {0};
 	for (unsigned round {0}; round < num_rounds; ) {
-		gen::ss::Generator<O> g {};
-		g();
+		GridArr<O> gen_grid;
+		generate<O>(shared_rng, gen_grid);
 
 		GridArr<O> gen_grid;
 		g.write_to_(std::span(gen_grid));
@@ -90,20 +89,18 @@ int main(const int argc, char const *const argv[]) {
 	SharedRng shared_rng;
 	shared_rng.rng.seed(srand_key);
 
-	if (test_morph_O<3>(num_rounds)) {
+	if (test_morph_O<3>(shared_rng, num_rounds)) {
 		return 1;
 	}
-	if (test_morph_O<4>(num_rounds)) {
+	if (test_morph_O<4>(shared_rng, num_rounds)) {
 		// return 1;
 	}
-	if (test_morph_O<5>(num_rounds)) {
+	if (test_morph_O<5>(shared_rng, num_rounds)) {
 		// return 1;
 	}
-	if (test_morph_O<10>(num_rounds)) {
+	if (test_morph_O<10>(shared_rng, num_rounds)) {
 		// return 1;
 	}
 
-	// std::cout << "\ntotal: " << okiidoku::gen::ss::total;
-	// std::cout << "\ntrue_: " << okiidoku::gen::ss::true_ << std::endl;
 	return 0;
 }
