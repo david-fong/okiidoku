@@ -18,6 +18,6 @@ namespace okiidoku::mono::morph {
 namespace okiidoku::visitor::morph {
 
 	// contract: span is a valid grid (though it may be incomplete)
-	OKIIDOKU_EXPORT Transformation scramble(GridSpan<>, SharedRng&);
+	OKIIDOKU_EXPORT Transformation scramble(GridSpan, SharedRng&);
 }
 #endif

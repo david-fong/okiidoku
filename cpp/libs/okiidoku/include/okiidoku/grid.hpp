@@ -12,60 +12,107 @@
 
 namespace okiidoku::mono {
 
-	template<Order O, class V> requires(is_order_compiled(O)) struct GridSpan;
+	namespace detail {
+		template<Order O, class V> requires(is_order_compiled(O)) struct GridlikeSpan;
 
-	template<Order O, class V=default_grid_val_t<O>>
-	requires(is_order_compiled(O))
-	using GridConstSpan = GridSpan<O, const V>;
+		// TODO.high benchmark to see impact of always initializing.
+		// default constructor can currently leave the grid uninitialized (I think?).
+		// this is currently left as is for performance reasons, but I need to benchmark
+		// to see how justified doing this is.
+		template<Order O, class V_>
+		requires(is_order_compiled(O))
+		class GridlikeArr final { // TODO.mid should this and the span struct be exported? currently all function body definitions are inline so it can be used header-only...
+		public:
+			using val_t = std::decay_t<V_>; // TODO.mid should this instead require std::is_same as decayed?
+			friend GridlikeSpan<O, val_t>;
+			friend GridlikeSpan<O, const val_t>;
+			friend GridlikeArr<O, default_grid_val_t<O>> grid_arr_copy_from_span<O>(GridlikeSpan<O, const default_grid_val_t<O>>);
+			using T = traits<O>;
+			using o2x_t = T::o2x_t;
+			using o2i_t = T::o2i_t;
+			using o4x_t = T::o4x_t;
+			using o4i_t = T::o4i_t;
 
-	template<Order O, class V_=default_grid_val_t<O>>
-	requires(is_order_compiled(O))
-	struct GridArr final { // TODO.mid should this and the span struct be exported? currently all function body definitions are inline so it can be used header-only...
-		using V = std::decay_t<V_>;
-		friend GridSpan<O, V>;
-		friend GridConstSpan<O, V>;
-		friend GridArr<O> grid_arr_copy_from_span<O>(GridConstSpan<O>);
-		using T = traits<O>;
-		using o2x_t = T::o2x_t;
-		using o2i_t = T::o2i_t;
-		using o4x_t = T::o4x_t;
-		using o4i_t = T::o4i_t;
-		template<Order OO>
-		[[nodiscard]] constexpr V& operator[](const o4x_t coord) noexcept { return cells_[coord]; }
-		[[nodiscard]] constexpr V& at(const o2x_t row, const o2x_t col) noexcept { return cells_[(T::O2*row)+col]; }
-		[[nodiscard]] constexpr std::span<V, T::O2> row_at(const o2x_t i) noexcept { return static_cast<std::span<V, T::O2>>(std::span(cells_).subspan(T::O2*i, T::O2)); }
-		[[nodiscard]] constexpr const V& operator[](const o4x_t coord) const noexcept { return cells_[coord]; }
-		[[nodiscard]] constexpr const V& at(const o2x_t row, const o2x_t col) const noexcept { return cells_[(T::O2*row)+col]; }
-		// [[nodiscard]] constexpr std::span<const V, T::O2> row_at(const o2x_t i) const noexcept { return static_cast<std::span<V, T::O2>>(std::span(cells_).subspan(T::O2*i, T::O2)); }
-		// [[nodiscard]] constexpr auto rows() const noexcept { namespace v = std::views; return v::iota(o2i_t{0}, T::O2) | v::transform([&](auto r){ return row_at(r); }); }
-		[[nodiscard]] constexpr auto rows() noexcept { namespace v = std::views; return v::iota(o2i_t{0}, T::O2) | v::transform([&](auto r){ return row_at(r); }); }
-	private:
-		std::array<V, T::O4> cells_;
+			// contract: coord is in [0, O4). o4i_t only used for convenience of caller.
+			[[nodiscard]] constexpr       val_t& operator[](const o4i_t coord)       noexcept { return cells_[coord]; }
+			[[nodiscard]] constexpr const val_t& operator[](const o4i_t coord) const noexcept { return cells_[coord]; }
+
+			// contract: row and col are in [0, O2). o2i_t only used for convenience of caller.
+			[[nodiscard]] constexpr       val_t& at(const o2i_t row, const o2i_t col)       noexcept { return cells_[(T::O2*row)+col]; }
+			[[nodiscard]] constexpr const val_t& at(const o2i_t row, const o2i_t col) const noexcept { return cells_[(T::O2*row)+col]; }
+
+			// contract: row is in [0, O2). o2i_t only used for convenience of caller.
+			[[nodiscard]] constexpr std::span<val_t, T::O2> row_at(const o2i_t i) noexcept { return static_cast<std::span<val_t, T::O2>>(std::span(cells_).subspan(T::O2*i, T::O2)); }
+			// [[nodiscard]] constexpr std::span<const V, T::O2> row_at(const o2i_t i) const noexcept { return static_cast<std::span<V, T::O2>>(std::span(cells_).subspan(T::O2*i, T::O2)); }
+
+			[[nodiscard]] constexpr auto rows() noexcept { namespace v = std::views; return v::iota(o2i_t{0}, T::O2) | v::transform([&](auto r){ return row_at(r); }); }
+			// [[nodiscard]] constexpr auto rows() const noexcept { namespace v = std::views; return v::iota(o2i_t{0}, T::O2) | v::transform([&](auto r){ return row_at(r); }); }
+		private:
+			std::array<val_t, T::O4> cells_;
+		};
+
+
+		template<Order O, class V=default_grid_val_t<O>>
+		requires(is_order_compiled(O))
+		class GridlikeSpan final {
+		public:
+			using val_t = V;
+			friend GridlikeSpan<O, const V>;
+			friend GridlikeArr<O, default_grid_val_t<O>> grid_arr_copy_from_span<O>(GridlikeSpan<O, const default_grid_val_t<O>>);
+			using T = traits<O>;
+			using o2x_t = T::o2x_t;
+			using o2i_t = T::o2i_t;
+			using o4x_t = T::o4x_t;
+			using o4i_t = T::o4i_t;
+
+			explicit constexpr GridlikeSpan(std::span<V, T::O4> cells) noexcept: cells_(cells) {}
+
+			// create const span from non-const span:
+			explicit constexpr GridlikeSpan(std::span<std::remove_const_t<V>, T::O4> cells) noexcept requires std::is_const_v<V>: cells_(cells) {}
+
+			template<class G, std::enable_if_t<std::is_const_v<V> || (std::is_const_v<G> == std::is_const_v<V>), bool> = true>
+			requires std::is_same_v<std::decay_t<G>, GridlikeArr<O, std::decay_t<V>>>
+			constexpr GridlikeSpan(G& arr) noexcept: cells_(arr.cells_) {}
+			// template<class G>
+			// requires std::is_same_v<std::decay_t<G>, GridlikeArr<O, std::decay_t<V>>>
+			// constexpr GridlikeSpan(G& arr) noexcept: cells_(arr.cells_) {}
+
+			constexpr GridlikeSpan(const GridlikeSpan<O, V>& other) noexcept = default;
+
+			// create const span from non-const span:
+			constexpr GridlikeSpan(const GridlikeSpan<O, std::remove_const_t<V>>& other) noexcept requires std::is_const_v<V>: cells_(other.cells_) {}
+
+			// contract: coord is in [0, O4). o4i_t only used for convenience of caller.
+			[[nodiscard]] constexpr val_t& operator[](const o4i_t coord) const noexcept { return cells_[coord]; }
+
+			// contract: row and col are in [0, O2). o2i_t only used for convenience of caller.
+			[[nodiscard]] constexpr val_t& at(const o2i_t row, const o2i_t col) const noexcept { return cells_[(T::O2*row)+col]; }
+
+			// contract: row is in [0, O2). o2i_t only used for convenience of caller.
+			[[nodiscard]] constexpr std::span<val_t, T::O2> row_at(const o2i_t i) const noexcept { return static_cast<std::span<V, T::O2>>(cells_.subspan(T::O2*i, T::O2)); }
+
+			[[nodiscard]] constexpr auto rows() const noexcept { namespace v = std::views; return v::iota(o2i_t{0}, T::O2) | v::transform([&](auto r){ return row_at(r); }); }
+		private:
+			std::span<val_t, T::O4> cells_;
+		};
 	};
+
+
+	template<Order O>
+	requires(is_order_compiled(O))
+	using GridSpan = detail::GridlikeSpan<O, default_grid_val_t<O>>;
+
+	template<Order O>
+	requires(is_order_compiled(O))
+	using GridConstSpan = detail::GridlikeSpan<O, const default_grid_val_t<O>>;
+
+	template<Order O>
+	requires(is_order_compiled(O))
+	using GridArr = detail::GridlikeArr<O, default_grid_val_t<O>>;
 
 	template<Order O>
 	requires(is_order_compiled(O))
 	OKIIDOKU_EXPORT [[nodiscard]] GridArr<O> grid_arr_copy_from_span(GridConstSpan<O> src) noexcept;
-
-	template<Order O, class V=default_grid_val_t<O>>
-	requires(is_order_compiled(O))
-	struct GridSpan final {
-		friend GridSpan<O, const V>;
-		friend GridArr<O> grid_arr_copy_from_span<O>(GridConstSpan<O>);
-		using T = traits<O>;
-		using o2x_t = T::o2x_t;
-		using o2i_t = T::o2i_t;
-		using o4x_t = T::o4x_t;
-		using o4i_t = T::o4i_t;
-		constexpr GridSpan(GridArr<O, std::decay_t<V>>& arr) noexcept: cells_(arr.cells_) {}
-		constexpr GridSpan(const GridSpan<O, std::remove_const_t<V>>& other) noexcept: cells_(other.cells_) {}
-		[[nodiscard]] constexpr V& operator[](const o4x_t coord) const noexcept { return cells_[coord]; }
-		[[nodiscard]] constexpr V& at(const o2x_t row, const o2x_t col) const noexcept { return cells_[(T::O2*row)+col]; }
-		[[nodiscard]] constexpr std::span<V, T::O2> row_at(const o2x_t i) const noexcept { return static_cast<std::span<V, T::O2>>(cells_.subspan(T::O2*i, T::O2)); }
-		[[nodiscard]] constexpr auto rows() const noexcept { namespace v = std::views; return v::iota(o2i_t{0}, T::O2) | v::transform([&](auto r){ return row_at(r); }); }
-	private:
-		std::span<V, T::O4> cells_;
-	};
 
 
 	// Returns false if any cells in a same house contain the same value.
@@ -83,7 +130,6 @@ namespace okiidoku::mono {
 	template<Order O> OKIIDOKU_EXPORT [[nodiscard, gnu::const]] constexpr typename traits<O>::o2i_t rmi_to_box(const typename traits<O>::o2i_t row, const typename traits<O>::o2i_t col) noexcept {
 		return static_cast<traits<O>::o2i_t>((row / O) * O) + (col / O);
 	}
-	// TODO.low consider changing the output to be o2x? then the input would have to be o4x...
 	template<Order O> [[nodiscard, gnu::const]]
 	OKIIDOKU_EXPORT constexpr typename traits<O>::o2i_t rmi_to_box(const typename traits<O>::o4i_t index) noexcept {
 		return rmi_to_box<O>(rmi_to_row<O>(index), rmi_to_col<O>(index));
@@ -125,76 +171,94 @@ namespace okiidoku::mono {
 namespace okiidoku::visitor {
 
 	namespace detail {
-		template<class V_=void>
-		struct GridSpanAdaptor final {
-			template<Order O>
-			using V = std::conditional_t<
-				std::is_same_v<std::decay_t<V_>, void>, 
-				std::conditional_t<
-					std::is_const_v<V_>,
-					std::add_const_t<default_grid_val_t<O>>,
-					default_grid_val_t<O>
-				>,
-				V_
-			>;
-			template<Order O>
-			using type = mono::GridSpan<O, V>;
-		};
-		template<class V_=void>
+		template<bool is_const>
+		struct GridSpan;
+	}
+
+	using GridSpan = detail::GridSpan<false>;
+	using GridConstSpan = detail::GridSpan<true>;
+
+	namespace detail {
 		struct GridArrAdaptor final {
 			template<Order O>
-			using V = std::conditional_t<
-				std::is_same_v<std::decay_t<V_>, void>, 
-				default_grid_val_t<O>,
-				std::decay_t<V_>
-			>;
-			template<Order O>
-			using type = mono::GridArr<O, V<O>>;
+			using type = mono::GridArr<O>;
 		};
 	}
 
-	template<class V>
-	struct GridSpan;
+	class GridArr final {
+	public:
+		using common_val_t = default_grid_val_t;
+		using variant_t = OrderVariantFor<detail::GridArrAdaptor>;
+		friend GridSpan;
+		friend GridConstSpan;
 
-	template<class V=void>
-	using GridConstSpan = GridSpan<const V>;
+		// uses a std::monostate variant if the specified order is not compiled.
+		explicit GridArr(Order O) noexcept;
+		template<Order O> constexpr GridArr(mono::GridArr<O> mono_arr): order_{O}, variant_(mono_arr) {}
 
-	template<class V_=void>
-	struct OKIIDOKU_EXPORT GridArr final {
-		using V = typename detail::GridArrAdaptor<V_>::V<O>;
-		friend GridSpan<V>;
-		friend GridConstSpan<V>;
-		[[nodiscard]] static GridArr copy_from_span(GridConstSpan<V> src) noexcept;
-		[[nodiscard]] constexpr V& operator[](const traits::o4x_t coord) noexcept { return cells_[coord]; }
-		[[nodiscard]] constexpr V& at(const traits::o2x_t row, const traits::o2x_t col) noexcept { return cells_[(order_*order_*row)+col]; }
-		[[nodiscard]] constexpr const V& operator[](const traits::o4x_t coord) const noexcept { return cells_[coord]; }
-		[[nodiscard]] constexpr const V& at(const traits::o2x_t row, const traits::o2x_t col) const noexcept { return cells_[(order_*order_*row)+col]; }
+		[[nodiscard]] constexpr Order get_order() { return order_; }
+
+		// contract: coord is in [0, O4).
+		[[nodiscard]]       common_val_t& operator[](const traits::o4i_t coord)       noexcept; /* { return cells_[coord]; } */
+		[[nodiscard]] const common_val_t& operator[](const traits::o4i_t coord) const noexcept; /* { return cells_[coord]; } */
+
+		// contract: row and col are in [0, O2).
+		[[nodiscard]]       common_val_t& at(const traits::o2i_t row, const traits::o2i_t col)       noexcept; /* { return cells_[(order_*order_*row)+col]; } */
+		[[nodiscard]] const common_val_t& at(const traits::o2i_t row, const traits::o2i_t col) const noexcept; /* { return cells_[(order_*order_*row)+col]; } */
+
+		[[nodiscard]] const variant_t& get_variant() const noexcept { return variant_; }
 	private:
 		Order order_;
-		OrderVariantFor<detail::GridArrAdaptor<V_>> cells_;
+		variant_t variant_;
 	};
 
-	template<class V_=void>
-	struct OKIIDOKU_EXPORT GridSpan final {
-		using V = typename detail::GridSpanAdaptor<V_>::V<O>;
-		friend GridSpan<const V>;
-		constexpr GridSpan(GridArr<std::decay_t<V>>& arr) noexcept: cells_(arr.cells_) {}
-		constexpr GridSpan(const GridSpan<std::remove_const_t<V>>& other) noexcept: cells_(other.cells_) {}
-		[[nodiscard]] constexpr V& operator[](const traits::o4x_t coord) const noexcept { return cells_[coord]; }
-		[[nodiscard]] constexpr V& at(const traits::o2x_t row, const traits::o2x_t col) const noexcept { return cells_[(order_*order_*row)+col]; }
-	private:
-		Order order_;
-		OrderVariantFor<detail::GridSpanAdaptor<V_>> cells_;
-	};
 
+	namespace detail {
+		template<bool is_const>
+		struct GridSpanAdaptor final {
+			template<Order O>
+			using type = std::conditional_t<is_const, mono::GridConstSpan<O>, mono::GridSpan<O>>;
+		};
+		template<bool is_const>
+		class GridSpan final {
+		public:
+			using common_val_t = default_grid_val_t;
+			using variant_t = OrderVariantFor<GridSpanAdaptor<is_const>>;
+			friend GridSpan<true>;
+
+			template<class G, std::enable_if_t<is_const || (std::is_const_v<G> == is_const), bool> = true>
+			requires std::is_same_v<std::decay_t<G>, GridArr>
+			constexpr GridSpan(G& arr) noexcept: order_(arr.get_order()), variant_(arr.variant_) {}
+
+			// create const span from non-const span:
+			constexpr GridSpan(const GridSpan<false>& other) noexcept requires (is_const): order_(other.order_), variant_(other.variant_) {}
+
+			template<Order O> constexpr GridSpan(mono::GridSpan<O> mono_arr): order_{O}, variant_(mono_arr) {}
+
+			[[nodiscard]] constexpr Order get_order() { return order_; }
+
+			// contract: coord is in [0, O4).
+			[[nodiscard]] common_val_t& operator[](const traits::o4i_t coord) const noexcept; /* { return cells_[coord]; } */
+
+			// contract: row and col are in [0, O2).
+			[[nodiscard]] common_val_t& at(const traits::o2i_t row, const traits::o2i_t col) const noexcept; /* { return cells_[(order_*order_*row)+col]; } */
+
+			[[nodiscard]] const variant_t& get_variant() const noexcept { return variant_; }
+		private:
+			Order order_;
+			variant_t variant_;
+		};
+	}
+
+	OKIIDOKU_EXPORT [[nodiscard]] GridArr grid_arr_copy_from_span(GridConstSpan src) noexcept;
 
 	// Returns false if any cells in a same house contain the same value.
 	// Can be used with incomplete grids.
 	OKIIDOKU_EXPORT [[nodiscard]]
-	bool grid_follows_rule(GridConstSpan<>) noexcept;
+	bool grid_follows_rule(GridConstSpan) noexcept;
 
 	// Returns true if none of the cells are empty (equal to O2). Does _not_ check if sudoku is valid.
 	OKIIDOKU_EXPORT [[nodiscard]]
-	bool grid_is_filled(GridConstSpan<>) noexcept;
+	bool grid_is_filled(GridConstSpan) noexcept;
 }
 #endif

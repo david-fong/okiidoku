@@ -20,7 +20,6 @@ namespace okiidoku::mono {
 		using T = traits<O>;
 		using o2i_t = T::o2i_t;
 		using has_mask_t = T::o2_bits_fast;
-		static constexpr o2i_t T::O2 {O*O};
 
 		std::array<has_mask_t, T::O2> rows_has_ {};
 		std::array<has_mask_t, T::O2> cols_has_ {};
@@ -70,4 +69,16 @@ namespace okiidoku::mono {
 		template bool grid_is_filled<O_>(GridConstSpan<O_>) noexcept;
 	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 	#undef OKIIDOKU_FOR_COMPILED_O
+}
+
+
+namespace okiidoku::visitor {
+	GridArr::GridArr(const Order O) noexcept: order_{O}, variant_(std::monostate{}) {
+		switch (O) {
+		#define OKIIDOKU_FOR_COMPILED_O(O_) \
+		case O_: variant_.emplace<mono::GridArr<O_>>(); break;
+		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
+		#undef OKIIDOKU_FOR_COMPILED_O
+		}
+	}
 }

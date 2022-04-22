@@ -37,15 +37,15 @@ namespace okiidoku::visitor::db::serdes {
 	}
 
 	// contract: the grid is filled.
-	OKIIDOKU_EXPORT void print_filled(std::ostream& os, GridConstSpan<> grid_view);
+	OKIIDOKU_EXPORT void print_filled(std::ostream& os, GridConstSpan grid_view);
 
 	// contract: the grid is filled.
-	OKIIDOKU_EXPORT void parse_filled(std::istream& is, GridSpan<> grid_view);
+	OKIIDOKU_EXPORT void parse_filled(std::istream& is, GridSpan grid_view);
 
 	// best used with sparse puzzles.
-	OKIIDOKU_EXPORT void print_puzzle(std::ostream& os, GridConstSpan<> grid_view);
+	OKIIDOKU_EXPORT void print_puzzle(std::ostream& os, GridConstSpan grid_view);
 
 	// best used with sparse puzzles.
-	OKIIDOKU_EXPORT void parse_puzzle(std::istream& is, GridSpan<> grid_view);
+	OKIIDOKU_EXPORT void parse_puzzle(std::istream& is, GridSpan grid_view);
 }
 #endif

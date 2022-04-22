@@ -48,12 +48,13 @@ namespace okiidoku::visitor::morph {
 	}
 
 	struct OKIIDOKU_EXPORT Transformation final {
+		using variant_t = OrderVariantFor<detail::TransformationAdaptor>;
 		constexpr bool operator==(const Transformation&) const = default;
-		void apply_from_to(GridConstSpan<> src, GridSpan<> dest) const noexcept;
-		void apply_in_place(GridSpan<>) const noexcept;
+		void apply_from_to(GridConstSpan src, GridSpan dest) const noexcept;
+		void apply_in_place(GridSpan) const noexcept;
 		Transformation inverted() const noexcept;
 	private:
-		OrderVariantFor<detail::TransformationAdaptor> var_;
+		variant_t var_;
 	};
 }
 #endif

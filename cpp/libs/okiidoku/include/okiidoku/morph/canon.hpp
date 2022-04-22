@@ -21,6 +21,6 @@ namespace okiidoku::visitor::morph {
 	// contract: the span is a _complete_, valid grid.
 	// If you want to canonicalize a puzzle, first solve it, then canonicalize
 	// the solution, and then apply the returned transformation to the puzzle.
-	OKIIDOKU_EXPORT Transformation canonicalize(GridSpan<>);
+	OKIIDOKU_EXPORT Transformation canonicalize(GridSpan);
 }
 #endif

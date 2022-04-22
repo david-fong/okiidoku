@@ -24,15 +24,16 @@ namespace okiidoku::mono {
 			}
 		}
 
+		// Note: using a scoped rng to avoid holding the shared_rng mutex
+		// during the long-running parts of this function body.
 		std::minstd_rand rng_; // other good LCG parameters https://arxiv.org/pdf/2001.05304v3.pdf
-		// TODO.try using mt19937_64 isn't much slower... could it be okay to use?
 		{
 			std::lock_guard lock_guard {shared_rng.mutex};
 			rng_.seed(shared_rng.rng());
 			for (auto row : grid.rows()) {
 				std::ranges::shuffle(row, shared_rng.rng);
 			}
-			// TODO.try should the shuffle just use `rng_`? The data-parallel implementation would be much better that way.
+			// TODO.try should the shuffle just use `rng_`? Note: A data-parallel implementation would be much better that way.
 		}
 		/* Note: wherever you see `% .../\* -1 *\/`, that's a place where the algorithm
 		would still work if it wasn't commented out, but commeting it out makes it slower
@@ -138,8 +139,14 @@ namespace okiidoku::mono {
 
 namespace okiidoku::visitor {
 
-	void generate(SharedRng& shared_rng, const GridSpan<> sink) {
-		return std::visit([](auto& s_rng_, auto& sink_) -> void { return mono::generate(s_rng_, sink_); }, shared_rng, sink);
-		// return mono::generate(shared_rng, sink);
+	void generate(SharedRng& shared_rng, const GridSpan visitor_sink) {
+		return std::visit([&](auto& mono_sink) -> void {
+			using T = std::decay_t<decltype(mono_sink)>;
+			if constexpr (std::is_same_v<T, std::monostate>) {
+				return;
+			} else {
+				return mono::generate(shared_rng, mono_sink);
+			}
+		}, visitor_sink.get_variant());
 	}
 }

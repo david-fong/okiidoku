@@ -27,7 +27,7 @@ namespace okiidoku::mono::morph {
 
 	private:
 		struct State final {
-			GridArr<O, Rel<O>> rel_table;
+			detail::GridlikeArr<O, Rel<O>> rel_table;
 			label_map_t<O> to_og;
 			TieLinks<O, 2> ties {};
 			explicit constexpr State(const GridConstSpan<O> grid) noexcept: rel_table{make_rel_table<O>(grid)} {
@@ -44,7 +44,7 @@ namespace okiidoku::mono::morph {
 
 	template<Order O>
 	void CanonLabel<O>::do_a_pass_(CanonLabel<O>::State& s) {
-		GridArr<O, Rel<O>> scratch;
+		detail::GridlikeArr<O, Rel<O>> scratch;
 
 		label_map_t<O> to_tied;
 		std::iota(to_tied.begin(), to_tied.end(), 0);

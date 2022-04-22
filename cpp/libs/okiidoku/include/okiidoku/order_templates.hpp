@@ -27,9 +27,11 @@ namespace okiidoku {
 		return largest;
 	}()};
 
+	// exists so that OrderVariantFor can use container templates that have other
+	// template parameters other than just the order.
 	template<typename T>
 	concept MonoToVisitorAdaptor = requires() {
-		#define OKIIDOKU_FOR_COMPILED_O(O_) typename T::type<O_>;
+		#define OKIIDOKU_FOR_COMPILED_O(O_) typename T::template type<O_>;
 		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 		#undef OKIIDOKU_FOR_COMPILED_O
 	};

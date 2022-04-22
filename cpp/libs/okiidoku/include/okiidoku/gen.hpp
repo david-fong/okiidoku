@@ -14,6 +14,6 @@ namespace okiidoku::mono {
 
 namespace okiidoku::visitor {
 
-	OKIIDOKU_EXPORT void generate(SharedRng&, GridSpan<> sink);
+	OKIIDOKU_EXPORT void generate(SharedRng&, GridSpan sink);
 }
 #endif

@@ -13,14 +13,14 @@ namespace okiidoku::mono::morph {
 		typename traits<O>::o2_bits_smol boxes_v;
 	};
 	template<Order O>
-	GridArr<O, RelMasks<O>> make_rel_masks_(const GridConstSpan<O> grid) noexcept {
+	detail::GridlikeArr<O, RelMasks<O>> make_rel_masks_(const GridConstSpan<O> grid) noexcept {
 		using T = traits<O>;
 		using has_mask_t = T::o2_bits_smol;
 		using val_t = T::o2i_smol_t;
 		using o1i_t = T::o1i_t;
 		using o2i_t = T::o2i_t;
 
-		GridArr<O, RelMasks<O>> masks {};
+		detail::GridlikeArr<O, RelMasks<O>> masks {};
 		for (o2i_t line {0}; line < T::O2; ++line) {
 		for (o2i_t atom {0}; atom < T::O2; atom += T::O1) {
 			// Go through all unique pairs in the atom:
@@ -45,15 +45,15 @@ namespace okiidoku::mono::morph {
 
 	template<Order O>
 	requires (is_order_compiled(O))
-	GridArr<O, Rel<O>> make_rel_table(const GridConstSpan<O> grid_in) {
+	detail::GridlikeArr<O, Rel<O>> make_rel_table(const GridConstSpan<O> grid_in) {
 		using T = traits<O>;
 		using has_mask_t = T::o2_bits_smol;
 		using o1i_t = T::o1i_t;
 		using o2i_t = T::o2i_t;
 		using chute_imbalance_t = chute_imbalance_t<O>;
 
-		const GridArr<O, RelMasks<O>> masks = make_rel_masks_<O>(grid_in);
-		GridArr<O, Rel<O>> table; // uninitialized!
+		const detail::GridlikeArr<O, RelMasks<O>> masks = make_rel_masks_<O>(grid_in);
+		detail::GridlikeArr<O, Rel<O>> table; // uninitialized!
 		for (o2i_t r {0}; r < T::O2; ++r) {
 		for (o2i_t c {0}; c < T::O2; ++c) {
 			const auto& mask = masks.at(r,c);
@@ -118,7 +118,7 @@ namespace okiidoku::mono::morph {
 
 	#define OKIIDOKU_FOR_COMPILED_O(O_) \
 		template struct Rel<O_>; \
-		template GridArr<O_, Rel<O_>> make_rel_table<O_>(GridConstSpan<O_>);
+		template detail::GridlikeArr<O_, Rel<O_>> make_rel_table<O_>(GridConstSpan<O_>);
 	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 	#undef OKIIDOKU_FOR_COMPILED_O
 }
