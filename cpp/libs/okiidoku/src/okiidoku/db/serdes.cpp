@@ -21,10 +21,6 @@ namespace okiidoku::mono::db::serdes {
 		assert(is_grid_filled<O>(grid));
 		unsigned bytes_written = 0;
 
-		// TODO.mid consider a design that uses exact values from not_has masks instead of these
-		//  that would mean losing the random access capability in exchange for probably better
-		//  average compression. In that case, also try not ignoring diagonal blocks.
-		//  ie. replace the std::max(<pop_things>) with cell_not_has.count() or something.
 		o2x_smol_t row_pop {0};
 		std::array<o2x_smol_t, T::O1> box_pops {0};
 		std::array<o2x_smol_t, T::O2> col_pops {0};

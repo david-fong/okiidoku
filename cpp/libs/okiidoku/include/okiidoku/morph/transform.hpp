@@ -48,13 +48,23 @@ namespace okiidoku::visitor::morph {
 	}
 
 	struct OKIIDOKU_EXPORT Transformation final {
+		// TODO.high is there a way to make a base class that takes care of the things like the order and
+		//  variant fields and making some of the easy/obvious constructors? The order field could really
+		//  be a getter that maps the variant index to an order. also see if the monostate can be gotten
+		//  rid of... I currently don't have a good reason to be including a monostate option.
 		using variant_t = OrderVariantFor<detail::TransformationAdaptor>;
+
+		// uses a std::monostate variant if the specified order is not compiled.
+		explicit Transformation(Order O) noexcept;
+		template<Order O> constexpr Transformation(mono::Transformation<O> mono_transform): order_{O}, variant_(mono_transform) {}
+
 		constexpr bool operator==(const Transformation&) const = default;
 		void apply_from_to(GridConstSpan src, GridSpan dest) const noexcept;
 		void apply_in_place(GridSpan) const noexcept;
 		Transformation inverted() const noexcept;
 	private:
-		variant_t var_;
+		Order order_;
+		variant_t variant_;
 	};
 }
 #endif

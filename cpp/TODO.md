@@ -21,15 +21,16 @@
 
 ## Misc List
 
-- now that the batch function is deleted, the mutex for shared_rng is technically not needed for my personal use... hm. I think I should still keep it though...
+
+- TODO.high benchmark to see impact of always initializing `GridArr`. default constructor can currently leave the grid uninitialized (I think?). this is currently left as is for performance reasons, but I need to benchmark to see how justified doing this is.
+
+- create a custom BitsO2 class that attempts to use efficient x86 instructions when possible and falls back to something portable otherwise.
+  - Most of the time in this library, there will not need to be a whole lot of these. For scanning a grid row-major-wise, that's 1+O1+O2 of them. If one is needed for each house, that's 3*O2 of them. Not sure if there would be significant gains from customizing storage to be more compact than u64 granularity...
+  - Try to write clear and strict contracts to prevent having to handle excess bits (those that exist higher than the bits that are actually required).
+    - The bit flip things are particularly problematic. Currently only used as optimized ways to resetting bits. Could they be removed? The shift operators I think are also only there because I didn't add set/reset methods. Hopefully most of those things can be replaced with just set/reset.
+  - The header and implementation could actually be private. Would we want to expose it to users of the library?
 
 - change the size-variable versions of the library functions to use the visitor pattern? Need to create a common variant grid class.
-
-- using stochastic search:
-  - compare intrinsic statistical properties of grids generated (the things currently used in canon\_label).
-  - Consider deleting the backtracking implementation? Or just removing it from the library api (move headers to the src/ folder and don't compile the cpp files; maybe rename the bt/ folder to legacy\_bt/).
-    - The backtracking implementation could then just be used as a reference for a more complicated deductive reasoning solver when deductive reasoning can't further progress by deductive reasoning.
-      - The path would prioritize the parts of the puzzle that the deductive reasoning knows the least about (the parts that are likely to result in large chain of new possible deductions when filled).
 
 - Consider a batch api that gives the caller control over the logic for when to stop.
 

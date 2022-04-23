@@ -2,7 +2,7 @@
 #define HPP_OKIIDOKU__CONFIG__DEFAULTS
 // https://vector-of-bool.github.io/2020/10/04/lib-configuration.html
 #if __has_include(<okiidoku_compiled_orders.tweaks.h>)
-	#include <compiled_orders.tweaks.h>
+	#include <okiidoku_compiled_orders.tweaks.h>
 #endif
 
 // apologies for the macros. they're used to selectively instantiate templates,

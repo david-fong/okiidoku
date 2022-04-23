@@ -106,7 +106,7 @@ namespace okiidoku::mono {
 				if constexpr (use_int_) { return val_ == 0; } else { return val_.none(); }
 			}
 			[[nodiscard, gnu::pure]] This operator~() const noexcept {
-				return ~val_;
+				return ~val_; // TODO.high this doesn't reset the top excess bits
 			}
 
 			This& set(o2x_t at) noexcept {

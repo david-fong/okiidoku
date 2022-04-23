@@ -15,10 +15,6 @@ namespace okiidoku::mono {
 	namespace detail {
 		template<Order O, class V> requires(is_order_compiled(O)) struct GridlikeSpan;
 
-		// TODO.high benchmark to see impact of always initializing.
-		// default constructor can currently leave the grid uninitialized (I think?).
-		// this is currently left as is for performance reasons, but I need to benchmark
-		// to see how justified doing this is.
 		template<Order O, class V_>
 		requires(is_order_compiled(O))
 		class GridlikeArr final { // TODO.mid should this and the span struct be exported? currently all function body definitions are inline so it can be used header-only...
