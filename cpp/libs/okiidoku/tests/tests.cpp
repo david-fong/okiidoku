@@ -20,9 +20,10 @@
 // TODO.high it should probably just return right away if it encounters any failure.
 // returns the number of failures
 template<okiidoku::Order O>
-unsigned test_morph_O(SharedRng& shared_rng, const unsigned num_rounds) {
+unsigned test_morph(okiidoku::SharedRng& shared_rng, const unsigned num_rounds) {
 	using namespace okiidoku;
 	using namespace okiidoku::mono;
+	using T = traits<O>;
 	std::cout << "\n\ntesting for order " << O << std::endl;
 	// Note: if gen_path gets un-deprecated, assert that paths are valid.
 
@@ -30,23 +31,20 @@ unsigned test_morph_O(SharedRng& shared_rng, const unsigned num_rounds) {
 	for (unsigned round {0}; round < num_rounds; ) {
 		GridArr<O> gen_grid;
 		generate<O>(shared_rng, gen_grid);
-
-		GridArr<O> gen_grid;
-		g.write_to_(std::span(gen_grid));
 		morph::canonicalize<O>(gen_grid);
 
 		GridArr<O> canon_grid = gen_grid;
-		morph::scramble<O>(canon_grid);
+		morph::scramble<O>(canon_grid, shared_rng);
 		morph::canonicalize<O>(canon_grid);
 
 		if (gen_grid != canon_grid) {
 			++count_bad;
 			std::clog << "\n!bad\n";
 			const std::array<print_2d_grid_view, 2> palette_ {
-				[&](auto coord){ return gen_grid[coord]; },
-				[&](auto coord){ return canon_grid[coord]; },
+				[&](auto coord){ return gen_grid[static_cast<T::o4i_t>(coord)]; },
+				[&](auto coord){ return canon_grid[static_cast<T::o4i_t>(coord)]; },
 			};
-			print_2d(std::clog, O, palette_);
+			print_2d(std::clog, O, palette_, shared_rng);
 			// std::clog << "\n";
 			std::clog << "\n==========\n";
 		} else {
@@ -86,19 +84,19 @@ int main(const int argc, char const *const argv[]) {
 	<< "\n- ARG 2 [[ num rounds ]] : " << num_rounds
 	<< std::endl;
 
-	SharedRng shared_rng;
+	okiidoku::SharedRng shared_rng;
 	shared_rng.rng.seed(srand_key);
 
-	if (test_morph_O<3>(shared_rng, num_rounds)) {
+	if (test_morph<3>(shared_rng, num_rounds)) {
 		return 1;
 	}
-	if (test_morph_O<4>(shared_rng, num_rounds)) {
+	if (test_morph<4>(shared_rng, num_rounds)) {
 		// return 1;
 	}
-	if (test_morph_O<5>(shared_rng, num_rounds)) {
+	if (test_morph<5>(shared_rng, num_rounds)) {
 		// return 1;
 	}
-	if (test_morph_O<10>(shared_rng, num_rounds)) {
+	if (test_morph<10>(shared_rng, num_rounds)) {
 		// return 1;
 	}
 

@@ -73,7 +73,7 @@ namespace okiidoku::mono {
 
 
 namespace okiidoku::visitor {
-	GridArr::GridArr(const Order O) noexcept: order_{O}, variant_(std::monostate{}) {
+	GridArr::GridArr(const Order O) noexcept: order_{O}, variant_() {
 		switch (O) {
 		#define OKIIDOKU_FOR_COMPILED_O(O_) \
 		case O_: variant_.emplace<mono::GridArr<O_>>(); break;

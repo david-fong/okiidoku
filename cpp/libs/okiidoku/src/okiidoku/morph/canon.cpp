@@ -27,8 +27,6 @@ namespace okiidoku::mono::morph {
 	}
 
 	#define OKIIDOKU_FOR_COMPILED_O(O_) \
-		extern template typename Transformation<O_>::label_map_t canon_label<O_>(GridSpan<O_>); \
-		extern template Transformation<O_> canon_place<O_>(GridSpan<O_>); \
 		template Transformation<O_> canonicalize<O_>(GridSpan<O_>);
 	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 	#undef OKIIDOKU_FOR_COMPILED_O

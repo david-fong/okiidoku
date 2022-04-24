@@ -38,6 +38,7 @@ namespace okiidoku::mono {
 		/* Note: wherever you see `% .../\* -1 *\/`, that's a place where the algorithm
 		would still work if it wasn't commented out, but commeting it out makes it slower
 		because sometimes what would be excluded would have a faster path to validity. */
+
 		// Outer array has an entry for each line in the chute.
 		using chute_has_counts_t = std::array<std::array<typename T::o2i_smol_t, T::O2>, T::O1>;
 		// unsigned long long op_count = 0;
@@ -141,12 +142,8 @@ namespace okiidoku::visitor {
 
 	void generate(SharedRng& shared_rng, const GridSpan visitor_sink) {
 		return std::visit([&](auto& mono_sink) -> void {
-			using T = std::decay_t<decltype(mono_sink)>;
-			if constexpr (std::is_same_v<T, std::monostate>) {
-				return;
-			} else {
-				return mono::generate(shared_rng, mono_sink);
-			}
+			// using T = std::decay_t<decltype(mono_sink)>;
+			return mono::generate(shared_rng, mono_sink);
 		}, visitor_sink.get_variant());
 	}
 }

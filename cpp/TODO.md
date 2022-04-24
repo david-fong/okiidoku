@@ -21,6 +21,7 @@
 
 ## Misc List
 
+- for the visitor interface, if the user wanted to to compile multiple dynamic shared libraries with non-overlapping compiled orders and link them all into another program, wouldn't we need to use a different namespace for the visitor stuff for each of those libraries to avoid clashes / symbol interposition?
 
 - TODO.high benchmark to see impact of always initializing `GridArr`. default constructor can currently leave the grid uninitialized (I think?). this is currently left as is for performance reasons, but I need to benchmark to see how justified doing this is.
 

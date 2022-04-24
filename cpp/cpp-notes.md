@@ -6,9 +6,13 @@
 ## Snippets
 
 ```sh
-# do these in a cmake build folder
-cmake --build .
-nm -nCD src/okiidoku/libokiidoku.so   # view public symbols of the shared library sorted by address
+# (cd to the build folder)
+# view public (-D) de-mangled (-C) symbols of the shared library sorted by address (-n)
+nm -nCD libs/okiidoku/libokiidoku.so
+
+# (cd to the cpp folder)
+# view the grid translation unit with macros fully expanded
+g++ -E -Icpp/libs/okiidoku/include/ -Icpp/build/Release/libs/okiidoku/ cpp/libs/okiidoku/src/okiidoku/grid.cpp | less
 ```
 
 ## CMake Things

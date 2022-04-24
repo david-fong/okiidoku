@@ -5,6 +5,7 @@
 #include <okiidoku/order_templates.macros.hpp>
 #include <okiidoku_export.h>
 
+#include <array>
 #include <variant>
 
 namespace okiidoku {
@@ -35,26 +36,61 @@ namespace okiidoku {
 		#undef OKIIDOKU_FOR_COMPILED_O
 	};
 
-	template<MonoToVisitorAdaptor T>
-	using OrderVariantFor = std::variant<
-		std::monostate
-		#define OKIIDOKU_FOR_COMPILED_O(O_) , typename T::type<O_>
+	namespace detail {
+		/* This helper is here because there's no great way to correctly put commas
+		between compiled order template instantiation entries if I want there to be
+		no monostate entries in the variant. */
+		template<class Ignored, class... Args>
+		using VariantSkipFirstHelper = std::variant<Args...>;
+
+		template<MonoToVisitorAdaptor Adaptor>
+		using OrderVariantFor = VariantSkipFirstHelper<
+			void
+			#define OKIIDOKU_FOR_COMPILED_O(O_) , typename Adaptor::template type<O_>
+			OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
+			#undef OKIIDOKU_FOR_COMPILED_O
+		>;
+
+		template<Order Ignored, Order... Orders>
+		struct CompiledOrdersHelper final {
+			static constexpr auto make_arr() { return std::to_array({Orders...}); }
+		};
+	}
+	constexpr auto compiled_orders {detail::CompiledOrdersHelper<
+		Order{0}
+		#define OKIIDOKU_FOR_COMPILED_O(O_) , O_
 		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 		#undef OKIIDOKU_FOR_COMPILED_O
-	>;
+	>::make_arr()};
 
-	// namespace {
-	// 	template<template<Order> class Fn, class... ArgTypes, Order O>
-	// 	using VisitorResult = std::invoke_result_t<Fn<O>, ArgTypes...>;
-	// }
 
-	// template<template<Order O> class Fn, class... ArgTypes>
-	// // requires std::is_invocable_v<Fn<>, ArgTypes...>
-	// auto visitor_for_order_variant(
-	// 	Fn fn, Args... args
-	// ) {
-		
-	// 	return std::visit([](auto&&... lambda_args) -> auto { return fn(args...) }, args...);
-	// }
+	namespace visitor {
+
+		template<MonoToVisitorAdaptor Adaptor>
+		class OrderVariantBase {
+		public:
+			using variant_t = detail::OrderVariantFor<Adaptor>;
+
+			template<Order O> constexpr OrderVariantBase(typename Adaptor::type<O> mono_obj) noexcept: variant_(mono_obj) {}
+			[[nodiscard]] constexpr Order get_order() const noexcept { return compiled_orders[variant_.index()]; }
+			[[nodiscard]] const variant_t& get_variant() const noexcept { return variant_; }
+		private:
+			variant_t variant_;
+		};
+
+		// namespace {
+		// 	template<template<Order> class Fn, class... ArgTypes, Order O>
+		// 	using VisitorResult = std::invoke_result_t<Fn<O>, ArgTypes...>;
+		// }
+
+		// template<template<Order O> class Fn, class... ArgTypes>
+		// // requires std::is_invocable_v<Fn<>, ArgTypes...>
+		// auto visitor_for_order_variant(
+		// 	Fn fn, Args... args
+		// ) {
+			
+		// 	return std::visit([](auto&&... lambda_args) -> auto { return fn(args...) }, args...);
+		// }
+	}
 }
 #endif

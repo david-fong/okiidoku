@@ -30,5 +30,5 @@ target_link_libraries(okiidoku
 
 
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND BUILD_TESTING)
-	# add_subdirectory(tests) # TODO.high add this back once lib is ready
+	add_subdirectory(tests) # TODO.high add this back once lib is ready
 endif()

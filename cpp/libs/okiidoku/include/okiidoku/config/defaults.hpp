@@ -8,7 +8,8 @@
 // apologies for the macros. they're used to selectively instantiate templates,
 // which allow allocating frequently-used data on the stack instead of the heap.
 
-// TODO.high see if these can be changed to use the constexpr variable flavour of tweak config headers.
+// unfortunately we can't use the constexpr variable/function flavour of
+// tweak configs since they aren't accessible to the preprocessor.
 #ifndef OKIIDOKU_COMPILE_O2
 #define OKIIDOKU_COMPILE_O2 false
 #endif

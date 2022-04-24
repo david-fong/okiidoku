@@ -29,6 +29,8 @@ namespace okiidoku::mono {
 			using o4x_t = T::o4x_t;
 			using o4i_t = T::o4i_t;
 
+			[[nodiscard]] constexpr friend auto operator<=>(const GridlikeArr& a, const GridlikeArr& b) noexcept = default;
+
 			// contract: coord is in [0, O4). o4i_t only used for convenience of caller.
 			[[nodiscard]] constexpr       val_t& operator[](const o4i_t coord)       noexcept { return cells_[coord]; }
 			[[nodiscard]] constexpr const val_t& operator[](const o4i_t coord) const noexcept { return cells_[coord]; }
@@ -184,7 +186,7 @@ namespace okiidoku::visitor {
 	class GridArr final {
 	public:
 		using common_val_t = default_grid_val_t;
-		using variant_t = OrderVariantFor<detail::GridArrAdaptor>;
+		using variant_t = okiidoku::detail::OrderVariantFor<detail::GridArrAdaptor>;
 		friend GridSpan;
 		friend GridConstSpan;
 
@@ -192,7 +194,7 @@ namespace okiidoku::visitor {
 		explicit GridArr(Order O) noexcept;
 		template<Order O> constexpr GridArr(mono::GridArr<O> mono_arr): order_{O}, variant_(mono_arr) {}
 
-		[[nodiscard]] constexpr Order get_order() { return order_; }
+		[[nodiscard]] constexpr Order get_order() const noexcept { return order_; }
 
 		// contract: coord is in [0, O4).
 		[[nodiscard]]       common_val_t& operator[](const traits::o4i_t coord)       noexcept; /* { return cells_[coord]; } */
@@ -219,7 +221,7 @@ namespace okiidoku::visitor {
 		class GridSpan final {
 		public:
 			using common_val_t = default_grid_val_t;
-			using variant_t = OrderVariantFor<GridSpanAdaptor<is_const>>;
+			using variant_t = okiidoku::detail::OrderVariantFor<GridSpanAdaptor<is_const>>;
 			friend GridSpan<true>;
 
 			template<class G, std::enable_if_t<is_const || (std::is_const_v<G> == is_const), bool> = true>
@@ -229,9 +231,9 @@ namespace okiidoku::visitor {
 			// create const span from non-const span:
 			constexpr GridSpan(const GridSpan<false>& other) noexcept requires (is_const): order_(other.order_), variant_(other.variant_) {}
 
-			template<Order O> constexpr GridSpan(mono::GridSpan<O> mono_arr): order_{O}, variant_(mono_arr) {}
+			template<Order O> constexpr GridSpan(mono::GridSpan<O> mono_arr) noexcept: order_{O}, variant_(mono_arr) {}
 
-			[[nodiscard]] constexpr Order get_order() { return order_; }
+			[[nodiscard]] constexpr Order get_order() const noexcept { return order_; }
 
 			// contract: coord is in [0, O4).
 			[[nodiscard]] common_val_t& operator[](const traits::o4i_t coord) const noexcept; /* { return cells_[coord]; } */

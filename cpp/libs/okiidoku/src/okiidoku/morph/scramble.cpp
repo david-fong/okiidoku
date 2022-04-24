@@ -38,12 +38,8 @@ namespace okiidoku::visitor::morph {
 
 	Transformation scramble(const GridSpan visitor_grid, SharedRng& shared_rng) {
 		return std::visit([&](auto& mono_grid) -> Transformation {
-			using T = std::decay_t<decltype(mono_grid)>;
-			if constexpr (std::is_same_v<T, std::monostate>) {
-				return std::monostate;
-			} else {
-				return mono::morph::scramble(mono_grid, shared_rng);
-			}
+			// using T = std::decay_t<decltype(mono_grid)>;
+			return mono::morph::scramble(mono_grid, shared_rng);
 		}, visitor_grid.get_variant());
 	}
 }

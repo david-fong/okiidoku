@@ -33,7 +33,7 @@ namespace okiidoku::mono::morph {
 		constexpr bool operator==(const Transformation<O>&) const = default;
 		void apply_from_to(GridConstSpan<O> src, GridSpan<O> dest) const noexcept;
 		void apply_in_place(GridSpan<O>) const noexcept;
-		Transformation<O> inverted() const noexcept;
+		[[nodiscard, gnu::const]] Transformation<O> inverted() const noexcept;
 	};
 }
 
@@ -52,16 +52,18 @@ namespace okiidoku::visitor::morph {
 		//  variant fields and making some of the easy/obvious constructors? The order field could really
 		//  be a getter that maps the variant index to an order. also see if the monostate can be gotten
 		//  rid of... I currently don't have a good reason to be including a monostate option.
-		using variant_t = OrderVariantFor<detail::TransformationAdaptor>;
+		using variant_t = okiidoku::detail::OrderVariantFor<detail::TransformationAdaptor>;
 
 		// uses a std::monostate variant if the specified order is not compiled.
 		explicit Transformation(Order O) noexcept;
-		template<Order O> constexpr Transformation(mono::Transformation<O> mono_transform): order_{O}, variant_(mono_transform) {}
+		template<Order O> constexpr Transformation(mono::morph::Transformation<O> mono_transform) noexcept: order_{O}, variant_(mono_transform) {}
+
+		[[nodiscard]] constexpr Order get_order() const noexcept { return order_; }
 
 		constexpr bool operator==(const Transformation&) const = default;
 		void apply_from_to(GridConstSpan src, GridSpan dest) const noexcept;
 		void apply_in_place(GridSpan) const noexcept;
-		Transformation inverted() const noexcept;
+		[[nodiscard, gnu::const]] Transformation inverted() const noexcept;
 	private:
 		Order order_;
 		variant_t variant_;

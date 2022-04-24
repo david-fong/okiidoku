@@ -77,6 +77,11 @@
 #endif
 
 
+#define OKIIDOKU_ORDER_TEMPLATE_DEFAULT_SEPARATOR /**/
+// most usages of the templates instantiater will use the default separator,
+// so I decided to make those that don't be more verbose instead of vice versa.
+#define OKIIDOKU_ORDER_TEMPLATE_SEPARATOR OKIIDOKU_ORDER_TEMPLATE_DEFAULT_SEPARATOR
+
 // At usage sites, first #define OKIIDOKU_FOR_COMPILED_O and then #undef it right after.
 // Note: This _seems_ to violate pitchfork library spec:
 //  "A library should not offer the user controls for tweaking its public interface."...
