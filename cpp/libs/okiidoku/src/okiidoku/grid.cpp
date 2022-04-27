@@ -5,17 +5,13 @@
 
 namespace okiidoku::mono {
 
-	template<Order O>
-	requires(is_order_compiled(O))
-	GridArr<O> grid_arr_copy_from_span(GridConstSpan<O> src) noexcept {
-		GridArr<O> result;
-		std::copy(src.cells_.begin(), src.cells_.end(), result.cells_.begin());
-		return result;
+	template<Order O> requires(is_order_compiled(O))
+	void copy_grid(const GridConstSpan<O> src, const GridSpan<O> dest) noexcept {
+		std::copy(src.cells_.begin(), src.cells_.end(), dest.cells_.begin());
 	}
 
 
-	template<Order O>
-	requires(is_order_compiled(O))
+	template<Order O> requires(is_order_compiled(O))
 	bool grid_follows_rule(const GridConstSpan<O> grid) noexcept {
 		using T = traits<O>;
 		using o2i_t = T::o2i_t;
@@ -49,8 +45,7 @@ namespace okiidoku::mono {
 	}
 
 
-	template<Order O>
-	requires(is_order_compiled(O))
+	template<Order O> requires(is_order_compiled(O))
 	bool grid_is_filled(const GridConstSpan<O> grid) noexcept {
 		using T = traits<O>;
 		using o4i_t = T::o4i_t;
@@ -64,7 +59,7 @@ namespace okiidoku::mono {
 
 
 	#define OKIIDOKU_FOR_COMPILED_O(O_) \
-		template GridArr<O_> grid_arr_copy_from_span<O_>(GridConstSpan<O_>) noexcept; \
+		template void copy_grid<O_>(GridConstSpan<O_>, GridSpan<O_>) noexcept; \
 		template bool grid_follows_rule<O_>(GridConstSpan<O_>) noexcept; \
 		template bool grid_is_filled<O_>(GridConstSpan<O_>) noexcept;
 	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
@@ -73,12 +68,10 @@ namespace okiidoku::mono {
 
 
 namespace okiidoku::visitor {
-	GridArr::GridArr(const Order O) noexcept: order_{O}, variant_() {
-		switch (O) {
-		#define OKIIDOKU_FOR_COMPILED_O(O_) \
-		case O_: variant_.emplace<mono::GridArr<O_>>(); break;
-		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-		#undef OKIIDOKU_FOR_COMPILED_O
-		}
-	}
+
+	// template<class G, std::enable_if_t<is_const || (std::is_const_v<G> == is_const), bool> = true>
+	// requires std::is_same_v<std::decay_t<G>, GridArr>
+	// GridSpan::GridSpan(G& arr) noexcept: order_() {
+	// 	;
+	// }
 }

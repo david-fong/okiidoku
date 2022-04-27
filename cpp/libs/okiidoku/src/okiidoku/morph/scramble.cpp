@@ -6,8 +6,7 @@
 
 namespace okiidoku::mono::morph {
 
-	template<Order O>
-	requires (is_order_compiled(O))
+	template<Order O> requires(is_order_compiled(O))
 	Transformation<O> scramble(const GridSpan<O> grid, SharedRng& shared_rng) {
 		Transformation<O> t {};
 		{
@@ -37,9 +36,8 @@ namespace okiidoku::mono::morph {
 namespace okiidoku::visitor::morph {
 
 	Transformation scramble(const GridSpan visitor_grid, SharedRng& shared_rng) {
-		return std::visit([&](auto& mono_grid) -> Transformation {
-			// using T = std::decay_t<decltype(mono_grid)>;
-			return mono::morph::scramble(mono_grid, shared_rng);
-		}, visitor_grid.get_variant());
+		return std::visit([&](auto& mono_grid) {
+			return static_cast<Transformation>(mono::morph::scramble(mono_grid, shared_rng));
+		}, visitor_grid.get_mono_variant());
 	}
 }

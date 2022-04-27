@@ -19,7 +19,8 @@ namespace okiidoku::mono::morph {
 
 	template<Order O>
 	void Transformation<O>::apply_in_place(const GridSpan<O> grid) const noexcept {
-		auto og_grid {grid_arr_copy_from_span<O>(grid)};
+		GridArr<O> og_grid;
+		copy_grid<O>(grid, og_grid);
 		apply_from_to(og_grid, grid);
 	}
 
@@ -47,4 +48,39 @@ namespace okiidoku::mono::morph {
 		template struct Transformation<O_>;
 	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 	#undef OKIIDOKU_FOR_COMPILED_O
+}
+
+
+namespace okiidoku::visitor::morph {
+
+	void Transformation::apply_from_to(const GridConstSpan visitor_src_grid, const GridSpan visitor_dest_grid) const noexcept {
+		return std::visit([&]<Order O_transform, Order O_src, Order O_dest>(
+			const mono::morph::Transformation<O_transform>& mono_transform,
+			const mono::GridConstSpan<O_src>& mono_src_grid,
+			const mono::GridSpan<O_dest>& mono_dest_grid
+		) {
+			if constexpr (O_transform == O_src && O_transform == O_dest) {
+				return mono_transform.apply_from_to(mono_src_grid, mono_dest_grid);
+			}
+		}, this->get_mono_variant(), visitor_src_grid.get_mono_variant(), visitor_dest_grid.get_mono_variant());
+	}
+
+
+	void Transformation::apply_in_place(const GridSpan visitor_grid) const noexcept {
+		return std::visit([&]<Order O_transform, Order O_grid>(
+			const mono::morph::Transformation<O_transform>& mono_transform,
+			const mono::GridSpan<O_grid>& mono_grid
+		) {
+			if constexpr (O_transform == O_grid) {
+				return mono_transform.apply_in_place(mono_grid);
+			}
+		}, this->get_mono_variant(), visitor_grid.get_mono_variant());
+	}
+
+
+	Transformation Transformation::inverted() const noexcept {
+		return std::visit([&](const auto& mono_transform) {
+			return static_cast<Transformation>(mono_transform.inverted());
+		}, this->get_mono_variant());
+	}
 }

@@ -9,8 +9,7 @@
 namespace okiidoku::mono::morph {
 
 	// contract: span is a valid grid (though it may be incomplete)
-	template<Order O>
-	requires (is_order_compiled(O))
+	template<Order O> requires(is_order_compiled(O))
 	OKIIDOKU_EXPORT Transformation<O> scramble(GridSpan<O>, SharedRng&);
 }
 

@@ -43,13 +43,9 @@ namespace okiidoku::cli {
 		}
 		int new_order {};
 		const auto parse_result = std::from_chars(new_order_str.begin(), new_order_str.end(), new_order);
-		if (parse_result.ec == std::errc{}) {
-			switch (new_order) {
-			#define OKIIDOKU_FOR_COMPILED_O(O_) \
-				case O_: { order(new_order); return; }
-			OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-			#undef OKIIDOKU_FOR_COMPILED_O
-			}
+		if (parse_result.ec == std::errc{} && is_order_compiled(new_order)) {
+			order(new_order);
+			return;
 		}
 		std::cout
 			<< str::red.on << '"' << new_order_str << "\" is not a valid order.\n" << str::red.off

@@ -4,6 +4,7 @@
 #include <okiidoku_cli_utils/str.hpp>
 #include <okiidoku/fmt/print_2d.hpp>
 #include <okiidoku/morph/canon.hpp>
+#include <okiidoku/gen.hpp>
 #include <okiidoku/db/serdes.hpp>
 
 #include <iostream>   // cout, endl,
@@ -21,10 +22,9 @@ namespace okiidoku::cli {
 
 
 	Repl::Repl(const Order order_input, SharedRng& rng):
-		gen_(gen::ss::Generator::create(order_input)),
 		shared_rng_(rng)
 	{
-		const Order O {gen_->get_order()};
+		const Order O {order_input};
 		config_.order(O);
 		config_.verbosity(verbosity::E::quiet);
 	}
@@ -46,12 +46,12 @@ namespace okiidoku::cli {
 
 
 	bool Repl::run_command(const std::string_view cmd_line) {
-		size_t token_pos;
+		const auto token_pos {cmd_line.find(" ")};
 		// Very simple parsing: Assumes no leading spaces, and does not
 		// trim leading or trailing spaces from the arguments substring.
-		const std::string_view cmd_name = cmd_line.substr(0, token_pos = cmd_line.find(" "));
-		const std::string_view cmd_args = (token_pos == std::string_view::npos)
-			? "" :  cmd_line.substr(token_pos + 1, std::string_view::npos);
+		const std::string_view cmd_name {cmd_line.substr(0, token_pos)};
+		const std::string_view cmd_args {(token_pos == std::string_view::npos)
+			? "" :  cmd_line.substr(token_pos + 1, std::string_view::npos)};
 		const auto it {Command::enum_str_to_enum.find(cmd_name)};
 		if (it == Command::enum_str_to_enum.end()) {
 			// No command name was matched.
@@ -69,7 +69,7 @@ namespace okiidoku::cli {
 				break;
 			case E::quit:
 				return false;
-			case E::config_order:       config_.order(cmd_args); gen_ = gen::ss::Generator::create(config_.order()); break; // TODO.mid only call if order has changed
+			case E::config_order:       config_.order(cmd_args); break;
 			case E::config_print_level: config_.verbosity(cmd_args); break;
 			case E::config_auto_canonicalize: config_.canonicalize(cmd_args); break;
 			case E::gen_single:   gen_single(); break;
@@ -80,21 +80,19 @@ namespace okiidoku::cli {
 
 
 	void Repl::gen_single() {
+		using namespace okiidoku::visitor;
 		const clock_t clock_start {std::clock()};
-		gen_->operator()();
+		GridArr grid(config_.order());
+		generate(grid, shared_rng_);
 		const double processor_time = (static_cast<double>(std::clock() - clock_start)) / CLOCKS_PER_SEC;
 		{
-			using val_t = traits<O_MAX>::o2i_smol_t;
-			std::array<val_t, O4_MAX> grid;
-			gen_->write_to(std::span<val_t>(grid));
 			if (config_.canonicalize()) {
-				morph::canonicalize<val_t>(gen_->get_order(), std::span(grid)); // should we make a copy and print as a second grid image?
+				morph::canonicalize(grid); // should we make a copy and print as a second grid image?
 			}
-			
-			const auto palette_ = std::to_array({
-				print_2d_grid_view([&](auto coord){ return grid.at(coord); }),
-			}); // TODO.low can this just be passed inline to the printer?
-			print_2d(std::cout, config_.order(), palette_);
+			const auto palette_ {std::to_array({
+				print_2d_grid_view([&](auto coord){ return grid[coord]; }),
+			})}; // TODO.low can this just be passed inline to the printer?
+			print_2d(std::cout, config_.order(), palette_, shared_rng_);
 		}
 		std::cout << std::setprecision(4)
 			<< "\nprocessor time: " << processor_time << " seconds"
@@ -104,11 +102,11 @@ namespace okiidoku::cli {
 
 
 	void Repl::gen_multiple(unsigned long long stop_after) {
-		gen::ss::batch::Params params {.stop_after {stop_after}};
+		using namespace okiidoku::visitor;
 		const Timer timer{};
-		const auto batch_report {[&]{
+		{
 			std::filesystem::create_directories("gen");
-			std::string file_path = std::string{"gen/"} + std::to_string(config_.order()) + std::string{".bin"};
+			std::string file_path {std::string{} + "gen/" + std::to_string(config_.order()) + ".bin"};
 			std::cout << "output file path: " << file_path << std::endl;
 			std::ofstream of(file_path, std::ios::binary|std::ios::ate);
 			// TODO.high change this to use the db operations.
@@ -117,31 +115,28 @@ namespace okiidoku::cli {
 			// } catch (const std::ios_base::failure& fail) {
 			// 	std::cout << str::red.on << fail.what() << str::red.off << std::endl;
 			// }
-			return gen::ss::batch::batch(config_.order(), params,
-				[this, &of](const gen::ss::Generator& result) mutable {
-					using val_t = traits<O_MAX>::o2i_smol_t;
-					std::array<val_t, O4_MAX> grid;
-					result.write_to(std::span<val_t>(grid));
-					if (config_.canonicalize()) {
-						morph::canonicalize<val_t>(result.get_order(), std::span(grid));
-					}
-					db::serdes::print(of, result.get_order(), std::span<const val_t>(grid), true);
-					// TODO.mid print a progress bar
+			for (unsigned long long prog {0}; prog < stop_after; ++prog) {
+				GridArr grid(config_.order());
+				generate(grid, shared_rng_);
+				if (config_.canonicalize()) {
+					morph::canonicalize(grid);
 				}
-			);
-		}()};
-		const auto elapsed = timer.read_elapsed();
+				db::serdes::print_filled(of, grid);
+				// TODO.mid print a progress bar
+			}
+		}
+		const auto elapsed {timer.read_elapsed()};
 
-		static const std::string seconds_units = std::string{} + str::dim.on + " seconds (with I/O)" + str::dim.off;
+		static const std::string seconds_units {std::string{} + str::dim.on + " seconds (with I/O)" + str::dim.off};
 		std::cout << std::setprecision(4)
-			<< "\nstop after:      " << params.stop_after
-			<< "\nnum threads:     " << params.num_threads
+			<< "\nstop after:      " << stop_after
+			// << "\nnum threads:     " << params.num_threads
 			<< "\nprocess time:    " << elapsed.proc_seconds << seconds_units
 			<< "\nwall-clock time: " << elapsed.wall_seconds << seconds_units
 			// Note: the timer will not include canonicalization time if verbosity is quiet
 			;
 
-		if (batch_report.time_elapsed.wall_seconds > 10.0) {
+		if (elapsed.wall_seconds > 10.0) {
 			// Emit a beep sound if the trials took longer than ten processor seconds:
 			std::cout << '\a' << std::flush;
 		}
@@ -150,7 +145,7 @@ namespace okiidoku::cli {
 
 
 	void Repl::gen_multiple(const std::string_view stop_after_str) {
-		unsigned long long stop_by_value;
+		unsigned long long stop_by_value {};
 		const auto parse_result {std::from_chars(stop_after_str.begin(), stop_after_str.end(), stop_by_value)};
 		if (parse_result.ec == std::errc{}) {
 			if (stop_by_value <= 0) {

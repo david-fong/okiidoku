@@ -8,9 +8,8 @@
 
 namespace okiidoku::mono {
 
-	template<Order O>
-	requires (is_order_compiled(O))
-	void generate(SharedRng& shared_rng, const GridSpan<O> grid) {
+	template<Order O> requires(is_order_compiled(O))
+	void generate(const GridSpan<O> grid, SharedRng& shared_rng) {
 		using T = traits<O>;
 		// using val_t = T::o2x_smol_t;
 		using o2x_t = T::o2x_t;
@@ -132,7 +131,7 @@ namespace okiidoku::mono {
 
 
 	#define OKIIDOKU_FOR_COMPILED_O(O_) \
-		template void generate<O_>(SharedRng&, GridSpan<O_>);
+		template void generate<O_>(GridSpan<O_>, SharedRng&);
 	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 	#undef OKIIDOKU_FOR_COMPILED_O
 }
@@ -140,10 +139,10 @@ namespace okiidoku::mono {
 
 namespace okiidoku::visitor {
 
-	void generate(SharedRng& shared_rng, const GridSpan visitor_sink) {
-		return std::visit([&](auto& mono_sink) -> void {
+	void generate(const GridSpan visitor_sink, SharedRng& shared_rng) {
+		return std::visit([&](auto& mono_sink) {
 			// using T = std::decay_t<decltype(mono_sink)>;
-			return mono::generate(shared_rng, mono_sink);
-		}, visitor_sink.get_variant());
+			return mono::generate(mono_sink, shared_rng);
+		}, visitor_sink.get_mono_variant());
 	}
 }

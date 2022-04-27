@@ -43,8 +43,7 @@ namespace okiidoku::mono::morph {
 	}
 
 
-	template<Order O>
-	requires (is_order_compiled(O))
+	template<Order O> requires(is_order_compiled(O))
 	detail::GridlikeArr<O, Rel<O>> make_rel_table(const GridConstSpan<O> grid_in) {
 		using T = traits<O>;
 		using has_mask_t = T::o2_bits_smol;

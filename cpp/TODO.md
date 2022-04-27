@@ -32,12 +32,10 @@
   - The header and implementation could actually be private. Would we want to expose it to users of the library?
 
 - change the size-variable versions of the library functions to use the visitor pattern? Need to create a common variant grid class.
+  - [it is allowed to have template functions and non-template functions with the same name. here are the resultion rules](https://stackoverflow.com/a/16865452/11107541). Could this be used to put the algorithm functions under the same namespace (not in separate "mono" and "visitor" namespace)?
 
 - Consider a batch api that gives the caller control over the logic for when to stop.
 
-- try making Order an enum
-  - see if it can improve switch case cover detection (I think not. I already have some enum-switch-returns that the current gcc warning flags complain about if I don't have a default case).
-  - if this works out, make sure to update all the contract docs and remove relevant assertions.
 - move the emoji definitions out of the program binary and externalize as a configurable data read in at runtime?
 
 - what's this?
@@ -45,6 +43,7 @@
 
 - cmake things I can try out:
   - versioning my targets https://cmake.org/cmake/help/latest/prop_tgt/VERSION.html#prop_tgt:VERSION
+    - cppcon video <https://www.youtube.com/watch?v=m0DwB4OvDXk&ab_channel=CppCon&t=17m13s>
 
 - try adding shortcuts to std::views::iota(0,N) and use them instead of all the raw loops. see how it impacts performance. Don't know if compilers will still do all their optimizations (simd, unrolling, etc.).
 
@@ -87,19 +86,3 @@
   - give a red message when trying to continue and nothing is left to be found.
 - do I want to generate doxygen docs?
   - https://jothepro.github.io/doxygen-awesome-css/index.html
-
-## Interesting Questions for Further Research
-
-- Can the scramble-invariant property analysis of a grid be used to efficiently estimate the difficulty of a puzzle? I believe (and hope) there is potential that the answer is yes. If it is the case, how? And what would the accuracy of the estimation be (error distribution)?
-  - If so, could it be used to _create_ probably difficult puzzles?
-  - What is the relationship between number of hints and puzzle difficulty?
-  - What is the relationship between distribution of hints between houses/chutes and puzzle difficulty?
-  - What is the relationship between the relationship between hints and cell relationships and puzzle difficulty?
-
-- Over all possible minimal puzzles for a given order size, what is the minimum and maximum number of remaining clues?
-  - The minimum number of remaining clues is interesting since it will likely correspond to more difficult puzzles (?)
-  - THe maximum number of remaining clues is interesting since it will likely be the worst case for compressed storage.
-
-- Since the stochastic generator cannot deterministically traverse all possible outputs, could it be possible that at a certain point, it becomes easier to find more unique (non-equivalent to previously found) puzzles by continuing a backtracking generator from the output of a stochastic generator's output?
-
-- How does the average number of swaps / swaps-attempts required for the stochastic generator to generate a solution scale with size? what is the distribution of the observed complexity in terms of number of swaps / swap-attempts?

@@ -7,13 +7,12 @@
 
 namespace okiidoku::mono {
 
-	template<Order O>
-	requires (is_order_compiled(O))
-	OKIIDOKU_EXPORT [[gnu::hot]] void generate(SharedRng&, GridSpan<O> sink);
+	template<Order O> requires(is_order_compiled(O))
+	OKIIDOKU_EXPORT [[gnu::hot]] void generate(GridSpan<O> sink, SharedRng&);
 }
 
 namespace okiidoku::visitor {
 
-	OKIIDOKU_EXPORT void generate(SharedRng&, GridSpan sink);
+	OKIIDOKU_EXPORT void generate(GridSpan sink, SharedRng&);
 }
 #endif

@@ -33,7 +33,9 @@ set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 set(CMAKE_VISIBILITY_INLINES_HIDDEN TRUE)
 include(GNUInstallDirs)
 # https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/RPATH-handling
-set(CMAKE_INSTALL_RPATH "\$ORIGIN/../${CMAKE_INSTALL_LIBDIR}")
+if(NOT APPLE)
+	set(CMAKE_INSTALL_RPATH "\$ORIGIN/../${CMAKE_INSTALL_LIBDIR}")
+endif()
 
 # https://cliutils.gitlab.io/modern-cmake/chapters/testing.html
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
@@ -48,14 +50,14 @@ endif()
 add_subdirectory(libs/cli_utils)
 add_subdirectory(libs/okiidoku)
 
-# add_subdirectory(apps/cli) # TODO.high add this back once lib is ready
+add_subdirectory(apps/cli)
 # add_subdirectory(apps/web)
 
 add_subdirectory(tools)
 
 
 install(TARGETS
-	okiidoku #okiidoku_cli # TODO.high add this back once lib is ready
+	okiidoku okiidoku_cli
 	EXPORT okiidokuTargets
 	FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/okiidoku
 	INCLUDES         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/okiidoku

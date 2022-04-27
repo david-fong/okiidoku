@@ -135,7 +135,7 @@ class Gui {
 			this.solver?.gridElem.remove();
 			this.gen = new Generator(order, genPath);
 			this.host.grid.appendChild(this.solver.gridElem);
-			// TODO.impl select the solver's default genpath.
+			// TODO.mid select the solver's default genpath.
 			this.in.genPath;
 
 		} else {

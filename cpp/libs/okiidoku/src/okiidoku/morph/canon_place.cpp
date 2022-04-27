@@ -7,14 +7,13 @@
 #include <numeric>   // iota
 #include <cassert>
 
-namespace okiidoku::mono::morph {
+namespace okiidoku::mono::morph::detail {
 
 	template<Order O>
 	using line_map_t = Transformation<O>::line_map_t;
 
 
-	template<Order O>
-	requires (is_order_compiled(O))
+	template<Order O> requires(is_order_compiled(O))
 	class CanonPlace final {
 		using T = traits<O>;
 		using val_t = T::o2i_smol_t;
@@ -189,8 +188,7 @@ namespace okiidoku::mono::morph {
 	}
 
 
-	template<Order O>
-	requires (is_order_compiled(O))
+	template<Order O> requires(is_order_compiled(O))
 	Transformation<O> canon_place(const GridSpan<O> grid) {
 		return CanonPlace<O>::do_it(grid);
 	}

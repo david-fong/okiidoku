@@ -20,6 +20,7 @@ g++ -E -Icpp/libs/okiidoku/include/ -Icpp/build/Release/libs/okiidoku/ cpp/libs/
 - https://cmake.org/cmake/help/latest/guide/tutorial/index.html
 - https://cliutils.gitlab.io/modern-cmake/
 - https://github.com/lefticus/cpp_weekly_game_project
+- [cmake for dynamic library developers](https://www.youtube.com/watch?v=m0DwB4OvDXk)
 
 ## things I got wrong before
 
@@ -47,6 +48,8 @@ things I got wrong before which I couldn't understand based on gcc's error messa
   - this.Base->member
   - this->member
   - Base<ARGS>::member
+
+- [using/inheriting base-class constructor](https://en.cppreference.com/w/cpp/language/using_declaration#Inheriting_constructors)
 
 - on Shared Library symbol visibility
   - https://gcc.gnu.org/wiki/Visibility

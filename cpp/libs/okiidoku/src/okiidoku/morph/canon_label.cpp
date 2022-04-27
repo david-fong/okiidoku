@@ -8,14 +8,13 @@
 #include <compare>   // is_eq
 #include <cassert>
 
-namespace okiidoku::mono::morph {
+namespace okiidoku::mono::morph::detail {
 
 	template<Order O>
 	using label_map_t = Transformation<O>::label_map_t;
 
 
-	template<Order O>
-	requires (is_order_compiled(O))
+	template<Order O> requires(is_order_compiled(O))
 	class CanonLabel final {
 		using T = traits<O>;
 		using val_t = T::o2i_smol_t;
@@ -27,7 +26,7 @@ namespace okiidoku::mono::morph {
 
 	private:
 		struct State final {
-			detail::GridlikeArr<O, Rel<O>> rel_table;
+			mono::detail::GridlikeArr<O, Rel<O>> rel_table;
 			label_map_t<O> to_og;
 			TieLinks<O, 2> ties {};
 			explicit constexpr State(const GridConstSpan<O> grid) noexcept: rel_table{make_rel_table<O>(grid)} {
@@ -44,7 +43,7 @@ namespace okiidoku::mono::morph {
 
 	template<Order O>
 	void CanonLabel<O>::do_a_pass_(CanonLabel<O>::State& s) {
-		detail::GridlikeArr<O, Rel<O>> scratch;
+		mono::detail::GridlikeArr<O, Rel<O>> scratch;
 
 		label_map_t<O> to_tied;
 		std::iota(to_tied.begin(), to_tied.end(), 0);
@@ -125,8 +124,7 @@ namespace okiidoku::mono::morph {
 	}
 
 
-	template<Order O>
-	requires (is_order_compiled(O))
+	template<Order O> requires(is_order_compiled(O))
 	label_map_t<O> canon_label(const GridSpan<O> grid) {
 		return CanonLabel<O>::do_it(grid);
 	}

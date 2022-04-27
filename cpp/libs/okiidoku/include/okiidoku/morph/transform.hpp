@@ -7,8 +7,7 @@
 
 namespace okiidoku::mono::morph {
 
-	template<Order O>
-	requires(is_order_compiled(O))
+	template<Order O> requires(is_order_compiled(O))
 	struct OKIIDOKU_EXPORT Transformation final {
 		using T = traits<O>;
 		using mapping_t = T::o2x_smol_t;
@@ -42,31 +41,24 @@ namespace okiidoku::visitor::morph {
 
 	namespace detail {
 		struct TransformationAdaptor final {
+			static constexpr bool is_ref = false;
 			template<Order O>
 			using type = mono::morph::Transformation<O>;
 		};
 	}
 
-	struct OKIIDOKU_EXPORT Transformation final {
-		// TODO.high is there a way to make a base class that takes care of the things like the order and
-		//  variant fields and making some of the easy/obvious constructors? The order field could really
-		//  be a getter that maps the variant index to an order. also see if the monostate can be gotten
-		//  rid of... I currently don't have a good reason to be including a monostate option.
-		using variant_t = okiidoku::detail::OrderVariantFor<detail::TransformationAdaptor>;
+	struct OKIIDOKU_EXPORT Transformation final : public visitor::detail::ContainerBase<detail::TransformationAdaptor> {
+		using ContainerBase::ContainerBase;
 
-		// uses a std::monostate variant if the specified order is not compiled.
-		explicit Transformation(Order O) noexcept;
-		template<Order O> constexpr Transformation(mono::morph::Transformation<O> mono_transform) noexcept: order_{O}, variant_(mono_transform) {}
+		bool operator==(const Transformation&) const = default;
 
-		[[nodiscard]] constexpr Order get_order() const noexcept { return order_; }
-
-		constexpr bool operator==(const Transformation&) const = default;
+		// does nothing if any orders are not the same.
 		void apply_from_to(GridConstSpan src, GridSpan dest) const noexcept;
+
+		// does nothing if any orders are not the same.
 		void apply_in_place(GridSpan) const noexcept;
+
 		[[nodiscard, gnu::const]] Transformation inverted() const noexcept;
-	private:
-		Order order_;
-		variant_t variant_;
 	};
 }
 #endif

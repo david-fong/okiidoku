@@ -11,8 +11,7 @@ namespace okiidoku::mono::morph {
 	template<Order O>
 	using chute_imbalance_t = uint_smolN_t<std::bit_width(2*(O/2)*(O-(O/2)))>;
 
-	template<Order O>
-	requires (is_order_compiled(O))
+	template<Order O> requires(is_order_compiled(O))
 	struct OKIIDOKU_EXPORT Rel final {
 		using polar_count_lesser_t = uint_smolN_t<std::bit_width((O*O)/2)>;
 		typename traits<O>::o2i_smol_t count;
@@ -33,8 +32,7 @@ namespace okiidoku::mono::morph {
 	};
 
 	// contract: the span is a _complete_, valid grid.
-	template<Order O>
-	requires (is_order_compiled(O))
+	template<Order O> requires(is_order_compiled(O))
 	OKIIDOKU_EXPORT detail::GridlikeArr<O, Rel<O>> make_rel_table(GridConstSpan<O>);
 }
 #endif

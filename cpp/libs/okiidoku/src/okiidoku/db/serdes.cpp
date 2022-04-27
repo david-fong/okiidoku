@@ -3,14 +3,14 @@
 #include <iostream>
 #include <algorithm>
 #include <array>
-#include <bitset>
-#include <limits>
+// #include <bitset>
+#include <limits> // numeric_limits
 #include <cassert>
 
 namespace okiidoku::mono::db::serdes {
 
 	template<Order O>
-	OKIIDOKU_EXPORT void print_filled(std::ostream& os, const GridConstSpan<O> grid) {
+	void print_filled(std::ostream& os, const GridConstSpan<O> grid) {
 		using T = traits<O>;
 		using has_mask_t = T::o2_bits_smol;
 		using o2x_smol_t = T::o2x_smol_t;
@@ -92,7 +92,7 @@ namespace okiidoku::mono::db::serdes {
 
 
 	template<Order O>
-	OKIIDOKU_EXPORT void parse_filled(std::istream& is, const GridSpan<O> grid) {
+	void parse_filled(std::istream& is, const GridSpan<O> grid) {
 		(void)is; (void)grid; // TODO.high
 
 		// will need some bit parallel deposit for the deserialization
@@ -100,13 +100,13 @@ namespace okiidoku::mono::db::serdes {
 
 
 	template<Order O>
-	OKIIDOKU_EXPORT void print_puzzle(std::ostream& os, const GridConstSpan<O> grid) {
+	void print_puzzle(std::ostream& os, const GridConstSpan<O> grid) {
 		(void)os; (void)grid; // TODO.high
 	}
 
 
 	template<Order O>
-	OKIIDOKU_EXPORT void parse_puzzle(std::istream& is, const GridSpan<O> grid) {
+	void parse_puzzle(std::istream& is, const GridSpan<O> grid) {
 		(void)is; (void)grid; // TODO.high
 	}
 
@@ -118,4 +118,32 @@ namespace okiidoku::mono::db::serdes {
 		template void parse_puzzle<O_>(std::istream&, GridSpan<O_>);
 	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 	#undef OKIIDOKU_FOR_COMPILED_O
+}
+
+
+namespace okiidoku::visitor::db::serdes {
+
+	void print_filled(std::ostream& os, const GridConstSpan visitor_grid) {
+		return std::visit([&](auto& mono_grid) {
+			return mono::db::serdes::print_filled(os, mono_grid);
+		}, visitor_grid.get_mono_variant());
+	}
+
+	void parse_filled(std::istream& is, const GridSpan visitor_grid) {
+		return std::visit([&](auto& mono_grid) {
+			return mono::db::serdes::parse_filled(is, mono_grid);
+		}, visitor_grid.get_mono_variant());
+	}
+
+	void print_puzzle(std::ostream& os, const GridConstSpan visitor_grid) {
+		return std::visit([&](auto& mono_grid) {
+			return mono::db::serdes::print_puzzle(os, mono_grid);
+		}, visitor_grid.get_mono_variant());
+	}
+
+	void parse_puzzle(std::istream& is, const GridSpan visitor_grid) {
+		return std::visit([&](auto& mono_grid) {
+			return mono::db::serdes::parse_puzzle(is, mono_grid);
+		}, visitor_grid.get_mono_variant());
+	}
 }
