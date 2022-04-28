@@ -93,7 +93,7 @@ namespace okiidoku::mono {
 			chute_has_counts_t cols_has {{0}};
 			for (o2i_t row {0}; row < T::O2; ++row) {
 			for (o2i_t box_col {0}; box_col < T::O1; ++box_col) {
-				++(cols_has[box_col][grid.at(row, v_chute + box_col)]);
+				++(cols_has[box_col][grid.at(row, static_cast<o2i_t>(v_chute + box_col))]);
 			}}
 			int has_nots {0};
 			for (const auto& col_has : cols_has) {
@@ -105,8 +105,8 @@ namespace okiidoku::mono {
 				const auto b_col {static_cast<o2x_t>((rng_() - rng_.min()) % T::O1)};
 				if (a_col == b_col) [[unlikely]] { continue; }
 				const auto row {static_cast<o2x_t>((rng_() - rng_.min()) % (T::O1*(T::O1/* -1 */)))};
-				auto& a_cell = grid.at(row, v_chute + a_col);
-				auto& b_cell = grid.at(row, v_chute + b_col);
+				auto& a_cell = grid.at(row, static_cast<o2i_t>(v_chute + a_col));
+				auto& b_cell = grid.at(row, static_cast<o2i_t>(v_chute + b_col));
 				const int has_nots_diff {
 					(cols_has[a_col][a_cell] == 1 ?  1 : 0) +
 					(cols_has[a_col][b_cell] == 0 ? -1 : 0) +
@@ -141,7 +141,6 @@ namespace okiidoku::visitor {
 
 	void generate(const GridSpan visitor_sink, SharedRng& shared_rng) {
 		return std::visit([&](auto& mono_sink) {
-			// using T = std::decay_t<decltype(mono_sink)>;
 			return mono::generate(mono_sink, shared_rng);
 		}, visitor_sink.get_mono_variant());
 	}

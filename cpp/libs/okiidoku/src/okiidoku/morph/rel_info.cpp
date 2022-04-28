@@ -27,13 +27,13 @@ namespace okiidoku::mono::morph {
 			for (o1i_t i {0}; i < T::O1 - 1; ++i) {
 			for (o1i_t j = i + 1; j < T::O1; ++j) {
 				{ // boxrow
-					const val_t i_val = grid.at(line, atom+i), j_val = grid.at(line, atom+j);
+					const val_t i_val = grid.at(line, static_cast<o2i_t>(atom+i)), j_val = grid.at(line, static_cast<o2i_t>(atom+j));
 					const has_mask_t box_mask_bit = has_mask_t{1} << rmi_to_box<O>(line, atom);
 					masks.at(i_val,j_val).boxes_h |= box_mask_bit;
 					masks.at(j_val,i_val).boxes_h |= box_mask_bit;
 				}
 				{ // boxcol
-					const val_t i_val = grid.at(atom+i, line), j_val = grid.at(atom+j, line);
+					const val_t i_val = grid.at(static_cast<o2i_t>(atom+i), line), j_val = grid.at(static_cast<o2i_t>(atom+j), line);
 					const has_mask_t box_mask_bit = has_mask_t{1} << rmi_to_box<O>(atom, line);
 					masks.at(i_val,j_val).boxes_v |= box_mask_bit;
 					masks.at(j_val,i_val).boxes_v |= box_mask_bit;

@@ -117,7 +117,7 @@ namespace okiidoku::mono::morph::detail {
 		}();
 
 		for (o4i_t i {0}; i < traits<O>::O4; ++i) {
-			grid[i] = static_cast<val_t>(label_og_to_canon[grid[i]]);
+			grid.at_row_major(i) = static_cast<val_t>(label_og_to_canon[grid.at_row_major(i)]);
 		}
 		assert(grid_follows_rule<O>(grid));
 		return label_og_to_canon;

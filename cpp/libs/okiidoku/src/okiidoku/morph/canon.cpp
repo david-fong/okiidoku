@@ -36,7 +36,7 @@ namespace okiidoku::mono::morph {
 namespace okiidoku::visitor::morph {
 
 	Transformation canonicalize(const GridSpan visitor_grid) {
-		return std::visit([&](const auto& mono_grid) -> Transformation {
+		return std::visit([&](const auto& mono_grid) {
 			return static_cast<Transformation>(mono::morph::canonicalize(mono_grid));
 		}, visitor_grid.get_mono_variant());
 	}

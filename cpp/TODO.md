@@ -4,6 +4,7 @@
 
 - visitor pattern
 - see where template deduction guides can make the mono interfaces nicer to use
+  - draft up an examples folder for the lib with one for mono and one for visitor (will be very much like the tests)
 - test CMake config with different compilers (gcc, clang, apple-clang, MSVC) and try to fix configuration issues
 - draft database
 - refactor and improve canonicalization
@@ -32,7 +33,7 @@
   - The header and implementation could actually be private. Would we want to expose it to users of the library?
 
 - change the size-variable versions of the library functions to use the visitor pattern? Need to create a common variant grid class.
-  - [it is allowed to have template functions and non-template functions with the same name. here are the resultion rules](https://stackoverflow.com/a/16865452/11107541). Could this be used to put the algorithm functions under the same namespace (not in separate "mono" and "visitor" namespace)?
+  - [it is allowed in c++ to have template functions and non-template functions with the same name. here are the resulting rules](https://stackoverflow.com/a/16865452/11107541). Could this be used to put the algorithm functions under the same namespace (not in separate "mono" and "visitor" namespace)?
 
 - Consider a batch api that gives the caller control over the logic for when to stop.
 

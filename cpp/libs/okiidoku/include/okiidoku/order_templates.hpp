@@ -88,7 +88,8 @@ namespace okiidoku {
 				}
 			}
 
-			ContainerBase(const variant_t variant) noexcept: variant_(variant) {}
+			ContainerBase(const variant_t& variant) noexcept: variant_(variant) {}
+			ContainerBase(variant_t&& variant) noexcept: variant_(std::forward<variant_t>(variant)) {}
 
 			[[nodiscard, gnu::pure]] constexpr Order get_mono_order() const noexcept { return compiled_orders[variant_.index()]; }
 

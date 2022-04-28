@@ -23,7 +23,7 @@ template<okiidoku::Order O>
 unsigned test_morph(okiidoku::SharedRng& shared_rng, const unsigned num_rounds) {
 	using namespace okiidoku;
 	using namespace okiidoku::mono;
-	using T = traits<O>;
+	// using T = traits<O>;
 	std::cout << "\n\ntesting for order " << O << std::endl;
 	// Note: if gen_path gets un-deprecated, assert that paths are valid.
 
@@ -41,8 +41,8 @@ unsigned test_morph(okiidoku::SharedRng& shared_rng, const unsigned num_rounds) 
 			++count_bad;
 			std::clog << "\n!bad\n";
 			const std::array<print_2d_grid_view, 2> palette_ {
-				[&](auto coord){ return gen_grid[static_cast<T::o4i_t>(coord)]; },
-				[&](auto coord){ return canon_grid[static_cast<T::o4i_t>(coord)]; },
+				[&](auto coord){ return   gen_grid.at_row_major(coord); },
+				[&](auto coord){ return canon_grid.at_row_major(coord); },
 			};
 			print_2d(std::clog, O, palette_, shared_rng);
 			// std::clog << "\n";

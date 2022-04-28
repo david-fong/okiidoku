@@ -54,14 +54,17 @@ namespace okiidoku::mono {
 
 			[[nodiscard]] constexpr friend auto operator<=>(const GridlikeArr& a, const GridlikeArr& b) noexcept = default;
 
-			// TODO.high consider changing all these inline accessors to take any integral type. should be fine because of the contracts. once done, scan repo for resulting unnecessary static_casts and remove them.
-			// contract: coord is in [0, O4). o4i_t only used for convenience of caller.
-			[[nodiscard]] constexpr       val_t& operator[](const o4i_t coord)       noexcept { return cells_[coord]; }
-			[[nodiscard]] constexpr const val_t& operator[](const o4i_t coord) const noexcept { return cells_[coord]; }
+			// contract: coord is in [0, O4).
+			template<class T_coord> requires(Any_o4ix<O, T_coord>)
+			[[nodiscard]] constexpr       val_t& at_row_major(const T_coord coord)       noexcept { return cells_[coord]; }
+			template<class T_coord> requires(Any_o4ix<O, T_coord>)
+			[[nodiscard]] constexpr const val_t& at_row_major(const T_coord coord) const noexcept { return cells_[coord]; }
 
-			// contract: row and col are in [0, O2). o2i_t only used for convenience of caller.
-			[[nodiscard]] constexpr       val_t& at(const o2i_t row, const o2i_t col)       noexcept { return cells_[(T::O2*row)+col]; }
-			[[nodiscard]] constexpr const val_t& at(const o2i_t row, const o2i_t col) const noexcept { return cells_[(T::O2*row)+col]; }
+			// contract: row and col are in [0, O2).
+			template<class T_row, class T_col> requires(Any_o2ix<O, T_row> && Any_o2ix<O, T_col>)
+			[[nodiscard]] constexpr       val_t& at(const T_row row, const T_col col)       noexcept { return cells_[(T::O2*row)+col]; }
+			template<class T_row, class T_col> requires(Any_o2ix<O, T_row> && Any_o2ix<O, T_col>)
+			[[nodiscard]] constexpr const val_t& at(const T_row row, const T_col col) const noexcept { return cells_[(T::O2*row)+col]; }
 
 			// contract: row is in [0, O2). o2i_t only used for convenience of caller.
 			[[nodiscard]] constexpr std::span<val_t, T::O2> row_at(const o2i_t i) noexcept { return static_cast<std::span<val_t, T::O2>>(std::span(cells_).subspan(T::O2*i, T::O2)); }
@@ -100,11 +103,13 @@ namespace okiidoku::mono {
 			// create const span from non-const span:
 			constexpr GridlikeSpan(const GridlikeSpan<O, std::remove_const_t<V>>& other) noexcept requires std::is_const_v<V>: cells_(other.cells_) {}
 
-			// contract: coord is in [0, O4). o4i_t only used for convenience of caller.
-			[[nodiscard]] constexpr val_t& operator[](const o4i_t coord) const noexcept { return cells_[coord]; }
+			// contract: coord is in [0, O4).
+			template<class T_coord> requires(Any_o4ix<O, T_coord>)
+			[[nodiscard]] constexpr val_t& at_row_major(const T_coord coord) const noexcept { return cells_[coord]; }
 
-			// contract: row and col are in [0, O2). o2i_t only used for convenience of caller.
-			[[nodiscard]] constexpr val_t& at(const o2i_t row, const o2i_t col) const noexcept { return cells_[(T::O2*row)+col]; }
+			// contract: row and col are in [0, O2).
+			template<class T_row, class T_col> requires(Any_o2ix<O, T_row> && Any_o2ix<O, T_col>)
+			[[nodiscard]] constexpr val_t& at(const T_row row, const T_col col) const noexcept { return cells_[(T::O2*row)+col]; }
 
 			// contract: row is in [0, O2). o2i_t only used for convenience of caller.
 			[[nodiscard]] constexpr std::span<val_t, T::O2> row_at(const o2i_t i) const noexcept { return static_cast<std::span<V, T::O2>>(cells_.subspan(T::O2*i, T::O2)); }
@@ -189,21 +194,23 @@ namespace okiidoku::visitor {
 		};
 	}
 
-	class GridArr final : public detail::ContainerBase<detail::GridArrAdaptor> {
+	class OKIIDOKU_EXPORT GridArr final : public detail::ContainerBase<detail::GridArrAdaptor> {
 	public:
 		using ContainerBase::ContainerBase;
 		using common_val_t = default_grid_val_t;
-		// using variant_t = okiidoku::detail::OrderVariantFor<detail::GridArrAdaptor>;
-		// friend GridSpan;
-		// friend GridConstSpan;
+
+		// Note: the accessors here and in GridSpan are readonly right now, meaning
+		// library users can only use mutators defined inside the library. That seems
+		// fine. This was done because returning a reference to the mono data would
+		// require defining a custom reference type, and I'm currently not in the mood.
 
 		// contract: coord is in [0, O4).
-		[[nodiscard]]       common_val_t& operator[](const traits::o4i_t coord)       noexcept;
-		[[nodiscard]] const common_val_t& operator[](const traits::o4i_t coord) const noexcept;
+		// [[nodiscard]] common_val_t& at_row_major(const traits::o4i_t coord)       noexcept;
+		[[nodiscard]] common_val_t at_row_major(const traits::o4i_t coord) const noexcept;
 
 		// contract: row and col are in [0, O2).
-		[[nodiscard]]       common_val_t& at(const traits::o2i_t row, const traits::o2i_t col)       noexcept;
-		[[nodiscard]] const common_val_t& at(const traits::o2i_t row, const traits::o2i_t col) const noexcept;
+		// [[nodiscard]] common_val_t& at(const traits::o2i_t row, const traits::o2i_t col)       noexcept;
+		[[nodiscard]] common_val_t at(const traits::o2i_t row, const traits::o2i_t col) const noexcept;
 	};
 
 
@@ -217,34 +224,39 @@ namespace okiidoku::visitor {
 		};
 
 		template<bool is_const>
-		class GridSpan final : public visitor::detail::ContainerBase<GridSpanAdaptor<is_const>> {
+		class OKIIDOKU_EXPORT GridSpan final : public detail::ContainerBase<GridSpanAdaptor<is_const>> {
 			using variant_t = okiidoku::detail::OrderVariantFor<GridSpanAdaptor<is_const>>;
 		public:
 			using ContainerBase<GridSpanAdaptor<is_const>>::ContainerBase;
-			using common_val_t = std::conditional_t<is_const, const default_grid_val_t, default_grid_val_t>;
+			// using common_val_t = std::conditional_t<is_const, const default_grid_val_t, default_grid_val_t>; // not used because entry accessors are now readonly and return by value.
+			using common_val_t = default_grid_val_t;
 
-			// create const span from non-const span:
-			GridSpan(const GridSpan<false>& other) noexcept requires(is_const): GridSpan(static_cast<GridSpan<true>>(other)) {}
-			template<Order O> explicit GridSpan(mono::GridSpan<O> mono_span) noexcept requires(is_const): GridSpan(static_cast<mono::GridConstSpan<O>>(mono_span)) {}
-
-			GridSpan(GridArr& arr) noexcept requires(!is_const): GridSpan(std::visit(
-				[&]<Order O>(mono::GridArr<O>& mono_arr){ return variant_t(mono::GridSpan<O>(mono_arr)); },
-				arr.get_mono_variant()
-			)) {}
-			GridSpan(const GridArr& arr) noexcept requires(is_const): GridSpan(std::visit(
-				[&]<Order O>(const mono::GridArr<O>& mono_arr){ return variant_t(mono::GridConstSpan<O>(mono_arr)); },
-				arr.get_mono_variant()
-			)) {}
-			GridSpan(GridArr& arr) noexcept requires(is_const): GridSpan(std::visit(
-				[&]<Order O>(const mono::GridArr<O>& mono_arr){ return variant_t(mono::GridConstSpan<O>(mono_arr)); },
-				arr.get_mono_variant()
-			)) {}
+			GridSpan(const GridSpan& other) noexcept = default;
 
 			// contract: coord is in [0, O4).
-			[[nodiscard]] common_val_t& operator[](const traits::o4i_t coord) const noexcept;
+			[[nodiscard]] common_val_t at_row_major(const traits::o4i_t coord) const noexcept;
 
 			// contract: row and col are in [0, O2).
-			[[nodiscard]] common_val_t& at(const traits::o2i_t row, const traits::o2i_t col) const noexcept;
+			[[nodiscard]] common_val_t at(const traits::o2i_t row, const traits::o2i_t col) const noexcept;
+		};
+
+		// Note: could also have implemented these specializations with c++20 `requires` clauses.
+		// I had trouble understanding this whole templates-everywhere business. What I have now
+		// seems okay.
+		template<>
+		class OKIIDOKU_EXPORT GridSpan<true> final : public detail::ContainerBase<GridSpanAdaptor<true>>{
+			using ContainerBase<GridSpanAdaptor<true>>::ContainerBase;
+		public:
+			GridSpan(const GridSpan<false>& other) noexcept;
+			template<Order O> explicit GridSpan(mono::GridSpan<O> mono_span) noexcept;
+			GridSpan(const GridArr& arr) noexcept;
+		};
+
+		template<>
+		class OKIIDOKU_EXPORT GridSpan<false> final : public detail::ContainerBase<GridSpanAdaptor<false>>{
+			using ContainerBase<GridSpanAdaptor<false>>::ContainerBase;
+		public:
+			GridSpan(GridArr& arr) noexcept;
 		};
 	}
 }

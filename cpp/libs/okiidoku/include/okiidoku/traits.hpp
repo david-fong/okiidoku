@@ -8,7 +8,9 @@
 #include <bit>
 #include <bitset> // TODO.mid could this be excluded if (O_MAX <= 8) ?
 #include <cstdint>
+#include <limits> // numeric_limits<T>::max
 #include <type_traits>
+#include <concepts>
 
 namespace okiidoku {
 
@@ -151,6 +153,13 @@ namespace okiidoku::mono {
 		static constexpr o4i_t O3 {O*O*O};
 		static constexpr o4i_t O4 {O*O*O*O};
 	};
+
+	// TODO.low consider changing all these allow signed integers as well? Not sure what pros and cons are.
+	template<Order O, typename T>
+	concept Any_o4ix = std::unsigned_integral<T> && std::numeric_limits<T>::max() >= (traits<O>::O4-1);
+
+	template<Order O, typename T>
+	concept Any_o2ix = std::unsigned_integral<T> && std::numeric_limits<T>::max() >= (traits<O>::O2-1);
 
 
 	template<unsigned O>

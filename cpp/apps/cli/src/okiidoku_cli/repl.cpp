@@ -90,8 +90,8 @@ namespace okiidoku::cli {
 				morph::canonicalize(grid); // should we make a copy and print as a second grid image?
 			}
 			const auto palette_ {std::to_array({
-				print_2d_grid_view([&](auto coord){ return grid[coord]; }),
-			})}; // TODO.low can this just be passed inline to the printer?
+				print_2d_grid_view([&](auto coord){ return grid.at_row_major(coord); }),
+			})}; // TODO.low can this just be passed inline to the printer? if not, how can we make that possible?
 			print_2d(std::cout, config_.order(), palette_, shared_rng_);
 		}
 		std::cout << std::setprecision(4)
@@ -121,7 +121,7 @@ namespace okiidoku::cli {
 				if (config_.canonicalize()) {
 					morph::canonicalize(grid);
 				}
-				db::serdes::print_filled(of, grid);
+				// db::serdes::print_filled(of, grid); // TODO.high this is currently crashing with floating point error :/
 				// TODO.mid print a progress bar
 			}
 		}

@@ -51,10 +51,10 @@ namespace okiidoku::mono::db::serdes {
 			o2x_smol_t smol_val {([&]{
 				has_mask_t under_val_mask {0};
 				under_val_mask.flip();
-				under_val_mask >>= T::O2 - grid[i];
+				under_val_mask >>= T::O2 - grid.at_row_major(i);
 				return (cell_not_has & under_val_mask).count();
 			})()};
-			o2i_t smol_val_remaining {static_cast<o2i_t>(T::O2 - std::max({row_pop, col_pop, box_pop}))};
+			auto smol_val_remaining {static_cast<o2i_t>(T::O2 - std::max({row_pop, col_pop, box_pop}))};
 			assert(smol_val_remaining > 0);
 			assert(smol_val < smol_val_remaining);
 			while (smol_val_remaining > 1) {
@@ -77,7 +77,7 @@ namespace okiidoku::mono::db::serdes {
 
 			++row_pop; ++col_pop; ++box_pop; {
 				has_mask_t val_mask {0};
-				val_mask.set(static_cast<o2x_t>(grid[i]));
+				val_mask.set(static_cast<o2x_t>(grid.at_row_major(i)));
 				val_mask.flip();
 				rows_not_has[row]  &= val_mask;
 				cols_not_has[col]  &= val_mask;

@@ -22,7 +22,7 @@ namespace okiidoku {
 				) / 1'000'000),
 			};
 		}
-
+	private:
 		time_point wall_clock_start_ {std::chrono::steady_clock::now()};
 		std::clock_t proc_clock_start_ {std::clock()};
 	};
