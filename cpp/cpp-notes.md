@@ -17,9 +17,9 @@ g++ -E -Icpp/libs/okiidoku/include/ -Icpp/build/Release/libs/okiidoku/ cpp/libs/
 
 ## CMake Things
 
-- https://cmake.org/cmake/help/latest/guide/tutorial/index.html
+- [official tutorial](https://cmake.org/cmake/help/latest/guide/tutorial/index.html)
 - https://cliutils.gitlab.io/modern-cmake/
-- https://github.com/lefticus/cpp_weekly_game_project
+- [Jason Turner example/template](https://github.com/lefticus/cpp_weekly_game_project)
 - [cmake for dynamic library developers](https://www.youtube.com/watch?v=m0DwB4OvDXk)
 
 ## things I got wrong before
@@ -34,13 +34,21 @@ things I got wrong before which I couldn't understand based on gcc's error messa
 
 ## more
 
-- [file open mode shorthands](https://en.cppreference.com/w/cpp/io/basic_filebuf/open)
-
-- [modern iterators](https://www.internalpointers.com/post/writing-custom-iterators-modern-cpp)
+- on Shared Library symbol visibility
+  - https://gcc.gnu.org/wiki/Visibility
+  - https://www.cs.miami.edu/home/burt/learning/Csc521.091/docs/dsohowto.pdf
 
 - on Template instantiation
   - https://gcc.gnu.org/onlinedocs/gcc/Template-Instantiation.html
   - https://arne-mertz.de/2019/02/extern-template-reduce-compile-times/
+
+- [file open mode shorthands](https://en.cppreference.com/w/cpp/io/basic_filebuf/open)
+
+- [modern iterators](https://www.internalpointers.com/post/writing-custom-iterators-modern-cpp)
+
+- [using/inheriting base-class constructor](https://en.cppreference.com/w/cpp/language/using_declaration#Inheriting_constructors)
+
+- [non-deduced contexts and template-argument deduction](https://en.cppreference.com/w/cpp/language/template_argument_deduction#Non-deduced_contexts)
 
 - I can specify base-class members like:
   - Derived::Base::member
@@ -49,13 +57,9 @@ things I got wrong before which I couldn't understand based on gcc's error messa
   - this->member
   - Base<ARGS>::member
 
-- [using/inheriting base-class constructor](https://en.cppreference.com/w/cpp/language/using_declaration#Inheriting_constructors)
-
-- on Shared Library symbol visibility
-  - https://gcc.gnu.org/wiki/Visibility
-  - https://www.cs.miami.edu/home/burt/learning/Csc521.091/docs/dsohowto.pdf
-
 - Tricky business with globals in static libraries being inlined into multiple DSOs / executables linked together: [cppcon talk](https://www.youtube.com/watch?v=xVT1y0xWgww&ab_channel=CppCon&t=4m25s). Try to avoid this scenario by avoiding globals, but if need be, make sure DSOs are specified first in the link order. See the questions section at t=33m19s for more info.
+
+- [How to write well-behaved value-wrappers](https://www.youtube.com/watch?v=J4A2B9eexiw&ab_channel=CppCon).
 
 If the library needs to use conan in the future, add this to the top of the readme instructions for repo setup:
 

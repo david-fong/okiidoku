@@ -12,6 +12,9 @@ namespace okiidoku::mono::morph {
 	// the solution, and then apply the returned transformation to the puzzle.
 	template<Order O> requires(is_order_compiled(O))
 	OKIIDOKU_EXPORT Transformation<O> canonicalize(GridSpan<O>);
+
+	// template-deducing auto-to-span-converting convenience wrapper
+	auto canonicalize(auto& grid) { return canonicalize(GridSpan(grid)); }
 }
 
 

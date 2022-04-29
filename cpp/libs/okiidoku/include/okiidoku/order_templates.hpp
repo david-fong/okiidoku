@@ -19,6 +19,19 @@ namespace okiidoku {
 		return false;
 	}
 
+	namespace detail {
+		template<Order Ignored, Order... Orders>
+		struct CompiledOrdersHelper final {
+			static constexpr auto make_arr() { return std::to_array({Orders...}); }
+		};
+	}
+	constexpr auto compiled_orders {detail::CompiledOrdersHelper<
+		/* ignored: */Order{0}
+		#define OKIIDOKU_FOR_COMPILED_O(O_) , O_
+		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
+		#undef OKIIDOKU_FOR_COMPILED_O
+	>::make_arr()};
+
 	constexpr Order largest_compiled_order {[]{
 		Order largest {0};
 		#define OKIIDOKU_FOR_COMPILED_O(O_) largest = O_;
@@ -28,18 +41,17 @@ namespace okiidoku {
 	}()};
 
 
-	// exists so that OrderVariantFor can use container templates that have other
-	// template parameters other than just the order.
-	template<typename T>
-	concept MonoToVisitorAdaptor = requires() {
-		std::is_same_v<decltype(T::is_ref), bool>;
-		#define OKIIDOKU_FOR_COMPILED_O(O_) typename T::template type<O_>;
-		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-		#undef OKIIDOKU_FOR_COMPILED_O
-	};
+	namespace visitor::detail {
+		// exists so that OrderVariantFor can use container templates that have other
+		// template parameters other than just the order.
+		template<typename T>
+		concept MonoToVisitorAdaptor = requires() {
+			std::is_same_v<decltype(T::is_ref), bool>;
+			#define OKIIDOKU_FOR_COMPILED_O(O_) typename T::template type<O_>;
+			OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
+			#undef OKIIDOKU_FOR_COMPILED_O
+		};
 
-
-	namespace detail {
 		/* This helper is here because there's no great way to correctly put commas
 		between compiled order template instantiation entries if I want there to be
 		no monostate entries in the variant. */
@@ -54,25 +66,11 @@ namespace okiidoku {
 			#undef OKIIDOKU_FOR_COMPILED_O
 		>;
 
-		template<Order Ignored, Order... Orders>
-		struct CompiledOrdersHelper final {
-			static constexpr auto make_arr() { return std::to_array({Orders...}); }
-		};
-	}
-	constexpr auto compiled_orders {detail::CompiledOrdersHelper<
-		/* ignored: */Order{0}
-		#define OKIIDOKU_FOR_COMPILED_O(O_) , O_
-		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-		#undef OKIIDOKU_FOR_COMPILED_O
-	>::make_arr()};
-
-
-	namespace visitor::detail {
 
 		template<MonoToVisitorAdaptor Adaptor>
 		class ContainerBase {
 		public:
-			using variant_t = okiidoku::detail::OrderVariantFor<Adaptor>;
+			using variant_t = OrderVariantFor<Adaptor>;
 
 			// copy-from-mono constructor
 			template<Order O>
@@ -95,6 +93,7 @@ namespace okiidoku {
 
 			// Though public, you shouldn't need to use this. The rest of the visitor
 			// interface of the library wraps operations around it with nicer syntax.
+			// TODO.high.asap see if the library ELF gets smaller if these are made non-exported. or see if there are things in the ELF that can be forced to be hidden.
 			[[nodiscard, gnu::pure]]       variant_t& get_mono_variant()       noexcept { return variant_; }
 			[[nodiscard, gnu::pure]] const variant_t& get_mono_variant() const noexcept { return variant_; }
 		private:

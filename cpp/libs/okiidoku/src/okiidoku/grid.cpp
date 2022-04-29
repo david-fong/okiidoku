@@ -6,12 +6,6 @@
 namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
-	void copy_grid(const GridConstSpan<O> src, const GridSpan<O> dest) noexcept {
-		std::copy(src.cells_.begin(), src.cells_.end(), dest.cells_.begin());
-	}
-
-
-	template<Order O> requires(is_order_compiled(O))
 	bool grid_follows_rule(const GridConstSpan<O> grid) noexcept {
 		using T = traits<O>;
 		using o2i_t = T::o2i_t;
@@ -44,6 +38,8 @@ namespace okiidoku::mono {
 		return true;
 	}
 
+	bool grid_follows_rule(const auto& grid) noexcept { return grid_follows_rule(GridConstSpan(grid)); }
+
 
 	template<Order O> requires(is_order_compiled(O))
 	bool grid_is_filled(const GridConstSpan<O> grid) noexcept {
@@ -57,11 +53,33 @@ namespace okiidoku::mono {
 		return true;
 	}
 
+	bool grid_is_filled(const auto& grid) noexcept { return grid_is_filled(GridConstSpan(grid)); }
+
+
+	template<Order O> requires(is_order_compiled(O))
+	void copy_grid(const GridConstSpan<O> src, const GridSpan<O> dest) noexcept {
+		std::copy(src.cells_.begin(), src.cells_.end(), dest.cells_.begin());
+	}
+
+	void copy_grid(const auto& src, auto& dest) noexcept { return copy_grid(GridConstSpan(src), GridSpan(dest)); }
+
+
+	template<Order O> requires(is_order_compiled(O))
+	OKIIDOKU_EXPORT std::strong_ordering cmp_grids(const GridConstSpan<O> a, const GridConstSpan<O> b) noexcept {
+		return std::lexicographical_compare_three_way(
+			a.cells_.begin(), a.cells_.end(),
+			b.cells_.begin(), b.cells_.end()
+		);
+	}
+
+	std::strong_ordering cmp_grids(const auto& a, const auto& b) noexcept { return cmp_grids(GridConstSpan(a), GridConstSpan(b)); }
+
 
 	#define OKIIDOKU_FOR_COMPILED_O(O_) \
-		template void copy_grid<O_>(GridConstSpan<O_>, GridSpan<O_>) noexcept; \
 		template bool grid_follows_rule<O_>(GridConstSpan<O_>) noexcept; \
-		template bool grid_is_filled<O_>(GridConstSpan<O_>) noexcept;
+		template bool grid_is_filled<O_>(GridConstSpan<O_>) noexcept; \
+		template void copy_grid<O_>(GridConstSpan<O_>, GridSpan<O_>) noexcept; \
+		template std::strong_ordering cmp_grids<O_>(GridConstSpan<O_>, GridConstSpan<O_>) noexcept;
 	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 	#undef OKIIDOKU_FOR_COMPILED_O
 }
@@ -69,17 +87,44 @@ namespace okiidoku::mono {
 
 namespace okiidoku::visitor {
 
-	bool grid_follows_rule(const GridConstSpan grid) noexcept {
+	bool grid_follows_rule(const GridConstSpan visitor_grid) noexcept {
 		return std::visit([&](auto& mono_grid){
 			return mono::grid_follows_rule(mono_grid);
-		}, grid.get_mono_variant());
+		}, visitor_grid.get_mono_variant());
 	}
 
-	bool grid_is_filled(const GridConstSpan grid) noexcept {
+	bool grid_is_filled(const GridConstSpan visitor_grid) noexcept {
 		return std::visit([&](auto& mono_grid){
 			return mono::grid_is_filled(mono_grid);
-		}, grid.get_mono_variant());
+		}, visitor_grid.get_mono_variant());
 	}
+
+	void copy_grid(const GridConstSpan visitor_src, const GridSpan visitor_dest) noexcept {
+		return std::visit([&]<Order O_src, Order O_dest>(
+			const mono::GridConstSpan<O_src>& mono_src,
+			const mono::GridSpan<O_dest>& mono_dest
+		){
+			if constexpr (O_src == O_dest) {
+				return mono::copy_grid(mono_src, mono_dest);
+			} else {
+				// TODO.high.asap what to do?
+			}
+		}, visitor_src.get_mono_variant(), visitor_dest.get_mono_variant());
+	}
+
+	std::strong_ordering cmp_grids(const GridConstSpan visitor_a, const GridConstSpan visitor_b) noexcept {
+		return std::visit([&]<Order O_a, Order O_b>(
+			const mono::GridConstSpan<O_a>& mono_a,
+			const mono::GridConstSpan<O_b>& mono_b
+		){
+			if constexpr (O_a != O_b) {
+				return O_a <=> O_b;
+			} else {
+				return mono::cmp_grids(mono_a, mono_b);
+			}
+		}, visitor_a.get_mono_variant(), visitor_b.get_mono_variant());
+	}
+
 
 	GridArr::common_val_t GridArr::at_row_major(const traits::o4i_t coord) const noexcept {
 		return std::visit([&](auto& mono_this){
@@ -92,45 +137,45 @@ namespace okiidoku::visitor {
 			return common_val_t{mono_this.at(row, col)};
 		}, get_mono_variant());
 	}
+}
+namespace okiidoku::visitor::detail {
 
-	namespace detail {
-		GridSpan<true>::GridSpan(const GridSpan<false>& other) noexcept: GridSpan(static_cast<const GridSpan<true>&>(other)) {}
+	GridSpan<true>::GridSpan(const GridSpan<false>& other) noexcept: GridSpan(static_cast<const GridSpan<true>&>(other)) {}
 
-		#define OKIIDOKU_FOR_COMPILED_O(O_) \
-			template<> GridSpan<true>::GridSpan<O_>(const mono::GridSpan<O_> mono_span) noexcept: GridSpan<true>(static_cast<mono::GridConstSpan<O_>>(mono_span)) {}
-		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-		#undef OKIIDOKU_FOR_COMPILED_O
+	#define OKIIDOKU_FOR_COMPILED_O(O_) \
+		template<> GridSpan<true>::GridSpan<O_>(const mono::GridSpan<O_> mono_span) noexcept: GridSpan<true>(static_cast<mono::GridConstSpan<O_>>(mono_span)) {}
+	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
+	#undef OKIIDOKU_FOR_COMPILED_O
 
-		GridSpan<false>::GridSpan(GridArr& arr) noexcept: GridSpan(std::visit(
-			[&]<Order O>(mono::GridArr<O>& mono_arr){
-				return variant_t(mono::GridSpan<O>(mono_arr));
-			},
-			arr.get_mono_variant()
-		)) {}
+	GridSpan<false>::GridSpan(GridArr& arr) noexcept: GridSpan(std::visit(
+		[&]<Order O>(mono::GridArr<O>& mono_arr){
+			return variant_t(mono::GridSpan<O>(mono_arr));
+		},
+		arr.get_mono_variant()
+	)) {}
 
-		GridSpan<true>::GridSpan(const GridArr& arr) noexcept: GridSpan(std::visit(
-			[&]<Order O>(const mono::GridArr<O>& mono_arr){
-				return variant_t(mono::GridConstSpan<O>(mono_arr));
-			},
-			arr.get_mono_variant()
-		)) {}
+	GridSpan<true>::GridSpan(const GridArr& arr) noexcept: GridSpan(std::visit(
+		[&]<Order O>(const mono::GridArr<O>& mono_arr){
+			return variant_t(mono::GridConstSpan<O>(mono_arr));
+		},
+		arr.get_mono_variant()
+	)) {}
 
-		template<bool is_const>
-		GridSpan<is_const>::common_val_t GridSpan<is_const>::at_row_major(const traits::o4i_t coord) const noexcept {
-			return std::visit([&](auto& mono_this){
-				return common_val_t{mono_this.at_row_major(coord)};
-			}, this->get_mono_variant());
-		}
-
-		template<bool is_const>
-		GridSpan<is_const>::common_val_t GridSpan<is_const>::at(const traits::o2i_t row, const traits::o2i_t col) const noexcept {
-			return std::visit([&](auto& mono_this){
-				return common_val_t{mono_this.at(row, col)};
-			}, this->get_mono_variant());
-		}
-
-
-		template class GridSpan<false>;
-		template class GridSpan<true>;
+	template<bool is_const>
+	GridSpan<is_const>::common_val_t GridSpan<is_const>::at_row_major(const traits::o4i_t coord) const noexcept {
+		return std::visit([&](auto& mono_this){
+			return common_val_t{mono_this.at_row_major(coord)};
+		}, this->get_mono_variant());
 	}
+
+	template<bool is_const>
+	GridSpan<is_const>::common_val_t GridSpan<is_const>::at(const traits::o2i_t row, const traits::o2i_t col) const noexcept {
+		return std::visit([&](auto& mono_this){
+			return common_val_t{mono_this.at(row, col)};
+		}, this->get_mono_variant());
+	}
+
+
+	template class GridSpan<false>;
+	template class GridSpan<true>;
 }

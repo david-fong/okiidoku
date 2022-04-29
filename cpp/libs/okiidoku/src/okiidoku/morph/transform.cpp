@@ -53,16 +53,17 @@ namespace okiidoku::mono::morph {
 
 namespace okiidoku::visitor::morph {
 
-	void Transformation::apply_from_to(const GridConstSpan visitor_src_grid, const GridSpan visitor_dest_grid) const noexcept {
+	void Transformation::apply_from_to(const GridConstSpan visitor_src, const GridSpan visitor_dest) const noexcept {
 		return std::visit([&]<Order O_transform, Order O_src, Order O_dest>(
 			const mono::morph::Transformation<O_transform>& mono_transform,
-			const mono::GridConstSpan<O_src>& mono_src_grid,
-			const mono::GridSpan<O_dest>& mono_dest_grid
+			const mono::GridConstSpan<O_src>& mono_src,
+			const mono::GridSpan<O_dest>& mono_dest
 		) {
+			// TODO.high.asap consider changing this to convert dest if order is not same. if so, state this in a doc comment in the header file.
 			if constexpr (O_transform == O_src && O_transform == O_dest) {
-				return mono_transform.apply_from_to(mono_src_grid, mono_dest_grid);
+				return mono_transform.apply_from_to(mono_src, mono_dest);
 			}
-		}, this->get_mono_variant(), visitor_src_grid.get_mono_variant(), visitor_dest_grid.get_mono_variant());
+		}, this->get_mono_variant(), visitor_src.get_mono_variant(), visitor_dest.get_mono_variant());
 	}
 
 

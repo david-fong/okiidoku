@@ -19,6 +19,7 @@
 		"chrono",
 		"cmake",
 		"cout",
+		"CTAD",
 		"ctzll",
 		"deserialization",
 		"desmos",

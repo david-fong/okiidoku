@@ -22,12 +22,15 @@ target_include_directories(okiidoku
 	PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
 )
 
-find_package(Threads REQUIRED)
-target_link_libraries(okiidoku
+# find_package(Threads REQUIRED)
+# target_link_libraries(okiidoku
 	# PRIVATE CONAN_PKG::range-v3
-	PRIVATE Threads::Threads
-)
+	# PRIVATE Threads::Threads
+# )
 
+if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+	add_subdirectory(examples)
+endif()
 
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND BUILD_TESTING)
 	add_subdirectory(tests)

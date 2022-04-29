@@ -2,18 +2,16 @@
 
 #include <cassert>
 
+namespace okiidoku::mono::morph::detail {
+	// contract: the span is a _complete_, valid grid.
+	template<Order O> requires(is_order_compiled(O))
+	Transformation<O>::label_map_t canon_label(GridSpan<O>);
+
+	// contract: the span is a _complete_, valid grid.
+	template<Order O> requires(is_order_compiled(O))
+	Transformation<O> canon_place(GridSpan<O>);
+}
 namespace okiidoku::mono::morph {
-
-	namespace detail {
-		// contract: the span is a _complete_, valid grid.
-		template<Order O> requires(is_order_compiled(O))
-		Transformation<O>::label_map_t canon_label(GridSpan<O>);
-
-		// contract: the span is a _complete_, valid grid.
-		template<Order O> requires(is_order_compiled(O))
-		Transformation<O> canon_place(GridSpan<O>);
-	}
-
 
 	template<Order O> requires(is_order_compiled(O))
 	Transformation<O> canonicalize(const GridSpan<O> og_grid) {

@@ -33,21 +33,22 @@ namespace okiidoku::mono::morph {
 		void apply_from_to(GridConstSpan<O> src, GridSpan<O> dest) const noexcept;
 		void apply_in_place(GridSpan<O>) const noexcept;
 		[[nodiscard, gnu::const]] Transformation<O> inverted() const noexcept;
+
+		// TODO.high.asap do we need to make auto wrappers for the above apply_... methods?
 	};
 }
 
 
+namespace okiidoku::visitor::detail::morph {
+	struct TransformationAdaptor final {
+		static constexpr bool is_ref = false;
+		template<Order O>
+		using type = mono::morph::Transformation<O>;
+	};
+}
 namespace okiidoku::visitor::morph {
 
-	namespace detail {
-		struct TransformationAdaptor final {
-			static constexpr bool is_ref = false;
-			template<Order O>
-			using type = mono::morph::Transformation<O>;
-		};
-	}
-
-	struct OKIIDOKU_EXPORT Transformation final : public visitor::detail::ContainerBase<detail::TransformationAdaptor> {
+	struct OKIIDOKU_EXPORT Transformation final : public detail::ContainerBase<detail::morph::TransformationAdaptor> {
 		using ContainerBase::ContainerBase;
 
 		bool operator==(const Transformation&) const = default;

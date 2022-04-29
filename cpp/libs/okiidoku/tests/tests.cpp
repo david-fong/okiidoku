@@ -1,16 +1,15 @@
-#include <okiidoku/fmt/print_2d.hpp>
-// #include <okiidoku/gen/batch.hpp>
-#include <okiidoku/gen.hpp>
 #include <okiidoku/morph/canon.hpp>
 #include <okiidoku/morph/scramble.hpp>
 #include <okiidoku/db/serdes.hpp>
+#include <okiidoku/fmt/print_2d.hpp>
+#include <okiidoku/gen.hpp>
 #include <okiidoku/grid.hpp>
 #include <okiidoku/shared_rng.hpp>
 
 #include <okiidoku_cli_utils/console_setup.hpp>
 
 #include <iostream>  // cout,
-#include <string>
+#include <string_view>
 #include <random>    // random_device,
 #include <array>
 
@@ -33,7 +32,7 @@ unsigned test_morph(okiidoku::SharedRng& shared_rng, const unsigned num_rounds) 
 		generate<O>(gen_grid, shared_rng);
 		morph::canonicalize<O>(gen_grid);
 
-		GridArr<O> canon_grid = gen_grid;
+		GridArr<O> canon_grid {gen_grid};
 		morph::scramble<O>(canon_grid, shared_rng);
 		morph::canonicalize<O>(canon_grid);
 
@@ -72,7 +71,7 @@ int main(const int argc, char const *const argv[]) {
 	std::uint_fast64_t srand_key;  // 1
 	unsigned int num_rounds; // 2
 
-	if (argc > 1 && !std::string(argv[1]).empty()) {
+	if (argc > 1 && !std::string_view(argv[1]).empty()) {
 		srand_key = std::stoi(argv[1]);
 	} else {
 		srand_key = std::random_device()();
