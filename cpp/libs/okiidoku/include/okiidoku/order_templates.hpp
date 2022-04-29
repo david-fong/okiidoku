@@ -93,7 +93,6 @@ namespace okiidoku {
 
 			// Though public, you shouldn't need to use this. The rest of the visitor
 			// interface of the library wraps operations around it with nicer syntax.
-			// TODO.high.asap see if the library ELF gets smaller if these are made non-exported. or see if there are things in the ELF that can be forced to be hidden.
 			[[nodiscard, gnu::pure]]       variant_t& get_mono_variant()       noexcept { return variant_; }
 			[[nodiscard, gnu::pure]] const variant_t& get_mono_variant() const noexcept { return variant_; }
 		private:

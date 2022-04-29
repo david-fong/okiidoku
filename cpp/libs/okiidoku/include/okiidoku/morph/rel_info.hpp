@@ -33,6 +33,6 @@ namespace okiidoku::mono::morph {
 
 	// contract: the span is a _complete_, valid grid.
 	template<Order O> requires(is_order_compiled(O))
-	OKIIDOKU_EXPORT detail::GridlikeArr<O, Rel<O>> make_rel_table(GridConstSpan<O>);
+	OKIIDOKU_EXPORT detail::Gridlike<O, Rel<O>> make_rel_table(const Grid<O>&);
 }
 #endif

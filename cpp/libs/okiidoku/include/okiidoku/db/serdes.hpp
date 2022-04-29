@@ -14,19 +14,19 @@ namespace okiidoku::mono::db::serdes {
 
 	// contract: the grid is filled.
 	template<Order O>
-	OKIIDOKU_EXPORT void print_filled(std::ostream& os, GridConstSpan<O> grid_view);
+	OKIIDOKU_EXPORT void print_filled(std::ostream& os, const Grid<O>& src);
 
 	// contract: the grid is filled.
 	template<Order O>
-	OKIIDOKU_EXPORT void parse_filled(std::istream& is, GridSpan<O> grid_view);
+	OKIIDOKU_EXPORT void parse_filled(std::istream& is, Grid<O>& sink);
 
 	// best used with sparse puzzles.
 	template<Order O>
-	OKIIDOKU_EXPORT void print_puzzle(std::ostream& os, GridConstSpan<O> grid_view);
+	OKIIDOKU_EXPORT void print_puzzle(std::ostream& os, const Grid<O>& src);
 
 	// best used with sparse puzzles.
 	template<Order O>
-	OKIIDOKU_EXPORT void parse_puzzle(std::istream& is, GridSpan<O> grid_view);
+	OKIIDOKU_EXPORT void parse_puzzle(std::istream& is, Grid<O>& sink);
 }
 
 
@@ -37,15 +37,15 @@ namespace okiidoku::visitor::db::serdes {
 	}
 
 	// contract: the grid is filled.
-	OKIIDOKU_EXPORT void print_filled(std::ostream& os, GridConstSpan grid_view);
+	OKIIDOKU_EXPORT void print_filled(std::ostream& os, const Grid& src);
 
 	// contract: the grid is filled.
-	OKIIDOKU_EXPORT void parse_filled(std::istream& is, GridSpan grid_view);
+	OKIIDOKU_EXPORT void parse_filled(std::istream& is, Grid& sink);
 
 	// best used with sparse puzzles.
-	OKIIDOKU_EXPORT void print_puzzle(std::ostream& os, GridConstSpan grid_view);
+	OKIIDOKU_EXPORT void print_puzzle(std::ostream& os, const Grid& src);
 
 	// best used with sparse puzzles.
-	OKIIDOKU_EXPORT void parse_puzzle(std::istream& is, GridSpan grid_view);
+	OKIIDOKU_EXPORT void parse_puzzle(std::istream& is, Grid& sink);
 }
 #endif

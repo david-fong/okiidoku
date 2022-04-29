@@ -25,18 +25,18 @@ int main([[maybe_unused]] const int argc, [[maybe_unused]] char const *const arg
 
 	constexpr oki::Order O = 3;
 
-	oki::GridArr<O> gen_grid;
+	oki::Grid<O> gen_grid;
 	oki::generate(gen_grid, shared_rng);
-	oki::GridArr<O> puz_grid;
+	oki::Grid<O> puz_grid;
 	// TODO.high oki::puzzle::make_hard(gen_grid, puz_of_gen_grid);
 	auto canon_transform_for_gen_grid {oki::morph::canonicalize(gen_grid)};
 	canon_transform_for_gen_grid.apply_in_place(puz_grid);
 
-	oki::GridArr<O> canon_grid {gen_grid};
+	oki::Grid<O> canon_grid {gen_grid};
 	oki::morph::scramble(canon_grid, shared_rng);
 	oki::morph::canonicalize(canon_grid);
 
-	if (std::is_neq(oki::cmp_grids(gen_grid, canon_grid))) {
+	if (gen_grid != canon_grid) {
 		// TODO.wait update this example comment when canonicalize works
 		// this should never happen (once the library is correctly implemented)
 		std::abort();

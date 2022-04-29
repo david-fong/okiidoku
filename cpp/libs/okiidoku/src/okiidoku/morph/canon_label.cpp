@@ -26,10 +26,10 @@ namespace okiidoku::mono::morph::detail {
 
 	private:
 		struct State final {
-			mono::detail::GridlikeArr<O, Rel<O>> rel_table;
+			mono::detail::Gridlike<O, Rel<O>> rel_table;
 			label_map_t<O> to_og;
 			TieLinks<O, 2> ties {};
-			explicit constexpr State(const GridConstSpan<O> grid) noexcept: rel_table{make_rel_table<O>(grid)} {
+			explicit constexpr State(const Grid<O>& grid) noexcept: rel_table{make_rel_table<O>(grid)} {
 				std::iota(to_og.begin(), to_og.end(), 0);
 			}
 			bool has_ties() const { return ties.has_unresolved(); }
@@ -37,13 +37,13 @@ namespace okiidoku::mono::morph::detail {
 		static void do_a_pass_(State& s);
 
 	public:
-		static label_map_t<O> do_it(const GridSpan<O> grid);
+		static label_map_t<O> do_it(Grid<O>& grid);
 	};
 
 
 	template<Order O>
 	void CanonLabel<O>::do_a_pass_(CanonLabel<O>::State& s) {
-		mono::detail::GridlikeArr<O, Rel<O>> scratch;
+		mono::detail::Gridlike<O, Rel<O>> scratch;
 
 		label_map_t<O> to_tied;
 		std::iota(to_tied.begin(), to_tied.end(), 0);
@@ -92,8 +92,8 @@ namespace okiidoku::mono::morph::detail {
 
 
 	template<Order O>
-	label_map_t<O> CanonLabel<O>::do_it(const GridSpan<O> grid) {
-		const label_map_t<O> label_og_to_canon = [&](){
+	label_map_t<O> CanonLabel<O>::do_it(Grid<O>& grid) {
+		const label_map_t<O> label_og_to_canon {[&](){
 			State s(grid);
 			while (s.has_ties()) {
 				auto old_ties {s.ties};
@@ -114,7 +114,7 @@ namespace okiidoku::mono::morph::detail {
 				_[s.to_og[canon_i]] = static_cast<Transformation<O>::mapping_t>(canon_i);
 			}
 			return _;
-		}();
+		}()};
 
 		for (o4i_t i {0}; i < traits<O>::O4; ++i) {
 			grid.at_row_major(i) = static_cast<val_t>(label_og_to_canon[grid.at_row_major(i)]);
@@ -125,13 +125,13 @@ namespace okiidoku::mono::morph::detail {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	label_map_t<O> canon_label(const GridSpan<O> grid) {
+	label_map_t<O> canon_label(Grid<O>& grid) {
 		return CanonLabel<O>::do_it(grid);
 	}
 
 
 	#define OKIIDOKU_FOR_COMPILED_O(O_) \
-		template label_map_t<O_> canon_label<O_>(GridSpan<O_>);
+		template label_map_t<O_> canon_label<O_>(Grid<O_>&);
 	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 	#undef OKIIDOKU_FOR_COMPILED_O
 }

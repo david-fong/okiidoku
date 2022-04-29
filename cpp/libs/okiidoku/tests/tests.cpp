@@ -28,11 +28,11 @@ unsigned test_morph(okiidoku::SharedRng& shared_rng, const unsigned num_rounds) 
 
 	unsigned int count_bad {0};
 	for (unsigned round {0}; round < num_rounds; ) {
-		GridArr<O> gen_grid;
+		Grid<O> gen_grid;
 		generate<O>(gen_grid, shared_rng);
 		morph::canonicalize<O>(gen_grid);
 
-		GridArr<O> canon_grid {gen_grid};
+		Grid<O> canon_grid {gen_grid};
 		morph::scramble<O>(canon_grid, shared_rng);
 		morph::canonicalize<O>(canon_grid);
 

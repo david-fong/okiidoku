@@ -23,10 +23,10 @@ namespace okiidoku::mono::morph::detail {
 		using o4i_t = T::o4i_t;
 
 	public:
-		// explicit CanonPlace(const GridSpan<O> grid): src_grid{grid} {}
+		// explicit CanonPlace(const Grid<O>& grid): src_grid{grid} {}
 
 	private:
-		// GridSpan<O> src_grid;
+		// Grid<O>& src_grid;
 
 		struct PolarState final {
 			line_map_t<O> to_og {Transformation<O>::identity.row_map};
@@ -40,23 +40,23 @@ namespace okiidoku::mono::morph::detail {
 			}
 			bool has_ties() const { return line_ties.has_unresolved() || chute_ties.has_unresolved(); }
 
-			void do_a_pass(GridSpan<O> table);
+			void do_a_pass(const Grid<O>& table);
 		};
-		static GridArr<O> make_table_for_a_pass(const GridConstSpan<O> src_grid, bool is_transpose, const PolarState& row, const PolarState& col);
+		static Grid<O> make_table_for_a_pass(const Grid<O>& src_grid, bool is_transpose, const PolarState& row, const PolarState& col);
 
 	public:
-		static Transformation<O> do_it(const GridSpan<O> src_grid);
+		static Transformation<O> do_it(Grid<O>& src_grid);
 	};
 
 
 	template<Order O>
-	GridArr<O> CanonPlace<O>::make_table_for_a_pass(
-		const GridConstSpan<O> src_grid,
+	Grid<O> CanonPlace<O>::make_table_for_a_pass(
+		const Grid<O>& src_grid,
 		const bool is_transpose,
 		const PolarState& row_state,
 		const PolarState& col_state
 	) {
-		GridArr<O> table; {
+		Grid<O> table; {
 			const auto t {Transformation<O>{
 				Transformation<O>::identity.label_map,
 				row_state.to_og,
@@ -98,9 +98,7 @@ namespace okiidoku::mono::morph::detail {
 
 
 	template<Order O>
-	void CanonPlace<O>::PolarState::do_a_pass(
-		const GridSpan<O> table
-	) {
+	void CanonPlace<O>::PolarState::do_a_pass(const Grid<O>& table) {
 		std::array<mapping_t, T::O2> to_tied;
 		std::iota(to_tied.begin(), to_tied.end(), 0);
 		for (const auto tie : line_ties) {
@@ -152,7 +150,7 @@ namespace okiidoku::mono::morph::detail {
 
 
 	template<Order O>
-	Transformation<O> CanonPlace<O>::do_it(const GridSpan<O> src_grid) {
+	Transformation<O> CanonPlace<O>::do_it(Grid<O>& src_grid) {
 		PolarState row_state {};
 		PolarState col_state {};
 
@@ -189,14 +187,14 @@ namespace okiidoku::mono::morph::detail {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	Transformation<O> canon_place(const GridSpan<O> grid) {
+	Transformation<O> canon_place(Grid<O>& grid) {
 		return CanonPlace<O>::do_it(grid);
 	}
 
 
 	#define OKIIDOKU_FOR_COMPILED_O(O_) \
 		template class CanonPlace<O_>; \
-		template Transformation<O_> canon_place<O_>(GridSpan<O_>);
+		template Transformation<O_> canon_place<O_>(Grid<O_>&);
 	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 	#undef OKIIDOKU_FOR_COMPILED_O
 }

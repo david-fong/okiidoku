@@ -10,7 +10,7 @@
 namespace okiidoku::mono::db::serdes {
 
 	template<Order O>
-	void print_filled(std::ostream& os, const GridConstSpan<O> grid) {
+	void print_filled(std::ostream& os, const Grid<O>& grid) {
 		using T = traits<O>;
 		using has_mask_t = T::o2_bits_smol;
 		using o2x_smol_t = T::o2x_smol_t;
@@ -92,7 +92,7 @@ namespace okiidoku::mono::db::serdes {
 
 
 	template<Order O>
-	void parse_filled(std::istream& is, const GridSpan<O> grid) {
+	void parse_filled(std::istream& is, Grid<O>& grid) {
 		(void)is; (void)grid; // TODO.high
 
 		// will need some bit parallel deposit for the deserialization
@@ -100,22 +100,22 @@ namespace okiidoku::mono::db::serdes {
 
 
 	template<Order O>
-	void print_puzzle(std::ostream& os, const GridConstSpan<O> grid) {
+	void print_puzzle(std::ostream& os, const Grid<O>& grid) {
 		(void)os; (void)grid; // TODO.high
 	}
 
 
 	template<Order O>
-	void parse_puzzle(std::istream& is, const GridSpan<O> grid) {
+	void parse_puzzle(std::istream& is, Grid<O>& grid) {
 		(void)is; (void)grid; // TODO.high
 	}
 
 
 	#define OKIIDOKU_FOR_COMPILED_O(O_) \
-		template void print_filled<O_>(std::ostream&, GridConstSpan<O_>); \
-		template void parse_filled<O_>(std::istream&, GridSpan<O_>); \
-		template void print_puzzle<O_>(std::ostream&, GridConstSpan<O_>); \
-		template void parse_puzzle<O_>(std::istream&, GridSpan<O_>);
+		template void print_filled<O_>(std::ostream&, const Grid<O_>&); \
+		template void parse_filled<O_>(std::istream&, Grid<O_>&); \
+		template void print_puzzle<O_>(std::ostream&, const Grid<O_>&); \
+		template void parse_puzzle<O_>(std::istream&, Grid<O_>&);
 	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 	#undef OKIIDOKU_FOR_COMPILED_O
 }
@@ -123,27 +123,27 @@ namespace okiidoku::mono::db::serdes {
 
 namespace okiidoku::visitor::db::serdes {
 
-	void print_filled(std::ostream& os, const GridConstSpan visitor_grid) {
-		return std::visit([&](auto& mono_grid) {
-			return mono::db::serdes::print_filled(os, mono_grid);
-		}, visitor_grid.get_mono_variant());
+	void print_filled(std::ostream& os, const Grid& vis_src) {
+		return std::visit([&](auto& mono_src) {
+			return mono::db::serdes::print_filled(os, mono_src);
+		}, vis_src.get_mono_variant());
 	}
 
-	void parse_filled(std::istream& is, const GridSpan visitor_grid) {
-		return std::visit([&](auto& mono_grid) {
-			return mono::db::serdes::parse_filled(is, mono_grid);
-		}, visitor_grid.get_mono_variant());
+	void parse_filled(std::istream& is, Grid& vis_sink) {
+		return std::visit([&](auto& mono_sink) {
+			return mono::db::serdes::parse_filled(is, mono_sink);
+		}, vis_sink.get_mono_variant());
 	}
 
-	void print_puzzle(std::ostream& os, const GridConstSpan visitor_grid) {
-		return std::visit([&](auto& mono_grid) {
-			return mono::db::serdes::print_puzzle(os, mono_grid);
-		}, visitor_grid.get_mono_variant());
+	void print_puzzle(std::ostream& os, const Grid& vis_src) {
+		return std::visit([&](auto& mono_src) {
+			return mono::db::serdes::print_puzzle(os, mono_src);
+		}, vis_src.get_mono_variant());
 	}
 
-	void parse_puzzle(std::istream& is, const GridSpan visitor_grid) {
-		return std::visit([&](auto& mono_grid) {
-			return mono::db::serdes::parse_puzzle(is, mono_grid);
-		}, visitor_grid.get_mono_variant());
+	void parse_puzzle(std::istream& is, Grid& vis_sink) {
+		return std::visit([&](auto& mono_sink) {
+			return mono::db::serdes::parse_puzzle(is, mono_sink);
+		}, vis_sink.get_mono_variant());
 	}
 }

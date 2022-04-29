@@ -25,11 +25,11 @@ int main([[maybe_unused]] const int argc, [[maybe_unused]] char const *const arg
 
 	constexpr oki::Order O = 3;
 
-	oki::GridArr gen_grid(O);
+	oki::Grid gen_grid(O);
 	// oki::generate(gen_grid, shared_rng);
 	// oki::morph::canonicalize(gen_grid);
 
-	oki::GridArr canon_grid {gen_grid};
+	oki::Grid canon_grid {gen_grid};
 	// oki::morph::scramble(canon_grid, shared_rng);
 	// oki::morph::canonicalize(canon_grid);
 

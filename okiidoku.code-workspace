@@ -16,7 +16,7 @@
 		"todo-tree.filtering.useBuiltInExcludes": "file excludes",
 		"todo-tree.general.statusBar": "total",
 		"todo-tree.general.tags": [
-			"TODO.high.asap",
+			"TODO.asap",
 			"TODO.high",
 			"TODO.mid",
 			"TODO.low",

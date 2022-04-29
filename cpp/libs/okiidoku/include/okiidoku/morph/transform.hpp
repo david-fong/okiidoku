@@ -30,11 +30,15 @@ namespace okiidoku::mono::morph {
 		};
 
 		constexpr bool operator==(const Transformation<O>&) const = default;
-		void apply_from_to(GridConstSpan<O> src, GridSpan<O> dest) const noexcept;
-		void apply_in_place(GridSpan<O>) const noexcept;
-		[[nodiscard, gnu::const]] Transformation<O> inverted() const noexcept;
 
-		// TODO.high.asap do we need to make auto wrappers for the above apply_... methods?
+		// immediately returns if order is not the same as `src`'s order.
+		// changes `dest`'s order to `src`'s order if not already the same.
+		void apply_from_to(const Grid<O>& src, Grid<O>& dest) const noexcept;
+
+		// immediately returns if order is not the same as `src`'s order.
+		void apply_in_place(Grid<O>&) const noexcept;
+
+		[[nodiscard, gnu::const]] Transformation<O> inverted() const noexcept;
 	};
 }
 
@@ -54,10 +58,10 @@ namespace okiidoku::visitor::morph {
 		bool operator==(const Transformation&) const = default;
 
 		// does nothing if any orders are not the same.
-		void apply_from_to(GridConstSpan src, GridSpan dest) const noexcept;
+		void apply_from_to(const Grid& src, Grid& dest) const noexcept;
 
 		// does nothing if any orders are not the same.
-		void apply_in_place(GridSpan) const noexcept;
+		void apply_in_place(Grid&) const noexcept;
 
 		[[nodiscard, gnu::const]] Transformation inverted() const noexcept;
 	};

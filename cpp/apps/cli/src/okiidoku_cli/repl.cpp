@@ -83,7 +83,7 @@ namespace okiidoku::cli {
 	void Repl::gen_single() {
 		using namespace okiidoku::visitor;
 		const clock_t clock_start {std::clock()};
-		GridArr grid(config_.order());
+		Grid grid(config_.order());
 		generate(grid, shared_rng_);
 		const double processor_time = (static_cast<double>(std::clock() - clock_start)) / CLOCKS_PER_SEC;
 		{
@@ -117,7 +117,7 @@ namespace okiidoku::cli {
 			// 	std::cout << str::red.on << fail.what() << str::red.off << std::endl;
 			// }
 			for (unsigned long long prog {0}; prog < stop_after; ++prog) {
-				GridArr grid(config_.order());
+				Grid grid(config_.order());
 				generate(grid, shared_rng_);
 				if (config_.canonicalize()) {
 					morph::canonicalize(grid);
