@@ -47,7 +47,7 @@ namespace okiidoku::cli {
 
 	// Returns zero on error.
 	inline unsigned get_terminal_num_cols() {
-		char const*const env_var = std::getenv("COLUMNS");
+		char const*const env_var {std::getenv("COLUMNS")};
 		return (env_var != NULL) ? static_cast<unsigned>(std::stoul(env_var)) : 0u;
 	}
 

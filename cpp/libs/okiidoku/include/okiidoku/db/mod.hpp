@@ -1,7 +1,7 @@
 #ifndef HPP_OKIIDOKU__DB__MOD
 #define HPP_OKIIDOKU__DB__MOD
 
-#include <okiidoku/order_templates.hpp>
+#include <okiidoku/detail/order_templates.hpp>
 
 #include <iosfwd>
 #include <string_view>

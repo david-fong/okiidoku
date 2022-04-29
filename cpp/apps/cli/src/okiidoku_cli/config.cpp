@@ -42,7 +42,7 @@ namespace okiidoku::cli {
 			return;
 		}
 		int new_order {};
-		const auto parse_result = std::from_chars(new_order_str.begin(), new_order_str.end(), new_order);
+		const auto parse_result {std::from_chars(new_order_str.begin(), new_order_str.end(), new_order)};
 		if (parse_result.ec == std::errc{} && is_order_compiled(new_order)) {
 			order(new_order);
 			return;

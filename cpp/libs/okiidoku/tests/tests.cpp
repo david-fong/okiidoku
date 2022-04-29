@@ -68,19 +68,18 @@ unsigned test_morph(okiidoku::SharedRng& shared_rng, const unsigned num_rounds) 
 int main(const int argc, char const *const argv[]) {
 	okiidoku::util::setup_console();
 
-	std::uint_fast64_t srand_key;  // 1
-	unsigned int num_rounds; // 2
+	const auto srand_key {[&]() -> std::uint_fast64_t {
+		if (argc > 1 && !std::string_view(argv[1]).empty()) {
+			return std::stoi(argv[1]);
+		} else {
+			return std::random_device()();
+		}		
+	}()};
+	const unsigned int num_rounds {(argc > 2) ? static_cast<unsigned>(std::stoi(argv[2])) : 1000u};
 
-	if (argc > 1 && !std::string_view(argv[1]).empty()) {
-		srand_key = std::stoi(argv[1]);
-	} else {
-		srand_key = std::random_device()();
-	}
-	num_rounds = (argc > 2) ? std::stoi(argv[2]) : 1000;
-
-	std::cout << "\nPARSED ARGUMENTS:"
-	<< "\n- ARG 1 [[ srand key  ]] : " << srand_key
-	<< "\n- ARG 2 [[ num rounds ]] : " << num_rounds
+	std::cout << "\nparsed arguments:"
+	<< "\n- arg 1 (srand key)  : " << srand_key
+	<< "\n- arg 2 (num rounds) : " << num_rounds
 	<< std::endl;
 
 	okiidoku::SharedRng shared_rng;

@@ -21,10 +21,6 @@ namespace okiidoku::mono::morph::detail {
 		using o1i_t = T::o1i_t;
 		using o2i_t = T::o2i_t;
 		using o4i_t = T::o4i_t;
-	public:
-		static constexpr o2i_t O2 = O*O;
-
-	private:
 		struct State final {
 			mono::detail::Gridlike<O, Rel<O>> rel_table;
 			label_map_t<O> to_og;
@@ -50,7 +46,7 @@ namespace okiidoku::mono::morph::detail {
 		for (const auto tie : s.ties) {
 			if (tie.size() == 1) [[likely]] { continue; }
 			for (const auto rel_i : tie) {
-				auto row = scratch.row_at(rel_i);
+				const auto row {scratch.row_at(rel_i)};
 				{ auto src {s.rel_table.row_at(rel_i)}; std::copy(src.begin(), src.end(), row.begin()); }
 				// normalize tied slice for later sorting:
 				for (const auto [t_begin, t_end] : s.ties) {
@@ -78,14 +74,14 @@ namespace okiidoku::mono::morph::detail {
 		{
 			// update s.to_og:
 			label_map_t<O> tied_to_og {s.to_og};
-			for (o2i_t i {0}; i < O2; ++i) {
+			for (o2i_t i {0}; i < T::O2; ++i) {
 				s.to_og[i] = tied_to_og[to_tied[i]];
 			}
 		}
 		// update s.rel_table (optimized version of doing get_rel_table again)
 		scratch = s.rel_table;
-		for (o2i_t i {0}; i < O2; ++i) {
-		for (o2i_t j {0}; j < O2; ++j) {
+		for (o2i_t i {0}; i < T::O2; ++i) {
+		for (o2i_t j {0}; j < T::O2; ++j) {
 			s.rel_table.at(i,j) = scratch.at(to_tied[i], to_tied[j]);
 		}}
 	}
@@ -110,7 +106,7 @@ namespace okiidoku::mono::morph::detail {
 			}
 
 			label_map_t<O> _;
-			for (o2i_t canon_i {0}; canon_i < O2; ++canon_i) {
+			for (o2i_t canon_i {0}; canon_i < T::O2; ++canon_i) {
 				_[s.to_og[canon_i]] = static_cast<Transformation<O>::mapping_t>(canon_i);
 			}
 			return _;

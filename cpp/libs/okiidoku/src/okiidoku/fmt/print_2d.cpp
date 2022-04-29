@@ -10,8 +10,8 @@ namespace okiidoku {
 
 	// current implementation is pretty simple (dumb?)
 	std::vector<size_t> make_random_emoji_set(const unsigned O, SharedRng& shared_rng) {
-		const unsigned O2 = O*O;
-		const auto& prefs = emoji::top_set_preferences;
+		const unsigned O2 {O*O};
+		const auto& prefs {emoji::top_set_preferences};
 		std::vector<size_t> shuffled_sets(emoji::sets.size());
 		std::iota(shuffled_sets.begin(), shuffled_sets.end(), 0);
 		{
@@ -43,7 +43,7 @@ namespace okiidoku {
 	void print_2d(std::ostream& os, const unsigned O, const std::span<const print_2d_grid_view> grid_views, SharedRng& shared_rng) {
 		using o2i_t = std::uint16_t;
 
-		const auto print_box_row_sep_string_ = [&os, O](const unsigned border_i) -> void {
+		const auto print_box_row_sep_string_ {[&os, O](const unsigned border_i) -> void {
 			#define M_NOOK(NOOK_T, NOOK_C, NOOK_B) \
 			if      (border_i == 0) [[unlikely]] { os << NOOK_T; } \
 			else if (border_i == O) [[unlikely]] { os << NOOK_B; } \
@@ -57,17 +57,17 @@ namespace okiidoku {
 			}
 			M_NOOK("┐", "┤", "┘")
 			#undef M_NOOK
-		};
+		}};
 
-		auto print_box_row_sep_strings = [&](const unsigned border_i) mutable {
+		auto print_box_row_sep_strings {[&](const unsigned border_i) mutable {
 			os << '\n';
 			print_box_row_sep_string_(border_i);
 			for (unsigned i {1}; i < grid_views.size(); ++i) {
 				os << "   ";
 				print_box_row_sep_string_(border_i);
 			}
-		};
-		const auto emoji_sets = make_random_emoji_set(O, shared_rng);
+		}};
+		const auto emoji_sets {make_random_emoji_set(O, shared_rng)};
 
 		for (o2i_t row {0}; row < O*O; ++row) {
 			if (row % O == 0) {
@@ -78,13 +78,13 @@ namespace okiidoku {
 				for (o2i_t col {0}; col < O*O; ++col) {
 					if ((col % O) == 0) { os << " │"; }
 
-					auto val = size_t{grid_views[grid_i](row * O*O + col)};
+					auto val {size_t{grid_views[grid_i](row * O*O + col)}};
 					if (val == O*O) {
 						os << "  ";
 						continue;
 					}
 					for (const auto emoji_set_index : emoji_sets) {
-						const auto& set = emoji::sets.at(emoji_set_index).entries;
+						const auto& set {emoji::sets.at(emoji_set_index).entries};
 						if (val < set.size()) {
 							os << set.at(val);
 							break;

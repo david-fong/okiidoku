@@ -13,9 +13,8 @@
 #include <array>
 
 // "copy" names under `okiidoku::mono` to okiidoku:
-namespace okiidoku {
-	using namespace okiidoku::mono;
-}
+// it is recommended to not do this in header files (only in .cpp files)
+namespace okiidoku { using namespace okiidoku::mono; }
 
 int main([[maybe_unused]] const int argc, [[maybe_unused]] char const *const argv[]) {
 	namespace oki = okiidoku;
@@ -23,12 +22,12 @@ int main([[maybe_unused]] const int argc, [[maybe_unused]] char const *const arg
 	oki::SharedRng shared_rng;
 	shared_rng.rng.seed(std::random_device()());
 
-	constexpr oki::Order O = 3;
+	constexpr oki::Order O {3};
 
 	oki::Grid<O> gen_grid;
 	oki::generate(gen_grid, shared_rng);
 	oki::Grid<O> puz_grid;
-	// TODO.high oki::puzzle::make_hard(gen_grid, puz_of_gen_grid);
+	// TODO.wait oki::puzzle::make_hard(gen_grid, puz_of_gen_grid);
 	auto canon_transform_for_gen_grid {oki::morph::canonicalize(gen_grid)};
 	canon_transform_for_gen_grid.apply_in_place(puz_grid);
 

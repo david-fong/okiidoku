@@ -67,7 +67,7 @@ namespace okiidoku::mono::morph::detail {
 		}
 
 		for (o2i_t row_i {0}; row_i < T::O2; ++row_i) {
-			auto row = table.row_at(row_i);
+			const auto row {table.row_at(row_i)};
 			const auto& ortho {is_transpose ? row_state : col_state};
 			// loop over orthogonal partially-resolved line ranges to normalize:
 			for (const auto [t_begin, t_end] : ortho.line_ties) {

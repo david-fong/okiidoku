@@ -2,7 +2,7 @@
 #define HPP_OKIIDOKU__MORPH__TIES
 
 #include <okiidoku/traits.hpp>
-#include <okiidoku/order_templates.hpp>
+#include <okiidoku/detail/order_templates.hpp>
 
 #include <algorithm>
 #include <ranges>
@@ -14,7 +14,7 @@ namespace okiidoku::mono::morph {
 	template<Order O, unsigned O1_OR_O2>
 	requires (O1_OR_O2 == 1) || (O1_OR_O2 == 2)
 	struct TieLinks final {
-		static constexpr size_t size_ = (O1_OR_O2 == 1) ? traits<O>::O1 : traits<O>::O2;
+		static constexpr size_t size_ {(O1_OR_O2 == 1) ? traits<O>::O1 : traits<O>::O2};
 		using link_t = std::conditional_t<(O1_OR_O2 == 1), typename traits<O>::o1i_t, typename traits<O>::o2i_smol_t>;
 		using links_t = std::array<link_t, size_>;
 

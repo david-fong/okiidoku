@@ -25,16 +25,16 @@ namespace okiidoku::mono::morph {
 		for (o2i_t atom {0}; atom < T::O2; atom += T::O1) {
 			// Go through all unique pairs in the atom:
 			for (o1i_t i {0}; i < T::O1 - 1; ++i) {
-			for (o1i_t j = i + 1; j < T::O1; ++j) {
+			for (o1i_t j {static_cast<o1i_t>(i + 1)}; j < T::O1; ++j) {
 				{ // boxrow
-					const val_t i_val = grid.at(line, static_cast<o2i_t>(atom+i)), j_val = grid.at(line, static_cast<o2i_t>(atom+j));
-					const has_mask_t box_mask_bit = has_mask_t{1} << rmi_to_box<O>(line, atom);
+					const val_t i_val {grid.at(line, static_cast<o2i_t>(atom+i))}, j_val {grid.at(line, static_cast<o2i_t>(atom+j))};
+					const has_mask_t box_mask_bit {has_mask_t{1} << rmi_to_box<O>(line, atom)};
 					masks.at(i_val,j_val).boxes_h |= box_mask_bit;
 					masks.at(j_val,i_val).boxes_h |= box_mask_bit;
 				}
 				{ // boxcol
-					const val_t i_val = grid.at(static_cast<o2i_t>(atom+i), line), j_val = grid.at(static_cast<o2i_t>(atom+j), line);
-					const has_mask_t box_mask_bit = has_mask_t{1} << rmi_to_box<O>(atom, line);
+					const val_t i_val {grid.at(static_cast<o2i_t>(atom+i), line)}, j_val {grid.at(static_cast<o2i_t>(atom+j), line)};
+					const has_mask_t box_mask_bit {has_mask_t{1} << rmi_to_box<O>(atom, line)};
 					masks.at(i_val,j_val).boxes_v |= box_mask_bit;
 					masks.at(j_val,i_val).boxes_v |= box_mask_bit;
 				}
@@ -51,18 +51,18 @@ namespace okiidoku::mono::morph {
 		using o2i_t = T::o2i_t;
 		using chute_imbalance_t = chute_imbalance_t<O>;
 
-		const detail::Gridlike<O, RelMasks<O>> masks = make_rel_masks_<O>(grid_in);
+		const detail::Gridlike<O, RelMasks<O>> masks {make_rel_masks_<O>(grid_in)};
 		detail::Gridlike<O, Rel<O>> table; // uninitialized!
 		for (o2i_t r {0}; r < T::O2; ++r) {
 		for (o2i_t c {0}; c < T::O2; ++c) {
-			const auto& mask = masks.at(r,c);
-			auto& rel = table.at(r,c);
+			const auto& mask {masks.at(r,c)};
+			auto& rel {table.at(r,c)};
 			if (r == c) {
 				rel = {0,(T::O2/2),0,0};
 				continue;
 			}
 			const has_mask_t non_polar_mask = mask.boxes_h | mask.boxes_v;
-			const unsigned count = non_polar_mask.count();
+			const unsigned count {non_polar_mask.count()};
 			rel.count = static_cast<T::o2i_smol_t>(count);
 			rel.polar_count_lesser = static_cast<Rel<O>::polar_count_lesser_t>(std::min(mask.boxes_h.count(), mask.boxes_v.count()));
 
@@ -89,7 +89,7 @@ namespace okiidoku::mono::morph {
 		}}
 		{
 			// normalize polar fields
-			// long double h_p = 1.0, v_p = 1.0;
+			// long double h_p {1.0}, v_p {1.0};
 			// o6i_t h_occ_dev {0}, v_occ_dev {0};
 			// for (const auto& row : table) { for (const Rel& rel : row) {
 			// 	h_p *= rel.polar_a_p;
@@ -97,8 +97,8 @@ namespace okiidoku::mono::morph {
 			// 	h_occ_dev += rel.h_chute_imbalance;
 			// 	v_occ_dev += rel.v_chute_imbalance;
 			// }}
-			// const auto cmp_p = h_p <=> v_p;
-			// const auto cmp_occ_dev = h_occ_dev <=> v_occ_dev;
+			// const auto cmp_p {h_p <=> v_p};
+			// const auto cmp_occ_dev {h_occ_dev <=> v_occ_dev};
 			// if (/* h is less rare */std::is_gt(cmp_p)
 			// || (std::is_eq(cmp_p) && /* v deviates more */std::is_lt(cmp_occ_dev))
 			// ) {

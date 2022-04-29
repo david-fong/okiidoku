@@ -12,6 +12,8 @@ I work on this project for fun. I like sudoku. I want to learn how to develop hi
 
 See the readme in the [cpp](./cpp/readme.md) directory.
 
+Right now I don't really have the motivation to maintain inline (in the source code) documentation about Sudoku terminology/concepts and algorithm descriptions, or on top of that to learn how to generate doc pages with tools like Doxygen. I'll only start doing that if I think I can commit to keeping them very clean and up to date. Again, there's the design folder. All you will find in source code is contracts and post-conditions.
+
 ### Preface
 
 This project is MIT licenced. If something does not work for you, you can always do your own work and adapt it for your own needs.
@@ -24,7 +26,7 @@ If you have a question about the project and whether it is suitable for your own
 - If you find configuration issues that prevent you from building the project using recent versions of a popular toolchain and you know how to fix it and submit a pull request, I will happily look at it, likely merge it in, and be very grateful.
 - If you have a suggestion of how the library could be improved and you present a case, I will engage in discussion with you. Where applicable, benchmarks would also be appreciated.
 
-## Other Existing Projects and Solvers
+### Some Other Existing Projects and Solvers
 
 - [codegolf competition](https://codegolf.stackexchange.com/questions/190727/the-fastest-sudoku-solver)
   - [the winner, tdoku](https://t-dillon.github.io/tdoku/)

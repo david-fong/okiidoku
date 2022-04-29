@@ -17,8 +17,8 @@ namespace okiidoku::mono::morph {
 	Transformation<O> canonicalize(Grid<O>& og_grid) {
 		assert(grid_is_filled<O>(og_grid));
 		assert(grid_follows_rule<O>(og_grid));
-		const auto label_map = detail::canon_label<O>(og_grid);
-		auto place_map = detail::canon_place<O>(og_grid);
+		const auto label_map {detail::canon_label<O>(og_grid)};
+		auto place_map {detail::canon_place<O>(og_grid)};
 		// Transformation<O> place_map{}; // TODO.high delete when done canon_place
 		place_map.label_map = label_map;
 		return place_map;

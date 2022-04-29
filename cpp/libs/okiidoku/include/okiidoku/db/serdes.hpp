@@ -2,7 +2,7 @@
 #define HPP_OKIIDOKU__DB__SERDES
 
 #include <okiidoku/grid.hpp>
-#include <okiidoku/order_templates.hpp>
+#include <okiidoku/detail/order_templates.hpp>
 
 #include <iosfwd>
 

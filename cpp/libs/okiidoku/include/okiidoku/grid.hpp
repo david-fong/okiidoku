@@ -2,7 +2,7 @@
 #define HPP_OKIIDOKU__GRID
 
 #include <okiidoku/traits.hpp>
-#include <okiidoku/order_templates.hpp>
+#include <okiidoku/detail/order_templates.hpp>
 
 #include <ranges>
 #include <array>
@@ -45,6 +45,14 @@ namespace okiidoku::mono {
 		// lexicographical comparison over row-major-order traversal of cells.
 		friend std::strong_ordering operator<=>(const Gridlike<O, V_>& a, const Gridlike<O, V_>& b) noexcept = default;
 
+		// For regular grids, always default initialize as an empty grid (to be safe).
+		// Note: Making this constexpr results in a 1% speed gain, but 45% program
+		// size increase. That speed doesn't seem worth it.
+		Gridlike() noexcept requires(std::is_same_v<V_, default_grid_val_t<O>>) {
+			cells_.fill(T::O2);
+		}
+		Gridlike() noexcept requires(!std::is_same_v<V_, default_grid_val_t<O>>) = default;
+
 		// contract: coord is in [0, O4).
 		template<class T_coord> requires(Any_o4ix<O, T_coord>)
 		[[nodiscard]] constexpr       val_t& at_row_major(const T_coord coord)       noexcept { return cells_[coord]; }
@@ -57,10 +65,12 @@ namespace okiidoku::mono {
 		template<class T_row, class T_col> requires(Any_o2ix<O, T_row> && Any_o2ix<O, T_col>)
 		[[nodiscard]] constexpr const val_t& at(const T_row row, const T_col col) const noexcept { return cells_[(T::O2*row)+col]; }
 
+		// TODO.mid consider renaming this to `row_span_at`. Would help when users want to use auto. Also the `rows()` method.
 		// contract: row is in [0, O2).
 		template<class T_row> requires(Any_o2ix<O, T_row>)
-		[[nodiscard]] constexpr std::span<val_t, T::O2> row_at(const T_row i) noexcept { return static_cast<std::span<val_t, T::O2>>(std::span(cells_).subspan(T::O2*i, T::O2)); }
-		[[nodiscard]] constexpr std::span<const val_t, T::O2> row_at(const o2i_t i) const noexcept { return static_cast<std::span<const val_t, T::O2>>(std::span(cells_).subspan(T::O2*i, T::O2)); }
+		[[nodiscard]] constexpr std::span<      val_t, T::O2> row_at(const T_row i)       noexcept { return static_cast<std::span<      val_t, T::O2>>(std::span(cells_).subspan(T::O2*i, T::O2)); }
+		template<class T_row> requires(Any_o2ix<O, T_row>)
+		[[nodiscard]] constexpr std::span<const val_t, T::O2> row_at(const T_row i) const noexcept { return static_cast<std::span<const val_t, T::O2>>(std::span(cells_).subspan(T::O2*i, T::O2)); }
 
 		[[nodiscard]] constexpr auto rows() noexcept { namespace v = std::views; return v::iota(o2i_t{0}, T::O2) | v::transform([&](auto r){ return row_at(r); }); }
 		// [[nodiscard]] constexpr auto rows() const noexcept { namespace v = std::views; return v::iota(o2i_t{0}, T::O2) | v::transform([&](auto r){ return row_at(r); }); }

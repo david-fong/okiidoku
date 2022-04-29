@@ -13,7 +13,7 @@ namespace okiidoku::cli {
 			quiet,
 			max_ = quiet,
 		};
-		constexpr size_t size = static_cast<size_t>(E::max_) + 1;
+		constexpr size_t size {static_cast<size_t>(E::max_) + 1};
 
 		// Indices of entries must match the literal values of their respective enums.
 		constexpr std::array<std::string_view, size> names {

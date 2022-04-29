@@ -36,13 +36,20 @@ namespace okiidoku::cli {
 		<< '\n' << Command::helpMessage
 		<< std::endl;
 
-		std::string command;
-		do {
+		while (true) {
 			std::cout << "\n[" << config_.order() << "]: ";
-
+			std::string command;
 			std::getline(std::cin, command);
-			// TODO.high detect eof (commonly from ctrl+D)
-		} while (run_command(command));
+			if (!std::cin) {
+				break; // input error or unrecoverable stream error.
+			}
+			if (std::cin.eof()) {
+				break; // Ex. console <CTRL+D>
+			}
+			if (!run_command(command)) {
+				break;
+			}
+		}
 	}
 
 
@@ -52,7 +59,9 @@ namespace okiidoku::cli {
 		// trim leading or trailing spaces from the arguments substring.
 		const std::string_view cmd_name {cmd_line.substr(0, token_pos)};
 		const std::string_view cmd_args {(token_pos == std::string_view::npos)
-			? "" :  cmd_line.substr(token_pos + 1, std::string_view::npos)};
+			? ""
+			:  cmd_line.substr(token_pos + 1, std::string_view::npos)}
+			;
 		const auto it {Command::enum_str_to_enum.find(cmd_name)};
 		if (it == Command::enum_str_to_enum.end()) {
 			// No command name was matched.
@@ -85,7 +94,7 @@ namespace okiidoku::cli {
 		const clock_t clock_start {std::clock()};
 		Grid grid(config_.order());
 		generate(grid, shared_rng_);
-		const double processor_time = (static_cast<double>(std::clock() - clock_start)) / CLOCKS_PER_SEC;
+		const double processor_time {(static_cast<double>(std::clock() - clock_start)) / CLOCKS_PER_SEC};
 		{
 			if (config_.canonicalize()) {
 				morph::canonicalize(grid); // should we make a copy and print as a second grid image?

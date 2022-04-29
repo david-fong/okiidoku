@@ -21,9 +21,9 @@ namespace okiidoku::mono {
 			assert(val <= T::O2);
 			if (val == T::O2) { continue; }
 
-			auto& row_has = rows_has_[row];
-			auto& col_has = cols_has_[col];
-			auto& box_has = boxes_has_[rmi_to_box<O>(row, col)];
+			auto& row_has {rows_has_[row]};
+			auto& col_has {cols_has_[col]};
+			auto& box_has {boxes_has_[rmi_to_box<O>(row, col)]};
 
 			const has_mask_t try_val_mask {has_mask_t{1} << val};
 			const has_mask_t t_has {row_has | col_has | box_has};
@@ -44,7 +44,7 @@ namespace okiidoku::mono {
 		using T = traits<O>;
 		using o4i_t = T::o4i_t;
 		for (o4i_t i {0}; i < T::O4; ++i) {
-			auto val = grid.at_row_major(i);
+			const auto val {grid.at_row_major(i)};
 			assert(val <= T::O2);
 			if (val == T::O2) { return false; }
 		}

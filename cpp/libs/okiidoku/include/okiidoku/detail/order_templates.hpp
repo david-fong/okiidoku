@@ -2,7 +2,7 @@
 #define HPP_OKIIDOKU__ORDER_TEMPLATES
 
 #include <okiidoku/config/defaults.hpp>
-#include <okiidoku/order_templates.macros.hpp>
+#include <okiidoku/detail/order_templates.macros.hpp>
 #include <okiidoku_export.h>
 
 #include <array>
@@ -72,19 +72,24 @@ namespace okiidoku {
 		public:
 			using variant_t = OrderVariantFor<Adaptor>;
 
+			// TODO.low delete the default constructor if Adaptor::is_ref is true.
+
 			// copy-from-mono constructor
 			template<Order O>
 			explicit ContainerBase(typename Adaptor::type<O> mono_obj) noexcept: variant_(mono_obj) {}
 
+			// default-for-order constructor.
+			// If the provided order is not compiled, defaults to the lowest compiled order.
 			// TODO.low this will only work for zero-argument constructors. so far that's fine.
-			explicit ContainerBase(const Order O) noexcept requires(!Adaptor::is_ref): variant_() {
+			explicit ContainerBase(const Order O) noexcept requires(!Adaptor::is_ref): variant_([O]{
 				switch (O) {
 				#define OKIIDOKU_FOR_COMPILED_O(O_) \
-				case O_: variant_.template emplace<typename Adaptor::type<O_>>(); break;
+				case O_: return variant_t(typename Adaptor::type<O_>());
 				OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 				#undef OKIIDOKU_FOR_COMPILED_O
+				default: return variant_t(); // default to the lowest compiled order.
 				}
-			}
+			}()) {}
 
 			ContainerBase(const variant_t& variant) noexcept: variant_(variant) {}
 			ContainerBase(variant_t&& variant) noexcept: variant_(std::forward<variant_t>(variant)) {}

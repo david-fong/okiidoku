@@ -3,7 +3,7 @@
 // Note: the byte width type logic could be done with boost, but I don't
 // have any other reason to add boost as a dependency, so I won't.
 
-#include <okiidoku/order_templates.hpp> // largest_compiled_order
+#include <okiidoku/detail/order_templates.hpp> // largest_compiled_order
 
 #include <bit>
 #include <bitset> // TODO.mid could this be excluded if (O_MAX <= 8) ?

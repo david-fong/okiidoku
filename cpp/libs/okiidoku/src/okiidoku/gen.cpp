@@ -40,7 +40,7 @@ namespace okiidoku::mono {
 
 		// Outer array has an entry for each line in the chute.
 		using chute_has_counts_t = std::array<std::array<typename T::o2i_smol_t, T::O2>, T::O1>;
-		// unsigned long long op_count = 0;
+		// unsigned long long op_count {0};
 		/* Using this counter, I found that it took fewer operations to go from having
 		one polarity of lines valid to also having boxes valid than from having only
 		boxes valid and then getting one polarity of lines to also be valid. Ie. It
@@ -66,8 +66,8 @@ namespace okiidoku::mono {
 				const auto b_box {static_cast<o2x_t>(b_col/T::O1)};
 				if (a_box == b_box) [[unlikely]] { continue; }
 				const auto row {static_cast<o2x_t>(h_chute + ((rng_() - rng_.min()) % (T::O1/* -1 */)))};
-				auto& a_cell = grid.at(row,a_col);
-				auto& b_cell = grid.at(row,b_col);
+				auto& a_cell {grid.at(row,a_col)};
+				auto& b_cell {grid.at(row,b_col)};
 				const int has_nots_diff {
 					(boxes_has[a_box][a_cell] == 1 ?  1 : 0) +
 					(boxes_has[a_box][b_cell] == 0 ? -1 : 0) +
@@ -105,8 +105,8 @@ namespace okiidoku::mono {
 				const auto b_col {static_cast<o2x_t>((rng_() - rng_.min()) % T::O1)};
 				if (a_col == b_col) [[unlikely]] { continue; }
 				const auto row {static_cast<o2x_t>((rng_() - rng_.min()) % (T::O1*(T::O1/* -1 */)))};
-				auto& a_cell = grid.at(row, static_cast<o2i_t>(v_chute + a_col));
-				auto& b_cell = grid.at(row, static_cast<o2i_t>(v_chute + b_col));
+				auto& a_cell {grid.at(row, static_cast<o2i_t>(v_chute + a_col))};
+				auto& b_cell {grid.at(row, static_cast<o2i_t>(v_chute + b_col))};
 				const int has_nots_diff {
 					(cols_has[a_col][a_cell] == 1 ?  1 : 0) +
 					(cols_has[a_col][b_cell] == 0 ? -1 : 0) +

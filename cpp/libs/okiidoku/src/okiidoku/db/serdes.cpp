@@ -19,7 +19,7 @@ namespace okiidoku::mono::db::serdes {
 		using o4i_t = T::o4i_t;
 
 		assert(is_grid_filled<O>(grid));
-		unsigned bytes_written = 0;
+		unsigned bytes_written {0};
 
 		o2x_smol_t row_pop {0};
 		std::array<o2x_smol_t, T::O1> box_pops {0};
@@ -45,8 +45,8 @@ namespace okiidoku::mono::db::serdes {
 			if ((T::O1-1-row)/T::O1 == col/T::O1) {
 				continue;
 			}
-			auto& col_pop = col_pops[col];
-			auto& box_pop = box_pops[box];
+			auto& col_pop {col_pops[col]};
+			auto& box_pop {box_pops[box]};
 			has_mask_t cell_not_has {rows_not_has[row] & cols_not_has[col] & boxes_not_has[box]};
 			o2x_smol_t smol_val {([&]{
 				has_mask_t under_val_mask {0};

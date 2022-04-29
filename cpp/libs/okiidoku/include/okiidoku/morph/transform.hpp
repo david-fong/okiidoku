@@ -2,7 +2,7 @@
 #define HPP_OKIIDOKU__MORPH__TRANSFORM
 
 #include <okiidoku/grid.hpp>
-#include <okiidoku/order_templates.hpp>
+#include <okiidoku/detail/order_templates.hpp>
 #include <okiidoku_export.h>
 
 namespace okiidoku::mono::morph {

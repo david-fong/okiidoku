@@ -37,7 +37,7 @@ namespace okiidoku::util {
 	void setup_console() {
 		// My implementation specifies this as safe:
 		std::ios_base::sync_with_stdio(false);
-		const auto pushed_locale = std::cout.imbue(std::locale(std::cout.getloc(), new MyNumPunct));
+		const auto pushed_locale {std::cout.imbue(std::locale(std::cout.getloc(), new MyNumPunct))};
 
 		#ifdef _WIN32
 		{

@@ -3,7 +3,7 @@
 
 #include <okiidoku/shared_rng.hpp>
 #include <okiidoku/grid.hpp>
-#include <okiidoku/order_templates.hpp>
+#include <okiidoku/detail/order_templates.hpp>
 
 #include <concepts>
 #include <type_traits>
