@@ -17,7 +17,7 @@ if(MSVC)
 	)
 else()
 	add_compile_options(
-		-Wall -Wextra -Wpedantic -Werror -Wfatal-errors
+		-Wall -Wextra -Wpedantic -Wfatal-errors #-Werror
 		-Wold-style-cast -Wcast-qual -Wcast-align -Wuseless-cast
 		-Wformat=2
 		-Wconversion # -Wsign-conversion

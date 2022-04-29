@@ -95,6 +95,11 @@ namespace okiidoku {
 			// interface of the library wraps operations around it with nicer syntax.
 			[[nodiscard, gnu::pure]]       variant_t& get_mono_variant()       noexcept { return variant_; }
 			[[nodiscard, gnu::pure]] const variant_t& get_mono_variant() const noexcept { return variant_; }
+
+			// Sugar wrapper around `std::get` for the underlying variant.
+			// Remember- `std::get` will throw if the requested type is not currently held by the variant.
+			template<Order O> [[nodiscard, gnu::pure]]       typename Adaptor::type<O>& get_mono_exact()       { return std::get<typename Adaptor::type<O>>(variant_); }
+			template<Order O> [[nodiscard, gnu::pure]] const typename Adaptor::type<O>& get_mono_exact() const { return std::get<typename Adaptor::type<O>>(variant_); }
 		private:
 			variant_t variant_;
 		};

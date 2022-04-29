@@ -31,11 +31,8 @@ namespace okiidoku::mono::morph {
 
 		constexpr bool operator==(const Transformation<O>&) const = default;
 
-		// immediately returns if order is not the same as `src`'s order.
-		// changes `dest`'s order to `src`'s order if not already the same.
 		void apply_from_to(const Grid<O>& src, Grid<O>& dest) const noexcept;
 
-		// immediately returns if order is not the same as `src`'s order.
 		void apply_in_place(Grid<O>&) const noexcept;
 
 		[[nodiscard, gnu::const]] Transformation<O> inverted() const noexcept;
@@ -57,10 +54,11 @@ namespace okiidoku::visitor::morph {
 
 		bool operator==(const Transformation&) const = default;
 
-		// does nothing if any orders are not the same.
+		// Does nothing if the transformation's order is not the same as the source grid's.
+		// If the dest grid has a different order, it is changed to match the source grid.
 		void apply_from_to(const Grid& src, Grid& dest) const noexcept;
 
-		// does nothing if any orders are not the same.
+		// Does nothing if the transformation's order is not the same as the grid's.
 		void apply_in_place(Grid&) const noexcept;
 
 		[[nodiscard, gnu::const]] Transformation inverted() const noexcept;

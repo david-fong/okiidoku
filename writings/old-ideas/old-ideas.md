@@ -60,6 +60,6 @@ These didn't end up doing the thing I wanted / thought might happen.
   - Update: I think this didn't work because I was doing naive backtracking. If I improve the backtracking logic. Now I need to remember/find out which traversal paths should make better usage of this and then test it out.
     - hm. but even with skipping backtracks when not-in-same-house as the backtrack origin, there's the projected cost of reaching backtrack origin again. maybe that's why deal_row_major is so bad?
 
-### config_auto_canonicalizer
+### Canonicalizer
 
 - See [the bottom of the canonicalization readme](./morph.md)

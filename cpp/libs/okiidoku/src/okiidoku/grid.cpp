@@ -75,13 +75,16 @@ namespace okiidoku::visitor {
 	}
 
 	std::strong_ordering operator<=>(const Grid& vis_a, const Grid& vis_b) noexcept {
-		return std::visit([&]<Order O1, Order O2>( // TODO.asap
-			const mono::Grid<O1>& mono_a,
-			const mono::Grid<O2>& mono_b
-		){
-			if constexpr (O1 != O2) { return O1 <=> O2; }
-			else { return mono_a <=> mono_b; }
-		}, vis_a.get_mono_variant(), vis_b.get_mono_variant());
+		if (const auto cmp {vis_a.get_mono_order() <=> vis_b.get_mono_order()}; std::is_neq(cmp)) {
+			return cmp;
+		}
+		switch (vis_a.get_mono_order()) {
+		#define OKIIDOKU_FOR_COMPILED_O(O_) \
+		case O_: return vis_a.get_mono_exact<O_>() <=> vis_b.get_mono_exact<O_>();
+		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
+		#undef OKIIDOKU_FOR_COMPILED_O
+		}
+		return std::strong_ordering::equivalent; // TODO.wait std::unreachable
 	}
 
 

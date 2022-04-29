@@ -59,13 +59,14 @@ namespace okiidoku::visitor::morph {
 		if (vis_src.get_mono_order() != vis_dest.get_mono_order()) {
 			vis_dest.get_mono_variant() = vis_src.get_mono_variant(); // lazy-coding way to implement order change.
 		}
-		return std::visit([&]<Order O1, Order O2, Order O3>( // TODO.asap
-			const mono::morph::Transformation<O1>& mono_transform,
-			const mono::Grid<O2>& mono_src,
-			mono::Grid<O3>& mono_dest
-		) {
-			if constexpr (O1 == O2 && O2 == O3) { return mono_transform.apply_from_to(mono_src, mono_dest); }
-		}, this->get_mono_variant(), vis_src.get_mono_variant(), vis_dest.get_mono_variant());
+		switch (this->get_mono_order()) {
+		#define OKIIDOKU_FOR_COMPILED_O(O_) \
+		case O_: return this->get_mono_exact<O_>().apply_from_to( \
+			vis_src.get_mono_exact<O_>(), vis_dest.get_mono_exact<O_>() \
+		);
+		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
+		#undef OKIIDOKU_FOR_COMPILED_O
+		}
 	}
 
 
@@ -73,12 +74,14 @@ namespace okiidoku::visitor::morph {
 		if (this->get_mono_order() != vis_grid.get_mono_order()) {
 			return;
 		}
-		return std::visit([&]<Order O1, Order O2>( // TODO.asap
-			const mono::morph::Transformation<O1>& mono_transform,
-			mono::Grid<O2>& mono_grid
-		) {
-			if constexpr (O1 == O2) { return mono_transform.apply_in_place(mono_grid); }
-		}, this->get_mono_variant(), vis_grid.get_mono_variant());
+		switch (this->get_mono_order()) {
+		#define OKIIDOKU_FOR_COMPILED_O(O_) \
+		case O_: return this->get_mono_exact<O_>().apply_in_place( \
+			vis_grid.get_mono_exact<O_>() \
+		);
+		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
+		#undef OKIIDOKU_FOR_COMPILED_O
+		}
 	}
 
 

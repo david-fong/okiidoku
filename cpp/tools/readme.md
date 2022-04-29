@@ -1,3 +1,3 @@
 # Complimentary Tools
 
-- translator: see [the serdes document](../../design/serdes.md).
+- translator: see [the serdes document](../../writings/design/serdes.md).
