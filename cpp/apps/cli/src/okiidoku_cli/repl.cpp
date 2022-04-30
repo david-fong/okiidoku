@@ -155,10 +155,12 @@ namespace okiidoku::cli {
 
 
 	void Repl::gen_multiple(const std::string_view stop_after_str) {
-		unsigned long long stop_by_value {};
-		const auto parse_result {std::from_chars(stop_after_str.begin(), stop_after_str.end(), stop_by_value)};
+		unsigned long long stop_after {};
+		const auto parse_result {std::from_chars(
+			stop_after_str.data(), stop_after_str.data()+stop_after_str.size(), stop_after
+		)};
 		if (parse_result.ec == std::errc{}) {
-			if (stop_by_value <= 0) {
+			if (stop_after <= 0) {
 				std::cout << str::red.on
 					<< "please provide a non-zero, positive integer."
 					<< str::red.off << std::endl;
@@ -170,6 +172,6 @@ namespace okiidoku::cli {
 				<< str::red.off << std::endl;
 			return;
 		}
-		this->gen_multiple(stop_by_value);
+		this->gen_multiple(stop_after);
 	}
 }

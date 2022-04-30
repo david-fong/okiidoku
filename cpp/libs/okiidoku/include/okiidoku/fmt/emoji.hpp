@@ -11,7 +11,7 @@ namespace okiidoku::emoji {
 		std::string_view name;
 		std::vector<std::string_view> entries;
 	};
-	OKIIDOKU_EXPORT extern const std::vector<Set> sets;
-	OKIIDOKU_EXPORT extern const std::vector<size_t> top_set_preferences;
+	/* OKIIDOKU_EXPORT */ extern const std::vector<Set> sets;
+	/* OKIIDOKU_EXPORT */ extern const std::vector<size_t> top_set_preferences;
 }
 #endif

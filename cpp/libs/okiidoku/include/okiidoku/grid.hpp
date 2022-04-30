@@ -78,17 +78,17 @@ namespace okiidoku::mono {
 		std::array<val_t, T::O4> cells_;
 	};
 
-	template<Order O> OKIIDOKU_EXPORT [[nodiscard, gnu::const]] constexpr typename traits<O>::o2i_t rmi_to_row(const typename traits<O>::o4i_t index) noexcept { return static_cast<traits<O>::o2i_t>(index / (traits<O>::O2)); }
-	template<Order O> OKIIDOKU_EXPORT [[nodiscard, gnu::const]] constexpr typename traits<O>::o2i_t rmi_to_col(const typename traits<O>::o4i_t index) noexcept { return static_cast<traits<O>::o2i_t>(index % (traits<O>::O2)); }
-	template<Order O> OKIIDOKU_EXPORT [[nodiscard, gnu::const]] constexpr typename traits<O>::o2i_t rmi_to_box(const typename traits<O>::o2i_t row, const typename traits<O>::o2i_t col) noexcept {
+	template<Order O> [[nodiscard, gnu::const]] constexpr typename traits<O>::o2i_t rmi_to_row(const typename traits<O>::o4i_t index) noexcept { return static_cast<traits<O>::o2i_t>(index / (traits<O>::O2)); }
+	template<Order O> [[nodiscard, gnu::const]] constexpr typename traits<O>::o2i_t rmi_to_col(const typename traits<O>::o4i_t index) noexcept { return static_cast<traits<O>::o2i_t>(index % (traits<O>::O2)); }
+	template<Order O> [[nodiscard, gnu::const]] constexpr typename traits<O>::o2i_t rmi_to_box(const typename traits<O>::o2i_t row, const typename traits<O>::o2i_t col) noexcept {
 		return static_cast<traits<O>::o2i_t>((row / O) * O) + (col / O);
 	}
 	template<Order O> [[nodiscard, gnu::const]]
-	OKIIDOKU_EXPORT constexpr typename traits<O>::o2i_t rmi_to_box(const typename traits<O>::o4i_t index) noexcept {
+	constexpr typename traits<O>::o2i_t rmi_to_box(const typename traits<O>::o4i_t index) noexcept {
 		return rmi_to_box<O>(rmi_to_row<O>(index), rmi_to_col<O>(index));
 	}
 
-	template<Order O> OKIIDOKU_EXPORT [[nodiscard, gnu::const]]
+	template<Order O> [[nodiscard, gnu::const]]
 	constexpr bool cells_share_house(typename traits<O>::o4i_t c1, typename traits<O>::o4i_t c2) noexcept {
 		return (rmi_to_row<O>(c1) == rmi_to_row<O>(c2))
 			||  (rmi_to_col<O>(c1) == rmi_to_col<O>(c2))

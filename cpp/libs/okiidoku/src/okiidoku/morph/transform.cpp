@@ -4,7 +4,7 @@
 
 namespace okiidoku::mono::morph {
 
-	template<Order O>
+	template<Order O> requires(is_order_compiled(O))
 	void Transformation<O>::apply_from_to(const Grid<O>& src_grid, Grid<O>& dest_grid) const noexcept {
 		for (o2i_t src_row {0}; src_row < T::O2; ++src_row) {
 		for (o2i_t src_col {0}; src_col < T::O2; ++src_col) {
@@ -17,14 +17,14 @@ namespace okiidoku::mono::morph {
 	}
 
 
-	template<Order O>
+	template<Order O> requires(is_order_compiled(O))
 	void Transformation<O>::apply_in_place(Grid<O>& grid) const noexcept {
 		const Grid<O> copy {grid};
 		apply_from_to(copy, grid);
 	}
 
 
-	template<Order O>
+	template<Order O> requires(is_order_compiled(O))
 	Transformation<O> Transformation<O>::inverted() const noexcept {
 		Transformation<O> _;
 		for (o2i_t i {0}; i < T::O2; ++i) {

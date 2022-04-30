@@ -10,10 +10,13 @@ set(CMAKE_CXX_STANDARD 20 CACHE STRING "The C++ standard to use")
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_CXX_EXTENSIONS FALSE)
 if(MSVC)
+	# TODO.mid newest MSVC requires CXX_STANDARD_23 to add the /std:c++latest flag, which allows using <ranges>
 	add_compile_options(
-		/EHsc # https://docs.microsoft.com/en-us/cpp/build/reference/eh-exception-handling-model?view=msvc-170#standard-c-exception-handling
-		/W4 /WX
-		/wd5030 # disable the "unrecognized attribute" warning. unfortunately needed or else MSVC warns for gnu-prefixed attributes.
+		/permissive-  # https://discourse.cmake.org/t/cxx-extensions-and-permissive/1994
+		/EHsc         # https://docs.microsoft.com/en-us/cpp/build/reference/eh-exception-handling-model#standard-c-exception-handling
+		/volatile:iso # https://docs.microsoft.com/en-us/cpp/build/reference/volatile-volatile-keyword-interpretation#remarks
+		/W4 /WX       # highest warning level and treat link warnings as errors.
+		/wd5030       # disable the "unrecognized attribute" warning. unfortunately needed or else MSVC warns for gnu-prefixed attributes.
 	)
 else()
 	add_compile_options(
@@ -23,12 +26,15 @@ else()
 		-Wconversion # -Wsign-conversion
 		-Wimplicit-fallthrough=5
 		-Wshadow -Woverloaded-virtual
+
 		-march=native # generated code meant only to run on compiling machine. for the speedup.
 		# TODO.wait see https://gcc.gnu.org/gcc-12/changes.html#uninitialized
 	)
 endif()
 
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+
+# set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 set(CMAKE_VISIBILITY_INLINES_HIDDEN TRUE)
 include(GNUInstallDirs)

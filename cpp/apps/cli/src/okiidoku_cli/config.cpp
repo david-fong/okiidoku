@@ -36,19 +36,21 @@ namespace okiidoku::cli {
 		order_ = new_order;
 	}
 
-	void Config::order(const std::string_view new_order_str) {
-		if (new_order_str.empty()) {
+	void Config::order(const std::string_view arg) {
+		if (arg.empty()) {
 			std::cout << "is: " << order() << std::endl;
 			return;
 		}
 		int new_order {};
-		const auto parse_result {std::from_chars(new_order_str.begin(), new_order_str.end(), new_order)};
+		const auto parse_result {std::from_chars(
+			arg.data(), arg.data()+arg.size(), new_order
+		)};
 		if (parse_result.ec == std::errc{} && is_order_compiled(new_order)) {
 			order(new_order);
 			return;
 		}
 		std::cout
-			<< str::red.on << '"' << new_order_str << "\" is not a valid order.\n" << str::red.off
+			<< str::red.on << '"' << arg << "\" is not a valid order.\n" << str::red.off
 			<< "ORDER OPTIONS: ";
 			#define OKIIDOKU_FOR_COMPILED_O(O_) \
 				std::cout << #O_ << ", ";

@@ -21,12 +21,14 @@ namespace okiidoku::mono::morph::detail {
 		using o1i_t = T::o1i_t;
 		using o2i_t = T::o2i_t;
 		using o4i_t = T::o4i_t;
+		using mapping_t = Transformation<O>::mapping_t;
+
 		struct State final {
 			mono::detail::Gridlike<O, Rel<O>> rel_table;
 			label_map_t<O> to_og;
 			TieLinks<O, 2> ties {};
 			explicit constexpr State(const Grid<O>& grid) noexcept: rel_table{make_rel_table<O>(grid)} {
-				std::iota(to_og.begin(), to_og.end(), 0);
+				std::iota(to_og.begin(), to_og.end(), mapping_t{0});
 			}
 			bool has_ties() const { return ties.has_unresolved(); }
 		};
@@ -37,12 +39,12 @@ namespace okiidoku::mono::morph::detail {
 	};
 
 
-	template<Order O>
+	template<Order O> requires(is_order_compiled(O))
 	void CanonLabel<O>::do_a_pass_(CanonLabel<O>::State& s) {
 		mono::detail::Gridlike<O, Rel<O>> scratch;
 
 		label_map_t<O> to_tied;
-		std::iota(to_tied.begin(), to_tied.end(), 0);
+		std::iota(to_tied.begin(), to_tied.end(), mapping_t{0});
 		for (const auto tie : s.ties) {
 			if (tie.size() == 1) [[likely]] { continue; }
 			for (const auto rel_i : tie) {
@@ -87,7 +89,7 @@ namespace okiidoku::mono::morph::detail {
 	}
 
 
-	template<Order O>
+	template<Order O> requires(is_order_compiled(O))
 	label_map_t<O> CanonLabel<O>::do_it(Grid<O>& grid) {
 		const label_map_t<O> label_og_to_canon {[&](){
 			State s(grid);
@@ -107,7 +109,7 @@ namespace okiidoku::mono::morph::detail {
 
 			label_map_t<O> _;
 			for (o2i_t canon_i {0}; canon_i < T::O2; ++canon_i) {
-				_[s.to_og[canon_i]] = static_cast<Transformation<O>::mapping_t>(canon_i);
+				_[s.to_og[canon_i]] = static_cast<mapping_t>(canon_i);
 			}
 			return _;
 		}()};

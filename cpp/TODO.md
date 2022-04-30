@@ -2,15 +2,16 @@
 
 ## Roadmap
 
-- draft up an examples folder
 - test CMake config with different compilers (gcc, clang, apple-clang, MSVC) and try to fix configuration issues
 - draft database
+  - (and update tests and examples)
 - refactor and improve canonicalization
 - compare backtracking and stochastic search statistics
 - implement grid-serdes translator tool
 - refine database
 - create a separate github repo for data. add as submodule?
 - deductive reasoning + backtracking solver
+  - (add tests and examples)
 - emscripten build and website
 - puzzle creation experiments (see [bottom section](#interesting-questions-for-further-research))
 - minlexing canonicalization

@@ -29,7 +29,7 @@ namespace okiidoku::mono::morph::detail {
 		// Grid<O>& src_grid;
 
 		struct PolarState final {
-			line_map_t<O> to_og {Transformation<O>::identity.row_map};
+			line_map_t<O> to_og {Transformation<O>::identity_row_map};
 			TieLinks<O, 2> line_ties {};
 			TieLinks<O, 1> chute_ties {};
 
@@ -49,7 +49,7 @@ namespace okiidoku::mono::morph::detail {
 	};
 
 
-	template<Order O>
+	template<Order O> requires(is_order_compiled(O))
 	Grid<O> CanonPlace<O>::make_table_for_a_pass(
 		const Grid<O>& src_grid,
 		const bool is_transpose,
@@ -58,7 +58,7 @@ namespace okiidoku::mono::morph::detail {
 	) {
 		Grid<O> table; {
 			const auto t {Transformation<O>{
-				Transformation<O>::identity.label_map,
+				Transformation<O>::identity_label_map,
 				row_state.to_og,
 				col_state.to_og,
 				is_transpose,
@@ -76,7 +76,7 @@ namespace okiidoku::mono::morph::detail {
 			// loop over orthogonal partially-resolved chute ranges to normalize:
 			{
 				std::array<o1i_t, T::O1> resolve;
-				std::iota(resolve.begin(), resolve.end(), 0);
+				std::iota(resolve.begin(), resolve.end(), o1i_t{0});
 				for (const auto t : ortho.chute_ties) {
 					namespace v = std::views;
 					std::ranges::sort(resolve | v::drop(t.begin_) | v::take(t.size()), [&](auto a, auto b){
@@ -97,10 +97,10 @@ namespace okiidoku::mono::morph::detail {
 	}
 
 
-	template<Order O>
+	template<Order O> requires(is_order_compiled(O))
 	void CanonPlace<O>::PolarState::do_a_pass(const Grid<O>& table) {
 		std::array<mapping_t, T::O2> to_tied;
-		std::iota(to_tied.begin(), to_tied.end(), 0);
+		std::iota(to_tied.begin(), to_tied.end(), mapping_t{0});
 		for (const auto tie : line_ties) {
 			// note: intentionally do not skip ties here since updated table
 			// rows could likely be used by chute tie resolution.
@@ -149,7 +149,7 @@ namespace okiidoku::mono::morph::detail {
 	}
 
 
-	template<Order O>
+	template<Order O> requires(is_order_compiled(O))
 	Transformation<O> CanonPlace<O>::do_it(Grid<O>& src_grid) {
 		PolarState row_state {};
 		PolarState col_state {};
@@ -173,7 +173,7 @@ namespace okiidoku::mono::morph::detail {
 		}
 
 		Transformation<O> transformation {
-			.label_map {Transformation<O>::identity.label_map},
+			.label_map {Transformation<O>::identity_label_map}, // TODO.low does this need to be state? or will the default member initializer definition get used?
 			.row_map {row_state.to_og},
 			.col_map {col_state.to_og},
 			.transpose {false},

@@ -18,7 +18,7 @@ namespace okiidoku::mono::db::serdes {
 		using o2i_t = T::o2i_t;
 		using o4i_t = T::o4i_t;
 
-		assert(is_grid_filled<O>(grid));
+		assert(grid_is_filled<O>(grid));
 		unsigned bytes_written {0};
 
 		o2x_smol_t row_pop {0};

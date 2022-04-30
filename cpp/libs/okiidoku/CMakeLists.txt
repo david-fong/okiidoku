@@ -1,4 +1,4 @@
-add_library(okiidoku SHARED
+add_library(okiidoku SHARED # TODO.mid having trouble getting SHARED working with MSVC. workaround is to just use STATIC for MSVC.
 	src/okiidoku/grid.cpp
 	src/okiidoku/gen.cpp
 	src/okiidoku/fmt/emoji.cpp

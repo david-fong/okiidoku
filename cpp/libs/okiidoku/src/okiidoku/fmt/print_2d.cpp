@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <algorithm>
+#include <numeric> // iota
 #include <vector>
 #include <cassert>
 
@@ -13,7 +14,7 @@ namespace okiidoku {
 		const unsigned O2 {O*O};
 		const auto& prefs {emoji::top_set_preferences};
 		std::vector<size_t> shuffled_sets(emoji::sets.size());
-		std::iota(shuffled_sets.begin(), shuffled_sets.end(), 0);
+		std::iota(shuffled_sets.begin(), shuffled_sets.end(), size_t{0});
 		{
 			std::lock_guard rng_guard_ {shared_rng.mutex};
 			for (

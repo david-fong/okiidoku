@@ -16,7 +16,7 @@ namespace okiidoku::mono {
 		using o2i_t = T::o2i_t;
 		{
 			std::array<default_grid_val_t<O>, T::O2> example_row;
-			std::iota(example_row.begin(), example_row.end(), 0); // TODO.wait c++23 ranges::iota
+			std::iota(example_row.begin(), example_row.end(), default_grid_val_t<O>{0}); // TODO.wait c++23 ranges::iota
 			for (o2i_t row {0}; row < T::O2; ++row) {
 				const auto span {grid.row_at(row)};
 				std::copy(example_row.cbegin(), example_row.cend(), span.begin());

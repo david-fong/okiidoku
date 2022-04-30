@@ -76,7 +76,7 @@ namespace okiidoku {
 
 			// copy-from-mono constructor
 			template<Order O>
-			explicit ContainerBase(typename Adaptor::type<O> mono_obj) noexcept: variant_(mono_obj) {}
+			explicit ContainerBase(typename Adaptor::template type<O> mono_obj) noexcept: variant_(mono_obj) {}
 
 			// default-for-order constructor.
 			// If the provided order is not compiled, defaults to the lowest compiled order.
@@ -84,7 +84,7 @@ namespace okiidoku {
 			explicit ContainerBase(const Order O) noexcept requires(!Adaptor::is_ref): variant_([O]{
 				switch (O) {
 				#define OKIIDOKU_FOR_COMPILED_O(O_) \
-				case O_: return variant_t(typename Adaptor::type<O_>());
+				case O_: return variant_t(typename Adaptor::template type<O_>());
 				OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 				#undef OKIIDOKU_FOR_COMPILED_O
 				default: return variant_t(); // default to the lowest compiled order.
@@ -103,8 +103,8 @@ namespace okiidoku {
 
 			// Sugar wrapper around `std::get` for the underlying variant.
 			// Remember- `std::get` will throw if the requested type is not currently held by the variant.
-			template<Order O> [[nodiscard, gnu::pure]]       typename Adaptor::type<O>& get_mono_exact()       { return std::get<typename Adaptor::type<O>>(variant_); }
-			template<Order O> [[nodiscard, gnu::pure]] const typename Adaptor::type<O>& get_mono_exact() const { return std::get<typename Adaptor::type<O>>(variant_); }
+			template<Order O> [[nodiscard, gnu::pure]]       typename Adaptor::template type<O>& get_mono_exact()       { return std::get<typename Adaptor::type<O>>(variant_); }
+			template<Order O> [[nodiscard, gnu::pure]] const typename Adaptor::template type<O>& get_mono_exact() const { return std::get<typename Adaptor::type<O>>(variant_); }
 		private:
 			variant_t variant_;
 		};
