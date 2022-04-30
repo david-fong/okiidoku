@@ -11,9 +11,9 @@ namespace okiidoku::mono {
 	template<Order O> requires(is_order_compiled(O))
 	void generate(Grid<O>& grid, SharedRng& shared_rng) {
 		using T = traits<O>;
-		// using val_t = T::o2x_smol_t;
-		using o2x_t = T::o2x_t;
-		using o2i_t = T::o2i_t;
+		// using val_t = typename T::o2x_smol_t;
+		using o2x_t = typename T::o2x_t;
+		using o2i_t = typename T::o2i_t;
 		{
 			std::array<default_grid_val_t<O>, T::O2> example_row;
 			std::iota(example_row.begin(), example_row.end(), default_grid_val_t<O>{0}); // TODO.wait c++23 ranges::iota

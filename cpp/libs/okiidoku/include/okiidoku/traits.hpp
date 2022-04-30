@@ -91,7 +91,7 @@ namespace okiidoku::mono {
 			constexpr o2_bits(): val_{0} {}
 			template<class T>
 			requires std::is_integral_v<T> && (!std::is_same_v<T, val_t>) && std::is_convertible_v<T, val_t>
-			constexpr o2_bits(T val): val_{static_cast<val_t>(val)} {}
+			constexpr o2_bits(T val): val_{static_cast<val_t>(static_cast<std::make_unsigned_t<T>>(val))} {}
 			constexpr o2_bits(val_t val): val_{val} {}
 
 			[[nodiscard, gnu::pure]] typename traits<O>::o2x_t count() const noexcept {
@@ -163,7 +163,7 @@ namespace okiidoku::mono {
 
 
 	template<unsigned O>
-	using default_grid_val_t = traits<O>::o2i_smol_t;
+	using default_grid_val_t = typename traits<O>::o2i_smol_t;
 }
 
 

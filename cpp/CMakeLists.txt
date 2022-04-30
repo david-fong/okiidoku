@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 project(okiidoku
 	VERSION 0.0.1
-	DESCRIPTION "sudoku solution generator and canonicalizer"
+	DESCRIPTION "sudoku solution generator, canonicalizer, and db"
 	HOMEPAGE_URL "https://github.com/david-fong/okiidoku"
 	LANGUAGES CXX
 )
@@ -21,15 +21,24 @@ if(MSVC)
 else()
 	add_compile_options(
 		-Wall -Wextra -Wpedantic -Wfatal-errors #-Werror
-		-Wold-style-cast -Wcast-qual -Wcast-align -Wuseless-cast
+		-Wold-style-cast -Wcast-qual -Wcast-align 
 		-Wformat=2
 		-Wconversion # -Wsign-conversion
-		-Wimplicit-fallthrough=5
 		-Wshadow -Woverloaded-virtual
 
 		-march=native # generated code meant only to run on compiling machine. for the speedup.
 		# TODO.wait see https://gcc.gnu.org/gcc-12/changes.html#uninitialized
 	)
+	if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+		add_compile_options(
+			-Wimplicit-fallthrough
+		)
+	elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+		add_compile_options(
+			-Wuseless-cast
+			-Wimplicit-fallthrough=5
+		)
+	endif()
 endif()
 
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)

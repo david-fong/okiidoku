@@ -19,7 +19,7 @@ namespace okiidoku::mono::puzzle {
 
 	// contract: grid is filled or a proper puzzle.
 	template<Order O> requires(is_order_compiled(O))
-	OKIIDOKU_EXPORT [[nodiscard]] bool is_minimal(const Grid<O>&);
+	[[nodiscard]] OKIIDOKU_EXPORT bool is_minimal(const Grid<O>&);
 }
 
 
@@ -31,6 +31,6 @@ namespace okiidoku::visitor::puzzle {
 
 	// contract: grid is filled or a proper puzzle.
 	template<Order O> requires(is_order_compiled(O))
-	OKIIDOKU_EXPORT [[nodiscard]] bool is_minimal(const Grid<O>&);
+	[[nodiscard]] OKIIDOKU_EXPORT bool is_minimal(const Grid<O>&);
 }
 #endif

@@ -10,12 +10,12 @@ namespace okiidoku::mono::morph {
 	template<Order O> requires(is_order_compiled(O))
 	struct OKIIDOKU_EXPORT Transformation final {
 		using T = traits<O>;
-		using mapping_t = T::o2x_smol_t;
-		using o1i_t = T::o1i_t;
-		using o2i_t = T::o2i_t;
+		using mapping_t = typename T::o2x_smol_t;
+		using o1i_t = typename T::o1i_t;
+		using o2i_t = typename T::o2i_t;
 
 		using label_map_t = std::array<mapping_t, T::O2>;
-		using line_map_t = std::array<std::array<mapping_t, T::O1>, T::O1>;
+		using  line_map_t = std::array<std::array<mapping_t, T::O1>, T::O1>;
 
 		static constexpr label_map_t identity_label_map {[]{ label_map_t _; for (o2i_t i {0}; i < T::O2; ++i) { _[i] = static_cast<mapping_t>(i); } return _; }()};
 		static constexpr  line_map_t identity_row_map   {[]{ line_map_t _;  for (o2i_t i {0}; i < T::O2; ++i) { _[i/T::O1][i%T::O1] = static_cast<mapping_t>(i); } return _; }()};
@@ -27,7 +27,8 @@ namespace okiidoku::mono::morph {
 		line_map_t col_map {identity_col_map};
 		bool transpose {identity_transpose};
 
-		constexpr bool operator==(const Transformation<O>&) const = default;
+		friend constexpr bool operator==(const Transformation&, const Transformation&) = default;
+		friend constexpr std::strong_ordering operator<=>(const Transformation&, const Transformation&) = default;
 
 		void apply_from_to(const Grid<O>& src, Grid<O>& dest) const noexcept;
 

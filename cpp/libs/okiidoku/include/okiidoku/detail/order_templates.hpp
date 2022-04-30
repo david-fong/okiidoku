@@ -7,6 +7,7 @@
 
 #include <array>
 #include <variant>
+#include <compare>
 
 namespace okiidoku {
 
@@ -72,7 +73,8 @@ namespace okiidoku {
 		public:
 			using variant_t = OrderVariantFor<Adaptor>;
 
-			// TODO.low delete the default constructor if Adaptor::is_ref is true.
+			// delete the default constructor if Adaptor::is_ref is true.
+			ContainerBase() requires(Adaptor::is_ref) = delete;
 
 			// copy-from-mono constructor
 			template<Order O>
@@ -94,6 +96,8 @@ namespace okiidoku {
 			ContainerBase(const variant_t& variant) noexcept: variant_(variant) {}
 			ContainerBase(variant_t&& variant) noexcept: variant_(std::forward<variant_t>(variant)) {}
 
+			friend constexpr bool operator==(const ContainerBase&, const ContainerBase&) noexcept = default;
+
 			[[nodiscard, gnu::pure]] constexpr Order get_mono_order() const noexcept { return compiled_orders[variant_.index()]; }
 
 			// Though public, you shouldn't need to use this. The rest of the visitor
@@ -103,11 +107,29 @@ namespace okiidoku {
 
 			// Sugar wrapper around `std::get` for the underlying variant.
 			// Remember- `std::get` will throw if the requested type is not currently held by the variant.
-			template<Order O> [[nodiscard, gnu::pure]]       typename Adaptor::template type<O>& get_mono_exact()       { return std::get<typename Adaptor::type<O>>(variant_); }
-			template<Order O> [[nodiscard, gnu::pure]] const typename Adaptor::template type<O>& get_mono_exact() const { return std::get<typename Adaptor::type<O>>(variant_); }
+			template<Order O> [[nodiscard, gnu::pure]]       typename Adaptor::template type<O>& get_mono_exact()       { return std::get<typename Adaptor::template type<O>>(variant_); }
+			template<Order O> [[nodiscard, gnu::pure]] const typename Adaptor::template type<O>& get_mono_exact() const { return std::get<typename Adaptor::template type<O>>(variant_); }
 		private:
 			variant_t variant_;
 		};
+	}
+}
+		
+template<okiidoku::visitor::detail::MonoToVisitorAdaptor Adaptor>
+std::compare_three_way_result<typename Adaptor::template type<okiidoku::compiled_orders[0]>> operator<=>(
+	const okiidoku::visitor::detail::ContainerBase<Adaptor>& vis_a,
+	const okiidoku::visitor::detail::ContainerBase<Adaptor>& vis_b
+) noexcept {
+	if (const auto cmp {vis_a.get_mono_order() <=> vis_b.get_mono_order()}; std::is_neq(cmp)) {
+		return cmp;
+	}
+	switch (vis_a.get_mono_order()) {
+	#define OKIIDOKU_FOR_COMPILED_O(O_) \
+	case O_: return vis_a.template get_mono_exact<O_>() <=> vis_b.template get_mono_exact<O_>();
+	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
+	#undef OKIIDOKU_FOR_COMPILED_O
+	// TODO.wait std::unreachable
+	default: return std::compare_three_way_result<typename Adaptor::template type<okiidoku::compiled_orders[0]>>::equivalent;
 	}
 }
 #endif

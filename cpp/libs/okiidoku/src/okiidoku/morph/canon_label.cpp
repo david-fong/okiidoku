@@ -11,17 +11,17 @@
 namespace okiidoku::mono::morph::detail {
 
 	template<Order O>
-	using label_map_t = Transformation<O>::label_map_t;
+	using label_map_t = typename Transformation<O>::label_map_t;
 
 
 	template<Order O> requires(is_order_compiled(O))
 	class CanonLabel final {
 		using T = traits<O>;
-		using val_t = T::o2i_smol_t;
-		using o1i_t = T::o1i_t;
-		using o2i_t = T::o2i_t;
-		using o4i_t = T::o4i_t;
-		using mapping_t = Transformation<O>::mapping_t;
+		using val_t = typename T::o2i_smol_t;
+		using o1i_t = typename T::o1i_t;
+		using o2i_t = typename T::o2i_t;
+		using o4i_t = typename T::o4i_t;
+		using mapping_t = typename Transformation<O>::mapping_t;
 
 		struct State final {
 			mono::detail::Gridlike<O, Rel<O>> rel_table;

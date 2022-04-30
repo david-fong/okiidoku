@@ -8,8 +8,8 @@ namespace okiidoku::mono {
 	template<Order O> requires(is_order_compiled(O))
 	bool grid_follows_rule(const Grid<O>& grid) noexcept {
 		using T = traits<O>;
-		using o2i_t = T::o2i_t;
-		using has_mask_t = T::o2_bits_fast;
+		using o2i_t = typename T::o2i_t;
+		using has_mask_t = typename T::o2_bits_fast;
 
 		std::array<has_mask_t, T::O2> rows_has_ {};
 		std::array<has_mask_t, T::O2> cols_has_ {};
@@ -42,7 +42,7 @@ namespace okiidoku::mono {
 	template<Order O> requires(is_order_compiled(O))
 	bool grid_is_filled(const Grid<O>& grid) noexcept {
 		using T = traits<O>;
-		using o4i_t = T::o4i_t;
+		using o4i_t = typename T::o4i_t;
 		for (o4i_t i {0}; i < T::O4; ++i) {
 			const auto val {grid.at_row_major(i)};
 			assert(val <= T::O2);
@@ -72,19 +72,6 @@ namespace okiidoku::visitor {
 		return std::visit([&](auto& mono_grid){
 			return mono::grid_is_filled(mono_grid);
 		}, vis_grid.get_mono_variant());
-	}
-
-	std::strong_ordering operator<=>(const Grid& vis_a, const Grid& vis_b) noexcept {
-		if (const auto cmp {vis_a.get_mono_order() <=> vis_b.get_mono_order()}; std::is_neq(cmp)) {
-			return cmp;
-		}
-		switch (vis_a.get_mono_order()) {
-		#define OKIIDOKU_FOR_COMPILED_O(O_) \
-		case O_: return vis_a.get_mono_exact<O_>() <=> vis_b.get_mono_exact<O_>();
-		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-		#undef OKIIDOKU_FOR_COMPILED_O
-		}
-		return std::strong_ordering::equivalent; // TODO.wait std::unreachable
 	}
 
 

@@ -34,6 +34,8 @@ things I got wrong before which I couldn't understand based on gcc's error messa
 
 ## more
 
+- [equality and ordering operators](https://brevzin.github.io/c++/2019/07/28/comparisons-cpp20/)
+
 - on Shared Library symbol visibility
   - https://gcc.gnu.org/wiki/Visibility
   - https://www.cs.miami.edu/home/burt/learning/Csc521.091/docs/dsohowto.pdf

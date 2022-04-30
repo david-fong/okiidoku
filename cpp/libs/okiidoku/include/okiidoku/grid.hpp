@@ -22,12 +22,12 @@ namespace okiidoku::mono {
 	// Returns false if any cells in a same house contain the same value.
 	// Can be used with incomplete grids.
 	template<Order O> requires(is_order_compiled(O))
-	OKIIDOKU_EXPORT [[nodiscard]]
+	[[nodiscard]] OKIIDOKU_EXPORT
 	bool grid_follows_rule(const Grid<O>&) noexcept;
 
 	// Returns true if none of the cells are empty (equal to O2). Does _not_ check if sudoku follows the one rule.
 	template<Order O> requires(is_order_compiled(O))
-	OKIIDOKU_EXPORT [[nodiscard]]
+	[[nodiscard]] OKIIDOKU_EXPORT
 	bool grid_is_filled(const Grid<O>&) noexcept;
 
 
@@ -37,10 +37,10 @@ namespace okiidoku::mono {
 	public:
 		using val_t = V_;
 		using T = traits<O>;
-		using o2x_t = T::o2x_t;
-		using o2i_t = T::o2i_t;
-		using o4x_t = T::o4x_t;
-		using o4i_t = T::o4i_t;
+		using o2x_t = typename T::o2x_t;
+		using o2i_t = typename T::o2i_t;
+		using o4x_t = typename T::o4x_t;
+		using o4i_t = typename T::o4i_t;
 
 		// lexicographical comparison over row-major-order traversal of cells.
 		friend std::strong_ordering operator<=>(const Gridlike<O, V_>& a, const Gridlike<O, V_>& b) noexcept = default;
@@ -72,16 +72,16 @@ namespace okiidoku::mono {
 		template<class T_row> requires(Any_o2ix<O, T_row>)
 		[[nodiscard]] constexpr std::span<const val_t, T::O2> row_at(const T_row i) const noexcept { return static_cast<std::span<const val_t, T::O2>>(std::span(cells_).subspan(T::O2*i, T::O2)); }
 
-		[[nodiscard]] constexpr auto rows() noexcept { namespace v = std::views; return v::iota(o2i_t{0}, T::O2) | v::transform([&](auto r){ return row_at(r); }); }
+		[[nodiscard]] constexpr auto rows() noexcept { namespace v = std::views; return v::iota(o2i_t{0}, o2i_t{T::O2}) | v::transform([&](auto r){ return row_at(r); }); }
 		// [[nodiscard]] constexpr auto rows() const noexcept { namespace v = std::views; return v::iota(o2i_t{0}, T::O2) | v::transform([&](auto r){ return row_at(r); }); }
 	private:
 		std::array<val_t, T::O4> cells_;
 	};
 
-	template<Order O> [[nodiscard, gnu::const]] constexpr typename traits<O>::o2i_t rmi_to_row(const typename traits<O>::o4i_t index) noexcept { return static_cast<traits<O>::o2i_t>(index / (traits<O>::O2)); }
-	template<Order O> [[nodiscard, gnu::const]] constexpr typename traits<O>::o2i_t rmi_to_col(const typename traits<O>::o4i_t index) noexcept { return static_cast<traits<O>::o2i_t>(index % (traits<O>::O2)); }
+	template<Order O> [[nodiscard, gnu::const]] constexpr typename traits<O>::o2i_t rmi_to_row(const typename traits<O>::o4i_t index) noexcept { return static_cast<typename traits<O>::o2i_t>(index / (traits<O>::O2)); }
+	template<Order O> [[nodiscard, gnu::const]] constexpr typename traits<O>::o2i_t rmi_to_col(const typename traits<O>::o4i_t index) noexcept { return static_cast<typename traits<O>::o2i_t>(index % (traits<O>::O2)); }
 	template<Order O> [[nodiscard, gnu::const]] constexpr typename traits<O>::o2i_t rmi_to_box(const typename traits<O>::o2i_t row, const typename traits<O>::o2i_t col) noexcept {
-		return static_cast<traits<O>::o2i_t>((row / O) * O) + (col / O);
+		return static_cast<typename traits<O>::o2i_t>((row / O) * O) + (col / O);
 	}
 	template<Order O> [[nodiscard, gnu::const]]
 	constexpr typename traits<O>::o2i_t rmi_to_box(const typename traits<O>::o4i_t index) noexcept {
@@ -99,7 +99,7 @@ namespace okiidoku::mono {
 
 	template<Order O>
 	struct OKIIDOKU_EXPORT chute_box_masks final {
-		using M = traits<O>::o2_bits_smol;
+		using M = typename traits<O>::o2_bits_smol;
 		using T = std::array<M, O>;
 		static inline const T row {[]{ // TODO.wait re-constexpr this when bitset gets constexpr :/ https://github.com/cplusplus/papers/issues/1087
 			T _ {0};
@@ -127,11 +127,11 @@ namespace okiidoku::visitor {
 
 	// Returns false if any cells in a same house contain the same value.
 	// Can be used with incomplete grids.
-	OKIIDOKU_EXPORT [[nodiscard]]
+	[[nodiscard]] OKIIDOKU_EXPORT
 	bool grid_follows_rule(const Grid&) noexcept;
 
 	// Returns true if none of the cells are empty (equal to O2). Does _not_ check if sudoku is valid.
-	OKIIDOKU_EXPORT [[nodiscard]]
+	[[nodiscard]] OKIIDOKU_EXPORT
 	bool grid_is_filled(const Grid&) noexcept;
 
 	namespace detail {

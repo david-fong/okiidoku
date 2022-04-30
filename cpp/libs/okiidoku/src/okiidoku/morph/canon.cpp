@@ -5,7 +5,7 @@
 namespace okiidoku::mono::morph::detail {
 	// contract: the span is a _complete_, valid grid.
 	template<Order O> requires(is_order_compiled(O))
-	Transformation<O>::label_map_t canon_label(Grid<O>&);
+	typename Transformation<O>::label_map_t canon_label(Grid<O>&);
 
 	// contract: the span is a _complete_, valid grid.
 	template<Order O> requires(is_order_compiled(O))

@@ -22,7 +22,11 @@ namespace okiidoku {
 				b != prefs.back();
 				b = e, ++e_i_, e = (e_i_ == prefs.size() ? emoji::sets.size() : prefs[e_i_])
 			) {
-				std::shuffle(shuffled_sets.begin() + b, shuffled_sets.begin() + e, shared_rng.rng);
+				std::shuffle(
+					std::next(shuffled_sets.begin(), static_cast<long>(b)),
+					std::next(shuffled_sets.begin(), static_cast<long>(e)),
+					shared_rng.rng
+				);
 			}
 		}
 		// first try to find a single set large enough:

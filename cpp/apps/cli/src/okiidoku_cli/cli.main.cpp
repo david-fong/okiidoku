@@ -17,10 +17,13 @@ ARGUMENTS
 int main(const int argc, char const *const argv[]) {
 	okiidoku::util::setup_console();
 
-	const unsigned int user_order {(argc > 1) ? std::stoi(argv[1]) : okiidoku::compiled_orders[0]};
+	const unsigned user_order {(argc > 1)
+		? static_cast<unsigned>(std::stoi(argv[1]))
+		: okiidoku::compiled_orders[0]
+	};
 	const auto srand_key {[&]() -> std::uint_fast64_t {
 		if (argc > 2 && !std::string(argv[2]).empty()) {
-			return std::stoi(argv[2]);
+			return static_cast<std::uint_fast64_t>(std::stoi(argv[2]));
 		} else {
 			return std::random_device()();
 		}

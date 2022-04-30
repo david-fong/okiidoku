@@ -21,10 +21,6 @@
 
 ## Misc List
 
-- Try using cmake's `CMAKE_LINK_WHAT_YOU_USE` and `CMAKE_CXX_INCLUDE_WHAT_YOU_USE` things.
-
-- read about how dllexport works for MSVC and find out why the current usage is insufficient for class methods.
-
 - create a custom BitsO2 class that attempts to use efficient x86 instructions when possible and falls back to something portable otherwise.
   - Most of the time in this library, there will not need to be a whole lot of these. For scanning a grid row-major-wise, that's 1+O1+O2 of them. If one is needed for each house, that's 3*O2 of them. Not sure if there would be significant gains from customizing storage to be more compact than u64 granularity...
   - Try to write clear and strict contracts to prevent having to handle excess bits (those that exist higher than the bits that are actually required).

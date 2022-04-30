@@ -12,11 +12,11 @@ namespace okiidoku::mono::db::serdes {
 	template<Order O>
 	void print_filled(std::ostream& os, const Grid<O>& grid) {
 		using T = traits<O>;
-		using has_mask_t = T::o2_bits_smol;
-		using o2x_smol_t = T::o2x_smol_t;
-		using o2x_t = T::o2x_t;
-		using o2i_t = T::o2i_t;
-		using o4i_t = T::o4i_t;
+		using has_mask_t = typename T::o2_bits_smol;
+		using o2x_smol_t = typename T::o2x_smol_t;
+		using o2x_t = typename T::o2x_t;
+		using o2i_t = typename T::o2i_t;
+		using o4i_t = typename T::o4i_t;
 
 		assert(grid_is_filled<O>(grid));
 		unsigned bytes_written {0};
@@ -68,7 +68,7 @@ namespace okiidoku::mono::db::serdes {
 					assert(buf_pos <= buf_ceil);
 				}
 				if (buf_pos == buf_ceil) {
-					os.put(buf);
+					os.put(static_cast<char>(buf));
 					buf = 0;
 					buf_pos = 1;
 					++bytes_written;
@@ -85,7 +85,7 @@ namespace okiidoku::mono::db::serdes {
 			}
 		}
 		if (buf_pos > 1) {
-			os.put(buf);
+			os.put(static_cast<char>(buf));
 			++bytes_written;
 		}
 	}

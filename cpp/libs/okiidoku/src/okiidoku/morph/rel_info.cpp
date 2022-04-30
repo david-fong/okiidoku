@@ -15,10 +15,10 @@ namespace okiidoku::mono::morph {
 	template<Order O>
 	detail::Gridlike<O, RelMasks<O>> make_rel_masks_(const Grid<O>& grid) noexcept {
 		using T = traits<O>;
-		using has_mask_t = T::o2_bits_smol;
-		using val_t = T::o2i_smol_t;
-		using o1i_t = T::o1i_t;
-		using o2i_t = T::o2i_t;
+		using has_mask_t = typename T::o2_bits_smol;
+		using val_t = typename T::o2i_smol_t;
+		using o1i_t = typename T::o1i_t;
+		using o2i_t = typename T::o2i_t;
 
 		detail::Gridlike<O, RelMasks<O>> masks {};
 		for (o2i_t line {0}; line < T::O2; ++line) {
@@ -46,9 +46,9 @@ namespace okiidoku::mono::morph {
 	template<Order O> requires(is_order_compiled(O))
 	detail::Gridlike<O, Rel<O>> make_rel_table(const Grid<O>& grid_in) {
 		using T = traits<O>;
-		using has_mask_t = T::o2_bits_smol;
-		using o1i_t = T::o1i_t;
-		using o2i_t = T::o2i_t;
+		using has_mask_t = typename T::o2_bits_smol;
+		using o1i_t = typename T::o1i_t;
+		using o2i_t = typename T::o2i_t;
 		using chute_imbalance_t = chute_imbalance_t<O>;
 
 		const detail::Gridlike<O, RelMasks<O>> masks {make_rel_masks_<O>(grid_in)};
@@ -63,8 +63,8 @@ namespace okiidoku::mono::morph {
 			}
 			const has_mask_t non_polar_mask = mask.boxes_h | mask.boxes_v;
 			const unsigned count {non_polar_mask.count()};
-			rel.count = static_cast<T::o2i_smol_t>(count);
-			rel.polar_count_lesser = static_cast<Rel<O>::polar_count_lesser_t>(std::min(mask.boxes_h.count(), mask.boxes_v.count()));
+			rel.count = static_cast<typename T::o2i_smol_t>(count);
+			rel.polar_count_lesser = static_cast<typename Rel<O>::polar_count_lesser_t>(std::min(mask.boxes_h.count(), mask.boxes_v.count()));
 
 			std::array<chute_imbalance_t, T::O1> h_chute_imbalance;
 			std::array<chute_imbalance_t, T::O1> v_chute_imbalance;
