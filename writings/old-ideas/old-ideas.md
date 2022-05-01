@@ -29,6 +29,9 @@
   - another idea I had along the same lines: make a buffering adapter for batch callbacks. use destructor to flush.
     - If a user wants this, they can still write it themselves.
 
+- ? Refactor names to use terminology suitable for more than just 2 dimensions? Ex. in 2D: row -> `d0i` (as in "dimension-zero index"), col -> `d1i`. But doing so would imply that I'm going to support multiple dimensions... and that's a huge can of worms.
+  - I don't really see myself attempting to do a 3d version of sudoku, and doing this seems like it would make the 2d code harder to read.
+
 ## No Longer Needed
 
 - "smarter"/greedier backtracking: backtracking may be occurring frequently at a coord because of values much earlier in the genpath progress. (wikipedia "backskipping")

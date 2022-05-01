@@ -28,7 +28,7 @@ namespace okiidoku::mono {
 		std::minstd_rand rng_; // other good LCG parameters https://arxiv.org/pdf/2001.05304v3.pdf
 		{
 			std::lock_guard lock_guard {shared_rng.mutex};
-			rng_.seed(shared_rng.rng());
+			rng_.seed(static_cast<unsigned int>(shared_rng.rng()));
 			for (auto row : grid.rows()) {
 				std::ranges::shuffle(row, shared_rng.rng);
 			}

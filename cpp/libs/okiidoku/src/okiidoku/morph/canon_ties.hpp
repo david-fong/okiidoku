@@ -61,7 +61,7 @@ namespace okiidoku::mono::morph {
 			for (const auto tie : *this) {
 				auto begin {tie.begin_};
 				for (auto i {static_cast<link_t>(begin+1)}; i < tie.end_; ++i) {
-					if (!std::invoke(is_eq, i-1, i)) [[likely]] {
+					if (!std::invoke(is_eq, static_cast<link_t>(i-1), i)) [[likely]] {
 						links_[begin] = i;
 						begin = i;
 				}	}

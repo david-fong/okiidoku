@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.23)
 project(okiidoku
 	VERSION 0.0.1
 	DESCRIPTION "sudoku solution generator, canonicalizer, and db"
@@ -12,10 +12,11 @@ set(CMAKE_CXX_EXTENSIONS FALSE)
 if(MSVC)
 	# TODO.mid newest MSVC requires CXX_STANDARD_23 to add the /std:c++latest flag, which allows using <ranges>
 	add_compile_options(
+		/utf-8        # /source-charset:utf-8 (for preprocessor), and /execution-charset:utf8 (for compiler)
 		/permissive-  # https://discourse.cmake.org/t/cxx-extensions-and-permissive/1994
 		/EHsc         # https://docs.microsoft.com/en-us/cpp/build/reference/eh-exception-handling-model#standard-c-exception-handling
 		/volatile:iso # https://docs.microsoft.com/en-us/cpp/build/reference/volatile-volatile-keyword-interpretation#remarks
-		/W4 /WX       # highest warning level and treat link warnings as errors.
+		/W4 #/WX      # highest warning level #and treat warnings as errors.
 		/wd5030       # disable the "unrecognized attribute" warning. unfortunately needed or else MSVC warns for gnu-prefixed attributes.
 	)
 else()

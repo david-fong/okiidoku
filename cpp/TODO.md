@@ -2,9 +2,9 @@
 
 ## Roadmap
 
-- test CMake config with different compilers (gcc, clang, apple-clang, MSVC) and try to fix configuration issues
 - draft database
   - (and update tests and examples)
+- test CMake config with different compilers (gcc, clang, apple-clang, MSVC) and try to fix configuration issues
 - refactor and improve canonicalization
 - compare backtracking and stochastic search statistics
 - implement grid-serdes translator tool
@@ -26,6 +26,11 @@
   - Try to write clear and strict contracts to prevent having to handle excess bits (those that exist higher than the bits that are actually required).
     - The bit flip things are particularly problematic. Currently only used as optimized ways to resetting bits. Could they be removed? The shift operators I think are also only there because I didn't add set/reset methods. Hopefully most of those things can be replaced with just set/reset.
   - The header and implementation could actually be private. Would we want to expose it to users of the library?
+
+- For the MSVC build:
+  - making a shared library feels too complicated. doing all the export annotations sounds like a real pain, and I can't seem to get WINDOWS_EXPORT_ALL_SYMBOLS working. Just make it a static library for windows.
+- For the Clang build:
+  - clang isn't happy with some of the ranges stuff in libstdc++ (the GCC one). Dunno what to do about that. Ranges is pretty new to the standard library...
 
 - [it is allowed in c++ to have template functions and non-template functions with the same name. here are the resulting rules](https://stackoverflow.com/a/16865452/11107541). Could this be used to put the algorithm functions under the same namespace (not in separate "mono" and "visitor" namespace)?
 
@@ -55,8 +60,6 @@
     - For each label, make an array where each index represents another label, and the value is an object containing the left and right distances between them, and the cohabitation count.
     - Hm. So far this seems to suggest a hill-climbing / brute-force-type solution...
     - OR... make an empty commit saying that a solution was implemented using the [Ostrich Algorithm](https://en.wikipedia.org/wiki/Ostrich_algorithm)
-
-- ? Refactor names to use terminology suitable for more than just 2 dimensions? Ex. in 2D: row -> `d0i` (as in "dimension-zero index"), col -> `d1i`. But doing so would imply that I'm going to support multiple dimensions... and that's a huge can of worms.
 
 - Decide what interfaces to support:
   - Probably best to start with just readline and a CLI
