@@ -1,6 +1,7 @@
 #include <okiidoku/grid.hpp>
 
-#include <ranges>
+#include <okiidoku/house_mask.hpp>
+
 #include <algorithm>
 
 namespace okiidoku::mono {
@@ -8,31 +9,30 @@ namespace okiidoku::mono {
 	template<Order O> requires(is_order_compiled(O))
 	bool grid_follows_rule(const Grid<O>& grid) noexcept {
 		using T = traits<O>;
+		using o2x_t = typename T::o2x_t;
 		using o2i_t = typename T::o2i_t;
-		using has_mask_t = typename T::o2_bits_fast;
+		using has_mask_t = HouseMask<O>;
 
-		std::array<has_mask_t, T::O2> rows_has_ {};
-		std::array<has_mask_t, T::O2> cols_has_ {};
-		std::array<has_mask_t, T::O2> boxes_has_ {};
+		has_mask_t row_has;
+		std::array<has_mask_t, T::O1> boxes_has;
+		std::array<has_mask_t, T::O2> cols_has;
 
 		for (o2i_t row {0}; row < T::O2; ++row) {
 		for (o2i_t col {0}; col < T::O2; ++col) {
+			if (col == 0) [[unlikely]] { row_has = has_mask_t{}; }
+			if (row % T::O1 == 0) [[unlikely]] { boxes_has.fill(has_mask_t{}); }
+
 			const auto val {grid.at(row,col)};
 			assert(val <= T::O2);
 			if (val == T::O2) { continue; }
 
-			auto& row_has {rows_has_[row]};
-			auto& col_has {cols_has_[col]};
-			auto& box_has {boxes_has_[rmi_to_box<O>(row, col)]};
+			auto& col_has {cols_has[col]};
+			auto& box_has {boxes_has[col / T::O1]};
 
-			const has_mask_t try_val_mask {has_mask_t{1} << val};
-			const has_mask_t t_has {row_has | col_has | box_has};
-			if ((t_has & try_val_mask).any()) [[unlikely]] {
+			if (has_mask_t::test_any3(static_cast<o2x_t>(val), row_has, col_has, box_has)) [[unlikely]] {
 				return false;
 			} else {
-				row_has |= try_val_mask;
-				col_has |= try_val_mask;
-				box_has |= try_val_mask;
+				has_mask_t::set3(static_cast<o2x_t>(val), row_has, col_has, box_has);
 			}
 		}}
 		return true;

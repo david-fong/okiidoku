@@ -14,6 +14,7 @@ namespace okiidoku::mono::morph {
 	template<Order O> requires(is_order_compiled(O))
 	struct OKIIDOKU_EXPORT Rel final {
 		using polar_count_lesser_t = uint_smolN_t<std::bit_width((O*O)/2)>;
+
 		typename traits<O>::o2i_smol_t count;
 		polar_count_lesser_t polar_count_lesser; // smaller value means more imbalance
 		chute_imbalance_t<O> chute_imbalance_a;

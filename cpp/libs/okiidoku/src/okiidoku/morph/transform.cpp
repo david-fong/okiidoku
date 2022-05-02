@@ -10,7 +10,7 @@ namespace okiidoku::mono::morph {
 		for (o2i_t src_col {0}; src_col < T::O2; ++src_col) {
 			auto dest_row {row_map[src_row/T::O1][src_row%T::O1]};
 			auto dest_col {col_map[src_col/T::O1][src_col%T::O1]};
-			if (transpose) { std::swap(dest_row, dest_col); }
+			if (post_transpose) { std::swap(dest_row, dest_col); }
 			const auto src_label {src_grid.at(src_row, src_col)};
 			dest_grid.at(dest_row, dest_col) = (src_label == T::O2) ? T::O2 : label_map[src_label];
 		}}
@@ -36,7 +36,7 @@ namespace okiidoku::mono::morph {
 			_.row_map[row_inv/T::O1][row_inv%T::O1] = static_cast<mapping_t>(i);
 			_.col_map[col_inv/T::O1][col_inv%T::O1] = static_cast<mapping_t>(i);
 		}
-		_.transpose = transpose;
+		_.post_transpose = post_transpose;
 		// assert(this->operator==(_.inverted()));
 		// TODO.low do the assert without causing infinite recursion or move it to tests.cpp
 		return _;

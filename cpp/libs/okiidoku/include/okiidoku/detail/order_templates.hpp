@@ -1,5 +1,5 @@
-#ifndef HPP_OKIIDOKU__ORDER_TEMPLATES
-#define HPP_OKIIDOKU__ORDER_TEMPLATES
+#ifndef HPP_OKIIDOKU__DETAIL__ORDER_TEMPLATES
+#define HPP_OKIIDOKU__DETAIL__ORDER_TEMPLATES
 
 #include <okiidoku/config/defaults.hpp>
 #include <okiidoku/detail/order_templates.macros.hpp>

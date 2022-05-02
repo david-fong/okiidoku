@@ -5,12 +5,11 @@
 
 #include <okiidoku/detail/order_templates.hpp> // largest_compiled_order
 
-#include <bit>
-#include <bitset> // TODO.mid could this be excluded if (O_MAX <= 8) ?
-#include <cstdint>
-#include <limits> // numeric_limits<T>::max
-#include <type_traits>
-#include <concepts>
+#include <bit>         // bit_width
+#include <cstdint>     // uint_...
+#include <limits>      // numeric_limits<T>::max
+#include <type_traits> // conditional_t
+#include <concepts>    // unsigned_integral
 
 namespace okiidoku {
 
@@ -62,6 +61,8 @@ namespace okiidoku::mono {
 		using o2x_smol_t = uint_smolN_t<std::bit_width(O*O-1)>;
 		using o2i_smol_t = uint_smolN_t<std::bit_width(O*O)>;
 
+		using o3i_t = uint_fastN_t<std::bit_width(O*O*O)>;
+
 		using o4x_t = uint_fastN_t<std::bit_width(O*O*O*O-1)>;
 		using o4i_t = uint_fastN_t<std::bit_width(O*O*O*O)>;
 		using o4x_smol_t = uint_smolN_t<std::bit_width(O*O*O*O-1)>;
@@ -71,86 +72,9 @@ namespace okiidoku::mono {
 
 		using o6i_t = uint_fastN_t<std::bit_width(O*O*O*O*O*O)>;
 
-	private:
-		// TODO consider moving this to its own header?
-		// Note: this class exists instead of just using bitset because it was
-		// found to have noticeably better performance for small orders.
-		template<bool F/* AKA: use_fast */>
-		class o2_bits {
-			static constexpr bool use_int_ = O <= 8;
-			using This = o2_bits<F>;
-			using val_t = std::conditional_t<use_int_,
-				std::conditional_t<F,
-					uint_fastN_t<O*O>,
-					uint_smolN_t<O*O>
-				>,
-				std::bitset<O*O>
-			>;
-			val_t val_ {};
-		public:
-			constexpr o2_bits(): val_{0} {}
-			template<class T>
-			requires std::is_integral_v<T> && (!std::is_same_v<T, val_t>) && std::is_convertible_v<T, val_t>
-			constexpr o2_bits(T val): val_{static_cast<val_t>(static_cast<std::make_unsigned_t<T>>(val))} {}
-			constexpr o2_bits(val_t val): val_{val} {}
-
-			[[nodiscard, gnu::pure]] typename traits<O>::o2x_t count() const noexcept {
-				if constexpr (use_int_) { return static_cast<o2x_t>(std::popcount(val_)); }
-				else { return static_cast<o2x_t>(val_.count()); }
-			}
-			[[nodiscard, gnu::pure]] bool all() const noexcept {
-				if constexpr (use_int_) { return std::popcount(val_) == O*O; } else { return val_.all(); }
-			}
-			[[nodiscard, gnu::pure]] bool any() const noexcept {
-				if constexpr (use_int_) { return val_ != 0; } else { return val_.any(); }
-			}
-			[[nodiscard, gnu::pure]] bool none() const noexcept {
-				if constexpr (use_int_) { return val_ == 0; } else { return val_.none(); }
-			}
-			[[nodiscard, gnu::pure]] This operator~() const noexcept {
-				return ~val_; // TODO.high this doesn't reset the top excess bits
-			}
-
-			This& set(o2x_t at) noexcept {
-				if constexpr (use_int_) { val_ |= static_cast<val_t>(val_t{1} << at); return *this; }
-				else { val_.set(at); return *this; }
-			}
-			This& flip() noexcept {
-				if constexpr (use_int_) { val_ = static_cast<val_t>(~val_) & static_cast<val_t>((val_t{1}<<O*O)-1); return *this; }
-				else { val_.flip(); return *this; }
-			}
-			This& operator&=(const This& rhs) noexcept {
-				val_ &= rhs.val_; return *this;
-			}
-			This& operator|=(const This& rhs) noexcept {
-				val_ |= rhs.val_; return *this;
-			}
-			This& operator<<=(const size_t rhs) noexcept {
-				val_ <<= rhs; return *this;
-			}
-			This& operator>>=(const size_t rhs) noexcept {
-				val_ >>= rhs; return *this;
-			}
-			[[nodiscard, gnu::pure]] friend This operator&(This lhs, const This& rhs) noexcept {
-				lhs &= rhs; return lhs;
-			}
-			[[nodiscard, gnu::pure]] friend This operator|(This lhs, const This& rhs) noexcept {
-				lhs |= rhs; return lhs;
-			}
-			[[nodiscard, gnu::pure]] friend This operator<<(This lhs, const size_t rhs) noexcept {
-				lhs <<= rhs; return lhs;
-			}
-			[[nodiscard, gnu::pure]] friend This operator>>(This lhs, const size_t rhs) noexcept {
-				lhs >>= rhs; return lhs;
-			}
-		};
-	public:
-		using o2_bits_fast = o2_bits<true>;
-		using o2_bits_smol = o2_bits<false>;
-
 		static constexpr o1i_t O1 {O};
 		static constexpr o2i_t O2 {O*O};
-		static constexpr o4i_t O3 {O*O*O};
+		static constexpr o3i_t O3 {O*O*O};
 		static constexpr o4i_t O4 {O*O*O*O};
 	};
 
@@ -186,9 +110,6 @@ namespace okiidoku::visitor {
 		using o5i_t = mono::traits<largest_compiled_order>::o5i_t;
 
 		using o6i_t = mono::traits<largest_compiled_order>::o6i_t;
-
-		using o2_bits_fast = mono::traits<largest_compiled_order>::o2_bits_fast;
-		using o2_bits_smol = mono::traits<largest_compiled_order>::o2_bits_smol;
 	}
 	using default_grid_val_t = mono::default_grid_val_t<largest_compiled_order>;
 }

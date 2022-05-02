@@ -15,6 +15,7 @@
 		"boxcol",
 		"boxrow",
 		"builtin",
+		"cands",
 		"canonicalizer",
 		"chrono",
 		"cmake",

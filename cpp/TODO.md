@@ -21,16 +21,13 @@
 
 ## Misc List
 
-- create a custom BitsO2 class that attempts to use efficient x86 instructions when possible and falls back to something portable otherwise.
-  - Most of the time in this library, there will not need to be a whole lot of these. For scanning a grid row-major-wise, that's 1+O1+O2 of them. If one is needed for each house, that's 3*O2 of them. Not sure if there would be significant gains from customizing storage to be more compact than u64 granularity...
-  - Try to write clear and strict contracts to prevent having to handle excess bits (those that exist higher than the bits that are actually required).
-    - The bit flip things are particularly problematic. Currently only used as optimized ways to resetting bits. Could they be removed? The shift operators I think are also only there because I didn't add set/reset methods. Hopefully most of those things can be replaced with just set/reset.
-  - The header and implementation could actually be private. Would we want to expose it to users of the library?
-
 - For the MSVC build:
   - making a shared library feels too complicated. doing all the export annotations sounds like a real pain, and I can't seem to get WINDOWS_EXPORT_ALL_SYMBOLS working. Just make it a static library for windows.
+  - Need to set `CMAKE_CXX_STANDARD` to 23 for recent MSVC versions to get it to do `/c++latest` to get `<ranges>`.
 - For the Clang build:
   - clang isn't happy with some of the ranges stuff in libstdc++ (the GCC one). Dunno what to do about that. Ranges is pretty new to the standard library...
+
+- try writing custom python pretty-printer for `HouseMask`?
 
 - [it is allowed in c++ to have template functions and non-template functions with the same name. here are the resulting rules](https://stackoverflow.com/a/16865452/11107541). Could this be used to put the algorithm functions under the same namespace (not in separate "mono" and "visitor" namespace)?
 
@@ -46,10 +43,6 @@
     - cppcon video <https://www.youtube.com/watch?v=m0DwB4OvDXk&ab_channel=CppCon&t=17m13s>
 
 - try adding shortcuts to std::views::iota(0,N) and use them instead of all the raw loops. see how it impacts performance. Don't know if compilers will still do all their optimizations (simd, unrolling, etc.).
-
-- Note to self: the visitor interface of the library could theoretically be made such that separate dynamic libraries containing multiple non-overlapping compiled orders could be linked together via the visitor interface.
-  - would require making the visitor stuff a separate library and giving it a tweak config with all the expected compiled orders to get from the mono libraries.
-  - I currently don't see any benefit from this. And as I found earlier when trying this out, I didn't like how it made the repo folder tree much bigger and (slightly- enough to be quite annoying) harder to navigate.
 
 - Go back and try the old canonicalization by rel row prob, but break ties by doing some brute force: try each tied permutation and valuate it according to some reduction of how it pushes rarer rel counts to the top left. Just be careful to shift to get rid of the main diagonal seam.
   - If there are multiple puddles of ties, the resolution of a puddle shouldn't depend on the resolution of any other puddle- only on the non-tied rows/columns. A consequence of this is that this resolution algorithm will not work if there are no non-tied rows/columns.

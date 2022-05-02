@@ -42,7 +42,7 @@ namespace okiidoku::mono::morph::detail {
 
 			void do_a_pass(const Grid<O>& table);
 		};
-		static Grid<O> make_table_for_a_pass(const Grid<O>& src_grid, bool is_transpose, const PolarState& row, const PolarState& col);
+		static Grid<O> make_table_for_a_pass(const Grid<O>& src_grid, bool is_post_transpose, const PolarState& row, const PolarState& col);
 
 	public:
 		static Transformation<O> do_it(Grid<O>& src_grid);
@@ -52,7 +52,7 @@ namespace okiidoku::mono::morph::detail {
 	template<Order O> requires(is_order_compiled(O))
 	Grid<O> CanonPlace<O>::make_table_for_a_pass(
 		const Grid<O>& src_grid,
-		const bool is_transpose,
+		const bool is_post_transpose,
 		const PolarState& row_state,
 		const PolarState& col_state
 	) {
@@ -61,14 +61,14 @@ namespace okiidoku::mono::morph::detail {
 				Transformation<O>::identity_label_map,
 				row_state.to_og,
 				col_state.to_og,
-				is_transpose,
+				is_post_transpose,
 			}};
 			t.inverted().apply_from_to(src_grid, table);
 		}
 
 		for (o2i_t row_i {0}; row_i < T::O2; ++row_i) {
 			const auto row {table.row_at(row_i)};
-			const auto& ortho {is_transpose ? row_state : col_state};
+			const auto& ortho {is_post_transpose ? row_state : col_state};
 			// loop over orthogonal partially-resolved line ranges to normalize:
 			for (const auto [t_begin, t_end] : ortho.line_ties) {
 				std::sort(std::next(row.begin(), t_begin), std::next(row.begin(), t_end));
@@ -176,10 +176,10 @@ namespace okiidoku::mono::morph::detail {
 			.label_map {Transformation<O>::identity_label_map}, // TODO.low does this need to be state? or will the default member initializer definition get used?
 			.row_map {row_state.to_og},
 			.col_map {col_state.to_og},
-			.transpose {false},
+			.post_transpose {false},
 		};
 		transformation = transformation.inverted();
-		// TODO.high use two iota views mapped one to src_grid and one to transposed view and lexicographical compare. if transposed less, edit transformation and apply a transpose_only transformation to src_grid in place.
+		// TODO.high use two iota views mapped one to src_grid and one to post_transposed view and lexicographical compare. if post_transposed less, edit transformation and apply a post_transpose_only transformation to src_grid in place.
 		transformation.apply_in_place(src_grid);
 		assert(grid_follows_rule<O>(src_grid));
 		return transformation;

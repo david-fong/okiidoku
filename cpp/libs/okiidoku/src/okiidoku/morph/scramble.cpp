@@ -18,7 +18,7 @@ namespace okiidoku::mono::morph {
 				std::ranges::shuffle(t.row_map[chute], shared_rng.rng);
 				std::ranges::shuffle(t.col_map[chute], shared_rng.rng);
 			}
-			// t.transpose = static_cast<bool>(shared_rng_() % 2); // TODO
+			// t.post_transpose = static_cast<bool>(shared_rng_() % 2); // TODO
 		}
 		t.apply_in_place(grid);
 		assert(grid_follows_rule<O>(grid));

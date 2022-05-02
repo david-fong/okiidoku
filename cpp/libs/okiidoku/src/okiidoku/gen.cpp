@@ -14,9 +14,10 @@ namespace okiidoku::mono {
 		// using val_t = typename T::o2x_smol_t;
 		using o2x_t = typename T::o2x_t;
 		using o2i_t = typename T::o2i_t;
+		using o3i_t = typename T::o3i_t;
 		{
 			std::array<default_grid_val_t<O>, T::O2> example_row;
-			std::iota(example_row.begin(), example_row.end(), default_grid_val_t<O>{0}); // TODO.wait c++23 ranges::iota
+			std::iota(example_row.begin(), example_row.end(), default_grid_val_t<O>{0});
 			for (o2i_t row {0}; row < T::O2; ++row) {
 				const auto span {grid.row_at(row)};
 				std::copy(example_row.cbegin(), example_row.cend(), span.begin());
@@ -41,11 +42,6 @@ namespace okiidoku::mono {
 		// Outer array has an entry for each line in the chute.
 		using chute_has_counts_t = std::array<std::array<typename T::o2i_smol_t, T::O2>, T::O1>;
 		// unsigned long long op_count {0};
-		/* Using this counter, I found that it took fewer operations to go from having
-		one polarity of lines valid to also having boxes valid than from having only
-		boxes valid and then getting one polarity of lines to also be valid. Ie. It
-		should be less optimal to start only with valid boxes (and then get both cols
-		and rows valid). */
 
 		// Make boxes valid:
 		for (o2i_t h_chute {0}; h_chute < T::O2; h_chute += T::O1) {
@@ -54,7 +50,7 @@ namespace okiidoku::mono {
 			for (o2i_t col {0}; col < T::O2; ++col) {
 				++(boxes_has[col/T::O1][grid.at(row,col)]);
 			}}
-			int has_nots {0};
+			o3i_t has_nots {0};
 			for (const auto& box_has : boxes_has) {
 				for (const auto& val_count : box_has) {
 					if (val_count == 0) { ++has_nots; }
@@ -75,7 +71,7 @@ namespace okiidoku::mono {
 					(boxes_has[b_box][a_cell] == 0 ? -1 : 0)
 				};
 				if (has_nots_diff <= 0) [[unlikely]] { // TODO.low for fun: find out on average at what op_count it starts being unlikely
-					has_nots += has_nots_diff;
+					has_nots = static_cast<o3i_t>(has_nots + has_nots_diff);
 					--boxes_has[a_box][a_cell];
 					++boxes_has[a_box][b_cell];
 					--boxes_has[b_box][b_cell];
@@ -95,7 +91,7 @@ namespace okiidoku::mono {
 			for (o2i_t box_col {0}; box_col < T::O1; ++box_col) {
 				++(cols_has[box_col][grid.at(row, static_cast<o2i_t>(v_chute + box_col))]);
 			}}
-			int has_nots {0};
+			o3i_t has_nots {0};
 			for (const auto& col_has : cols_has) {
 				for (const auto& val_count : col_has) {
 					if (val_count == 0) { ++has_nots; }
@@ -114,7 +110,7 @@ namespace okiidoku::mono {
 					(cols_has[b_col][a_cell] == 0 ? -1 : 0)
 				};
 				if (has_nots_diff <= 0) [[unlikely]] {
-					has_nots += has_nots_diff;
+					has_nots = static_cast<o3i_t>(has_nots + has_nots_diff);
 					--cols_has[a_col][a_cell];
 					++cols_has[a_col][b_cell];
 					--cols_has[b_col][b_cell];

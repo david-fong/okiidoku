@@ -95,29 +95,6 @@ namespace okiidoku::mono {
 			||  (rmi_to_box<O>(c1) == rmi_to_box<O>(c2));
 	}
 	// Note: the compiler optimizes the division/modulus pairs just fine.
-	
-
-	template<Order O>
-	struct OKIIDOKU_EXPORT chute_box_masks final {
-		using M = typename traits<O>::o2_bits_smol;
-		using T = std::array<M, O>;
-		static inline const T row {[]{ // TODO.wait re-constexpr this when bitset gets constexpr :/ https://github.com/cplusplus/papers/issues/1087
-			T _ {0};
-			for (unsigned chute {0}; chute < O; ++chute) {
-				for (unsigned i {0}; i < O; ++i) {
-					_[chute] |= M{1} << ((O*chute) + i);
-			}	}
-			return _;
-		}()};
-		static inline const T col {[]{
-			T _ {0};
-			for (unsigned chute {0}; chute < O; ++chute) {
-				for (unsigned i {0}; i < O; ++i) {
-					_[chute] |= M{1} << ((O*i) + chute);
-			}	}
-			return _;
-		}()};
-	};
 }
 
 

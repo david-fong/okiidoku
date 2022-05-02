@@ -1,5 +1,7 @@
 #include <okiidoku/morph/rel_info.hpp>
 
+#include <okiidoku/house_mask.hpp>
+
 #include <algorithm> // swap, sort, ranges::next_permutation
 #include <numeric>   // abs
 
@@ -9,15 +11,15 @@ namespace okiidoku::mono::morph {
 	// Does not include self-to-self relationship bit for main diagonal entries.
 	template<Order O>
 	struct RelMasks final {
-		typename traits<O>::o2_bits_smol boxes_h;
-		typename traits<O>::o2_bits_smol boxes_v;
+		HouseMask<O> boxes_h;
+		HouseMask<O> boxes_v;
 	};
 	template<Order O>
 	detail::Gridlike<O, RelMasks<O>> make_rel_masks_(const Grid<O>& grid) noexcept {
 		using T = traits<O>;
-		using has_mask_t = typename T::o2_bits_smol;
 		using val_t = typename T::o2i_smol_t;
 		using o1i_t = typename T::o1i_t;
+		using o2x_t = typename T::o2x_t;
 		using o2i_t = typename T::o2i_t;
 
 		detail::Gridlike<O, RelMasks<O>> masks {};
@@ -27,16 +29,18 @@ namespace okiidoku::mono::morph {
 			for (o1i_t i {0}; i < T::O1 - 1; ++i) {
 			for (o1i_t j {static_cast<o1i_t>(i + 1)}; j < T::O1; ++j) {
 				{ // boxrow
-					const val_t i_val {grid.at(line, static_cast<o2i_t>(atom+i))}, j_val {grid.at(line, static_cast<o2i_t>(atom+j))};
-					const has_mask_t box_mask_bit {has_mask_t{1} << rmi_to_box<O>(line, atom)};
-					masks.at(i_val,j_val).boxes_h |= box_mask_bit;
-					masks.at(j_val,i_val).boxes_h |= box_mask_bit;
+					const val_t i_val {grid.at(line, static_cast<o2i_t>(atom+i))};
+					const val_t j_val {grid.at(line, static_cast<o2i_t>(atom+j))};
+					const auto box {static_cast<o2x_t>(rmi_to_box<O>(line, atom))};
+					masks.at(i_val,j_val).boxes_h.set(box);
+					masks.at(j_val,i_val).boxes_h.set(box);
 				}
 				{ // boxcol
-					const val_t i_val {grid.at(static_cast<o2i_t>(atom+i), line)}, j_val {grid.at(static_cast<o2i_t>(atom+j), line)};
-					const has_mask_t box_mask_bit {has_mask_t{1} << rmi_to_box<O>(atom, line)};
-					masks.at(i_val,j_val).boxes_v |= box_mask_bit;
-					masks.at(j_val,i_val).boxes_v |= box_mask_bit;
+					const val_t i_val {grid.at(static_cast<o2i_t>(atom+i), line)};
+					const val_t j_val {grid.at(static_cast<o2i_t>(atom+j), line)};
+					const auto box {static_cast<o2x_t>(rmi_to_box<O>(atom, line))};
+					masks.at(i_val,j_val).boxes_v.set(box);
+					masks.at(j_val,i_val).boxes_v.set(box);
 				}
 		}}	}}
 		return masks;
@@ -46,7 +50,7 @@ namespace okiidoku::mono::morph {
 	template<Order O> requires(is_order_compiled(O))
 	detail::Gridlike<O, Rel<O>> make_rel_table(const Grid<O>& grid_in) {
 		using T = traits<O>;
-		using has_mask_t = typename T::o2_bits_smol;
+		using rel_at_mask_t = HouseMask<O>;
 		using o1i_t = typename T::o1i_t;
 		using o2i_t = typename T::o2i_t;
 		using chute_imbalance_t = chute_imbalance_t<O>;
@@ -61,16 +65,16 @@ namespace okiidoku::mono::morph {
 				rel = {0,(T::O2/2),0,0};
 				continue;
 			}
-			const has_mask_t non_polar_mask = mask.boxes_h | mask.boxes_v;
-			const unsigned count {non_polar_mask.count()};
+			const rel_at_mask_t rel_at_mask {mask.boxes_h | mask.boxes_v};
+			const auto count {rel_at_mask.count()};
 			rel.count = static_cast<typename T::o2i_smol_t>(count);
 			rel.polar_count_lesser = static_cast<typename Rel<O>::polar_count_lesser_t>(std::min(mask.boxes_h.count(), mask.boxes_v.count()));
 
 			std::array<chute_imbalance_t, T::O1> h_chute_imbalance;
 			std::array<chute_imbalance_t, T::O1> v_chute_imbalance;
 			for (o1i_t chute {0}; chute < T::O1; ++chute) {
-				h_chute_imbalance[chute] = static_cast<chute_imbalance_t>((chute_box_masks<O>::row[chute] & non_polar_mask).count());
-				v_chute_imbalance[chute] = static_cast<chute_imbalance_t>((chute_box_masks<O>::col[chute] & non_polar_mask).count());
+				h_chute_imbalance[chute] = static_cast<chute_imbalance_t>((chute_box_masks<O>::row[chute] & rel_at_mask).count());
+				v_chute_imbalance[chute] = static_cast<chute_imbalance_t>((chute_box_masks<O>::col[chute] & rel_at_mask).count());
 			}
 			std::ranges::sort(h_chute_imbalance, std::greater{});
 			std::ranges::sort(v_chute_imbalance, std::greater{});

@@ -20,12 +20,12 @@ namespace okiidoku::mono::morph {
 		static constexpr label_map_t identity_label_map {[]{ label_map_t _; for (o2i_t i {0}; i < T::O2; ++i) { _[i] = static_cast<mapping_t>(i); } return _; }()};
 		static constexpr  line_map_t identity_row_map   {[]{ line_map_t _;  for (o2i_t i {0}; i < T::O2; ++i) { _[i/T::O1][i%T::O1] = static_cast<mapping_t>(i); } return _; }()};
 		static constexpr  line_map_t identity_col_map   {[]{ line_map_t _;  for (o2i_t i {0}; i < T::O2; ++i) { _[i/T::O1][i%T::O1] = static_cast<mapping_t>(i); } return _; }()};
-		static constexpr        bool identity_transpose {false};
+		static constexpr        bool identity_post_transpose {false};
 
 		label_map_t label_map {identity_label_map};
 		line_map_t row_map {identity_row_map};
 		line_map_t col_map {identity_col_map};
-		bool transpose {identity_transpose};
+		bool post_transpose {identity_post_transpose};
 
 		friend constexpr bool operator==(const Transformation&, const Transformation&) = default;
 		friend constexpr std::strong_ordering operator<=>(const Transformation&, const Transformation&) = default;
