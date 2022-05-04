@@ -3,7 +3,7 @@
 
 #include <okiidoku/config/defaults.hpp>
 #include <okiidoku/detail/order_templates.macros.hpp>
-#include <okiidoku_export.h>
+#include <okiidoku/detail/export.h>
 
 #include <array>
 #include <variant>

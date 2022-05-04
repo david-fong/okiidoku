@@ -1,7 +1,7 @@
 #ifndef HPP_OKIIDOKU__FMT__EMOJI
 #define HPP_OKIIDOKU__FMT__EMOJI
 
-#include <okiidoku_export.h>
+#include <okiidoku/detail/export.h>
 
 #include <vector>
 #include <string_view>

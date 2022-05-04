@@ -75,9 +75,9 @@ namespace okiidoku::visitor {
 	}
 
 
-	Grid::common_val_t Grid::at_row_major(const traits::o4i_t coord) const noexcept {
+	Grid::common_val_t Grid::at_row_major(const traits::o4i_t rmi) const noexcept {
 		return std::visit([&](const auto& mono_this){
-			return common_val_t{mono_this.at_row_major(coord)};
+			return common_val_t{mono_this.at_row_major(rmi)};
 		}, get_mono_variant());
 	}
 

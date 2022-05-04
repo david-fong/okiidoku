@@ -53,11 +53,11 @@ namespace okiidoku::mono {
 		}
 		Gridlike() noexcept requires(!std::is_same_v<V_, grid_val_t<O>>) = default;
 
-		// contract: coord is in [0, O4).
-		template<class T_coord> requires(Any_o4ix<O, T_coord>)
-		[[nodiscard]] constexpr       val_t& at_row_major(const T_coord coord)       noexcept { return cells_[coord]; }
-		template<class T_coord> requires(Any_o4ix<O, T_coord>)
-		[[nodiscard]] constexpr const val_t& at_row_major(const T_coord coord) const noexcept { return cells_[coord]; }
+		// contract: rmi is in [0, O4).
+		template<class T_rmi> requires(Any_o4ix<O, T_rmi>)
+		[[nodiscard]] constexpr       val_t& at_row_major(const T_rmi rmi)       noexcept { return cells_[rmi]; }
+		template<class T_rmi> requires(Any_o4ix<O, T_rmi>)
+		[[nodiscard]] constexpr const val_t& at_row_major(const T_rmi rmi) const noexcept { return cells_[rmi]; }
 
 		// contract: row and col are in [0, O2).
 		template<class T_row, class T_col> requires(Any_o2ix<O, T_row> && Any_o2ix<O, T_col>)
@@ -132,9 +132,9 @@ namespace okiidoku::visitor {
 		// require defining a custom reference type, and I'm currently not in the mood.
 		// Or we could just take the easy route and make setter methods.
 
-		// contract: coord is in [0, O4).
-		// [[nodiscard]] common_val_t& at_row_major(const traits::o4i_t coord)       noexcept;
-		[[nodiscard]] common_val_t at_row_major(const traits::o4i_t coord) const noexcept;
+		// contract: rmi is in [0, O4).
+		// [[nodiscard]] common_val_t& at_row_major(const traits::o4i_t rmi)       noexcept;
+		[[nodiscard]] common_val_t at_row_major(const traits::o4i_t rmi) const noexcept;
 
 		// contract: row and col are in [0, O2).
 		// [[nodiscard]] common_val_t& at(const traits::o2i_t row, const traits::o2i_t col)       noexcept;

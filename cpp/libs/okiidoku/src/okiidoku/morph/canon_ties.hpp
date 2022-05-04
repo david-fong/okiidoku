@@ -12,7 +12,7 @@
 namespace okiidoku::mono::morph {
 
 	template<Order O, unsigned O1_OR_O2>
-	requires (order_is_compiled(O) && (O1_OR_O2 == 1) || (O1_OR_O2 == 2))
+	requires (is_order_compiled(O) && (O1_OR_O2 == 1) || (O1_OR_O2 == 2))
 	struct TieLinks final {
 		static constexpr size_t size_ {(O1_OR_O2 == 1) ? traits<O>::O1 : traits<O>::O2};
 		using link_t = std::conditional_t<(O1_OR_O2 == 1), typename traits<O>::o1i_t, typename traits<O>::o2i_smol_t>;

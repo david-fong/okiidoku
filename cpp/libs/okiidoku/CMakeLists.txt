@@ -1,4 +1,6 @@
-add_library(okiidoku SHARED # TODO.mid having trouble getting SHARED working with MSVC. workaround is to just use STATIC for MSVC.
+# https://alexreinking.com/blog/building-a-dual-shared-and-static-library-with-cmake.html
+# TODO.low there's a lot of other good things in the above tutorial I'm not currently using
+add_library(okiidoku
 	src/okiidoku/grid.cpp
 	src/okiidoku/gen.cpp
 	src/okiidoku/fmt/emoji.cpp
@@ -11,16 +13,20 @@ add_library(okiidoku SHARED # TODO.mid having trouble getting SHARED working wit
 	src/okiidoku/morph/canon_place.cpp
 	src/okiidoku/morph/canon.cpp
 )
+add_library(okiidoku::okiidoku ALIAS okiidoku)
+set_target_properties(okiidoku PROPERTIES
+	VERSION   ${okiidoku_VERSION}
+	SOVERSION ${okiidoku_VERSION_MAJOR}
+)
 
 # https://cmake.org/cmake/help/latest/module/GenerateExportHeader.html
 include(GenerateExportHeader)
-generate_export_header(okiidoku BASE_NAME)
+generate_export_header(okiidoku EXPORT_FILE_NAME include/okiidoku/detail/export.h)
+target_compile_definitions(okiidoku PUBLIC "$<$<NOT:$<BOOL:${BUILD_SHARED_LIBS}>>:OKIIDOKU_STATIC_DEFINE>")
+target_sources(okiidoku PUBLIC FILE_SET HEADERS BASE_DIRS "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>")
 
 target_sources(okiidoku PUBLIC FILE_SET HEADERS BASE_DIRS include)
-target_include_directories(okiidoku
-	PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src"
-	PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
-)
+target_include_directories(okiidoku PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
 
 # find_package(Threads REQUIRED)
 # target_link_libraries(okiidoku
@@ -28,10 +34,10 @@ target_include_directories(okiidoku
 	# PRIVATE Threads::Threads
 # )
 
-if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+if(PROJECT_IS_TOP_LEVEL)
 	add_subdirectory(examples)
 endif()
 
-if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND BUILD_TESTING)
+if(PROJECT_IS_TOP_LEVEL AND BUILD_TESTING)
 	add_subdirectory(tests)
 endif()

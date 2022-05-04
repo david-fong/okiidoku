@@ -44,9 +44,19 @@ endif()
 
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 
+
+if(PROJECT_IS_TOP_LEVEL OR MSVC)
+	set(okiidoku_SHARED_LIBS TRUE)
+endif()
+if(DEFINED okiidoku_SHARED_LIBS)
+	set(BUILD_SHARED_LIBS "${okiidoku_SHARED_LIBS}")
+endif()
 # set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
-set(CMAKE_CXX_VISIBILITY_PRESET hidden)
-set(CMAKE_VISIBILITY_INLINES_HIDDEN TRUE)
+# if (NOT DEFINED CMAKE_CXX_VISIBILITY_PRESET AND NOT DEFINED CMAKE_VISIBILITY_INLINES_HIDDEN)
+	# use user-specified, or otherwise default to strict.
+	set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+	set(CMAKE_VISIBILITY_INLINES_HIDDEN TRUE)
+# endif()
 include(GNUInstallDirs)
 # https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/RPATH-handling
 if(NOT APPLE)
@@ -54,7 +64,7 @@ if(NOT APPLE)
 endif()
 
 # https://cliutils.gitlab.io/modern-cmake/chapters/testing.html
-if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+if(PROJECT_IS_TOP_LEVEL)
 	include(CTest)
 endif()
 
@@ -81,7 +91,7 @@ install(TARGETS
 # TODO.mid install the generated export header somehow
 install(EXPORT okiidokuTargets
 	FILE okiidokuTargets.cmake
-	# NAMESPACE okiidoku::
+	NAMESPACE okiidoku::
 	DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/okiidoku
 )
 

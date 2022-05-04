@@ -109,17 +109,17 @@ namespace okiidoku::mono {
 		}
 
 		// contract: there are at least `set_bit_index+1` set bits.
-		[[nodiscard, gnu::pure]] o2x_t get_index_of_nth_set_bit_and_unset(o2x_t set_bit_index) const noexcept {
+		[[nodiscard, gnu::pure]] o2x_t get_index_of_nth_set_bit(o2x_t set_bit_index) const noexcept {
 			assert(count() > o2i_t{set_bit_index});
 			for (size_t int_i {0}; int_i < ints_.size(); ++int_i) {
 				auto& int_ {ints_[int_i]};
 				const auto int_popcount {std::popcount(int_)};
-				if (int_popcount > set_bit_index) {
+				if (static_cast<unsigned>(int_popcount) > static_cast<unsigned>(set_bit_index)) {
 					for (unsigned bit_i {0}; bit_i < int_t_num_bits; ++bit_i) { // TODO.mid possible optimization: skip consecutive on bits by somehow using std::countr_<>
 						const auto bit_mask {int_t{1} << bit_i};
 						if (int_ & bit_mask) {
 							if (set_bit_index == 0) {
-								int_ &= ~bit_mask;
+								// int_ &= ~bit_mask;
 								return static_cast<o2x_t>((int_t_num_bits * int_i) + bit_i);
 							}
 							--set_bit_index;
@@ -127,10 +127,10 @@ namespace okiidoku::mono {
 					}
 					// TODO.high if has pdep instruction:
 					// const auto bit_mask {_pdep_u64(1 << set_bit_index, int_)};
-					// int_ &= ~bit_mask;
+					//// int_ &= ~bit_mask;
 					// return std::countr_zero(bit_mask);
 				} else {
-					set_bit_index -= int_popcount;
+					set_bit_index -= static_cast<o2x_t>(int_popcount);
 				}
 			}
 			assert(false); // TODO.wait c++23 std::unreachable

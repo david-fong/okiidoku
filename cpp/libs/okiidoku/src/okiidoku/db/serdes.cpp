@@ -17,17 +17,15 @@ namespace okiidoku::mono::db::serdes {
 	class detail::SerdesHelper final {
 		using T = traits<O>;
 		using cands_t = HouseMask<O>;
-		using o2x_smol_t = typename T::o2x_smol_t;
-		using o2x_t = typename T::o2x_t;
-		using o2i_t = typename T::o2i_t;
+		using val_t = typename T::o2x_t;
 		using o4i_t = typename T::o4i_t;
 
-		using buf_t = uint8_t;
-		using buf_plus_t = unsigned;
-		static_assert(sizeof(buf_plus_t) > sizeof(buf_t));
+		static constexpr unsigned num_buf_bytes {1};
+		using buf_t = uint_smolN_t<2*8*num_buf_bytes>; // x2 to prevent overflow
+		static_assert((1<<(2*8*num_buf_bytes)) > (2*T::O2)); // requirement to handle overflow
 
 	public:
-		explicit SerdesHelper() noexcept: row_cands{house_mask_ones<O>} {
+		SerdesHelper() noexcept: row_cands{house_mask_ones<O>} {
 			h_chute_boxes_cands.fill(house_mask_ones<O>);
 			cols_cands.fill(house_mask_ones<O>);
 			cell_cands = house_mask_ones<O>;
@@ -39,14 +37,14 @@ namespace okiidoku::mono::db::serdes {
 		void advance() noexcept;
 
 		// automatically removes val as a candidate of future cells.
-		void print_val(std::ostream&, o2x_t val) noexcept;
+		void print_val(std::ostream&, val_t val) noexcept;
 		void print_remaining_buf(std::ostream&) noexcept;
 
 		// automatically removes val as a candidate of future cells.
-		[[nodiscard]] o2x_t parse_val(std::istream&) noexcept;
+		[[nodiscard]] val_t parse_val(std::istream&) noexcept;
 
 	private:
-		void remove_cand_at_current_rmi_(o2x_t cand) noexcept;
+		void remove_cand_at_current_rmi_(val_t cand) noexcept;
 
 		// hypothetical candidates remaining for future cells
 		// based on already encountered (printed/parsed) cells.
@@ -60,9 +58,9 @@ namespace okiidoku::mono::db::serdes {
 		o4i_t cell_rmi;
 
 		// current small buffer of data to print/parse.
-		static constexpr buf_plus_t buf_ceil = buf_plus_t{std::numeric_limits<buf_t>::max()} + 1u;
+		static constexpr buf_t buf_end {buf_t{8*num_buf_bytes}};
 		buf_t buf;
-		buf_plus_t buf_pos;
+		buf_t buf_pos;
 	};
 
 
@@ -79,26 +77,32 @@ namespace okiidoku::mono::db::serdes {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	void detail::SerdesHelper<O>::print_val(std::ostream& os, const typename traits<O>::o2x_t val) noexcept {
+	void detail::SerdesHelper<O>::print_val(std::ostream& os, const typename detail::SerdesHelper<O>::val_t val) noexcept {
+		// The number of possible different values that this cell could be
+		// based on the values that have already been encountered.
 		auto smol_val_buf_remaining {cell_cands.count()};
-		assert(smol_val_buf_remaining > 0);
+		assert(smol_val_buf_remaining > 0); // implied by contract (grid_follows_rule)
 
-		auto smol_val_buf {static_cast<o2x_smol_t>(cell_cands.count_bits_below(val))};
+		// Some slightly-weird-looking logic stems from the fact that it is
+		// a "null" action to try to print something that can only take on one
+		// value (as in- the buffer will be unchanged). Just keep that in mind.
+		auto smol_val_buf {static_cast<val_t>(cell_cands.count_bits_below(val))};
 		assert(smol_val_buf < smol_val_buf_remaining);
 		while (smol_val_buf_remaining > 1) {
-			buf += static_cast<buf_t>(smol_val_buf * buf_pos);
+			buf += static_cast<buf_t>(buf_pos * smol_val_buf); // should never overflow
+			// const auto buf_remaining {(buf_pos == 1) ? buf_end : static_cast<buf_t>(buf_end - buf_pos)};
 			{
-				assert(buf_pos < buf_ceil);
-				const auto use_factor {std::min(buf_ceil-buf_pos, static_cast<buf_plus_t>(smol_val_buf_remaining))}; // TODO does this need a +1?
+				const auto use_factor {static_cast<buf_t>(smol_val_buf_remaining)};
+				assert(buf_pos != 0 && buf_pos < buf_end);
 				buf_pos *= use_factor;
-				assert(buf_pos <= buf_ceil);
-				smol_val_buf /= static_cast<o2x_smol_t>(use_factor);
-				smol_val_buf_remaining /= static_cast<o2i_t>(use_factor);
+				smol_val_buf /= static_cast<val_t>(use_factor);
+				smol_val_buf_remaining /= static_cast<typename T::o2i_t>(use_factor);
 			}
-			if (buf_pos == buf_ceil) {
+			if (buf_pos >= buf_end) { // TODO.asap should this be a while loop?
+				static_assert(num_buf_bytes == 1); // otherwise the below needs to change.
 				os.put(static_cast<char>(buf));
-				buf = 0;
-				buf_pos = 1;
+				buf >>= 8 * num_buf_bytes;
+				buf_pos = static_cast<buf_t>((buf_pos % buf_end) + 1);
 			}
 		}
 		remove_cand_at_current_rmi_(val);
@@ -115,21 +119,25 @@ namespace okiidoku::mono::db::serdes {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	typename traits<O>::o2x_t detail::SerdesHelper<O>::parse_val(std::istream& is) noexcept {
+	typename detail::SerdesHelper<O>::val_t detail::SerdesHelper<O>::parse_val(std::istream& is) noexcept {
+		// The number of possible different values that this cell could be
+		// based on the values that have already been encountered.
 		auto smol_val_buf_remaining {cell_cands.count()};
-		assert(smol_val_buf_remaining > 0);
+		assert(smol_val_buf_remaining > 0); // implied by contract (grid_follows_rule)
+		(void)smol_val_buf_remaining; (void)is;
 
-		o2x_t smol_val_buf {0};
+		val_t smol_val_buf {0};
 		// TODO.asap
 
-		const auto val {cell_cands.get_index_of_nth_set_bit_and_unset(smol_val_buf)};
+		assert(smol_val_buf < smol_val_buf_remaining);
+		const auto val {cell_cands.get_index_of_nth_set_bit(smol_val_buf)};
 		remove_cand_at_current_rmi_(val);
 		return val;
 	}
 
 
 	template<Order O> requires(is_order_compiled(O))
-	void detail::SerdesHelper<O>::remove_cand_at_current_rmi_(const typename traits<O>::o2x_t cand) noexcept {
+	void detail::SerdesHelper<O>::remove_cand_at_current_rmi_(const typename SerdesHelper<O>::val_t cand) noexcept {
 		auto& box_cands {h_chute_boxes_cands[cell_rmi / T::O3]};
 		auto& col_cands {cols_cands[cell_rmi / T::O2]};
 		cands_t::unset3(cand, row_cands, box_cands, col_cands);
@@ -149,7 +157,8 @@ namespace okiidoku::mono::db::serdes {
 			if ((T::O1-1-row)/T::O1 == col/T::O1) {
 				continue; // skip cells in the anti-diagonal boxes
 			}
-			const auto val {static_cast<typename T::o2x_t>(grid.at_row_major(helper.get_cell_rmi()))};
+			using val_t = typename traits<O>::o2x_t;
+			const auto val {static_cast<val_t>(grid.at_row_major(helper.get_cell_rmi()))};
 			helper.print_val(os, val);
 		}
 		helper.print_remaining_buf(os);
@@ -167,7 +176,7 @@ namespace okiidoku::mono::db::serdes {
 			if ((T::O1-1-row)/T::O1 == col/T::O1) {
 				continue; // skip cells in the anti-diagonal boxes
 			}
-			const auto val {helper.parse_val_and_remove_cand(is)};
+			const auto val {helper.parse_val(is)};
 			grid.at_row_major(helper.get_cell_rmi()) = static_cast<grid_val_t<O>>(val);
 		}
 		// TODO.asap infer cells in anti-diagonal boxes.

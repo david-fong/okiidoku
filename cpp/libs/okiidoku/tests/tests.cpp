@@ -40,8 +40,8 @@ unsigned test_morph(okiidoku::SharedRng& shared_rng, const unsigned num_rounds) 
 			++count_bad;
 			std::clog << "\n!bad\n";
 			const std::array<print_2d_grid_view, 2> palette_ {
-				[&](auto coord){ return   gen_grid.at_row_major(coord); },
-				[&](auto coord){ return canon_grid.at_row_major(coord); },
+				[&](auto rmi){ return   gen_grid.at_row_major(rmi); },
+				[&](auto rmi){ return canon_grid.at_row_major(rmi); },
 			};
 			print_2d(std::clog, O, palette_, shared_rng);
 			// std::clog << "\n";

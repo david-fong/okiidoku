@@ -3,7 +3,7 @@
 
 #include <okiidoku/grid.hpp>
 #include <okiidoku/detail/order_templates.hpp>
-#include <okiidoku_export.h>
+#include <okiidoku/detail/export.h>
 
 namespace okiidoku::mono::morph {
 
