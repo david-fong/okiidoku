@@ -13,13 +13,18 @@
 - deductive reasoning + backtracking solver
   - (add tests and examples)
 - emscripten build and website
-- puzzle creation experiments (see [bottom section](#interesting-questions-for-further-research))
+- puzzle creation experiments (see [research-questions.md](../writings/research-questions.md))
 - minlexing canonicalization
 - compare canonicalization methods (performance / time-complexity)
 - opencl stochastic generator
   - some template/starter code can be found at commit 5a8d4c0 (deleted)
+- language bindings for other languages?
 
 ## Misc List
+
+- try using clang-tidy
+
+- decide between the terminology "coord" vs "rmi"
 
 - For the MSVC build:
   - making a shared library feels too complicated. doing all the export annotations sounds like a real pain, and I can't seem to get WINDOWS_EXPORT_ALL_SYMBOLS working. Just make it a static library for windows.
@@ -28,6 +33,7 @@
   - clang isn't happy with some of the ranges stuff in libstdc++ (the GCC one). Dunno what to do about that. Ranges is pretty new to the standard library...
 
 - try writing custom python pretty-printer for `HouseMask`?
+  - [how to write a gdb pretty-printer](https://sourceware.org/gdb/onlinedocs/gdb/Writing-a-Pretty_002dPrinter.html#Writing-a-Pretty_002dPrinter)
 
 - [it is allowed in c++ to have template functions and non-template functions with the same name. here are the resulting rules](https://stackoverflow.com/a/16865452/11107541). Could this be used to put the algorithm functions under the same namespace (not in separate "mono" and "visitor" namespace)?
 

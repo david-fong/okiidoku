@@ -16,7 +16,7 @@ namespace okiidoku::mono {
 		template<Order O, class V> requires(is_order_compiled(O) && !std::is_reference_v<V>) class Gridlike;
 	}
 	template<Order O> requires(is_order_compiled(O))
-	using Grid = detail::Gridlike<O, default_grid_val_t<O>>;
+	using Grid = detail::Gridlike<O, grid_val_t<O>>;
 
 
 	// Returns false if any cells in a same house contain the same value.
@@ -47,11 +47,11 @@ namespace okiidoku::mono {
 
 		// For regular grids, always default initialize as an empty grid (to be safe).
 		// Note: Making this constexpr results in a 1% speed gain, but 45% program
-		// size increase. That speed doesn't seem worth it.
-		Gridlike() noexcept requires(std::is_same_v<V_, default_grid_val_t<O>>) {
+		// size increase with GCC. That speed doesn't seem worth it.
+		Gridlike() noexcept requires(std::is_same_v<V_, grid_val_t<O>>) {
 			cells_.fill(T::O2);
 		}
-		Gridlike() noexcept requires(!std::is_same_v<V_, default_grid_val_t<O>>) = default;
+		Gridlike() noexcept requires(!std::is_same_v<V_, grid_val_t<O>>) = default;
 
 		// contract: coord is in [0, O4).
 		template<class T_coord> requires(Any_o4ix<O, T_coord>)
@@ -65,15 +65,14 @@ namespace okiidoku::mono {
 		template<class T_row, class T_col> requires(Any_o2ix<O, T_row> && Any_o2ix<O, T_col>)
 		[[nodiscard]] constexpr const val_t& at(const T_row row, const T_col col) const noexcept { return cells_[(T::O2*row)+col]; }
 
-		// TODO.mid consider renaming this to `row_span_at`. Would help when users want to use auto. Also the `rows()` method.
 		// contract: row is in [0, O2).
 		template<class T_row> requires(Any_o2ix<O, T_row>)
-		[[nodiscard]] constexpr std::span<      val_t, T::O2> row_at(const T_row i)       noexcept { return static_cast<std::span<      val_t, T::O2>>(std::span(cells_).subspan(T::O2*i, T::O2)); }
+		[[nodiscard]] constexpr std::span<      val_t, T::O2> row_span_at(const T_row i)       noexcept { return static_cast<std::span<      val_t, T::O2>>(std::span(cells_).subspan(T::O2*i, T::O2)); }
 		template<class T_row> requires(Any_o2ix<O, T_row>)
-		[[nodiscard]] constexpr std::span<const val_t, T::O2> row_at(const T_row i) const noexcept { return static_cast<std::span<const val_t, T::O2>>(std::span(cells_).subspan(T::O2*i, T::O2)); }
+		[[nodiscard]] constexpr std::span<const val_t, T::O2> row_span_at(const T_row i) const noexcept { return static_cast<std::span<const val_t, T::O2>>(std::span(cells_).subspan(T::O2*i, T::O2)); }
 
-		[[nodiscard]] constexpr auto rows() noexcept { namespace v = std::views; return v::iota(o2i_t{0}, o2i_t{T::O2}) | v::transform([&](auto r){ return row_at(r); }); }
-		// [[nodiscard]] constexpr auto rows() const noexcept { namespace v = std::views; return v::iota(o2i_t{0}, T::O2) | v::transform([&](auto r){ return row_at(r); }); }
+		[[nodiscard]] constexpr auto row_spans() noexcept { namespace v = std::views; return v::iota(o2i_t{0}, o2i_t{T::O2}) | v::transform([&](auto r){ return row_span_at(r); }); }
+		// [[nodiscard]] constexpr auto row_spans() const noexcept { namespace v = std::views; return v::iota(o2i_t{0}, T::O2) | v::transform([&](auto r){ return row_span_at(r); }); }
 	private:
 		std::array<val_t, T::O4> cells_;
 	};
@@ -125,7 +124,7 @@ namespace okiidoku::visitor {
 	class OKIIDOKU_EXPORT Grid final : public detail::ContainerBase<detail::GridAdaptor> {
 	public:
 		using ContainerBase::ContainerBase;
-		using common_val_t = default_grid_val_t;
+		using common_val_t = grid_val_t;
 
 		// Note: the accessors here are readonly right now, meaning
 		// library users can only use mutators defined inside the library. That seems

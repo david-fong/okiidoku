@@ -67,11 +67,11 @@ namespace okiidoku::mono::morph::detail {
 		}
 
 		for (o2i_t row_i {0}; row_i < T::O2; ++row_i) {
-			const auto row {table.row_at(row_i)};
+			const auto row_sp {table.row_span_at(row_i)};
 			const auto& ortho {is_post_transpose ? row_state : col_state};
 			// loop over orthogonal partially-resolved line ranges to normalize:
 			for (const auto [t_begin, t_end] : ortho.line_ties) {
-				std::sort(std::next(row.begin(), t_begin), std::next(row.begin(), t_end));
+				std::sort(std::next(row_sp.begin(), t_begin), std::next(row_sp.begin(), t_end));
 			}
 			// loop over orthogonal partially-resolved chute ranges to normalize:
 			{
@@ -80,15 +80,15 @@ namespace okiidoku::mono::morph::detail {
 				for (const auto t : ortho.chute_ties) {
 					namespace v = std::views;
 					std::ranges::sort(resolve | v::drop(t.begin_) | v::take(t.size()), [&](auto a, auto b){
-						return std::ranges::lexicographical_compare(row.subspan(a*T::O1,T::O1), row.subspan(b*T::O1,T::O1));
+						return std::ranges::lexicographical_compare(row_sp.subspan(a*T::O1,T::O1), row_sp.subspan(b*T::O1,T::O1));
 					});
 				}
 				std::array<val_t, T::O2> copy;
-				std::copy(row.begin(), row.end(), copy.begin());
+				std::copy(row_sp.begin(), row_sp.end(), copy.begin());
 				for (o1i_t i {0}; i < T::O1; ++i) {
 					std::copy(
 						std::next(copy.begin(), i*T::O1), std::next(copy.begin(), (i+1)*T::O1),
-						std::next(row.begin(), i*T::O1)
+						std::next(row_sp.begin(), i*T::O1)
 					);
 				}
 			}
@@ -109,12 +109,12 @@ namespace okiidoku::mono::morph::detail {
 			std::sort(
 				std::next(to_tied.begin(), tie.begin_),
 				std::next(to_tied.begin(), tie.end_),
-				[&](auto a, auto b){ return std::ranges::lexicographical_compare(table.row_at(a), table.row_at(b)); }
+				[&](auto a, auto b){ return std::ranges::lexicographical_compare(table.row_span_at(a), table.row_span_at(b)); }
 			);
 		}
 		const auto chute_tie_data {[&](o2i_t chute) {
 			namespace v = std::views;
-			return to_tied | v::drop(chute*T::O1) | v::take(T::O1) | v::transform([&](auto i){ return v::common(table.row_at(i)); }) | v::join;
+			return to_tied | v::drop(chute*T::O1) | v::take(T::O1) | v::transform([&](auto i){ return v::common(table.row_span_at(i)); }) | v::join;
 		}};
 		// try to resolve tied chute ranges:
 		for (const auto tie : chute_ties) {
@@ -129,7 +129,7 @@ namespace okiidoku::mono::morph::detail {
 		}
 
 		line_ties.update([&](auto a, auto b){
-			return std::ranges::equal(table.row_at(to_tied[a]), table.row_at(to_tied[b]));
+			return std::ranges::equal(table.row_span_at(to_tied[a]), table.row_span_at(to_tied[b]));
 		});
 		chute_ties.update([&](o1i_t a, o1i_t b){
 			return std::ranges::equal(chute_tie_data(a), chute_tie_data(b));

@@ -131,7 +131,7 @@ namespace okiidoku::cli {
 				if (config_.canonicalize()) {
 					morph::canonicalize(grid);
 				}
-				// db::serdes::print_filled(of, grid); // TODO.high this is currently crashing with floating point error :/
+				db::serdes::print_filled(of, grid); // TODO.high this is currently crashing with floating point error :/
 				// TODO.mid print a progress bar
 			}
 		}

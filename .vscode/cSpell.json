@@ -27,6 +27,7 @@
 		"distrib",
 		"emscripten",
 		"genpath",
+		"givens",
 		"libokiidoku",
 		"minlexing",
 		"MSVC",
@@ -41,6 +42,7 @@
 		"stoi",
 		"stoul",
 		"strials",
-		"sudoku"
+		"sudoku",
+		"sudopedia"
 	]
 }

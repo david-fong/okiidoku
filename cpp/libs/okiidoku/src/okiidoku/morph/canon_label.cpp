@@ -48,11 +48,11 @@ namespace okiidoku::mono::morph::detail {
 		for (const auto tie : s.ties) {
 			if (tie.size() == 1) [[likely]] { continue; }
 			for (const auto rel_i : tie) {
-				const auto row {scratch.row_at(rel_i)};
-				{ auto src {s.rel_table.row_at(rel_i)}; std::copy(src.begin(), src.end(), row.begin()); }
+				const auto row_sp {scratch.row_span_at(rel_i)};
+				{ const auto src_sp {s.rel_table.row_span_at(rel_i)}; std::copy(src_sp.begin(), src_sp.end(), row_sp.begin()); }
 				// normalize tied slice for later sorting:
 				for (const auto [t_begin, t_end] : s.ties) {
-					std::sort(std::next(row.begin(), t_begin), std::next(row.begin(), t_end));
+					std::sort(std::next(row_sp.begin(), t_begin), std::next(row_sp.begin(), t_end));
 					// if (t_begin == tie_begin) {
 					// } else {
 					// 	; // TODO try sorting preserving vertical slices across rows
@@ -63,14 +63,15 @@ namespace okiidoku::mono::morph::detail {
 				std::next(to_tied.begin(), tie.begin_),
 				std::next(to_tied.begin(), tie.end_),
 				[&](auto a, auto b){ return std::lexicographical_compare(
-					scratch.row_at(a).begin(), scratch.row_at(a).end(),
-					scratch.row_at(b).begin(), scratch.row_at(b).end()
+					scratch.row_span_at(a).begin(), scratch.row_span_at(a).end(),
+					scratch.row_span_at(b).begin(), scratch.row_span_at(b).end()
 				); } // TODO.low why doesn't the ranges version work?
 			);
 		}
 		s.ties.update([&](auto a, auto b){
-			auto a_row {scratch.row_at(to_tied[a])}, b_row {scratch.row_at(to_tied[b])};
-			return std::equal(a_row.begin(), a_row.end(), b_row.begin(), b_row.end());
+			const auto a_row_sp {scratch.row_span_at(to_tied[a])};
+			const auto b_row_sp {scratch.row_span_at(to_tied[b])};
+			return std::equal(a_row_sp.begin(), a_row_sp.end(), b_row_sp.begin(), b_row_sp.end());
 		});
 
 		{

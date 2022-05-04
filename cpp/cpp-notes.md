@@ -46,11 +46,15 @@ things I got wrong before which I couldn't understand based on gcc's error messa
 
 - [file open mode shorthands](https://en.cppreference.com/w/cpp/io/basic_filebuf/open)
 
+- [move simply - herb sutter](https://herbsutter.com/2020/02/17/move-simply/)
+
 - [modern iterators](https://www.internalpointers.com/post/writing-custom-iterators-modern-cpp)
 
 - [using/inheriting base-class constructor](https://en.cppreference.com/w/cpp/language/using_declaration#Inheriting_constructors)
 
 - [non-deduced contexts and template-argument deduction](https://en.cppreference.com/w/cpp/language/template_argument_deduction#Non-deduced_contexts)
+
+- [cpp core guidelines - do not over-parametrize members](https://github.com/isocpp/CppCoreGuidelines/blob/master/CppCoreGuidelines.md#t61-do-not-over-parameterize-members-scary)
 
 - I can specify base-class members like:
   - Derived::Base::member

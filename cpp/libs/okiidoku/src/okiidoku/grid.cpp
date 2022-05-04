@@ -14,20 +14,20 @@ namespace okiidoku::mono {
 		using has_mask_t = HouseMask<O>;
 
 		has_mask_t row_has;
-		std::array<has_mask_t, T::O1> boxes_has;
+		std::array<has_mask_t, T::O1> h_chute_boxes_has;
 		std::array<has_mask_t, T::O2> cols_has;
 
 		for (o2i_t row {0}; row < T::O2; ++row) {
 		for (o2i_t col {0}; col < T::O2; ++col) {
 			if (col == 0) [[unlikely]] { row_has = has_mask_t{}; }
-			if (row % T::O1 == 0) [[unlikely]] { boxes_has.fill(has_mask_t{}); }
+			if (row % T::O1 == 0) [[unlikely]] { h_chute_boxes_has.fill(has_mask_t{}); }
 
 			const auto val {grid.at(row,col)};
 			assert(val <= T::O2);
 			if (val == T::O2) { continue; }
 
 			auto& col_has {cols_has[col]};
-			auto& box_has {boxes_has[col / T::O1]};
+			auto& box_has {h_chute_boxes_has[col / T::O1]};
 
 			if (has_mask_t::test_any3(static_cast<o2x_t>(val), row_has, col_has, box_has)) [[unlikely]] {
 				return false;

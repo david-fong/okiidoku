@@ -15,7 +15,6 @@ namespace okiidoku::mono {
 	// set bit operation with cool optimization.
 	template<Order O> requires(is_order_compiled(O))
 	class HouseMask final {
-	private:
 		using T = traits<O>;
 		using o2x_t = typename traits<O>::o2x_t;
 		using o2i_t = typename traits<O>::o2i_t;
@@ -36,12 +35,12 @@ namespace okiidoku::mono {
 	public:
 		constexpr HouseMask() noexcept: ints_{{0}} {}
 
-		static constexpr HouseMask ones {[]{
-			HouseMask _;
+		static constexpr HouseMask create_ones_() noexcept {
+			HouseMask<O> _;
 			for (auto& int_ : _.ints_) { int_ = ~int_; }
-			_.ints_.back() >>= num_excess_bits;
+			_.ints_.back() >>= HouseMask<O>::num_excess_bits;
 			return _;
-		}()};
+		}
 
 		[[nodiscard, gnu::pure]] o2i_t count() const noexcept {
 			return static_cast<o2i_t>(std::transform_reduce(
@@ -95,10 +94,12 @@ namespace okiidoku::mono {
 		}
 
 		HouseMask& operator|=(const HouseMask& rhs) noexcept {
-			for (size_t i {0}; i < ints_.size(); ++i) { ints_[i] |= rhs.ints_[i]; }; return *this;
+			for (size_t i {0}; i < ints_.size(); ++i) { ints_[i] |= rhs.ints_[i]; };
+			return *this;
 		}
 		HouseMask& operator&=(const HouseMask& rhs) noexcept {
-			for (size_t i {0}; i < ints_.size(); ++i) { ints_[i] &= rhs.ints_[i]; }; return *this;
+			for (size_t i {0}; i < ints_.size(); ++i) { ints_[i] &= rhs.ints_[i]; };
+			return *this;
 		}
 		[[nodiscard, gnu::pure]] friend HouseMask operator|(HouseMask lhs, const HouseMask& rhs) noexcept {
 			lhs |= rhs; return lhs;
@@ -136,6 +137,9 @@ namespace okiidoku::mono {
 			return 0; 
 		}
 	};
+
+	template<Order O> requires(is_order_compiled(O))
+	static constexpr HouseMask<O> house_mask_ones {HouseMask<O>::create_ones_()};
 	
 
 	template<Order O>

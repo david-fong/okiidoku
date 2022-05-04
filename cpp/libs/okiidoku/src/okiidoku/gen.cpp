@@ -16,10 +16,10 @@ namespace okiidoku::mono {
 		using o2i_t = typename T::o2i_t;
 		using o3i_t = typename T::o3i_t;
 		{
-			std::array<default_grid_val_t<O>, T::O2> example_row;
-			std::iota(example_row.begin(), example_row.end(), default_grid_val_t<O>{0});
+			std::array<grid_val_t<O>, T::O2> example_row;
+			std::iota(example_row.begin(), example_row.end(), grid_val_t<O>{0});
 			for (o2i_t row {0}; row < T::O2; ++row) {
-				const auto span {grid.row_at(row)};
+				const auto span {grid.row_span_at(row)};
 				std::copy(example_row.cbegin(), example_row.cend(), span.begin());
 			}
 		}
@@ -30,8 +30,8 @@ namespace okiidoku::mono {
 		{
 			std::lock_guard lock_guard {shared_rng.mutex};
 			rng_.seed(static_cast<unsigned int>(shared_rng.rng()));
-			for (auto row : grid.rows()) {
-				std::ranges::shuffle(row, shared_rng.rng);
+			for (const auto row_sp : grid.row_spans()) {
+				std::ranges::shuffle(row_sp, shared_rng.rng);
 			}
 			// TODO.try should the shuffle just use `rng_`? Note: A data-parallel implementation would be much better that way.
 		}

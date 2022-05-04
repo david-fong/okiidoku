@@ -87,7 +87,7 @@ namespace okiidoku::mono {
 
 
 	template<unsigned O>
-	using default_grid_val_t = typename traits<O>::o2i_smol_t;
+	using grid_val_t = typename traits<O>::o2i_smol_t;
 }
 
 
@@ -111,6 +111,6 @@ namespace okiidoku::visitor {
 
 		using o6i_t = mono::traits<largest_compiled_order>::o6i_t;
 	}
-	using default_grid_val_t = mono::default_grid_val_t<largest_compiled_order>;
+	using grid_val_t = mono::grid_val_t<largest_compiled_order>;
 }
 #endif

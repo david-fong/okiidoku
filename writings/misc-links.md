@@ -1,4 +1,5 @@
 
+http://forum.enjoysudoku.com/the-hardest-sudokus-new-thread-t6539.html?hilit=discord
 
 - [Math Cornell - There is no 16 clue sudoku](https://arxiv.org/abs/1201.0749)
 

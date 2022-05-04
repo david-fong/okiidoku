@@ -8,6 +8,7 @@
 - No duplicate entries (conversion of grids to some canonical form will be helpful for this)
 - Store grids in a highly compressed form that can have an efficient serdes implementation.
 - Allow quickly checking if a grid that is _not_ stored in the DB is equivalent to one that _is_ stored in the DB.
+  - TODO actually I'm not sure if I still want this. It would be useful if I've generated enough grids to the point that on average I begin generating ones that I've already found, but I'm not sure how likely/when I'll get to that point. Otherwise, when I merge, I can just skip entries that are duplicate with the last-pushed entry to the merged DB.
 - I want to be able to merge databases efficiently, and if the databases have similar entry ordering requirements (ex. canonical lexicographical, label favouritism), to have the merge result also follow that ordering requirement.
 
 ### Non-Goals
@@ -44,7 +45,7 @@ Further compression can be gained by using the actual number of possible candida
 
 Doing so would mean entries don't all have the same number of bits as each other, and so the DB would have to include link-to-next-entry information for each entry. The links could be absolute or relative. For absolute, the bit cost of this is proportional to the number of unique grids for a grid size and the average number of bits required to store a serialized grid, but the computational effort to generate higher order grids could also be taken into consideration to make an argument for link info with bit-cost invariant with respect to grid size. For relative links, the bit cost is at most the bit cost of storing the the value of the number of worst-case bytes taken by an entry.
 
-If absolute links are used, storing the link map like a "table of contents" separate from and before the actual grid contents of the DB would be helpful for doing the binary search. If each link were instead stored next to their corresponding entry, binary search would first require scanning the DB to extract the links to contiguous main memory. If relative links are used, the table of contents still needs to be translated to an absolute form
+If absolute links are used, storing the link map like a "table of contents" separate from and before the actual grid contents of the DB would be helpful for doing the binary search. If each link were instead stored next to their corresponding entry, binary search would first require scanning the DB to extract the links to contiguous main memory. If relative links are used, the table of contents still needs to be translated to an absolute form, so it isn't critical whether the links are stored as a separate ToC, or interleaved with each entry, though the ToC means less file scanning when constructing the absolute links into main memory for processing.
 
 For this approach to be worth to be worthwhile in terms of _persisted storage space used_, the average number of bytes saved compared to the worst case must be equal to or greater than the number of bytes to store an entry's link (relative links for orders below 6 only consume one byte; 2 bytes for orders up to 17, etc.). Hopefully that's true.
 TODO.try test out the above.
