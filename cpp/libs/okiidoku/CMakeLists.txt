@@ -1,4 +1,5 @@
 # https://alexreinking.com/blog/building-a-dual-shared-and-static-library-with-cmake.html
+# https://www.reddit.com/r/cpp/comments/m0rt7v/building_a_dual_shared_and_static_library_with/
 # TODO.low there's a lot of other good things in the above tutorial I'm not currently using
 add_library(okiidoku
 	src/okiidoku/grid.cpp

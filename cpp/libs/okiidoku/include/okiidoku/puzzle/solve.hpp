@@ -27,9 +27,9 @@ namespace okiidoku::mono::puzzle {
 
 		BfDfsStack bf_dfs_stack_;
 
-		void find_cells_requiring_symbols() noexcept; // AKA naked subsets
-		void find_symbols_requiring_cells() noexcept; // AKA midden subsets
-		void find_fish() noexcept;
+		void solve_cells_requiring_symbols() noexcept; // AKA naked subsets
+		void solve_symbols_requiring_cells() noexcept; // AKA midden subsets
+		void solve_fish() noexcept;
 
 	public:
 		explicit SolutionWalker(const) noexcept;

@@ -38,14 +38,14 @@ namespace okiidoku::mono::morph::detail {
 					return (a%T::O1) == (b%T::O1);
 				});
 			}
-			bool has_ties() const { return line_ties.has_unresolved() || chute_ties.has_unresolved(); }
+			bool has_ties() const noexcept { return line_ties.has_unresolved() || chute_ties.has_unresolved(); }
 
-			void do_a_pass(const Grid<O>& table);
+			void do_a_pass(const Grid<O>& table) noexcept;
 		};
-		static Grid<O> make_table_for_a_pass(const Grid<O>& src_grid, bool is_post_transpose, const PolarState& row, const PolarState& col);
+		static Grid<O> make_table_for_a_pass(const Grid<O>& src_grid, bool is_post_transpose, const PolarState& row, const PolarState& col) noexcept;
 
 	public:
-		static Transformation<O> do_it(Grid<O>& src_grid);
+		static Transformation<O> do_it(Grid<O>& src_grid) noexcept ;
 	};
 
 
@@ -55,7 +55,7 @@ namespace okiidoku::mono::morph::detail {
 		const bool is_post_transpose,
 		const PolarState& row_state,
 		const PolarState& col_state
-	) {
+	) noexcept {
 		Grid<O> table; {
 			const auto t {Transformation<O>{
 				Transformation<O>::identity_label_map,
@@ -98,7 +98,7 @@ namespace okiidoku::mono::morph::detail {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	void CanonPlace<O>::PolarState::do_a_pass(const Grid<O>& table) {
+	void CanonPlace<O>::PolarState::do_a_pass(const Grid<O>& table) noexcept {
 		std::array<mapping_t, T::O2> to_tied;
 		std::iota(to_tied.begin(), to_tied.end(), mapping_t{0});
 		for (const auto tie : line_ties) {
@@ -150,7 +150,7 @@ namespace okiidoku::mono::morph::detail {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	Transformation<O> CanonPlace<O>::do_it(Grid<O>& src_grid) {
+	Transformation<O> CanonPlace<O>::do_it(Grid<O>& src_grid) noexcept {
 		PolarState row_state {};
 		PolarState col_state {};
 
@@ -187,14 +187,14 @@ namespace okiidoku::mono::morph::detail {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	Transformation<O> canon_place(Grid<O>& grid) {
+	Transformation<O> canon_place(Grid<O>& grid) noexcept {
 		return CanonPlace<O>::do_it(grid);
 	}
 
 
 	#define OKIIDOKU_FOR_COMPILED_O(O_) \
 		template class CanonPlace<O_>; \
-		template Transformation<O_> canon_place<O_>(Grid<O_>&);
+		template Transformation<O_> canon_place<O_>(Grid<O_>&) noexcept;
 	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 	#undef OKIIDOKU_FOR_COMPILED_O
 }

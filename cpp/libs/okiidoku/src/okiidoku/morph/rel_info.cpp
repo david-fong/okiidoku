@@ -48,7 +48,7 @@ namespace okiidoku::mono::morph {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	detail::Gridlike<O, Rel<O>> make_rel_table(const Grid<O>& grid_in) {
+	detail::Gridlike<O, Rel<O>> make_rel_table(const Grid<O>& grid_in) noexcept {
 		using T = traits<O>;
 		using rel_at_mask_t = HouseMask<O>;
 		using o1i_t = typename T::o1i_t;
@@ -121,7 +121,7 @@ namespace okiidoku::mono::morph {
 
 	#define OKIIDOKU_FOR_COMPILED_O(O_) \
 		template struct Rel<O_>; \
-		template detail::Gridlike<O_, Rel<O_>> make_rel_table<O_>(const Grid<O_>&);
+		template detail::Gridlike<O_, Rel<O_>> make_rel_table<O_>(const Grid<O_>&) noexcept ;
 	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 	#undef OKIIDOKU_FOR_COMPILED_O
 }

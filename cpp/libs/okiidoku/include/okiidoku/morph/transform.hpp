@@ -51,7 +51,7 @@ namespace okiidoku::visitor::morph {
 	struct OKIIDOKU_EXPORT Transformation final : public detail::ContainerBase<detail::morph::TransformationAdaptor> {
 		using ContainerBase::ContainerBase;
 
-		bool operator==(const Transformation&) const = default;
+		bool operator==(const Transformation&) const noexcept = default;
 
 		// Does nothing if the transformation's order is not the same as the source grid's.
 		// If the dest grid has a different order, it is changed to match the source grid.

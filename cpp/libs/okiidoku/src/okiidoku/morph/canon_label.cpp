@@ -32,15 +32,15 @@ namespace okiidoku::mono::morph::detail {
 			}
 			bool has_ties() const { return ties.has_unresolved(); }
 		};
-		static void do_a_pass_(State& s);
+		static void do_a_pass_(State& s) noexcept;
 
 	public:
-		static label_map_t<O> do_it(Grid<O>& grid);
+		static label_map_t<O> do_it(Grid<O>& grid) noexcept;
 	};
 
 
 	template<Order O> requires(is_order_compiled(O))
-	void CanonLabel<O>::do_a_pass_(CanonLabel<O>::State& s) {
+	void CanonLabel<O>::do_a_pass_(CanonLabel<O>::State& s) noexcept {
 		mono::detail::Gridlike<O, Rel<O>> scratch;
 
 		label_map_t<O> to_tied;
@@ -91,7 +91,7 @@ namespace okiidoku::mono::morph::detail {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	label_map_t<O> CanonLabel<O>::do_it(Grid<O>& grid) {
+	label_map_t<O> CanonLabel<O>::do_it(Grid<O>& grid) noexcept {
 		const label_map_t<O> label_og_to_canon {[&](){
 			State s(grid);
 			while (s.has_ties()) {
@@ -124,13 +124,13 @@ namespace okiidoku::mono::morph::detail {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	label_map_t<O> canon_label(Grid<O>& grid) {
+	label_map_t<O> canon_label(Grid<O>& grid) noexcept {
 		return CanonLabel<O>::do_it(grid);
 	}
 
 
 	#define OKIIDOKU_FOR_COMPILED_O(O_) \
-		template label_map_t<O_> canon_label<O_>(Grid<O_>&);
+		template label_map_t<O_> canon_label<O_>(Grid<O_>&) noexcept;
 	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 	#undef OKIIDOKU_FOR_COMPILED_O
 }

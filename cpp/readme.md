@@ -3,7 +3,7 @@
 
 ## Using the Dynamic Library
 
-Building okiidoku requires CMake (with [the minimum specified version](./CMakeLists.txt)), a C++ compiler [supporting C++20](https://en.cppreference.com/w/cpp/compiler_support), and a build system like Make or Ninja. Current only gcc is supported, but MSVC and Clang support are close. Read the [TODO file](./TODO.md) for more info.
+Building okiidoku requires CMake (with [the minimum specified version](./CMakeLists.txt)), a C++ compiler [supporting C++20](https://en.cppreference.com/w/cpp/compiler_support), and a build system like Make or Ninja. Current gcc and MSVC are supported; Clang support is close. Read the [TODO file](./TODO.md) for more info.
 
 Refer to the [CMake guide](https://cmake.org/cmake/help/latest/guide/importing-exporting/index.html). This may also help: [tldp.org on shared libraries](https://tldp.org/HOWTO/Program-Library-HOWTO/shared-libraries.html)
 

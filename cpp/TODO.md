@@ -4,7 +4,7 @@
 
 - draft database
   - (and update tests and examples)
-- test CMake config with different compilers (gcc, clang, apple-clang, MSVC) and try to fix configuration issues
+- test CMake config with different compilers (clang, apple-clang) and try to fix configuration issues
 - refactor and improve canonicalization
 - compare backtracking and stochastic search statistics
 - implement grid-serdes translator tool
@@ -26,9 +26,6 @@
 
 - decide between the terminology "rmi" vs "rmi"
 
-- For the MSVC build:
-  - making a shared library feels too complicated. doing all the export annotations sounds like a real pain, and I can't seem to get WINDOWS_EXPORT_ALL_SYMBOLS working. Just make it a static library for windows.
-  - Need to set `CMAKE_CXX_STANDARD` to 23 for recent MSVC versions to get it to do `/c++latest` to get `<ranges>`.
 - For the Clang build:
   - clang isn't happy with some of the ranges stuff in libstdc++ (the GCC one). Dunno what to do about that. Ranges is pretty new to the standard library...
 

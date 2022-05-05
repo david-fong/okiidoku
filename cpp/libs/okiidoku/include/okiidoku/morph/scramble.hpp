@@ -10,13 +10,13 @@ namespace okiidoku::mono::morph {
 
 	// contract: span is a valid grid (though it may be incomplete)
 	template<Order O> requires(is_order_compiled(O))
-	OKIIDOKU_EXPORT Transformation<O> scramble(Grid<O>&, SharedRng&);
+	OKIIDOKU_EXPORT Transformation<O> scramble(Grid<O>&, SharedRng&) noexcept;
 }
 
 
 namespace okiidoku::visitor::morph {
 
 	// contract: span is a valid grid (though it may be incomplete)
-	OKIIDOKU_EXPORT Transformation scramble(Grid&, SharedRng&);
+	OKIIDOKU_EXPORT Transformation scramble(Grid&, SharedRng&) noexcept;
 }
 #endif

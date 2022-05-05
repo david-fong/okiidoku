@@ -145,7 +145,7 @@ namespace okiidoku::mono::db::serdes {
 
 
 	template<Order O>
-	void print_filled(std::ostream& os, const Grid<O>& grid) {
+	void print_filled(std::ostream& os, const Grid<O>& grid) noexcept {
 		assert(grid_is_filled<O>(grid));
 		assert(grid_follows_rule(grid));
 		using T = traits<O>;
@@ -166,7 +166,7 @@ namespace okiidoku::mono::db::serdes {
 
 
 	template<Order O>
-	void parse_filled(std::istream& is, Grid<O>& grid) {
+	void parse_filled(std::istream& is, Grid<O>& grid) noexcept {
 		using T = traits<O>;
 
 		detail::SerdesHelper<O> helper {};
@@ -187,7 +187,7 @@ namespace okiidoku::mono::db::serdes {
 
 
 	template<Order O>
-	void print_puzzle(std::ostream& os, const Grid<O>& grid) {
+	void print_puzzle(std::ostream& os, const Grid<O>& grid) noexcept {
 		assert(grid_follows_rule(grid));
 		// using T = traits<O>;
 		(void)os; (void)grid;
@@ -195,7 +195,7 @@ namespace okiidoku::mono::db::serdes {
 
 
 	template<Order O>
-	void parse_puzzle(std::istream& is, Grid<O>& grid) {
+	void parse_puzzle(std::istream& is, Grid<O>& grid) noexcept {
 		// using T = traits<O>;
 		(void)is; (void)grid;
 
@@ -205,10 +205,10 @@ namespace okiidoku::mono::db::serdes {
 
 
 	#define OKIIDOKU_FOR_COMPILED_O(O_) \
-		template void print_filled<O_>(std::ostream&, const Grid<O_>&); \
-		template void parse_filled<O_>(std::istream&, Grid<O_>&); \
-		template void print_puzzle<O_>(std::ostream&, const Grid<O_>&); \
-		template void parse_puzzle<O_>(std::istream&, Grid<O_>&);
+		template void print_filled<O_>(std::ostream&, const Grid<O_>&) noexcept; \
+		template void parse_filled<O_>(std::istream&, Grid<O_>&) noexcept; \
+		template void print_puzzle<O_>(std::ostream&, const Grid<O_>&) noexcept; \
+		template void parse_puzzle<O_>(std::istream&, Grid<O_>&) noexcept;
 	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 	#undef OKIIDOKU_FOR_COMPILED_O
 }
@@ -216,25 +216,25 @@ namespace okiidoku::mono::db::serdes {
 
 namespace okiidoku::visitor::db::serdes {
 
-	void print_filled(std::ostream& os, const Grid& vis_src) {
+	void print_filled(std::ostream& os, const Grid& vis_src) noexcept {
 		return std::visit([&](auto& mono_src) {
 			return mono::db::serdes::print_filled(os, mono_src);
 		}, vis_src.get_mono_variant());
 	}
 
-	void parse_filled(std::istream& is, Grid& vis_sink) {
+	void parse_filled(std::istream& is, Grid& vis_sink) noexcept {
 		return std::visit([&](auto& mono_sink) {
 			return mono::db::serdes::parse_filled(is, mono_sink);
 		}, vis_sink.get_mono_variant());
 	}
 
-	void print_puzzle(std::ostream& os, const Grid& vis_src) {
+	void print_puzzle(std::ostream& os, const Grid& vis_src) noexcept {
 		return std::visit([&](auto& mono_src) {
 			return mono::db::serdes::print_puzzle(os, mono_src);
 		}, vis_src.get_mono_variant());
 	}
 
-	void parse_puzzle(std::istream& is, Grid& vis_sink) {
+	void parse_puzzle(std::istream& is, Grid& vis_sink) noexcept {
 		return std::visit([&](auto& mono_sink) {
 			return mono::db::serdes::parse_puzzle(is, mono_sink);
 		}, vis_sink.get_mono_variant());

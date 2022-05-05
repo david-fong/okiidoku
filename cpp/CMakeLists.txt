@@ -6,11 +6,15 @@ project(okiidoku
 	LANGUAGES CXX
 )
 
-set(CMAKE_CXX_STANDARD 20 CACHE STRING "The C++ standard to use")
+if(MSVC)
+	# newest MSVC requires CXX_STANDARD_23 to add the /std:c++latest flag, which allows using <ranges>
+	set(CMAKE_CXX_STANDARD 23 CACHE STRING "The C++ standard to use")
+else()
+	set(CMAKE_CXX_STANDARD 20 CACHE STRING "The C++ standard to use")
+endif()
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_CXX_EXTENSIONS FALSE)
 if(MSVC)
-	# TODO.mid newest MSVC requires CXX_STANDARD_23 to add the /std:c++latest flag, which allows using <ranges>
 	add_compile_options(
 		/utf-8        # /source-charset:utf-8 (for preprocessor), and /execution-charset:utf8 (for compiler)
 		/permissive-  # https://discourse.cmake.org/t/cxx-extensions-and-permissive/1994
@@ -45,7 +49,9 @@ endif()
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 
 
-if(PROJECT_IS_TOP_LEVEL OR MSVC)
+if(MSVC)
+	set(okiidoku_SHARED_LIBS FALSE)
+elseif(PROJECT_IS_TOP_LEVEL)
 	set(okiidoku_SHARED_LIBS TRUE)
 endif()
 if(DEFINED okiidoku_SHARED_LIBS)
@@ -88,9 +94,13 @@ install(TARGETS
 	FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/okiidoku
 	INCLUDES         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/okiidoku
 )
-# TODO.mid install the generated export header somehow
+if (BUILD_SHARED_LIBS)
+	set(OKIIDOKU_LIB_TYPE_NAME shared)
+else ()
+	set(OKIIDOKU_LIB_TYPE_NAME static)
+endif()
 install(EXPORT okiidokuTargets
-	FILE okiidokuTargets.cmake
+	FILE okiidoku-${OKIIDOKU_LIB_TYPE_NAME}-targets.cmake
 	NAMESPACE okiidoku::
 	DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/okiidoku
 )

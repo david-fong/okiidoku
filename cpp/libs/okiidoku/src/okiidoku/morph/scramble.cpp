@@ -7,7 +7,7 @@
 namespace okiidoku::mono::morph {
 
 	template<Order O> requires(is_order_compiled(O))
-	Transformation<O> scramble(Grid<O>& grid, SharedRng& shared_rng) {
+	Transformation<O> scramble(Grid<O>& grid, SharedRng& shared_rng) noexcept {
 		Transformation<O> t {};
 		{
 			std::lock_guard lock_guard_{shared_rng.mutex};
@@ -27,7 +27,7 @@ namespace okiidoku::mono::morph {
 
 
 	#define OKIIDOKU_FOR_COMPILED_O(O_) \
-		template Transformation<O_> scramble<O_>(Grid<O_>&, SharedRng&);
+		template Transformation<O_> scramble<O_>(Grid<O_>&, SharedRng&) noexcept;
 	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 	#undef OKIIDOKU_FOR_COMPILED_O
 }
@@ -35,7 +35,7 @@ namespace okiidoku::mono::morph {
 
 namespace okiidoku::visitor::morph {
 
-	Transformation scramble(Grid& vis_grid, SharedRng& shared_rng) {
+	Transformation scramble(Grid& vis_grid, SharedRng& shared_rng) noexcept {
 		return std::visit([&](auto& mono_grid) {
 			return static_cast<Transformation>(mono::morph::scramble(mono_grid, shared_rng));
 		}, vis_grid.get_mono_variant());
