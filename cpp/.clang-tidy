@@ -1,0 +1,2 @@
+---
+Checks: '*,-altera-*,-fuchsia-*,-google-*,-zircon-*,-abseil-*,-llvm-*,-llvmlibc-*,-readability-identifier-length,-modernize-use-trailing-return-type,-cppcoreguidelines-macro-usage,-misc-non-private-member-variables-in-classes'

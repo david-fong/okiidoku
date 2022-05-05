@@ -38,7 +38,7 @@ namespace okiidoku::mono::morph::detail {
 					return (a%T::O1) == (b%T::O1);
 				});
 			}
-			bool has_ties() const noexcept { return line_ties.has_unresolved() || chute_ties.has_unresolved(); }
+			[[nodiscard]] bool has_ties() const noexcept { return line_ties.has_unresolved() || chute_ties.has_unresolved(); }
 
 			void do_a_pass(const Grid<O>& table) noexcept;
 		};

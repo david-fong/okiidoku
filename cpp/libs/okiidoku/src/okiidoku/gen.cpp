@@ -9,7 +9,7 @@
 namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
-	void generate(Grid<O>& grid, SharedRng& shared_rng) noexcept {
+	void generate(Grid<O>& grid, SharedRng& shared_rng) noexcept { // NOLINT(readability-function-cognitive-complexity) *laughs in cognitive complexity of 72
 		using T = traits<O>;
 		// using val_t = typename T::o2x_smol_t;
 		using o2x_t = typename T::o2x_t;
@@ -26,7 +26,8 @@ namespace okiidoku::mono {
 
 		// Note: using a scoped rng to avoid holding the shared_rng mutex
 		// during the long-running parts of this function body.
-		std::minstd_rand rng_; // other good LCG parameters https://arxiv.org/pdf/2001.05304v3.pdf
+		using rng_t = std::minstd_rand; // other good LCG parameters: https://arxiv.org/pdf/2001.05304v3.pdf
+		rng_t rng_; // NOLINT(cert-msc32-c,cert-msc51-cpp) deferred seeding
 		{
 			std::lock_guard lock_guard {shared_rng.mutex};
 			rng_.seed(static_cast<unsigned int>(shared_rng.rng()));
@@ -56,12 +57,12 @@ namespace okiidoku::mono {
 					if (val_count == 0) { ++has_nots; }
 			}	}
 			while (has_nots != 0) [[likely]] {
-				const auto a_col {static_cast<o2x_t>((rng_() - rng_.min()) % T::O2)};
-				const auto b_col {static_cast<o2x_t>((rng_() - rng_.min()) % T::O2)};
+				const auto a_col {static_cast<o2x_t>((rng_() - rng_t::min()) % T::O2)};
+				const auto b_col {static_cast<o2x_t>((rng_() - rng_t::min()) % T::O2)};
 				const auto a_box {static_cast<o2x_t>(a_col/T::O1)};
 				const auto b_box {static_cast<o2x_t>(b_col/T::O1)};
 				if (a_box == b_box) [[unlikely]] { continue; }
-				const auto row {static_cast<o2x_t>(h_chute + ((rng_() - rng_.min()) % (T::O1/* -1 */)))};
+				const auto row {static_cast<o2x_t>(h_chute + ((rng_() - rng_t::min()) % (T::O1/* -1 */)))};
 				auto& a_cell {grid.at(row,a_col)};
 				auto& b_cell {grid.at(row,b_col)};
 				const int has_nots_diff {
@@ -97,10 +98,10 @@ namespace okiidoku::mono {
 					if (val_count == 0) { ++has_nots; }
 			}	}
 			while (has_nots != 0) [[likely]] {
-				const auto a_col {static_cast<o2x_t>((rng_() - rng_.min()) % T::O1)};
-				const auto b_col {static_cast<o2x_t>((rng_() - rng_.min()) % T::O1)};
+				const auto a_col {static_cast<o2x_t>((rng_() - rng_t::min()) % T::O1)};
+				const auto b_col {static_cast<o2x_t>((rng_() - rng_t::min()) % T::O1)};
 				if (a_col == b_col) [[unlikely]] { continue; }
-				const auto row {static_cast<o2x_t>((rng_() - rng_.min()) % (T::O1*(T::O1/* -1 */)))};
+				const auto row {static_cast<o2x_t>((rng_() - rng_t::min()) % (T::O1*(T::O1/* -1 */)))};
 				auto& a_cell {grid.at(row, static_cast<o2i_t>(v_chute + a_col))};
 				auto& b_cell {grid.at(row, static_cast<o2i_t>(v_chute + b_col))};
 				const int has_nots_diff {

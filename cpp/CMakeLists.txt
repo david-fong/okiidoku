@@ -74,6 +74,16 @@ if(PROJECT_IS_TOP_LEVEL)
 	include(CTest)
 endif()
 
+find_program(
+	CLANG_TIDY_EXE
+	NAMES "clang-tidy"
+	DOC "Path to clang-tidy executable"
+)
+if(NOT ${CLANG_TIDY_EXE} STREQUAL "CLANG_TIDY_EXE-NOTFOUND")
+	# set(CMAKE_CXX_CLANG_TIDY ${CLANG_TIDY_EXE})
+	# weird warnings are happening related to ranges :')
+endif()
+
 
 # TODO.low https://docs.conan.io/en/latest/howtos/cmake_launch.html
 # include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake) # Include Conan-generated file
