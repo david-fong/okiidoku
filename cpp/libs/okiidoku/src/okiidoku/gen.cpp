@@ -31,7 +31,8 @@ namespace okiidoku::mono {
 		{
 			std::lock_guard lock_guard {shared_rng.mutex};
 			rng_.seed(static_cast<unsigned int>(shared_rng.rng()));
-			for (const auto row_sp : grid.row_spans()) {
+			for (o2i_t row {0}; row < T::O2; ++row) {
+				const auto row_sp {grid.row_span_at(row)};
 				std::ranges::shuffle(row_sp, shared_rng.rng);
 			}
 			// TODO.try should the shuffle just use `rng_`? Note: A data-parallel implementation would be much better that way.
@@ -46,7 +47,7 @@ namespace okiidoku::mono {
 
 		// Make boxes valid:
 		for (o2i_t h_chute {0}; h_chute < T::O2; h_chute += T::O1) {
-			chute_has_counts_t boxes_has {{0}};
+			chute_has_counts_t boxes_has {{{0}}};
 			for (o2i_t row {h_chute}; row < h_chute+T::O1; ++row) {
 			for (o2i_t col {0}; col < T::O2; ++col) {
 				++(boxes_has[col/T::O1][grid.at(row,col)]);
@@ -87,7 +88,7 @@ namespace okiidoku::mono {
 
 		// Make columns valid:
 		for (o2i_t v_chute {0}; v_chute < T::O2; v_chute += T::O1) {
-			chute_has_counts_t cols_has {{0}};
+			chute_has_counts_t cols_has {{{0}}};
 			for (o2i_t row {0}; row < T::O2; ++row) {
 			for (o2i_t box_col {0}; box_col < T::O1; ++box_col) {
 				++(cols_has[box_col][grid.at(row, static_cast<o2i_t>(v_chute + box_col))]);

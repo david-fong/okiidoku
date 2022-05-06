@@ -71,11 +71,10 @@ int main(const int argc, char const *const argv[]) {
 	const auto srand_key {[&]() -> std::uint_fast64_t {
 		if (argc > 1 && !std::string_view(argv[1]).empty()) {
 			return std::stoi(argv[1]);
-		} else {
-			return std::random_device()();
-		}		
+		}
+		return std::random_device()();
 	}()};
-	const unsigned int num_rounds {(argc > 2) ? static_cast<unsigned>(std::stoi(argv[2])) : 1000u};
+	const unsigned int num_rounds {(argc > 2) ? static_cast<unsigned>(std::stoi(argv[2])) : 1000U};
 
 	std::cout << "\nparsed arguments:"
 	<< "\n- arg 1 (srand key)  : " << srand_key
@@ -85,16 +84,16 @@ int main(const int argc, char const *const argv[]) {
 	okiidoku::SharedRng shared_rng;
 	shared_rng.rng.seed(srand_key);
 
-	if (test_morph<3>(shared_rng, num_rounds)) {
+	if (test_morph<3>(shared_rng, num_rounds) != 0) {
 		return 1;
 	}
-	if (test_morph<4>(shared_rng, num_rounds)) {
+	if (test_morph<4>(shared_rng, num_rounds) != 0) {
 		// return 1;
 	}
-	if (test_morph<5>(shared_rng, num_rounds)) {
+	if (test_morph<5>(shared_rng, num_rounds) != 0) {
 		// return 1;
 	}
-	if (test_morph<10>(shared_rng, num_rounds)) {
+	if (test_morph<10>(shared_rng, num_rounds) != 0) {
 		// return 1;
 	}
 

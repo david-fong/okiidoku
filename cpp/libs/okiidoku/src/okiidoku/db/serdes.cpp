@@ -22,26 +22,25 @@ namespace okiidoku::mono::db::serdes {
 
 		static constexpr unsigned num_buf_bytes {1};
 		using buf_t = uint_smolN_t<2*8*num_buf_bytes>; // x2 to prevent overflow
-		static_assert((1<<(2*8*num_buf_bytes)) > (2*T::O2)); // requirement to handle overflow
+		static_assert((1U<<(2*8*num_buf_bytes)) > (2U*T::O2)); // requirement to handle overflow
 
 	public:
-		SerdesHelper() noexcept: row_cands{house_mask_ones<O>} {
+		SerdesHelper() noexcept:
+			row_cands {house_mask_ones<O>},
+			cell_cands {house_mask_ones<O>}
+		{
 			h_chute_boxes_cands.fill(house_mask_ones<O>);
 			cols_cands.fill(house_mask_ones<O>);
-			cell_cands = house_mask_ones<O>;
-			cell_rmi = 0;
-			buf = 0;
-			buf_pos = 1;
 		}
 		[[nodiscard, gnu::pure]] o4i_t get_cell_rmi() const noexcept { return cell_rmi; }
 		void advance() noexcept;
 
 		// automatically removes val as a candidate of future cells.
-		void print_val(std::ostream&, val_t val) noexcept;
-		void print_remaining_buf(std::ostream&) noexcept;
+		void print_val(std::ostream& os, val_t val) noexcept;
+		void print_remaining_buf(std::ostream& os) noexcept;
 
 		// automatically removes val as a candidate of future cells.
-		[[nodiscard]] val_t parse_val(std::istream&) noexcept;
+		[[nodiscard]] val_t parse_val(std::istream& is) noexcept;
 
 	private:
 		void remove_cand_at_current_rmi_(val_t cand) noexcept;
@@ -55,12 +54,12 @@ namespace okiidoku::mono::db::serdes {
 		// hypothetical candidates of cell to print/parse.
 		cands_t cell_cands;
 
-		o4i_t cell_rmi;
+		o4i_t cell_rmi {0};
 
 		// current small buffer of data to print/parse.
 		static constexpr buf_t buf_end {buf_t{8*num_buf_bytes}};
-		buf_t buf;
-		buf_t buf_pos;
+		buf_t buf {0};
+		buf_t buf_pos {1};
 	};
 
 

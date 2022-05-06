@@ -22,10 +22,14 @@ Refer to the [CMake guide](https://cmake.org/cmake/help/latest/guide/importing-e
 
 ```shell
 # cd into the cpp directory of the repo first
+mkdir build/Release
+pushd build/Release
+conan install ../../ --build=missing #--profile=
+popd
 cmake -S . -B build/Release -DCMAKE_BUILD_TYPE=Release
 cd build/Release
 cmake --build . --config=Release
-./src/okiidoku_cli/okiidoku_cli
+./apps/cli/okiidoku_cli
 ```
 
 You can use `tput rmam` to disable the terminal's line wrapping, and `tput smam` to enable it again afterward.

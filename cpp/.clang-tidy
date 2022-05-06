@@ -1,2 +1,4 @@
 ---
-Checks: '*,-altera-*,-fuchsia-*,-google-*,-zircon-*,-abseil-*,-llvm-*,-llvmlibc-*,-readability-identifier-length,-modernize-use-trailing-return-type,-cppcoreguidelines-macro-usage,-misc-non-private-member-variables-in-classes'
+# https://clang.llvm.org/extra/clang-tidy/checks/list.html
+Checks: 'boost-*,bugprone-*,cert-*,clang-analyzer-*,concurrency-*,cppcoreguidelines-*,darwin-*,hicpp-*,misc-*,modernize-*,performance-*,portability-*,readability-*,-cppcoreguidelines-pro-bounds-constant-array-index,-readability-identifier-length,-modernize-use-trailing-return-type,-cppcoreguidelines-macro-usage'
+#,-misc-non-private-member-variables-in-classes'

@@ -81,13 +81,16 @@ find_program(
 )
 if(NOT ${CLANG_TIDY_EXE} STREQUAL "CLANG_TIDY_EXE-NOTFOUND")
 	# set(CMAKE_CXX_CLANG_TIDY ${CLANG_TIDY_EXE})
-	# weird warnings are happening related to ranges :')
+	# TODO.mid sort out the warnings
 endif()
 
 
 # TODO.low https://docs.conan.io/en/latest/howtos/cmake_launch.html
-# include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake) # Include Conan-generated file
-# conan_basic_setup(TARGETS) # Introduce Conan-generated targets
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake) # Include Conan-generated file
+conan_basic_setup(
+	TARGETS # Introduce Conan-generated targets
+	NO_OUTPUT_DIRS # don't put all target outputs under a bin/ directory of the build tree. if this works fine with MSVC, then maybe I'd be okay with allowing this.
+)
 
 add_subdirectory(libs/cli_utils)
 add_subdirectory(libs/okiidoku)

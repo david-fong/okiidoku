@@ -2,7 +2,12 @@
 #include <okiidoku/morph/canon_ties.hpp>
 #include <okiidoku/grid.hpp>
 
-#include <ranges>
+#include <range/v3/view/common.hpp>
+#include <range/v3/view/drop.hpp>
+#include <range/v3/view/take.hpp>
+#include <range/v3/view/join.hpp>
+#include <range/v3/view/transform.hpp>
+
 #include <algorithm> // sort
 #include <numeric>   // iota
 #include <cassert>
@@ -75,10 +80,10 @@ namespace okiidoku::mono::morph::detail {
 			}
 			// loop over orthogonal partially-resolved chute ranges to normalize:
 			{
-				std::array<o1i_t, T::O1> resolve;
+				std::array<o1i_t, T::O1> resolve; // TODO.high where is this being used?
 				std::iota(resolve.begin(), resolve.end(), o1i_t{0});
 				for (const auto t : ortho.chute_ties) {
-					namespace v = std::views;
+					namespace v = ranges::views;
 					std::ranges::sort(resolve | v::drop(t.begin_) | v::take(t.size()), [&](auto a, auto b){
 						return std::ranges::lexicographical_compare(row_sp.subspan(a*T::O1,T::O1), row_sp.subspan(b*T::O1,T::O1));
 					});
@@ -113,7 +118,7 @@ namespace okiidoku::mono::morph::detail {
 			);
 		}
 		const auto chute_tie_data {[&](o2i_t chute) {
-			namespace v = std::views;
+			namespace v = ranges::views;
 			return to_tied | v::drop(chute*T::O1) | v::take(T::O1) | v::transform([&](auto i){ return v::common(table.row_span_at(i)); }) | v::join;
 		}};
 		// try to resolve tied chute ranges:

@@ -45,20 +45,25 @@ namespace okiidoku {
 	}
 
 
-	void print_2d(std::ostream& os, const unsigned O, const std::span<const print_2d_grid_view> grid_views, SharedRng& shared_rng) {
+	void print_2d( // NOLINT(readability-function-cognitive-complexity) :B
+		std::ostream& os,
+		const unsigned O,
+		const std::span<const print_2d_grid_view> grid_views,
+		SharedRng& shared_rng
+	) {
 		using o2i_t = std::uint16_t;
 
 		const auto print_box_row_sep_string_ {[&os, O](const unsigned border_i) -> void {
 			#define M_NOOK(NOOK_T, NOOK_C, NOOK_B) \
-			if      (border_i == 0) [[unlikely]] { os << NOOK_T; } \
-			else if (border_i == O) [[unlikely]] { os << NOOK_B; } \
-			else                    { os << NOOK_C; }
+			if      (border_i == 0) [[unlikely]] { os << (NOOK_T); } \
+			else if (border_i == O) [[unlikely]] { os << (NOOK_B); } \
+			else                    { os << (NOOK_C); }
 			M_NOOK(" ┌", " ├", " └")
 			for (unsigned box_col {0}; box_col < O; ++box_col) {
-				for (unsigned i {0}; i < 1u + (2u * O); ++i) {
+				for (unsigned i {0}; i < 1U + (2U * O); ++i) {
 					os << "─";
 				}
-				if (box_col < O - 1u) { M_NOOK("┬", "┼", "┴") }
+				if (box_col < O - 1U) { M_NOOK("┬", "┼", "┴") }
 			}
 			M_NOOK("┐", "┤", "┘")
 			#undef M_NOOK
@@ -93,9 +98,9 @@ namespace okiidoku {
 						if (val < set.size()) {
 							os << set.at(val);
 							break;
-						} else {
-							val -= set.size();
-					}	}
+						}
+						val -= set.size();
+					}
 				}
 				os << " │";
 				if (grid_i != grid_views.size() - 1) {

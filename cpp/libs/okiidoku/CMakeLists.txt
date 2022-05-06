@@ -30,10 +30,10 @@ target_sources(okiidoku PUBLIC FILE_SET HEADERS BASE_DIRS include)
 target_include_directories(okiidoku PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
 
 # find_package(Threads REQUIRED)
-# target_link_libraries(okiidoku
-	# PRIVATE CONAN_PKG::range-v3
+target_link_libraries(okiidoku
+	PRIVATE CONAN_PKG::range-v3
 	# PRIVATE Threads::Threads
-# )
+)
 
 if(PROJECT_IS_TOP_LEVEL)
 	add_subdirectory(examples)

@@ -21,7 +21,7 @@ namespace okiidoku::util {
 	#endif
 
 	struct MyNumPunct final : std::numpunct<char> {
-		std::string do_grouping() const {
+		std::string do_grouping() const override {
 			return "\03";
 		}
 	};
@@ -55,6 +55,9 @@ namespace okiidoku::util {
 		}
 		#endif
 
-		std::atexit(&restore_console_config_);
+		const auto registration_failure {std::atexit(&restore_console_config_)};
+		if (registration_failure != 0) {
+			restore_console_config_(); // just undo the console things immediately.
+		}
 	}
 }

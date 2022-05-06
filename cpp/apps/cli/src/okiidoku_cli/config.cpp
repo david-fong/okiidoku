@@ -41,7 +41,7 @@ namespace okiidoku::cli {
 			std::cout << "is: " << order() << std::endl;
 			return;
 		}
-		int new_order {};
+		unsigned int new_order {};
 		const auto parse_result {std::from_chars(
 			arg.data(), arg.data()+arg.size(), new_order
 		)};

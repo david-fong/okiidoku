@@ -24,6 +24,8 @@
 
 - try using clang-tidy
 
+- try switching usages of `std::ranges` to use ranges-v3. Maybe that will allow using clang, clang-tidy, and MSVC without requiring "c++23".
+
 - decide between the terminology "rmi" vs "rmi"
 
 - For the Clang build:

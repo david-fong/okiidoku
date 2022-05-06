@@ -65,7 +65,7 @@ namespace okiidoku::cli {
 
 		void gen_single();
 
-		void gen_multiple(unsigned long long stop_after);
+		void gen_multiple(unsigned long long how_many);
 		void gen_multiple(std::string_view);
 	};
 }

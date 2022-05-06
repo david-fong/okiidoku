@@ -66,12 +66,3 @@ things I got wrong before which I couldn't understand based on gcc's error messa
 - Tricky business with globals in static libraries being inlined into multiple DSOs / executables linked together: [cppcon talk](https://www.youtube.com/watch?v=xVT1y0xWgww&ab_channel=CppCon&t=4m25s). Try to avoid this scenario by avoiding globals, but if need be, make sure DSOs are specified first in the link order. See the questions section at t=33m19s for more info.
 
 - [How to write well-behaved value-wrappers](https://www.youtube.com/watch?v=J4A2B9eexiw&ab_channel=CppCon).
-
-If the library needs to use conan in the future, add this to the top of the readme instructions for repo setup:
-
-```sh
-mkdir build/Release
-pushd build/Release
-conan install ../../ --build=missing
-popd
-```

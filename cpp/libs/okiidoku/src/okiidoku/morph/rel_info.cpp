@@ -81,7 +81,7 @@ namespace okiidoku::mono::morph {
 			rel.chute_imbalance_a = 0;
 			rel.chute_imbalance_b = 0;
 			for (o1i_t i {0}; i < T::O1; ++i) {
-				const chute_imbalance_t expected_count = static_cast<chute_imbalance_t>((count / T::O1) + ((i < count % T::O1) ? 1 : 0));
+				const auto expected_count = static_cast<chute_imbalance_t>((count / T::O1) + ((i < count % T::O1) ? 1 : 0));
 				rel.chute_imbalance_a += static_cast<chute_imbalance_t>(std::abs(h_chute_imbalance[i] - expected_count));
 				rel.chute_imbalance_b += static_cast<chute_imbalance_t>(std::abs(v_chute_imbalance[i] - expected_count));
 			}
@@ -121,7 +121,7 @@ namespace okiidoku::mono::morph {
 
 	#define OKIIDOKU_FOR_COMPILED_O(O_) \
 		template struct Rel<O_>; \
-		template detail::Gridlike<O_, Rel<O_>> make_rel_table<O_>(const Grid<O_>&) noexcept ;
+		template detail::Gridlike<O_, Rel<(O_)>> make_rel_table<O_>(const Grid<O_>&) noexcept ;
 	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 	#undef OKIIDOKU_FOR_COMPILED_O
 }

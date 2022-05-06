@@ -24,9 +24,8 @@ int main(const int argc, char const *const argv[]) {
 	const auto srand_key {[&]() -> std::uint_fast64_t {
 		if (argc > 2 && !std::string(argv[2]).empty()) {
 			return static_cast<std::uint_fast64_t>(std::stoi(argv[2]));
-		} else {
-			return std::random_device()();
 		}
+		return std::random_device()();
 	}()};
 
 	std::cout << "\nparsed arguments:"

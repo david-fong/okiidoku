@@ -13,11 +13,11 @@
 namespace okiidoku::util::str {
 
 	struct SgrPair final {
-		char const*const on;
-		char const*const off;
+		std::string_view on;
+		std::string_view off;
 	};
 	#if USE_ANSI_ESC
-	#define SGR(NAME, ON_STR, OFF_STR) constexpr SgrPair NAME { .on {ON_STR}, .off {OFF_STR} };
+	#define SGR(NAME, ON_STR, OFF_STR) constexpr SgrPair NAME { .on {(ON_STR)}, .off {(OFF_STR)} };
 	#else
 	#define SGR(NAME, ON_STR, OFF_STR) constexpr SgrPair NAME { .on {""}, .off {""} };
 	#endif

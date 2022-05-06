@@ -54,7 +54,7 @@ namespace okiidoku::cli {
 
 
 	bool Repl::run_command(const std::string_view cmd_line) {
-		const auto token_pos {cmd_line.find(" ")};
+		const auto token_pos {cmd_line.find(' ')};
 		// Very simple parsing: Assumes no leading spaces, and does not
 		// trim leading or trailing spaces from the arguments substring.
 		const std::string_view cmd_name {cmd_line.substr(0, token_pos)};
@@ -111,7 +111,7 @@ namespace okiidoku::cli {
 	}
 
 
-	void Repl::gen_multiple(unsigned long long stop_after) {
+	void Repl::gen_multiple(unsigned long long how_many) {
 		using namespace okiidoku::visitor;
 		const Timer timer{};
 		{
@@ -125,7 +125,7 @@ namespace okiidoku::cli {
 			// } catch (const std::ios_base::failure& fail) {
 			// 	std::cout << str::red.on << fail.what() << str::red.off << std::endl;
 			// }
-			for (unsigned long long prog {0}; prog < stop_after; ++prog) {
+			for (unsigned long long prog {0}; prog < how_many; ++prog) {
 				Grid grid(config_.order());
 				generate(grid, shared_rng_);
 				if (config_.canonicalize()) {
@@ -137,12 +137,11 @@ namespace okiidoku::cli {
 		}
 		const auto elapsed {timer.read_elapsed()};
 
-		static const std::string seconds_units {std::string{} + str::dim.on + " seconds (with I/O)" + str::dim.off};
 		std::cout << std::setprecision(4)
-			<< "\nstop after:      " << stop_after
-			// << "\nnum threads:     " << params.num_threads
-			<< "\nprocess time:    " << elapsed.proc_seconds << seconds_units
-			<< "\nwall-clock time: " << elapsed.wall_seconds << seconds_units
+			<< "\nhow_many:            " << how_many
+			// << "\nnum threads:        " << params.num_threads
+			<< "\nprocess time (s):    " << elapsed.proc_seconds
+			<< "\nwall-clock time (s): " << elapsed.wall_seconds
 			// Note: the timer will not include canonicalization time if verbosity is quiet
 			;
 
@@ -154,13 +153,13 @@ namespace okiidoku::cli {
 	}
 
 
-	void Repl::gen_multiple(const std::string_view stop_after_str) {
-		unsigned long long stop_after {};
+	void Repl::gen_multiple(const std::string_view how_many_str) {
+		unsigned long long how_many {};
 		const auto parse_result {std::from_chars(
-			stop_after_str.data(), stop_after_str.data()+stop_after_str.size(), stop_after
+			how_many_str.data(), how_many_str.data()+how_many_str.size(), how_many
 		)};
 		if (parse_result.ec == std::errc{}) {
-			if (stop_after <= 0) {
+			if (how_many <= 0) {
 				std::cout << str::red.on
 					<< "please provide a non-zero, positive integer."
 					<< str::red.off << std::endl;
@@ -168,10 +167,10 @@ namespace okiidoku::cli {
 			}
 		} else {
 			std::cout << str::red.on
-				<< "could not convert \"" << stop_after_str << "\" to an integer."
+				<< "could not convert \"" << how_many_str << "\" to an integer."
 				<< str::red.off << std::endl;
 			return;
 		}
-		this->gen_multiple(stop_after);
+		this->gen_multiple(how_many);
 	}
 }

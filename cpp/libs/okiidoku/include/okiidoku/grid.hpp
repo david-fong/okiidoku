@@ -4,7 +4,9 @@
 #include <okiidoku/traits.hpp>
 #include <okiidoku/detail/order_templates.hpp>
 
-#include <ranges>
+// #include <range/
+
+// #include <ranges>
 #include <array>
 #include <span>
 #include <compare>
@@ -71,7 +73,7 @@ namespace okiidoku::mono {
 		template<class T_row> requires(Any_o2ix<O, T_row>)
 		[[nodiscard]] constexpr std::span<const val_t, T::O2> row_span_at(const T_row i) const noexcept { return static_cast<std::span<const val_t, T::O2>>(std::span(cells_).subspan(T::O2*i, T::O2)); }
 
-		[[nodiscard]] constexpr auto row_spans() noexcept { namespace v = std::views; return v::iota(o2i_t{0}, o2i_t{T::O2}) | v::transform([&](auto r){ return row_span_at(r); }); }
+		// [[nodiscard]] constexpr auto row_spans() noexcept { namespace v = ranges::views; return v::iota(o2i_t{0}, o2i_t{T::O2}) | v::transform([&](auto r){ return row_span_at(r); }); }
 		// [[nodiscard]] constexpr auto row_spans() const noexcept { namespace v = std::views; return v::iota(o2i_t{0}, T::O2) | v::transform([&](auto r){ return row_span_at(r); }); }
 	private:
 		std::array<val_t, T::O4> cells_;
