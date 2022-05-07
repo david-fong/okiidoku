@@ -16,6 +16,7 @@ add_library(okiidoku
 )
 add_library(okiidoku::okiidoku ALIAS okiidoku)
 set_target_properties(okiidoku PROPERTIES
+	# https://www.youtube.com/watch?v=m0DwB4OvDXk&ab_channel=CppCon&t=17m13s
 	VERSION   ${okiidoku_VERSION}
 	SOVERSION ${okiidoku_VERSION_MAJOR}
 )

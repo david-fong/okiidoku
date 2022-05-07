@@ -6,12 +6,7 @@ project(okiidoku
 	LANGUAGES CXX
 )
 
-if(MSVC)
-	# newest MSVC requires CXX_STANDARD_23 to add the /std:c++latest flag, which allows using <ranges>
-	set(CMAKE_CXX_STANDARD 23 CACHE STRING "The C++ standard to use")
-else()
-	set(CMAKE_CXX_STANDARD 20 CACHE STRING "The C++ standard to use")
-endif()
+set(CMAKE_CXX_STANDARD 20 CACHE STRING "The C++ standard to use")
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_CXX_EXTENSIONS FALSE)
 if(MSVC)

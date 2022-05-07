@@ -24,13 +24,6 @@
 
 - try using clang-tidy
 
-- try switching usages of `std::ranges` to use ranges-v3. Maybe that will allow using clang, clang-tidy, and MSVC without requiring "c++23".
-
-- decide between the terminology "rmi" vs "rmi"
-
-- For the Clang build:
-  - clang isn't happy with some of the ranges stuff in libstdc++ (the GCC one). Dunno what to do about that. Ranges is pretty new to the standard library...
-
 - try writing custom python pretty-printer for `HouseMask`?
   - [how to write a gdb pretty-printer](https://sourceware.org/gdb/onlinedocs/gdb/Writing-a-Pretty_002dPrinter.html#Writing-a-Pretty_002dPrinter)
 
@@ -45,7 +38,7 @@
 
 - cmake things I can try out:
   - versioning my targets https://cmake.org/cmake/help/latest/prop_tgt/VERSION.html#prop_tgt:VERSION
-    - cppcon video <https://www.youtube.com/watch?v=m0DwB4OvDXk&ab_channel=CppCon&t=17m13s>
+    - cppcon video <>
 
 - try adding shortcuts to std::views::iota(0,N) and use them instead of all the raw loops. see how it impacts performance. Don't know if compilers will still do all their optimizations (simd, unrolling, etc.).
 
