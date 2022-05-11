@@ -1,4 +1,4 @@
-#include <okiidoku/db/serdes.hpp>
+#include <okiidoku/serdes.hpp>
 
 #include <okiidoku/house_mask.hpp>
 
@@ -8,24 +8,22 @@
 #include <limits> // numeric_limits
 #include <cassert>
 
-namespace okiidoku::mono::db::serdes {
+// TODO.asap try unnamed namespace, examine nm, compare library size
+namespace okiidoku::mono::detail::serdes {
 
-	namespace detail {
-		template<Order O> requires(is_order_compiled(O)) class SerdesHelper;
-	}
 	template<Order O> requires(is_order_compiled(O))
-	class detail::SerdesHelper final {
-		using T = traits<O>;
+	class Helper final {
+		using T = Ints<O>;
 		using cands_t = HouseMask<O>;
 		using val_t = typename T::o2x_t;
 		using o4i_t = typename T::o4i_t;
 
 		static constexpr unsigned num_buf_bytes {1};
-		using buf_t = uint_smolN_t<2*8*num_buf_bytes>; // x2 to prevent overflow
+		using buf_t = detail::uint_smolN_t<2*8*num_buf_bytes>; // x2 to prevent overflow
 		static_assert((1U<<(2*8*num_buf_bytes)) > (2U*T::O2)); // requirement to handle overflow
 
 	public:
-		SerdesHelper() noexcept:
+		Helper() noexcept:
 			row_cands {house_mask_ones<O>},
 			cell_cands {house_mask_ones<O>}
 		{
@@ -64,7 +62,7 @@ namespace okiidoku::mono::db::serdes {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	void detail::SerdesHelper<O>::advance() noexcept {
+	void Helper<O>::advance() noexcept {
 		++cell_rmi;
 		if (cell_rmi % T::O2 == 0) [[unlikely]] { row_cands = house_mask_ones<O>; }
 		if (cell_rmi % T::O3 == 0) [[unlikely]] { h_chute_boxes_cands.fill(house_mask_ones<O>); }
@@ -76,7 +74,7 @@ namespace okiidoku::mono::db::serdes {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	void detail::SerdesHelper<O>::print_val(std::ostream& os, const typename detail::SerdesHelper<O>::val_t val) noexcept {
+	void Helper<O>::print_val(std::ostream& os, const typename Helper<O>::val_t val) noexcept {
 		// The number of possible different values that this cell could be
 		// based on the values that have already been encountered.
 		auto smol_val_buf_remaining {cell_cands.count()};
@@ -109,7 +107,7 @@ namespace okiidoku::mono::db::serdes {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	void detail::SerdesHelper<O>::print_remaining_buf(std::ostream& os) noexcept {
+	void Helper<O>::print_remaining_buf(std::ostream& os) noexcept {
 		if (buf_pos > 1) {
 			os.put(static_cast<char>(buf));
 		}
@@ -118,7 +116,7 @@ namespace okiidoku::mono::db::serdes {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	typename detail::SerdesHelper<O>::val_t detail::SerdesHelper<O>::parse_val(std::istream& is) noexcept {
+	typename Helper<O>::val_t Helper<O>::parse_val(std::istream& is) noexcept {
 		// The number of possible different values that this cell could be
 		// based on the values that have already been encountered.
 		auto smol_val_buf_remaining {cell_cands.count()};
@@ -136,27 +134,28 @@ namespace okiidoku::mono::db::serdes {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	void detail::SerdesHelper<O>::remove_cand_at_current_rmi_(const typename SerdesHelper<O>::val_t cand) noexcept {
+	void Helper<O>::remove_cand_at_current_rmi_(const typename Helper<O>::val_t cand) noexcept {
 		auto& box_cands {h_chute_boxes_cands[cell_rmi / T::O3]};
 		auto& col_cands {cols_cands[cell_rmi / T::O2]};
 		cands_t::unset3(cand, row_cands, box_cands, col_cands);
 	}
+}
+namespace okiidoku::mono::serdes {
 
-
-	template<Order O>
+	template<Order O> requires(is_order_compiled(O))
 	void print_filled(std::ostream& os, const Grid<O>& grid) noexcept {
 		assert(grid_is_filled<O>(grid));
 		assert(grid_follows_rule(grid));
-		using T = traits<O>;
+		using T = Ints<O>;
 
-		detail::SerdesHelper<O> helper {};
+		detail::serdes::Helper<O> helper {};
 		for (; helper.get_cell_rmi() < T::O4; helper.advance()) {
 			const auto row {helper.get_cell_rmi() / T::O2};
 			const auto col {helper.get_cell_rmi() % T::O2};
 			if ((T::O1-1-row)/T::O1 == col/T::O1) {
 				continue; // skip cells in the anti-diagonal boxes
 			}
-			using val_t = typename traits<O>::o2x_t;
+			using val_t = typename Ints<O>::o2x_t;
 			const auto val {static_cast<val_t>(grid.at_rmi(helper.get_cell_rmi()))};
 			helper.print_val(os, val);
 		}
@@ -164,11 +163,11 @@ namespace okiidoku::mono::db::serdes {
 	}
 
 
-	template<Order O>
+	template<Order O> requires(is_order_compiled(O))
 	void parse_filled(std::istream& is, Grid<O>& grid) noexcept {
-		using T = traits<O>;
+		using T = Ints<O>;
 
-		detail::SerdesHelper<O> helper {};
+		detail::serdes::Helper<O> helper {};
 		for (; helper.get_cell_rmi() < T::O4; helper.advance()) {
 			const auto row {helper.get_cell_rmi() / T::O2};
 			const auto col {helper.get_cell_rmi() % T::O2};
@@ -185,17 +184,17 @@ namespace okiidoku::mono::db::serdes {
 	}
 
 
-	template<Order O>
+	template<Order O> requires(is_order_compiled(O))
 	void print_puzzle(std::ostream& os, const Grid<O>& grid) noexcept {
 		assert(grid_follows_rule(grid));
-		// using T = traits<O>;
+		// using T = Ints<O>;
 		(void)os; (void)grid;
 	}
 
 
-	template<Order O>
+	template<Order O> requires(is_order_compiled(O))
 	void parse_puzzle(std::istream& is, Grid<O>& grid) noexcept {
-		// using T = traits<O>;
+		// using T = Ints<O>;
 		(void)is; (void)grid;
 
 		assert(grid_follows_rule(grid));
@@ -212,29 +211,29 @@ namespace okiidoku::mono::db::serdes {
 }
 
 
-namespace okiidoku::visitor::db::serdes {
+namespace okiidoku::visitor::serdes {
 
 	void print_filled(std::ostream& os, const Grid& vis_src) noexcept {
 		return std::visit([&](auto& mono_src) {
-			return mono::db::serdes::print_filled(os, mono_src);
+			return mono::serdes::print_filled(os, mono_src);
 		}, vis_src.get_mono_variant());
 	}
 
 	void parse_filled(std::istream& is, Grid& vis_sink) noexcept {
 		return std::visit([&](auto& mono_sink) {
-			return mono::db::serdes::parse_filled(is, mono_sink);
+			return mono::serdes::parse_filled(is, mono_sink);
 		}, vis_sink.get_mono_variant());
 	}
 
 	void print_puzzle(std::ostream& os, const Grid& vis_src) noexcept {
 		return std::visit([&](auto& mono_src) {
-			return mono::db::serdes::print_puzzle(os, mono_src);
+			return mono::serdes::print_puzzle(os, mono_src);
 		}, vis_src.get_mono_variant());
 	}
 
 	void parse_puzzle(std::istream& is, Grid& vis_sink) noexcept {
 		return std::visit([&](auto& mono_sink) {
-			return mono::db::serdes::parse_puzzle(is, mono_sink);
+			return mono::serdes::parse_puzzle(is, mono_sink);
 		}, vis_sink.get_mono_variant());
 	}
 }

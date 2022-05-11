@@ -9,7 +9,7 @@ namespace okiidoku::mono::morph {
 
 	template<Order O> requires(is_order_compiled(O))
 	struct OKIIDOKU_EXPORT Transformation final {
-		using T = traits<O>;
+		using T = Ints<O>;
 		using mapping_t = typename T::o2x_smol_t;
 		using o1i_t = typename T::o1i_t;
 		using o2i_t = typename T::o2i_t;

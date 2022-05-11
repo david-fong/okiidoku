@@ -112,24 +112,24 @@ namespace okiidoku {
 		private:
 			variant_t variant_;
 		};
-	}
-}
-		
-template<okiidoku::visitor::detail::MonoToVisitorAdaptor Adaptor>
-std::compare_three_way_result<typename Adaptor::template type<okiidoku::compiled_orders[0]>> operator<=>(
-	const okiidoku::visitor::detail::ContainerBase<Adaptor>& vis_a,
-	const okiidoku::visitor::detail::ContainerBase<Adaptor>& vis_b
-) noexcept {
-	if (const auto cmp {vis_a.get_mono_order() <=> vis_b.get_mono_order()}; std::is_neq(cmp)) {
-		return cmp;
-	}
-	switch (vis_a.get_mono_order()) {
-	#define OKIIDOKU_FOR_COMPILED_O(O_) \
-	case O_: return vis_a.template get_mono_exact<O_>() <=> vis_b.template get_mono_exact<O_>();
-	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-	#undef OKIIDOKU_FOR_COMPILED_O
-	// TODO.wait std::unreachable
-	default: return std::compare_three_way_result<typename Adaptor::template type<okiidoku::compiled_orders[0]>>::equivalent;
+
+		template<MonoToVisitorAdaptor Adaptor>
+		std::compare_three_way_result<typename Adaptor::template type<compiled_orders[0]>> operator<=>(
+			const ContainerBase<Adaptor>& vis_a,
+			const ContainerBase<Adaptor>& vis_b
+		) noexcept {
+			if (const auto cmp {vis_a.get_mono_order() <=> vis_b.get_mono_order()}; std::is_neq(cmp)) {
+				return cmp;
+			}
+			switch (vis_a.get_mono_order()) {
+			#define OKIIDOKU_FOR_COMPILED_O(O_) \
+			case O_: return vis_a.template get_mono_exact<O_>() <=> vis_b.template get_mono_exact<O_>();
+			OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
+			#undef OKIIDOKU_FOR_COMPILED_O
+			// TODO.wait std::unreachable
+			default: return std::compare_three_way_result<typename Adaptor::template type<compiled_orders[0]>>::equivalent;
+			}
+		}
 	}
 }
 #endif

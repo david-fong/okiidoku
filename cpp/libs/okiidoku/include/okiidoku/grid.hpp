@@ -1,10 +1,8 @@
 #ifndef HPP_OKIIDOKU__GRID
 #define HPP_OKIIDOKU__GRID
 
-#include <okiidoku/traits.hpp>
+#include <okiidoku/ints.hpp>
 #include <okiidoku/detail/order_templates.hpp>
-
-// #include <range/
 
 #include <array>
 #include <span>
@@ -37,7 +35,7 @@ namespace okiidoku::mono {
 	class detail::Gridlike final { // TODO.mid should this be exported? currently all function body definitions are inline so it can be used header-only... but anything not header-only needs to be exported for sure!
 	public:
 		using val_t = V_;
-		using T = traits<O>;
+		using T = Ints<O>;
 		using o2x_t = typename T::o2x_t;
 		using o2i_t = typename T::o2i_t;
 		using o4x_t = typename T::o4x_t;
@@ -59,21 +57,21 @@ namespace okiidoku::mono {
 		[[nodiscard]] const array_t& get_underlying_array() const noexcept { return cells_; };
 
 		// contract: rmi is in [0, O4).
-		template<class T_rmi> requires(Any_o4ix<O, T_rmi>)
+		template<class T_rmi> requires(Any_o4x<O, T_rmi>)
 		[[nodiscard]] constexpr       val_t& at_rmi(const T_rmi rmi)       noexcept { return cells_[rmi]; }
-		template<class T_rmi> requires(Any_o4ix<O, T_rmi>)
+		template<class T_rmi> requires(Any_o4x<O, T_rmi>)
 		[[nodiscard]] constexpr const val_t& at_rmi(const T_rmi rmi) const noexcept { return cells_[rmi]; }
 
 		// contract: row and col are in [0, O2).
-		template<class T_row, class T_col> requires(Any_o2ix<O, T_row> && Any_o2ix<O, T_col>)
+		template<class T_row, class T_col> requires(Any_o2x<O, T_row> && Any_o2x<O, T_col>)
 		[[nodiscard]] constexpr       val_t& at(const T_row row, const T_col col)       noexcept { return cells_[(T::O2*row)+col]; }
-		template<class T_row, class T_col> requires(Any_o2ix<O, T_row> && Any_o2ix<O, T_col>)
+		template<class T_row, class T_col> requires(Any_o2x<O, T_row> && Any_o2x<O, T_col>)
 		[[nodiscard]] constexpr const val_t& at(const T_row row, const T_col col) const noexcept { return cells_[(T::O2*row)+col]; }
 
 		// contract: row is in [0, O2).
-		template<class T_row> requires(Any_o2ix<O, T_row>)
+		template<class T_row> requires(Any_o2x<O, T_row>)
 		[[nodiscard]] constexpr std::span<      val_t, T::O2> row_span_at(const T_row i)       noexcept { return static_cast<std::span<      val_t, T::O2>>(std::span(cells_).subspan(T::O2*i, T::O2)); }
-		template<class T_row> requires(Any_o2ix<O, T_row>)
+		template<class T_row> requires(Any_o2x<O, T_row>)
 		[[nodiscard]] constexpr std::span<const val_t, T::O2> row_span_at(const T_row i) const noexcept { return static_cast<std::span<const val_t, T::O2>>(std::span(cells_).subspan(T::O2*i, T::O2)); }
 
 		// [[nodiscard]] constexpr auto row_spans() noexcept { namespace v = ranges::views; return v::iota(o2i_t{0}, o2i_t{T::O2}) | v::transform([&](auto r){ return row_span_at(r); }); }
@@ -82,18 +80,18 @@ namespace okiidoku::mono {
 		array_t cells_;
 	};
 
-	template<Order O> [[nodiscard, gnu::const]] constexpr typename traits<O>::o2i_t rmi_to_row(const typename traits<O>::o4i_t index) noexcept { return static_cast<typename traits<O>::o2i_t>(index / (traits<O>::O2)); }
-	template<Order O> [[nodiscard, gnu::const]] constexpr typename traits<O>::o2i_t rmi_to_col(const typename traits<O>::o4i_t index) noexcept { return static_cast<typename traits<O>::o2i_t>(index % (traits<O>::O2)); }
-	template<Order O> [[nodiscard, gnu::const]] constexpr typename traits<O>::o2i_t rmi_to_box(const typename traits<O>::o2i_t row, const typename traits<O>::o2i_t col) noexcept {
-		return static_cast<typename traits<O>::o2i_t>((row / O) * O) + (col / O);
+	template<Order O> [[nodiscard, gnu::const]] constexpr typename Ints<O>::o2i_t rmi_to_row(const typename Ints<O>::o4i_t index) noexcept { return static_cast<typename Ints<O>::o2i_t>(index / (Ints<O>::O2)); }
+	template<Order O> [[nodiscard, gnu::const]] constexpr typename Ints<O>::o2i_t rmi_to_col(const typename Ints<O>::o4i_t index) noexcept { return static_cast<typename Ints<O>::o2i_t>(index % (Ints<O>::O2)); }
+	template<Order O> [[nodiscard, gnu::const]] constexpr typename Ints<O>::o2i_t rmi_to_box(const typename Ints<O>::o2i_t row, const typename Ints<O>::o2i_t col) noexcept {
+		return static_cast<typename Ints<O>::o2i_t>((row / O) * O) + (col / O);
 	}
 	template<Order O> [[nodiscard, gnu::const]]
-	constexpr typename traits<O>::o2i_t rmi_to_box(const typename traits<O>::o4i_t index) noexcept {
+	constexpr typename Ints<O>::o2i_t rmi_to_box(const typename Ints<O>::o4i_t index) noexcept {
 		return rmi_to_box<O>(rmi_to_row<O>(index), rmi_to_col<O>(index));
 	}
 
 	template<Order O> [[nodiscard, gnu::const]]
-	constexpr bool cells_share_house(typename traits<O>::o4i_t c1, typename traits<O>::o4i_t c2) noexcept {
+	constexpr bool cells_share_house(typename Ints<O>::o4i_t c1, typename Ints<O>::o4i_t c2) noexcept {
 		return (rmi_to_row<O>(c1) == rmi_to_row<O>(c2))
 			||  (rmi_to_col<O>(c1) == rmi_to_col<O>(c2))
 			||  (rmi_to_box<O>(c1) == rmi_to_box<O>(c2));
@@ -138,12 +136,12 @@ namespace okiidoku::visitor {
 		// Or we could just take the easy route and make setter methods.
 
 		// contract: rmi is in [0, O4).
-		// [[nodiscard]] common_val_t& at_rmi(const traits::o4i_t rmi)       noexcept;
-		[[nodiscard]] common_val_t at_rmi(const traits::o4i_t rmi) const noexcept;
+		// [[nodiscard]] common_val_t& at_rmi(const Ints::o4i_t rmi)       noexcept;
+		[[nodiscard]] common_val_t at_rmi(const Ints::o4i_t rmi) const noexcept;
 
 		// contract: row and col are in [0, O2).
-		// [[nodiscard]] common_val_t& at(const traits::o2i_t row, const traits::o2i_t col)       noexcept;
-		[[nodiscard]] common_val_t at(const traits::o2i_t row, const traits::o2i_t col) const noexcept;
+		// [[nodiscard]] common_val_t& at(const Ints::o2i_t row, const Ints::o2i_t col)       noexcept;
+		[[nodiscard]] common_val_t at(const Ints::o2i_t row, const Ints::o2i_t col) const noexcept;
 	};
 }
 #endif

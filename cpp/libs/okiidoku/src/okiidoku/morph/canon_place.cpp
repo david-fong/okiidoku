@@ -12,7 +12,9 @@
 #include <numeric>   // iota
 #include <cassert>
 
-namespace okiidoku::mono::morph::detail {
+namespace okiidoku::mono::morph { namespace {
+
+	using mono::morph::Transformation;
 
 	template<Order O>
 	using line_map_t = typename Transformation<O>::line_map_t;
@@ -20,7 +22,7 @@ namespace okiidoku::mono::morph::detail {
 
 	template<Order O> requires(is_order_compiled(O))
 	class CanonPlace final {
-		using T = traits<O>;
+		using T = Ints<O>;
 		using val_t = typename T::o2i_smol_t;
 		using mapping_t = typename Transformation<O>::mapping_t;
 		using o1i_t = typename T::o1i_t;
@@ -189,16 +191,17 @@ namespace okiidoku::mono::morph::detail {
 		assert(grid_follows_rule<O>(src_grid));
 		return transformation;
 	}
+}}
+namespace okiidoku::mono::detail::morph {
 
+	using namespace okiidoku::mono::morph;
 
 	template<Order O> requires(is_order_compiled(O))
 	Transformation<O> canon_place(Grid<O>& grid) noexcept {
 		return CanonPlace<O>::do_it(grid);
 	}
 
-
 	#define OKIIDOKU_FOR_COMPILED_O(O_) \
-		template class CanonPlace<O_>; \
 		template Transformation<O_> canon_place<O_>(Grid<O_>&) noexcept;
 	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 	#undef OKIIDOKU_FOR_COMPILED_O

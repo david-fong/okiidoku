@@ -50,6 +50,8 @@ things I got wrong before which I couldn't understand based on gcc's error messa
 
 - [modern iterators](https://www.internalpointers.com/post/writing-custom-iterators-modern-cpp)
 
+- [stream operator for class should go in same namespace as that class](https://stackoverflow.com/a/2479542/11107541)
+
 - [using/inheriting base-class constructor](https://en.cppreference.com/w/cpp/language/using_declaration#Inheriting_constructors)
 
 - [non-deduced contexts and template-argument deduction](https://en.cppreference.com/w/cpp/language/template_argument_deduction#Non-deduced_contexts)

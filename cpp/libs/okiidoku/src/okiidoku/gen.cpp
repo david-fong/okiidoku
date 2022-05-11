@@ -1,20 +1,146 @@
 #include <okiidoku/gen.hpp>
 
 #include <random>    // minstd_rand
-#include <algorithm> // swap, copy, shuffle
+#include <algorithm> // swap, copy, shuffle, count
 #include <numeric>   // iota
 #include <array>
 #include <cassert>
 
+namespace okiidoku::mono { namespace {
+
+	// Note: using a scoped rng to avoid holding the shared_rng mutex
+	// during the long-running parts of this function body.
+	using rng_t = std::minstd_rand; // other good LCG parameters: https://arxiv.org/pdf/2001.05304v3.pdf
+
+
+	template<Order O> requires(is_order_compiled(O))
+	struct CountSymsInInvalidBox final {
+		using T = Ints<O>;
+		using V = typename T::o1i_t;
+		using o3i_t = typename T::o3i_t;
+		[[nodiscard, gnu::pure]] o3i_t count_num_missing_syms() const noexcept { return static_cast<o3i_t>(std::ranges::count(store_, V{0})); }
+		template<class T_box, class T_sym> requires(Any_o1x<O, T_box> && Any_o2x<O, T_sym>)
+		[[nodiscard]] const V& box_count_sym(const T_box box, const T_sym sym) const noexcept { return store_[(T::O1*sym)+box]; }
+		template<class T_box, class T_sym> requires(Any_o1x<O, T_box> && Any_o2x<O, T_sym>)
+		[[nodiscard]]       V& box_count_sym(const T_box box, const T_sym sym)       noexcept { return store_[(T::O1*sym)+box]; }
+	private:
+		// rows for each symbol, entry-in-row for each box.
+		std::array<V, T::O3> store_ {0};
+	};
+
+	template<Order O> requires(is_order_compiled(O))
+	void make_boxes_valid(Grid<O>& grid, rng_t& rng_) noexcept {
+		using T = Ints<O>;
+		using o1x_t = typename T::o1x_t;
+		using o2x_t = typename T::o2x_t;
+		using o2i_t = typename T::o2i_t;
+		using o3i_t = typename T::o3i_t;
+		
+		// unsigned long long op_count {0};
+		for (o2i_t h_chute {0}; h_chute < T::O2; h_chute += T::O1) {
+			CountSymsInInvalidBox<O> boxes_has {};
+			for (o2i_t row {h_chute}; row < h_chute+T::O1; ++row) {
+			for (o2i_t col {0}; col < T::O2; ++col) {
+				++(boxes_has.box_count_sym(static_cast<o1x_t>(col/T::O1), grid.at(row,col)));
+			}}
+			o3i_t num_missing_syms {boxes_has.count_num_missing_syms()};
+			while (num_missing_syms != 0) [[likely]] {
+				const auto a_col {static_cast<o2x_t>((rng_() - rng_t::min()) % T::O2)};
+				const auto b_col {static_cast<o2x_t>((rng_() - rng_t::min()) % T::O2)};
+				const auto a_box {static_cast<o1x_t>(a_col/T::O1)};
+				const auto b_box {static_cast<o1x_t>(b_col/T::O1)};
+				if (a_box == b_box) [[unlikely]] { continue; }
+				const auto row {static_cast<o2x_t>(h_chute + ((rng_() - rng_t::min()) % T::O1))};
+				auto& a_sym {grid.at(row,a_col)};
+				auto& b_sym {grid.at(row,b_col)};
+				assert(a_sym != b_sym);
+				const auto num_missing_syms_diff {static_cast<signed char>(
+					(boxes_has.box_count_sym(a_box,a_sym) == 1 ?  1 : 0) + // regression
+					(boxes_has.box_count_sym(a_box,b_sym) == 0 ? -1 : 0) + // improvement
+					(boxes_has.box_count_sym(b_box,b_sym) == 1 ?  1 : 0) + // regression
+					(boxes_has.box_count_sym(b_box,a_sym) == 0 ? -1 : 0)   // improvement
+				)};
+				if (num_missing_syms_diff <= 0) [[unlikely]] { // TODO.low for fun: find out on average at what op_count it starts being unlikely
+					num_missing_syms = static_cast<o3i_t>(num_missing_syms + num_missing_syms_diff);
+					--boxes_has.box_count_sym(a_box,a_sym);
+					++boxes_has.box_count_sym(a_box,b_sym);
+					--boxes_has.box_count_sym(b_box,b_sym);
+					++boxes_has.box_count_sym(b_box,a_sym);
+					std::swap(a_sym, b_sym);
+				}
+				// ++op_count;
+			}
+		}
+		// std::cout << "\n" << op_count << ", ";
+	}
+
+
+	template<Order O> requires(is_order_compiled(O))
+	struct CountSymsInInvalidCol final {
+		using T = Ints<O>;
+		using V = typename T::o2i_t;
+		using o3i_t = typename T::o3i_t;
+		[[nodiscard, gnu::pure]] o3i_t count_num_missing_syms() const noexcept { return static_cast<o3i_t>(std::ranges::count(store_, V{0})); }
+		template<class T_col, class T_sym> requires(Any_o1x<O, T_col> && Any_o2x<O, T_sym>)
+		[[nodiscard]] const V& col_count_sym(const T_col col, const T_sym sym) const noexcept { return store_[(T::O1*sym)+col]; }
+		template<class T_col, class T_sym> requires(Any_o1x<O, T_col> && Any_o2x<O, T_sym>)
+		[[nodiscard]]       V& col_count_sym(const T_col col, const T_sym sym)       noexcept { return store_[(T::O1*sym)+col]; }
+	private:
+		// rows for each symbol, entry-in-row for each col.
+		std::array<V, T::O3> store_ {0};
+	};
+
+	template<Order O> requires(is_order_compiled(O))
+	void make_columns_valid(Grid<O>& grid, rng_t& rng_) noexcept {
+		using T = Ints<O>;
+		using o1x_t = typename T::o1x_t;
+		using o1i_t = typename T::o1i_t;
+		using o2x_t = typename T::o2x_t;
+		using o2i_t = typename T::o2i_t;
+		using o3i_t = typename T::o3i_t;
+
+		// unsigned long long op_count {0};
+		for (o2i_t v_chute {0}; v_chute < T::O2; v_chute += T::O1) {
+			CountSymsInInvalidCol<O> cols_has {};
+			for (o2i_t row {0}; row < T::O2; ++row) {
+			for (o1i_t box_col {0}; box_col < T::O1; ++box_col) {
+				++(cols_has.col_count_sym(box_col, grid.at(row, static_cast<o2x_t>(v_chute + box_col))));
+			}}
+			o3i_t num_missing_syms {cols_has.count_num_missing_syms()};
+			while (num_missing_syms != 0) [[likely]] {
+				const auto a_col {static_cast<o1x_t>((rng_() - rng_t::min()) % T::O1)};
+				const auto b_col {static_cast<o1x_t>((rng_() - rng_t::min()) % T::O1)};
+				if (a_col == b_col) [[unlikely]] { continue; }
+				const auto row {static_cast<o2x_t>((rng_() - rng_t::min()) % (T::O2))};
+				auto& a_sym {grid.at(row, static_cast<o2i_t>(v_chute + a_col))};
+				auto& b_sym {grid.at(row, static_cast<o2i_t>(v_chute + b_col))};
+				assert(a_sym != b_sym);
+				const auto num_missing_syms_diff {static_cast<signed char>(
+					(cols_has.col_count_sym(a_col,a_sym) == 1 ?  1 : 0) + // regression
+					(cols_has.col_count_sym(a_col,b_sym) == 0 ? -1 : 0) + // improvement
+					(cols_has.col_count_sym(b_col,b_sym) == 1 ?  1 : 0) + // regression
+					(cols_has.col_count_sym(b_col,a_sym) == 0 ? -1 : 0)   // improvement
+				)};
+				if (num_missing_syms_diff <= 0) [[unlikely]] {
+					num_missing_syms = static_cast<o3i_t>(num_missing_syms + num_missing_syms_diff);
+					--cols_has.col_count_sym(a_col,a_sym);
+					++cols_has.col_count_sym(a_col,b_sym);
+					--cols_has.col_count_sym(b_col,b_sym);
+					++cols_has.col_count_sym(b_col,a_sym);
+					std::swap(a_sym, b_sym);
+				}
+				// ++op_count;
+			}
+		}
+		// std::cout << op_count;
+	}
+}}
 namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
 	void generate(Grid<O>& grid, SharedRng& shared_rng) noexcept { // NOLINT(readability-function-cognitive-complexity) *laughs in cognitive complexity of 72
-		using T = traits<O>;
-		// using val_t = typename T::o2x_smol_t;
-		using o2x_t = typename T::o2x_t;
+		using T = Ints<O>;
 		using o2i_t = typename T::o2i_t;
-		using o3i_t = typename T::o3i_t;
 		{
 			std::array<grid_val_t<O>, T::O2> example_row;
 			std::iota(example_row.begin(), example_row.end(), grid_val_t<O>{0});
@@ -23,10 +149,6 @@ namespace okiidoku::mono {
 				std::copy(example_row.cbegin(), example_row.cend(), span.begin());
 			}
 		}
-
-		// Note: using a scoped rng to avoid holding the shared_rng mutex
-		// during the long-running parts of this function body.
-		using rng_t = std::minstd_rand; // other good LCG parameters: https://arxiv.org/pdf/2001.05304v3.pdf
 		rng_t rng_; // NOLINT(cert-msc32-c,cert-msc51-cpp) deferred seeding
 		{
 			std::lock_guard lock_guard {shared_rng.mutex};
@@ -37,92 +159,11 @@ namespace okiidoku::mono {
 			}
 			// TODO.try should the shuffle just use `rng_`? Note: A data-parallel implementation would be much better that way.
 		}
-		/* Note: wherever you see `% .../\* -1 *\/`, that's a place where the algorithm
-		would still work if it wasn't commented out, but commeting it out makes it slower
-		because sometimes what would be excluded would have a faster path to validity. */
+		/* Note: when making boxes valid, keeping one line untouched works,
+		but is actually slower. same for making columns valid and one box. */
 
-		// Outer array has an entry for each line in the chute.
-		using chute_has_counts_t = std::array<std::array<typename T::o2i_smol_t, T::O2>, T::O1>;
-		// unsigned long long op_count {0};
-
-		// Make boxes valid:
-		for (o2i_t h_chute {0}; h_chute < T::O2; h_chute += T::O1) {
-			chute_has_counts_t boxes_has {{{0}}};
-			for (o2i_t row {h_chute}; row < h_chute+T::O1; ++row) {
-			for (o2i_t col {0}; col < T::O2; ++col) {
-				++(boxes_has[col/T::O1][grid.at(row,col)]);
-			}}
-			o3i_t has_nots {0};
-			for (const auto& box_has : boxes_has) {
-				for (const auto& val_count : box_has) {
-					if (val_count == 0) { ++has_nots; }
-			}	}
-			while (has_nots != 0) [[likely]] {
-				const auto a_col {static_cast<o2x_t>((rng_() - rng_t::min()) % T::O2)};
-				const auto b_col {static_cast<o2x_t>((rng_() - rng_t::min()) % T::O2)};
-				const auto a_box {static_cast<o2x_t>(a_col/T::O1)};
-				const auto b_box {static_cast<o2x_t>(b_col/T::O1)};
-				if (a_box == b_box) [[unlikely]] { continue; }
-				const auto row {static_cast<o2x_t>(h_chute + ((rng_() - rng_t::min()) % (T::O1/* -1 */)))};
-				auto& a_cell {grid.at(row,a_col)};
-				auto& b_cell {grid.at(row,b_col)};
-				const int has_nots_diff {
-					(boxes_has[a_box][a_cell] == 1 ?  1 : 0) +
-					(boxes_has[a_box][b_cell] == 0 ? -1 : 0) +
-					(boxes_has[b_box][b_cell] == 1 ?  1 : 0) +
-					(boxes_has[b_box][a_cell] == 0 ? -1 : 0)
-				};
-				if (has_nots_diff <= 0) [[unlikely]] { // TODO.low for fun: find out on average at what op_count it starts being unlikely
-					has_nots = static_cast<o3i_t>(has_nots + has_nots_diff);
-					--boxes_has[a_box][a_cell];
-					++boxes_has[a_box][b_cell];
-					--boxes_has[b_box][b_cell];
-					++boxes_has[b_box][a_cell];
-					std::swap(a_cell, b_cell);
-				}
-				// ++op_count;
-			}
-		}
-		// std::cout << "\n" << op_count << ", ";
-		// op_count = 0;
-
-		// Make columns valid:
-		for (o2i_t v_chute {0}; v_chute < T::O2; v_chute += T::O1) {
-			chute_has_counts_t cols_has {{{0}}};
-			for (o2i_t row {0}; row < T::O2; ++row) {
-			for (o2i_t box_col {0}; box_col < T::O1; ++box_col) {
-				++(cols_has[box_col][grid.at(row, static_cast<o2i_t>(v_chute + box_col))]);
-			}}
-			o3i_t has_nots {0};
-			for (const auto& col_has : cols_has) {
-				for (const auto& val_count : col_has) {
-					if (val_count == 0) { ++has_nots; }
-			}	}
-			while (has_nots != 0) [[likely]] {
-				const auto a_col {static_cast<o2x_t>((rng_() - rng_t::min()) % T::O1)};
-				const auto b_col {static_cast<o2x_t>((rng_() - rng_t::min()) % T::O1)};
-				if (a_col == b_col) [[unlikely]] { continue; }
-				const auto row {static_cast<o2x_t>((rng_() - rng_t::min()) % (T::O1*(T::O1/* -1 */)))};
-				auto& a_cell {grid.at(row, static_cast<o2i_t>(v_chute + a_col))};
-				auto& b_cell {grid.at(row, static_cast<o2i_t>(v_chute + b_col))};
-				const int has_nots_diff {
-					(cols_has[a_col][a_cell] == 1 ?  1 : 0) +
-					(cols_has[a_col][b_cell] == 0 ? -1 : 0) +
-					(cols_has[b_col][b_cell] == 1 ?  1 : 0) +
-					(cols_has[b_col][a_cell] == 0 ? -1 : 0)
-				};
-				if (has_nots_diff <= 0) [[unlikely]] {
-					has_nots = static_cast<o3i_t>(has_nots + has_nots_diff);
-					--cols_has[a_col][a_cell];
-					++cols_has[a_col][b_cell];
-					--cols_has[b_col][b_cell];
-					++cols_has[b_col][a_cell];
-					std::swap(a_cell, b_cell);
-				}
-				// ++op_count;
-			}
-		}
-		// std::cout << op_count;
+		make_boxes_valid(grid, rng_);
+		make_columns_valid(grid, rng_);
 
 		assert(grid_follows_rule<O>(grid));
 	}

@@ -28,6 +28,7 @@
 
 		"files.associations": {
 			"**/gcc/**": "cpp",
+			".clang-tidy": "yaml",
 		},
 		// "explorer.sortOrder": "default",
 		"C_Cpp.autoAddFileAssociations": false,

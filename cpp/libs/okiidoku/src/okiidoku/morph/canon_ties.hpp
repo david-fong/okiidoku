@@ -1,7 +1,7 @@
 #ifndef HPP_OKIIDOKU__MORPH__TIES
 #define HPP_OKIIDOKU__MORPH__TIES
 
-#include <okiidoku/traits.hpp>
+#include <okiidoku/ints.hpp>
 #include <okiidoku/detail/order_templates.hpp>
 
 #include <range/v3/view/iota.hpp>
@@ -15,8 +15,8 @@ namespace okiidoku::mono::morph {
 	template<Order O, unsigned O1_OR_O2>
 	requires (is_order_compiled(O) && ((O1_OR_O2 == 1) || (O1_OR_O2 == 2)))
 	struct TieLinks final {
-		static constexpr size_t size_ {(O1_OR_O2 == 1) ? traits<O>::O1 : traits<O>::O2};
-		using link_t = std::conditional_t<(O1_OR_O2 == 1), typename traits<O>::o1i_t, typename traits<O>::o2i_smol_t>;
+		static constexpr size_t size_ {(O1_OR_O2 == 1) ? Ints<O>::O1 : Ints<O>::O2};
+		using link_t = std::conditional_t<(O1_OR_O2 == 1), typename Ints<O>::o1i_t, typename Ints<O>::o2i_smol_t>;
 		using links_t = std::array<link_t, size_>;
 
 		// TODO.low (?) https://github.com/isocpp/CppCoreGuidelines/blob/master/CppCoreGuidelines.md#t61-do-not-over-parameterize-members-scary

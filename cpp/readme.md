@@ -3,11 +3,11 @@
 
 ## Using the Dynamic Library
 
-Building okiidoku requires CMake 3.23, a C++ compiler [supporting C++20](https://en.cppreference.com/w/cpp/compiler_support), a build system like Make or Ninja, and conan. Read the [TODO file](./TODO.md) for more info.
+Building okiidoku requires CMake 3.23, a C++ compiler [supporting C++20](https://en.cppreference.com/w/cpp/compiler_support), a build system (ex. Make, Ninja), and conan.
 
 Refer to the [CMake guide](https://cmake.org/cmake/help/latest/guide/importing-exporting/index.html). This may also help: [tldp.org on shared libraries](https://tldp.org/HOWTO/Program-Library-HOWTO/shared-libraries.html)
 
-- The library uses templates for each compiled grid order for optimization purposes. The templates are accessible under the `okiidoku::mono` namespace, and a visitor-pattern interface is exposed under the `okiidoku::visitor` namespace. The visitor pattern is intended to make it more convenient to _write_ code that uses an order selected at runtime.
+- The library uses templates for each compiled grid order for optimization purposes. The templates are accessible under the `okiidoku::mono` namespace, and a visitor-pattern interface is exposed under the `okiidoku::visitor` namespace. The visitor pattern is intended to make it more convenient to write code that uses an order selected at runtime.
   - Code examples can be found in [the examples folder](./libs/okiidoku/examples/).
 
 - Make sure to read and follow the api contracts documented in the headers. Exceptions are intentionally not thrown for precondition violations. If you would like to run against a build of libokiidoku with assertions for debugging purposes, create and use a build of libokiidoku with `-DCMAKE_BUILD_TYPE=Debug`.
@@ -34,8 +34,10 @@ cmake --build . --config=Release
 
 You can use `tput rmam` to disable the terminal's line wrapping, and `tput smam` to enable it again afterward.
 
-## Navigating the Source Code
+## Source Code
 
 The project is generally structured following [pitchfork layout conventions](https://api.csswg.org/bikeshed/?force=1&url=https://raw.githubusercontent.com/vector-of-bool/pitchfork/develop/data/spec.bs).
 
-The project is set up for use with VS Code. After enabling the recommended extensions, you will need to perform [some initial steps](https://code.visualstudio.com/docs/cpp/cmake-linux#_select-a-kit) to tell VS Code what specific build tools you want to use.
+I follow the Stroustrup casing convention (lower-snake case for variables, functions, and namespaces, and camel-case for user-defined types). For type aliases, I use lower-snake with a `_t` suffix.
+
+The project is set up for use with VS Code. After installing and enabling the recommended extensions, you will need to perform [some initial steps](https://code.visualstudio.com/docs/cpp/cmake-linux#_select-a-kit) to tell VS Code what specific build tools ("kit") and configuration ("variant") you want to use.

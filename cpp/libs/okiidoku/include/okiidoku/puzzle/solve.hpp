@@ -13,7 +13,7 @@ namespace okiidoku::mono::puzzle {
 
 	template<Order O> requires(is_order_compiled(O))
 	class OKIIDOKU_EXPORT FastSolver final {
-		struct Impl;
+		/* OKIIDOKU_NO_EXPORT */ struct Impl;
 		std::experimental::propagate_const<std::unique_ptr<Impl>> impl_;
 
 	public:

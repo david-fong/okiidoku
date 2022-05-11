@@ -5,19 +5,13 @@
 
 #include <iosfwd>
 #include <string_view>
-// #include <span>
-// #include <bit>
+#include <optional>
 
 namespace okiidoku::mono::db {
 
 	class Db final {
 	public:
-		// disallow copies
-		//  if any fields maintain invariants with the state of a stream,
-		//  that could get messed up if a copy is created over the same
-		//  stream... or would the stream. actually, output streams are
-		//  not copyable, so I think copy operations will not get implicitly
-		//  declared.
+		// disallow copies.
 		Db(const Db&) = delete;
 		Db& operator=(const Db&) = delete;
 	};
@@ -29,6 +23,7 @@ namespace okiidoku::mono::db {
 		bool is_canonicalized;
 	};
 
-	OKIIDOKU_EXPORT bool open_or_create(std::string_view);
+	// contract: 
+	OKIIDOKU_EXPORT std::optional<Db> open_file(std::string_view filename);
 }
 #endif

@@ -16,7 +16,7 @@ namespace okiidoku::mono::morph {
 	};
 	template<Order O>
 	detail::Gridlike<O, RelMasks<O>> make_rel_masks_(const Grid<O>& grid) noexcept {
-		using T = traits<O>;
+		using T = Ints<O>;
 		using val_t = typename T::o2i_smol_t;
 		using o1i_t = typename T::o1i_t;
 		using o2x_t = typename T::o2x_t;
@@ -49,7 +49,7 @@ namespace okiidoku::mono::morph {
 
 	template<Order O> requires(is_order_compiled(O))
 	detail::Gridlike<O, Rel<O>> make_rel_table(const Grid<O>& grid_in) noexcept {
-		using T = traits<O>;
+		using T = Ints<O>;
 		using rel_at_mask_t = HouseMask<O>;
 		using o1i_t = typename T::o1i_t;
 		using o2i_t = typename T::o2i_t;

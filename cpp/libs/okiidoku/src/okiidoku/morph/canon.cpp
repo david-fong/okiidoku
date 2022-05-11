@@ -2,7 +2,9 @@
 
 #include <cassert>
 
-namespace okiidoku::mono::morph::detail {
+namespace okiidoku::mono::detail::morph {
+	using mono::morph::Transformation;
+
 	// contract: the grid is filled and follows the one rule.
 	template<Order O> requires(is_order_compiled(O))
 	typename Transformation<O>::label_map_t canon_label(Grid<O>&) noexcept;
@@ -18,8 +20,8 @@ namespace okiidoku::mono::morph {
 	Transformation<O> canonicalize(Grid<O>& grid) noexcept {
 		assert(grid_is_filled<O>(grid));
 		assert(grid_follows_rule<O>(grid));
-		const auto label_map {detail::canon_label<O>(grid)};
-		auto place_map {detail::canon_place<O>(grid)};
+		const auto label_map {detail::morph::canon_label<O>(grid)};
+		auto place_map {detail::morph::canon_place<O>(grid)};
 		// Transformation<O> place_map{}; // TODO.high delete when done canon_place
 		place_map.label_map = label_map;
 		return place_map;

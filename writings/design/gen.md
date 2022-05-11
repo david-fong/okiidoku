@@ -21,6 +21,8 @@ First make all boxes valid while allowing invalid columns. Once all boxes are va
 
 Improve cache locality by doing one house at a time: when working on boxes, completely satisfy the boxes of the first horizontal chute before moving to the next one; when working on columns, completely satisfy all columns of the first vertical chute before moving to the next one. This results in less data being worked on at any time.
 
+When storing counts of how many copies of a symbol a house has, for the 2D array where one dimension is for the `O2` different symbols, and the other is for the `O1` houses currently being made valid, make the outer dimension be the one for symbols. Rationale: cache locality. As grid-order increases, `O2` grows much faster than `O1`. Every swap operation involves four entries in the 2D array, being four "corners" in a sub-rectangle of the array. Putting the smaller dimension as the inner one increases the likelihood of getting pairs of those four "corners" in the same cache line (the best case becomes two cache misses instead of four).
+
 Note: I explored the difference in starting with valid boxes instead of valid lines (rows/columns). Using a counter, I found that it took fewer operations to go from having one polarity of lines valid to also having boxes valid than from having only boxes valid and then getting one polarity of lines to also be valid. Ie. It should be less optimal to start only with valid boxes (and then get both cols and rows valid).
 
 ### Observations and Properties

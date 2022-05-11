@@ -1,6 +1,6 @@
 #include <okiidoku/morph/canon.hpp>
 #include <okiidoku/morph/scramble.hpp>
-#include <okiidoku/db/serdes.hpp>
+#include <okiidoku/serdes.hpp>
 #include <okiidoku/fmt/print_2d.hpp>
 #include <okiidoku/gen.hpp>
 #include <okiidoku/grid.hpp>

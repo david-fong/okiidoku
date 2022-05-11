@@ -8,7 +8,7 @@
 #include <compare>   // is_eq
 #include <cassert>
 
-namespace okiidoku::mono::morph::detail {
+namespace okiidoku::mono::morph { namespace {
 
 	template<Order O>
 	using label_map_t = typename Transformation<O>::label_map_t;
@@ -16,7 +16,7 @@ namespace okiidoku::mono::morph::detail {
 
 	template<Order O> requires(is_order_compiled(O))
 	class CanonLabel final {
-		using T = traits<O>;
+		using T = Ints<O>;
 		using val_t = typename T::o2i_smol_t;
 		using o1i_t = typename T::o1i_t;
 		using o2i_t = typename T::o2i_t;
@@ -24,7 +24,7 @@ namespace okiidoku::mono::morph::detail {
 		using mapping_t = typename Transformation<O>::mapping_t;
 
 		struct State final {
-			mono::detail::Gridlike<O, Rel<O>> rel_table;
+			detail::Gridlike<O, Rel<O>> rel_table;
 			label_map_t<O> to_og;
 			TieLinks<O, 2> ties {};
 			explicit constexpr State(const Grid<O>& grid) noexcept: rel_table{make_rel_table<O>(grid)} {
@@ -41,7 +41,7 @@ namespace okiidoku::mono::morph::detail {
 
 	template<Order O> requires(is_order_compiled(O))
 	void CanonLabel<O>::do_a_pass_(CanonLabel<O>::State& s) noexcept {
-		mono::detail::Gridlike<O, Rel<O>> scratch;
+		detail::Gridlike<O, Rel<O>> scratch;
 
 		label_map_t<O> to_tied;
 		std::iota(to_tied.begin(), to_tied.end(), mapping_t{0});
@@ -115,19 +115,21 @@ namespace okiidoku::mono::morph::detail {
 			return _;
 		}()};
 
-		for (o4i_t i {0}; i < traits<O>::O4; ++i) {
+		for (o4i_t i {0}; i < Ints<O>::O4; ++i) {
 			grid.at_rmi(i) = static_cast<val_t>(label_og_to_canon[grid.at_rmi(i)]);
 		}
 		assert(grid_follows_rule<O>(grid));
 		return label_og_to_canon;
 	}
+}}
+namespace okiidoku::mono::detail::morph {
 
+	using namespace okiidoku::mono::morph;
 
 	template<Order O> requires(is_order_compiled(O))
 	label_map_t<O> canon_label(Grid<O>& grid) noexcept {
 		return CanonLabel<O>::do_it(grid);
 	}
-
 
 	#define OKIIDOKU_FOR_COMPILED_O(O_) \
 		template label_map_t<O_> canon_label<O_>(Grid<O_>&) noexcept;

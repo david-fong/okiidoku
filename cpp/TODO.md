@@ -24,6 +24,19 @@
 ## Misc List
 
 - try using clang-tidy
+- find out what cppcheck is
+- find out what tools can be used to enforce enforceable parts of cppcoreguidelines.
+- add sanitizers (address,UB) to cmake debug config.
+  - can look at [lefticus weekly game project](https://github.com/lefticus/cpp_weekly_game_project/blob/master/cmake/Sanitizers.cmake) for inspiration.
+  - would some bounds-checking assertions become redundant with UB sanitizer?
+  - https://docs.microsoft.com/en-us/cpp/sanitizers/asan
+- find out how to use the [cppcoreguideline checker](https://docs.microsoft.com/en-us/cpp/code-quality/using-the-cpp-core-guidelines-checkers?view=msvc-170)
+
+- see where ADL can be used to shorten code in a way that isn't mentally taxing. perhaps it should be avoided within the library when it comes to visitor-vs-mono distinction just to be explicit. But maybe for users it can be helpful, since they should only use one of mono or visitor.
+
+- consider supporting CMake 3.22 or 3.21. Ubuntu 20.04's apt repos don't seem to have 3.23. The only 3.23 thing I'm using is `FILE_SET` for target headers
+
+- can the users of the library use [ADL](https://en.cppreference.com/w/cpp/language/adl) to skip specifying the okiidoku namespace for functions consuming Grid?
 
 - try writing custom python pretty-printer for `HouseMask`?
   - [how to write a gdb pretty-printer](https://sourceware.org/gdb/onlinedocs/gdb/Writing-a-Pretty_002dPrinter.html#Writing-a-Pretty_002dPrinter)

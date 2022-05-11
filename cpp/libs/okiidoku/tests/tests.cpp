@@ -1,6 +1,6 @@
 #include <okiidoku/morph/canon.hpp>
 #include <okiidoku/morph/scramble.hpp>
-#include <okiidoku/db/serdes.hpp>
+#include <okiidoku/serdes.hpp>
 #include <okiidoku/fmt/print_2d.hpp>
 #include <okiidoku/gen.hpp>
 #include <okiidoku/grid.hpp>
@@ -22,7 +22,7 @@ template<okiidoku::Order O>
 unsigned test_morph(okiidoku::SharedRng& shared_rng, const unsigned num_rounds) {
 	using namespace okiidoku;
 	using namespace okiidoku::mono;
-	using T = traits<O>;
+	using T = Ints<O>;
 	std::cout << "\n\ntesting for order " << O << std::endl;
 	// Note: if gen_path gets un-deprecated, assert that paths are valid.
 

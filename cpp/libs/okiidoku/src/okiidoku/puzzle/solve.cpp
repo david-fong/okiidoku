@@ -6,16 +6,16 @@
 namespace okiidoku::mono::puzzle {
 
 	template<Order O> requires(is_order_compiled(O))
-	class FastSolver<O>::Impl final {
+	class OKIIDOKU_NO_EXPORT FastSolver<O>::Impl final {
 	public:
 		explicit Impl(const Grid<O>& puzzle) noexcept;
 		std::optional<Grid<O>> get_next_solution() noexcept;
 
 	private:
-		using T = traits<O>;
+		using T = Ints<O>;
 		using cands_t = HouseMask<O>;
 		using cands_grid_t = detail::Gridlike<O, cands_t>;
-		using o2x_t = typename T::o2x_t;
+		using val_t = typename T::o2x_t;
 		using rmi_t = typename T::o4x_smol_t;
 		using o4i_t = typename T::o4i_t;
 		using hit_unsat_t = bool;
@@ -44,8 +44,8 @@ namespace okiidoku::mono::puzzle {
 		bool no_solutions_remaining_ {false};
 
 
-		[[nodiscard]] hit_unsat_t remove_cell_candidate_(rmi_t rmi, o2x_t cand) noexcept;
-		[[nodiscard]] hit_unsat_t commit_cell_val_(rmi_t rmi, o2x_t val) noexcept;
+		[[nodiscard]] hit_unsat_t remove_cell_candidate_(rmi_t rmi, val_t cand) noexcept;
+		[[nodiscard]] hit_unsat_t commit_cell_val_(rmi_t rmi, val_t val) noexcept;
 
 		// solve_cell_requires_symbol_ is trivial with the current representation.
 		// [[nodiscard]] hit_unsat_t solve_cell_requires_symbol_() noexcept; // cell can't have anything else
@@ -55,7 +55,7 @@ namespace okiidoku::mono::puzzle {
 		[[nodiscard]] hit_unsat_t solve_symbols_requiring_cells_() noexcept; // AKA "hidden subsets"
 		[[nodiscard]] hit_unsat_t solve_fish() noexcept;
 
-		void push_guess_(rmi_t rmi) noexcept;
+		[[nodiscard]] hit_unsat_t push_guess_(rmi_t rmi) noexcept;
 
 		/* if the guess stack is not empty, unwinds one entry.
 		since the guess stack is only used when the implemented deductive techniques
@@ -87,10 +87,13 @@ namespace okiidoku::mono::puzzle {
 	template<Order O> requires(is_order_compiled(O))
 	FastSolver<O>::Impl::Impl(const Grid<O>& puzzle) noexcept {
 		cells_cands_.get_underlying_array().fill(house_mask_ones<O>);
-		for (o4i_t i {0}; i < T::O4; ++i) {
-			const auto& given {puzzle.at_rmi(i)};
+		for (o4i_t rmi {0}; rmi < T::O4; ++rmi) {
+			const auto& given {puzzle.at_rmi(rmi)};
 			if (given == T::O2) { continue; }
-			commit_cell_val_(i, given);
+			const auto hit_unsat {commit_cell_val_(static_cast<rmi_t>(rmi), static_cast<val_t>(given))};
+			if (hit_unsat) {
+				return;
+			}
 		}
 	}
 
@@ -107,17 +110,20 @@ namespace okiidoku::mono::puzzle {
 			// 	if ()
 			// }
 		// }
-		assert(( std::ranges::all_of(
-			cells_cands_.get_underlying_array(),
-			[](const auto& cands){ return cands.count == 1; }
+		assert(( std::all_of(
+			cells_cands_.get_underlying_array().cbegin(),
+			cells_cands_.get_underlying_array().cend(),
+			[](const auto& cands){ return cands.count() == 1; }
 		) ));
 
 		// build solution struct and return:
 		std::optional<Grid<O>> soln_optional {std::in_place};
 		{
 			auto& soln {soln_optional.value()};
-			for (o4i_t i {0}; i < T::O4; ++i) {
-				soln.at_rmi(i) = cells_cands_.at_rmi(i).count_lower_zeros();
+			for (o4i_t rmi {0}; rmi < T::O4; ++rmi) {
+				const auto& cell_cands {cells_cands_.at_rmi(rmi)};
+				assert(cell_cands.count() == 1);
+				soln.at_rmi(rmi) = cell_cands.count_lower_zeros_assuming_non_empty_mask();
 			}
 		}
 		return soln_optional;
@@ -128,11 +134,14 @@ namespace okiidoku::mono::puzzle {
 	FastSolver<O>::Impl::hit_unsat_t
 	FastSolver<O>::Impl::remove_cell_candidate_(
 		const FastSolver<O>::Impl::rmi_t rmi,
-		const FastSolver<O>::Impl::o2x_t cand_to_remove
+		const FastSolver<O>::Impl::val_t cand_to_remove
 	) noexcept {
 		// TODO.asap where should the optimizing check for whether the cell is already solved go?
 		//  or should it be done by the caller?
 		auto& cell_cands {cells_cands_.at_rmi(rmi)};
+		if (!cell_cands.test(cand_to_remove)) {
+			// this candidate is already ruled out.
+		}
 		cell_cands.unset(cand_to_remove);
 		// TODO.low(?) the current design can easily detect when a cell has no candidate symbols,
 		// but it will be "late" to detect when a symbol cannot go anywhere in a house. "late" as
@@ -143,7 +152,8 @@ namespace okiidoku::mono::puzzle {
 			return hit_unsat_t{true};
 		}
 		if (cell_cands.count() == 1) [[unlikely]] {
-			commit_cell_val_(rmi, cell_cands.count_lower_zeros());
+			return commit_cell_val_(rmi, cell_cands.count_lower_zeros_assuming_non_empty_mask());
+			// TODO.asap instead of deepening the program stack, enqueue to a commit queue.
 		}
 		return hit_unsat_t{false};
 	}
@@ -153,7 +163,7 @@ namespace okiidoku::mono::puzzle {
 	FastSolver<O>::Impl::hit_unsat_t
 	FastSolver<O>::Impl::commit_cell_val_(
 		const FastSolver<O>::Impl::rmi_t rmi,
-		const FastSolver<O>::Impl::o2x_t val
+		const FastSolver<O>::Impl::val_t val
 	) noexcept {
 		assert(num_puzzle_cells_remaining_ > 0);;
 		assert(!solved_cells_.test(rmi));
@@ -162,10 +172,10 @@ namespace okiidoku::mono::puzzle {
 		solved_cells_.set(rmi);
 		// TODO.asap do remove_cell_candidates_ for all same-house cells
 		while (false) {
-			hit_unsat_t hit_unsat {remove_cell_candidate_(neighbour_rmi, val)};
-			if (hit_unsat) [[unlikely]] {
-				return hit_unsat_t{true};
-			}
+			// hit_unsat_t hit_unsat {remove_cell_candidate_(neighbour_rmi, val)};
+			// if (hit_unsat) [[unlikely]] {
+			// 	return hit_unsat_t{true};
+			// }
 		}
 		--num_puzzle_cells_remaining_;
 		return hit_unsat_t{false};
@@ -173,7 +183,8 @@ namespace okiidoku::mono::puzzle {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	void FastSolver<O>::Impl::push_guess_(
+	FastSolver<O>::Impl::hit_unsat_t
+	FastSolver<O>::Impl::push_guess_(
 		const FastSolver<O>::Impl::rmi_t rmi
 	) noexcept {
 		guess_stack_.emplace(cells_cands_, rmi);
@@ -181,7 +192,9 @@ namespace okiidoku::mono::puzzle {
 		guess_step.prev_cells_cands = cells_cands_;
 		guess_step.curr_guessed_rmi = rmi;
 
-		commit_cell_val_(rmi, );
+		// TODO.asap currently just chooses the lowest-valued candidate symbol.
+		//  should we extract to a method in case we later want more sophisticated logic?
+		return commit_cell_val_(rmi, cells_cands_.at_rmi(rmi).count_lower_zeros_assuming_non_empty_mask());
 	}
 
 
@@ -189,17 +202,22 @@ namespace okiidoku::mono::puzzle {
 	void FastSolver<O>::Impl::handle_unsat_() noexcept {
 		if (guess_stack_.empty()) {
 			; // uhoh precondition this away? if so, add assert here.
+			no_solutions_remaining_ = true;
 		}
 		auto& step {guess_stack_.top()};
 		const auto prev_guessed_rmi {step.curr_guessed_rmi};
 		// before restoring old `cells_cands_`,  get the value that was guessed:
-		const auto prev_guessed_val {cells_cands_.at_rmi(prev_guessed_rmi).count_lower_zeros()};
+		assert(cells_cands_.at_rmi(prev_guessed_rmi).count() == 1);
+		const auto prev_guessed_val {cells_cands_.at_rmi(prev_guessed_rmi).count_lower_zeros_assuming_non_empty_mask()};
 		cells_cands_ = std::move(step.prev_cells_cands);
 		// after restoring old `cells_cands_`, rule out the failed guess value
 		// to prevent revisiting that path:
-		remove_cell_candidate_(prev_guessed_rmi, prev_guessed_val);
+		const auto hit_unset {remove_cell_candidate_(prev_guessed_rmi, prev_guessed_val)};
 
 		guess_stack_.pop();
+		if (hit_unset) [[unlikely]] {
+			handle_unsat_();
+		}
 	}
 
 

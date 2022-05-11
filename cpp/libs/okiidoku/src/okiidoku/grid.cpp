@@ -8,7 +8,7 @@ namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
 	bool grid_follows_rule(const Grid<O>& grid) noexcept {
-		using T = traits<O>;
+		using T = Ints<O>;
 		using o2x_t = typename T::o2x_t;
 		using o2i_t = typename T::o2i_t;
 		using has_mask_t = HouseMask<O>;
@@ -41,7 +41,7 @@ namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
 	bool grid_is_filled(const Grid<O>& grid) noexcept {
-		using T = traits<O>;
+		using T = Ints<O>;
 		using o4i_t = typename T::o4i_t;
 		for (o4i_t i {0}; i < T::O4; ++i) {
 			const auto val {grid.at_rmi(i)};
@@ -75,13 +75,13 @@ namespace okiidoku::visitor {
 	}
 
 
-	Grid::common_val_t Grid::at_rmi(const traits::o4i_t rmi) const noexcept {
+	Grid::common_val_t Grid::at_rmi(const Ints::o4i_t rmi) const noexcept {
 		return std::visit([&](const auto& mono_this){
 			return common_val_t{mono_this.at_rmi(rmi)};
 		}, get_mono_variant());
 	}
 
-	Grid::common_val_t Grid::at(const traits::o2i_t row, const traits::o2i_t col) const noexcept {
+	Grid::common_val_t Grid::at(const Ints::o2i_t row, const Ints::o2i_t col) const noexcept {
 		return std::visit([&](const auto& mono_this){
 			return common_val_t{mono_this.at(row, col)};
 		}, get_mono_variant());

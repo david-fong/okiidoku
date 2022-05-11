@@ -9,36 +9,17 @@ project(okiidoku
 set(CMAKE_CXX_STANDARD 20 CACHE STRING "The C++ standard to use")
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_CXX_EXTENSIONS FALSE)
-if(MSVC)
-	add_compile_options(
-		/utf-8        # /source-charset:utf-8 (for preprocessor), and /execution-charset:utf8 (for compiler)
-		/permissive-  # https://discourse.cmake.org/t/cxx-extensions-and-permissive/1994
-		/EHsc         # https://docs.microsoft.com/en-us/cpp/build/reference/eh-exception-handling-model#standard-c-exception-handling
-		/volatile:iso # https://docs.microsoft.com/en-us/cpp/build/reference/volatile-volatile-keyword-interpretation#remarks
-		/W4 #/WX      # highest warning level #and treat warnings as errors.
-		/wd5030       # disable the "unrecognized attribute" warning. unfortunately needed or else MSVC warns for gnu-prefixed attributes.
-	)
-else()
-	add_compile_options(
-		-Wall -Wextra -Wpedantic -Wfatal-errors #-Werror
-		-Wold-style-cast -Wcast-qual -Wcast-align 
-		-Wformat=2
-		-Wconversion # -Wsign-conversion
-		-Wshadow -Woverloaded-virtual
 
+include(cmake/BasicCompilerOptions.cmake)
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+	include(cmake/Sanitizers.cmake)
+endif()
+
+if(NOT MSVC)
+	add_compile_options(
 		-march=native # generated code meant only to run on compiling machine. for the speedup.
 		# TODO.wait see https://gcc.gnu.org/gcc-12/changes.html#uninitialized
 	)
-	if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-		add_compile_options(
-			-Wimplicit-fallthrough
-		)
-	elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-		add_compile_options(
-			-Wuseless-cast
-			-Wimplicit-fallthrough=5
-		)
-	endif()
 endif()
 
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
@@ -65,19 +46,11 @@ if(NOT APPLE)
 	set(CMAKE_INSTALL_RPATH "\$ORIGIN/../${CMAKE_INSTALL_LIBDIR}")
 endif()
 
-# https://cliutils.gitlab.io/modern-cmake/chapters/testing.html
 if(PROJECT_IS_TOP_LEVEL)
+	# https://cliutils.gitlab.io/modern-cmake/chapters/testing.html
 	include(CTest)
-endif()
 
-find_program(
-	CLANG_TIDY_EXE
-	NAMES "clang-tidy"
-	DOC "Path to clang-tidy executable"
-)
-if(NOT ${CLANG_TIDY_EXE} STREQUAL "CLANG_TIDY_EXE-NOTFOUND")
-	# set(CMAKE_CXX_CLANG_TIDY ${CLANG_TIDY_EXE})
-	# TODO.mid sort out the warnings
+	include(cmake/StaticAnalyzers.cmake)
 endif()
 
 
@@ -95,7 +68,7 @@ add_subdirectory(apps/cli)
 # add_subdirectory(apps/web)
 
 if(PROJECT_IS_TOP_LEVEL)
-	add_subdirectory(tools)
+	add_subdirectory(tools/okiidoku_translator)
 endif()
 
 
