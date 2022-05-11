@@ -19,6 +19,7 @@
 - opencl stochastic generator
   - some template/starter code can be found at commit 5a8d4c0 (deleted)
 - language bindings for other languages?
+  - python, java
 
 ## Misc List
 

@@ -6,8 +6,11 @@
 
 #include <iosfwd>
 
-// These are lower-level utilities used internally by the database abstraction.
-// Prefer to use the database abstraction instead.
+/**
+These are low-level serialization utilities. You likely want the
+provided database abstraction instead. These utilities are probably
+only useful to you if you want to do data-streaming over a network.
+*/
 namespace okiidoku::mono::db::serdes {
 
 	constexpr unsigned get_min_bytes_to_store(const unsigned max_value) {

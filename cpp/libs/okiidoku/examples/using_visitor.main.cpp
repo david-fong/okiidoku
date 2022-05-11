@@ -36,8 +36,8 @@ int main([[maybe_unused]] const int argc, [[maybe_unused]] char const *const arg
 
 	{
 		const auto palette_ {std::to_array<oki::print_2d_grid_view>({
-			[&](auto rmi){ return   gen_grid.at_row_major(rmi); },
-			[&](auto rmi){ return canon_grid.at_row_major(rmi); },
+			[&](auto rmi){ return   gen_grid.at_rmi(rmi); },
+			[&](auto rmi){ return canon_grid.at_rmi(rmi); },
 		})};
 		print_2d(std::clog, O, palette_, shared_rng);
 	}

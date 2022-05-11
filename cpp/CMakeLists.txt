@@ -45,6 +45,7 @@ set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 
 
 if(MSVC)
+	# DLLs are such a pain. Doesn't feel worth the effort and learning-curve.
 	set(okiidoku_SHARED_LIBS FALSE)
 elseif(PROJECT_IS_TOP_LEVEL)
 	set(okiidoku_SHARED_LIBS TRUE)
@@ -93,18 +94,23 @@ add_subdirectory(libs/okiidoku)
 add_subdirectory(apps/cli)
 # add_subdirectory(apps/web)
 
-add_subdirectory(tools)
+if(PROJECT_IS_TOP_LEVEL)
+	add_subdirectory(tools)
+endif()
 
 
+# Note: I'm not sure if enabling installation is even useful.
+# This library is pretty niche. Perhaps it would be better just to
+# export from the build tree. https://cmake.org/cmake/help/latest/guide/importing-exporting/index.html#exporting-targets-from-the-build-tree
 install(TARGETS
 	okiidoku okiidoku_cli
 	EXPORT okiidokuTargets
 	FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/okiidoku
 	INCLUDES         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/okiidoku
 )
-if (BUILD_SHARED_LIBS)
+if(BUILD_SHARED_LIBS)
 	set(OKIIDOKU_LIB_TYPE_NAME shared)
-else ()
+else()
 	set(OKIIDOKU_LIB_TYPE_NAME static)
 endif()
 install(EXPORT okiidokuTargets
@@ -116,6 +122,7 @@ install(EXPORT okiidokuTargets
 
 # Packaging support
 # https://cmake.org/cmake/help/latest/module/CPack.html
+# https://cmake.org/cmake/help/latest/guide/importing-exporting/index.html#creating-packages
 set(CPACK_PACKAGE_VENDOR "david-fong")
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENCE")
 set(CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/readme.md")

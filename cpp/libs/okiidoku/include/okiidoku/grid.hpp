@@ -6,7 +6,6 @@
 
 // #include <range/
 
-// #include <ranges>
 #include <array>
 #include <span>
 #include <compare>
@@ -24,12 +23,12 @@ namespace okiidoku::mono {
 	// Returns false if any cells in a same house contain the same value.
 	// Can be used with incomplete grids.
 	template<Order O> requires(is_order_compiled(O))
-	[[nodiscard]] OKIIDOKU_EXPORT
+	[[nodiscard, gnu::pure]] OKIIDOKU_EXPORT
 	bool grid_follows_rule(const Grid<O>&) noexcept;
 
 	// Returns true if none of the cells are empty (equal to O2). Does _not_ check if sudoku follows the one rule.
 	template<Order O> requires(is_order_compiled(O))
-	[[nodiscard]] OKIIDOKU_EXPORT
+	[[nodiscard, gnu::pure]] OKIIDOKU_EXPORT
 	bool grid_is_filled(const Grid<O>&) noexcept;
 
 
@@ -43,6 +42,7 @@ namespace okiidoku::mono {
 		using o2i_t = typename T::o2i_t;
 		using o4x_t = typename T::o4x_t;
 		using o4i_t = typename T::o4i_t;
+		using array_t = std::array<val_t, T::O4>;
 
 		// lexicographical comparison over row-major-order traversal of cells.
 		friend std::strong_ordering operator<=>(const Gridlike<O, V_>& a, const Gridlike<O, V_>& b) noexcept = default;
@@ -55,11 +55,14 @@ namespace okiidoku::mono {
 		}
 		Gridlike() noexcept requires(!std::is_same_v<V_, grid_val_t<O>>) = default;
 
+		[[nodiscard]]       array_t& get_underlying_array()       noexcept { return cells_; };
+		[[nodiscard]] const array_t& get_underlying_array() const noexcept { return cells_; };
+
 		// contract: rmi is in [0, O4).
 		template<class T_rmi> requires(Any_o4ix<O, T_rmi>)
-		[[nodiscard]] constexpr       val_t& at_row_major(const T_rmi rmi)       noexcept { return cells_[rmi]; }
+		[[nodiscard]] constexpr       val_t& at_rmi(const T_rmi rmi)       noexcept { return cells_[rmi]; }
 		template<class T_rmi> requires(Any_o4ix<O, T_rmi>)
-		[[nodiscard]] constexpr const val_t& at_row_major(const T_rmi rmi) const noexcept { return cells_[rmi]; }
+		[[nodiscard]] constexpr const val_t& at_rmi(const T_rmi rmi) const noexcept { return cells_[rmi]; }
 
 		// contract: row and col are in [0, O2).
 		template<class T_row, class T_col> requires(Any_o2ix<O, T_row> && Any_o2ix<O, T_col>)
@@ -74,9 +77,9 @@ namespace okiidoku::mono {
 		[[nodiscard]] constexpr std::span<const val_t, T::O2> row_span_at(const T_row i) const noexcept { return static_cast<std::span<const val_t, T::O2>>(std::span(cells_).subspan(T::O2*i, T::O2)); }
 
 		// [[nodiscard]] constexpr auto row_spans() noexcept { namespace v = ranges::views; return v::iota(o2i_t{0}, o2i_t{T::O2}) | v::transform([&](auto r){ return row_span_at(r); }); }
-		// [[nodiscard]] constexpr auto row_spans() const noexcept { namespace v = std::views; return v::iota(o2i_t{0}, T::O2) | v::transform([&](auto r){ return row_span_at(r); }); }
+		// [[nodiscard]] constexpr auto row_spans() const noexcept { namespace v = ranges::views; return v::iota(o2i_t{0}, T::O2) | v::transform([&](auto r){ return row_span_at(r); }); }
 	private:
-		std::array<val_t, T::O4> cells_;
+		array_t cells_;
 	};
 
 	template<Order O> [[nodiscard, gnu::const]] constexpr typename traits<O>::o2i_t rmi_to_row(const typename traits<O>::o4i_t index) noexcept { return static_cast<typename traits<O>::o2i_t>(index / (traits<O>::O2)); }
@@ -105,11 +108,11 @@ namespace okiidoku::visitor {
 
 	// Returns false if any cells in a same house contain the same value.
 	// Can be used with incomplete grids.
-	[[nodiscard]] OKIIDOKU_EXPORT
+	[[nodiscard, gnu::pure]] OKIIDOKU_EXPORT
 	bool grid_follows_rule(const Grid&) noexcept;
 
 	// Returns true if none of the cells are empty (equal to O2). Does _not_ check if sudoku is valid.
-	[[nodiscard]] OKIIDOKU_EXPORT
+	[[nodiscard, gnu::pure]] OKIIDOKU_EXPORT
 	bool grid_is_filled(const Grid&) noexcept;
 
 	namespace detail {
@@ -135,8 +138,8 @@ namespace okiidoku::visitor {
 		// Or we could just take the easy route and make setter methods.
 
 		// contract: rmi is in [0, O4).
-		// [[nodiscard]] common_val_t& at_row_major(const traits::o4i_t rmi)       noexcept;
-		[[nodiscard]] common_val_t at_row_major(const traits::o4i_t rmi) const noexcept;
+		// [[nodiscard]] common_val_t& at_rmi(const traits::o4i_t rmi)       noexcept;
+		[[nodiscard]] common_val_t at_rmi(const traits::o4i_t rmi) const noexcept;
 
 		// contract: row and col are in [0, O2).
 		// [[nodiscard]] common_val_t& at(const traits::o2i_t row, const traits::o2i_t col)       noexcept;

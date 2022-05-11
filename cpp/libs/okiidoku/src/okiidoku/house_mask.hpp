@@ -42,12 +42,14 @@ namespace okiidoku::mono {
 			return _;
 		}
 
+		// count the number of set bits.
 		[[nodiscard, gnu::pure]] o2i_t count() const noexcept {
 			return static_cast<o2i_t>(std::transform_reduce(
 				ints_.cbegin(), ints_.cend(), 0, std::plus{},
 				[&](const auto int_){ return static_cast<o2i_t>(std::popcount(int_)); }
 			));
 		}
+		// count the number of set bits below the specified bit index.
 		[[nodiscard, gnu::pure]] o2i_t count_bits_below(const o2i_t top_exclusive) const noexcept {
 			auto count {static_cast<o2i_t>(std::popcount(ints_[num_ints-1] & static_cast<o2i_t>(top_exclusive - 1u)))};
 			if constexpr (num_ints == 0) { return count; }
@@ -106,6 +108,19 @@ namespace okiidoku::mono {
 		}
 		[[nodiscard, gnu::pure]] friend HouseMask operator&(HouseMask lhs, const HouseMask& rhs) noexcept {
 			lhs &= rhs; return lhs;
+		}
+
+		[[nodiscard, gnu::pure]] o2x_t count_lower_zeros() const noexcept {
+			o2x_t count {0};
+			for (const auto& int_ : ints_) {
+				if (int_ == 0) {
+					count += int_t_num_bits;
+				} else {
+					count += std::countr_zero(int_);
+					break;
+				}
+			}
+			return count;
 		}
 
 		// contract: there are at least `set_bit_index+1` set bits.

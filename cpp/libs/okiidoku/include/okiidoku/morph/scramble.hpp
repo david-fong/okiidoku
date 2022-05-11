@@ -8,7 +8,7 @@
 
 namespace okiidoku::mono::morph {
 
-	// contract: span is a valid grid (though it may be incomplete)
+	// post-condition: before and after states of the grid canonicalize to the same grid.
 	template<Order O> requires(is_order_compiled(O))
 	OKIIDOKU_EXPORT Transformation<O> scramble(Grid<O>&, SharedRng&) noexcept;
 }
@@ -16,7 +16,7 @@ namespace okiidoku::mono::morph {
 
 namespace okiidoku::visitor::morph {
 
-	// contract: span is a valid grid (though it may be incomplete)
+	// post-condition: before and after states of the grid canonicalize to the same grid.
 	OKIIDOKU_EXPORT Transformation scramble(Grid&, SharedRng&) noexcept;
 }
 #endif

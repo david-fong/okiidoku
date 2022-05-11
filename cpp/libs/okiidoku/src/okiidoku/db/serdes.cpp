@@ -157,7 +157,7 @@ namespace okiidoku::mono::db::serdes {
 				continue; // skip cells in the anti-diagonal boxes
 			}
 			using val_t = typename traits<O>::o2x_t;
-			const auto val {static_cast<val_t>(grid.at_row_major(helper.get_cell_rmi()))};
+			const auto val {static_cast<val_t>(grid.at_rmi(helper.get_cell_rmi()))};
 			helper.print_val(os, val);
 		}
 		helper.print_remaining_buf(os);
@@ -176,7 +176,7 @@ namespace okiidoku::mono::db::serdes {
 				continue; // skip cells in the anti-diagonal boxes
 			}
 			const auto val {helper.parse_val(is)};
-			grid.at_row_major(helper.get_cell_rmi()) = static_cast<grid_val_t<O>>(val);
+			grid.at_rmi(helper.get_cell_rmi()) = static_cast<grid_val_t<O>>(val);
 		}
 		// TODO.asap infer cells in anti-diagonal boxes.
 
@@ -198,7 +198,6 @@ namespace okiidoku::mono::db::serdes {
 		// using T = traits<O>;
 		(void)is; (void)grid;
 
-		assert(grid_follows_rule(grid));
 		assert(grid_follows_rule(grid));
 	}
 

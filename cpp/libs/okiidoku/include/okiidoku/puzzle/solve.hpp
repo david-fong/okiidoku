@@ -2,41 +2,39 @@
 #define HPP_OKIIDOKU__PUZZLE__SOLVE
 
 #include <okiidoku/grid.hpp>
+#include <okiidoku/house_mask.hpp>
 #include <okiidoku/detail/order_templates.hpp>
+
+#include <optional>
+#include <memory> // unique_ptr
+#include <experimental/propagate_const>
 
 namespace okiidoku::mono::puzzle {
 
 	template<Order O> requires(is_order_compiled(O))
-	class OKIIDOKU_EXPORT SolutionWalker final {
-		using T = traits<O>;
-		using cands_t = HouseMask<O>;
-		using cands_grid_t = detail::Gridlike<cands_t>;
-		using rmi_t = typename T::o4x_smol_t;
-
-		/* Note: A pretty large structure. Hard to get around it, since
-		cell_cands_ has non-trivial management logic (deductive solving)
-		so backtracking the DFS isn't as simple as unsetting some house-
-		mask bits. */
-		struct BfDfsStep final {
-			cands_grid_t prev_cell_cands;
-			rmi_t curr_guessed_rmi;
-		};
-		using BfDfsStack = std::stack<BfDfsStep/* , std::vector<BfDfsStep> */>;
-
-		cands_grid_t cell_cands_;
-
-		BfDfsStack bf_dfs_stack_;
-
-		void solve_cells_requiring_symbols() noexcept; // AKA naked subsets
-		void solve_symbols_requiring_cells() noexcept; // AKA midden subsets
-		void solve_fish() noexcept;
+	class OKIIDOKU_EXPORT FastSolver final {
+		struct Impl;
+		std::experimental::propagate_const<std::unique_ptr<Impl>> impl_;
 
 	public:
-		explicit SolutionWalker(const) noexcept;
-		// TODO.low either 
-		struct Iterator final {
-			;
-		};
+		// contract: `puzzle` is a valid grid.
+		explicit FastSolver(const Grid<O>& puzzle) noexcept;
+
+		~FastSolver();
+
+		// disallow copies. not much reason.
+		// I just don't see it being needed. there's a lot of state too.
+		// Note: already implicitly deleted due to unique_ptr field.
+		FastSolver(const FastSolver&) = delete;
+		FastSolver& operator=(const FastSolver&) = delete;
+
+		// allow moves. using a moved-from `FastSolver` is UB.
+		FastSolver(FastSolver&&) = default;
+		FastSolver& operator=(FastSolver&&) = default;
+
+		// once `std::nullopt` is first returned, all future calls will also return `std::nullopt`.
+		// can use like: while (const auto solution {solution_walker.get_next_solution()}; solution) {...}
+		std::optional<Grid<O>> get_next_solution() noexcept;
 	};
 }
 

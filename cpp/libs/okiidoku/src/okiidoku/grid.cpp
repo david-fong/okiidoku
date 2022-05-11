@@ -44,7 +44,7 @@ namespace okiidoku::mono {
 		using T = traits<O>;
 		using o4i_t = typename T::o4i_t;
 		for (o4i_t i {0}; i < T::O4; ++i) {
-			const auto val {grid.at_row_major(i)};
+			const auto val {grid.at_rmi(i)};
 			assert(val <= T::O2);
 			if (val == T::O2) { return false; }
 		}
@@ -75,9 +75,9 @@ namespace okiidoku::visitor {
 	}
 
 
-	Grid::common_val_t Grid::at_row_major(const traits::o4i_t rmi) const noexcept {
+	Grid::common_val_t Grid::at_rmi(const traits::o4i_t rmi) const noexcept {
 		return std::visit([&](const auto& mono_this){
-			return common_val_t{mono_this.at_row_major(rmi)};
+			return common_val_t{mono_this.at_rmi(rmi)};
 		}, get_mono_variant());
 	}
 

@@ -35,16 +35,19 @@
 		"NOLINT",
 		"ōkiidoku",
 		"opcount",
+		"pimpl",
 		"popcount",
 		"popcountll",
 		"prefetch",
 		"serdes",
 		"smol",
+		"soln",
 		"speedup",
 		"stoi",
 		"stoul",
 		"strials",
 		"sudoku",
-		"sudopedia"
+		"sudopedia",
+		"unsat"
 	]
 }

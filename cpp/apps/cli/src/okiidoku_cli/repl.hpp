@@ -56,6 +56,12 @@ namespace okiidoku::cli {
 	class Repl final {
 	public:
 		explicit Repl(Order O, SharedRng& rng);
+
+		// disallow copies and moves:
+		Repl(const Repl&) = delete;
+		Repl& operator=(const Repl&) = delete;
+		// Note to self: move operations are not implicitly declared if copy operations are user-declared.
+
 		void start();
 		bool run_command(std::string_view cmd_line);
 

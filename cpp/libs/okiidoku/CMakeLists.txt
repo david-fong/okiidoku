@@ -13,6 +13,7 @@ add_library(okiidoku
 	src/okiidoku/morph/canon_label.cpp
 	src/okiidoku/morph/canon_place.cpp
 	src/okiidoku/morph/canon.cpp
+	src/okiidoku/puzzle/solve.cpp
 )
 add_library(okiidoku::okiidoku ALIAS okiidoku)
 set_target_properties(okiidoku PROPERTIES
@@ -38,8 +39,7 @@ target_link_libraries(okiidoku
 
 if(PROJECT_IS_TOP_LEVEL)
 	add_subdirectory(examples)
-endif()
-
-if(PROJECT_IS_TOP_LEVEL AND BUILD_TESTING)
-	add_subdirectory(tests)
+	if(BUILD_TESTING)
+		add_subdirectory(tests)
+	endif()
 endif()

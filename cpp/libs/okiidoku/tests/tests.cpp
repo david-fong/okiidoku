@@ -22,13 +22,20 @@ template<okiidoku::Order O>
 unsigned test_morph(okiidoku::SharedRng& shared_rng, const unsigned num_rounds) {
 	using namespace okiidoku;
 	using namespace okiidoku::mono;
-	// using T = traits<O>;
+	using T = traits<O>;
 	std::cout << "\n\ntesting for order " << O << std::endl;
 	// Note: if gen_path gets un-deprecated, assert that paths are valid.
 
 	unsigned int count_bad {0};
 	for (unsigned round {0}; round < num_rounds; ) {
 		Grid<O> gen_grid;
+		if (!(grid_is_filled(gen_grid) && std::all_of(
+			gen_grid.get_underlying_array().cbegin(),
+			gen_grid.get_underlying_array().cend(),
+			[](const auto val){ return val == T::O2; }
+		))) {
+			std::clog << "\ngrid must be initialized to an empty grid";
+		}
 		generate<O>(gen_grid, shared_rng);
 		morph::canonicalize<O>(gen_grid);
 
@@ -40,8 +47,8 @@ unsigned test_morph(okiidoku::SharedRng& shared_rng, const unsigned num_rounds) 
 			++count_bad;
 			std::clog << "\n!bad\n";
 			const std::array<print_2d_grid_view, 2> palette_ {
-				[&](auto rmi){ return   gen_grid.at_row_major(rmi); },
-				[&](auto rmi){ return canon_grid.at_row_major(rmi); },
+				[&](auto rmi){ return   gen_grid.at_rmi(rmi); },
+				[&](auto rmi){ return canon_grid.at_rmi(rmi); },
 			};
 			print_2d(std::clog, O, palette_, shared_rng);
 			// std::clog << "\n";

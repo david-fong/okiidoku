@@ -10,7 +10,7 @@ namespace okiidoku::mono::puzzle {
 	// contract: grid is filled or a proper puzzle.
 	// post-condition: the grid is a minimal puzzle. solution unchanged.
 	template<Order O> requires(is_order_compiled(O))
-	OKIIDOKU_EXPORT void make_minimal(Grid<O>&) noexcept ;
+	OKIIDOKU_EXPORT void make_minimal(Grid<O>&) noexcept;
 
 	// Not decided on whether to put is_minimal and is_proper functions
 	// here. is_proper can be defined in terms of solving, and is_minimal
