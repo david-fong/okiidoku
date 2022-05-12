@@ -13,8 +13,8 @@ namespace okiidoku::mono::puzzle {
 
 	private:
 		using T = Ints<O>;
-		using cands_t = HouseMask<O>;
-		using cands_grid_t = detail::Gridlike<O, cands_t>;
+		using cand_syms_t = HouseMask<O>;
+		using cand_syms_grid_t = detail::Gridlike<O, cand_syms_t>;
 		using val_t = typename T::o2x_t;
 		using rmi_t = typename T::o4x_smol_t;
 		using o4i_t = typename T::o4i_t;
@@ -25,14 +25,18 @@ namespace okiidoku::mono::puzzle {
 		so backtracking the DFS isn't as simple as unsetting some house-
 		mask bits. */
 		struct GuessStep final {
-			cands_grid_t prev_cells_cands;
+			cand_syms_grid_t prev_cells_cands;
 			rmi_t curr_guessed_rmi;
+			GuessStep(
+				const cand_syms_grid_t& prev_cells_cands_,
+				const rmi_t curr_guessed_rmi_
+			) noexcept: prev_cells_cands{prev_cells_cands_}, curr_guessed_rmi{curr_guessed_rmi_} {}
 		};
 		using guess_stack_t = std::stack<GuessStep/* , std::vector<GuessStep> */>;
 
 
 		std::bitset<T::O4> solved_cells_ {};
-		cands_grid_t cells_cands_;
+		cand_syms_grid_t cells_cands_;
 
 		// helper to speed up checking if the grid is solved.
 		o4i_t num_puzzle_cells_remaining_ {T::O4};
@@ -75,7 +79,7 @@ namespace okiidoku::mono::puzzle {
 	// complete type in the header (it is forward declared there). Defaulting
 	// dtor requires a complete type.
 	template<Order O> requires(is_order_compiled(O))
-	FastSolver<O>::~FastSolver() = default;
+	FastSolver<O>::~FastSolver() noexcept = default;
 
 
 	template<Order O> requires(is_order_compiled(O))
@@ -131,7 +135,7 @@ namespace okiidoku::mono::puzzle {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	FastSolver<O>::Impl::hit_unsat_t
+	typename FastSolver<O>::Impl::hit_unsat_t
 	FastSolver<O>::Impl::remove_cell_candidate_(
 		const FastSolver<O>::Impl::rmi_t rmi,
 		const FastSolver<O>::Impl::val_t cand_to_remove
@@ -160,18 +164,21 @@ namespace okiidoku::mono::puzzle {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	FastSolver<O>::Impl::hit_unsat_t
+	typename FastSolver<O>::Impl::hit_unsat_t
 	FastSolver<O>::Impl::commit_cell_val_(
 		const FastSolver<O>::Impl::rmi_t rmi,
 		const FastSolver<O>::Impl::val_t val
 	) noexcept {
-		assert(num_puzzle_cells_remaining_ > 0);;
+		assert(num_puzzle_cells_remaining_ > 0);
 		assert(!solved_cells_.test(rmi));
 		assert(val < T::O2);
 		assert(cells_cands_.at_rmi(rmi).test(val));
 		solved_cells_.set(rmi);
+		cells_cands_.at_rmi(rmi) = cand_syms_t{};
+		cells_cands_.at_rmi(rmi).set(val);
 		// TODO.asap do remove_cell_candidates_ for all same-house cells
 		while (false) {
+			// if (neighbour_rmi == rmi) [[unlikely]] { continue; }
 			// hit_unsat_t hit_unsat {remove_cell_candidate_(neighbour_rmi, val)};
 			// if (hit_unsat) [[unlikely]] {
 			// 	return hit_unsat_t{true};
@@ -183,7 +190,7 @@ namespace okiidoku::mono::puzzle {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	FastSolver<O>::Impl::hit_unsat_t
+	typename FastSolver<O>::Impl::hit_unsat_t
 	FastSolver<O>::Impl::push_guess_(
 		const FastSolver<O>::Impl::rmi_t rmi
 	) noexcept {
@@ -221,8 +228,8 @@ namespace okiidoku::mono::puzzle {
 	}
 
 
+	// Note: no need to explicitly instantiate Impl
 	#define OKIIDOKU_FOR_COMPILED_O(O_) \
-		template class FastSolver<O_>::Impl; \
 		template class FastSolver<O_>;
 	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 	#undef OKIIDOKU_FOR_COMPILED_O

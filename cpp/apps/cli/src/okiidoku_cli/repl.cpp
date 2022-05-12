@@ -2,7 +2,7 @@
 
 #include <okiidoku_cli/timer.hpp>
 #include <okiidoku_cli_utils/str.hpp>
-#include <okiidoku/fmt/print_2d.hpp>
+#include <okiidoku/print_2d.hpp>
 #include <okiidoku/morph/canon.hpp>
 #include <okiidoku/gen.hpp>
 #include <okiidoku/serdes.hpp>

@@ -52,7 +52,6 @@ namespace okiidoku::cli {
 	// }
 
 
-	/** */
 	class Repl final {
 	public:
 		explicit Repl(Order O, SharedRng& rng);
@@ -72,7 +71,7 @@ namespace okiidoku::cli {
 		void gen_single();
 
 		void gen_multiple(unsigned long long how_many);
-		void gen_multiple(std::string_view);
+		void gen_multiple(std::string_view how_many_str);
 	};
 }
 #endif

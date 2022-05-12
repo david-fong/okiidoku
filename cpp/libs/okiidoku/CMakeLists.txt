@@ -4,8 +4,7 @@
 add_library(okiidoku
 	src/okiidoku/grid.cpp
 	src/okiidoku/gen.cpp
-	src/okiidoku/fmt/emoji.cpp
-	src/okiidoku/fmt/print_2d.cpp
+	src/okiidoku/print_2d.cpp
 	src/okiidoku/serdes.cpp
 	src/okiidoku/morph/transform.cpp
 	src/okiidoku/morph/scramble.cpp

@@ -3,7 +3,7 @@
 // Note: the byte width type logic could be done with boost, but I don't
 // have any other reason to add boost as a dependency, so I won't.
 
-#include <okiidoku/detail/order_templates.hpp> // largest_compiled_order
+#include <okiidoku/detail/order_templates.hpp> // Order, largest_compiled_order
 
 #include <bit>         // bit_width
 #include <cstdint>     // uint_...
@@ -48,8 +48,10 @@ namespace okiidoku::mono {
 	}
 
 	// Note: when printing things, make sure to cast to int, since byte-like types will be interpreted as characters.
-	template<unsigned O>
+	template<Order O>
 	struct Ints final {
+
+		Ints() = delete;
 
 		using o1x_t = detail::uint_fastN_t<std::bit_width(O)>;
 		using o1i_t = detail::uint_fastN_t<std::bit_width(O)>;
@@ -87,7 +89,7 @@ namespace okiidoku::mono {
 	concept Any_o4x = std::unsigned_integral<T> && std::numeric_limits<T>::max() >= (Ints<O>::O4-1);
 
 
-	template<unsigned O>
+	template<Order O>
 	using grid_val_t = typename Ints<O>::o2i_smol_t;
 }
 

@@ -1,7 +1,7 @@
 #include <okiidoku/morph/canon.hpp>
 #include <okiidoku/morph/scramble.hpp>
 #include <okiidoku/serdes.hpp>
-#include <okiidoku/fmt/print_2d.hpp>
+#include <okiidoku/print_2d.hpp>
 #include <okiidoku/gen.hpp>
 #include <okiidoku/grid.hpp>
 #include <okiidoku/shared_rng.hpp>
@@ -46,7 +46,7 @@ int main([[maybe_unused]] const int argc, [[maybe_unused]] char const *const arg
 			[&](auto rmi){ return   gen_grid.at_rmi(rmi); },
 			[&](auto rmi){ return canon_grid.at_rmi(rmi); },
 		})};
-		print_2d(std::clog, O, palette_, shared_rng);
+		oki::print_2d(std::clog, O, palette_, shared_rng);
 	}
 
 	return 0;

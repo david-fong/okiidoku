@@ -1,12 +1,15 @@
 # C++ Notes
 
+## Coding Guides
+
 - [isocpp core guidelines](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines)
 - [pitchfork layout](https://api.csswg.org/bikeshed/?force=1&url=https://raw.githubusercontent.com/vector-of-bool/pitchfork/develop/data/spec.bs)
+- [google cppguide](https://google.github.io/styleguide/cppguide.html)
 
 ## Snippets
 
 ```sh
-# (cd to the build folder)
+# (cd to the cmake build folder of interest)
 # view public (-D) de-mangled (-C) symbols of the shared library sorted by address (-n)
 nm -nCD libs/okiidoku/libokiidoku.so
 
@@ -43,6 +46,9 @@ things I got wrong before which I couldn't understand based on gcc's error messa
 - on Template instantiation
   - https://gcc.gnu.org/onlinedocs/gcc/Template-Instantiation.html
   - https://arne-mertz.de/2019/02/extern-template-reduce-compile-times/
+
+- [nodiscard in the standard library](https://stackoverflow.com/a/63204963/11107541)
+  - this can inform where I should use nodiscard in my library interfaces.
 
 - [file open mode shorthands](https://en.cppreference.com/w/cpp/io/basic_filebuf/open)
 

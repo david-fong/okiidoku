@@ -7,6 +7,9 @@
 #include <string_view>
 #include <optional>
 
+// TODO.asap consider renaming. DB generally implies mutability,
+// but I thought we weren't implementing that and instead having
+// only merge operations. Maybe "archive" might be a better word.
 namespace okiidoku::mono::db {
 
 	class Db final {
@@ -23,7 +26,8 @@ namespace okiidoku::mono::db {
 		bool is_canonicalized;
 	};
 
-	// contract: 
-	OKIIDOKU_EXPORT std::optional<Db> open_file(std::string_view filename);
+	// post-condition: returns `std::nullopt` if the specified file doesn't
+	// exist or is not a regular file. Otherwise returns a handle to an open DB.
+	[[nodiscard]] OKIIDOKU_EXPORT std::optional<Db> open_file(std::string_view filename);
 }
 #endif

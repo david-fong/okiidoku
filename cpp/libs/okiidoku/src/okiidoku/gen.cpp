@@ -29,7 +29,7 @@ namespace okiidoku::mono { namespace {
 	};
 
 	template<Order O> requires(is_order_compiled(O))
-	void make_boxes_valid(Grid<O>& grid, rng_t& rng_) noexcept {
+	void make_boxes_valid(Grid<O>& grid, const typename Ints<O>::o2i_t h_chute, rng_t& rng_) noexcept {
 		using T = Ints<O>;
 		using o1x_t = typename T::o1x_t;
 		using o2x_t = typename T::o2x_t;
@@ -37,39 +37,37 @@ namespace okiidoku::mono { namespace {
 		using o3i_t = typename T::o3i_t;
 		
 		// unsigned long long op_count {0};
-		for (o2i_t h_chute {0}; h_chute < T::O2; h_chute += T::O1) {
-			CountSymsInInvalidBox<O> boxes_has {};
-			for (o2i_t row {h_chute}; row < h_chute+T::O1; ++row) {
-			for (o2i_t col {0}; col < T::O2; ++col) {
-				++(boxes_has.box_count_sym(static_cast<o1x_t>(col/T::O1), grid.at(row,col)));
-			}}
-			o3i_t num_missing_syms {boxes_has.count_num_missing_syms()};
-			while (num_missing_syms != 0) [[likely]] {
-				const auto a_col {static_cast<o2x_t>((rng_() - rng_t::min()) % T::O2)};
-				const auto b_col {static_cast<o2x_t>((rng_() - rng_t::min()) % T::O2)};
-				const auto a_box {static_cast<o1x_t>(a_col/T::O1)};
-				const auto b_box {static_cast<o1x_t>(b_col/T::O1)};
-				if (a_box == b_box) [[unlikely]] { continue; }
-				const auto row {static_cast<o2x_t>(h_chute + ((rng_() - rng_t::min()) % T::O1))};
-				auto& a_sym {grid.at(row,a_col)};
-				auto& b_sym {grid.at(row,b_col)};
-				assert(a_sym != b_sym);
-				const auto num_missing_syms_diff {static_cast<signed char>(
-					(boxes_has.box_count_sym(a_box,a_sym) == 1 ?  1 : 0) + // regression
-					(boxes_has.box_count_sym(a_box,b_sym) == 0 ? -1 : 0) + // improvement
-					(boxes_has.box_count_sym(b_box,b_sym) == 1 ?  1 : 0) + // regression
-					(boxes_has.box_count_sym(b_box,a_sym) == 0 ? -1 : 0)   // improvement
-				)};
-				if (num_missing_syms_diff <= 0) [[unlikely]] { // TODO.low for fun: find out on average at what op_count it starts being unlikely
-					num_missing_syms = static_cast<o3i_t>(num_missing_syms + num_missing_syms_diff);
-					--boxes_has.box_count_sym(a_box,a_sym);
-					++boxes_has.box_count_sym(a_box,b_sym);
-					--boxes_has.box_count_sym(b_box,b_sym);
-					++boxes_has.box_count_sym(b_box,a_sym);
-					std::swap(a_sym, b_sym);
-				}
-				// ++op_count;
+		CountSymsInInvalidBox<O> boxes_has {};
+		for (o2i_t row {h_chute}; row < h_chute+T::O1; ++row) {
+		for (o2i_t col {0}; col < T::O2; ++col) {
+			++(boxes_has.box_count_sym(static_cast<o1x_t>(col/T::O1), grid.at(row,col)));
+		}}
+		o3i_t num_missing_syms {boxes_has.count_num_missing_syms()};
+		while (num_missing_syms != 0) [[likely]] {
+			const auto a_col {static_cast<o2x_t>((rng_() - rng_t::min()) % T::O2)};
+			const auto b_col {static_cast<o2x_t>((rng_() - rng_t::min()) % T::O2)};
+			const auto a_box {static_cast<o1x_t>(a_col/T::O1)};
+			const auto b_box {static_cast<o1x_t>(b_col/T::O1)};
+			if (a_box == b_box) [[unlikely]] { continue; }
+			const auto row {static_cast<o2x_t>(h_chute + ((rng_() - rng_t::min()) % T::O1))};
+			auto& a_sym {grid.at(row,a_col)};
+			auto& b_sym {grid.at(row,b_col)};
+			assert(a_sym != b_sym);
+			const auto num_missing_syms_resolved {static_cast<signed char>(
+				(boxes_has.box_count_sym(a_box,a_sym) == 1 ? -1 : 0) + // regression
+				(boxes_has.box_count_sym(a_box,b_sym) == 0 ?  1 : 0) + // improvement
+				(boxes_has.box_count_sym(b_box,b_sym) == 1 ? -1 : 0) + // regression
+				(boxes_has.box_count_sym(b_box,a_sym) == 0 ?  1 : 0)   // improvement
+			)};
+			if (num_missing_syms_resolved >= 0) [[unlikely]] { // TODO.low for fun: find out on average at what op_count it starts being unlikely
+				num_missing_syms = static_cast<o3i_t>(num_missing_syms - static_cast<o3i_t>(num_missing_syms_resolved));
+				--boxes_has.box_count_sym(a_box,a_sym);
+				++boxes_has.box_count_sym(a_box,b_sym);
+				--boxes_has.box_count_sym(b_box,b_sym);
+				++boxes_has.box_count_sym(b_box,a_sym);
+				std::swap(a_sym, b_sym);
 			}
+			// ++op_count;
 		}
 		// std::cout << "\n" << op_count << ", ";
 	}
@@ -78,7 +76,7 @@ namespace okiidoku::mono { namespace {
 	template<Order O> requires(is_order_compiled(O))
 	struct CountSymsInInvalidCol final {
 		using T = Ints<O>;
-		using V = typename T::o2i_t;
+		using V = typename T::o2i_smol_t;
 		using o3i_t = typename T::o3i_t;
 		[[nodiscard, gnu::pure]] o3i_t count_num_missing_syms() const noexcept { return static_cast<o3i_t>(std::ranges::count(store_, V{0})); }
 		template<class T_col, class T_sym> requires(Any_o1x<O, T_col> && Any_o2x<O, T_sym>)
@@ -91,7 +89,7 @@ namespace okiidoku::mono { namespace {
 	};
 
 	template<Order O> requires(is_order_compiled(O))
-	void make_columns_valid(Grid<O>& grid, rng_t& rng_) noexcept {
+	void make_cols_valid(Grid<O>& grid, const typename Ints<O>::o2i_t v_chute, rng_t& rng_) noexcept {
 		using T = Ints<O>;
 		using o1x_t = typename T::o1x_t;
 		using o1i_t = typename T::o1i_t;
@@ -100,37 +98,35 @@ namespace okiidoku::mono { namespace {
 		using o3i_t = typename T::o3i_t;
 
 		// unsigned long long op_count {0};
-		for (o2i_t v_chute {0}; v_chute < T::O2; v_chute += T::O1) {
-			CountSymsInInvalidCol<O> cols_has {};
-			for (o2i_t row {0}; row < T::O2; ++row) {
-			for (o1i_t box_col {0}; box_col < T::O1; ++box_col) {
-				++(cols_has.col_count_sym(box_col, grid.at(row, static_cast<o2x_t>(v_chute + box_col))));
-			}}
-			o3i_t num_missing_syms {cols_has.count_num_missing_syms()};
-			while (num_missing_syms != 0) [[likely]] {
-				const auto a_col {static_cast<o1x_t>((rng_() - rng_t::min()) % T::O1)};
-				const auto b_col {static_cast<o1x_t>((rng_() - rng_t::min()) % T::O1)};
-				if (a_col == b_col) [[unlikely]] { continue; }
-				const auto row {static_cast<o2x_t>((rng_() - rng_t::min()) % (T::O2))};
-				auto& a_sym {grid.at(row, static_cast<o2i_t>(v_chute + a_col))};
-				auto& b_sym {grid.at(row, static_cast<o2i_t>(v_chute + b_col))};
-				assert(a_sym != b_sym);
-				const auto num_missing_syms_diff {static_cast<signed char>(
-					(cols_has.col_count_sym(a_col,a_sym) == 1 ?  1 : 0) + // regression
-					(cols_has.col_count_sym(a_col,b_sym) == 0 ? -1 : 0) + // improvement
-					(cols_has.col_count_sym(b_col,b_sym) == 1 ?  1 : 0) + // regression
-					(cols_has.col_count_sym(b_col,a_sym) == 0 ? -1 : 0)   // improvement
-				)};
-				if (num_missing_syms_diff <= 0) [[unlikely]] {
-					num_missing_syms = static_cast<o3i_t>(num_missing_syms + num_missing_syms_diff);
-					--cols_has.col_count_sym(a_col,a_sym);
-					++cols_has.col_count_sym(a_col,b_sym);
-					--cols_has.col_count_sym(b_col,b_sym);
-					++cols_has.col_count_sym(b_col,a_sym);
-					std::swap(a_sym, b_sym);
-				}
-				// ++op_count;
+		CountSymsInInvalidCol<O> cols_has {};
+		for (o2i_t row {0}; row < T::O2; ++row) {
+		for (o1i_t box_col {0}; box_col < T::O1; ++box_col) {
+			++(cols_has.col_count_sym(box_col, grid.at(row, static_cast<o2x_t>(v_chute + box_col))));
+		}}
+		o3i_t num_missing_syms {cols_has.count_num_missing_syms()};
+		while (num_missing_syms != 0) [[likely]] {
+			const auto a_col {static_cast<o1x_t>((rng_() - rng_t::min()) % T::O1)};
+			const auto b_col {static_cast<o1x_t>((rng_() - rng_t::min()) % T::O1)};
+			if (a_col == b_col) [[unlikely]] { continue; }
+			const auto row {static_cast<o2x_t>((rng_() - rng_t::min()) % (T::O2))};
+			auto& a_sym {grid.at(row, static_cast<o2i_t>(v_chute + a_col))};
+			auto& b_sym {grid.at(row, static_cast<o2i_t>(v_chute + b_col))};
+			assert(a_sym != b_sym);
+			const auto num_missing_syms_resolved {static_cast<signed char>(
+				(cols_has.col_count_sym(a_col,a_sym) == 1 ? -1 : 0) + // regression
+				(cols_has.col_count_sym(a_col,b_sym) == 0 ?  1 : 0) + // improvement
+				(cols_has.col_count_sym(b_col,b_sym) == 1 ? -1 : 0) + // regression
+				(cols_has.col_count_sym(b_col,a_sym) == 0 ?  1 : 0)   // improvement
+			)};
+			if (num_missing_syms_resolved >= 0) [[unlikely]] {
+				num_missing_syms = static_cast<o3i_t>(num_missing_syms - static_cast<o3i_t>(num_missing_syms_resolved));
+				--cols_has.col_count_sym(a_col,a_sym);
+				++cols_has.col_count_sym(a_col,b_sym);
+				--cols_has.col_count_sym(b_col,b_sym);
+				++cols_has.col_count_sym(b_col,a_sym);
+				std::swap(a_sym, b_sym);
 			}
+			// ++op_count;
 		}
 		// std::cout << op_count;
 	}
@@ -162,8 +158,12 @@ namespace okiidoku::mono {
 		/* Note: when making boxes valid, keeping one line untouched works,
 		but is actually slower. same for making columns valid and one box. */
 
-		make_boxes_valid(grid, rng_);
-		make_columns_valid(grid, rng_);
+		for (o2i_t h_chute {0}; h_chute < T::O2; h_chute += T::O1) {
+			make_boxes_valid(grid, h_chute, rng_);
+		}
+		for (o2i_t v_chute {0}; v_chute < T::O2; v_chute += T::O1) {
+			make_cols_valid(grid, v_chute, rng_);
+		}
 
 		assert(grid_follows_rule<O>(grid));
 	}

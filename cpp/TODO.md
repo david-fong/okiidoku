@@ -32,14 +32,20 @@
   - https://docs.microsoft.com/en-us/cpp/sanitizers/asan
 - find out how to use the [cppcoreguideline checker](https://docs.microsoft.com/en-us/cpp/code-quality/using-the-cpp-core-guidelines-checkers?view=msvc-170)
 
-- see where ADL can be used to shorten code in a way that isn't mentally taxing. perhaps it should be avoided within the library when it comes to visitor-vs-mono distinction just to be explicit. But maybe for users it can be helpful, since they should only use one of mono or visitor.
-
 - consider supporting CMake 3.22 or 3.21. Ubuntu 20.04's apt repos don't seem to have 3.23. The only 3.23 thing I'm using is `FILE_SET` for target headers
 
-- can the users of the library use [ADL](https://en.cppreference.com/w/cpp/language/adl) to skip specifying the okiidoku namespace for functions consuming Grid?
+- can the users of the library use [ADL](https://en.cppreference.com/w/cpp/language/adl) to skip specifying the okiidoku namespace for functions consuming Grid? Or should ADL be discouraged? If a user creates a function that takes an object defined in my namespace and I add a function with a same signature in my namespace, then it may break any of their code that uses ADL to resolve to their own functions.
 
-- try writing custom python pretty-printer for `HouseMask`?
+- see if grid qualities (like being a solution, being a proper puzzle, being a minimal puzzle), can be encoded through the type system and make it so that always-safe conversions (such as ) are easy, but "unsafe" (not always true) have to either go through an `unsafe_cast_X_grid_to_Y_grid` function, or go through a `checked_cast_X_grid_to_Y_grid`, which may have a non-trivial performance penalty.
+  - This would allow making many of the current contracts part of the type system; turning-runtime-error-into-compiler-errors-TM. I would no longer need to write such contract and post-condition comments.
+  - Definitely useful types: SolutionGrid, ProperPuzzleGrid, MaybeInvalidPuzzleGrid.
+  - Maybe useful types: MinimalPuzzleGrid.
+  - Things that might get ugly: the way they are, `grid_is_filled` and `grid_is_valid` would still require the caller to do some kind of unsafe-moving-cast to a new variable of a stronger type.
+
+- try writing custom GDB python pretty-printer for `HouseMask`?
   - [how to write a gdb pretty-printer](https://sourceware.org/gdb/onlinedocs/gdb/Writing-a-Pretty_002dPrinter.html#Writing-a-Pretty_002dPrinter)
+  - also look into [visual studio `.natvis` files](https://docs.microsoft.com/en-us/visualstudio/debugger/create-custom-views-of-native-objects)
+  - interesting: https://github.com/asarium/gdb-natvis
 
 - [it is allowed in c++ to have template functions and non-template functions with the same name. here are the resulting rules](https://stackoverflow.com/a/16865452/11107541). Could this be used to put the algorithm functions under the same namespace (not in separate "mono" and "visitor" namespace)?
 

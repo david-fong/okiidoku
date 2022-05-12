@@ -59,7 +59,7 @@ namespace okiidoku::mono::morph {
 
 		template<class IsEq>
 		// requires (std::regular_invocable<IsEq, link_t, link_t>)
-		void update(IsEq is_eq) {
+		void update(const IsEq is_eq) {
 			for (const auto tie : *this) {
 				auto begin {tie.begin_};
 				for (auto i {static_cast<link_t>(begin+1)}; i < tie.end_; ++i) {

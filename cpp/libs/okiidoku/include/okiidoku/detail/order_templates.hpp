@@ -26,6 +26,8 @@ namespace okiidoku {
 			static constexpr auto make_arr() { return std::to_array({Orders...}); }
 		};
 	}
+	// exists because my template instantiation macro has no delimiter
+	// argument, so I hack this to ignore a leading comma at a usage site.
 	constexpr auto compiled_orders {detail::CompiledOrdersHelper<
 		/* ignored: */Order{0}
 		#define OKIIDOKU_FOR_COMPILED_O(O_) , O_
@@ -98,6 +100,7 @@ namespace okiidoku {
 
 			friend constexpr bool operator==(const ContainerBase&, const ContainerBase&) noexcept = default;
 
+			// Note to self: no need to export these members which are public and inline
 			[[nodiscard, gnu::pure]] constexpr Order get_mono_order() const noexcept { return compiled_orders[variant_.index()]; }
 
 			// Though public, you shouldn't need to use this. The rest of the visitor
@@ -105,6 +108,7 @@ namespace okiidoku {
 			[[nodiscard, gnu::pure]]       variant_t& get_mono_variant()       noexcept { return variant_; }
 			[[nodiscard, gnu::pure]] const variant_t& get_mono_variant() const noexcept { return variant_; }
 
+			// TODO.try marking noexcept to make it abort upon exception? is there any benefit to this?
 			// Sugar wrapper around `std::get` for the underlying variant.
 			// Remember- `std::get` will throw if the requested type is not currently held by the variant.
 			template<Order O> [[nodiscard, gnu::pure]]       typename Adaptor::template type<O>& get_mono_exact()       { return std::get<typename Adaptor::template type<O>>(variant_); }

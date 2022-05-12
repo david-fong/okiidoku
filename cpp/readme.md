@@ -20,14 +20,17 @@ Refer to the [CMake guide](https://cmake.org/cmake/help/latest/guide/importing-e
 
 ## Building and Running okiidoku\_cli
 
+Example values used for CMake kit and build type.
+
 ```shell
 # cd into the cpp directory of the repo first
-mkdir build/Release
-pushd build/Release
-conan install ../../ --build=missing #--profile=
+mkdir build/GCC/Release
+pushd build/GCC/Release
+conan install ../../../ --build=missing #--profile=
 popd
-cmake -S . -B build/Release -DCMAKE_BUILD_TYPE=Release
-cd build/Release
+cmake -S . -B build/GCC/Release -DCMAKE_BUILD_TYPE=Release
+# ^Or just use the configure command of the vscode cmake tools extension.
+cd build/GCC/Release
 cmake --build . --config=Release
 ./apps/cli/okiidoku_cli
 ```
@@ -41,3 +44,6 @@ The project is generally structured following [pitchfork layout conventions](htt
 I follow the Stroustrup casing convention (lower-snake case for variables, functions, and namespaces, and camel-case for user-defined types). For type aliases, I use lower-snake with a `_t` suffix.
 
 The project is set up for use with VS Code. After installing and enabling the recommended extensions, you will need to perform [some initial steps](https://code.visualstudio.com/docs/cpp/cmake-linux#_select-a-kit) to tell VS Code what specific build tools ("kit") and configuration ("variant") you want to use.
+
+Note: if you installed cmake via snap: https://github.com/microsoft/vscode-cmake-tools/issues/838#issuecomment-1035123514
+

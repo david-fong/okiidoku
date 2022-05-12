@@ -20,7 +20,7 @@ namespace okiidoku::mono::morph {
 		chute_imbalance_t<O> chute_imbalance_a;
 		chute_imbalance_t<O> chute_imbalance_b;
 
-		std::strong_ordering operator<=>(const Rel<O>& that) const noexcept {
+		[[nodiscard]] std::strong_ordering operator<=>(const Rel<O>& that) const noexcept {
 			// TODO.mid could maybe use std::tie here https://en.cppreference.com/w/cpp/utility/tuple/tie
 			#define M_RETURN_IF_NEQ if (std::is_neq(cmp)) [[likely]] { return cmp; }
 			std::strong_ordering cmp {that.count <=> count};
@@ -30,11 +30,11 @@ namespace okiidoku::mono::morph {
 			return cmp;
 			#undef M_RETURN_IF_NEQ
 		}
-		bool operator==(const Rel&) const noexcept = default;
+		[[nodiscard]] bool operator==(const Rel&) const noexcept = default;
 	};
 
 	// contract: the span is a _complete_, valid grid.
 	template<Order O> requires(is_order_compiled(O))
-	OKIIDOKU_EXPORT detail::Gridlike<O, Rel<O>> make_rel_table(const Grid<O>&) noexcept;
+	[[nodiscard]] OKIIDOKU_EXPORT detail::Gridlike<O, Rel<O>> make_rel_table(const Grid<O>&) noexcept;
 }
 #endif

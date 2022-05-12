@@ -13,7 +13,7 @@ only useful to you if you want to do data-streaming over a network.
 */
 namespace okiidoku::mono::serdes {
 
-	constexpr unsigned get_min_bytes_to_store(const unsigned max_value) {
+	[[nodiscard, gnu::const]] constexpr unsigned get_min_bytes_to_store(const unsigned max_value) {
 		return (std::bit_width(max_value) + 7) / 8;
 	}
 
@@ -36,10 +36,6 @@ namespace okiidoku::mono::serdes {
 
 
 namespace okiidoku::visitor::serdes {
-
-	constexpr unsigned get_min_bytes_to_store(const unsigned max_value) {
-		return (std::bit_width(max_value) + 7) / 8;
-	}
 
 	// contract: the grid is filled and follows the one rule.
 	OKIIDOKU_EXPORT void print_filled(std::ostream& sink, const Grid& src) noexcept;

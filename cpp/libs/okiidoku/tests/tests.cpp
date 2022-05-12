@@ -1,7 +1,7 @@
 #include <okiidoku/morph/canon.hpp>
 #include <okiidoku/morph/scramble.hpp>
 #include <okiidoku/serdes.hpp>
-#include <okiidoku/fmt/print_2d.hpp>
+#include <okiidoku/print_2d.hpp>
 #include <okiidoku/gen.hpp>
 #include <okiidoku/grid.hpp>
 #include <okiidoku/shared_rng.hpp>
@@ -9,7 +9,9 @@
 #include <okiidoku_cli_utils/console_setup.hpp>
 
 #include <iostream>  // cout,
-#include <string_view>
+#include <iomanip>   // hex
+#include <charconv>
+#include <cstring>
 #include <random>    // random_device,
 #include <array>
 
@@ -75,16 +77,23 @@ unsigned test_morph(okiidoku::SharedRng& shared_rng, const unsigned num_rounds) 
 int main(const int argc, char const *const argv[]) {
 	okiidoku::util::setup_console();
 
+	// TODO.mid design a way to extract this duplicate code (see cli.main.cpp) to utilities
 	const auto srand_key {[&]() -> std::uint_fast64_t {
-		if (argc > 1 && !std::string_view(argv[1]).empty()) {
-			return std::stoi(argv[1]);
+		if (argc > 1) {
+			const auto cstr {argv[1]};
+			std::uint_fast64_t parsed;
+			if (std::from_chars(cstr, cstr+std::strlen(cstr), parsed, 16).ec == std::errc{}) {
+				return parsed;
+			} else {
+				std::cerr << "\nfailed to parse rng seed argument (hex u64). using random_device.";
+			}
 		}
 		return std::random_device()();
 	}()};
 	const unsigned int num_rounds {(argc > 2) ? static_cast<unsigned>(std::stoi(argv[2])) : 1000U};
 
 	std::cout << "\nparsed arguments:"
-	<< "\n- arg 1 (srand key)  : " << srand_key
+	<< "\n- arg 1 (srand key)  : " << std::hex << srand_key
 	<< "\n- arg 2 (num rounds) : " << num_rounds
 	<< std::endl;
 

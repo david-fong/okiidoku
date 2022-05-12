@@ -1,5 +1,5 @@
-#ifndef HPP_OKIIDOKU__FMT__PRINT_2D
-#define HPP_OKIIDOKU__FMT__PRINT_2D
+#ifndef HPP_OKIIDOKU__PRINT_2D
+#define HPP_OKIIDOKU__PRINT_2D
 
 #include <okiidoku/shared_rng.hpp>
 #include <okiidoku/detail/export.h>

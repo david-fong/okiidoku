@@ -1,10 +1,22 @@
-#include <okiidoku/fmt/emoji.hpp>
+#ifndef HPP_OKIIDOKU__DETAIL__EMOJI
+#define HPP_OKIIDOKU__DETAIL__EMOJI
+
+#include <okiidoku/detail/export.h>
+
+#include <vector>
+#include <string_view>
 
 namespace okiidoku::emoji {
+	struct Set final {
+		std::string_view name;
+		std::vector<std::string_view> entries;
+	};
 
-	const std::vector<size_t> top_set_preferences {5, 11};
+	// TODO.mid constexpr all the things with std::tuple, std::to_array, etc.
 
-	const std::vector<Set> sets {
+	inline const std::vector<size_t> top_set_preferences {5, 11};
+
+	inline const std::vector<Set> sets {
 		{"fruit",       {"🍉","🍄","🍓","🍅","🌶 ","🍎","🍑","🍊","🥕","🥭","🍍","🍋","🍌","🌽","🥑","🍐","🥝","🍏","🥬","🍈","🫐","🧄","🍆","🍇","🌰"}}, // yeah yeah. vegetables. I know.
 		{"reptile",     {"🐸","🦎","🐍","🐢","🐊","🐉","🐲","🦕","🦖"}},
 		{"marine",      {"🦦","🦭","🦈","🐬","🐋","🐟","🐠","🦑","🐙","🦀","🦞","🐚"}},
@@ -32,3 +44,4 @@ namespace okiidoku::emoji {
 		{"circle",      {"🔮","🗿","🚬","🔴","🟠️","🟡️","🟢️","🔵","🟣️","🟤️","⚫️","⚪️"}},
 	};
 }
+#endif

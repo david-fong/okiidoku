@@ -1,5 +1,5 @@
-#include <okiidoku/fmt/print_2d.hpp>
-#include <okiidoku/fmt/emoji.hpp>
+#include <okiidoku/print_2d.hpp>
+#include <okiidoku/print_2d.emoji.hpp>
 
 #include <iostream>
 #include <algorithm>
@@ -7,7 +7,7 @@
 #include <vector>
 #include <cassert>
 
-namespace okiidoku {
+namespace okiidoku { namespace {
 
 	// current implementation is pretty simple (dumb?)
 	std::vector<size_t> make_random_emoji_set(const unsigned O, SharedRng& shared_rng) {
@@ -43,7 +43,8 @@ namespace okiidoku {
 		// otherwise just return everything:
 		return shuffled_sets;
 	}
-
+}}
+namespace okiidoku {
 
 	void print_2d( // NOLINT(readability-function-cognitive-complexity) :B
 		std::ostream& os,
