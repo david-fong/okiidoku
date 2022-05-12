@@ -24,8 +24,7 @@ namespace okiidoku::cli {
 	Repl::Repl(const Order order_input, SharedRng& rng):
 		shared_rng_(rng)
 	{
-		const Order O {order_input};
-		config_.order(O);
+		config_.order(order_input);
 		config_.verbosity(verbosity::E::quiet);
 	}
 

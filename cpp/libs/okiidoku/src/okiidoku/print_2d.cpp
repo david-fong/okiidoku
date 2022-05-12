@@ -52,6 +52,7 @@ namespace okiidoku {
 		const std::span<const print_2d_grid_view> grid_views,
 		SharedRng& shared_rng
 	) {
+		const unsigned O2 {O*O};
 		using o2i_t = std::uint16_t;
 
 		const auto print_box_row_sep_string_ {[&os, O](const unsigned border_i) -> void {
@@ -80,17 +81,17 @@ namespace okiidoku {
 		}};
 		const auto emoji_sets {make_random_emoji_set(O, shared_rng)};
 
-		for (o2i_t row {0}; row < O*O; ++row) {
+		for (o2i_t row {0}; row < O2; ++row) {
 			if (row % O == 0) {
 				print_box_row_sep_strings(row / O);
 			}
 			os << '\n';
 			for (unsigned grid_i {0}; grid_i < grid_views.size(); ++grid_i) {
-				for (o2i_t col {0}; col < O*O; ++col) {
+				for (o2i_t col {0}; col < O2; ++col) {
 					if ((col % O) == 0) { os << " │"; }
 
-					auto val {size_t{grid_views[grid_i](row * O*O + col)}};
-					if (val == O*O) {
+					auto val {size_t{grid_views[grid_i].operator()((row * O2) + col)}};
+					if (val == O2) {
 						os << "  ";
 						continue;
 					}

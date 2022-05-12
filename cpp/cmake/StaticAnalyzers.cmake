@@ -14,7 +14,8 @@ find_program(
 	DOC "Path to cppcheck executable"
 )
 if(NOT ${CPPCHECK_EXE} STREQUAL "CPPCHECK_EXE-NOTFOUND")
-	# set(CMAKE_CXX_CPPCHECK "${CPPCHECK_EXE} "--inline-suppr")
+	# set(CMAKE_CXX_CPPCHECK ${CPPCHECK_EXE} --inline-suppr)
 	# enable suppressing inline with comments like: "cppcheck-suppress [aaaa,bbbb]"
-	# TODO.mid try it out
+	# It's choking on the tweak header's `#if __has_include(...)`.
+	# Other people also mention this issue on sourceforge.
 endif()

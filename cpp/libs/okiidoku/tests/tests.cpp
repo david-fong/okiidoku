@@ -11,7 +11,7 @@
 #include <iostream>  // cout,
 #include <iomanip>   // hex
 #include <charconv>
-#include <cstring>
+#include <string_view>
 #include <random>    // random_device,
 #include <array>
 
@@ -80,13 +80,12 @@ int main(const int argc, char const *const argv[]) {
 	// TODO.mid design a way to extract this duplicate code (see cli.main.cpp) to utilities
 	const auto srand_key {[&]() -> std::uint_fast64_t {
 		if (argc > 1) {
-			const auto cstr {argv[1]};
-			std::uint_fast64_t parsed;
-			if (std::from_chars(cstr, cstr+std::strlen(cstr), parsed, 16).ec == std::errc{}) {
+			const std::string_view arg {argv[1]};
+			std::uint_fast64_t parsed {};
+			if (std::from_chars(arg.data(), arg.data()+arg.size(), parsed, 16).ec == std::errc{}) {
 				return parsed;
-			} else {
-				std::cerr << "\nfailed to parse rng seed argument (hex u64). using random_device.";
 			}
+			std::cerr << "\nfailed to parse rng seed argument (hex u64). using random_device instead.";
 		}
 		return std::random_device()();
 	}()};

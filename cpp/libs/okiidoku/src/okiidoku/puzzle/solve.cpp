@@ -110,8 +110,8 @@ namespace okiidoku::mono::puzzle {
 		// while (num_puzzle_cells_remaining_ != 0) {
 			// for (const auto& technique : techniques) {
 			// 	const auto old_num_puzzle_cells_remaining {num_puzzle_cells_remaining_};
-			// 	technique();
-			// 	if ()
+			// 	const auto hit_unsat {technique()};
+			// 	if (hit_unsat) {}
 			// }
 		// }
 		assert(( std::all_of(

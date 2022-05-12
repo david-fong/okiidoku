@@ -5,6 +5,7 @@
 
 #include <iostream> // cout, endl,
 #include <charconv> // from_chars
+#include <cassert>
 
 namespace okiidoku::cli {
 
@@ -32,8 +33,10 @@ namespace okiidoku::cli {
 	}
 
 
-	void Config::order(Order new_order) noexcept {
-		order_ = new_order;
+	void Config::order(const Order new_order) noexcept {
+		if (is_order_compiled(new_order)) {
+			order_ = new_order;
+		}
 	}
 
 	void Config::order(const std::string_view arg) {

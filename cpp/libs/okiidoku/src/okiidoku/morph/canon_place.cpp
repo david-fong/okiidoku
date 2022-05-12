@@ -38,7 +38,7 @@ namespace okiidoku::mono { namespace {
 			TieLinks<O, 2> line_ties {};
 			TieLinks<O, 1> chute_ties {};
 
-			explicit constexpr PolarState() noexcept {
+			explicit PolarState() noexcept {
 				line_ties.update([](auto a, auto b){
 					return (a%T::O1) == (b%T::O1);
 				});
@@ -88,7 +88,7 @@ namespace okiidoku::mono { namespace {
 						return std::ranges::lexicographical_compare(row_sp.subspan(a*T::O1,T::O1), row_sp.subspan(b*T::O1,T::O1));
 					});
 				}
-				std::array<val_t, T::O2> copy;
+				std::array<val_t, T::O2> copy; // NOLINT(cppcoreguidelines-pro-type-member-init) see next line
 				std::copy(row_sp.begin(), row_sp.end(), copy.begin());
 				for (o1i_t i {0}; i < T::O1; ++i) {
 					std::copy(
@@ -104,7 +104,7 @@ namespace okiidoku::mono { namespace {
 
 	template<Order O> requires(is_order_compiled(O))
 	void CanonPlace<O>::PolarState::do_a_pass(const Grid<O>& table) noexcept {
-		std::array<mapping_t, T::O2> to_tied;
+		std::array<mapping_t, T::O2> to_tied; // NOLINT(cppcoreguidelines-pro-type-member-init) see next line
 		std::iota(to_tied.begin(), to_tied.end(), mapping_t{0});
 		for (const auto tie : line_ties) {
 			// note: intentionally do not skip ties here since updated table
@@ -143,7 +143,7 @@ namespace okiidoku::mono { namespace {
 
 		{
 			// update s.to_og:
-			std::array<mapping_t, T::O2> tied_to_og;
+			std::array<mapping_t, T::O2> tied_to_og; // NOLINT(cppcoreguidelines-pro-type-member-init) see next line
 			for (o2i_t i {0}; i < T::O2; ++i) {
 				tied_to_og[i] = to_og[i/T::O1][i%T::O1];
 			}

@@ -24,9 +24,7 @@
 ## Misc List
 
 - try using clang-tidy
-- find out what cppcheck is
-- find out what tools can be used to enforce enforceable parts of cppcoreguidelines.
-- add sanitizers (address,UB) to cmake debug config.
+- add sanitizers (address,UB) to debug builds.
   - can look at [lefticus weekly game project](https://github.com/lefticus/cpp_weekly_game_project/blob/master/cmake/Sanitizers.cmake) for inspiration.
   - would some bounds-checking assertions become redundant with UB sanitizer?
   - https://docs.microsoft.com/en-us/cpp/sanitizers/asan

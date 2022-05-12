@@ -1,22 +1,33 @@
 ---
 # https://clang.llvm.org/extra/clang-tidy/checks/list.html
 Checks: "
-  boost-*,
   bugprone-*,
-  cert-*,
-  clang-analyzer-*,
   concurrency-*,
-  cppcoreguidelines-*,
-  darwin-*,
-  hicpp-*,
-  misc-*,
-  modernize-*,
-  performance-*,
   portability-*,
   readability-*,
-  -cppcoreguidelines-pro-bounds-constant-array-index,
-  -readability-identifier-length,
-  -modernize-use-trailing-return-type,
-  -cppcoreguidelines-macro-usage
+    -readability-identifier-length,
+  performance-*,
+  modernize-*,
+    -modernize-use-trailing-return-type,
+
+  cppcoreguidelines-*,
+    -cppcoreguidelines-pro-bounds-constant-array-index,
+    -cppcoreguidelines-macro-usage,
+  clang-analyzer-*,
+  cert-*,
+  hicpp-avoid-goto,
+  hicpp-exception-baseclass,
+  hicpp-multiway-paths-covered,
+  hicpp-no-assembler,
+  hicpp-signed-bitwise
+  boost-use-to-string,
+  google-explicit-constructor,
+  google-global-names-in-headers,
+  darwin-*,
+  misc-*,
+    -misc-non-private-member-variables-in-classes,
 "
-#,-misc-non-private-member-variables-in-classes'
+# hicpp is mostly aliases to other rules. I just added specifically all
+# that are not aliases to rules I already include. On a similar note,
+# some of the excluded rules are just alias exclusions so I don't have
+# to write inline ignore-comments for both a rule and its alias.

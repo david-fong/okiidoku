@@ -70,8 +70,8 @@ namespace okiidoku::mono::detail {
 			rel.count = static_cast<typename T::o2i_smol_t>(count);
 			rel.polar_count_lesser = static_cast<typename Rel<O>::polar_count_lesser_t>(std::min(mask.boxes_h.count(), mask.boxes_v.count()));
 
-			std::array<chute_imbalance_t, T::O1> h_chute_imbalance;
-			std::array<chute_imbalance_t, T::O1> v_chute_imbalance;
+			std::array<chute_imbalance_t, T::O1> h_chute_imbalance; // NOLINT(cppcoreguidelines-pro-type-member-init) initialized in following loop
+			std::array<chute_imbalance_t, T::O1> v_chute_imbalance; // NOLINT(cppcoreguidelines-pro-type-member-init) initialized in following loop
 			for (o1i_t chute {0}; chute < T::O1; ++chute) {
 				h_chute_imbalance[chute] = static_cast<chute_imbalance_t>((chute_box_masks<O>::row[chute] & rel_at_mask).count());
 				v_chute_imbalance[chute] = static_cast<chute_imbalance_t>((chute_box_masks<O>::col[chute] & rel_at_mask).count());
