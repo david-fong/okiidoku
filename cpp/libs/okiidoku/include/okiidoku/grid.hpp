@@ -12,7 +12,7 @@
 namespace okiidoku::mono {
 
 	namespace detail {
-		template<Order O, class V> requires(is_order_compiled(O) && !std::is_reference_v<V>) class Gridlike;
+		template<Order O, class V> requires(is_order_compiled(O) && !std::is_reference_v<V>) struct Gridlike;
 	}
 	template<Order O> requires(is_order_compiled(O))
 	using Grid = detail::Gridlike<O, grid_val_t<O>>;
@@ -32,7 +32,7 @@ namespace okiidoku::mono {
 
 	template<Order O, class V_>
 	requires(is_order_compiled(O) && !std::is_reference_v<V_>)
-	class detail::Gridlike final { // TODO.mid should this be exported? currently all function body definitions are inline so it can be used header-only... but anything not header-only needs to be exported for sure!
+	struct detail::Gridlike final { // TODO.mid should this be exported? currently all function body definitions are inline so it can be used header-only... but anything not header-only needs to be exported for sure!
 	public:
 		using val_t = V_;
 		using T = Ints<O>;
@@ -49,35 +49,35 @@ namespace okiidoku::mono {
 		// Note: Making this constexpr results in a 1% speed gain, but 45% program
 		// size increase with GCC. That speed doesn't seem worth it.
 		Gridlike() noexcept requires(std::is_same_v<V_, grid_val_t<O>>) {
-			cells_.fill(T::O2);
+			arr_.fill(T::O2);
 		}
 		Gridlike() noexcept requires(!std::is_same_v<V_, grid_val_t<O>>) = default;
 
-		[[nodiscard]]       array_t& get_underlying_array()       noexcept { return cells_; };
-		[[nodiscard]] const array_t& get_underlying_array() const noexcept { return cells_; };
+		[[nodiscard]]       array_t& get_underlying_array()       noexcept { return arr_; };
+		[[nodiscard]] const array_t& get_underlying_array() const noexcept { return arr_; };
 
 		// contract: rmi is in [0, O4).
 		template<class T_rmi> requires(Any_o4x<O, T_rmi>)
-		[[nodiscard]] constexpr       val_t& at_rmi(const T_rmi rmi)       noexcept { return cells_[rmi]; }
+		[[nodiscard]] constexpr       val_t& at_rmi(const T_rmi rmi)       noexcept { return arr_[rmi]; }
 		template<class T_rmi> requires(Any_o4x<O, T_rmi>)
-		[[nodiscard]] constexpr const val_t& at_rmi(const T_rmi rmi) const noexcept { return cells_[rmi]; }
+		[[nodiscard]] constexpr const val_t& at_rmi(const T_rmi rmi) const noexcept { return arr_[rmi]; }
 
 		// contract: row and col are in [0, O2).
 		template<class T_row, class T_col> requires(Any_o2x<O, T_row> && Any_o2x<O, T_col>)
-		[[nodiscard]] constexpr       val_t& at(const T_row row, const T_col col)       noexcept { return cells_[(T::O2*row)+col]; }
+		[[nodiscard]] constexpr       val_t& at(const T_row row, const T_col col)       noexcept { return arr_[(T::O2*row)+col]; }
 		template<class T_row, class T_col> requires(Any_o2x<O, T_row> && Any_o2x<O, T_col>)
-		[[nodiscard]] constexpr const val_t& at(const T_row row, const T_col col) const noexcept { return cells_[(T::O2*row)+col]; }
+		[[nodiscard]] constexpr const val_t& at(const T_row row, const T_col col) const noexcept { return arr_[(T::O2*row)+col]; }
 
 		// contract: row is in [0, O2).
 		template<class T_row> requires(Any_o2x<O, T_row>)
-		[[nodiscard]] constexpr std::span<      val_t, T::O2> row_span_at(const T_row i)       noexcept { return static_cast<std::span<      val_t, T::O2>>(std::span(cells_).subspan(T::O2*i, T::O2)); }
+		[[nodiscard]] constexpr std::span<      val_t, T::O2> row_span_at(const T_row i)       noexcept { return static_cast<std::span<      val_t, T::O2>>(std::span(arr_).subspan(T::O2*i, T::O2)); }
 		template<class T_row> requires(Any_o2x<O, T_row>)
-		[[nodiscard]] constexpr std::span<const val_t, T::O2> row_span_at(const T_row i) const noexcept { return static_cast<std::span<const val_t, T::O2>>(std::span(cells_).subspan(T::O2*i, T::O2)); }
+		[[nodiscard]] constexpr std::span<const val_t, T::O2> row_span_at(const T_row i) const noexcept { return static_cast<std::span<const val_t, T::O2>>(std::span(arr_).subspan(T::O2*i, T::O2)); }
 
 		// [[nodiscard]] constexpr auto row_spans() noexcept { namespace v = ranges::views; return v::iota(o2i_t{0}, o2i_t{T::O2}) | v::transform([&](auto r){ return row_span_at(r); }); }
 		// [[nodiscard]] constexpr auto row_spans() const noexcept { namespace v = ranges::views; return v::iota(o2i_t{0}, T::O2) | v::transform([&](auto r){ return row_span_at(r); }); }
 	private:
-		array_t cells_;
+		array_t arr_;
 	};
 
 	template<Order O> [[nodiscard, gnu::const]] constexpr typename Ints<O>::o2i_t rmi_to_row(const typename Ints<O>::o4i_t index) noexcept { return static_cast<typename Ints<O>::o2i_t>(index / (Ints<O>::O2)); }
@@ -102,7 +102,7 @@ namespace okiidoku::mono {
 
 namespace okiidoku::visitor {
 
-	class Grid;
+	struct Grid;
 
 	// Returns false if any cells in a same house contain the same value.
 	// Can be used with incomplete grids.
@@ -124,7 +124,7 @@ namespace okiidoku::visitor {
 	// Note: It is not recommended to directly make collections containing
 	// instances of this class.
 	// TODO.mid make collection wrapper template that stores the mono version and returns variant version from accessors.
-	class OKIIDOKU_EXPORT Grid final : public detail::ContainerBase<detail::GridAdaptor> {
+	struct OKIIDOKU_EXPORT Grid final : public detail::ContainerBase<detail::GridAdaptor> {
 	public:
 		using ContainerBase::ContainerBase;
 		using common_val_t = grid_val_t;

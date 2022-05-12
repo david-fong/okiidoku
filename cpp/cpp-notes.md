@@ -6,6 +6,12 @@
 - [pitchfork layout](https://api.csswg.org/bikeshed/?force=1&url=https://raw.githubusercontent.com/vector-of-bool/pitchfork/develop/data/spec.bs)
 - [google cppguide](https://google.github.io/styleguide/cppguide.html)
 
+## Project Style Guide
+
+- Try to follow pitchfork layout conventions
+- Use Stroustrup naming conventions. lower-snake with `_t` suffix for type aliases.
+- Use `struct` for things where the primary purpose is to _store_ things. Use `class` for where the primary purpose is to _do_ things.
+
 ## Snippets
 
 ```sh

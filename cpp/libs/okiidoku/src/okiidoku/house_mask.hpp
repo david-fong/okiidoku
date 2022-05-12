@@ -14,7 +14,8 @@ namespace okiidoku::mono {
 	// Like `bitset` but with only what's needed, and a get index of nth
 	// set bit operation with cool optimization.
 	template<Order O> requires(is_order_compiled(O))
-	class HouseMask final {
+	struct HouseMask final {
+	public:
 		using T = Ints<O>;
 		using o2x_smol_t = typename Ints<O>::o2x_smol_t;
 		using o2x_t = typename Ints<O>::o2x_t;

@@ -71,7 +71,7 @@ namespace okiidoku {
 
 
 		template<MonoToVisitorAdaptor Adaptor>
-		class ContainerBase {
+		struct ContainerBase {
 		public:
 			using variant_t = OrderVariantFor<Adaptor>;
 

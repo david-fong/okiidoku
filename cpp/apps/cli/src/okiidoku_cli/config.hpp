@@ -9,7 +9,7 @@
 
 namespace okiidoku::cli {
 
-	class Config {
+	struct Config {
 	public:
 		[[nodiscard, gnu::pure]] verbosity::E verbosity() const noexcept { return verbosity_; };
 		void verbosity(verbosity::E);

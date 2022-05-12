@@ -20,7 +20,8 @@ namespace okiidoku::util {
 	std::optional<UINT> old_con_output_codepage {std::nullopt};
 	#endif
 
-	struct MyNumPunct final : std::numpunct<char> {
+	class MyNumPunct final : public std::numpunct<char> {
+	protected:
 		std::string do_grouping() const override {
 			return "\03";
 		}

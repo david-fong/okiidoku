@@ -15,19 +15,22 @@ namespace okiidoku::mono {
 	template<Order O, unsigned O1_OR_O2>
 	requires (is_order_compiled(O) && ((O1_OR_O2 == 1) || (O1_OR_O2 == 2)))
 	struct TieLinks final {
-		static constexpr size_t size_ {(O1_OR_O2 == 1) ? Ints<O>::O1 : Ints<O>::O2};
-		using link_t = std::conditional_t<(O1_OR_O2 == 1), typename Ints<O>::o1i_t, typename Ints<O>::o2i_smol_t>;
+		using T = Ints<O>;
+		static constexpr size_t size_ {(O1_OR_O2 == 1) ? T::O1 : T::O2};
+		using link_t = std::conditional_t<(O1_OR_O2 == 1), typename T::o1i_t, typename T::o2i_smol_t>;
 		using links_t = std::array<link_t, size_>;
 
-		// TODO.low (?) https://github.com/isocpp/CppCoreGuidelines/blob/master/CppCoreGuidelines.md#t61-do-not-over-parameterize-members-scary
-		struct Range final {
+		class Range final {
+		public:
 			link_t begin_;
 			link_t end_;
+			Range(const link_t begin, const link_t end) noexcept: begin_{begin}, end_{end} {}
 			[[nodiscard]] link_t size() const noexcept { return end_ - begin_; }
 			auto begin() const noexcept { return ranges::views::iota(begin_, end_).begin(); }
 			auto end()   const noexcept { return ranges::views::iota(begin_, end_).end(); }
 		};
-		struct Iterator final {
+		class Iterator final {
+		public:
 			using iterator_category = std::input_iterator_tag;
 			using difference_type = std::ptrdiff_t;
 			using value_type = Range;
@@ -39,8 +42,8 @@ namespace okiidoku::mono {
 		public:
 			constexpr Iterator(const links_t& links, link_t i = 0): links_(links), i_{i} {}
 
-			Range operator*()  const noexcept { return {i_, links_[i_]}; }
-			Range operator->() const noexcept { return {i_, links_[i_]}; }
+			Range operator*()  const noexcept { return Range{i_, links_[i_]}; }
+			Range operator->() const noexcept { return Range{i_, links_[i_]}; }
 			constexpr Iterator& operator++() noexcept { i_ = links_[i_]; return *this; }  
 			constexpr Iterator operator++(int) noexcept { Iterator tmp = *this; ++(*this); return tmp; }
 			constexpr friend bool operator==(const Iterator& a, const Iterator& b) noexcept { return (&a.links_ == &b.links_) && (a.i_ == b.i_); }
