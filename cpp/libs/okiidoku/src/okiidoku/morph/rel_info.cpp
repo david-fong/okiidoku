@@ -5,7 +5,7 @@
 #include <algorithm> // swap, sort, ranges::next_permutation
 #include <numeric>   // abs
 
-namespace okiidoku::mono::morph {
+namespace okiidoku::mono::detail {
 
 	// Info is placement-independent.
 	// Does not include self-to-self relationship bit for main diagonal entries.
@@ -53,7 +53,7 @@ namespace okiidoku::mono::morph {
 		using rel_at_mask_t = HouseMask<O>;
 		using o1i_t = typename T::o1i_t;
 		using o2i_t = typename T::o2i_t;
-		using chute_imbalance_t = chute_imbalance_t<O>;
+		using chute_imbalance_t = typename Rel<O>::chute_imbalance_t;
 
 		const detail::Gridlike<O, RelMasks<O>> masks {make_rel_masks_<O>(grid_in)};
 		detail::Gridlike<O, Rel<O>> table; // uninitialized!

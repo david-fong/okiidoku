@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.23)
 project(okiidoku
 	VERSION 0.0.1
-	DESCRIPTION "sudoku solution generator, canonicalizer, and db"
+	DESCRIPTION "david fong's variable-grid-size sudoku utilities"
 	HOMEPAGE_URL "https://github.com/david-fong/okiidoku"
 	LANGUAGES CXX
 )

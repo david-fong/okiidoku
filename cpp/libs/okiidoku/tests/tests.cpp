@@ -39,11 +39,11 @@ unsigned test_morph(okiidoku::SharedRng& shared_rng, const unsigned num_rounds) 
 			std::clog << "\ngrid must be initialized to an empty grid";
 		}
 		generate<O>(gen_grid, shared_rng);
-		morph::canonicalize<O>(gen_grid);
+		canonicalize<O>(gen_grid);
 
 		Grid<O> canon_grid {gen_grid};
-		morph::scramble<O>(canon_grid, shared_rng);
-		morph::canonicalize<O>(canon_grid);
+		scramble<O>(canon_grid, shared_rng);
+		canonicalize<O>(canon_grid);
 
 		if (gen_grid != canon_grid) {
 			++count_bad;

@@ -6,6 +6,7 @@ add_library(okiidoku
 	src/okiidoku/gen.cpp
 	src/okiidoku/print_2d.cpp
 	src/okiidoku/serdes.cpp
+	src/okiidoku/archive.cpp
 	src/okiidoku/morph/transform.cpp
 	src/okiidoku/morph/scramble.cpp
 	src/okiidoku/morph/rel_info.cpp
@@ -13,6 +14,7 @@ add_library(okiidoku
 	src/okiidoku/morph/canon_place.cpp
 	src/okiidoku/morph/canon.cpp
 	src/okiidoku/puzzle/solve.cpp
+	src/okiidoku/puzzle/make.cpp
 )
 add_library(okiidoku::okiidoku ALIAS okiidoku)
 set_target_properties(okiidoku PROPERTIES

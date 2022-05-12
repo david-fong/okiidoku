@@ -8,8 +8,8 @@ namespace okiidoku::mono::puzzle {
 	template<Order O> requires(is_order_compiled(O))
 	class OKIIDOKU_NO_EXPORT FastSolver<O>::Impl final {
 	public:
-		explicit Impl(const Grid<O>& puzzle) noexcept;
-		std::optional<Grid<O>> get_next_solution() noexcept;
+		OKIIDOKU_NO_EXPORT explicit Impl(const Grid<O>& puzzle) noexcept;
+		OKIIDOKU_NO_EXPORT std::optional<Grid<O>> get_next_solution() noexcept;
 
 	private:
 		using T = Ints<O>;
@@ -24,7 +24,7 @@ namespace okiidoku::mono::puzzle {
 		cells_cands_ has non-trivial management logic (deductive solving)
 		so backtracking the DFS isn't as simple as unsetting some house-
 		mask bits. */
-		struct GuessStep final {
+		struct OKIIDOKU_NO_EXPORT GuessStep final {
 			cand_syms_grid_t prev_cells_cands;
 			rmi_t curr_guessed_rmi;
 			GuessStep(
@@ -48,25 +48,25 @@ namespace okiidoku::mono::puzzle {
 		bool no_solutions_remaining_ {false};
 
 
-		[[nodiscard]] hit_unsat_t remove_cell_candidate_(rmi_t rmi, val_t cand) noexcept;
-		[[nodiscard]] hit_unsat_t commit_cell_val_(rmi_t rmi, val_t val) noexcept;
+		[[nodiscard]] OKIIDOKU_NO_EXPORT hit_unsat_t remove_cell_candidate_(rmi_t rmi, val_t cand) noexcept;
+		[[nodiscard]] OKIIDOKU_NO_EXPORT hit_unsat_t commit_cell_val_(rmi_t rmi, val_t val) noexcept;
 
 		// solve_cell_requires_symbol_ is trivial with the current representation.
 		// [[nodiscard]] hit_unsat_t solve_cell_requires_symbol_() noexcept; // cell can't have anything else
-		[[nodiscard]] hit_unsat_t solve_symbol_requires_cell_() noexcept; // symbol can't go anywhere else in a house
+		[[nodiscard]] OKIIDOKU_NO_EXPORT hit_unsat_t solve_symbol_requires_cell_() noexcept; // symbol can't go anywhere else in a house
 
-		[[nodiscard]] hit_unsat_t solve_cells_requiring_symbols_() noexcept; // AKA "naked subsets"
-		[[nodiscard]] hit_unsat_t solve_symbols_requiring_cells_() noexcept; // AKA "hidden subsets"
-		[[nodiscard]] hit_unsat_t solve_fish() noexcept;
+		[[nodiscard]] OKIIDOKU_NO_EXPORT hit_unsat_t solve_cells_requiring_symbols_() noexcept; // AKA "naked subsets"
+		[[nodiscard]] OKIIDOKU_NO_EXPORT hit_unsat_t solve_symbols_requiring_cells_() noexcept; // AKA "hidden subsets"
+		[[nodiscard]] OKIIDOKU_NO_EXPORT hit_unsat_t solve_fish_() noexcept;
 
-		[[nodiscard]] hit_unsat_t push_guess_(rmi_t rmi) noexcept;
+		[[nodiscard]] OKIIDOKU_NO_EXPORT hit_unsat_t push_guess_(rmi_t rmi) noexcept;
 
 		/* if the guess stack is not empty, unwinds one entry.
 		since the guess stack is only used when the implemented deductive techniques
 		are insufficient to do any further candidate eliminations, the caller can
 		immediately attempt another guess instead of trying
 		*/
-		void handle_unsat_() noexcept; // either a bad guess, or the puzzle is unsolvable.
+		OKIIDOKU_NO_EXPORT void handle_unsat_() noexcept; // either a bad guess, or the puzzle is unsolvable.
 	};
 
 

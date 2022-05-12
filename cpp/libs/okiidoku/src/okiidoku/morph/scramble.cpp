@@ -4,7 +4,7 @@
 #include <algorithm> // shuffle
 #include <cassert>
 
-namespace okiidoku::mono::morph {
+namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
 	Transformation<O> scramble(Grid<O>& grid, SharedRng& shared_rng) noexcept {
@@ -33,11 +33,11 @@ namespace okiidoku::mono::morph {
 }
 
 
-namespace okiidoku::visitor::morph {
+namespace okiidoku::visitor {
 
 	Transformation scramble(Grid& vis_grid, SharedRng& shared_rng) noexcept {
 		return std::visit([&](auto& mono_grid) {
-			return static_cast<Transformation>(mono::morph::scramble(mono_grid, shared_rng));
+			return static_cast<Transformation>(mono::scramble(mono_grid, shared_rng));
 		}, vis_grid.get_mono_variant());
 	}
 }

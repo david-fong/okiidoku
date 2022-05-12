@@ -6,7 +6,7 @@
 #include <okiidoku/grid.hpp>
 #include <okiidoku/detail/order_templates.hpp>
 
-namespace okiidoku::mono::morph {
+namespace okiidoku::mono {
 
 	// post-condition: before and after states of the grid canonicalize to the same grid.
 	template<Order O> requires(is_order_compiled(O))
@@ -14,7 +14,7 @@ namespace okiidoku::mono::morph {
 }
 
 
-namespace okiidoku::visitor::morph {
+namespace okiidoku::visitor {
 
 	// post-condition: before and after states of the grid canonicalize to the same grid.
 	OKIIDOKU_EXPORT Transformation scramble(Grid&, SharedRng&) noexcept;

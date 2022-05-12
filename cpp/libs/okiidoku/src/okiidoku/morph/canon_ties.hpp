@@ -10,7 +10,7 @@
 #include <array>
 #include <type_traits>
 
-namespace okiidoku::mono::morph {
+namespace okiidoku::mono {
 
 	template<Order O, unsigned O1_OR_O2>
 	requires (is_order_compiled(O) && ((O1_OR_O2 == 1) || (O1_OR_O2 == 2)))

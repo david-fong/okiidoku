@@ -8,7 +8,10 @@
 #include <compare>   // is_eq
 #include <cassert>
 
-namespace okiidoku::mono::morph { namespace {
+namespace okiidoku::mono { namespace {
+
+	using okiidoku::mono::detail::make_rel_table;
+	using okiidoku::mono::detail::Rel;
 
 	template<Order O>
 	using label_map_t = typename Transformation<O>::label_map_t;
@@ -122,9 +125,7 @@ namespace okiidoku::mono::morph { namespace {
 		return label_og_to_canon;
 	}
 }}
-namespace okiidoku::mono::detail::morph {
-
-	using namespace okiidoku::mono::morph;
+namespace okiidoku::mono::detail {
 
 	template<Order O> requires(is_order_compiled(O))
 	label_map_t<O> canon_label(Grid<O>& grid) noexcept {

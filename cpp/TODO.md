@@ -2,13 +2,13 @@
 
 ## Roadmap
 
-- draft database
+- draft archive
   - (and update tests and examples)
 - test CMake config with different compilers (clang, apple-clang) and try to fix configuration issues
 - refactor and improve canonicalization
 - compare backtracking and stochastic search statistics
 - implement grid-serdes translator tool
-- refine database
+- refine archive
 - create a separate github repo for data. add as submodule?
 - deductive reasoning + backtracking solver
   - (add tests and examples)
@@ -32,9 +32,9 @@
   - https://docs.microsoft.com/en-us/cpp/sanitizers/asan
 - find out how to use the [cppcoreguideline checker](https://docs.microsoft.com/en-us/cpp/code-quality/using-the-cpp-core-guidelines-checkers?view=msvc-170)
 
-- consider supporting CMake 3.22 or 3.21. Ubuntu 20.04's apt repos don't seem to have 3.23. The only 3.23 thing I'm using is `FILE_SET` for target headers
+- consider switching from using `std::variant` to just unions for the visitor container wrappers. Rationale: no longer have exceptions from `std::visit`. It will mean lots more macro usage, but I'm pretty far down that path already ':).
 
-- can the users of the library use [ADL](https://en.cppreference.com/w/cpp/language/adl) to skip specifying the okiidoku namespace for functions consuming Grid? Or should ADL be discouraged? If a user creates a function that takes an object defined in my namespace and I add a function with a same signature in my namespace, then it may break any of their code that uses ADL to resolve to their own functions.
+- consider supporting CMake 3.22 or 3.21. Ubuntu 20.04's apt repos don't seem to have 3.23. The only 3.23 thing I'm using is `FILE_SET` for target headers
 
 - see if grid qualities (like being a solution, being a proper puzzle, being a minimal puzzle), can be encoded through the type system and make it so that always-safe conversions (such as ) are easy, but "unsafe" (not always true) have to either go through an `unsafe_cast_X_grid_to_Y_grid` function, or go through a `checked_cast_X_grid_to_Y_grid`, which may have a non-trivial performance penalty.
   - This would allow making many of the current contracts part of the type system; turning-runtime-error-into-compiler-errors-TM. I would no longer need to write such contract and post-condition comments.
@@ -48,8 +48,6 @@
   - interesting: https://github.com/asarium/gdb-natvis
 
 - [it is allowed in c++ to have template functions and non-template functions with the same name. here are the resulting rules](https://stackoverflow.com/a/16865452/11107541). Could this be used to put the algorithm functions under the same namespace (not in separate "mono" and "visitor" namespace)?
-
-- Consider a (multi-threaded) batch api that gives the caller control over the logic for when to stop.
 
 - move the emoji definitions out of the program binary and externalize as a configurable data read in at runtime?
 

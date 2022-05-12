@@ -8,11 +8,10 @@
 #include <limits> // numeric_limits
 #include <cassert>
 
-// TODO.asap try unnamed namespace, examine nm, compare library size
-namespace okiidoku::mono::detail::serdes {
+namespace okiidoku::mono { namespace {
 
 	template<Order O> requires(is_order_compiled(O))
-	class Helper final {
+	class SerdesHelper final {
 		using T = Ints<O>;
 		using cands_t = HouseMask<O>;
 		using val_t = typename T::o2x_t;
@@ -23,7 +22,7 @@ namespace okiidoku::mono::detail::serdes {
 		static_assert((1U<<(2*8*num_buf_bytes)) > (2U*T::O2)); // requirement to handle overflow
 
 	public:
-		Helper() noexcept:
+		SerdesHelper() noexcept:
 			row_cands {house_mask_ones<O>},
 			cell_cands {house_mask_ones<O>}
 		{
@@ -62,7 +61,7 @@ namespace okiidoku::mono::detail::serdes {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	void Helper<O>::advance() noexcept {
+	void SerdesHelper<O>::advance() noexcept {
 		++cell_rmi;
 		if (cell_rmi % T::O2 == 0) [[unlikely]] { row_cands = house_mask_ones<O>; }
 		if (cell_rmi % T::O3 == 0) [[unlikely]] { h_chute_boxes_cands.fill(house_mask_ones<O>); }
@@ -74,7 +73,7 @@ namespace okiidoku::mono::detail::serdes {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	void Helper<O>::print_val(std::ostream& os, const typename Helper<O>::val_t val) noexcept {
+	void SerdesHelper<O>::print_val(std::ostream& os, const typename SerdesHelper<O>::val_t val) noexcept {
 		// The number of possible different values that this cell could be
 		// based on the values that have already been encountered.
 		auto smol_val_buf_remaining {cell_cands.count()};
@@ -107,7 +106,7 @@ namespace okiidoku::mono::detail::serdes {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	void Helper<O>::print_remaining_buf(std::ostream& os) noexcept {
+	void SerdesHelper<O>::print_remaining_buf(std::ostream& os) noexcept {
 		if (buf_pos > 1) {
 			os.put(static_cast<char>(buf));
 		}
@@ -116,7 +115,7 @@ namespace okiidoku::mono::detail::serdes {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	typename Helper<O>::val_t Helper<O>::parse_val(std::istream& is) noexcept {
+	typename SerdesHelper<O>::val_t SerdesHelper<O>::parse_val(std::istream& is) noexcept {
 		// The number of possible different values that this cell could be
 		// based on the values that have already been encountered.
 		auto smol_val_buf_remaining {cell_cands.count()};
@@ -134,21 +133,21 @@ namespace okiidoku::mono::detail::serdes {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	void Helper<O>::remove_cand_at_current_rmi_(const typename Helper<O>::val_t cand) noexcept {
+	void SerdesHelper<O>::remove_cand_at_current_rmi_(const typename SerdesHelper<O>::val_t cand) noexcept {
 		auto& box_cands {h_chute_boxes_cands[cell_rmi / T::O3]};
 		auto& col_cands {cols_cands[cell_rmi / T::O2]};
 		cands_t::unset3(cand, row_cands, box_cands, col_cands);
 	}
-}
-namespace okiidoku::mono::serdes {
+}}
+namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
-	void print_filled(std::ostream& os, const Grid<O>& grid) noexcept {
+	void write_solution_grid_to_stream(const Grid<O>& grid, std::ostream& os) noexcept {
 		assert(grid_is_filled<O>(grid));
 		assert(grid_follows_rule(grid));
 		using T = Ints<O>;
 
-		detail::serdes::Helper<O> helper {};
+		SerdesHelper<O> helper {};
 		for (; helper.get_cell_rmi() < T::O4; helper.advance()) {
 			const auto row {helper.get_cell_rmi() / T::O2};
 			const auto col {helper.get_cell_rmi() % T::O2};
@@ -164,10 +163,10 @@ namespace okiidoku::mono::serdes {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	void parse_filled(std::istream& is, Grid<O>& grid) noexcept {
+	void parse_solution_grid_from_stream(Grid<O>& grid, std::istream& is) noexcept {
 		using T = Ints<O>;
 
-		detail::serdes::Helper<O> helper {};
+		SerdesHelper<O> helper {};
 		for (; helper.get_cell_rmi() < T::O4; helper.advance()) {
 			const auto row {helper.get_cell_rmi() / T::O2};
 			const auto col {helper.get_cell_rmi() % T::O2};
@@ -185,7 +184,7 @@ namespace okiidoku::mono::serdes {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	void print_puzzle(std::ostream& os, const Grid<O>& grid) noexcept {
+	void print_puzzle_grid_to_stream(const Grid<O>& grid, std::ostream& os) noexcept {
 		assert(grid_follows_rule(grid));
 		// using T = Ints<O>;
 		(void)os; (void)grid;
@@ -193,7 +192,7 @@ namespace okiidoku::mono::serdes {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	void parse_puzzle(std::istream& is, Grid<O>& grid) noexcept {
+	void parse_puzzle_grid_from_stream(Grid<O>& grid, std::istream& is) noexcept {
 		// using T = Ints<O>;
 		(void)is; (void)grid;
 
@@ -202,38 +201,38 @@ namespace okiidoku::mono::serdes {
 
 
 	#define OKIIDOKU_FOR_COMPILED_O(O_) \
-		template void print_filled<O_>(std::ostream&, const Grid<O_>&) noexcept; \
-		template void parse_filled<O_>(std::istream&, Grid<O_>&) noexcept; \
-		template void print_puzzle<O_>(std::ostream&, const Grid<O_>&) noexcept; \
-		template void parse_puzzle<O_>(std::istream&, Grid<O_>&) noexcept;
+		template void write_solution_grid_to_stream  <O_>(const Grid<O_>&, std::ostream&) noexcept; \
+		template void parse_solution_grid_from_stream<O_>(      Grid<O_>&, std::istream&) noexcept; \
+		template void print_puzzle_grid_to_stream    <O_>(const Grid<O_>&, std::ostream&) noexcept; \
+		template void parse_puzzle_grid_from_stream  <O_>(      Grid<O_>&, std::istream&) noexcept;
 	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 	#undef OKIIDOKU_FOR_COMPILED_O
 }
 
 
-namespace okiidoku::visitor::serdes {
+namespace okiidoku::visitor {
 
-	void print_filled(std::ostream& os, const Grid& vis_src) noexcept {
+	void write_solution_grid_to_stream(const Grid& vis_src, std::ostream& os) noexcept {
 		return std::visit([&](auto& mono_src) {
-			return mono::serdes::print_filled(os, mono_src);
+			return mono::write_solution_grid_to_stream(mono_src, os);
 		}, vis_src.get_mono_variant());
 	}
 
-	void parse_filled(std::istream& is, Grid& vis_sink) noexcept {
+	void parse_solution_grid_from_stream(Grid& vis_sink, std::istream& is) noexcept {
 		return std::visit([&](auto& mono_sink) {
-			return mono::serdes::parse_filled(is, mono_sink);
+			return mono::parse_solution_grid_from_stream(mono_sink, is);
 		}, vis_sink.get_mono_variant());
 	}
 
-	void print_puzzle(std::ostream& os, const Grid& vis_src) noexcept {
+	void print_puzzle_grid_to_stream(const Grid& vis_src, std::ostream& os) noexcept {
 		return std::visit([&](auto& mono_src) {
-			return mono::serdes::print_puzzle(os, mono_src);
+			return mono::print_puzzle_grid_to_stream(mono_src, os);
 		}, vis_src.get_mono_variant());
 	}
 
-	void parse_puzzle(std::istream& is, Grid& vis_sink) noexcept {
+	void parse_puzzle_grid_from_stream(Grid& vis_sink, std::istream& is) noexcept {
 		return std::visit([&](auto& mono_sink) {
-			return mono::serdes::parse_puzzle(is, mono_sink);
+			return mono::parse_puzzle_grid_from_stream(mono_sink, is);
 		}, vis_sink.get_mono_variant());
 	}
 }

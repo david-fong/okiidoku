@@ -97,7 +97,7 @@ namespace okiidoku::cli {
 		const double processor_time {(static_cast<double>(std::clock() - clock_start)) / CLOCKS_PER_SEC};
 		{
 			if (config_.canonicalize()) {
-				morph::canonicalize(grid); // should we make a copy and print as a second grid image?
+				canonicalize(grid); // should we make a copy and print as a second grid image?
 			}
 			const auto palette_ {std::to_array<print_2d_grid_view>({
 				[&](auto rmi){ return grid.at_rmi(rmi); },
@@ -119,7 +119,7 @@ namespace okiidoku::cli {
 			std::string file_path {std::string{} + "gen/" + std::to_string(config_.order()) + ".bin"};
 			std::cout << "output file path: " << file_path << std::endl;
 			std::ofstream of(file_path, std::ios::binary|std::ios::ate);
-			// TODO.high change this to use the db operations.
+			// TODO.high change this to use the archiving operations.
 			// try {
 			// 	of.exceptions()
 			// } catch (const std::ios_base::failure& fail) {
@@ -129,9 +129,9 @@ namespace okiidoku::cli {
 				Grid grid(config_.order());
 				generate(grid, shared_rng_);
 				if (config_.canonicalize()) {
-					morph::canonicalize(grid);
+					canonicalize(grid);
 				}
-				// serdes::print_filled(of, grid); // TODO.high this is currently crashing with floating point error :/
+				// write_solution_grid_to_stream(grid, of); // TODO.high this is currently crashing with floating point error :/
 				// TODO.mid print a progress bar
 			}
 		}

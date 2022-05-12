@@ -5,7 +5,7 @@
 #include <okiidoku/grid.hpp>
 #include <okiidoku/detail/order_templates.hpp>
 
-namespace okiidoku::mono::morph {
+namespace okiidoku::mono {
 
 	// contract: the span is a _complete_, valid grid.
 	// If you want to canonicalize a puzzle, first solve it, then canonicalize
@@ -15,7 +15,7 @@ namespace okiidoku::mono::morph {
 }
 
 
-namespace okiidoku::visitor::morph {
+namespace okiidoku::visitor {
 
 	// contract: the span is a _complete_, valid grid.
 	// If you want to canonicalize a puzzle, first solve it, then canonicalize

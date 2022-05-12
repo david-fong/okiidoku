@@ -12,8 +12,13 @@
 #include <random>    // random_device,
 #include <array>
 
+// Strong recommendation: do NOT do `using namespace okiidoku;` anywhere.
+// Strong recommendation: do NOT use C++'s ADL mechanism to call non-operator
+// functions defined in the okiidoku namespace in an unqualified manner.
+// You will probably not have a good time if you do any of those things.
+
 // "copy" names under `okiidoku::mono` to okiidoku:
-// it is recommended to not do this in header files (only in .cpp files)
+// Recommendation: do NOT do this in header files (only in .cpp files)
 namespace okiidoku { using namespace okiidoku::mono; }
 
 int main([[maybe_unused]] const int argc, [[maybe_unused]] char const *const argv[]) {
@@ -28,12 +33,12 @@ int main([[maybe_unused]] const int argc, [[maybe_unused]] char const *const arg
 	oki::generate(gen_grid, shared_rng);
 	oki::Grid<O> puz_grid;
 	// TODO.wait oki::puzzle::make_hard(gen_grid, puz_of_gen_grid);
-	auto canon_transform_for_gen_grid {oki::morph::canonicalize(gen_grid)};
+	auto canon_transform_for_gen_grid {oki::canonicalize(gen_grid)};
 	canon_transform_for_gen_grid.apply_in_place(puz_grid);
 
 	oki::Grid<O> canon_grid {gen_grid};
-	oki::morph::scramble(canon_grid, shared_rng);
-	oki::morph::canonicalize(canon_grid);
+	oki::scramble(canon_grid, shared_rng);
+	oki::canonicalize(canon_grid);
 
 	if (gen_grid != canon_grid) {
 		// TODO.wait update this example comment when canonicalize works

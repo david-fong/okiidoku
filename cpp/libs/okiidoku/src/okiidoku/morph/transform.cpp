@@ -2,7 +2,7 @@
 
 #include <algorithm> // copy
 
-namespace okiidoku::mono::morph {
+namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
 	void Transformation<O>::apply_from_to(const Grid<O>& src_grid, Grid<O>& dest_grid) const noexcept {
@@ -50,7 +50,7 @@ namespace okiidoku::mono::morph {
 }
 
 
-namespace okiidoku::visitor::morph {
+namespace okiidoku::visitor {
 
 	void Transformation::apply_from_to(const Grid& vis_src, Grid& vis_dest) const noexcept {
 		if (this->get_mono_order() != vis_src.get_mono_order()) {

@@ -1,4 +1,4 @@
-# Brainstorming Database Ideas
+# Brainstorming Archiving Ideas
 
 ## For Full Grids
 
@@ -7,9 +7,9 @@
 - Persistently store every single grid generated.
 - No duplicate entries (conversion of grids to some canonical form will be helpful for this)
 - Store grids in a highly compressed form that can have an efficient serdes implementation.
-- Allow quickly checking if a grid that is _not_ stored in the DB is equivalent to one that _is_ stored in the DB.
-  - TODO actually I'm not sure if I still want this. It would be useful if I've generated enough grids to the point that on average I begin generating ones that I've already found, but I'm not sure how likely/when I'll get to that point. Otherwise, when I merge, I can just skip entries that are duplicate with the last-pushed entry to the merged DB.
-- I want to be able to merge databases efficiently, and if the databases have similar entry ordering requirements (ex. canonical lexicographical, label favouritism), to have the merge result also follow that ordering requirement.
+- Allow quickly checking if a grid that is _not_ stored in the ARCHIVE is equivalent to one that _is_ stored in the ARCHIVE.
+  - TODO actually I'm not sure if I still want this. It would be useful if I've generated enough grids to the point that on average I begin generating ones that I've already found, but I'm not sure how likely/when I'll get to that point. Otherwise, when I merge, I can just skip entries that are duplicate with the last-pushed entry to the merged ARCHIVE.
+- I want to be able to merge archives efficiently, and if the archives have similar entry ordering requirements (ex. canonical lexicographical, label favouritism), to have the merge result also follow that ordering requirement.
 
 ### Non-Goals
 
@@ -27,7 +27,7 @@ Optimize for space, but also keep it reasonably fast and simple to do the serdes
 
 For full grids, the boxes along the main diagonal can be removed and are easy to restore.
 
-In order to be able to quickly check if a generated grid is already in the DB by binary search, a comparison function needs to either be defined for grids in serialized or deserialized form. If defined on the deserialized form, the binary search would need to operate on deserialized entries, which would be inefficient unless the whole DB needs to be deserialized into main memory for some other requirement (and currently there is no such requirement). Defining the comparison function serialized/compressed grids feels weird, but here there's actually a good contextual reason for it.
+In order to be able to quickly check if a generated grid is already in the ARCHIVE by binary search, a comparison function needs to either be defined for grids in serialized or deserialized form. If defined on the deserialized form, the binary search would need to operate on deserialized entries, which would be inefficient unless the whole ARCHIVE needs to be deserialized into main memory for some other requirement (and currently there is no such requirement). Defining the comparison function serialized/compressed grids feels weird, but here there's actually a good contextual reason for it.
 
 ### Fixed-Size by Worst-Case Compression Experiments
 
@@ -35,7 +35,7 @@ In order to be able to quickly check if a generated grid is already in the DB by
 
 More improvement can actually be made by looking at intersections between houses and the "worst-case". If serdes traverses entries in row-major order, for some cell C at (row, col), in the "worst case" (where already seen parts of C's houses have maximum similarity), the number of candidates for C is reduced to the minimum of the number of candidates for each house based on the number of already serialized/deserialized cells in that house (O4 - num-cells-already-visited-in-house). For each order, a table can be precomputed of how many candidates remain for that cell, or it can be generated on the fly each time.
 
-I did some experiments for different traversal paths to compare them in terms of _space_. The script can be found [here](./db_paths_experiment.js). Out of the paths I tried, doing row major with blocks on the non-main diagonal removed was always the second best option by a close margin- the best being fairly more difficult to implement.
+I did some experiments for different traversal paths to compare them in terms of _space_. The script can be found [here](./solution_serdes_paths_experiment.js). Out of the paths I tried, doing row major with blocks on the non-main diagonal removed was always the second best option by a close margin- the best being fairly more difficult to implement.
 
 ### Non-Fixed-Size Entries for More Compression
 
@@ -43,9 +43,9 @@ All the experiments above use worst-case values for candidate counts. This autom
 
 Further compression can be gained by using the actual number of possible candidates remaining for a cell based on the actual values of same-house cells already processed during serialization. I'm not sure how much could be gained from this on average.
 
-Doing so would mean entries don't all have the same number of bits as each other, and so the DB would have to include link-to-next-entry information for each entry. The links could be absolute or relative. For absolute, the bit cost of this is proportional to the number of unique grids for a grid size and the average number of bits required to store a serialized grid, but the computational effort to generate higher order grids could also be taken into consideration to make an argument for link info with bit-cost invariant with respect to grid size. For relative links, the bit cost is at most the bit cost of storing the the value of the number of worst-case bytes taken by an entry.
+Doing so would mean entries don't all have the same number of bits as each other, and so the ARCHIVE would have to include link-to-next-entry information for each entry. The links could be absolute or relative. For absolute, the bit cost of this is proportional to the number of unique grids for a grid size and the average number of bits required to store a serialized grid, but the computational effort to generate higher order grids could also be taken into consideration to make an argument for link info with bit-cost invariant with respect to grid size. For relative links, the bit cost is at most the bit cost of storing the the value of the number of worst-case bytes taken by an entry.
 
-If absolute links are used, storing the link map like a "table of contents" separate from and before the actual grid contents of the DB would be helpful for doing the binary search. If each link were instead stored next to their corresponding entry, binary search would first require scanning the DB to extract the links to contiguous main memory. If relative links are used, the table of contents still needs to be translated to an absolute form, so it isn't critical whether the links are stored as a separate ToC, or interleaved with each entry, though the ToC means less file scanning when constructing the absolute links into main memory for processing.
+If absolute links are used, storing the link map like a "table of contents" separate from and before the actual grid contents of the ARCHIVE would be helpful for doing the binary search. If each link were instead stored next to their corresponding entry, binary search would first require scanning the ARCHIVE to extract the links to contiguous main memory. If relative links are used, the table of contents still needs to be translated to an absolute form, so it isn't critical whether the links are stored as a separate ToC, or interleaved with each entry, though the ToC means less file scanning when constructing the absolute links into main memory for processing.
 
 For this approach to be worth to be worthwhile in terms of _persisted storage space used_, the average number of bytes saved compared to the worst case must be equal to or greater than the number of bytes to store an entry's link (relative links for orders below 6 only consume one byte; 2 bytes for orders up to 17, etc.). Hopefully that's true.
 TODO.try test out the above.

@@ -5,7 +5,7 @@
 #include <okiidoku/detail/order_templates.hpp>
 #include <okiidoku/detail/export.h>
 
-namespace okiidoku::mono::morph {
+namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
 	struct OKIIDOKU_EXPORT Transformation final {
@@ -39,16 +39,16 @@ namespace okiidoku::mono::morph {
 }
 
 
-namespace okiidoku::visitor::detail::morph {
+namespace okiidoku::visitor::detail {
 	struct TransformationAdaptor final {
 		static constexpr bool is_ref = false;
 		template<Order O>
-		using type = mono::morph::Transformation<O>;
+		using type = okiidoku::mono::Transformation<O>;
 	};
 }
-namespace okiidoku::visitor::morph {
+namespace okiidoku::visitor {
 
-	struct OKIIDOKU_EXPORT Transformation final : public detail::ContainerBase<detail::morph::TransformationAdaptor> {
+	struct OKIIDOKU_EXPORT Transformation final : public detail::ContainerBase<detail::TransformationAdaptor> {
 		using ContainerBase::ContainerBase;
 
 		[[nodiscard]] bool operator==(const Transformation&) const noexcept = default;

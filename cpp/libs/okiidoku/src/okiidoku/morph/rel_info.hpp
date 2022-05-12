@@ -6,19 +6,17 @@
 
 #include <compare> // strong_ordering, is_eq, etc.
 
-namespace okiidoku::mono::morph {
-
-	template<Order O>
-	using chute_imbalance_t = detail::uint_smolN_t<std::bit_width(2*(O/2)*(O-(O/2)))>;
+namespace okiidoku::mono::detail {
 
 	template<Order O> requires(is_order_compiled(O))
-	struct OKIIDOKU_EXPORT Rel final {
+	struct Rel final {
 		using polar_count_lesser_t = detail::uint_smolN_t<std::bit_width((O*O)/2)>;
+		using chute_imbalance_t = detail::uint_smolN_t<std::bit_width(2*(O/2)*(O-(O/2)))>;
 
 		typename Ints<O>::o2i_smol_t count;
 		polar_count_lesser_t polar_count_lesser; // smaller value means more imbalance
-		chute_imbalance_t<O> chute_imbalance_a;
-		chute_imbalance_t<O> chute_imbalance_b;
+		chute_imbalance_t chute_imbalance_a;
+		chute_imbalance_t chute_imbalance_b;
 
 		[[nodiscard]] std::strong_ordering operator<=>(const Rel<O>& that) const noexcept {
 			// TODO.mid could maybe use std::tie here https://en.cppreference.com/w/cpp/utility/tuple/tie
@@ -35,6 +33,6 @@ namespace okiidoku::mono::morph {
 
 	// contract: the span is a _complete_, valid grid.
 	template<Order O> requires(is_order_compiled(O))
-	[[nodiscard]] OKIIDOKU_EXPORT detail::Gridlike<O, Rel<O>> make_rel_table(const Grid<O>&) noexcept;
+	[[nodiscard]] detail::Gridlike<O, Rel<O>> make_rel_table(const Grid<O>&) noexcept;
 }
 #endif

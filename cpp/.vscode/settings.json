@@ -9,6 +9,7 @@
 	"C_Cpp.default.browse.limitSymbolsToIncludedHeaders": true,
 
 	// https://vector-of-bool.github.io/docs/vscode-cmake-tools/settings.html
+	// TODO.try will this have conflicts for mingw-64?
 	"cmake.buildDirectory": "${workspaceFolder}/build/${buildKitVendor}/${buildType}",
 	"cmake.configureOnOpen": true,
 

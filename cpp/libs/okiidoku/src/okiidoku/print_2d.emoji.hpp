@@ -1,5 +1,5 @@
-#ifndef HPP_OKIIDOKU__DETAIL__EMOJI
-#define HPP_OKIIDOKU__DETAIL__EMOJI
+#ifndef HPP_OKIIDOKU__PRINT_2D__EMOJI
+#define HPP_OKIIDOKU__PRINT_2D__EMOJI
 
 #include <okiidoku/detail/export.h>
 
