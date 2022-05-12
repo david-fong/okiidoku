@@ -1,2 +1,0 @@
-- mono (as in "monomorphic"). Template definitions of containers and algorithms.
-- visitor. `std::variant` wrappers around the monomorphic templates.

@@ -9,7 +9,7 @@
 ## Project Style Guide
 
 - Try to follow pitchfork layout conventions
-- Use Stroustrup naming conventions. lower-snake with `_t` suffix for type aliases.
+- Use Stroustrup naming conventions. In general, use lower-snake with `_t` suffix for type aliases.
 - Use `struct` for things where the primary purpose is to _store_ things. Use `class` for where the primary purpose is to _do_ things.
 
 ## Snippets

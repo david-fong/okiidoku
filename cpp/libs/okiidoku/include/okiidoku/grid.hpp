@@ -70,12 +70,12 @@ namespace okiidoku::mono {
 
 		// contract: row is in [0, O2).
 		template<class T_row> requires(Any_o2x<O, T_row>)
-		[[nodiscard]] constexpr std::span<      val_t, T::O2> row_span_at(const T_row i)       noexcept { return static_cast<std::span<      val_t, T::O2>>(std::span(arr_).subspan(T::O2*i, T::O2)); }
+		[[nodiscard]] std::span<      val_t, T::O2> row_span_at(const T_row i)       noexcept { return static_cast<std::span<      val_t, T::O2>>(std::span(arr_).subspan(T::O2*i, T::O2)); }
 		template<class T_row> requires(Any_o2x<O, T_row>)
-		[[nodiscard]] constexpr std::span<const val_t, T::O2> row_span_at(const T_row i) const noexcept { return static_cast<std::span<const val_t, T::O2>>(std::span(arr_).subspan(T::O2*i, T::O2)); }
+		[[nodiscard]] std::span<const val_t, T::O2> row_span_at(const T_row i) const noexcept { return static_cast<std::span<const val_t, T::O2>>(std::span(arr_).subspan(T::O2*i, T::O2)); }
 
-		// [[nodiscard]] constexpr auto row_spans() noexcept { namespace v = ranges::views; return v::iota(o2i_t{0}, o2i_t{T::O2}) | v::transform([&](auto r){ return row_span_at(r); }); }
-		// [[nodiscard]] constexpr auto row_spans() const noexcept { namespace v = ranges::views; return v::iota(o2i_t{0}, T::O2) | v::transform([&](auto r){ return row_span_at(r); }); }
+		// [[nodiscard]] auto row_spans() noexcept { namespace v = ranges::views; return v::iota(o2i_t{0}, o2i_t{T::O2}) | v::transform([&](auto r){ return row_span_at(r); }); }
+		// [[nodiscard]] auto row_spans() const noexcept { namespace v = ranges::views; return v::iota(o2i_t{0}, T::O2) | v::transform([&](auto r){ return row_span_at(r); }); }
 	private:
 		array_t arr_;
 	};
@@ -115,7 +115,7 @@ namespace okiidoku::visitor {
 
 	namespace detail {
 		struct GridAdaptor final {
-			static constexpr bool is_ref = false;
+			static constexpr bool is_borrowtype = false;
 			template<Order O>
 			using type = mono::Grid<O>;
 		};

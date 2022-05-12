@@ -8,6 +8,7 @@ if(NOT ${CLANG_TIDY_EXE} STREQUAL "CLANG_TIDY_EXE-NOTFOUND")
 	# TODO.mid sort out the warnings
 endif()
 
+
 find_program(
 	CPPCHECK_EXE
 	NAMES "cppcheck"

@@ -33,6 +33,8 @@
 		"minlexing",
 		"MSVC",
 		"NOLINT",
+		"NOLINTBEGIN",
+		"NOLINTEND",
 		"ōkiidoku",
 		"opcount",
 		"pimpl",

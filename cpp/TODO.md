@@ -23,14 +23,14 @@
 
 ## Misc List
 
+- delete the repl's verbosity config setting. It's not used anymore.
+
 - try using clang-tidy
 - add sanitizers (address,UB) to debug builds.
   - can look at [lefticus weekly game project](https://github.com/lefticus/cpp_weekly_game_project/blob/master/cmake/Sanitizers.cmake) for inspiration.
   - would some bounds-checking assertions become redundant with UB sanitizer?
   - https://docs.microsoft.com/en-us/cpp/sanitizers/asan
 - find out how to use the [cppcoreguideline checker](https://docs.microsoft.com/en-us/cpp/code-quality/using-the-cpp-core-guidelines-checkers?view=msvc-170)
-
-- consider switching from using `std::variant` to just unions for the visitor container wrappers. Rationale: no longer have exceptions from `std::visit`. It will mean lots more macro usage, but I'm pretty far down that path already ':).
 
 - consider supporting CMake 3.22 or 3.21. Ubuntu 20.04's apt repos don't seem to have 3.23. The only 3.23 thing I'm using is `FILE_SET` for target headers
 

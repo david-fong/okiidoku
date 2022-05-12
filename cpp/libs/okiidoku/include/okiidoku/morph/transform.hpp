@@ -27,8 +27,8 @@ namespace okiidoku::mono {
 		line_map_t col_map {identity_col_map};
 		bool post_transpose {identity_post_transpose};
 
-		friend constexpr bool operator==(const Transformation&, const Transformation&) = default;
-		friend constexpr std::strong_ordering operator<=>(const Transformation&, const Transformation&) = default;
+		friend bool operator==(const Transformation&, const Transformation&) noexcept = default;
+		// friend std::strong_ordering operator<=>(const Transformation&, const Transformation&) noexcept = default;
 
 		void apply_from_to(const Grid<O>& src, Grid<O>& dest) const noexcept;
 
@@ -41,7 +41,7 @@ namespace okiidoku::mono {
 
 namespace okiidoku::visitor::detail {
 	struct TransformationAdaptor final {
-		static constexpr bool is_ref = false;
+		static constexpr bool is_borrowtype = false;
 		template<Order O>
 		using type = okiidoku::mono::Transformation<O>;
 	};

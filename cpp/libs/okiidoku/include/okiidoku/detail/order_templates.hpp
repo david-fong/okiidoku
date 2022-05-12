@@ -49,7 +49,7 @@ namespace okiidoku {
 		// template parameters other than just the order.
 		template<typename T>
 		concept MonoToVisitorAdaptor = requires() {
-			std::is_same_v<decltype(T::is_ref), bool>;
+			std::is_same_v<decltype(T::is_borrowtype), bool>;
 			#define OKIIDOKU_FOR_COMPILED_O(O_) typename T::template type<O_>;
 			OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 			#undef OKIIDOKU_FOR_COMPILED_O
@@ -75,8 +75,8 @@ namespace okiidoku {
 		public:
 			using variant_t = OrderVariantFor<Adaptor>;
 
-			// delete the default constructor if Adaptor::is_ref is true.
-			ContainerBase() requires(Adaptor::is_ref) = delete;
+			// delete the default constructor if Adaptor::is_borrowtype is true.
+			ContainerBase() requires(Adaptor::is_borrowtype) = delete;
 
 			// copy-from-mono constructor
 			template<Order O>
@@ -84,19 +84,24 @@ namespace okiidoku {
 
 			// default-for-order constructor.
 			// If the provided order is not compiled, defaults to the lowest compiled order.
-			// TODO.low this will only work for zero-argument constructors. so far that's fine.
-			explicit ContainerBase(const Order O) noexcept requires(!Adaptor::is_ref): variant_([O]{
+			explicit ContainerBase(const Order O) noexcept requires(
+				!Adaptor::is_borrowtype
+				#define OKIIDOKU_FOR_COMPILED_O(O_) \
+				&& std::is_nothrow_default_constructible_v<typename Adaptor::template type<O_>>
+				OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
+				#undef OKIIDOKU_FOR_COMPILED_O
+			): variant_([O]{
 				switch (O) {
 				#define OKIIDOKU_FOR_COMPILED_O(O_) \
-				case O_: return variant_t(typename Adaptor::template type<O_>());
+				case O_: return variant_t(std::in_place_type<typename Adaptor::template type<O_>>);
 				OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 				#undef OKIIDOKU_FOR_COMPILED_O
 				default: return variant_t(); // default to the lowest compiled order.
 				}
 			}()) {}
 
-			ContainerBase(const variant_t& variant) noexcept: variant_(variant) {}
-			ContainerBase(variant_t&& variant) noexcept: variant_(std::forward<variant_t>(variant)) {}
+			// ContainerBase(const variant_t& variant) noexcept: variant_(variant) {}
+			// ContainerBase(variant_t&& variant) noexcept: variant_(std::forward<variant_t>(variant)) {}
 
 			friend constexpr bool operator==(const ContainerBase&, const ContainerBase&) noexcept = default;
 
@@ -108,11 +113,10 @@ namespace okiidoku {
 			[[nodiscard, gnu::pure]]       variant_t& get_mono_variant()       noexcept { return variant_; }
 			[[nodiscard, gnu::pure]] const variant_t& get_mono_variant() const noexcept { return variant_; }
 
-			// TODO.try marking noexcept to make it abort upon exception? is there any benefit to this?
-			// Sugar wrapper around `std::get` for the underlying variant.
-			// Remember- `std::get` will throw if the requested type is not currently held by the variant.
-			template<Order O> [[nodiscard, gnu::pure]]       typename Adaptor::template type<O>& get_mono_exact()       { return std::get<typename Adaptor::template type<O>>(variant_); }
-			template<Order O> [[nodiscard, gnu::pure]] const typename Adaptor::template type<O>& get_mono_exact() const { return std::get<typename Adaptor::template type<O>>(variant_); }
+			// Sugar wrapper around an unchecked dereference of `std::get_if` for the underlying variant.
+			// Note: not using `std::get` since it could throw and we're going all in with the unchecked thing here.
+			template<Order O> [[nodiscard, gnu::pure]]       typename Adaptor::template type<O>& unchecked_get_mono_exact()       noexcept { return *std::get_if<typename Adaptor::template type<O>>(&variant_); }
+			template<Order O> [[nodiscard, gnu::pure]] const typename Adaptor::template type<O>& unchecked_get_mono_exact() const noexcept { return *std::get_if<typename Adaptor::template type<O>>(&variant_); }
 		private:
 			variant_t variant_;
 		};
@@ -127,7 +131,7 @@ namespace okiidoku {
 			}
 			switch (vis_a.get_mono_order()) {
 			#define OKIIDOKU_FOR_COMPILED_O(O_) \
-			case O_: return vis_a.template get_mono_exact<O_>() <=> vis_b.template get_mono_exact<O_>();
+			case O_: return vis_a.template unchecked_get_mono_exact<O_>() <=> vis_b.template unchecked_get_mono_exact<O_>();
 			OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 			#undef OKIIDOKU_FOR_COMPILED_O
 			// TODO.wait std::unreachable

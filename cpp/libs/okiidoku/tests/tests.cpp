@@ -29,21 +29,22 @@ unsigned test_morph(okiidoku::SharedRng& shared_rng, const unsigned num_rounds) 
 	// Note: if gen_path gets un-deprecated, assert that paths are valid.
 
 	unsigned int count_bad {0};
+	Grid<O> gen_grid;
+	if (!(grid_is_filled(gen_grid) && std::all_of(
+		gen_grid.get_underlying_array().cbegin(),
+		gen_grid.get_underlying_array().cend(),
+		[](const auto val){ return val == T::O2; }
+	))) {
+		std::clog << "\ngrid must be initialized to an empty grid";
+	}
+	Grid<O> canon_grid;
 	for (unsigned round {0}; round < num_rounds; ) {
-		Grid<O> gen_grid;
-		if (!(grid_is_filled(gen_grid) && std::all_of(
-			gen_grid.get_underlying_array().cbegin(),
-			gen_grid.get_underlying_array().cend(),
-			[](const auto val){ return val == T::O2; }
-		))) {
-			std::clog << "\ngrid must be initialized to an empty grid";
-		}
-		generate<O>(gen_grid, shared_rng);
-		canonicalize<O>(gen_grid);
+		generate(gen_grid, shared_rng);
+		canonicalize(gen_grid);
 
-		Grid<O> canon_grid {gen_grid};
-		scramble<O>(canon_grid, shared_rng);
-		canonicalize<O>(canon_grid);
+		canon_grid = gen_grid;
+		scramble(canon_grid, shared_rng);
+		canonicalize(canon_grid);
 
 		if (gen_grid != canon_grid) {
 			++count_bad;
@@ -78,6 +79,7 @@ int main(const int argc, char const *const argv[]) {
 	okiidoku::util::setup_console();
 
 	// TODO.mid design a way to extract this duplicate code (see cli.main.cpp) to utilities
+	// NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic,*-avoid-c-arrays)
 	const auto srand_key {[&]() -> std::uint_fast64_t {
 		if (argc > 1) {
 			const std::string_view arg {argv[1]};
@@ -90,6 +92,7 @@ int main(const int argc, char const *const argv[]) {
 		return std::random_device()();
 	}()};
 	const unsigned int num_rounds {(argc > 2) ? static_cast<unsigned>(std::stoi(argv[2])) : 1000U};
+	// NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic,*-avoid-c-arrays)
 
 	std::cout << "\nparsed arguments:"
 	<< "\n- arg 1 (srand key)  : " << std::hex << srand_key
@@ -99,18 +102,10 @@ int main(const int argc, char const *const argv[]) {
 	okiidoku::SharedRng shared_rng;
 	shared_rng.rng.seed(srand_key);
 
-	if (test_morph<3>(shared_rng, num_rounds) != 0) {
-		return 1;
-	}
-	if (test_morph<4>(shared_rng, num_rounds) != 0) {
-		// return 1;
-	}
-	if (test_morph<5>(shared_rng, num_rounds) != 0) {
-		// return 1;
-	}
-	if (test_morph<10>(shared_rng, num_rounds) != 0) {
-		// return 1;
-	}
+	#define OKIIDOKU_FOR_COMPILED_O(O_) \
+	if (test_morph<O_>(shared_rng, num_rounds) != 0) { return 1; }
+	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
+	#undef OKIIDOKU_FOR_COMPILED_O
 
 	return 0;
 }

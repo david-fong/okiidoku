@@ -66,8 +66,8 @@ namespace okiidoku::visitor {
 		220kB. Not a big difference, but we might as well. */
 		switch (this->get_mono_order()) {
 		#define OKIIDOKU_FOR_COMPILED_O(O_) \
-		case O_: return this->get_mono_exact<O_>().apply_from_to( \
-			vis_src.get_mono_exact<O_>(), vis_dest.get_mono_exact<O_>() \
+		case O_: return this->unchecked_get_mono_exact<O_>().apply_from_to( \
+			vis_src.unchecked_get_mono_exact<O_>(), vis_dest.unchecked_get_mono_exact<O_>() \
 		);
 		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 		#undef OKIIDOKU_FOR_COMPILED_O
@@ -81,8 +81,8 @@ namespace okiidoku::visitor {
 		}
 		switch (this->get_mono_order()) {
 		#define OKIIDOKU_FOR_COMPILED_O(O_) \
-		case O_: return this->get_mono_exact<O_>().apply_in_place( \
-			vis_grid.get_mono_exact<O_>() \
+		case O_: return this->unchecked_get_mono_exact<O_>().apply_in_place( \
+			vis_grid.unchecked_get_mono_exact<O_>() \
 		);
 		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 		#undef OKIIDOKU_FOR_COMPILED_O

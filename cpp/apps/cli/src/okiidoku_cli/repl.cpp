@@ -36,7 +36,7 @@ namespace okiidoku::cli {
 		<< std::endl;
 
 		while (true) {
-			std::cout << "\n[" << config_.order() << "]: ";
+			std::cout << "\n[" << std::dec << config_.order() << "]: ";
 			std::string command;
 			std::getline(std::cin, command);
 			if (!std::cin) {
@@ -124,8 +124,8 @@ namespace okiidoku::cli {
 			// } catch (const std::ios_base::failure& fail) {
 			// 	std::cout << str::red.on << fail.what() << str::red.off << std::endl;
 			// }
+			Grid grid(config_.order());
 			for (unsigned long long prog {0}; prog < how_many; ++prog) {
-				Grid grid(config_.order());
 				generate(grid, shared_rng_);
 				if (config_.canonicalize()) {
 					canonicalize(grid);
@@ -136,7 +136,7 @@ namespace okiidoku::cli {
 		}
 		const auto elapsed {timer.read_elapsed()};
 
-		std::cout << std::setprecision(4)
+		std::cout << std::setprecision(4) << std::dec
 			<< "\nhow_many:            " << how_many
 			// << "\nnum threads:        " << params.num_threads
 			<< "\nprocess time (s):    " << elapsed.proc_seconds

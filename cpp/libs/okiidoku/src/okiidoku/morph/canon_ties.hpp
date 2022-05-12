@@ -29,6 +29,7 @@ namespace okiidoku::mono {
 			auto begin() const noexcept { return ranges::views::iota(begin_, end_).begin(); }
 			auto end()   const noexcept { return ranges::views::iota(begin_, end_).end(); }
 		};
+
 		class Iterator final {
 		public:
 			using iterator_category = std::input_iterator_tag;
@@ -40,24 +41,24 @@ namespace okiidoku::mono {
 			const links_t& links_;
 			link_t i_;
 		public:
-			constexpr Iterator(const links_t& links, link_t i = 0): links_(links), i_{i} {}
+			Iterator(const links_t& links, link_t i = 0) noexcept: links_(links), i_{i} {}
 
 			Range operator*()  const noexcept { return Range{i_, links_[i_]}; }
 			Range operator->() const noexcept { return Range{i_, links_[i_]}; }
-			constexpr Iterator& operator++() noexcept { i_ = links_[i_]; return *this; }  
-			constexpr Iterator operator++(int) noexcept { Iterator tmp = *this; ++(*this); return tmp; }
-			constexpr friend bool operator==(const Iterator& a, const Iterator& b) noexcept { return (&a.links_ == &b.links_) && (a.i_ == b.i_); }
-			constexpr friend bool operator!=(const Iterator& a, const Iterator& b) noexcept { return (&a.links_ != &b.links_) || (a.i_ != b.i_); }
+			Iterator& operator++() noexcept { i_ = links_[i_]; return *this; }  
+			Iterator operator++(int) noexcept { Iterator tmp = *this; ++(*this); return tmp; }
+			friend bool operator==(const Iterator& a, const Iterator& b) noexcept { return (&a.links_ == &b.links_) && (a.i_ == b.i_); }
+			friend bool operator!=(const Iterator& a, const Iterator& b) noexcept { return (&a.links_ != &b.links_) || (a.i_ != b.i_); }
 		};
 	private:
 		links_t links_ {0};
 	public:
-		constexpr TieLinks(): links_{[]{ links_t _{0}; _[0] = size_; return _; }()} {}
-		constexpr friend bool operator==(const TieLinks&, const TieLinks&) noexcept = default;
-		constexpr Iterator begin() const noexcept { return Iterator(links_); }
-		constexpr Iterator end()   const noexcept { return Iterator(links_, size_); }
+		TieLinks() noexcept: links_{[]{ links_t _{0}; _[0] = size_; return _; }()} {}
+		friend bool operator==(const TieLinks&, const TieLinks&) noexcept = default;
+		Iterator begin() const noexcept { return Iterator(links_); }
+		Iterator end()   const noexcept { return Iterator(links_, size_); }
 
-		[[nodiscard]] bool has_unresolved() const { return std::ranges::any_of(links_, [](const auto& e){ return e == 0; }); }
+		[[nodiscard]] bool has_unresolved() const noexcept { return std::ranges::any_of(links_, [](const auto& e){ return e == 0; }); }
 		[[nodiscard]] bool is_completely_unresolved() const noexcept { return links_[0] == size_; }
 
 		template<class IsEq>
