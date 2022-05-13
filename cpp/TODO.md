@@ -23,14 +23,16 @@
 
 ## Misc List
 
-- try using clang-tidy
 - add sanitizers (address,UB) to debug builds.
   - can look at [lefticus weekly game project](https://github.com/lefticus/cpp_weekly_game_project/blob/master/cmake/Sanitizers.cmake) for inspiration.
   - would some bounds-checking assertions become redundant with UB sanitizer?
   - https://docs.microsoft.com/en-us/cpp/sanitizers/asan
 - find out how to use the [cppcoreguideline checker](https://docs.microsoft.com/en-us/cpp/code-quality/using-the-cpp-core-guidelines-checkers?view=msvc-170)
 
-- consider supporting CMake 3.22 or 3.21. Ubuntu 20.04's apt repos don't seem to have 3.23. The only 3.23 thing I'm using is `FILE_SET` for target headers
+- consider supporting CMake 3.22 or 3.21. Ubuntu 20.04's apt repos don't seem to have 3.23. The only 3.23 thing I'm using is `FILE_SET` for target headers. We can't go lower than 3.21 since we're using the `PROJECT_IS_TOP_LEVEL` variable. Why aren't headers installing with the current `FILE_SET` setup? Everything compiles and includes are working in the generated IDE intellisense... Do I need to manually list header files for installation to work?
+
+- experiment with using compiler "assume" hints (asserts are checked at runtime. assumptions are not checked and used for optimizations (to do the opposite: "remove checks")).
+  - GSL has a macro to do this on MSVC, Clang, and GCC. Feels weird to add an entire dependency just for a tiny macro though...
 
 - see if grid qualities (like being a solution, being a proper puzzle, being a minimal puzzle), can be encoded through the type system and make it so that always-safe conversions (such as ) are easy, but "unsafe" (not always true) have to either go through an `unsafe_cast_X_grid_to_Y_grid` function, or go through a `checked_cast_X_grid_to_Y_grid`, which may have a non-trivial performance penalty.
   - This would allow making many of the current contracts part of the type system; turning-runtime-error-into-compiler-errors-TM. I would no longer need to write such contract and post-condition comments.

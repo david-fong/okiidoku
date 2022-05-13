@@ -29,18 +29,26 @@ unsigned test_morph(okiidoku::SharedRng& shared_rng, const unsigned num_rounds) 
 	// Note: if gen_path gets un-deprecated, assert that paths are valid.
 
 	unsigned int count_bad {0};
+
 	Grid<O> gen_grid;
-	if (!(grid_is_filled(gen_grid) && std::all_of(
+	if (!std::all_of(
 		gen_grid.get_underlying_array().cbegin(),
 		gen_grid.get_underlying_array().cend(),
 		[](const auto val){ return val == T::O2; }
-	))) {
-		std::clog << "\ngrid must be initialized to an empty grid";
+	)) {
+		std::clog << "\ngrid must be initialized to an empty grid.";
+		std::exit(1);
 	}
+
 	Grid<O> canon_grid;
+
 	for (unsigned round {0}; round < num_rounds; ) {
 		generate(gen_grid, shared_rng);
-		canonicalize(gen_grid);
+		const auto gen_canon_transform {canonicalize(gen_grid)};
+		if (gen_canon_transform.inverted().inverted() != gen_canon_transform) {
+			std::clog << "\ntransformation twice-inverted must equal itself.";
+			std::exit(1);
+		}
 
 		canon_grid = gen_grid;
 		scramble(canon_grid, shared_rng);
@@ -95,7 +103,7 @@ int main(const int argc, char const *const argv[]) {
 	// NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic,*-avoid-c-arrays)
 
 	std::cout << "\nparsed arguments:"
-	<< "\n- arg 1 (srand key)  : " << std::hex << srand_key
+	<< "\n- arg 1 (srand key)  : " << std::hex << srand_key << std::dec
 	<< "\n- arg 2 (num rounds) : " << num_rounds
 	<< std::endl;
 

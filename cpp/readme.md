@@ -3,14 +3,14 @@
 
 ## Using the Dynamic Library
 
-Building okiidoku requires CMake 3.23, a C++ compiler [supporting C++20](https://en.cppreference.com/w/cpp/compiler_support), a build system (ex. Make, Ninja), and conan.
+Building okiidoku requires CMake 3.23, a C++ compiler [supporting C++20](https://en.cppreference.com/w/cpp/compiler_support), a build system (ex. Make, Ninja, Visual Studio), and [conan](https://conan.io/downloads.html).
 
-Refer to the [CMake guide](https://cmake.org/cmake/help/latest/guide/importing-exporting/index.html). This may also help: [tldp.org on shared libraries](https://tldp.org/HOWTO/Program-Library-HOWTO/shared-libraries.html)
+Refer to the [CMake guide](https://cmake.org/cmake/help/latest/guide/importing-exporting/index.html).
 
 - The library uses templates for each compiled grid order for optimization purposes. The templates are accessible under the `okiidoku::mono` namespace, and a visitor-pattern interface is exposed under the `okiidoku::visitor` namespace. The visitor pattern is intended to make it more convenient to write code that uses an order selected at runtime.
   - Code examples can be found in [the examples folder](./libs/okiidoku/examples/).
 
-- Make sure to read and follow the api contracts documented in the headers. Exceptions are intentionally not thrown for precondition violations. If you would like to run against a build of libokiidoku with assertions for debugging purposes, create and use a build of libokiidoku with `-DCMAKE_BUILD_TYPE=Debug`.
+- Make sure to read and follow the api contracts documented in the headers. Exceptions are intentionally not thrown for precondition violations. If you would like to run against a build of libokiidoku with assertions for debugging purposes, use a debug build of libokiidoku.
 
 - To change the supported grid sizes that get compiled, create a [tweak header](https://vector-of-bool.github.io/2020/10/04/lib-configuration.html#providing-a-tweak-header) for [`./libs/okiidoku/include/okiidoku/config/defaults.hpp`](./libs/okiidoku/include/okiidoku/config/defaults.hpp).
 
@@ -24,15 +24,11 @@ Example values used for CMake kit and build type.
 
 ```shell
 # cd into the cpp directory of the repo first
-mkdir build/GCC/Release
-pushd build/GCC/Release
-conan install ../../../ --build=missing #--profile=
-popd
 cmake -S . -B build/GCC/Release -DCMAKE_BUILD_TYPE=Release
 # ^Or just use the configure command of the vscode cmake tools extension.
 cd build/GCC/Release
 cmake --build . --config=Release
-./apps/cli/okiidoku_cli
+./bin/okiidoku_cli
 ```
 
 You can use `tput rmam` to disable the terminal's line wrapping, and `tput smam` to enable it again afterward.

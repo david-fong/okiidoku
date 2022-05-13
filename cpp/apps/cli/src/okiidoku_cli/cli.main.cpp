@@ -37,7 +37,7 @@ int main(const int argc, char const *const argv[]) {
 
 	std::cout << "\nparsed arguments:"
 	<< "\n- arg 1 (grid order) : " << user_order
-	<< "\n- arg 2 (srand key)  : " << std::hex << srand_key // TODO.mid ugh. it's using my numpunct grouping.
+	<< "\n- arg 2 (srand key)  : " << std::hex << srand_key << std::dec // TODO.mid ugh. it's using my numpunct grouping.
 	<< std::endl;
 
 	okiidoku::SharedRng shared_rng;

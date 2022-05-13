@@ -1,7 +1,7 @@
 # https://alexreinking.com/blog/building-a-dual-shared-and-static-library-with-cmake.html
 # https://www.reddit.com/r/cpp/comments/m0rt7v/building_a_dual_shared_and_static_library_with/
 # TODO.low there's a lot of other good things in the above tutorial I'm not currently using
-add_library(okiidoku
+add_library(okiidoku # uses BUILD_SHARED_LIBS
 	src/okiidoku/grid.cpp
 	src/okiidoku/gen.cpp
 	src/okiidoku/print_2d.cpp
@@ -38,7 +38,7 @@ target_link_libraries(okiidoku
 	# PRIVATE Threads::Threads
 )
 
-if(PROJECT_IS_TOP_LEVEL)
+if(okiidoku_IS_TOP_LEVEL)
 	add_subdirectory(examples)
 	if(BUILD_TESTING)
 		add_subdirectory(tests)

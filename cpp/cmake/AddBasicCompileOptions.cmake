@@ -1,3 +1,8 @@
+# settings to enable standard compliance and enable many warnings
+# this should help ensure that this library supports most compilers
+# and isn't less strict on itself than a very strict user's compiler
+# options might be on it.
+
 if(MSVC)
 	add_compile_options(
 		/nologo
