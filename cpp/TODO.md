@@ -23,8 +23,6 @@
 
 ## Misc List
 
-- delete the repl's verbosity config setting. It's not used anymore.
-
 - try using clang-tidy
 - add sanitizers (address,UB) to debug builds.
   - can look at [lefticus weekly game project](https://github.com/lefticus/cpp_weekly_game_project/blob/master/cmake/Sanitizers.cmake) for inspiration.

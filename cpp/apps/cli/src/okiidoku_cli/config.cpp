@@ -12,27 +12,6 @@ namespace okiidoku::cli {
 	namespace str = okiidoku::util::str;
 
 
-	void Config::verbosity(verbosity::E verbosity) {
-		verbosity_ = verbosity;
-	}
-
-	void Config::verbosity(const std::string_view new_verbosity_str) {
-		if (new_verbosity_str.empty()) {
-			std::cout << "is: " << verbosity() << std::endl;
-			return;
-		}
-		for (unsigned i {0}; i < verbosity::size; ++i) {
-			if (new_verbosity_str.compare(verbosity::names[i]) == 0) {
-				verbosity(verbosity::E{i});
-				return;
-			}
-		}
-		std::cout
-			<< str::red.on << '"' << new_verbosity_str << "\" is not valid.\n" << str::red.off
-			<< verbosity::options_menu_str << std::endl;
-	}
-
-
 	void Config::order(const Order new_order) noexcept {
 		if (is_order_compiled(new_order)) {
 			order_ = new_order;

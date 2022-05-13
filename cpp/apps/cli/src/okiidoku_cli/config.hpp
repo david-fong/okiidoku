@@ -11,10 +11,6 @@ namespace okiidoku::cli {
 
 	struct Config {
 	public:
-		[[nodiscard, gnu::pure]] verbosity::E verbosity() const noexcept { return verbosity_; };
-		void verbosity(verbosity::E);
-		void verbosity(std::string_view);
-
 		[[nodiscard, gnu::pure]] Order order() const noexcept { return order_; }
 		// if the specified order is not compiled, no change.
 		void order(Order) noexcept;
@@ -27,7 +23,6 @@ namespace okiidoku::cli {
 	private:
 		// invariant: `order_` is always a compiled order.
 		Order order_ {compiled_orders[0]};
-		verbosity::E verbosity_ {verbosity::E::full};
 		bool canonicalize_ {false};
 	};
 }

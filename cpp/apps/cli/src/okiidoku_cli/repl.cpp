@@ -25,7 +25,6 @@ namespace okiidoku::cli {
 		shared_rng_(rng)
 	{
 		config_.order(order_input);
-		config_.verbosity(verbosity::E::quiet);
 	}
 
 
@@ -72,14 +71,13 @@ namespace okiidoku::cli {
 			using Command::E;
 			case E::help:
 				std::cout
-				<< Command::helpMessage << str::dim.on
-				<< '\n' << verbosity::options_menu_str
-				<< str::dim.off << std::endl;
+				<< Command::helpMessage /* << str::dim.on
+				important subcommand help messages can go here if needed
+				<< str::dim.off */ << std::endl;
 				break;
 			case E::quit:
 				return false;
 			case E::config_order:       config_.order(cmd_args); break;
-			case E::config_print_level: config_.verbosity(cmd_args); break;
 			case E::config_auto_canonicalize: config_.canonicalize(cmd_args); break;
 			case E::gen_single:   gen_single(); break;
 			case E::gen_multiple: gen_multiple(cmd_args); break;
@@ -141,7 +139,6 @@ namespace okiidoku::cli {
 			// << "\nnum threads:        " << params.num_threads
 			<< "\nprocess time (s):    " << elapsed.proc_seconds
 			<< "\nwall-clock time (s): " << elapsed.wall_seconds
-			// Note: the timer will not include canonicalization time if verbosity is quiet
 			;
 
 		if (elapsed.wall_seconds > 10.0) {

@@ -18,7 +18,6 @@ namespace okiidoku::cli {
 			help,
 			quit,
 			config_order,
-			config_print_level,
 			config_auto_canonicalize,
 			gen_single,
 			gen_multiple,
@@ -27,7 +26,6 @@ namespace okiidoku::cli {
 			{ "help",         E::help },
 			{ "quit",         E::quit },
 			{ "order",        E::config_order },
-			{ "verbosity",    E::config_print_level },
 			{ "canonicalize", E::config_auto_canonicalize },
 			{ "",             E::gen_single },
 			{ "gen",          E::gen_multiple },
@@ -36,7 +34,6 @@ namespace okiidoku::cli {
 		"\n- help                  print this help menu"
 		"\n- quit                  cleanly exit this program"
 		"\n"
-		"\n- verbosity [<level>]   get/set verbosity level"
 		"\n- order [<order>]       get/set order (sqrt of grid length)"
 		"\n- canonicalize [<y/n>]  get/set canonicalization"
 		"\n"
