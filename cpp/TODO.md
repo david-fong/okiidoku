@@ -29,8 +29,6 @@
   - https://docs.microsoft.com/en-us/cpp/sanitizers/asan
 - find out how to use the [cppcoreguideline checker](https://docs.microsoft.com/en-us/cpp/code-quality/using-the-cpp-core-guidelines-checkers?view=msvc-170)
 
-- consider supporting CMake 3.22 or 3.21. Ubuntu 20.04's apt repos don't seem to have 3.23. The only 3.23 thing I'm using is `FILE_SET` for target headers. We can't go lower than 3.21 since we're using the `PROJECT_IS_TOP_LEVEL` variable. Why aren't headers installing with the current `FILE_SET` setup? Everything compiles and includes are working in the generated IDE intellisense... Do I need to manually list header files for installation to work?
-
 - experiment with using compiler "assume" hints (asserts are checked at runtime. assumptions are not checked and used for optimizations (to do the opposite: "remove checks")).
   - GSL has a macro to do this on MSVC, Clang, and GCC. Feels weird to add an entire dependency just for a tiny macro though...
 

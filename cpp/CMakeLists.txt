@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.23)
+cmake_minimum_required(VERSION 3.21)
 project(okiidoku
 	VERSION 0.0.1
 	DESCRIPTION "david fong's variable-grid-size sudoku utilities"
@@ -64,18 +64,23 @@ endif()
 install(TARGETS
 	okiidoku okiidoku_cli
 	EXPORT okiidokuTargets
-	FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/okiidoku
-	INCLUDES         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/okiidoku
+	RUNTIME  COMPONENT okiidoku_runtime
+	LIBRARY  COMPONENT okiidoku_runtime
+	NAMELINK_COMPONENT okiidoku_development
+	ARCHIVE  COMPONENT okiidoku_development
+	INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
+
 if(BUILD_SHARED_LIBS)
 	set(OKIIDOKU_LIB_TYPE_NAME shared)
 else()
 	set(OKIIDOKU_LIB_TYPE_NAME static)
 endif()
 install(EXPORT okiidokuTargets
-	FILE okiidoku-${OKIIDOKU_LIB_TYPE_NAME}-targets.cmake
 	NAMESPACE okiidoku::
 	DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/okiidoku
+	FILE okiidoku-${OKIIDOKU_LIB_TYPE_NAME}-targets.cmake
+	COMPONENT okiidoku_development
 )
 
 

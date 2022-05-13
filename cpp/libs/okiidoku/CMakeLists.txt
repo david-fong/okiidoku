@@ -27,10 +27,16 @@ set_target_properties(okiidoku PROPERTIES
 include(GenerateExportHeader)
 generate_export_header(okiidoku EXPORT_FILE_NAME include/okiidoku/detail/export.h)
 target_compile_definitions(okiidoku PUBLIC "$<$<NOT:$<BOOL:${BUILD_SHARED_LIBS}>>:OKIIDOKU_STATIC_DEFINE>")
-target_sources(okiidoku PUBLIC FILE_SET HEADERS BASE_DIRS "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>")
+target_include_directories(okiidoku PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>")
+# Future note: if switching back to FILE_SET, make sure headers get installed. not sure why they weren't when previously using FILE_SET.
 
-target_sources(okiidoku PUBLIC FILE_SET HEADERS BASE_DIRS include)
+target_include_directories(okiidoku PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>")
 target_include_directories(okiidoku PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
+
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include" "${CMAKE_CURRENT_BINARY_DIR}/include"
+	TYPE INCLUDE
+	COMPONENT okiidoku_development
+)
 
 # find_package(Threads REQUIRED)
 target_link_libraries(okiidoku

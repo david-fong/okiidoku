@@ -10,6 +10,7 @@
 
 	// https://vector-of-bool.github.io/docs/vscode-cmake-tools/settings.html
 	// TODO.try will this have conflicts for mingw-64?
+	// TODO.low is there way to exclude the buildType part for multiconfig generators?
 	"cmake.buildDirectory": "${workspaceFolder}/build/${buildKitVendor}/${buildType}",
 	"cmake.configureOnOpen": true,
 
