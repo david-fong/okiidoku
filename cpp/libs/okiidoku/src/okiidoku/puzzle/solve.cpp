@@ -1,5 +1,6 @@
 #include <okiidoku/puzzle/solve.hpp>
 
+#include <algorithm>
 #include <stack>
 #include <bitset>
 

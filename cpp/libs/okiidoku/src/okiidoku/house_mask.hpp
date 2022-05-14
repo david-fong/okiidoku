@@ -24,7 +24,7 @@ namespace okiidoku::mono {
 		using int_t = std::uint64_t;
 
 		static constexpr unsigned int int_t_num_bits  {8 * sizeof(int_t)};
-		static constexpr unsigned int num_ints        {(T::O2 + int_t_num_bits-1) / int_t_num_bits};
+		static constexpr unsigned int num_ints        {(T::O2 + int_t_num_bits-1) / int_t_num_bits}; static_assert(num_ints != 0);
 		static constexpr unsigned int ints_t_num_bits {num_ints * int_t_num_bits};
 		static constexpr unsigned int num_excess_bits {ints_t_num_bits - T::O2};
 		[[nodiscard, gnu::const]] static constexpr unsigned char bit_index_to_int_index(const o2x_t bit_index) noexcept {
@@ -100,11 +100,11 @@ namespace okiidoku::mono {
 		}
 
 		HouseMask& operator|=(const HouseMask& rhs) noexcept {
-			for (size_t i {0}; i < ints_.size(); ++i) { ints_[i] |= rhs.ints_[i]; };
+			for (size_t i {0}; i < num_ints; ++i) { ints_[i] |= rhs.ints_[i]; };
 			return *this;
 		}
 		HouseMask& operator&=(const HouseMask& rhs) noexcept {
-			for (size_t i {0}; i < ints_.size(); ++i) { ints_[i] &= rhs.ints_[i]; };
+			for (size_t i {0}; i < num_ints; ++i) { ints_[i] &= rhs.ints_[i]; };
 			return *this;
 		}
 		[[nodiscard, gnu::pure]] friend HouseMask operator|(HouseMask lhs, const HouseMask& rhs) noexcept {
@@ -161,7 +161,7 @@ namespace okiidoku::mono {
 				// return std::countr_zero(bit_mask);
 			}
 			assert(false); // TODO.wait c++23 std::unreachable
-			return 0; 
+			return 0;
 		}
 	};
 	#define OKIIDOKU_FOR_COMPILED_O(O_) \
@@ -172,7 +172,7 @@ namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
 	static constexpr HouseMask<O> house_mask_ones {HouseMask<O>::create_ones_()};
-	
+
 
 	template<Order O>
 	struct chute_box_masks final {

@@ -88,7 +88,7 @@ namespace okiidoku::mono::detail {
 			if (rel.chute_imbalance_b > rel.chute_imbalance_a) {
 				std::swap(rel.chute_imbalance_a, rel.chute_imbalance_b);
 			}
-			// note: if fast lexicographical compare is needed later, shrink h_chute_imbalance
+			// Note: if fast lexicographical compare is needed later, shrink h_chute_imbalance
 			// by looping and doing `digits == h_chute_imbalance[i++]; digits *= T::O1;`
 		}}
 		{

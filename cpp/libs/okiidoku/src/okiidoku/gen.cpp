@@ -35,7 +35,7 @@ namespace okiidoku::mono { namespace {
 		using o2x_t = typename T::o2x_t;
 		using o2i_t = typename T::o2i_t;
 		using o3i_t = typename T::o3i_t;
-		
+
 		// unsigned long long op_count {0};
 		CountSymsInInvalidBox<O> boxes_has {};
 		for (o2i_t row {h_chute}; row < h_chute+T::O1; ++row) {

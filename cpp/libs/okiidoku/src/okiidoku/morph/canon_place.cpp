@@ -107,8 +107,8 @@ namespace okiidoku::mono { namespace {
 		std::array<mapping_t, T::O2> to_tied; // NOLINT(cppcoreguidelines-pro-type-member-init) see next line
 		std::iota(to_tied.begin(), to_tied.end(), mapping_t{0});
 		for (const auto tie : line_ties) {
-			// note: intentionally do not skip ties here since updated table
-			// rows could likely be used by chute tie resolution.
+			// Note: intentionally do not skip ties here since updated table
+			// rows could (and likely will) be used by chute tie resolution.
 
 			// try to resolve tied line range:
 			std::sort(

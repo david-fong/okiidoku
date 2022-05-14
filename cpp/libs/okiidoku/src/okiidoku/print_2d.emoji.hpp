@@ -16,6 +16,9 @@ namespace okiidoku::emoji {
 
 	inline const std::vector<size_t> top_set_preferences {5, 11};
 
+	// TODO.low annoyingly, when printing on various terminal emulators, some
+	// emojis vary in width. I've added spaces where required on gnome terminal,
+	// but windows terminal is different.
 	inline const std::vector<Set> sets {
 		{"fruit",       {"🍉","🍄","🍓","🍅","🌶 ","🍎","🍑","🍊","🥕","🥭","🍍","🍋","🍌","🌽","🥑","🍐","🥝","🍏","🥬","🍈","🫐","🧄","🍆","🍇","🌰"}}, // yeah yeah. vegetables. I know.
 		{"reptile",     {"🐸","🦎","🐍","🐢","🐊","🐉","🐲","🦕","🦖"}},

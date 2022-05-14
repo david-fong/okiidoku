@@ -11,7 +11,7 @@
 		],
 	},
 	"settings": {
-		"trailing-spaces.trimOnSave": true,
+		"files.trimTrailingWhitespace": true,
 
 		"todo-tree.filtering.useBuiltInExcludes": "file excludes",
 		"todo-tree.general.statusBar": "total",

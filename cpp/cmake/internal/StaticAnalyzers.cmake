@@ -1,3 +1,8 @@
+if(MSVC)
+	add_compile_options("/analyze") # https://docs.microsoft.com/en-us/cpp/build/reference/analyze-code-analysis
+endif()
+
+
 find_program(
 	CLANG_TIDY_EXE
 	NAMES "clang-tidy"

@@ -75,7 +75,7 @@ This was originally more of a "things that I tried and didn't work" section, but
   - A public domain library for the Jacobi algorithm (for diagonalizing dense, real symmetric matrices) https://github.com/jewettaij/jacobi_pd. This could be useful if going through several steps is needed to break ties.
   - This doesn't work for order 2. I know order 2 isn't even marginally interesting, but I think the solution should work for any order, and if it doesn't work for order 2, then something's wrong with it. That being said, I didn't explore this route much. Perhaps with adjustments, it can be useful.
 
-- Graph Theory Route: 
+- Graph Theory Route:
   - Could the relabelling canonicalization be approached as a travelling salesman problem? I wonder if this would succeed. The cost of each edge would be the probability of that edge's count.
     - See https://www.math.northwestern.edu/documents/book-markov-chains.pdf section 8.2.2.
     - Is NP

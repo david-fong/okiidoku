@@ -6,20 +6,19 @@
 if(MSVC)
 	add_compile_options(
 		/nologo
+		/options:strict # unrecognized compiler options are errors
 		/utf-8        # /source-charset:utf-8 (for preprocessor), and /execution-charset:utf8 (for compiler)
 		/permissive-  # https://discourse.cmake.org/t/cxx-extensions-and-permissive/1994
 		/EHsc         # https://docs.microsoft.com/en-us/cpp/build/reference/eh-exception-handling-model#standard-c-exception-handling
 		/volatile:iso # https://docs.microsoft.com/en-us/cpp/build/reference/volatile-volatile-keyword-interpretation#remarks
 		/W4 #/WX      # highest warning level #and treat warnings as errors.
-		/wd5030       # disable the "unrecognized attribute" warning. unfortunately needed or else MSVC warns for gnu-prefixed attributes.
+		/wd5030       # warning disable: "unrecognized attribute". (unfortunately needed or else MSVC warns for gnu-prefixed attributes)
 		/diagnostics:caret
-		# TODO.try /options:strict
-		# TODO.try https://docs.microsoft.com/en-us/cpp/build/reference/sdl-enable-additional-security-checks?view=msvc-170
 	)
 else()
 	add_compile_options(
 		-Wall -Wextra -Wpedantic -Wfatal-errors #-Werror
-		-Wold-style-cast -Wcast-qual -Wcast-align 
+		-Wold-style-cast -Wcast-qual -Wcast-align
 		-Wformat=2
 		-Wconversion # -Wsign-conversion
 		-Wshadow -Woverloaded-virtual

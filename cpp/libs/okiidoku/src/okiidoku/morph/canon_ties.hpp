@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <array>
 #include <type_traits>
+#include <cassert>
 
 namespace okiidoku::mono {
 
@@ -45,7 +46,7 @@ namespace okiidoku::mono {
 
 			Range operator*()  const noexcept { return Range{i_, links_[i_]}; }
 			Range operator->() const noexcept { return Range{i_, links_[i_]}; }
-			Iterator& operator++() noexcept { i_ = links_[i_]; return *this; }  
+			Iterator& operator++() noexcept { i_ = links_[i_]; return *this; }
 			Iterator operator++(int) noexcept { Iterator tmp = *this; ++(*this); return tmp; }
 			friend bool operator==(const Iterator& a, const Iterator& b) noexcept { return (&a.links_ == &b.links_) && (a.i_ == b.i_); }
 			friend bool operator!=(const Iterator& a, const Iterator& b) noexcept { return (&a.links_ != &b.links_) || (a.i_ != b.i_); }
@@ -65,13 +66,15 @@ namespace okiidoku::mono {
 		// requires (std::regular_invocable<IsEq, link_t, link_t>)
 		void update(const IsEq is_eq) {
 			for (const auto tie : *this) {
-				auto begin {tie.begin_};
-				for (auto i {static_cast<link_t>(begin+1)}; i < tie.end_; ++i) {
+				assert(tie.begin_ < tie.end_);
+				auto cursor {tie.begin_};
+				for (auto i {static_cast<link_t>(cursor+1)}; i < tie.end_; ++i) {
+					assert(cursor < i);
 					if (!std::invoke(is_eq, static_cast<link_t>(i-1), i)) [[likely]] {
-						links_[begin] = i;
-						begin = i;
+						links_[cursor] = i;
+						cursor = i;
 				}	}
-				links_[begin] = tie.end_;
+				links_[cursor] = tie.end_;
 			}
 		}
 	};

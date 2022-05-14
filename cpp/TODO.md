@@ -23,10 +23,6 @@
 
 ## Misc List
 
-- add sanitizers (address,UB) to debug builds.
-  - can look at [lefticus weekly game project](https://github.com/lefticus/cpp_weekly_game_project/blob/master/cmake/Sanitizers.cmake) for inspiration.
-  - would some bounds-checking assertions become redundant with UB sanitizer?
-  - https://docs.microsoft.com/en-us/cpp/sanitizers/asan
 - find out how to use the [cppcoreguideline checker](https://docs.microsoft.com/en-us/cpp/code-quality/using-the-cpp-core-guidelines-checkers?view=msvc-170)
 
 - experiment with using compiler "assume" hints (asserts are checked at runtime. assumptions are not checked and used for optimizations (to do the opposite: "remove checks")).
@@ -37,6 +33,8 @@
   - Definitely useful types: SolutionGrid, ProperPuzzleGrid, MaybeInvalidPuzzleGrid.
   - Maybe useful types: MinimalPuzzleGrid.
   - Things that might get ugly: the way they are, `grid_is_filled` and `grid_is_valid` would still require the caller to do some kind of unsafe-moving-cast to a new variable of a stronger type.
+
+- I wish vscode-cmake-tools wouldn't delete CMakeCache.txt and CMakeFiles.txt when switching kit if the build directory is different after the switch. Maybe report an issue on their GitHub?
 
 - try writing custom GDB python pretty-printer for `HouseMask`?
   - [how to write a gdb pretty-printer](https://sourceware.org/gdb/onlinedocs/gdb/Writing-a-Pretty_002dPrinter.html#Writing-a-Pretty_002dPrinter)

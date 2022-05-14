@@ -7,6 +7,6 @@ endif()
 include(${CMAKE_BINARY_DIR}/conan.cmake)
 conan_cmake_run(
 	REQUIRES ${OKIIDOKU_CONAN_DEPENDENCIES}
-	BASIC_SETUP CMAKE_TARGETS KEEP_RPATHS #NO_OUTPUT_DIRS
+	BASIC_SETUP CMAKE_TARGETS KEEP_RPATHS NO_OUTPUT_DIRS
 	BUILD missing # build deps with no pre-built binary artifacts
 )

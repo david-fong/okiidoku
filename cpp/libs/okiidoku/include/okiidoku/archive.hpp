@@ -7,18 +7,25 @@
 #include <string_view>
 #include <optional>
 #include <memory> // unique_ptr
+#if __has_include(<experimental/propagate_const>)
 #include <experimental/propagate_const>
+#endif
 
 namespace okiidoku::mono::archive {
 
-	class Reader final {
-		/* OKIIDOKU_NO_EXPORT */ class Impl;
-		std::experimental::propagate_const<std::unique_ptr<Impl>> impl_;
-
+	class OKIIDOKU_EXPORT Reader final {
 	public:
 		// disallow copies.
 		Reader(const Reader&) = delete;
 		Reader& operator=(const Reader&) = delete;
+
+	private:
+		/* OKIIDOKU_NO_EXPORT */ class Impl;
+		#if __has_include(<experimental/propagate_const>)
+		std::experimental::propagate_const<std::unique_ptr<Impl>> impl_;
+		#else // fallback for MSVC
+		std::unique_ptr<Impl> impl_;
+		#endif
 	};
 
 	struct Header final {

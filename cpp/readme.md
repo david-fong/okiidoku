@@ -20,24 +20,19 @@ Refer to the [CMake guide](https://cmake.org/cmake/help/latest/guide/importing-e
 
 ## Building and Running okiidoku\_cli
 
-Example values used for CMake kit and build type.
+Example with autodetected GCC/Clang and Make/Ninja (no Ninja multi-config):
 
 ```shell
 # cd into the cpp directory of the repo first
-cmake -S . -B build/GCC/Release -DCMAKE_BUILD_TYPE=Release
-# ^Or just use the configure command of the vscode cmake tools extension.
-cd build/GCC/Release
-cmake --build . --config=Release
-./bin/okiidoku_cli
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cd build
+cmake --build .
+./apps/cli/okiidoku_cli
 ```
 
 You can use `tput rmam` to disable the terminal's line wrapping, and `tput smam` to enable it again afterward.
 
 ## Source Code
-
-The project is generally structured following [pitchfork layout conventions](https://api.csswg.org/bikeshed/?force=1&url=https://raw.githubusercontent.com/vector-of-bool/pitchfork/develop/data/spec.bs).
-
-I follow the Stroustrup casing convention (lower-snake case for variables, functions, and namespaces, and camel-case for user-defined types). For type aliases, I use lower-snake with a `_t` suffix.
 
 The project is set up for use with VS Code. After installing and enabling the recommended extensions, you will need to perform [some initial steps](https://code.visualstudio.com/docs/cpp/cmake-linux#_select-a-kit) to tell VS Code what specific build tools ("kit") and configuration ("variant") you want to use.
 

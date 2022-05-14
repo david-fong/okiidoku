@@ -10,7 +10,7 @@ I'm beginning to question the value of having GridArr and GridSpan.
 - No more CTAD guides for the converting constructors
 - No worrying about how to do automatic change-dest-order-to-be-compatible-with-src for src-dest operations in the visitor interface.
   - This is a big one. I currently have no idea if I can address this when using the variant-of-spans abstraction, since I have no idea about the layout guarantees (if any) provided by the backing variant-of-array abstraction when using `std::variant`. I definitely haven't read anything on cppreference announcing something like that (though I haven't done any true scouring of the spec).
-   
+
 ## Why Did I Do This In the First Place?
 
 - Honestly I don't know if that was even a "good" idea.
