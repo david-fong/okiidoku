@@ -5,16 +5,31 @@
 #include <algorithm> // swap, sort, ranges::next_permutation
 #include <numeric>   // abs
 
-namespace okiidoku::mono::detail {
+namespace okiidoku::mono { namespace {
 
-	// Info is placement-independent.
-	// Does not include self-to-self relationship bit for main diagonal entries.
-	template<Order O>
+	template<Order O> requires(is_order_compiled(O))
 	struct RelMasks final {
 		HouseMask<O> boxes_h;
 		HouseMask<O> boxes_v;
 	};
-	template<Order O>
+
+	// A structure to avoid duplicating information from the diagonal symmetry
+	// of a symbol-pair-relation table with large entries.
+	// make the upper right triangle of the bottom left quarter mirror along
+	// the main diagonal and map to the bottom left triangle of the upper left quarter.
+	// struct FoldedRelMasksTable
+	// Rel& at(sym_a, sym_b):
+	// first, if sym_a > sym_b, swap them.
+	// then, if sym_a > ((O2+1)//2), do the mirror and hug:
+	//  swap sym_a and sym_b and subtract (O2//2) from both.
+	// as a bonus optimization, the width of the table can be decremented by decrementing sym_b
+	//  in an else block after the `if sym_a > ((O2+1)//2)`. This is based on the assumption that
+	//  the input sym_a must not be equal to sym_b.
+	// can consider having template specializations for smaller orders to not use this space optimization.
+	// if so, to hide the detail of setting a bit for both halves, make the at getter const, and
+	// have a separate setter method.
+
+	template<Order O> requires(is_order_compiled(O))
 	detail::Gridlike<O, RelMasks<O>> make_rel_masks_(const Grid<O>& grid) noexcept {
 		using T = Ints<O>;
 		using val_t = typename T::o2i_smol_t;
@@ -22,6 +37,22 @@ namespace okiidoku::mono::detail {
 		using o2x_t = typename T::o2x_t;
 		using o2i_t = typename T::o2i_t;
 
+		// TODO.high for large grid sizes, this uses hundreds of KB of stack.
+		// stacks have limits defaulted by the OS. This is not good. Find a
+		// way to reduce memory usage, or allocate on heap... It's possible
+		// to halve the current usage by abstracting over the property of
+		// diagonal symmetry, but unfortunately, other than that, the
+		// current representation is optimizing for speed in a way that is
+		// not _needlessly_ wasteful of memory. Well, actually, the RelMasks
+		// is 25% waste: between boxes_h and boxes_v, if one is set at bit
+		// index i, the other will always be unset. So technically the number
+		// of bits there can be reduced to a factor of log(3)/log(2)/2, (0.7925)
+		// but that comes at the cost of having to reconstruct the two masks
+		// when they are later used. That direction doesn't sound appealing.
+
+		// rows and columns are symbols. cells are masks indicating blocks
+		// where the two symbols indicated by the row and col are in a same line.
+		// Does not include self-to-self relationship bit for main diagonal entries.
 		detail::Gridlike<O, RelMasks<O>> masks {};
 		for (o2i_t line {0}; line < T::O2; ++line) {
 		for (o2i_t atom {0}; atom < T::O2; atom += T::O1) {
@@ -45,7 +76,8 @@ namespace okiidoku::mono::detail {
 		}}	}}
 		return masks;
 	}
-
+}}
+namespace okiidoku::mono::detail {
 
 	template<Order O> requires(is_order_compiled(O))
 	detail::Gridlike<O, Rel<O>> make_rel_table(const Grid<O>& grid_in) noexcept {
@@ -57,11 +89,11 @@ namespace okiidoku::mono::detail {
 
 		const detail::Gridlike<O, RelMasks<O>> masks {make_rel_masks_<O>(grid_in)};
 		detail::Gridlike<O, Rel<O>> table; // uninitialized!
-		for (o2i_t r {0}; r < T::O2; ++r) {
-		for (o2i_t c {0}; c < T::O2; ++c) {
-			const auto& mask {masks.at(r,c)};
-			auto& rel {table.at(r,c)};
-			if (r == c) {
+		for (o2i_t sym_a {0}; sym_a < T::O2; ++sym_a) {
+		for (o2i_t sym_b {0}; sym_b < T::O2; ++sym_b) {
+			const auto& mask {masks.at(sym_a,sym_b)};
+			auto& rel {table.at(sym_a,sym_b)};
+			if (sym_a == sym_b) {
 				rel = {0,(T::O2/2),0,0};
 				continue;
 			}
@@ -81,7 +113,7 @@ namespace okiidoku::mono::detail {
 			rel.chute_imbalance_a = 0;
 			rel.chute_imbalance_b = 0;
 			for (o1i_t i {0}; i < T::O1; ++i) {
-				const auto expected_count = static_cast<chute_imbalance_t>((count / T::O1) + ((i < count % T::O1) ? 1 : 0));
+				const auto expected_count = static_cast<chute_imbalance_t>((count / T::O1) + ((i < count % T::O1) ? 1U : 0U));
 				rel.chute_imbalance_a += static_cast<chute_imbalance_t>(std::abs(h_chute_imbalance[i] - expected_count));
 				rel.chute_imbalance_b += static_cast<chute_imbalance_t>(std::abs(v_chute_imbalance[i] - expected_count));
 			}
@@ -91,30 +123,6 @@ namespace okiidoku::mono::detail {
 			// Note: if fast lexicographical compare is needed later, shrink h_chute_imbalance
 			// by looping and doing `digits == h_chute_imbalance[i++]; digits *= T::O1;`
 		}}
-		{
-			// normalize polar fields
-			// long double h_p {1.0}, v_p {1.0};
-			// o6i_t h_occ_dev {0}, v_occ_dev {0};
-			// for (const auto& row : table) { for (const Rel& rel : row) {
-			// 	h_p *= rel.polar_a_p;
-			// 	v_p *= rel.polar_b_p;
-			// 	h_occ_dev += rel.h_chute_imbalance;
-			// 	v_occ_dev += rel.v_chute_imbalance;
-			// }}
-			// const auto cmp_p {h_p <=> v_p};
-			// const auto cmp_occ_dev {h_occ_dev <=> v_occ_dev};
-			// if (/* h is less rare */std::is_gt(cmp_p)
-			// || (std::is_eq(cmp_p) && /* v deviates more */std::is_lt(cmp_occ_dev))
-			// ) {
-			// 	std::swap(h_p, v_p);
-			// 	for (auto& row : table) { for (auto& count : row) {
-			// 		std::swap(count.polar_a_p, count.polar_b_p);
-			// 		std::swap(count.h_chute_imbalance, count.v_chute_imbalance);
-			// 	}}
-			// } else if (std::is_eq(cmp_p) && std::is_eq(cmp_occ_dev)) {
-			// 	std::clog << "\n! tie between all rel polar stats.";
-			// }
-		}
 		return table;
 	}
 

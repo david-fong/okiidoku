@@ -19,8 +19,8 @@ endif()
 
 if(NOT MSVC)
 	add_compile_options(
-		-march=native # enable optimizing for the compiling machine.
-		# TODO.wait see https://gcc.gnu.org/gcc-12/changes.html#uninitialized
+		-fno-semantic-interposition # disable ELF external overrides for more optimization (on by default for LLVM)
+		-march=native # enable optimizing for the compiling machine's instruction set architecture.
 	)
 endif()
 

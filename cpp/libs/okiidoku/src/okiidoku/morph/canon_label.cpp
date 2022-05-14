@@ -10,7 +10,6 @@
 
 namespace okiidoku::mono { namespace {
 
-	using okiidoku::mono::detail::make_rel_table;
 	using okiidoku::mono::detail::Rel;
 
 	template<Order O>
@@ -30,7 +29,7 @@ namespace okiidoku::mono { namespace {
 			detail::Gridlike<O, Rel<O>> rel_table;
 			label_map_t<O> to_og;
 			TieLinks<O, 2> ties {};
-			explicit constexpr State(const Grid<O>& grid) noexcept: rel_table{make_rel_table<O>(grid)} {
+			explicit constexpr State(const Grid<O>& grid) noexcept: rel_table{detail::make_rel_table<O>(grid)} {
 				std::iota(to_og.begin(), to_og.end(), mapping_t{0});
 			}
 			[[nodiscard]] bool has_ties() const { return ties.has_unresolved(); }

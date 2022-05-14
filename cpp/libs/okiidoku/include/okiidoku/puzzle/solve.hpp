@@ -2,7 +2,6 @@
 #define HPP_OKIIDOKU__PUZZLE__SOLVE
 
 #include <okiidoku/grid.hpp>
-#include <okiidoku/house_mask.hpp>
 #include <okiidoku/detail/order_templates.hpp>
 
 #include <optional>
@@ -10,6 +9,12 @@
 #if __has_include(<experimental/propagate_const>)
 #include <experimental/propagate_const>
 #endif
+
+namespace okiidoku::mono::detail {
+
+	template<Order O> requires(is_order_compiled(O))
+	class SolverBase /* final */;
+}
 
 namespace okiidoku::mono::puzzle {
 
@@ -20,10 +25,6 @@ namespace okiidoku::mono::puzzle {
 		explicit FastSolver(const Grid<O>& puzzle) noexcept;
 
 		~FastSolver() noexcept;
-
-		// disallow copies. not much reason.
-		// I just don't see it being needed. there's a lot of state too.
-		// Note: already implicitly deleted due to unique_ptr field.
 		FastSolver(const FastSolver&) = delete;
 		FastSolver& operator=(const FastSolver&) = delete;
 
@@ -36,9 +37,8 @@ namespace okiidoku::mono::puzzle {
 		[[nodiscard]] std::optional<Grid<O>> get_next_solution() noexcept;
 
 	private:
-		/* OKIIDOKU_NO_EXPORT */ class Impl;
 		#if __has_include(<experimental/propagate_const>)
-		std::experimental::propagate_const<std::unique_ptr<Impl>> impl_;
+		std::experimental::propagate_const<std::unique_ptr<detail::SolverBase<O>>> impl_;
 		#else // fallback for MSVC
 		std::unique_ptr<Impl> impl_;
 		#endif

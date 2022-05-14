@@ -5,6 +5,7 @@ if(MSVC)
 	# https://docs.microsoft.com/en-us/cpp/sanitizers/asan
 	# https://docs.microsoft.com/en-us/cpp/sanitizers/asan-building
 	# known issues: https://docs.microsoft.com/en-us/cpp/sanitizers/asan-known-issues
+	#  in particular, see the section "#addresssanitizer-runtime-dll-locations."
 	add_compile_options("$<$<CONFIG:Debug>:/fsanitize=address>")
 
 	# TODO.try consider trying /sdl (additional security checks)
@@ -13,6 +14,9 @@ if(MSVC)
 	#  https://docs.microsoft.com/en-us/cpp/build/reference/sdl-enable-additional-security-checks?view=msvc-170
 
 else()
+	# TODO.wait see https://gcc.gnu.org/gcc-12/changes.html#uninitialized
+	#  would this be compatible with sanitizers? or no?
+
 	add_compile_options("$<$<CONFIG:Debug>:-fsanitize=address,undefined>")
 	add_link_options(   "$<$<CONFIG:Debug>:-fsanitize=address,undefined>")
 

@@ -4,7 +4,7 @@
 
 - draft archive
   - (and update tests and examples)
-- test CMake config with different compilers (clang, apple-clang) and try to fix configuration issues
+- test CMake config apple-clang and try to fix configuration issues
 - refactor and improve canonicalization
 - compare backtracking and stochastic search statistics
 - implement grid-serdes translator tool
@@ -21,6 +21,12 @@
 - language bindings for other languages?
   - python, java
 
+## Periodic Checkups
+
+- Examine contents of exported symbols (`nm -nCD libs/okiidoku/.../libokiidoku.so | less`) and make sure nothing is exported that isn't intended to be.
+- Ensure conan dependencies that should be private to the library aren't exposed in any way to the library interface.
+- Run aggressive static analyzers
+
 ## Misc List
 
 - find out how to use the [cppcoreguideline checker](https://docs.microsoft.com/en-us/cpp/code-quality/using-the-cpp-core-guidelines-checkers?view=msvc-170)
@@ -33,6 +39,9 @@
   - Definitely useful types: SolutionGrid, ProperPuzzleGrid, MaybeInvalidPuzzleGrid.
   - Maybe useful types: MinimalPuzzleGrid.
   - Things that might get ugly: the way they are, `grid_is_filled` and `grid_is_valid` would still require the caller to do some kind of unsafe-moving-cast to a new variable of a stronger type.
+
+- try DLL's again? read the docs actually.
+  - [general rules and limitations](https://docs.microsoft.com/en-us/cpp/cpp/general-rules-and-limitations)
 
 - I wish vscode-cmake-tools wouldn't delete CMakeCache.txt and CMakeFiles.txt when switching kit if the build directory is different after the switch. Maybe report an issue on their GitHub?
 

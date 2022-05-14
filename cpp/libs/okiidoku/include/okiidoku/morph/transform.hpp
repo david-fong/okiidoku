@@ -34,7 +34,7 @@ namespace okiidoku::mono {
 
 		void apply_in_place(Grid<O>&) const noexcept;
 
-		[[nodiscard, gnu::const]] Transformation<O> inverted() const noexcept;
+		[[nodiscard, gnu::pure]] Transformation<O> inverted() const noexcept;
 	};
 }
 
@@ -60,7 +60,7 @@ namespace okiidoku::visitor {
 		// Does nothing if the transformation's order is not the same as the grid's.
 		void apply_in_place(Grid&) const noexcept;
 
-		[[nodiscard, gnu::const]] Transformation inverted() const noexcept;
+		[[nodiscard, gnu::pure]] Transformation inverted() const noexcept;
 	};
 }
 #endif

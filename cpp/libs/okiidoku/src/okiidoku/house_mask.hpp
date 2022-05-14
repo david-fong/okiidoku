@@ -23,6 +23,7 @@ namespace okiidoku::mono {
 
 		using int_t = std::uint64_t;
 
+	private:
 		static constexpr unsigned int int_t_num_bits  {8 * sizeof(int_t)};
 		static constexpr unsigned int num_ints        {(T::O2 + int_t_num_bits-1) / int_t_num_bits}; static_assert(num_ints != 0);
 		static constexpr unsigned int ints_t_num_bits {num_ints * int_t_num_bits};
@@ -32,7 +33,8 @@ namespace okiidoku::mono {
 		}
 		using ints_t = std::array<int_t, num_ints>;
 
-		// if user follows contracts, excess top bits are always zero.
+		// if user follows contracts, excess top bits are always zero; this
+		// property must not be dependended upon by users of this library.
 		ints_t ints_ {{0}};
 
 	public:
@@ -136,7 +138,7 @@ namespace okiidoku::mono {
 		[[nodiscard, gnu::pure]] o2x_t get_index_of_nth_set_bit(o2x_t set_bit_index) const noexcept {
 			assert(set_bit_index < T::O2);
 			assert(count() > o2i_t{set_bit_index});
-			for (size_t int_i {0}; int_i < ints_.size(); ++int_i) {
+			for (size_t int_i {0}; int_i < num_ints; ++int_i) {
 				auto& int_ {ints_[int_i]};
 				const auto int_popcount {std::popcount(int_)};
 				if constexpr (num_ints > 1) {

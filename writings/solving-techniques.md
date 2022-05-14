@@ -30,3 +30,13 @@ Given intersection `I` between some line `L` and box `B`, if either house `L` or
 
 - [sudopedia](https://www.sudopedia.org/wiki/Fish)
 
+
+---
+
+# Making Hard Puzzles
+
+How is it done?
+
+- Perhaps by searching for the next given to remove that retains the most symbol and cell candidates?
+
+- Perhaps there is some correlation to the properties currently being used for canonicalizing labels?
