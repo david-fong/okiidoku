@@ -15,34 +15,34 @@ namespace okiidoku::mono {
 
 	namespace detail {
 
-		template<int N>
-		using uint_fastN_t = 
-			std::conditional_t<(N <=   8), std::uint_fast8_t,
-			std::conditional_t<(N <=  16), std::uint_fast16_t,
-			std::conditional_t<(N <=  32), std::uint_fast32_t,
-			std::conditional_t<(N <=  64), std::uint_fast64_t,
-			// std::conditional_t<(N <= 128), __uint128_t, // currently unused. Note: won't work with MSVC
+		template<unsigned int N>
+		using uint_fastN_t =
+			std::conditional_t<(N <=   8U), std::uint_fast8_t,
+			std::conditional_t<(N <=  16U), std::uint_fast16_t,
+			std::conditional_t<(N <=  32U), std::uint_fast32_t,
+			std::conditional_t<(N <=  64U), std::uint_fast64_t,
+			// std::conditional_t<(N <= 128U), __uint128_t, // currently unused. Note: won't work with MSVC
 			void
 		>>>>;
 
-		template<int N>
-		using uint_smolN_t = 
-			std::conditional_t<(N <=   8), std::uint_least8_t,
-			std::conditional_t<(N <=  16), std::uint_least16_t,
-			std::conditional_t<(N <=  32), std::uint_least32_t,
-			std::conditional_t<(N <=  64), std::uint_least64_t,
-			// std::conditional_t<(N <= 128), __uint128_t,
+		template<unsigned int N>
+		using uint_smolN_t =
+			std::conditional_t<(N <=   8U), std::uint_least8_t,
+			std::conditional_t<(N <=  16U), std::uint_least16_t,
+			std::conditional_t<(N <=  32U), std::uint_least32_t,
+			std::conditional_t<(N <=  64U), std::uint_least64_t,
+			// std::conditional_t<(N <= 128U), __uint128_t,
 			void
 		>>>>;
 
 		// Note: this is optional based on whether the target architecture supports these fixed-width types.
-		template<int N>
-		using uint_fixedN_t = 
-			std::conditional_t<(N <=   8), std::uint8_t,
-			std::conditional_t<(N <=  16), std::uint16_t,
-			std::conditional_t<(N <=  32), std::uint32_t,
-			std::conditional_t<(N <=  64), std::uint64_t,
-			// std::conditional_t<(N <= 128), __uint128_t,
+		template<unsigned int N>
+		using uint_fixedN_t =
+			std::conditional_t<(N <=   8U), std::uint8_t,
+			std::conditional_t<(N <=  16U), std::uint16_t,
+			std::conditional_t<(N <=  32U), std::uint32_t,
+			std::conditional_t<(N <=  64U), std::uint64_t,
+			// std::conditional_t<(N <= 128U), __uint128_t,
 			void
 		>>>>;
 	}

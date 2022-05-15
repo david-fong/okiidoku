@@ -27,12 +27,14 @@ namespace okiidoku::util {
 		}
 	};
 
-	void restore_console_config_() {
-		#ifdef _WIN32
-		if (old_con_mode) { SetConsoleMode(GetStdHandle(STD_OUTPUT_HANDLE), old_con_mode.value()); }
-		if (old_con_input_codepage) { SetConsoleCP(old_con_input_codepage.value()); }
-		if (old_con_output_codepage) { SetConsoleOutputCP(old_con_output_codepage.value()); }
-		#endif
+	namespace {
+		void restore_console_config_() {
+			#ifdef _WIN32
+			if (old_con_mode) { SetConsoleMode(GetStdHandle(STD_OUTPUT_HANDLE), old_con_mode.value()); }
+			if (old_con_input_codepage) { SetConsoleCP(old_con_input_codepage.value()); }
+			if (old_con_output_codepage) { SetConsoleOutputCP(old_con_output_codepage.value()); }
+			#endif
+		}
 	}
 
 	void setup_console() {

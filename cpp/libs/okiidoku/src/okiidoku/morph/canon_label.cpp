@@ -32,7 +32,7 @@ namespace okiidoku::mono { namespace {
 			explicit constexpr State(const Grid<O>& grid) noexcept: rel_table{detail::make_rel_table<O>(grid)} {
 				std::iota(to_og.begin(), to_og.end(), mapping_t{0});
 			}
-			[[nodiscard]] bool has_ties() const { return ties.has_unresolved(); }
+			[[nodiscard]] bool has_ties() const noexcept { return ties.has_unresolved(); }
 		};
 		static void do_a_pass_(State& s) noexcept;
 

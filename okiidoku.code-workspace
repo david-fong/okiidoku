@@ -27,7 +27,6 @@
 		"cmake.configureOnOpen": false,
 
 		"files.associations": {
-			"**/gcc/**": "cpp",
 			".clang-tidy": "yaml",
 		},
 		// "explorer.sortOrder": "default",

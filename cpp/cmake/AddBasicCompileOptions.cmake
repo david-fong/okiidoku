@@ -50,12 +50,24 @@ if(MSVC)
 	)
 else()
 	add_compile_options(
-		-Wall -Wextra -Wpedantic #-Werror
+		-Wall -Wextra -Wpedantic -pedantic-errors #-Werror
 		-Wfatal-errors # stop compilation on first error. I found it hard to read multiple.
-		-Wold-style-cast -Wcast-qual -Wcast-align
-		-Wformat=2
+		-Wold-style-cast -Wvla # maybe put this in the project-root cmake file
 		-Wconversion # -Wsign-conversion -Warith-conversion
+		-Wdouble-promotion
+		# -Wframe-larger-than=byte-size -Wstack-usage=byte-size
+
+		-Wdisabled-optimization # not an error: functions too big. gcc gave up on optimizing.
+
+		-Wformat=2
+		-Wcast-qual -Wcast-align
 		-Wshadow -Woverloaded-virtual
+		-Wnon-virtual-dtor
+		# -Wnoexcept
+		-Wenum-compare -Wenum-conversion
+		-Wmissing-declarations
+		-Wunused-macros
+		-Wundef # warn on undefined identifier used in `#if`
 	)
 	if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 		add_compile_options(
@@ -66,26 +78,20 @@ else()
 			-Wuseless-cast
 			-Wimplicit-fallthrough=5
 			# TODO.try
-			# -Wvla # maybe put this in the project-root cmake file
-			# -Wpedantic-errors
-			# -Walloc-zero
-			# -Wenum-compare -Wenum-conversion
-			# -Wduplicated-cond
-			# -Wlogical-op
-			# -Wmissing-declarations
-			# -Wunused-macros
-			# -Wundef # warn on undefined identifier used in `#if`
-			# -Wtrampolines
-			# -Wframe-larger-than=byte-size -Wstack-usage=byte-size
-			# -fno-nonansi-builtins
-			# -Wno-builtin-declaration-mismatch
-			# -Wunsafe-loop-optimizations
 			# -fno-implicit-templates or -frepo # https://gcc.gnu.org/onlinedocs/gcc-4.7.2/gcc/Template-Instantiation.html#Template-Instantiation
+			-Wno-builtin-declaration-mismatch
+			-fno-nonansi-builtins # Disable built-in declarations of functions that are not mandated by ANSI/ISO C. These include ffs, alloca, _exit, index, bzero, conjf, and other related functions.
+
+			# -Wunsafe-loop-optimizations # only meaningful with -funsafe-loop-optimizations
+
+			-Walloc-zero
+			-Wlogical-op
+			-Wduplicated-cond
+			-Wtrampolines
 
 			# interesting but probably too overboard:
 			# -Wpadded
-			# -Wdisabled-optimization
-			# -Wdouble-promotion
+			# -Wsign-promo # actually warns on overload selection behaviour mandated by the standard :O
 		)
 	endif()
 endif()

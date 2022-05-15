@@ -39,7 +39,7 @@ namespace okiidoku::mono { namespace {
 			TieLinks<O, 1> chute_ties {};
 
 			explicit PolarState() noexcept {
-				line_ties.update([](auto a, auto b){
+				line_ties.update([](auto a, auto b)noexcept{
 					return (a%T::O1) == (b%T::O1);
 				});
 			}

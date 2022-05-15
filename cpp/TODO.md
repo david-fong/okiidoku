@@ -31,7 +31,7 @@
 
 - I added `gnu::const` and pure to a bunch of equality and ordering operators. Need to test it out and see if things still seem to be working.
 
-- find out how to use the [cppcoreguideline checker](https://docs.microsoft.com/en-us/cpp/code-quality/using-the-cpp-core-guidelines-checkers?view=msvc-170)
+- find out how to use the [cppcoreguidelines checker](https://docs.microsoft.com/en-us/cpp/code-quality/using-the-cpp-core-guidelines-checkers?view=msvc-170)
 
 - experiment with using compiler "assume" hints (asserts are checked at runtime. assumptions are not checked and used for optimizations (to do the opposite: "remove checks")).
   - GSL has a macro to do this on MSVC, Clang, and GCC. Feels weird to add an entire dependency just for a tiny macro though...
@@ -70,7 +70,7 @@
 
 1. Consider: The current relabelling canonicalization method may have a big weakness: I think ties can be easily crafted: consider the "Most Canonical" solution grid- it would be all ties. How can this be addressed? (Or perhaps the "Most Canonical" grid is the only weakness?)
     - Break ties by designing a way to give symbols that frequently cohabit atoms label-values that are closer together in value:
-    - The cohabitation table can be tiled; a rmiinate's vertical or horizontal distance (these are the same, since relabelling moves both the col and row together) from the closest tiling of the main diagonal represents the distance of the labels from each other.
+    - The cohabitation table can be tiled; a coordinate's vertical or horizontal distance (these are the same, since relabelling moves both the col and row together) from the closest tiling of the main diagonal represents the distance of the labels from each other.
     - For each label, make an array where each index represents another label, and the value is an object containing the left and right distances between them, and the cohabitation count.
     - Hm. So far this seems to suggest a hill-climbing / brute-force-type solution...
     - OR... make an empty commit saying that a solution was implemented using the [Ostrich Algorithm](https://en.wikipedia.org/wiki/Ostrich_algorithm)
