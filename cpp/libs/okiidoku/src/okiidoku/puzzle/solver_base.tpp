@@ -10,24 +10,47 @@
 #include <queue>
 #include <memory> // unique_ptr
 
+/**
+This class provides solving primitives to design a solver.
+Currently it is private and used to build public solvers.
+There is some merit to publicizing this class. Maybe in the future.
+Part of why it's private is because it still feels quite low-level to use.
+It's much more like a micro-library than a micro-framework.
+I imagine an average library _user_ would not be interested in such tinkering.
+Of course, anyone can clone the repo and do such tinkering within it if they wish.
+
+Examples of various ways this could be used:
+- solvers that greedily/immediately consume queued commits
+- solvers that "hoard"/accumulate queued commits until solving techniques
+	cannot find anything more without consuming queued commits.
+- can purely use the guess mechanism (_very_ inefficient, but technically valid approach)
+  - note that the solver is not designed to be efficient when used in
+    a way that makes heavy use of guessing- quite the opposite!
+	 See the guess stack comments for more info.
+
+Please very carefully read and adhere to the contracts.
+*/
 namespace okiidoku::mono::detail::cell_major_deductive_solver {
-	/**
-	This class provides solving primitives to design a solver.
-	Currently it is private and used to build public solvers.
-	There is some merit to publicizing this class. Maybe in the future.
-	Part of why it's private is because it still feels quite low-level to use.
-	It's much more like a micro-library than a micro-framework.
-	I imagine an average library _user_ would not be interested in such tinkering.
-	Of course, anyone can clone the repo and do such tinkering within it if they wish.
 
-	Examples of various ways this could be used:
-	- solvers that greedily/immediately consume queued commits
-	- solvers that "hoard"/accumulate queued commits until solving techniques
-	   cannot find anything more without consuming queued commits.
-	- can purely use the guess mechanism (very inefficient, but technically valid approach)
+	enum class [[nodiscard("unsat must be handled")]] CandElimResult : unsigned char {
+		ok,
+		unsat, // resulted in cell having zero candidate-symbols
+	};
+	enum class [[nodiscard("unsat must be handled")]] TryTechniqueResult : unsigned char {
+		no_match,
+		match_ok,
+		match_unsat, // resulted in cell having zero candidate-symbols
+	};
 
-	Please carefully read and adhere to the contracts.
-	*/
+	// ADL-capable code-readability wrapper to check a `CandElimResult` for unsat.
+	[[nodiscard, gnu::const]] bool hit_unsat(const CandElimResult check) noexcept {
+		return check == CandElimResult::unsat;
+	}
+	[[nodiscard, gnu::const]] bool hit_unsat(const TryTechniqueResult check) noexcept {
+		return check == TryTechniqueResult::match_unsat;
+	}
+
+
 	template<Order O> requires(is_order_compiled(O))
 	class LowLevelEngine final {
 	public:
@@ -36,26 +59,12 @@ namespace okiidoku::mono::detail::cell_major_deductive_solver {
 		using rmi_t = typename T::o4x_smol_t;
 		using o4i_t = typename T::o4i_t;
 
-		enum class [[nodiscard("unsat must be handled")]] CandElimResult : unsigned char {
-			ok,
-			unsat, // resulted in cell having zero candidate-symbols
-		};
-		enum class [[nodiscard("unsat must be handled")]] TryTechniqueResult : unsigned char {
-			no_match,
-			match_ok,
-			match_unsat, // resulted in cell having zero candidate-symbols
-		};
-
 		explicit LowLevelEngine(const Grid<O>& puzzle) noexcept;
 
-		// contract: this should be checked at the beginning of the solving routine
+		// contract: (usage) this should be checked at the beginning of the solving routine
 		// to immediately return `std::nullopt` if it returns true.
 		[[nodiscard, gnu::pure]]
 		bool no_solutions_remain() const noexcept { return no_solutions_remain_; }
-
-		// contract: `val` is a candidate-symbol at `rmi`.
-		// contract: no previous call has been made with the same value of `rmi`.
-		void commit_and_enqueue_effects(rmi_t rmi, val_t val) noexcept;
 
 		[[nodiscard, gnu::pure]]
 		bool has_enqueued_commit_effects() const noexcept { return !commit_effects_queue_.empty(); }
@@ -106,6 +115,16 @@ namespace okiidoku::mono::detail::cell_major_deductive_solver {
 		CandElimResult unwind_and_rule_out_bad_guesses() noexcept;
 
 	private:
+		// contract: `val` is currently one of _multiple_ candidate-symbols at `rmi`.
+		// contract: no previous call has been made with the same value of `rmi`.
+		// post-condition: `val` is registered as the only candidate-symbol at `rmi`.
+		void register_new_given_(rmi_t rmi, val_t val) noexcept;
+
+		// contract: must be called immediately when a cell's candidate-symbol count _changes_ to one.
+		// contract: (it follows that) no previous call has been made with the same value of `rmi`.
+		// contract: (it follows that) the cell at `rmi` has exactly one candidate-symbol.
+		void enqueue_commit_effects_for_new_cell_requires_symbol_(rmi_t rmi) noexcept;
+
 		// If the candidate is already eliminated, returns `ok`.
 		CandElimResult eliminate_candidate_(rmi_t rmi, val_t cand) noexcept;
 
@@ -127,9 +146,10 @@ namespace okiidoku::mono::detail::cell_major_deductive_solver {
 		cells_cands_ has non-trivial management logic (deductive solving)
 		so backtracking the DFS isn't as simple as unsetting some house-
 		mask bits. */
+		// TODO.asap rename to "GuessRecord"
 		struct GuessStep final {
 			CandSymsGrid prev_cells_cands;
-			rmi_t curr_guessed_rmi;
+			rmi_t curr_guessed_rmi; // TODO.asap currently has a bug: assumes the guessed val can be gotten by reading it from the now-known-to-be-unsat puzzle. but what if the guessed-at cell is the one that got all its candidates removed? That's the bug. Instead, this struct should also store the guessed val. Can use CommitRecord for that and name the field "guess".
 			GuessStep(
 				const CandSymsGrid& prev_cells_cands_,
 				const rmi_t curr_guessed_rmi_
@@ -155,8 +175,9 @@ namespace okiidoku::mono::detail::cell_major_deductive_solver {
 		cells_cands_.get_underlying_array().fill(house_mask_ones<O>);
 		for (o4i_t rmi {0}; rmi < T::O4; ++rmi) {
 			const auto& given {puzzle.at_rmi(rmi)};
+			assert(given <= T::O2);
 			if (given >= T::O2) { continue; }
-			commit_and_enqueue_effects(static_cast<rmi_t>(rmi), static_cast<val_t>(given));
+			register_new_given_(static_cast<rmi_t>(rmi), static_cast<val_t>(given));
 		}
 	}
 
@@ -164,6 +185,7 @@ namespace okiidoku::mono::detail::cell_major_deductive_solver {
 	template<Order O> requires(is_order_compiled(O))
 	std::optional<Grid<O>> LowLevelEngine<O>::build_solution_obj() const noexcept {
 		if (no_solutions_remain_) [[unlikely]] {
+			// Note: this case is technically covered by
 			return std::nullopt;
 		}
 		assert(num_puzzle_cells_remaining_ == 0);
@@ -188,8 +210,7 @@ namespace okiidoku::mono::detail::cell_major_deductive_solver {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	typename LowLevelEngine<O>::CandElimResult
-	LowLevelEngine<O>::eliminate_candidate_(
+	CandElimResult LowLevelEngine<O>::eliminate_candidate_(
 		const LowLevelEngine<O>::rmi_t rmi,
 		const LowLevelEngine<O>::val_t cand_to_elim
 	) noexcept {
@@ -208,38 +229,50 @@ namespace okiidoku::mono::detail::cell_major_deductive_solver {
 			return CandElimResult::unsat;
 		}
 		if (cell_cands.count() == 1) [[unlikely]] {
-			commit_and_enqueue_effects(rmi, cell_cands.count_lower_zeros_assuming_non_empty_mask());
+			enqueue_commit_effects_for_new_cell_requires_symbol_(rmi);
 		}
 		return CandElimResult::ok;
 	}
 
 
 	template<Order O> requires(is_order_compiled(O))
-	void LowLevelEngine<O>::commit_and_enqueue_effects(
+	void LowLevelEngine<O>::register_new_given_(
 		const LowLevelEngine<O>::rmi_t rmi,
 		const LowLevelEngine<O>::val_t val
 	) noexcept {
-		assert(num_puzzle_cells_remaining_ > 0);
 		assert(val < T::O2);
 		auto& cell_cands {cells_cands_.at_rmi(rmi)};
 		assert(cell_cands.test(val));
+		assert(cell_cands.count() > 1);
 		cell_cands.unset_all();
 		cell_cands.set(val);
 		assert(cell_cands.test(val));
+		assert(cell_cands.count() == 1);
+		// TODO.low inlined the call. seems like a latent foot-gun.
+		// enqueue_commit_effects_for_new_cell_requires_symbol_(rmi);
 		commit_effects_queue_.emplace(rmi, val);
+		--num_puzzle_cells_remaining_;
+	}
+	template<Order O> requires(is_order_compiled(O))
+	void LowLevelEngine<O>::enqueue_commit_effects_for_new_cell_requires_symbol_(
+		const LowLevelEngine<O>::rmi_t rmi
+	) noexcept {
+		assert(num_puzzle_cells_remaining_ > 0);
+		auto& cell_cands {cells_cands_.at_rmi(rmi)};
+		assert(cell_cands.count() == 1);
+		commit_effects_queue_.emplace(rmi, cell_cands.count_lower_zeros_assuming_non_empty_mask());
 		--num_puzzle_cells_remaining_;
 	}
 
 
 	template<Order O> requires(is_order_compiled(O))
-	typename LowLevelEngine<O>::CandElimResult
-	LowLevelEngine<O>::process_one_queued_commit_effects() noexcept {
+	CandElimResult LowLevelEngine<O>::process_one_queued_commit_effects() noexcept {
 		assert(has_enqueued_commit_effects());
 		// TODO.asap do eliminate_candidate_ for all same-house cells
 		// while (false) {
 		// 	if (neighbour_rmi == rmi) [[unlikely]] { continue; }
-		// 	CandElimResult hit_unsat {eliminate_candidate_(neighbour_rmi, val)};
-		// 	if (hit_unsat) [[unlikely]] {
+		// 	const auto check {eliminate_candidate_(neighbour_rmi, val)};
+		// 	if (check) [[unlikely]] {
 		// 		return CandElimResult::unsat;
 		// 	}
 		// }
@@ -248,12 +281,11 @@ namespace okiidoku::mono::detail::cell_major_deductive_solver {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	typename LowLevelEngine<O>::CandElimResult
-	LowLevelEngine<O>::process_all_queued_commit_effects() noexcept {
+	CandElimResult LowLevelEngine<O>::process_all_queued_commit_effects() noexcept {
 		while (has_enqueued_commit_effects()) {
-			const auto hit_unsat {process_one_queued_commit_effects()};
-			if (hit_unsat == CandElimResult::unsat) {
-				return hit_unsat;
+			const auto check {process_one_queued_commit_effects()};
+			if (check == CandElimResult::unsat) {
+				return CandElimResult::unsat;
 			}
 		}
 		return CandElimResult::ok;
@@ -269,13 +301,12 @@ namespace okiidoku::mono::detail::cell_major_deductive_solver {
 		assert(cells_cands_.at_rmi(rmi).test(val));
 		guess_stack_.emplace(std::make_unique<GuessStep>(cells_cands_, rmi));
 
-		commit_and_enqueue_effects(rmi, val);
+		register_new_given_(rmi, val);
 	}
 
 
 	template<Order O> requires(is_order_compiled(O))
-	typename LowLevelEngine<O>::CandElimResult
-	LowLevelEngine<O>::unwind_and_rule_out_bad_guesses() noexcept {
+	CandElimResult LowLevelEngine<O>::unwind_and_rule_out_bad_guesses() noexcept {
 		if (guess_stack_.empty()) {
 			no_solutions_remain_ = true;
 			return CandElimResult::unsat;
@@ -289,13 +320,20 @@ namespace okiidoku::mono::detail::cell_major_deductive_solver {
 		cells_cands_ = std::move(step.prev_cells_cands);
 
 		// after restoring old `cells_cands_`, rule out the bad guess value:
-		const auto hit_unsat {eliminate_candidate_(prev_guessed_rmi, prev_guessed_val)};
+		const auto check {eliminate_candidate_(prev_guessed_rmi, prev_guessed_val)};
 
 		guess_stack_.pop();
-		if (hit_unsat == CandElimResult::unsat) [[unlikely]] {
+		if (check == CandElimResult::unsat) [[unlikely]] {
 			return unwind_and_rule_out_bad_guesses();
 		}
 		return CandElimResult::ok;
+	}
+
+
+	template<Order O> requires(is_order_compiled(O))
+	TryTechniqueResult LowLevelEngine<O>::try_technique_symbol_requires_cell() noexcept {
+		// TODO.asap
+		return TryTechniqueResult::no_match;
 	}
 
 

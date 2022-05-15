@@ -29,6 +29,8 @@
 
 ## Misc List
 
+- boost has a `variant2` class that is never valueless by exception
+
 - I added `gnu::const` and pure to a bunch of equality and ordering operators. Need to test it out and see if things still seem to be working.
 
 - find out how to use the [cppcoreguidelines checker](https://docs.microsoft.com/en-us/cpp/code-quality/using-the-cpp-core-guidelines-checkers?view=msvc-170)

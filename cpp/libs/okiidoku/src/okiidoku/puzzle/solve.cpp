@@ -19,18 +19,31 @@ namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
 	std::optional<Grid<O>> FastSolver<O>::get_next_solution() noexcept {
-		if (impl_.get() == nullptr) {
+		if (impl_) [[unlikely]] {
 			// should I really do this? My spec says this is UB.
 			return std::nullopt;
 		}
-		// while (num_puzzle_cells_remaining_ != 0) {
-			// for (const auto& technique : techniques) {
-			// 	const auto old_num_puzzle_cells_remaining {num_puzzle_cells_remaining_};
-			// 	const auto hit_unsat {technique()};
-			// 	if (hit_unsat) {}
-			// }
-		// }
-		return impl_->build_solution_obj();
+		impl_t& impl {*impl_};
+		if (impl.no_solutions_remain()) [[unlikely]] {
+			return std::nullopt;
+		}
+		{const auto check {impl.process_all_queued_commit_effects()};
+		// TODO.asap annoying to have to write this unwind part, and it's almost certainly an error not to!
+		// I think it makes sense for the engine to abstract the unwinding away so that
+		if (hit_unsat(check) && hit_unsat(impl.unwind_and_rule_out_bad_guesses())) {
+			return std::nullopt;
+		}}
+		while (impl.get_num_puzzle_cells_remaining() != 0) {
+			{const auto check {impl.try_technique_symbol_requires_cell()};
+			if (hit_unsat(check) && hit_unsat(impl.unwind_and_rule_out_bad_guesses())) {
+				return std::nullopt;
+			}}
+			{const auto check {impl.process_all_queued_commit_effects()};
+			if (hit_unsat(check) && hit_unsat(impl.unwind_and_rule_out_bad_guesses())) {
+				return std::nullopt;
+			}}
+		}
+		return impl.build_solution_obj();
 	}
 }
 namespace okiidoku::mono {

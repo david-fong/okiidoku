@@ -77,17 +77,22 @@ else()
 		add_compile_options(
 			-Wuseless-cast
 			-Wimplicit-fallthrough=5
-			# TODO.try
-			# -fno-implicit-templates or -frepo # https://gcc.gnu.org/onlinedocs/gcc-4.7.2/gcc/Template-Instantiation.html#Template-Instantiation
-			-Wno-builtin-declaration-mismatch
-			-fno-nonansi-builtins # Disable built-in declarations of functions that are not mandated by ANSI/ISO C. These include ffs, alloca, _exit, index, bzero, conjf, and other related functions.
-
-			# -Wunsafe-loop-optimizations # only meaningful with -funsafe-loop-optimizations
-
 			-Walloc-zero
 			-Wlogical-op
 			-Wduplicated-cond
+
+			-Wsuggest-attribute=pure
+			-Wsuggest-attribute=const
+			-Wsuggest-attribute=noreturn
+			# TODO.try
+			# -fno-implicit-templates or -frepo # https://gcc.gnu.org/onlinedocs/gcc-4.7.2/gcc/Template-Instantiation.html#Template-Instantiation
+
+			-Wno-builtin-declaration-mismatch
+			-fno-nonansi-builtins # Disable built-in declarations of functions that are not mandated by ANSI/ISO C. These include ffs, alloca, _exit, index, bzero, conjf, and other related functions.
 			-Wtrampolines
+
+			# -Wunsafe-loop-optimizations # only meaningful with -funsafe-loop-optimizations
+
 
 			# interesting but probably too overboard:
 			# -Wpadded
