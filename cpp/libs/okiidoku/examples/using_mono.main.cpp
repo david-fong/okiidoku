@@ -32,7 +32,7 @@ int main([[maybe_unused]] const int argc, [[maybe_unused]] char const *const arg
 	oki::Grid<O> gen_grid;
 	oki::generate(gen_grid, shared_rng);
 	oki::Grid<O> puz_grid;
-	// TODO.wait oki::puzzle::make_hard(gen_grid, puz_of_gen_grid);
+	// TODO.wait oki::make_minimal_puzzle(gen_grid, puz_of_gen_grid);
 	auto canon_transform_for_gen_grid {oki::canonicalize(gen_grid)};
 	canon_transform_for_gen_grid.apply_in_place(puz_grid);
 

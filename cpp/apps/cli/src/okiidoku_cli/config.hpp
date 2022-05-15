@@ -1,7 +1,6 @@
 #ifndef HPP_OKIIDOKU_CLI__CONFIG
 #define HPP_OKIIDOKU_CLI__CONFIG
 
-#include <okiidoku_cli/enum.hpp>
 #include <okiidoku/detail/order_templates.hpp>
 
 #include <string_view>

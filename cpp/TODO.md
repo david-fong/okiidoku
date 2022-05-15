@@ -29,6 +29,8 @@
 
 ## Misc List
 
+- I added `gnu::const` and pure to a bunch of equality and ordering operators. Need to test it out and see if things still seem to be working.
+
 - find out how to use the [cppcoreguideline checker](https://docs.microsoft.com/en-us/cpp/code-quality/using-the-cpp-core-guidelines-checkers?view=msvc-170)
 
 - experiment with using compiler "assume" hints (asserts are checked at runtime. assumptions are not checked and used for optimizations (to do the opposite: "remove checks")).

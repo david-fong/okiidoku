@@ -29,7 +29,7 @@ namespace okiidoku::mono { namespace {
 			h_chute_boxes_cands.fill(house_mask_ones<O>);
 			cols_cands.fill(house_mask_ones<O>);
 		}
-		[[nodiscard, gnu::pure]] o4i_t get_cell_rmi() const noexcept { return cell_rmi; }
+		[[nodiscard]] o4i_t get_cell_rmi() const noexcept { return cell_rmi; }
 		void advance() noexcept;
 
 		// automatically removes val as a candidate of future cells.

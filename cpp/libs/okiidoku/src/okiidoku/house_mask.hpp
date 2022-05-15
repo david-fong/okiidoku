@@ -50,6 +50,7 @@ namespace okiidoku::mono {
 
 		// count the number of set bits.
 		[[nodiscard, gnu::pure]] o2i_t count() const noexcept {
+			// TODO.mid investigate how good compilers are at optimizing these member functions.
 			return static_cast<o2i_t>(std::transform_reduce(
 				ints_.cbegin(), ints_.cend(), 0, std::plus{},
 				[&](const auto int_){ return static_cast<o2i_t>(std::popcount(int_)); }
@@ -79,6 +80,10 @@ namespace okiidoku::mono {
 			const auto at_int {bit_index_to_int_index(at)};
 			const int_t at_int_bit_mask {int_t{1} << (at % int_t_num_bits)};
 			ints_[at_int] &= ~at_int_bit_mask;
+		}
+
+		void unset_all() noexcept {
+			ints_.fill(0);
 		}
 
 		[[nodiscard, gnu::pure]] static bool test_any3(const o2x_t at, const HouseMask& a, const HouseMask& b, const HouseMask& c) noexcept {

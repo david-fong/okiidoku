@@ -10,13 +10,16 @@
 #include <experimental/propagate_const>
 #endif
 
-namespace okiidoku::mono::detail {
+namespace okiidoku::mono::detail::cell_major_deductive_solver {
 
 	template<Order O> requires(is_order_compiled(O))
-	class SolverBase /* final */;
+	class LowLevelEngine /* final */;
+
+	// template<Order O> requires(is_order_compiled(O))
+	// class DynamicBuilder /* final */;
 }
 
-namespace okiidoku::mono::puzzle {
+namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
 	class OKIIDOKU_EXPORT FastSolver final {
@@ -37,15 +40,16 @@ namespace okiidoku::mono::puzzle {
 		[[nodiscard]] std::optional<Grid<O>> get_next_solution() noexcept;
 
 	private:
+		using impl_t = detail::cell_major_deductive_solver::LowLevelEngine<O>;
 		#if __has_include(<experimental/propagate_const>)
-		std::experimental::propagate_const<std::unique_ptr<detail::SolverBase<O>>> impl_;
+		std::experimental::propagate_const<std::unique_ptr<impl_t>> impl_;
 		#else // fallback for MSVC
-		std::unique_ptr<Impl> impl_;
+		std::unique_ptr<impl_t> impl_;
 		#endif
 	};
 }
 
 
-namespace okiidoku::visitor::puzzle {
+namespace okiidoku::visitor {
 }
 #endif

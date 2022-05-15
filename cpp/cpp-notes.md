@@ -87,3 +87,5 @@ things I got wrong before which I couldn't understand based on gcc's error messa
 - [pitfalls of ADL](https://stackoverflow.com/questions/2958648/what-are-the-pitfalls-of-adl)
 
 - [How to write well-behaved value-wrappers](https://www.youtube.com/watch?v=J4A2B9eexiw&ab_channel=CppCon).
+
+- [](https://gcc.gnu.org/onlinedocs/gcc/Compatibility.html)

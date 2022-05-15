@@ -45,7 +45,7 @@ target_link_libraries(okiidoku
 )
 
 if(okiidoku_IS_TOP_LEVEL)
-	add_subdirectory(examples)
+	add_subdirectory(examples) # TODO.try using EXCLUDE_FROM_ALL and making examples a separate project https://cmake.org/cmake/help/latest/command/add_subdirectory.html
 	if(BUILD_TESTING)
 		add_subdirectory(tests)
 	endif()

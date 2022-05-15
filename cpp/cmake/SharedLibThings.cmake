@@ -1,6 +1,6 @@
 
 # set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
-# ^tried in last-ditch attempt to support DLLs. It didn't work.
+# ^tried in last-ditch attempt to support DLLs. It didn't work probably because I don't know what I'm doing.
 
 # Alex Reinking's tutorial suggests respecting user-specified values, but
 # that doesn't make intuitive sense to me as to why, so I'm not doing it.

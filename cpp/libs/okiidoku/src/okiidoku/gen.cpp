@@ -18,7 +18,7 @@ namespace okiidoku::mono { namespace {
 		using T = Ints<O>;
 		using V = typename T::o1i_t;
 		using o3i_t = typename T::o3i_t;
-		[[nodiscard, gnu::pure]] o3i_t count_num_missing_syms() const noexcept { return static_cast<o3i_t>(std::ranges::count(store_, V{0})); }
+		[[nodiscard]] o3i_t count_num_missing_syms() const noexcept { return static_cast<o3i_t>(std::ranges::count(store_, V{0})); }
 		template<class T_box, class T_sym> requires(Any_o1x<O, T_box> && Any_o2x<O, T_sym>)
 		[[nodiscard]] const V& box_count_sym(const T_box box, const T_sym sym) const noexcept { return store_[(T::O1*sym)+box]; }
 		template<class T_box, class T_sym> requires(Any_o1x<O, T_box> && Any_o2x<O, T_sym>)
@@ -78,7 +78,7 @@ namespace okiidoku::mono { namespace {
 		using T = Ints<O>;
 		using V = typename T::o2i_smol_t;
 		using o3i_t = typename T::o3i_t;
-		[[nodiscard, gnu::pure]] o3i_t count_num_missing_syms() const noexcept { return static_cast<o3i_t>(std::ranges::count(store_, V{0})); }
+		[[nodiscard]] o3i_t count_num_missing_syms() const noexcept { return static_cast<o3i_t>(std::ranges::count(store_, V{0})); }
 		template<class T_col, class T_sym> requires(Any_o1x<O, T_col> && Any_o2x<O, T_sym>)
 		[[nodiscard]] const V& col_count_sym(const T_col col, const T_sym sym) const noexcept { return store_[(T::O1*sym)+col]; }
 		template<class T_col, class T_sym> requires(Any_o1x<O, T_col> && Any_o2x<O, T_sym>)

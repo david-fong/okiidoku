@@ -14,6 +14,7 @@ namespace okiidoku::mono {
 	namespace detail {
 		template<Order O, class V> requires(is_order_compiled(O) && !std::is_reference_v<V>) struct Gridlike;
 	}
+	// contract: all entry values are in the range [0, O2].
 	template<Order O> requires(is_order_compiled(O))
 	using Grid = detail::Gridlike<O, grid_val_t<O>>;
 
@@ -43,7 +44,7 @@ namespace okiidoku::mono {
 		using array_t = std::array<val_t, T::O4>;
 
 		// lexicographical comparison over row-major-order traversal of cells.
-		friend std::strong_ordering operator<=>(const Gridlike<O, V_>& a, const Gridlike<O, V_>& b) noexcept = default;
+		[[nodiscard, gnu::const]] friend std::strong_ordering operator<=>(const Gridlike<O, V_>& a, const Gridlike<O, V_>& b) noexcept = default;
 
 		// For regular grids, always default initialize as an empty grid (to be safe).
 		// Note: Making this constexpr results in a 1% speed gain, but 45% program

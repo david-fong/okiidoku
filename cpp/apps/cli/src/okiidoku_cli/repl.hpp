@@ -2,7 +2,6 @@
 #define HPP_OKIIDOKU_CLI__REPL
 
 #include <okiidoku_cli/config.hpp>
-#include <okiidoku_cli/enum.hpp>
 #include <okiidoku/shared_rng.hpp>
 
 #include <map>

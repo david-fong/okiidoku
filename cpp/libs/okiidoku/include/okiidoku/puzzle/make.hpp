@@ -5,12 +5,12 @@
 #include <okiidoku/grid.hpp>
 #include <okiidoku/detail/order_templates.hpp>
 
-namespace okiidoku::mono::puzzle {
+namespace okiidoku::mono {
 
 	// contract: grid is filled or a proper puzzle.
 	// post-condition: the grid is a minimal puzzle. solution unchanged.
 	template<Order O> requires(is_order_compiled(O))
-	OKIIDOKU_EXPORT void make_minimal(Grid<O>&) noexcept;
+	OKIIDOKU_EXPORT void make_minimal_puzzle(Grid<O>&) noexcept;
 
 	// Not decided on whether to put is_minimal and is_proper functions
 	// here. is_proper can be defined in terms of solving, and is_minimal
@@ -19,18 +19,18 @@ namespace okiidoku::mono::puzzle {
 
 	// contract: grid is filled or a proper puzzle.
 	template<Order O> requires(is_order_compiled(O))
-	[[nodiscard]] OKIIDOKU_EXPORT bool is_minimal(const Grid<O>&) noexcept;
+	[[nodiscard, gnu::pure]] OKIIDOKU_EXPORT bool is_minimal_puzzle(const Grid<O>&) noexcept;
 }
 
 
-namespace okiidoku::visitor::puzzle {
+namespace okiidoku::visitor {
 
 	// contract: grid is filled or a proper puzzle.
 	// post-condition: the grid is a minimal puzzle. solution unchanged.
-	OKIIDOKU_EXPORT void make_minimal(Grid&) noexcept;
+	OKIIDOKU_EXPORT void make_minimal_puzzle(Grid&) noexcept;
 
 	// contract: grid is filled or a proper puzzle.
 	template<Order O> requires(is_order_compiled(O))
-	[[nodiscard]] OKIIDOKU_EXPORT bool is_minimal(const Grid&) noexcept;
+	[[nodiscard, gnu::pure]] OKIIDOKU_EXPORT bool is_minimal_puzzle(const Grid&) noexcept;
 }
 #endif
