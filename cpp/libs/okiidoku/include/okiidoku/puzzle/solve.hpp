@@ -40,11 +40,11 @@ namespace okiidoku::mono {
 		[[nodiscard]] std::optional<Grid<O>> get_next_solution() noexcept;
 
 	private:
-		using impl_t = detail::cell_major_deductive_solver::LowLevelEngine<O>;
+		using engine_t = detail::cell_major_deductive_solver::LowLevelEngine<O>;
 		#if __has_include(<experimental/propagate_const>)
-		std::experimental::propagate_const<std::unique_ptr<impl_t>> impl_;
+		std::experimental::propagate_const<std::unique_ptr<engine_t>> engine_;
 		#else // fallback for MSVC
-		std::unique_ptr<impl_t> impl_;
+		std::unique_ptr<engine_t> engine_;
 		#endif
 	};
 }

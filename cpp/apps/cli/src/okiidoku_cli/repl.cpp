@@ -116,7 +116,7 @@ namespace okiidoku::cli {
 			std::string file_path {std::string{} + "gen/" + std::to_string(config_.order()) + ".bin"};
 			std::cout << "output file path: " << file_path << std::endl;
 			std::ofstream of(file_path, std::ios::binary|std::ios::ate);
-			// TODO.high change this to use the archiving operations.
+			// TODO.wait change this to use the archiving operations.
 			// try {
 			// 	of.exceptions()
 			// } catch (const std::ios_base::failure& fail) {
