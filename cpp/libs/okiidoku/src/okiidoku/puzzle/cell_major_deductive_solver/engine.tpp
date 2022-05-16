@@ -22,11 +22,8 @@ namespace okiidoku::mono::detail::cell_major_deductive_solver {
 
 	template<Order O> requires(is_order_compiled(O))
 	std::optional<Grid<O>> LowLevelEngine<O>::build_solution_obj() const noexcept {
-		if (no_solutions_remain_) [[unlikely]] {
-			// Note: this case is technically covered by
-			return std::nullopt;
-		}
-		assert(num_puzzle_cells_remaining_ == 0);
+		assert(!no_solutions_remain());
+		assert(get_num_puzzle_cells_remaining() == 0);
 		assert(( std::all_of(
 			cells_cands_.get_underlying_array().cbegin(),
 			cells_cands_.get_underlying_array().cend(),
@@ -53,7 +50,7 @@ namespace okiidoku::mono::detail::cell_major_deductive_solver {
 		const LowLevelEngine<O>::val_t cand_to_elim
 	) noexcept {
 		auto& cell_cands {cells_cands_.at_rmi(rmi)};
-		if (!cell_cands.test(cand_to_elim)) {
+		if (!cell_cands.test(cand_to_elim)) /* TODO.low likelihood */ {
 			// candidate was already eliminated.
 			return CandElimResult::ok;
 		}
@@ -65,7 +62,7 @@ namespace okiidoku::mono::detail::cell_major_deductive_solver {
 		if (new_cands_count == 0) [[unlikely]] {
 			return CandElimResult::unsat;
 		}
-		if (new_cands_count < old_cands_count && new_cands_count == 1) [[unlikely]] {
+		if ((new_cands_count < old_cands_count) && /* TODO.low likelihood? */(new_cands_count == 1)) [[unlikely]] {
 			enqueue_commit_effects_for_new_cell_requires_symbol_(rmi);
 		}
 		return CandElimResult::ok;
@@ -106,13 +103,33 @@ namespace okiidoku::mono::detail::cell_major_deductive_solver {
 	CandElimResult LowLevelEngine<O>::process_one_queued_commit_effects() noexcept {
 		assert(has_enqueued_commit_effects());
 		// TODO.asap do eliminate_candidate_sym_ for all same-house cells
-		// while (false) {
-		// 	if (neighbour_rmi == rmi) [[unlikely]] { continue; }
-		// 	const auto check {eliminate_candidate_sym_(neighbour_rmi, val)};
-		// 	if (check) [[unlikely]] {
-		// 		return CandElimResult::unsat;
-		// 	}
-		// }
+		const auto commit {commit_effects_queue_.front()};
+		commit_effects_queue_.pop();
+		#define OKIIDOKU_TRY_ELIM_NB_CAND \
+			if (neighbour_rmi == commit.rmi) [[unlikely]] { continue; } \
+			const auto check {eliminate_candidate_sym_(neighbour_rmi, commit.val)}; \
+			if (hit_unsat(check)) [[unlikely]] { \
+				return CandElimResult::unsat; \
+			}
+		{
+			const auto commit_row {rmi_to_row<O>(commit.rmi)};
+			for (o2i_t nb_col {0}; nb_col < T::O2; ++nb_col) {
+				const auto neighbour_rmi {static_cast<rmi_t>((T::O2*commit_row)+nb_col)};
+				OKIIDOKU_TRY_ELIM_NB_CAND
+		}	}
+		{
+			const auto commit_col {rmi_to_col<O>(commit.rmi)};
+			for (o2i_t nb_row {0}; nb_row < T::O2; ++nb_row) {
+				const auto neighbour_rmi {static_cast<rmi_t>((T::O2*nb_row)+commit_col)};
+				OKIIDOKU_TRY_ELIM_NB_CAND
+		}	}
+		{
+			const auto commit_box {rmi_to_box<O>(commit.rmi)};
+			for (o2i_t nb_box_cell {0}; nb_box_cell < T::O2; ++nb_box_cell) {
+				const auto neighbour_rmi {static_cast<rmi_t>(box_cell_to_rmi<O>(commit_box, nb_box_cell))};
+				OKIIDOKU_TRY_ELIM_NB_CAND
+		}	}
+		#undef OKIIDOKU_TRY_ELIM_NB_CAND
 		return CandElimResult::ok;
 	}
 
@@ -143,7 +160,7 @@ namespace okiidoku::mono::detail::cell_major_deductive_solver {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	CandElimResult LowLevelEngine<O>::unwind_and_rule_out_bad_guesses() noexcept {
+	CandElimResult LowLevelEngine<O>::unwind_and_rule_out_bad_guesses_() noexcept {
 		if (guess_stack_.empty()) {
 			no_solutions_remain_ = true;
 			return CandElimResult::unsat;
@@ -155,7 +172,7 @@ namespace okiidoku::mono::detail::cell_major_deductive_solver {
 		}()};
 		guess_stack_.pop();
 		if (check == CandElimResult::unsat) [[unlikely]] {
-			return unwind_and_rule_out_bad_guesses();
+			return unwind_and_rule_out_bad_guesses_();
 		}
 		return CandElimResult::ok;
 	}

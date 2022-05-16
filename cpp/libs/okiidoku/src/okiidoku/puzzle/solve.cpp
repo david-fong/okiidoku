@@ -1,10 +1,15 @@
 #include <okiidoku/puzzle/solve.hpp>
+
 #include <okiidoku/puzzle/cell_major_deductive_solver/engine.hpp>
 #include <okiidoku/puzzle/cell_major_deductive_solver/engine.tpp>
 #include <okiidoku/puzzle/cell_major_deductive_solver/engine.techniques.tpp>
 
 // #include <algorithm>
 #include <memory> // unique_ptr
+
+// TODO.low if this translation unit becomes slow to compile and specific functions
+// are being frequently modified, consider experimenting with explicit instantiation
+// at the granularity of member functions in separate translation units.
 
 namespace okiidoku::mono {
 
@@ -32,23 +37,19 @@ namespace okiidoku::mono {
 		}
 		while (e.get_num_puzzle_cells_remaining() > 0) [[likely]] {
 			{const auto check {e.process_all_queued_commit_effects()};
-			// TODO.asap annoying to have to write this unwind part, and it's almost certainly an error not to!
-			// I think it makes sense for the engine to abstract the unwinding away so that
-			if (hit_unsat(check) && hit_unsat(e.unwind_and_rule_out_bad_guesses())) {
-				return std::nullopt;
-			}}
-			if (e.get_num_puzzle_cells_remaining() == 0) [[unlikely]] { break; }
-			while (e.get_num_puzzle_cells_remaining() != 0) {
-				{const auto check {e.try_technique_symbol_requires_cell()};
-				if (hit_unsat(check) && hit_unsat(e.unwind_and_rule_out_bad_guesses())) {
-					return std::nullopt;
-				}}
-				{const auto check {e.process_all_queued_commit_effects()};
-				if (hit_unsat(check) && hit_unsat(e.unwind_and_rule_out_bad_guesses())) {
-					return std::nullopt;
-				}}
+				if (hit_unsat(check)) { return std::nullopt; }
 				if (e.get_num_puzzle_cells_remaining() == 0) [[unlikely]] { break; }
 			}
+			{const auto check {e.try_technique_symbol_requires_cell()};
+				if (hit_unsat(check)) { return std::nullopt; }
+				if (match_ok(check)) { continue; }
+				// TODO.asap consider alternate design: all candidate elimination is queueable- not just the cell-requires-symbol scenario.
+			}
+			{const auto check {e.try_technique_locked_candidates()};
+				if (hit_unsat(check)) { return std::nullopt; }
+				if (match_ok(check)) { continue; }
+			}
+			// TODO.asap call other techniques and finish with push_guess.
 		}
 		return e.build_solution_obj();
 	}

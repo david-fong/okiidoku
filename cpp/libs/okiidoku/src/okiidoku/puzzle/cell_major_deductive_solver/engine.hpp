@@ -36,8 +36,8 @@ namespace okiidoku::mono::detail::cell_major_deductive_solver {
 		unsat, // resulted in cell having zero candidate-symbols
 	};
 	enum class [[nodiscard("unsat must be handled")]] TryTechniqueResult : unsigned char {
-		no_match,
-		match_ok,
+		no_match, // usage: if received, try a different technique.
+		match_ok, // can be used to immediately skip back to trying easier techniques
 		match_unsat, // resulted in cell having zero candidate-symbols
 	};
 
@@ -45,10 +45,11 @@ namespace okiidoku::mono::detail::cell_major_deductive_solver {
 	[[nodiscard, gnu::const]] bool hit_unsat(const CandElimResult check) noexcept {
 		return check == CandElimResult::unsat;
 	}
-	// TODO.asap I'm not sure if I like the overload. combined with auto for the check variable,
-	//  it may make it easy to forget to check for the remaining match_ok vs. no_match distinction.
 	[[nodiscard, gnu::const]] bool hit_unsat(const TryTechniqueResult check) noexcept {
 		return check == TryTechniqueResult::match_unsat;
+	}
+	[[nodiscard, gnu::const]] bool match_ok(const TryTechniqueResult check) noexcept {
+		return check == TryTechniqueResult::match_ok;
 	}
 
 
@@ -56,25 +57,25 @@ namespace okiidoku::mono::detail::cell_major_deductive_solver {
 	class LowLevelEngine final {
 	public:
 		using T = Ints<O>;
+		using o2i_t = typename T::o2i_t;
 		using val_t = typename T::o2x_smol_t;
 		using rmi_t = typename T::o4x_smol_t;
 		using o4i_t = typename T::o4i_t;
 
 		explicit LowLevelEngine(const Grid<O>& puzzle) noexcept;
 
-		// becomes true when unsat is detected and no guesses remain to be unwound.
+		// Becomes true when unsat is detected and no guesses remain to be unwound.
+		// The user of the engine must respond to `get_next_solution` with `std::nullopt`
+		// if this returns `true`.
 		//
-		// contract: (usage) this should be checked at the beginning of the solving routine
-		// to immediately return `std::nullopt` if it returns true.
-		//
-		// All candidate elimination techniques have a contract that this returns `false`.
+		// Note: All candidate elimination techniques have a contract that this returns `false`.
 		[[nodiscard, gnu::pure]]
 		bool no_solutions_remain() const noexcept { return no_solutions_remain_; }
 
 		[[nodiscard, gnu::pure]]
 		bool has_enqueued_commit_effects() const noexcept { return !commit_effects_queue_.empty(); }
 
-		// contract: `has_enqueued_commit_effects` returns true.
+		// contract: `has_enqueued_commit_effects` returns `true`.
 		CandElimResult process_one_queued_commit_effects() noexcept;
 
 		// convenience wrapper around `process_one_queued_commit_effects`.
@@ -84,7 +85,9 @@ namespace okiidoku::mono::detail::cell_major_deductive_solver {
 		[[nodiscard, gnu::pure]]
 		o4i_t get_num_puzzle_cells_remaining() const noexcept { return num_puzzle_cells_remaining_; }
 
+		// contract: `no_solutions_remain` returns `false`.
 		// contract: `get_num_puzzle_cells_remaining` returns zero.
+		// returns a filled grid following the one rule and containing all the puzzle's givens.
 		[[nodiscard, gnu::pure]]
 		std::optional<Grid<O>> build_solution_obj() const noexcept;
 
@@ -92,9 +95,9 @@ namespace okiidoku::mono::detail::cell_major_deductive_solver {
 		// _techniques_ must never incorrectly progress in solving a proper puzzle.r running the same technique again right away...
 
 		// common contracts and invariants for techniques:
-		// invariant: all techniques immediately return TryTechniqueResult::no_match
+		// contract: all techniques require that `no_solutions_remain` returns `false`.
+		// behaviour: all techniques immediately return `TryTechniqueResult::no_match`
 		//  if `get_num_puzzle_cells_remaining` returns zero.
-		// contract: all techniques require that `no_solutions_remain` returns false.
 
 		// TODO.high probably best that these return right away after solving just one? (gives most control to caller)
 		//  but then would that possibly lead to duplicate effort if caller wants to run the same technique again right away?
@@ -124,13 +127,6 @@ namespace okiidoku::mono::detail::cell_major_deductive_solver {
 		[[nodiscard, gnu::pure]]
 		size_t get_guess_stack_depth() const noexcept { return guess_stack_.size(); };
 
-		// TODO.asap make this private and call automaticaly, internally when necessary.
-		// call this when unsat is encountered.
-		// contract: `get_guess_stack_depth` returns non-zero value.
-		// returns unsat if unwound to empty guess stack and ruling out the
-		//  guess eliminated the last candidate-symbol of that guessed-at cell.
-		CandElimResult unwind_and_rule_out_bad_guesses() noexcept;
-
 
 	private:
 		// contract: `val` is currently one of _multiple_ candidate-symbols at `rmi`.
@@ -141,10 +137,21 @@ namespace okiidoku::mono::detail::cell_major_deductive_solver {
 		// contract: must be called immediately when a cell's candidate-symbol count _changes_ to one.
 		// contract: (it follows that) no previous call has been made with the same value of `rmi`.
 		// contract: (it follows that) the cell at `rmi` has exactly one candidate-symbol.
+		// post-condition: decrements `num_puzzle_cells_remaining`.
 		OKIIDOKU_NO_EXPORT void enqueue_commit_effects_for_new_cell_requires_symbol_(rmi_t rmi) noexcept;
 
-		// If the candidate is already eliminated, returns `ok`.
+		// The specified candidate is allowed to already be removed.
 		OKIIDOKU_NO_EXPORT CandElimResult eliminate_candidate_sym_(rmi_t rmi, val_t cand) noexcept;
+
+		// TODO.asap make this private and call automaticaly, internally when necessary.
+		// call this when unsat is encountered.
+		// contract: `get_guess_stack_depth` returns non-zero value.
+		// returns unsat if unwound to empty guess stack and ruling out the
+		//  guess eliminated the last candidate-symbol of that guessed-at cell.
+		CandElimResult unwind_and_rule_out_bad_guesses_() noexcept;
+
+
+		// num_puzzles_found_t num_puzzles_found_ {0};
 
 		using cand_syms_t = HouseMask<O>;
 		using CandSymsGrid = detail::Gridlike<O, cand_syms_t>;

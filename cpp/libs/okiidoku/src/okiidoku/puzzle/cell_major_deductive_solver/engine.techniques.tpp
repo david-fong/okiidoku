@@ -26,5 +26,16 @@ namespace okiidoku::mono::detail::cell_major_deductive_solver {
 
 		return TryTechniqueResult::no_match;
 	}
+
+
+	template<Order O> requires(is_order_compiled(O))
+	TryTechniqueResult LowLevelEngine<O>::try_technique_locked_candidates() noexcept {
+		assert(!no_solutions_remain());
+		if (get_num_puzzle_cells_remaining() == 0) {
+			return TryTechniqueResult::no_match;
+		}
+		// TODO.asap
+		return TryTechniqueResult::no_match;
+	}
 }
 #endif
