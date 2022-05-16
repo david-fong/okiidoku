@@ -7,6 +7,7 @@
 #include <numeric> // accumulate
 #include <array>
 #include <bit>
+#include <compare>
 #include <cassert>
 
 namespace okiidoku::mono {
@@ -169,6 +170,13 @@ namespace okiidoku::mono {
 			}
 			assert(false); // TODO.wait c++23 std::unreachable
 			return 0;
+		}
+
+		// Defines a strong ordering between masks. Its semantics are unspecified.
+		// It is indended to be time-performant. Can be used to partition by masks
+		// where the relationship between partitions doesn't matter.
+		static std::strong_ordering mysterious_compare(const HouseMask& a, const HouseMask& b) noexcept {
+			return a.ints_ <=> b.ints_;
 		}
 	};
 	#define OKIIDOKU_FOR_COMPILED_O(O_) \

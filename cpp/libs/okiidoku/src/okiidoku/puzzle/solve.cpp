@@ -36,6 +36,7 @@ namespace okiidoku::mono {
 			return std::nullopt;
 		}
 		while (e.get_num_puzzle_cells_remaining() > 0) [[likely]] {
+			// TODO.wait comparatively, the VeryDeductive solver goes through all techniques, then consumes one queued candidate elimination, and then goes through all techniques again. It only pushes a guess if it goes through all techniques and there are no queued candidate eliminations.
 			{const auto check {e.process_all_queued_commit_effects()};
 				if (hit_unsat(check)) { return std::nullopt; }
 				if (e.get_num_puzzle_cells_remaining() == 0) [[unlikely]] { break; }

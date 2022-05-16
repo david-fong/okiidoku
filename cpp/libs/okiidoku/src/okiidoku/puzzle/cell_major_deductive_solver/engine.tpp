@@ -51,6 +51,7 @@ namespace okiidoku::mono::detail::cell_major_deductive_solver {
 	) noexcept {
 		auto& cell_cands {cells_cands_.at_rmi(rmi)};
 		if (!cell_cands.test(cand_to_elim)) /* TODO.low likelihood */ {
+			// TODO.try this if-block can technically be removed. need to benchmark to see whether it is beneficial.
 			// candidate was already eliminated.
 			return CandElimResult::ok;
 		}
@@ -105,6 +106,7 @@ namespace okiidoku::mono::detail::cell_major_deductive_solver {
 		// TODO.asap do eliminate_candidate_sym_ for all same-house cells
 		const auto commit {commit_effects_queue_.front()};
 		commit_effects_queue_.pop();
+		// repetitive code. #undef-ed before end of function.
 		#define OKIIDOKU_TRY_ELIM_NB_CAND \
 			if (neighbour_rmi == commit.rmi) [[unlikely]] { continue; } \
 			const auto check {eliminate_candidate_sym_(neighbour_rmi, commit.val)}; \
