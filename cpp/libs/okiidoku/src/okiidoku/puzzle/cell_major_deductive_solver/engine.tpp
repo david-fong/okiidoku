@@ -2,14 +2,14 @@
 #define TPP_OKIIDOKU__PUZZLE__CELL_MAJOR_DEDUCTIVE_SOLVER__ENGINE
 
 #include <okiidoku/puzzle/cell_major_deductive_solver/engine.hpp>
-#include <okiidoku/puzzle/cell_major_deductive_solver/engine.techniques.tpp>
+#include <okiidoku/puzzle/cell_major_deductive_solver/techniques.tpp>
 
 #include <algorithm>
 
 namespace okiidoku::mono::detail::cell_major_deductive_solver {
 
 	template<Order O> requires(is_order_compiled(O))
-	LowLevelEngine<O>::LowLevelEngine(const Grid<O>& puzzle) noexcept {
+	EngineObj<O>::EngineObj(const Grid<O>& puzzle) noexcept {
 		cells_cands_.get_underlying_array().fill(house_mask_ones<O>);
 		for (o4i_t rmi {0}; rmi < T::O4; ++rmi) {
 			const auto& given {puzzle.at_rmi(rmi)};
@@ -21,7 +21,7 @@ namespace okiidoku::mono::detail::cell_major_deductive_solver {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	std::optional<Grid<O>> LowLevelEngine<O>::build_solution_obj() const noexcept {
+	std::optional<Grid<O>> EngineObj<O>::build_solution_obj() const noexcept {
 		assert(!no_solutions_remain());
 		assert(get_num_puzzle_cells_remaining() == 0);
 		assert(( std::all_of(
@@ -45,15 +45,15 @@ namespace okiidoku::mono::detail::cell_major_deductive_solver {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	CandElimResult LowLevelEngine<O>::eliminate_candidate_sym_(
-		const LowLevelEngine<O>::rmi_t rmi,
-		const LowLevelEngine<O>::val_t cand_to_elim
+	SolutionsRemain EngineObj<O>::eliminate_candidate_sym_(
+		const EngineObj<O>::rmi_t rmi,
+		const EngineObj<O>::val_t cand_to_elim
 	) noexcept {
 		auto& cell_cands {cells_cands_.at_rmi(rmi)};
 		if (!cell_cands.test(cand_to_elim)) /* TODO.low likelihood */ {
 			// TODO.try this if-block can technically be removed. need to benchmark to see whether it is beneficial.
 			// candidate was already eliminated.
-			return CandElimResult::ok;
+			return SolutionsRemain::yes();
 		}
 		const auto old_cands_count {cell_cands.count()};
 		cell_cands.unset(cand_to_elim);
@@ -61,19 +61,19 @@ namespace okiidoku::mono::detail::cell_major_deductive_solver {
 		assert(new_cands_count <= old_cands_count);
 
 		if (new_cands_count == 0) [[unlikely]] {
-			return CandElimResult::unsat;
+			return unwind_and_rule_out_bad_guesses_(*this);
 		}
 		if ((new_cands_count < old_cands_count) && /* TODO.low likelihood? */(new_cands_count == 1)) [[unlikely]] {
-			enqueue_commit_effects_for_new_cell_requires_symbol_(rmi);
+			enqueue_cand_elims_for_new_cell_requires_symbol_(rmi);
 		}
-		return CandElimResult::ok;
+		return SolutionsRemain::yes();
 	}
 
 
 	template<Order O> requires(is_order_compiled(O))
-	void LowLevelEngine<O>::register_new_given_(
-		const LowLevelEngine<O>::rmi_t rmi,
-		const LowLevelEngine<O>::val_t val
+	void EngineObj<O>::register_new_given_(
+		const EngineObj<O>::rmi_t rmi,
+		const EngineObj<O>::val_t val
 	) noexcept {
 		assert(val < T::O2);
 		auto& cell_cands {cells_cands_.at_rmi(rmi)};
@@ -84,13 +84,13 @@ namespace okiidoku::mono::detail::cell_major_deductive_solver {
 		assert(cell_cands.test(val));
 		assert(cell_cands.count() == 1);
 		// TODO.low inlined the call. seems like a latent foot-gun.
-		// enqueue_commit_effects_for_new_cell_requires_symbol_(rmi);
+		// enqueue_cand_elims_for_new_cell_requires_symbol_(rmi);
 		commit_effects_queue_.emplace(rmi, val);
 		--num_puzzle_cells_remaining_;
 	}
 	template<Order O> requires(is_order_compiled(O))
-	void LowLevelEngine<O>::enqueue_commit_effects_for_new_cell_requires_symbol_(
-		const LowLevelEngine<O>::rmi_t rmi
+	void EngineObj<O>::enqueue_cand_elims_for_new_cell_requires_symbol_(
+		const EngineObj<O>::rmi_t rmi
 	) noexcept {
 		assert(num_puzzle_cells_remaining_ > 0);
 		auto& cell_cands {cells_cands_.at_rmi(rmi)};
@@ -101,18 +101,15 @@ namespace okiidoku::mono::detail::cell_major_deductive_solver {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	CandElimResult LowLevelEngine<O>::process_one_queued_commit_effects() noexcept {
-		assert(has_enqueued_commit_effects());
-		// TODO.asap do eliminate_candidate_sym_ for all same-house cells
+	SolutionsRemain EngineObj<O>::process_first_queued_cand_elims() noexcept {
+		assert(has_enqueued_cand_elims());
 		const auto commit {commit_effects_queue_.front()};
 		commit_effects_queue_.pop();
 		// repetitive code. #undef-ed before end of function.
 		#define OKIIDOKU_TRY_ELIM_NB_CAND \
 			if (neighbour_rmi == commit.rmi) [[unlikely]] { continue; } \
 			const auto check {eliminate_candidate_sym_(neighbour_rmi, commit.val)}; \
-			if (hit_unsat(check)) [[unlikely]] { \
-				return CandElimResult::unsat; \
-			}
+			if (check.no_solutions_remain()) [[unlikely]] { return check; }
 		{
 			const auto commit_row {rmi_to_row<O>(commit.rmi)};
 			for (o2i_t nb_col {0}; nb_col < T::O2; ++nb_col) {
@@ -132,51 +129,46 @@ namespace okiidoku::mono::detail::cell_major_deductive_solver {
 				OKIIDOKU_TRY_ELIM_NB_CAND
 		}	}
 		#undef OKIIDOKU_TRY_ELIM_NB_CAND
-		return CandElimResult::ok;
+		return SolutionsRemain::yes();
 	}
 
 
 	template<Order O> requires(is_order_compiled(O))
-	CandElimResult LowLevelEngine<O>::process_all_queued_commit_effects() noexcept {
-		while (has_enqueued_commit_effects()) {
-			const auto check {process_one_queued_commit_effects()};
-			if (check == CandElimResult::unsat) {
-				return CandElimResult::unsat;
+	SolutionsRemain EngineObj<O>::process_all_queued_cand_elims() noexcept {
+		while (has_enqueued_cand_elims()) {
+			const auto check {process_first_queued_cand_elims()};
+			if (check.no_solutions_remain()) {
+				return check;
 			}
 		}
-		return CandElimResult::ok;
+		return SolutionsRemain::yes();
 	}
 
 
 	template<Order O> requires(is_order_compiled(O))
-	void LowLevelEngine<O>::push_guess(
-		const LowLevelEngine<O>::rmi_t rmi,
-		const LowLevelEngine<O>::val_t val
+	void EngineObj<O>::push_guess(
+		const EngineObj<O>::rmi_t rmi,
+		const EngineObj<O>::val_t val
 	) noexcept {
-		assert(!has_enqueued_commit_effects());
+		// assert(!has_enqueued_cand_elims()); // only a strong recommendation. not a contract.
 		assert(cells_cands_.at_rmi(rmi).test(val));
-		guess_stack_.emplace(std::make_unique<GuessRecord>(cells_cands_, CommitRecord{rmi, val}));
+		assert(cells_cands_.at_rmi(rmi).count() > 1);
+		guess_stack_.emplace(cells_cands_, CommitRecord{rmi, val});
 
 		register_new_given_(rmi, val);
 	}
 
 
 	template<Order O> requires(is_order_compiled(O))
-	CandElimResult LowLevelEngine<O>::unwind_and_rule_out_bad_guesses_() noexcept {
-		if (guess_stack_.empty()) {
-			no_solutions_remain_ = true;
-			return CandElimResult::unsat;
+	SolutionsRemain unwind_and_rule_out_bad_guesses_(EngineObj<O>& e) noexcept {
+		if (e.guess_stack_.empty()) {
+			e.no_solutions_remain_ = true;
+			return SolutionsRemain{false};
 		}
-		const auto check {[&]{
-			const GuessRecord& step {*guess_stack_.top()};
-			cells_cands_ = std::move(step.prev_cells_cands);
-			return eliminate_candidate_sym_(step.committed.rmi, step.committed.val);
-		}()};
-		guess_stack_.pop();
-		if (check == CandElimResult::unsat) [[unlikely]] {
-			return unwind_and_rule_out_bad_guesses_();
-		}
-		return CandElimResult::ok;
+		const auto step {std::move(e.guess_stack_.top())};
+		e.guess_stack_.pop();
+		e.cells_cands_ = std::move(*step.prev_cells_cands);
+		return e.eliminate_candidate_sym_(step.committed.rmi, step.committed.val);
 	}
 }
 #endif

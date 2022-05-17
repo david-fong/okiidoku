@@ -1,5 +1,5 @@
-#ifndef TPP_OKIIDOKU__PUZZLE__CELL_MAJOR_DEDUCTIVE_SOLVER__ENGINE__TECHNIQUES
-#define TPP_OKIIDOKU__PUZZLE__CELL_MAJOR_DEDUCTIVE_SOLVER__ENGINE__TECHNIQUES
+#ifndef TPP_OKIIDOKU__PUZZLE__CELL_MAJOR_DEDUCTIVE_SOLVER__TECHNIQUES
+#define TPP_OKIIDOKU__PUZZLE__CELL_MAJOR_DEDUCTIVE_SOLVER__TECHNIQUES
 
 #include <okiidoku/puzzle/cell_major_deductive_solver/engine.hpp>
 
@@ -8,15 +8,51 @@
 
 namespace okiidoku::mono::detail::cell_major_deductive_solver {
 
+	template<Order O> requires(is_order_compiled(O))
+	class Techniques final {
+		using T = Ints<O>;
+		using o2i_t = typename T::o2i_t;
+		using val_t = typename T::o2x_smol_t;
+		using rmi_t = typename T::o4x_smol_t;
+		using o4i_t = typename T::o4i_t;
+		using cand_syms_t = typename EngineObj<O>::cand_syms_t;
+
+		// Internal (somewhat obvious) contract:
+		// _techniques_ must never incorrectly progress in solving a proper puzzle.r running the same technique again right away...
+
+	public:
+		// common contracts and invariants for all techniques:
+		// contract: `no_solutions_remain` returns `false`.
+		// behaviour: immediately returns if `get_num_puzzle_cells_remaining` returns zero.
+
+		// TODO.high  for techniques that are not (relatively) trivial to perform a full scan of the grid,
+		//   provide a parameter enum `SearchEffort { find_first, find_all, };`
+		static void symbol_requires_cell(EngineObj<O>&) noexcept; // symbol can't go anywhere else in a house
+
+		static void locked_candidates(EngineObj<O>&) noexcept;
+
+		static constexpr unsigned technique_subsets_max_subset_size {};
+
+		// AKA "naked subsets"
+		// // contract: `subset_size` is in the range [2, ((O2+1)//2)].
+		static void cells_requiring_symbols(EngineObj<O>&/* val_t subset_size */) noexcept;
+
+		// AKA "hidden subsets"
+		// // contract: `subset_size` is in the range [2, ((O2+1)//2)].
+		static void symbols_requiring_cells(EngineObj<O>&/* val_t subset_size */) noexcept;
+
+		static void fish(EngineObj<O>&) noexcept;
+	};
+
+
 	// opening boilerplate. #undef-ed before end of namespace.
 	#define OKIIDOKU_TECHNIQUE_PRELUDE \
-		assert(!no_solutions_remain()); \
-		if (get_num_puzzle_cells_remaining() == 0) [[unlikely]] { \
-			return TryTechniqueResult::no_match; \
-		}
+		assert(!e.no_solutions_remain()); \
+		if (e.get_num_puzzle_cells_remaining() == 0) [[unlikely]] { return; }
+
 
 	template<Order O> requires(is_order_compiled(O))
-	TryTechniqueResult LowLevelEngine<O>::try_technique_symbol_requires_cell() noexcept {
+	void Techniques<O>::symbol_requires_cell(EngineObj<O>& e) noexcept {
 		OKIIDOKU_TECHNIQUE_PRELUDE
 		// TODO for each house of all house-types, check if any symbol only has one candidate-house-cell.
 		// how to use masks to optimize? have an accumulator candidate-symbol mask "<house-type>_seen_cand_syms" that starts as zeros.
@@ -28,20 +64,18 @@ namespace okiidoku::mono::detail::cell_major_deductive_solver {
 
 		// for any matches, _if the cell is not already committed (ie. if the cell still has more than one candidate-symbols),
 		//  call register_new_given_();
-
-		return TryTechniqueResult::no_match;
 	}
 
 
 	// TODO consider adding an argument about whether to do candidate elimination eagerly or queue them.
-	//  the annoying thing is that then the return type for the queue case doesn't need to be CandElimResult...
+	//  the annoying thing is that then the return type for the queue case doesn't need to be SolutionsRemain...
 	//  in that case, we could make it a wrapper than just discards (void-casts) the result because it knows that it should never be unsat if queueing. can also assert that it is not unsat.
 	//  the main question: why would that be beneficial? in the eager case, I think theres the benefit of operating on masks that
 	//  are already in cache. but is that a significant enough benefit? probably needs benchmark to justify...
 	//  The eager function wrapper takes an argument for find_one vs find_all. the queueing wrapper returns void.
 	template<Order O> requires(is_order_compiled(O))
-	TryTechniqueResult LowLevelEngine<O>::try_technique_cells_requiring_symbols(
-		// const LowLevelEngine<O>::val_t subset_size
+	void Techniques<O>::cells_requiring_symbols(EngineObj<O>& e
+		// const EngineObj<O>::val_t subset_size
 	) noexcept {
 		// assert(subset_size > 1);
 		// assert(subset_size <= technique_subsets_max_subset_size);
@@ -52,14 +86,13 @@ namespace okiidoku::mono::detail::cell_major_deductive_solver {
 			rmi_t house_cell_i;
 		};
 		// TODO
-		bool any_matches {false};
 		// for each house type, for each house,
 		const o2i_t row {0};
 		std::array<GroupMe, T::O2> subset_searcher;
 		for (o2i_t i {0}; i < T::O2; ++i) {
 			const auto rmi {static_cast<rmi_t>((T::O2*row)+i)};
 			subset_searcher[i] = GroupMe{
-				.cand_sym_count{static_cast<cand_sym_count_t>(cells_cands_.at_rmi(rmi).count())},
+				.cand_sym_count{static_cast<cand_sym_count_t>(e.cells_cands_.at_rmi(rmi).count())},
 				.house_cell_i{rmi}
 			};
 		}
@@ -67,9 +100,9 @@ namespace okiidoku::mono::detail::cell_major_deductive_solver {
 			if (const auto cmp {a.cand_sym_count <=> b.cand_sym_count}; std::is_neq(cmp)) [[likely]] {
 				return cmp;
 			}
-			return cand_syms_t::mysterious_compare(
-				cells_cands_.at(row, a.house_cell_i),
-				cells_cands_.at(row, b.house_cell_i)
+			return cand_syms_t::non_meaningful_compare(
+				e.cells_cands_.at(row, a.house_cell_i),
+				e.cells_cands_.at(row, b.house_cell_i)
 			);
 		}};
 		std::sort(subset_searcher.begin(), subset_searcher.end(), [&](const GroupMe& a, const GroupMe& b){
@@ -89,29 +122,33 @@ namespace okiidoku::mono::detail::cell_major_deductive_solver {
 				}
 			}
 		}
-		return any_matches ? TryTechniqueResult::match_ok : TryTechniqueResult::no_match;
 	}
 
 
-	// TODO I think there should be a way to do a bit of data prep and then basically reuse the code of try_technique_cells_requiring_symbols
+	// TODO I think there should be a way to do a bit of data prep and then basically reuse the code of cells_requiring_symbols
 	template<Order O> requires(is_order_compiled(O))
-	TryTechniqueResult LowLevelEngine<O>::try_technique_symbols_requiring_cells(
-		// const LowLevelEngine<O>::val_t subset_size
+	void Techniques<O>::symbols_requiring_cells(EngineObj<O>& e
+		// const EngineObj<O>::val_t subset_size
 	) noexcept {
 		OKIIDOKU_TECHNIQUE_PRELUDE
 		// TODO
-		return TryTechniqueResult::no_match;
 	}
 
 
 	template<Order O> requires(is_order_compiled(O))
-	TryTechniqueResult LowLevelEngine<O>::try_technique_locked_candidates() noexcept {
+	void Techniques<O>::locked_candidates(EngineObj<O>& e) noexcept {
 		OKIIDOKU_TECHNIQUE_PRELUDE
 		// TODO
-		return TryTechniqueResult::no_match;
 	}
 
 
 	#undef OKIIDOKU_TECHNIQUE_PRELUDE
+
+
+	// disable implicit template instantiation.
+	#define OKIIDOKU_FOR_COMPILED_O(O_) \
+		extern template class Techniques<O_>;
+	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
+	#undef OKIIDOKU_FOR_COMPILED_O
 }
 #endif

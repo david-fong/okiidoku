@@ -9,7 +9,7 @@
 	"C_Cpp.default.browse.limitSymbolsToIncludedHeaders": true,
 
 	// https://vector-of-bool.github.io/docs/vscode-cmake-tools/settings.html
-	"cmake.configureOnOpen": true,
+	"cmake.configureOnOpen": false,
 	// prefer multi-config generators when available
 	"cmake.preferredGenerators": ["Visual Studio 17 2022", "Ninja Multi-Config"],
 	// If you don't have a build system with multi-config, you may want to append "/${buildType}" to the below.
