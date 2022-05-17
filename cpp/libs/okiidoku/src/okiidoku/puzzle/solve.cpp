@@ -32,17 +32,16 @@ namespace okiidoku::mono {
 		}
 		while (e.get_num_puzzle_cells_remaining() > 0) [[likely]] {
 			{const auto check {e.process_all_queued_cand_elims()};
+				assert(!e.has_enqueued_cand_elims());
 				if (check.no_solutions_remain()) [[unlikely]] { return std::nullopt; }
 				if (e.get_num_puzzle_cells_remaining() == 0) [[unlikely]] { break; }
 			}
 
 			using Tech = detail::cell_major_deductive_solver::Techniques<O>;
-			{Tech::symbol_requires_cell(e);
-				// TODO if queue has new entries, `continue;`
-			}
-			{Tech::locked_candidates(e);
-				// TODO if queue has new entries, `continue;`
-			}
+			Tech::find_symbol_requires_cell(e);
+			if (e.has_enqueued_cand_elims()) { continue; }
+			Tech::find_locked_candidates(e);
+			if (e.has_enqueued_cand_elims()) { continue; }
 			// TODO call other techniques.
 			// TODO e.push_guess(rmi, val);
 		}
@@ -61,11 +60,12 @@ namespace okiidoku::mono {
 		}
 		while (e.get_num_puzzle_cells_remaining() > 0) [[likely]] {
 			using Tech = detail::cell_major_deductive_solver::Techniques<O>;
-			Tech::symbol_requires_cell(e);
-			Tech::locked_candidates(e);
+			Tech::find_symbol_requires_cell(e);
+			Tech::find_locked_candidates(e);
 			// TODO call other techniques
 
 			if (e.has_enqueued_cand_elims()) {
+				// TODO sort queue. or make queue internally always sorted.
 				{const auto check {e.process_first_queued_cand_elims()};
 					if (check.no_solutions_remain()) [[unlikely]] { return std::nullopt; }
 					if (e.get_num_puzzle_cells_remaining() == 0) [[unlikely]] { break; }

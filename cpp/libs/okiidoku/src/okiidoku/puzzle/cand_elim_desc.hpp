@@ -1,5 +1,5 @@
-#ifndef HPP_OKIIDOKU__PUZZLE__CELL_MAJOR_DEDUCTIVE_SOLVER__CAND_ELIM_DESC
-#define HPP_OKIIDOKU__PUZZLE__CELL_MAJOR_DEDUCTIVE_SOLVER__CAND_ELIM_DESC
+#ifndef HPP_OKIIDOKU__PUZZLE__CAND_ELIM_DESC
+#define HPP_OKIIDOKU__PUZZLE__CAND_ELIM_DESC
 
 #include <okiidoku/ints.hpp>
 
@@ -10,11 +10,17 @@
 namespace okiidoku::mono::detail::cell_major_deductive_solver {
 
 	namespace cand_elim_desc {
-		enum class TypeId : unsigned char {
-		};
+		// enum class TypeId : unsigned char {
+		// 	cell_requires_symbol,
+		// 	symbol_requires_cell,
+		// 	locked_candidate,
+		// 	cells_require_symbols,
+		// 	symbols_require_cells,
+		// };
+		constexpr unsigned heap_if_large_times_ptr {2};
 		template <class T>
 		using HeapIfLarge = std::conditional_t<
-			(sizeof(T) > sizeof(std::unique_ptr<T>)),
+			(sizeof(T) > (heap_if_large_times_ptr * sizeof(std::unique_ptr<T>))),
 			std::unique_ptr<T>,
 			T
 		>;
@@ -35,9 +41,15 @@ namespace okiidoku::mono::detail::cell_major_deductive_solver {
 			};
 			template<Order O> requires(is_order_compiled(O))
 			class CellsRequireSymbols final {
+				HouseMask<O> house_cells;
+				typename Ints<O>::o2x_smol_t house;
+				HouseType house_type;
 			};
 			template<Order O> requires(is_order_compiled(O))
 			class SymbolsRequireCells final {
+				HouseMask<O> syms;
+				typename Ints<O>::o2x_smol_t house;
+				HouseType house_type;
 			};
 		}
 		template<class... Ts>
@@ -53,6 +65,9 @@ namespace okiidoku::mono::detail::cell_major_deductive_solver {
 		>;
 	}
 
+	// TODO.asap or just design so that instead of a unified queue of any of the types, have a separate queue for each type.
+	//  can make an abstraction over such a "separate-lane" queue to expose easy things like get-count-over-all-lanes.
+	//  in that case, we don't need the heapify helper, since we don't need to worry about padding-related wastage.
 	template<Order O> requires(is_order_compiled(O))
 	struct OKIIDOKU_NO_EXPORT CandElimDesc final {
 		cand_elim_desc::types_variant_t<O> variant_;

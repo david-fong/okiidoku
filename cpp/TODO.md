@@ -31,8 +31,6 @@
 
 - boost has a `variant2` class that is never valueless by exception
 
-- I added `gnu::const` and pure to a bunch of equality and ordering operators. Need to test it out and see if things still seem to be working.
-
 - find out how to use the [cppcoreguidelines checker](https://docs.microsoft.com/en-us/cpp/code-quality/using-the-cpp-core-guidelines-checkers?view=msvc-170)
 
 - experiment with using compiler "assume" hints (asserts are checked at runtime. assumptions are not checked and used for optimizations (to do the opposite: "remove checks")).
@@ -47,8 +45,6 @@
 - try DLL's again? read the docs actually.
   - [general rules and limitations](https://docs.microsoft.com/en-us/cpp/cpp/general-rules-and-limitations)
 
-- I wish vscode-cmake-tools wouldn't delete CMakeCache.txt and CMakeFiles.txt when switching kit if the build directory is different after the switch. Maybe report an issue on their GitHub?
-
 - try writing custom GDB python pretty-printer for `HouseMask`?
   - [how to write a gdb pretty-printer](https://sourceware.org/gdb/onlinedocs/gdb/Writing-a-Pretty_002dPrinter.html#Writing-a-Pretty_002dPrinter)
   - also look into [visual studio `.natvis` files](https://docs.microsoft.com/en-us/visualstudio/debugger/create-custom-views-of-native-objects)
@@ -57,13 +53,6 @@
 - [it is allowed in c++ to have template functions and non-template functions with the same name. here are the resulting rules](https://stackoverflow.com/a/16865452/11107541). Could this be used to put the algorithm functions under the same namespace (not in separate "mono" and "visitor" namespace)?
 
 - move the emoji definitions out of the program binary and externalize as a configurable data read in at runtime?
-
-- what's this?
-  - https://stackoverflow.com/questions/4977252/why-an-unnamed-namespace-is-a-superior-alternative-to-static
-
-- cmake things I can try out:
-  - versioning my targets https://cmake.org/cmake/help/latest/prop_tgt/VERSION.html#prop_tgt:VERSION
-    - cppcon video <>
 
 - try adding shortcuts to std::views::iota(0,N) and use them instead of all the raw loops. see how it impacts performance. Don't know if compilers will still do all their optimizations (simd, unrolling, etc.).
 
@@ -75,7 +64,6 @@
     - The cohabitation table can be tiled; a coordinate's vertical or horizontal distance (these are the same, since relabelling moves both the col and row together) from the closest tiling of the main diagonal represents the distance of the labels from each other.
     - For each label, make an array where each index represents another label, and the value is an object containing the left and right distances between them, and the cohabitation count.
     - Hm. So far this seems to suggest a hill-climbing / brute-force-type solution...
-    - OR... make an empty commit saying that a solution was implemented using the [Ostrich Algorithm](https://en.wikipedia.org/wiki/Ostrich_algorithm)
 
 - Decide what interfaces to support:
   - Probably best to start with just readline and a CLI

@@ -1,7 +1,7 @@
 #ifndef HPP_OKIIDOKU__PUZZLE__CELL_MAJOR_DEDUCTIVE_SOLVER__ENGINE
 #define HPP_OKIIDOKU__PUZZLE__CELL_MAJOR_DEDUCTIVE_SOLVER__ENGINE
 
-#include <okiidoku/puzzle/cell_major_deductive_solver/cand_elim_desc.hpp>
+#include <okiidoku/puzzle/cand_elim_desc.hpp>
 #include <okiidoku/grid.hpp>
 #include <okiidoku/house_mask.hpp>
 #include <okiidoku/detail/export.h>
