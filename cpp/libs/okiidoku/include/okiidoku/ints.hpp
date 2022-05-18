@@ -5,6 +5,7 @@
 
 #include <okiidoku/detail/order_templates.hpp> // Order, largest_compiled_order
 
+#include <array>
 #include <bit>         // bit_width
 #include <cstdint>     // uint_...
 #include <limits>      // numeric_limits<T>::max
@@ -16,6 +17,12 @@ namespace okiidoku {
 	enum class HouseType : unsigned char {
 		box, row, col,
 	};
+
+	constexpr auto HouseTypes {std::to_array<>({
+		HouseType::row,
+		HouseType::col,
+		HouseType::box
+	})};
 }
 
 

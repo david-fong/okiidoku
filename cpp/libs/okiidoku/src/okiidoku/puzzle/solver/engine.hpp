@@ -71,19 +71,8 @@ namespace okiidoku::mono::detail::solver {
 
 	template<Order O> requires(is_order_compiled(O))
 	class EngineObj final {
-		// TODO.asap is there a good way to not require friending?
-		//  Rationale: want to avoid showing and _allowing_ engine fields as non-const / showing non-const
-		//   member functions to the finder that it doesn't need to be able to see / mutate.
-		//  pass specific fields instead of the whole engine?
-		//  I'd like to have the engine to do some prelude things like checking `no_solutions_remain` and `get_num_puzzle_cells_remaining`.
-		//  The finder basically only needs to see the cells_cands_ field and the cand_elim_queue_ field.
-		//  But I wouldn't want a solution that allows an engine _user_ to pass a finder an engine from one solver
-		//   with a queue from a _different_ solver.
-		//  Solution: make a lightweight class wrapper for the engine _user_. It will be friended, but only to do those prelude things.
-		//   It will do the prelude things and then pass the necessary fields of the engine to a main-body finder that is private to the library.
-		// TODO.asap think of what to do for the apply class.
-		friend class CandElimFind<O>;
-		friend class CandElimApply<O>;
+		friend class CandElimFind<O>;  // the class wraps implementations that can only see what they need.
+		friend class CandElimApply<O>; // TODO.asap follow the Find pattern of wrapping implementations that can only see what they need.
 		friend SolutionsRemain unwind_and_rule_out_bad_guesses_<O>(EngineObj<O>&) noexcept;
 	public:
 		using T = Ints<O>;
@@ -91,6 +80,8 @@ namespace okiidoku::mono::detail::solver {
 		using val_t = typename T::o2x_smol_t;
 		using rmi_t = typename T::o4x_smol_t;
 		using o4i_t = typename T::o4i_t;
+		using cand_syms_t = HouseMask<O>;
+		using CandSymsGrid = detail::Gridlike<O, cand_syms_t>;
 
 		explicit EngineObj(const Grid<O>& puzzle) noexcept;
 
@@ -103,7 +94,7 @@ namespace okiidoku::mono::detail::solver {
 
 		// the candidate elimination queue is processed in the order of insertion.
 		[[nodiscard, gnu::pure]]
-		bool has_queued_cand_elims() const noexcept { return !cand_elim_queues_.empty(); }
+		bool has_queued_cand_elims() const noexcept { return !cand_elim_queues_.is_empty(); }
 
 		// contract: `has_queued_cand_elims` returns `true`.
 		SolutionsRemain process_first_queued_cand_elims() noexcept;
@@ -155,8 +146,6 @@ namespace okiidoku::mono::detail::solver {
 
 		// num_puzzles_found_t num_puzzles_found_ {0};
 
-		using cand_syms_t = HouseMask<O>;
-		using CandSymsGrid = detail::Gridlike<O, cand_syms_t>;
 		CandSymsGrid cells_cands_;
 
 		// (The alternative is to count the number of cells with only one candidate

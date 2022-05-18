@@ -72,10 +72,10 @@ namespace okiidoku::mono {
 		[[nodiscard]] constexpr const val_t& at(const T_row row, const T_col col) const noexcept { return arr_[(T::O2*row)+col]; }
 
 		// contract: `box` and `box_cell` are in [0, O2).
-		template<class T_box, class T_box_cell> requires(Any_o2x<O, T_box> && Any_o2x<O, T_box_cell>)
-		[[nodiscard]] constexpr       val_t& at_box_cell(const T_box box, const T_box_cell box_cell)       noexcept { return arr_[box_cell_to_rmi<O>(box, box_cell)]; }
-		template<class T_box, class T_box_cell> requires(Any_o2x<O, T_box> && Any_o2x<O, T_box_cell>)
-		[[nodiscard]] constexpr const val_t& at_box_cell(const T_box box, const T_box_cell box_cell) const noexcept { return arr_[box_cell_to_rmi<O>(box, box_cell)]; }
+		template<class T_house, class T_house_cell> requires(Any_o2x<O, T_house> && Any_o2x<O, T_house_cell>)
+		[[nodiscard]] constexpr       val_t& at_box_cell(const T_house box, const T_house_cell box_cell)       noexcept { return arr_[box_cell_to_rmi<O>(box, box_cell)]; }
+		template<class T_house, class T_house_cell> requires(Any_o2x<O, T_house> && Any_o2x<O, T_house_cell>)
+		[[nodiscard]] constexpr const val_t& at_box_cell(const T_house box, const T_house_cell box_cell) const noexcept { return arr_[box_cell_to_rmi<O>(box, box_cell)]; }
 
 		// contract: `row` is in [0, O2).
 		template<class T_row> requires(Any_o2x<O, T_row>)
@@ -101,13 +101,25 @@ namespace okiidoku::mono {
 		return rmi_to_box<O>(rmi_to_row<O>(index), rmi_to_col<O>(index));
 	}
 
-	template<Order O, class T_box, class T_box_cell>
-	requires(Any_o2x<O, T_box> && Any_o2x<O, T_box_cell>) [[nodiscard, gnu::const]]
-	constexpr typename Ints<O>::o4i_t box_cell_to_rmi(const T_box box, const T_box_cell box_cell) noexcept {
+	template<Order O, class T_house, class T_house_cell>
+	requires(Any_o2x<O, T_house> && Any_o2x<O, T_house_cell>) [[nodiscard, gnu::const]]
+	constexpr typename Ints<O>::o4i_t box_cell_to_rmi(const T_house box, const T_house_cell box_cell) noexcept {
 		using T = Ints<O>;
 		const auto row {static_cast<typename T::o4i_t>(((box/T::O1)*T::O1) + (box_cell/T::O1))};
 		const auto col {static_cast<typename T::o4i_t>(((box%T::O1)*T::O1) + (box_cell%T::O1))};
 		return (Ints<O>::O4 * row) + col;
+	}
+
+	template<Order O, class T_house, class T_house_cell>
+	requires(Any_o2x<O, T_house> && Any_o2x<O, T_house_cell>) [[nodiscard, gnu::const]]
+	constexpr typename Ints<O>::o4i_t house_cell_to_rmi(HouseType house_type, const T_house house, const T_house_cell house_cell) noexcept {
+		using T = Ints<O>;
+		using o4i_t = typename T::o4i_t;
+		switch (house_type) {
+		case HouseType::row: return static_cast<o4i_t>((T::O2*house)+house_cell);
+		case HouseType::col: return static_cast<o4i_t>((T::O2*house_cell)+house);
+		case HouseType::box: return box_cell_to_rmi<O>(house, house_cell);
+		}
 	}
 
 	template<Order O> [[nodiscard, gnu::const]]

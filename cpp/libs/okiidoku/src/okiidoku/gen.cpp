@@ -19,10 +19,10 @@ namespace okiidoku::mono { namespace {
 		using V = typename T::o1i_t;
 		using o3i_t = typename T::o3i_t;
 		[[nodiscard]] o3i_t count_num_missing_syms() const noexcept { return static_cast<o3i_t>(std::ranges::count(store_, V{0})); }
-		template<class T_box, class T_sym> requires(Any_o1x<O, T_box> && Any_o2x<O, T_sym>)
-		[[nodiscard]] const V& box_count_sym(const T_box box, const T_sym sym) const noexcept { return store_[(T::O1*sym)+box]; }
-		template<class T_box, class T_sym> requires(Any_o1x<O, T_box> && Any_o2x<O, T_sym>)
-		[[nodiscard]]       V& box_count_sym(const T_box box, const T_sym sym)       noexcept { return store_[(T::O1*sym)+box]; }
+		template<class T_house, class T_sym> requires(Any_o1x<O, T_house> && Any_o2x<O, T_sym>)
+		[[nodiscard]] const V& box_count_sym(const T_house box, const T_sym sym) const noexcept { return store_[(T::O1*sym)+box]; }
+		template<class T_house, class T_sym> requires(Any_o1x<O, T_house> && Any_o2x<O, T_sym>)
+		[[nodiscard]]       V& box_count_sym(const T_house box, const T_sym sym)       noexcept { return store_[(T::O1*sym)+box]; }
 	private:
 		// rows for each symbol, entry-in-row for each box.
 		std::array<V, T::O3> store_ {0};

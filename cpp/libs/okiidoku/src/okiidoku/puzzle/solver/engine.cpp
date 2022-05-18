@@ -2,6 +2,7 @@
 
 #include <algorithm>
 
+// TODO.low go through and see where it makes sense to add [[likely/unlikely]].
 namespace okiidoku::mono::detail::solver {
 
 	template<Order O> requires(is_order_compiled(O))
@@ -41,7 +42,7 @@ namespace okiidoku::mono::detail::solver {
 		const EngineObj<O>::val_t cand_to_elim
 	) noexcept {
 		auto& cell_cands {cells_cands_.at_rmi(rmi)};
-		if (!cell_cands.test(cand_to_elim)) /* TODO.low likelihood */ {
+		if (!cell_cands.test(cand_to_elim)) {
 			// TODO.try this if-block can technically be removed. need to benchmark to see whether it is beneficial.
 			// candidate was already eliminated.
 			return SolutionsRemain::yes();
@@ -54,7 +55,7 @@ namespace okiidoku::mono::detail::solver {
 		if (new_cands_count == 0) [[unlikely]] {
 			return unwind_and_rule_out_bad_guesses_(*this);
 		}
-		if ((new_cands_count < old_cands_count) && /* TODO.low likelihood? */(new_cands_count == 1)) [[unlikely]] {
+		if ((new_cands_count < old_cands_count) && (new_cands_count == 1)) [[unlikely]] {
 			enqueue_cand_elims_for_new_cell_requires_symbol_(rmi);
 		}
 		return SolutionsRemain::yes();
@@ -76,7 +77,9 @@ namespace okiidoku::mono::detail::solver {
 		assert(cell_cands.count() == 1);
 		// TODO.low inlined the call. seems like a latent foot-gun.
 		// enqueue_cand_elims_for_new_cell_requires_symbol_(rmi);
-		cand_elim_queues_.emplace(rmi, val);
+		cand_elim_queues_.emplace(cand_elim_desc::CellRequiresSymbol<O>{
+			.rmi{rmi}, .val{val}}
+		);
 		--num_puzzle_cells_remaining_;
 	}
 	template<Order O> requires(is_order_compiled(O))
@@ -86,41 +89,17 @@ namespace okiidoku::mono::detail::solver {
 		assert(num_puzzle_cells_remaining_ > 0);
 		auto& cell_cands {cells_cands_.at_rmi(rmi)};
 		assert(cell_cands.count() == 1);
-		cand_elim_queues_.emplace(rmi, cell_cands.count_lower_zeros_assuming_non_empty_mask());
+		cand_elim_queues_.emplace(cand_elim_desc::CellRequiresSymbol<O>{
+			.rmi{rmi},
+			.val{cell_cands.count_lower_zeros_assuming_non_empty_mask()}
+		});
 		--num_puzzle_cells_remaining_;
 	}
 
 
 	template<Order O> requires(is_order_compiled(O))
 	SolutionsRemain EngineObj<O>::process_first_queued_cand_elims() noexcept {
-		assert(has_queued_cand_elims());
-		const auto commit {cand_elim_queues_.front()};
-		commit_effects_queue_.pop();
-		// repetitive code. #undef-ed before end of function.
-		#define OKIIDOKU_TRY_ELIM_NB_CAND \
-			if (neighbour_rmi == commit.rmi) [[unlikely]] { continue; } \
-			const auto check {eliminate_candidate_sym_(neighbour_rmi, commit.val)}; \
-			if (check.no_solutions_remain()) [[unlikely]] { return check; }
-		{
-			const auto commit_row {rmi_to_row<O>(commit.rmi)};
-			for (o2i_t nb_col {0}; nb_col < T::O2; ++nb_col) {
-				const auto neighbour_rmi {static_cast<rmi_t>((T::O2*commit_row)+nb_col)};
-				OKIIDOKU_TRY_ELIM_NB_CAND
-		}	}
-		{
-			const auto commit_col {rmi_to_col<O>(commit.rmi)};
-			for (o2i_t nb_row {0}; nb_row < T::O2; ++nb_row) {
-				const auto neighbour_rmi {static_cast<rmi_t>((T::O2*nb_row)+commit_col)};
-				OKIIDOKU_TRY_ELIM_NB_CAND
-		}	}
-		{
-			const auto commit_box {rmi_to_box<O>(commit.rmi)};
-			for (o2i_t nb_box_cell {0}; nb_box_cell < T::O2; ++nb_box_cell) {
-				const auto neighbour_rmi {static_cast<rmi_t>(box_cell_to_rmi<O>(commit_box, nb_box_cell))};
-				OKIIDOKU_TRY_ELIM_NB_CAND
-		}	}
-		#undef OKIIDOKU_TRY_ELIM_NB_CAND
-		return SolutionsRemain::yes();
+		// TODO
 	}
 
 
@@ -141,7 +120,7 @@ namespace okiidoku::mono::detail::solver {
 		const EngineObj<O>::rmi_t rmi,
 		const EngineObj<O>::val_t val
 	) noexcept {
-		// assert(!has_queued_cand_elims()); // only a strong recommendation. not a contract.
+		// assert(!has_queued_cand_elims()); // only a guideline. not a contract.
 		assert(cells_cands_.at_rmi(rmi).test(val));
 		assert(cells_cands_.at_rmi(rmi).count() > 1);
 		guess_stack_.emplace(cells_cands_, rmi, val);
@@ -152,6 +131,7 @@ namespace okiidoku::mono::detail::solver {
 
 	template<Order O> requires(is_order_compiled(O))
 	SolutionsRemain unwind_and_rule_out_bad_guesses_(EngineObj<O>& e) noexcept {
+		e.cand_elim_queues_.clear();
 		if (e.guess_stack_.empty()) {
 			e.no_solutions_remain_ = true;
 			return SolutionsRemain{false};

@@ -8,7 +8,7 @@ namespace okiidoku::mono::detail::solver {
 	SolutionsRemain EngineObj<O>::process_first_queued_cand_elims() noexcept {
 		assert(has_queued_cand_elims());
 		const auto commit {cand_elim_queues_.front()};
-		commit_effects_queue_.pop();
+		cand_elim_queues_.pop();
 
 		// repetitive code. #undef-ed before end of function.
 		#define OKIIDOKU_TRY_ELIM_NB_CAND \

@@ -11,12 +11,6 @@ namespace okiidoku::mono::detail::solver {
 	//  be done via the prelude macro, albeit probably requiring some [[maybe_unused]] attributes.
 	template<Order O> requires(is_order_compiled(O))
 	class CandElimFind final {
-		using T = Ints<O>;
-		using o2i_t = typename T::o2i_t;
-		using val_t = typename T::o2x_smol_t;
-		using rmi_t = typename T::o4x_smol_t;
-		using o4i_t = typename T::o4i_t;
-		using cand_syms_t = typename EngineObj<O>::cand_syms_t;
 
 		// Internal (somewhat obvious) contract:
 		// finders must never incorrectly progress in solving a proper puzzle.
