@@ -1,23 +1,20 @@
-#ifndef HPP_OKIIDOKU__PUZZLE__CELL_MAJOR_DEDUCTIVE_SOLVER__ENGINE
-#define HPP_OKIIDOKU__PUZZLE__CELL_MAJOR_DEDUCTIVE_SOLVER__ENGINE
+#ifndef HPP_OKIIDOKU__PUZZLE__SOLVER__ENGINE
+#define HPP_OKIIDOKU__PUZZLE__SOLVER__ENGINE
 
-#include <okiidoku/puzzle/cand_elim_desc.hpp>
+#include <okiidoku/puzzle/solver/cand_elim_queues.hpp>
 #include <okiidoku/grid.hpp>
 #include <okiidoku/house_mask.hpp>
 #include <okiidoku/detail/export.h>
 
 #include <stack>
-#include <queue>
-#include <optional>
 #include <memory>      // unique_ptr
 #include <type_traits> // conditional_t
 
 /**
 This class provides solving primitives to design a solver.
+It uses a cell-major representation. See the design docs for more info.
 Currently it is private and used to build public solvers.
-There is some merit to publicizing this class. Maybe in the future.
-Part of why it's private is because it still feels quite low-level to use.
-It's much more like a micro-library than a micro-framework.
+The contracts require dutiful care to follow.
 I imagine an average library _user_ would not be interested in such tinkering.
 Of course, anyone can clone the repo and do such tinkering within it if they wish.
 
@@ -31,7 +28,7 @@ Examples of various ways this could be used:
 	 See the guess stack comments for more info.
 
 Please very carefully read and adhere to the contracts. */
-namespace okiidoku::mono::detail::cell_major_deductive_solver {
+namespace okiidoku::mono::detail::solver {
 
 	template<Order O> requires(is_order_compiled(O))
 	class EngineObj;
@@ -98,9 +95,9 @@ namespace okiidoku::mono::detail::cell_major_deductive_solver {
 
 		// the candidate elimination queue is processed in the order of insertion.
 		[[nodiscard, gnu::pure]]
-		bool has_enqueued_cand_elims() const noexcept { return !commit_effects_queue_.empty(); }
+		bool has_queued_cand_elims() const noexcept { return !cand_elim_queues_.empty(); }
 
-		// contract: `has_enqueued_cand_elims` returns `true`.
+		// contract: `has_queued_cand_elims` returns `true`.
 		SolutionsRemain process_first_queued_cand_elims() noexcept;
 
 		// convenience wrapper around `process_first_queued_cand_elims`.
@@ -122,7 +119,7 @@ namespace okiidoku::mono::detail::cell_major_deductive_solver {
 		// contract: `get_num_puzzle_cells_remaining` returns zero.
 		// returns a filled grid following the one rule and containing all the puzzle's givens.
 		[[nodiscard, gnu::pure]]
-		std::optional<Grid<O>> build_solution_obj() const noexcept;
+		Grid<O> build_solution_obj() const noexcept;
 
 
 	private:
@@ -152,30 +149,26 @@ namespace okiidoku::mono::detail::cell_major_deductive_solver {
 		using CandSymsGrid = detail::Gridlike<O, cand_syms_t>;
 		CandSymsGrid cells_cands_;
 
-		// helper to speed up checking if the grid is solved.
+		// (The alternative is to count the number of cells with only one candidate
+		// each time this property is queried). This is faster, but requires careful
+		// internal bookkeeping to not accidentally put in a wrong state.
 		o4i_t num_puzzle_cells_remaining_ {T::O4};
 
-		struct OKIIDOKU_NO_EXPORT CommitRecord final {
-			rmi_t rmi;
-			val_t val;
-			CommitRecord(const rmi_t rmi_, const val_t val_) noexcept: rmi{rmi_}, val{val_} {}
-		};
-		std::queue<CommitRecord> commit_effects_queue_ {};
+		CandElimQueues<O> cand_elim_queues_ {};
 
 		struct OKIIDOKU_NO_EXPORT GuessRecord final {
 			// nothing that was deducted based on a bad guess can be used, and since
 			// deduction logic is non-trivial, the simplest way to revert is to save
 			// the entire restore-state. For large grids, that's a lot of memory for
-			// each `GuessRecord`, so since the data is cold, it is allocated on the
+			// each `cells_cands`, so since the data is cold, it is allocated on the
 			// heap.
 			std::unique_ptr<CandSymsGrid> prev_cells_cands;
-			CommitRecord committed;
-			GuessRecord(
-				const CandSymsGrid& prev_cells_cands_,
-				const CommitRecord committed_
-			) noexcept:
+			rmi_t guess_rmi;
+			val_t guess_val;
+			GuessRecord(const CandSymsGrid& prev_cells_cands_, rmi_t rmi, val_t val) noexcept:
 				prev_cells_cands{std::make_unique<CandSymsGrid>(prev_cells_cands_)},
-				committed{committed_}
+				guess_rmi{rmi},
+				guess_val{val}
 			{}
 		};
 		using guess_stack_t = std::stack<GuessRecord/* , std::vector<GuessRecord> */>;

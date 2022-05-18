@@ -28,7 +28,7 @@ namespace okiidoku::mono { namespace {
 		struct State final {
 			detail::Gridlike<O, Rel<O>> rel_table;
 			label_map_t<O> to_og;
-			TieLinks<O, 2> ties {};
+			detail::TieLinks<O, 2> ties {};
 			explicit constexpr State(const Grid<O>& grid) noexcept: rel_table{detail::make_rel_table<O>(grid)} {
 				std::iota(to_og.begin(), to_og.end(), mapping_t{0});
 			}

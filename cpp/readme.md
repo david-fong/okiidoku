@@ -3,20 +3,18 @@
 
 ## Using the Dynamic Library
 
-Building okiidoku requires CMake 3.23, a C++ compiler [supporting C++20](https://en.cppreference.com/w/cpp/compiler_support), a build system (ex. Make, Ninja, Visual Studio), and [conan](https://conan.io/downloads.html).
+Building okiidoku requires CMake 3.23, a C++ compiler [supporting C++20](https://en.cppreference.com/w/cpp/compiler_support), a build system (ex. Ninja, Visual Studio, Make), and [conan](https://conan.io/downloads.html).
 
 Refer to the [CMake guide](https://cmake.org/cmake/help/latest/guide/importing-exporting/index.html).
 
-- The library uses templates for each compiled grid order for optimization purposes. The templates are accessible under the `okiidoku::mono` namespace, and a visitor-pattern interface is exposed under the `okiidoku::visitor` namespace. The visitor pattern is intended to make it more convenient to write code that uses an order selected at runtime.
-  - Code examples can be found in [the examples folder](./libs/okiidoku/examples/).
+- The library uses templates for each compiled grid size for optimization purposes. The templates are accessible under the `okiidoku::mono` namespace, and a visitor-pattern interface is exposed under the `okiidoku::visitor` namespace. The visitor pattern is intended to make it more convenient to write code that uses an order selected at runtime.
+  - To change the supported grid sizes that get compiled, create a [tweak header](https://vector-of-bool.github.io/2020/10/04/lib-configuration.html#providing-a-tweak-header) for [`./libs/okiidoku/include/okiidoku/config/defaults.hpp`](./libs/okiidoku/include/okiidoku/config/defaults.hpp).
 
 - Make sure to read and follow the api contracts documented in the headers. Exceptions are intentionally not thrown for precondition violations. If you would like to run against a build of libokiidoku with assertions for debugging purposes, use a debug build of libokiidoku.
 
-- To change the supported grid sizes that get compiled, create a [tweak header](https://vector-of-bool.github.io/2020/10/04/lib-configuration.html#providing-a-tweak-header) for [`./libs/okiidoku/include/okiidoku/config/defaults.hpp`](./libs/okiidoku/include/okiidoku/config/defaults.hpp).
+- Code examples can be found in [the examples folder](./libs/okiidoku/examples/).
 
-- Installing the library is supported (I might have made configuration mistakes) but not really recommended. I can't actually think of a good use case for doing so.
-
-- It does not make any use of `printf` and friends, so (unless your code uses them) it is safe to do [`std::ios_base::sync_with_stdio(false);`](https://en.cppreference.com/w/cpp/io/ios_base/sync_with_stdio).
+- It does not make any use of `printf` and friends, so if nothing in your project uses them either, it is safe to do [`sync_with_stdio(false);`](https://en.cppreference.com/w/cpp/io/ios_base/sync_with_stdio).
 
 ## Building and Running okiidoku\_cli
 

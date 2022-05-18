@@ -1,12 +1,11 @@
-#ifndef TPP_OKIIDOKU__PUZZLE__CELL_MAJOR_DEDUCTIVE_SOLVER__ENGINE
-#define TPP_OKIIDOKU__PUZZLE__CELL_MAJOR_DEDUCTIVE_SOLVER__ENGINE
+#ifndef TPP_OKIIDOKU__PUZZLE__SOLVER__ENGINE
+#define TPP_OKIIDOKU__PUZZLE__SOLVER__ENGINE
 
-#include <okiidoku/puzzle/cell_major_deductive_solver/engine.hpp>
-#include <okiidoku/puzzle/cell_major_deductive_solver/techniques.tpp>
+#include <okiidoku/puzzle/solver/engine.hpp>
 
 #include <algorithm>
 
-namespace okiidoku::mono::detail::cell_major_deductive_solver {
+namespace okiidoku::mono::detail::solver {
 
 	template<Order O> requires(is_order_compiled(O))
 	EngineObj<O>::EngineObj(const Grid<O>& puzzle) noexcept {
@@ -21,7 +20,7 @@ namespace okiidoku::mono::detail::cell_major_deductive_solver {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	std::optional<Grid<O>> EngineObj<O>::build_solution_obj() const noexcept {
+	std::optional<Grid<O>> EngineObj<O>::build_solution_obj(Grid<O>& dest_grid) const noexcept {
 		assert(!no_solutions_remain());
 		assert(get_num_puzzle_cells_remaining() == 0);
 		assert(( std::all_of(
@@ -29,18 +28,11 @@ namespace okiidoku::mono::detail::cell_major_deductive_solver {
 			cells_cands_.get_underlying_array().cend(),
 			[](const auto& cands){ return cands.count() == 1; }
 		) ));
-
-		// build solution struct and return:
-		std::optional<Grid<O>> soln_optional {std::in_place};
-		{
-			auto& soln {soln_optional.value()};
-			for (o4i_t rmi {0}; rmi < T::O4; ++rmi) {
-				const auto& cell_cands {cells_cands_.at_rmi(rmi)};
-				assert(cell_cands.count() == 1);
-				soln.at_rmi(rmi) = cell_cands.count_lower_zeros_assuming_non_empty_mask();
-			}
+		for (o4i_t rmi {0}; rmi < T::O4; ++rmi) {
+			const auto& cell_cands {cells_cands_.at_rmi(rmi)};
+			assert(cell_cands.count() == 1);
+			dest_grid.at_rmi(rmi) = cell_cands.count_lower_zeros_assuming_non_empty_mask();
 		}
-		return soln_optional;
 	}
 
 
@@ -102,7 +94,7 @@ namespace okiidoku::mono::detail::cell_major_deductive_solver {
 
 	template<Order O> requires(is_order_compiled(O))
 	SolutionsRemain EngineObj<O>::process_first_queued_cand_elims() noexcept {
-		assert(has_enqueued_cand_elims());
+		assert(has_queued_cand_elims());
 		const auto commit {commit_effects_queue_.front()};
 		commit_effects_queue_.pop();
 		// repetitive code. #undef-ed before end of function.
@@ -135,7 +127,7 @@ namespace okiidoku::mono::detail::cell_major_deductive_solver {
 
 	template<Order O> requires(is_order_compiled(O))
 	SolutionsRemain EngineObj<O>::process_all_queued_cand_elims() noexcept {
-		while (has_enqueued_cand_elims()) {
+		while (has_queued_cand_elims()) {
 			const auto check {process_first_queued_cand_elims()};
 			if (check.no_solutions_remain()) {
 				return check;
@@ -150,10 +142,10 @@ namespace okiidoku::mono::detail::cell_major_deductive_solver {
 		const EngineObj<O>::rmi_t rmi,
 		const EngineObj<O>::val_t val
 	) noexcept {
-		// assert(!has_enqueued_cand_elims()); // only a strong recommendation. not a contract.
+		// assert(!has_queued_cand_elims()); // only a strong recommendation. not a contract.
 		assert(cells_cands_.at_rmi(rmi).test(val));
 		assert(cells_cands_.at_rmi(rmi).count() > 1);
-		guess_stack_.emplace(cells_cands_, CommitRecord{rmi, val});
+		guess_stack_.emplace(cells_cands_, rmi, val);
 
 		register_new_given_(rmi, val);
 	}
@@ -167,8 +159,8 @@ namespace okiidoku::mono::detail::cell_major_deductive_solver {
 		}
 		const auto step {std::move(e.guess_stack_.top())};
 		e.guess_stack_.pop();
-		e.cells_cands_ = std::move(*step.prev_cells_cands);
-		return e.eliminate_candidate_sym_(step.committed.rmi, step.committed.val);
+		e.cells_cands_ = *std::move(step.prev_cells_cands);
+		return e.eliminate_candidate_sym_(step.guess_rmi, step.guess_val);
 	}
 }
 #endif

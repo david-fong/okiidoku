@@ -29,6 +29,8 @@
 
 ## Misc List
 
+- change the .tpp files to .hpp and .cpp files and add to the cpp files to the CMakeLists.txt. Was using tpp files as an artifact of early structure revolving around standard pImpl. Now, things are refactored into a bunch of separate files: the engine implementation, and the candidate-elimination finding and applying are all separate files which are able to be structured as internal header and source files with their own explicit template instantiation in the sources files.
+
 - boost has a `variant2` class that is never valueless by exception
 
 - find out how to use the [cppcoreguidelines checker](https://docs.microsoft.com/en-us/cpp/code-quality/using-the-cpp-core-guidelines-checkers?view=msvc-170)

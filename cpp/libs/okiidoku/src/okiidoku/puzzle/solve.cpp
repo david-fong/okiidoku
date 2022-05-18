@@ -1,8 +1,9 @@
 #include <okiidoku/puzzle/solve.hpp>
 
-#include <okiidoku/puzzle/cell_major_deductive_solver/engine.hpp>
-#include <okiidoku/puzzle/cell_major_deductive_solver/engine.tpp>
-#include <okiidoku/puzzle/cell_major_deductive_solver/techniques.tpp>
+#include <okiidoku/puzzle/solver/engine.hpp>
+#include <okiidoku/puzzle/solver/engine.tpp>
+#include <okiidoku/puzzle/solver/cand_elim_find.tpp>
+#include <okiidoku/puzzle/solver/cand_elim_apply.tpp>
 
 // TODO.low if this translation unit becomes slow to compile and specific functions
 // are being frequently modified, consider experimenting with explicit instantiation
@@ -12,7 +13,7 @@ namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
 	FastSolver<O>::FastSolver(const Grid<O>& puzzle) noexcept:
-		engine_{std::make_unique<detail::cell_major_deductive_solver::EngineObj<O>>(puzzle)} {}
+		engine_{std::make_unique<detail::solver::EngineObj<O>>(puzzle)} {}
 
 	// Note: with pimpl, can't default in header since the impl class is not a
 	// complete type in the header (it is forward declared there). Defaulting
@@ -32,20 +33,22 @@ namespace okiidoku::mono {
 		}
 		while (e.get_num_puzzle_cells_remaining() > 0) [[likely]] {
 			{const auto check {e.process_all_queued_cand_elims()};
-				assert(!e.has_enqueued_cand_elims());
+				assert(!e.has_queued_cand_elims());
 				if (check.no_solutions_remain()) [[unlikely]] { return std::nullopt; }
 				if (e.get_num_puzzle_cells_remaining() == 0) [[unlikely]] { break; }
 			}
 
-			using Tech = detail::cell_major_deductive_solver::Techniques<O>;
+			using Tech = detail::solver::Techniques<O>;
 			Tech::find_symbol_requires_cell(e);
-			if (e.has_enqueued_cand_elims()) { continue; }
+			if (e.has_queued_cand_elims()) { continue; }
 			Tech::find_locked_candidates(e);
-			if (e.has_enqueued_cand_elims()) { continue; }
+			if (e.has_queued_cand_elims()) { continue; }
 			// TODO call other techniques.
 			// TODO e.push_guess(rmi, val);
 		}
-		return e.build_solution_obj();
+		std::optional<Grid<O>> soln {std::in_place};
+		e.build_solution_obj(*soln);
+		return soln;
 	}
 
 
@@ -59,12 +62,12 @@ namespace okiidoku::mono {
 			return std::nullopt;
 		}
 		while (e.get_num_puzzle_cells_remaining() > 0) [[likely]] {
-			using Tech = detail::cell_major_deductive_solver::Techniques<O>;
+			using Tech = detail::solver::Techniques<O>;
 			Tech::find_symbol_requires_cell(e);
 			Tech::find_locked_candidates(e);
 			// TODO call other techniques
 
-			if (e.has_enqueued_cand_elims()) {
+			if (e.has_queued_cand_elims()) {
 				// TODO sort queue. or make queue internally always sorted.
 				{const auto check {e.process_first_queued_cand_elims()};
 					if (check.no_solutions_remain()) [[unlikely]] { return std::nullopt; }
@@ -74,13 +77,15 @@ namespace okiidoku::mono {
 				// TODO e.push_guess(rmi, val);
 			}
 		}
-		return e.build_solution_obj();
+		std::optional<Grid<O>> soln {std::in_place};
+		e.build_solution_obj(*soln);
+		return soln;
 	}
 }
 namespace okiidoku::mono {
 	#define OKIIDOKU_FOR_COMPILED_O(O_) \
-		template class detail::cell_major_deductive_solver::EngineObj<O_>; \
-		template class detail::cell_major_deductive_solver::Techniques<O_>; \
+		template class detail::solver::EngineObj<O_>; \
+		template class detail::solver::Techniques<O_>; \
 		template class FastSolver<O_>; \
 		template class VeryDeductiveSolver<O_>;
 	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES

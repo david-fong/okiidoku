@@ -1,18 +1,30 @@
-#ifndef TPP_OKIIDOKU__PUZZLE__CELL_MAJOR_DEDUCTIVE_SOLVER__TECHNIQUES
-#define TPP_OKIIDOKU__PUZZLE__CELL_MAJOR_DEDUCTIVE_SOLVER__TECHNIQUES
+#ifndef TPP_OKIIDOKU__PUZZLE__SOLVER__CAND_ELIM_FIND
+#define TPP_OKIIDOKU__PUZZLE__SOLVER__CAND_ELIM_FIND
 
-#include <okiidoku/puzzle/cell_major_deductive_solver/engine.hpp>
-#include <okiidoku/puzzle/cand_elim_desc.hpp>
+#include <okiidoku/puzzle/solver/engine.hpp>
+#include <okiidoku/puzzle/solver/cand_elim_desc.hpp>
 
 #include <algorithm>
 #include <compare>
 
-namespace okiidoku::mono::detail::cell_major_deductive_solver {
+namespace okiidoku::mono::detail::solver {
 
 	namespace techniques::subsets {
+
 		template<Order O> requires(is_order_compiled(O))
 		static constexpr unsigned max_subset_size {};
+
+		template<Order O> requires(is_order_compiled(O))
+		struct GroupMe final {
+			using cand_count_t = typename T::o2i_smol_t;
+			cand_count_t cand_count;
+			rmi_t house_cell_i;
+		};
+
+		template<Order O> requires(is_order_compiled(O))
+		void find_subsets(Engine<O>& engine);
 	}
+
 
 	template<Order O> requires(is_order_compiled(O))
 	class Techniques final {
@@ -51,12 +63,12 @@ namespace okiidoku::mono::detail::cell_major_deductive_solver {
 
 	// opening boilerplate. #undef-ed before end of namespace.
 	#define OKIIDOKU_TECHNIQUE_PRELUDE \
-		assert(!e.no_solutions_remain()); \
-		if (e.get_num_puzzle_cells_remaining() == 0) [[unlikely]] { return; }
+		assert(!engine.no_solutions_remain()); \
+		if (engine.get_num_puzzle_cells_remaining() == 0) [[unlikely]] { return; }
 
 
 	template<Order O> requires(is_order_compiled(O))
-	void Techniques<O>::find_symbol_requires_cell(EngineObj<O>& e) noexcept {
+	void Techniques<O>::find_symbol_requires_cell(EngineObj<O>& engine) noexcept {
 		OKIIDOKU_TECHNIQUE_PRELUDE
 		// TODO for each house of all house-types, check if any symbol only has one candidate-house-cell.
 		// how to use masks to optimize? have an accumulator candidate-symbol mask "<house-type>_seen_cand_syms" that starts as zeros.
@@ -78,17 +90,12 @@ namespace okiidoku::mono::detail::cell_major_deductive_solver {
 	//  are already in cache. but is that a significant enough benefit? probably needs benchmark to justify...
 	//  The eager function wrapper takes an argument for find_one vs find_all. the queueing wrapper returns void.
 	template<Order O> requires(is_order_compiled(O))
-	void Techniques<O>::find_cells_requiring_symbols(EngineObj<O>& e
+	void Techniques<O>::find_cells_requiring_symbols(EngineObj<O>& engine
 		// const EngineObj<O>::val_t subset_size
 	) noexcept {
 		// assert(subset_size > 1);
 		// assert(subset_size <= techniques::subsets::max_subset_size<O>);
 		OKIIDOKU_TECHNIQUE_PRELUDE
-		using cand_count_t = typename T::o2i_smol_t;
-		struct GroupMe final {
-			cand_count_t cand_count;
-			rmi_t house_cell_i;
-		};
 		// TODO
 		// for each house type, for each house,
 		const o2i_t row {0};
@@ -96,7 +103,7 @@ namespace okiidoku::mono::detail::cell_major_deductive_solver {
 		for (o2i_t i {0}; i < T::O2; ++i) {
 			const auto rmi {static_cast<rmi_t>((T::O2*row)+i)};
 			subset_searcher[i] = GroupMe{
-				.cand_count{static_cast<cand_count_t>(e.cells_cands_.at_rmi(rmi).count())},
+				.cand_count{static_cast<cand_count_t>(engine.cells_cands_.at_rmi(rmi).count())},
 				.house_cell_i{rmi}
 			};
 		}
@@ -105,8 +112,8 @@ namespace okiidoku::mono::detail::cell_major_deductive_solver {
 				return cmp;
 			}
 			return cand_syms_t::unspecified_strong_cmp(
-				e.cells_cands_.at(row, a.house_cell_i),
-				e.cells_cands_.at(row, b.house_cell_i)
+				engine.cells_cands_.at(row, a.house_cell_i),
+				engine.cells_cands_.at(row, b.house_cell_i)
 			);
 		}};
 		std::sort(subset_searcher.begin(), subset_searcher.end(), [&](const GroupMe& a, const GroupMe& b){
@@ -132,7 +139,7 @@ namespace okiidoku::mono::detail::cell_major_deductive_solver {
 
 	// TODO I think there should be a way to do a bit of data prep and then basically reuse the code of cells_requiring_symbols
 	template<Order O> requires(is_order_compiled(O))
-	void Techniques<O>::find_symbols_requiring_cells(EngineObj<O>& e
+	void Techniques<O>::find_symbols_requiring_cells(EngineObj<O>& engine
 		// const EngineObj<O>::val_t subset_size
 	) noexcept {
 		OKIIDOKU_TECHNIQUE_PRELUDE
@@ -144,7 +151,7 @@ namespace okiidoku::mono::detail::cell_major_deductive_solver {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	void Techniques<O>::find_locked_candidates(EngineObj<O>& e) noexcept {
+	void Techniques<O>::find_locked_candidates(EngineObj<O>& engine) noexcept {
 		OKIIDOKU_TECHNIQUE_PRELUDE
 		// TODO
 	}
