@@ -61,7 +61,7 @@ namespace okiidoku::mono {
 		[[nodiscard, gnu::pure]] o2i_t count_bits_below(const o2i_t top_exclusive) const noexcept {
 			auto count {static_cast<o2i_t>(std::popcount(ints_[num_ints-1] & static_cast<o2i_t>(top_exclusive - 1u)))};
 			if constexpr (num_ints == 0) { return count; }
-			for (size_t i {0}; i < num_ints - 1; ++i) {
+			for (std::size_t i {0}; i < num_ints - 1; ++i) {
 				count += static_cast<o2i_t>(std::popcount(ints_[i]));
 			}
 			return count;
@@ -108,11 +108,11 @@ namespace okiidoku::mono {
 		}
 
 		HouseMask& operator|=(const HouseMask& rhs) noexcept {
-			for (size_t i {0}; i < num_ints; ++i) { ints_[i] |= rhs.ints_[i]; };
+			for (std::size_t i {0}; i < num_ints; ++i) { ints_[i] |= rhs.ints_[i]; };
 			return *this;
 		}
 		HouseMask& operator&=(const HouseMask& rhs) noexcept {
-			for (size_t i {0}; i < num_ints; ++i) { ints_[i] &= rhs.ints_[i]; };
+			for (std::size_t i {0}; i < num_ints; ++i) { ints_[i] &= rhs.ints_[i]; };
 			return *this;
 		}
 		[[nodiscard, gnu::pure]] friend HouseMask operator|(HouseMask lhs, const HouseMask& rhs) noexcept {
@@ -144,7 +144,7 @@ namespace okiidoku::mono {
 		[[nodiscard, gnu::pure]] o2x_t get_index_of_nth_set_bit(o2x_t set_bit_index) const noexcept {
 			assert(set_bit_index < T::O2);
 			assert(count() > o2i_t{set_bit_index});
-			for (size_t int_i {0}; int_i < num_ints; ++int_i) {
+			for (std::size_t int_i {0}; int_i < num_ints; ++int_i) {
 				auto& int_ {ints_[int_i]};
 				const auto int_popcount {std::popcount(int_)};
 				if constexpr (num_ints > 1) {

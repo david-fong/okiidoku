@@ -1,75 +1,37 @@
-#ifndef TPP_OKIIDOKU__PUZZLE__SOLVER__CAND_ELIM_FIND
-#define TPP_OKIIDOKU__PUZZLE__SOLVER__CAND_ELIM_FIND
-
-#include <okiidoku/puzzle/solver/engine.hpp>
-#include <okiidoku/puzzle/solver/cand_elim_desc.hpp>
+#include <okiidoku/puzzle/solver/cand_elim_find.hpp>
 
 #include <algorithm>
 #include <compare>
 
 namespace okiidoku::mono::detail::solver {
 
-	namespace techniques::subsets {
+	namespace { namespace subsets {
 
 		template<Order O> requires(is_order_compiled(O))
 		static constexpr unsigned max_subset_size {};
 
 		template<Order O> requires(is_order_compiled(O))
 		struct GroupMe final {
+			using T = Ints<O>;
 			using cand_count_t = typename T::o2i_smol_t;
 			cand_count_t cand_count;
 			rmi_t house_cell_i;
 		};
 
 		template<Order O> requires(is_order_compiled(O))
-		void find_subsets(Engine<O>& engine);
-	}
-
-
-	template<Order O> requires(is_order_compiled(O))
-	class Techniques final {
-		using T = Ints<O>;
-		using o2i_t = typename T::o2i_t;
-		using val_t = typename T::o2x_smol_t;
-		using rmi_t = typename T::o4x_smol_t;
-		using o4i_t = typename T::o4i_t;
-		using cand_syms_t = typename EngineObj<O>::cand_syms_t;
-
-		// Internal (somewhat obvious) contract:
-		// techniques must never incorrectly progress in solving a proper puzzle.
-
-	public:
-		// common contracts and invariants for all techniques:
-		// contract: `no_solutions_remain` returns `false`.
-		// behaviour: immediately returns if `get_num_puzzle_cells_remaining` returns zero.
-
-		// TODO.high  for techniques that are not (relatively) trivial to perform a full scan of the grid,
-		//   provide a parameter enum `SearchEffort { find_first, find_all, };`
-		static void find_symbol_requires_cell(EngineObj<O>&) noexcept;
-
-		static void find_locked_candidates(EngineObj<O>&) noexcept;
-
-		// AKA "naked subsets"
-		// // contract: `subset_size` is in the range [2, ((O2+1)//2)].
-		static void find_cells_requiring_symbols(EngineObj<O>&/* val_t subset_size */) noexcept;
-
-		// AKA "hidden subsets"
-		// // contract: `subset_size` is in the range [2, ((O2+1)//2)].
-		static void find_symbols_requiring_cells(EngineObj<O>&/* val_t subset_size */) noexcept;
-
-		static void find_fish(EngineObj<O>&) noexcept;
-	};
+		void subsets(Engine<O>& engine);
+	}}
 
 
 	// opening boilerplate. #undef-ed before end of namespace.
-	#define OKIIDOKU_TECHNIQUE_PRELUDE \
+	#define OKIIDOKU_CAND_ELIM_FINDER_PRELUDE \
 		assert(!engine.no_solutions_remain()); \
 		if (engine.get_num_puzzle_cells_remaining() == 0) [[unlikely]] { return; }
 
 
 	template<Order O> requires(is_order_compiled(O))
-	void Techniques<O>::find_symbol_requires_cell(EngineObj<O>& engine) noexcept {
-		OKIIDOKU_TECHNIQUE_PRELUDE
+	void CandElimFind<O>::symbol_requires_cell(EngineObj<O>& engine) noexcept {
+		OKIIDOKU_CAND_ELIM_FINDER_PRELUDE
 		// TODO for each house of all house-types, check if any symbol only has one candidate-house-cell.
 		// how to use masks to optimize? have an accumulator candidate-symbol mask "<house-type>_seen_cand_syms" that starts as zeros.
 		// have a <house-type>_syms_with_multiple_cand_cells accumulator that also starts as zeros.
@@ -85,17 +47,17 @@ namespace okiidoku::mono::detail::solver {
 
 	// TODO consider adding an argument about whether to do candidate elimination eagerly or queue them.
 	//  the annoying thing is that then the return type for the queue case doesn't need to be SolutionsRemain...
-	//  in that case, we could make it a wrapper than just discards (void-casts) the result because it knows that it should never be unsat if queueing. can also assert that it is not unsat.
+	//  in that case, we could make it a wrapper than just discards (void-casts) the result because it knows that it should never be SolutionsRemain(false) if queueing. can also assert that that is so.
 	//  the main question: why would that be beneficial? in the eager case, I think theres the benefit of operating on masks that
 	//  are already in cache. but is that a significant enough benefit? probably needs benchmark to justify...
 	//  The eager function wrapper takes an argument for find_one vs find_all. the queueing wrapper returns void.
 	template<Order O> requires(is_order_compiled(O))
-	void Techniques<O>::find_cells_requiring_symbols(EngineObj<O>& engine
+	void CandElimFind<O>::cells_require_symbols(EngineObj<O>& engine
 		// const EngineObj<O>::val_t subset_size
 	) noexcept {
 		// assert(subset_size > 1);
-		// assert(subset_size <= techniques::subsets::max_subset_size<O>);
-		OKIIDOKU_TECHNIQUE_PRELUDE
+		// assert(subset_size <= techniques::max_subset_size<O>);
+		OKIIDOKU_CAND_ELIM_FINDER_PRELUDE
 		// TODO
 		// for each house type, for each house,
 		const o2i_t row {0};
@@ -137,12 +99,12 @@ namespace okiidoku::mono::detail::solver {
 	}
 
 
-	// TODO I think there should be a way to do a bit of data prep and then basically reuse the code of cells_requiring_symbols
+	// TODO I think there should be a way to do a bit of data prep and then basically reuse the code of cells_require_symbols
 	template<Order O> requires(is_order_compiled(O))
-	void Techniques<O>::find_symbols_requiring_cells(EngineObj<O>& engine
+	void CandElimFind<O>::symbols_require_cells(EngineObj<O>& engine
 		// const EngineObj<O>::val_t subset_size
 	) noexcept {
-		OKIIDOKU_TECHNIQUE_PRELUDE
+		OKIIDOKU_CAND_ELIM_FINDER_PRELUDE
 		// for each house type, for each house of that type, for each symbol
 		// get a mask for each symbol of which cells it can be in in that house.
 		// then apply the same technique.
@@ -151,19 +113,17 @@ namespace okiidoku::mono::detail::solver {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	void Techniques<O>::find_locked_candidates(EngineObj<O>& engine) noexcept {
-		OKIIDOKU_TECHNIQUE_PRELUDE
+	void CandElimFind<O>::locked_candidates(EngineObj<O>& engine) noexcept {
+		OKIIDOKU_CAND_ELIM_FINDER_PRELUDE
 		// TODO
 	}
 
 
-	#undef OKIIDOKU_TECHNIQUE_PRELUDE
+	#undef OKIIDOKU_CAND_ELIM_FINDER_PRELUDE
 
 
-	// disable implicit template instantiation.
 	#define OKIIDOKU_FOR_COMPILED_O(O_) \
-		extern template class Techniques<O_>;
+		template class CandElimFind<O_>;
 	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 	#undef OKIIDOKU_FOR_COMPILED_O
 }
-#endif

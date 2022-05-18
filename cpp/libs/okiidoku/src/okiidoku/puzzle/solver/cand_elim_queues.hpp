@@ -11,11 +11,11 @@ namespace okiidoku::mono::detail::solver {
 	template<Order O> requires(is_order_compiled(O))
 	struct CandElimQueues final {
 		std::tuple<
-			std::deque<cand_elim_desc::subsets::CellRequiresSymbol<O>>,
-			std::deque<cand_elim_desc::subsets::SymbolRequiresCell<O>>,
-			std::deque<cand_elim_desc::subsets::CellsRequireSymbols<O>>,
-			std::deque<cand_elim_desc::subsets::SymbolsRequireCells<O>>,
-			std::deque<cand_elim_desc::LockedCandidate<O>>,
+			std::deque<cand_elim_desc::CellRequiresSymbol<O>>,
+			std::deque<cand_elim_desc::SymbolRequiresCell<O>>,
+			std::deque<cand_elim_desc::CellsRequireSymbols<O>>,
+			std::deque<cand_elim_desc::SymbolsRequireCells<O>>,
+			std::deque<cand_elim_desc::LockedCandidate<O>>
 		> deques_;
 
 		[[nodiscard, gnu::pure]] bool empty() const noexcept {

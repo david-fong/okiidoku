@@ -14,7 +14,7 @@ namespace okiidoku::emoji {
 
 	// TODO.mid constexpr all the things with std::tuple, std::to_array, etc.
 
-	inline const std::vector<size_t> top_set_preferences {5, 11};
+	inline const std::vector<std::size_t> top_set_preferences {5, 11};
 
 	// TODO.low annoyingly, when printing on various terminal emulators, some
 	// emojis vary in width. I've added spaces where required on gnome terminal,

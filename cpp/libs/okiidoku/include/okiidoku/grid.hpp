@@ -90,10 +90,7 @@ namespace okiidoku::mono {
 	};
 
 
-	enum class HouseType : unsigned char {
-		box, row, col,
-	};
-
+	// TODO.asap consider moving these to ints.hpp?
 	template<Order O> [[nodiscard, gnu::const]] constexpr typename Ints<O>::o2i_t rmi_to_row(const typename Ints<O>::o4i_t index) noexcept { return static_cast<typename Ints<O>::o2i_t>(index / (Ints<O>::O2)); }
 	template<Order O> [[nodiscard, gnu::const]] constexpr typename Ints<O>::o2i_t rmi_to_col(const typename Ints<O>::o4i_t index) noexcept { return static_cast<typename Ints<O>::o2i_t>(index % (Ints<O>::O2)); }
 	template<Order O> [[nodiscard, gnu::const]] constexpr typename Ints<O>::o2i_t rmi_to_box(const typename Ints<O>::o2i_t row, const typename Ints<O>::o2i_t col) noexcept {

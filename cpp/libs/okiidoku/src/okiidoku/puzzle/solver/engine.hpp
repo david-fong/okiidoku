@@ -19,9 +19,9 @@ I imagine an average library _user_ would not be interested in such tinkering.
 Of course, anyone can clone the repo and do such tinkering within it if they wish.
 
 Examples of various ways this could be used:
-- solvers that greedily/immediately consume queued commits
-- solvers that "hoard"/accumulate queued commits until solving techniques
-	cannot find anything more without consuming queued commits.
+- solvers that greedily/immediately consume deduced candidate eliminations
+- solvers that "hoard"/accumulate deduced candidate eliminations until no more
+	can possibly be found without consuming any.
 - can purely use the guess mechanism (_very_ inefficient, but technically valid approach)
   - note that the solver is not designed to be efficient when used in
     a way that makes heavy use of guessing- quite the opposite!
@@ -42,10 +42,7 @@ namespace okiidoku::mono::detail::solver {
 	// returns that no solutions remain if the guess stack is empty.
 	template<Order O> requires(is_order_compiled(O))
 	SolutionsRemain unwind_and_rule_out_bad_guesses_(EngineObj<O>&) noexcept;
-	// Note: ^I wanted this to be a private `EngineObj` member, but then friending
-	// to it from `SolutionsRemain` would get _really_ ugly: the friendship would
-	// try to implicitly instantiate the `EngineObj` class, and and fail because
-	// the member would be private (invisible to `SolutionsRemain`).
+	// Note: ^I wanted this to be a private `EngineObj` member, but friendship got ugly.
 
 	// This class exists to make it difficult for me to forget to internally
 	// attempt to unwind the guess stack when required, and to enforce the receiver
@@ -68,13 +65,25 @@ namespace okiidoku::mono::detail::solver {
 	};
 
 
-	template<Order O> requires(is_order_compiled(O))
-	class Techniques;
+	template<Order O> requires(is_order_compiled(O)) class CandElimFind;
+	template<Order O> requires(is_order_compiled(O)) class CandElimApply;
 
 
 	template<Order O> requires(is_order_compiled(O))
 	class EngineObj final {
-		friend class Techniques<O>;
+		// TODO.asap is there a good way to not require friending?
+		//  Rationale: want to avoid showing and _allowing_ engine fields as non-const / showing non-const
+		//   member functions to the finder that it doesn't need to be able to see / mutate.
+		//  pass specific fields instead of the whole engine?
+		//  I'd like to have the engine to do some prelude things like checking `no_solutions_remain` and `get_num_puzzle_cells_remaining`.
+		//  The finder basically only needs to see the cells_cands_ field and the cand_elim_queue_ field.
+		//  But I wouldn't want a solution that allows an engine _user_ to pass a finder an engine from one solver
+		//   with a queue from a _different_ solver.
+		//  Solution: make a lightweight class wrapper for the engine _user_. It will be friended, but only to do those prelude things.
+		//   It will do the prelude things and then pass the necessary fields of the engine to a main-body finder that is private to the library.
+		// TODO.asap think of what to do for the apply class.
+		friend class CandElimFind<O>;
+		friend class CandElimApply<O>;
 		friend SolutionsRemain unwind_and_rule_out_bad_guesses_<O>(EngineObj<O>&) noexcept;
 	public:
 		using T = Ints<O>;
@@ -85,7 +94,6 @@ namespace okiidoku::mono::detail::solver {
 
 		explicit EngineObj(const Grid<O>& puzzle) noexcept;
 
-		// Becomes true when unsat is detected and no guesses remain to be unwound.
 		// The user of the engine must respond to `get_next_solution` with `std::nullopt`
 		// if this returns `true`.
 		//
@@ -108,12 +116,14 @@ namespace okiidoku::mono::detail::solver {
 		o4i_t get_num_puzzle_cells_remaining() const noexcept { return num_puzzle_cells_remaining_; }
 
 		// contract: `val` is currently one of _multiple_ candidate-symbols at `rmi`.
-		// strong recommendation: call `process_all_queued_cand_elims` before
-		//  making guesses. Rationale: why guess while you can still deduct?
+		// guideline: only call when `has_queued_cand_elims` returns `false`. There
+		//  is _never_ a good reason to make a guess when you have a deduction ready.
+		//  If you do otherwise, those queued candidate eliminations will be discarded
+		//  if/when a guess is popped. See design docs for fun discussion on why.
 		void push_guess(rmi_t rmi, val_t val) noexcept;
 
 		[[nodiscard, gnu::pure]]
-		size_t get_guess_stack_depth() const noexcept { return guess_stack_.size(); };
+		std::size_t get_guess_stack_depth() const noexcept { return guess_stack_.size(); };
 
 		// contract: `no_solutions_remain` returns `false`.
 		// contract: `get_num_puzzle_cells_remaining` returns zero.
@@ -182,7 +192,6 @@ namespace okiidoku::mono::detail::solver {
 	};
 
 
-	// disable implicit template instantiation.
 	#define OKIIDOKU_FOR_COMPILED_O(O_) \
 		extern template class EngineObj<O_>;
 	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES

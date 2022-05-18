@@ -11,6 +11,14 @@
 #include <type_traits> // conditional_t
 #include <concepts>    // unsigned_integral
 
+namespace okiidoku {
+
+	enum class HouseType : unsigned char {
+		box, row, col,
+	};
+}
+
+
 namespace okiidoku::mono {
 
 	namespace detail {

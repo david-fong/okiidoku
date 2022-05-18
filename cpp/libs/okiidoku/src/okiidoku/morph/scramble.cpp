@@ -8,13 +8,14 @@ namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
 	Transformation<O> scramble(Grid<O>& grid, SharedRng& shared_rng) noexcept {
+		using T = Ints<O>;
 		Transformation<O> t {};
 		{
 			std::lock_guard lock_guard_{shared_rng.mutex};
 			std::ranges::shuffle(t.label_map, shared_rng.rng);
 			std::ranges::shuffle(t.row_map, shared_rng.rng);
 			std::ranges::shuffle(t.col_map, shared_rng.rng);
-			for (size_t chute {0}; chute < O; ++chute) {
+			for (typename T::o1i_t chute {0}; chute < T::O1; ++chute) {
 				std::ranges::shuffle(t.row_map[chute], shared_rng.rng);
 				std::ranges::shuffle(t.col_map[chute], shared_rng.rng);
 			}

@@ -17,7 +17,7 @@ namespace okiidoku::mono::detail {
 	requires (is_order_compiled(O) && ((O1_OR_O2 == 1) || (O1_OR_O2 == 2)))
 	struct TieLinks final {
 		using T = Ints<O>;
-		static constexpr size_t size_ {(O1_OR_O2 == 1) ? T::O1 : T::O2};
+		static constexpr std::size_t size_ {(O1_OR_O2 == 1) ? T::O1 : T::O2};
 		using link_t = std::conditional_t<(O1_OR_O2 == 1), typename T::o1i_t, typename T::o2i_smol_t>;
 		using links_t = std::array<link_t, size_>;
 

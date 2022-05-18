@@ -1,6 +1,3 @@
-#ifndef TPP_OKIIDOKU__PUZZLE__SOLVER__ENGINE
-#define TPP_OKIIDOKU__PUZZLE__SOLVER__ENGINE
-
 #include <okiidoku/puzzle/solver/engine.hpp>
 
 #include <algorithm>
@@ -20,7 +17,7 @@ namespace okiidoku::mono::detail::solver {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	std::optional<Grid<O>> EngineObj<O>::build_solution_obj(Grid<O>& dest_grid) const noexcept {
+	Grid<O> EngineObj<O>::build_solution_obj() const noexcept {
 		assert(!no_solutions_remain());
 		assert(get_num_puzzle_cells_remaining() == 0);
 		assert(( std::all_of(
@@ -28,11 +25,13 @@ namespace okiidoku::mono::detail::solver {
 			cells_cands_.get_underlying_array().cend(),
 			[](const auto& cands){ return cands.count() == 1; }
 		) ));
+		Grid<O> soln;
 		for (o4i_t rmi {0}; rmi < T::O4; ++rmi) {
 			const auto& cell_cands {cells_cands_.at_rmi(rmi)};
 			assert(cell_cands.count() == 1);
-			dest_grid.at_rmi(rmi) = cell_cands.count_lower_zeros_assuming_non_empty_mask();
+			soln.at_rmi(rmi) = cell_cands.count_lower_zeros_assuming_non_empty_mask();
 		}
+		return soln;
 	}
 
 
@@ -77,7 +76,7 @@ namespace okiidoku::mono::detail::solver {
 		assert(cell_cands.count() == 1);
 		// TODO.low inlined the call. seems like a latent foot-gun.
 		// enqueue_cand_elims_for_new_cell_requires_symbol_(rmi);
-		commit_effects_queue_.emplace(rmi, val);
+		cand_elim_queues_.emplace(rmi, val);
 		--num_puzzle_cells_remaining_;
 	}
 	template<Order O> requires(is_order_compiled(O))
@@ -87,7 +86,7 @@ namespace okiidoku::mono::detail::solver {
 		assert(num_puzzle_cells_remaining_ > 0);
 		auto& cell_cands {cells_cands_.at_rmi(rmi)};
 		assert(cell_cands.count() == 1);
-		commit_effects_queue_.emplace(rmi, cell_cands.count_lower_zeros_assuming_non_empty_mask());
+		cand_elim_queues_.emplace(rmi, cell_cands.count_lower_zeros_assuming_non_empty_mask());
 		--num_puzzle_cells_remaining_;
 	}
 
@@ -95,7 +94,7 @@ namespace okiidoku::mono::detail::solver {
 	template<Order O> requires(is_order_compiled(O))
 	SolutionsRemain EngineObj<O>::process_first_queued_cand_elims() noexcept {
 		assert(has_queued_cand_elims());
-		const auto commit {commit_effects_queue_.front()};
+		const auto commit {cand_elim_queues_.front()};
 		commit_effects_queue_.pop();
 		// repetitive code. #undef-ed before end of function.
 		#define OKIIDOKU_TRY_ELIM_NB_CAND \
@@ -162,5 +161,10 @@ namespace okiidoku::mono::detail::solver {
 		e.cells_cands_ = *std::move(step.prev_cells_cands);
 		return e.eliminate_candidate_sym_(step.guess_rmi, step.guess_val);
 	}
+
+
+	#define OKIIDOKU_FOR_COMPILED_O(O_) \
+		template class EngineObj<O_>;
+	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
+	#undef OKIIDOKU_FOR_COMPILED_O
 }
-#endif

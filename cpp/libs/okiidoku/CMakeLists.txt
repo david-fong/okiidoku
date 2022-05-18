@@ -13,6 +13,9 @@ add_library(okiidoku # uses BUILD_SHARED_LIBS
 	src/okiidoku/morph/canon_label.cpp
 	src/okiidoku/morph/canon_place.cpp
 	src/okiidoku/morph/canon.cpp
+	src/okiidoku/puzzle/solver/engine.cpp
+	src/okiidoku/puzzle/solver/cand_elim_find.cpp
+	src/okiidoku/puzzle/solver/cand_elim_apply.cpp
 	src/okiidoku/puzzle/solve.cpp
 	src/okiidoku/puzzle/make.cpp
 )
