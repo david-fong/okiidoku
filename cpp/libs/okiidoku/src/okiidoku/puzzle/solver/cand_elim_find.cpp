@@ -115,7 +115,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 	// TODO consider adding an argument about whether to do candidate elimination eagerly or queue them.
 	//  the annoying thing is that then the return type for the queue case doesn't need to be SolutionsRemain...
 	//  in that case, we could make it a wrapper than just discards (void-casts) the result because it knows that it should never be SolutionsRemain(false) if queueing. can also assert that that is so.
-	//  the main question: why would that be beneficial? in the eager case, I think theres the benefit of operating on masks that
+	//  the main question: why would that be beneficial? in the eager case, I think there's the benefit of operating on masks that
 	//  are already in cache. but is that a significant enough benefit? probably needs benchmark to justify...
 	//  The eager function wrapper takes an argument for find_one vs find_all. the queueing wrapper returns void.
 	template<Order O> requires(is_order_compiled(O))

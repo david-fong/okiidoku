@@ -13,47 +13,37 @@
 		"jsonc"
 	],
 	"words": [
-		"boxcol",
-		"boxrow",
-		"builtin",
 		"cands",
-		"canonicalizer",
-		"chrono",
-		"cmake",
-		"cout",
-		"cppcoreguidelines",
-		"CTAD",
 		"deserialization",
 		"desmos",
 		"distrib",
 		"elim",
 		"elims",
-		"emscripten",
 		"genpath",
-		"givens",
 		"libokiidoku",
-		"minlexing",
-		"MSVC",
-		"nodiscard",
-		"NOLINT",
-		"NOLINTBEGIN",
-		"NOLINTEND",
-		"nullopt",
 		"ōkiidoku",
 		"opcount",
-		"pencilmark",
-		"pimpl",
-		"popcount",
 		"prefetch",
 		"serdes",
 		"smol",
 		"soln",
 		"speedup",
-		"stoi",
-		"stoul",
-		"subspan",
-		"sudoku",
-		"sudopedia",
 		"unsat"
+	],
+	"dictionaries": [
+		"okiidoku-sudoku",
+		"okiidoku-cpp"
+	],
+	"dictionaryDefinitions": [
+		{
+			"name": "okiidoku-sudoku",
+			"path": "./.cspell/sudoku.txt",
+			"addWords": true
+		},
+		{
+			"name": "okiidoku-cpp",
+			"path": "./.cspell/cpp.txt",
+			"addWords": true
+		}
 	]
 }

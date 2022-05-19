@@ -1,0 +1,8 @@
+sudoku
+boxcol
+boxrow
+canonicalizer
+givens
+minlexing
+pencilmark
+sudopedia

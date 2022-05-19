@@ -29,8 +29,6 @@
 
 ## Misc List
 
-- create custom cspell dictionaries in the repo. one for general sudoku terms / language-agnostic vocabulary used by my implementation that is related to sudoku, one for c++ terms.
-
 - Am I breaking any of these? https://en.cppreference.com/w/cpp/language/rule_of_three
 
 - boost has a `variant2` class that is never valueless by exception

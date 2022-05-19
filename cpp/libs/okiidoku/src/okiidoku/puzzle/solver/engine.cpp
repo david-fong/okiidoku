@@ -141,6 +141,7 @@ namespace okiidoku::mono::detail::solver {
 		const auto frame {std::move(e.guess_stack_.top())};
 		e.guess_stack_.pop();
 		e.cells_cands_ = *std::move(frame.prev_cells_cands);
+		e.num_puzzle_cells_remaining_ = frame.num_puzzle_cells_remaining;
 		return e.eliminate_candidate_sym_(frame.guess.rmi, frame.guess.val);
 	}
 
