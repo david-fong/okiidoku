@@ -27,8 +27,8 @@ namespace okiidoku::mono {
 		line_map_t col_map {identity_col_map};
 		bool post_transpose {identity_post_transpose};
 
-		[[nodiscard, gnu::const]] friend bool operator==(const Transformation&, const Transformation&) noexcept = default;
-		// [[nodiscard, gnu::const]] friend std::strong_ordering operator<=>(const Transformation&, const Transformation&) noexcept = default;
+		[[nodiscard, gnu::pure]] friend bool operator==(const Transformation&, const Transformation&) noexcept = default;
+		// [[nodiscard, gnu::pure]] friend std::strong_ordering operator<=>(const Transformation&, const Transformation&) noexcept = default;
 
 		void apply_from_to(const Grid<O>& src, Grid<O>& dest) const noexcept;
 
@@ -51,7 +51,7 @@ namespace okiidoku::visitor {
 	struct OKIIDOKU_EXPORT Transformation final : public detail::ContainerBase<detail::TransformationAdaptor> {
 		using ContainerBase::ContainerBase;
 
-		[[nodiscard, gnu::const]] friend bool operator==(const Transformation&, const Transformation&) noexcept = default;
+		[[nodiscard, gnu::pure]] friend bool operator==(const Transformation&, const Transformation&) noexcept = default;
 
 		// Does nothing if the transformation's order is not the same as the source grid's.
 		// If the dest grid has a different order, it is changed to match the source grid.

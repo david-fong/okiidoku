@@ -26,11 +26,11 @@ namespace okiidoku::mono::detail::solver {
 			// TODO.low consider whether resizing down is a good idea here?
 		}
 
-		void emplace(cand_elim_desc::CellRequiresSymbol<O>&& desc)  noexcept { std::get<std::deque<cand_elim_desc::CellRequiresSymbol<O>>>(tup_).emplace_front(std::move(desc)); }
-		void emplace(cand_elim_desc::SymbolRequiresCell<O>&& desc)  noexcept { std::get<std::deque<cand_elim_desc::SymbolRequiresCell<O>>>(tup_).emplace_front(std::move(desc)); }
+		void emplace(cand_elim_desc::CellRequiresSymbol<O>&& desc)  noexcept { std::get<std::deque<cand_elim_desc::CellRequiresSymbol<O>>>(tup_) .emplace_front(std::move(desc)); }
+		void emplace(cand_elim_desc::SymbolRequiresCell<O>&& desc)  noexcept { std::get<std::deque<cand_elim_desc::SymbolRequiresCell<O>>>(tup_) .emplace_front(std::move(desc)); }
 		void emplace(cand_elim_desc::CellsRequireSymbols<O>&& desc) noexcept { std::get<std::deque<cand_elim_desc::CellsRequireSymbols<O>>>(tup_).emplace_front(std::move(desc)); }
 		void emplace(cand_elim_desc::SymbolsRequireCells<O>&& desc) noexcept { std::get<std::deque<cand_elim_desc::SymbolsRequireCells<O>>>(tup_).emplace_front(std::move(desc)); }
-		void emplace(cand_elim_desc::LockedCandidate<O>&& desc)     noexcept { std::get<std::deque<cand_elim_desc::LockedCandidate<O>>>(tup_).emplace_front(std::move(desc)); }
+		void emplace(cand_elim_desc::LockedCandidate<O>&& desc)     noexcept { std::get<std::deque<cand_elim_desc::LockedCandidate<O>>>(tup_)    .emplace_front(std::move(desc)); }
 	};
 }
 #endif

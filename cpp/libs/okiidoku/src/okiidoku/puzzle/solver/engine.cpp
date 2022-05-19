@@ -53,7 +53,7 @@ namespace okiidoku::mono::detail::solver {
 		assert(new_cands_count <= old_cands_count);
 
 		if (new_cands_count == 0) [[unlikely]] {
-			return unwind_and_rule_out_bad_guesses_(*this);
+			return detail_engine_unwind_and_rule_out_bad_guesses_(*this);
 		}
 		if ((new_cands_count < old_cands_count) && (new_cands_count == 1)) [[unlikely]] {
 			enqueue_cand_elims_for_new_cell_requires_symbol_(rmi);
@@ -75,13 +75,10 @@ namespace okiidoku::mono::detail::solver {
 		cell_cands.set(val);
 		assert(cell_cands.test(val));
 		assert(cell_cands.count() == 1);
-		// TODO.low inlined the call. seems like a latent foot-gun.
-		// enqueue_cand_elims_for_new_cell_requires_symbol_(rmi);
-		cand_elim_queues_.emplace(cand_elim_desc::CellRequiresSymbol<O>{
-			.rmi{rmi}, .val{val}}
-		);
-		--num_puzzle_cells_remaining_;
+		enqueue_cand_elims_for_new_cell_requires_symbol_(rmi);
 	}
+
+
 	template<Order O> requires(is_order_compiled(O))
 	void EngineObj<O>::enqueue_cand_elims_for_new_cell_requires_symbol_(
 		const EngineObj<O>::rmi_t rmi
@@ -94,6 +91,11 @@ namespace okiidoku::mono::detail::solver {
 			.val{cell_cands.count_lower_zeros_assuming_non_empty_mask()}
 		});
 		--num_puzzle_cells_remaining_;
+		assert(get_num_puzzle_cells_remaining() == static_cast<o4i_t>(std::count_if(
+			e.cells_cands_.get_underlying_array().cbegin(),
+			e.cells_cands_.get_underlying_array().cend(),
+			[](const auto& cell_cands){ return cell_cands.count() == 1; }
+		)));
 	}
 
 
@@ -123,23 +125,23 @@ namespace okiidoku::mono::detail::solver {
 		// assert(!has_queued_cand_elims()); // only a guideline. not a contract.
 		assert(cells_cands_.at_rmi(rmi).test(val));
 		assert(cells_cands_.at_rmi(rmi).count() > 1);
-		guess_stack_.emplace(cells_cands_, rmi, val);
+		guess_stack_.emplace(cells_cands_, get_num_puzzle_cells_remaining(), rmi, val);
 
 		register_new_given_(rmi, val);
 	}
 
 
 	template<Order O> requires(is_order_compiled(O))
-	SolutionsRemain unwind_and_rule_out_bad_guesses_(EngineObj<O>& e) noexcept {
+	SolutionsRemain detail_engine_unwind_and_rule_out_bad_guesses_(EngineObj<O>& e) noexcept {
 		e.cand_elim_queues_.clear();
 		if (e.guess_stack_.empty()) {
 			e.no_solutions_remain_ = true;
 			return SolutionsRemain{false};
 		}
-		const auto step {std::move(e.guess_stack_.top())};
+		const auto frame {std::move(e.guess_stack_.top())};
 		e.guess_stack_.pop();
-		e.cells_cands_ = *std::move(step.prev_cells_cands);
-		return e.eliminate_candidate_sym_(step.guess_rmi, step.guess_val);
+		e.cells_cands_ = *std::move(frame.prev_cells_cands);
+		return e.eliminate_candidate_sym_(frame.guess.rmi, frame.guess.val);
 	}
 
 

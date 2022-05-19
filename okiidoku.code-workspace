@@ -7,10 +7,10 @@
 	"extensions": {
 		"recommendations": [
 			"Gruntfuggly.todo-tree",
-			"shardulm94.trailing-spaces",
 		],
 	},
 	"settings": {
+		"cSpell.language": "en-GB",
 		"files.trimTrailingWhitespace": true,
 
 		"todo-tree.filtering.useBuiltInExcludes": "file excludes",

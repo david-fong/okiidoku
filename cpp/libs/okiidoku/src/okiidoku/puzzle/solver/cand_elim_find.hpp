@@ -2,6 +2,7 @@
 #define HPP_OKIIDOKU__PUZZLE__SOLVER__CAND_ELIM_FIND
 
 #include <okiidoku/puzzle/solver/engine.hpp>
+#include <okiidoku/puzzle/solver/cand_elim_desc.hpp>
 
 namespace okiidoku::mono::detail::solver {
 
@@ -27,20 +28,15 @@ namespace okiidoku::mono::detail::solver {
 		static void locked_candidates(EngineObj<O>&) noexcept;
 
 		// AKA "naked subsets"
-		// // contract: `subset_size` is in the range [2, ((O2+1)//2)].
-		static void cells_require_symbols(EngineObj<O>&/* val_t subset_size */) noexcept;
+		static void cells_require_symbols(EngineObj<O>&) noexcept;
 
 		// AKA "hidden subsets"
-		// // contract: `subset_size` is in the range [2, ((O2+1)//2)].
-		static void symbols_require_cells(EngineObj<O>&/* val_t subset_size */) noexcept;
+		static void symbols_require_cells(EngineObj<O>&) noexcept;
 
 		// static void fish(EngineObj<O>&) noexcept;
+
+
+		static typename EngineObj<O>::Guess good_guess_candidate(const EngineObj<O>&) noexcept;
 	};
-
-
-	#define OKIIDOKU_FOR_COMPILED_O(O_) \
-		extern template class CandElimFind<O_>;
-	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-	#undef OKIIDOKU_FOR_COMPILED_O
 }
 #endif

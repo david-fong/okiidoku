@@ -37,11 +37,10 @@ namespace okiidoku::mono {
 			}
 
 			using Find = detail::solver::CandElimFind<O>;
-			Find::symbol_requires_cell(e);
-			if (e.has_queued_cand_elims()) { continue; }
-			Find::locked_candidates(e);
-			if (e.has_queued_cand_elims()) { continue; }
-			// TODO call other techniques.
+			Find::symbol_requires_cell(e);  if (e.has_queued_cand_elims()) { continue; }
+			Find::locked_candidates(e);     if (e.has_queued_cand_elims()) { continue; }
+			Find::cells_require_symbols(e); if (e.has_queued_cand_elims()) { continue; }
+			Find::symbols_require_cells(e); if (e.has_queued_cand_elims()) { continue; }
 			// TODO e.push_guess(rmi, val);
 		}
 		return std::optional<Grid<O>>{std::in_place, e.build_solution_obj()};
@@ -64,6 +63,9 @@ namespace okiidoku::mono {
 			// TODO call other techniques
 
 			if (e.has_queued_cand_elims()) {
+				// TODO but I want to consume the deduction that would lead to the
+				//  most/technique-simplest newly-findable candidate eliminations.
+				//  How to implement? seems to imply a degree of "BFS".
 				{const auto check {e.process_first_queued_cand_elims()};
 					if (check.no_solutions_remain()) [[unlikely]] { return std::nullopt; }
 					if (e.get_num_puzzle_cells_remaining() == 0) [[unlikely]] { break; }

@@ -29,12 +29,16 @@
 
 ## Misc List
 
+- create custom cspell dictionaries in the repo. one for general sudoku terms / language-agnostic vocabulary used by my implementation that is related to sudoku, one for c++ terms.
+
+- Am I breaking any of these? https://en.cppreference.com/w/cpp/language/rule_of_three
+
 - boost has a `variant2` class that is never valueless by exception
 
 - find out how to use the [cppcoreguidelines checker](https://docs.microsoft.com/en-us/cpp/code-quality/using-the-cpp-core-guidelines-checkers?view=msvc-170)
 
 - experiment with using compiler "assume" hints (asserts are checked at runtime. assumptions are not checked and used for optimizations (to do the opposite: "remove checks")).
-  - GSL has a macro to do this on MSVC, Clang, and GCC. Feels weird to add an entire dependency just for a tiny macro though...
+  - [GSL](https://conan.io/center/ms-gsl) has a macro ["`GSL_ASSUME`"](https://github.com/microsoft/GSL/blob/main/include/gsl/assert) to do this on MSVC, Clang, and GCC. Feels weird to add an entire dependency just for a tiny macro though...
 
 - see if grid qualities (like being a solution, being a proper puzzle, being a minimal puzzle), can be encoded through the type system and make it so that always-safe conversions (such as ) are easy, but "unsafe" (not always true) have to either go through an `unsafe_cast_X_grid_to_Y_grid` function, or go through a `checked_cast_X_grid_to_Y_grid`, which may have a non-trivial performance penalty.
   - This would allow making many of the current contracts part of the type system; turning-runtime-error-into-compiler-errors-TM. I would no longer need to write such contract and post-condition comments.

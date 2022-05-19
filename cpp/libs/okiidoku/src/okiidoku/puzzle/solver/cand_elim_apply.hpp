@@ -21,11 +21,5 @@ namespace okiidoku::mono::detail::solver {
 
 		// static SolutionsRemain fish(EngineObj<O>&, const cand_elim_desc::&) noexcept;
 	};
-
-
-	#define OKIIDOKU_FOR_COMPILED_O(O_) \
-		extern template class CandElimApply<O_>;
-	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-	#undef OKIIDOKU_FOR_COMPILED_O
 }
 #endif

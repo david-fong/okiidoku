@@ -60,6 +60,9 @@ things I got wrong before which I couldn't understand based on gcc's error messa
 - [nodiscard in the standard library](https://stackoverflow.com/a/63204963/11107541)
   - this can inform where I should use nodiscard in my library interfaces.
 
+- [constness and logical-vs-physical state](https://isocpp.org/wiki/faq/const-correctness#logical-vs-physical-state)
+- [misuse of the gnu const attribute on functions](https://github.com/OSGeo/PROJ/issues/1224)
+
 - [file open mode shorthands](https://en.cppreference.com/w/cpp/io/basic_filebuf/open)
 
 - [move simply - herb sutter](https://herbsutter.com/2020/02/17/move-simply/)

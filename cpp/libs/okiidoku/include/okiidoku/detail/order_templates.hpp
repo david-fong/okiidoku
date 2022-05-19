@@ -103,7 +103,7 @@ namespace okiidoku {
 			// ContainerBase(const variant_t& variant) noexcept: variant_(variant) {}
 			// ContainerBase(variant_t&& variant) noexcept: variant_(std::forward<variant_t>(variant)) {}
 
-			[[nodiscard, gnu::const]] friend constexpr bool operator==(const ContainerBase&, const ContainerBase&) noexcept = default;
+			[[nodiscard, gnu::pure]] friend constexpr bool operator==(const ContainerBase&, const ContainerBase&) noexcept = default;
 
 			// Note to self: no need to export these members which are public and inline
 			[[nodiscard, gnu::pure]] constexpr Order get_mono_order() const noexcept { return compiled_orders[variant_.index()]; }
@@ -122,7 +122,7 @@ namespace okiidoku {
 		};
 
 		template<MonoToVisitorAdaptor Adaptor>
-		[[nodiscard, gnu::const]] std::compare_three_way_result<typename Adaptor::template type<compiled_orders[0]>> operator<=>(
+		[[nodiscard, gnu::pure]] std::compare_three_way_result<typename Adaptor::template type<compiled_orders[0]>> operator<=>(
 			const ContainerBase<Adaptor>& vis_a,
 			const ContainerBase<Adaptor>& vis_b
 		) noexcept {

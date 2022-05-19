@@ -48,14 +48,14 @@ namespace okiidoku::mono::detail {
 			Range operator->() const noexcept { return Range{i_, links_[i_]}; }
 			Iterator& operator++() noexcept { i_ = links_[i_]; return *this; }
 			Iterator operator++(int) noexcept { Iterator tmp = *this; ++(*this); return tmp; }
-			[[nodiscard, gnu::const]] friend bool operator==(const Iterator& a, const Iterator& b) noexcept { return (&a.links_ == &b.links_) && (a.i_ == b.i_); }
-			[[nodiscard, gnu::const]] friend bool operator!=(const Iterator& a, const Iterator& b) noexcept { return (&a.links_ != &b.links_) || (a.i_ != b.i_); }
+			[[nodiscard, gnu::pure]] friend bool operator==(const Iterator& a, const Iterator& b) noexcept { return (&a.links_ == &b.links_) && (a.i_ == b.i_); }
+			[[nodiscard, gnu::pure]] friend bool operator!=(const Iterator& a, const Iterator& b) noexcept { return (&a.links_ != &b.links_) || (a.i_ != b.i_); }
 		};
 	private:
 		links_t links_ {0};
 	public:
 		TieLinks() noexcept: links_{[]{ links_t _{0}; _[0] = size_; return _; }()} {}
-		[[nodiscard, gnu::const]] friend bool operator==(const TieLinks&, const TieLinks&) noexcept = default;
+		[[nodiscard, gnu::pure]] friend bool operator==(const TieLinks&, const TieLinks&) noexcept = default;
 		Iterator begin() const noexcept { return Iterator(links_); }
 		Iterator end()   const noexcept { return Iterator(links_, size_); }
 

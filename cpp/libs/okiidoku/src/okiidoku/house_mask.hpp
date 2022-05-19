@@ -140,6 +140,7 @@ namespace okiidoku::mono {
 			return count;
 		}
 
+		// TODO.asap move definition to a cpp file. it is big.
 		// contract: `set_bit_index` < O2 and there are at least `set_bit_index+1` set bits.
 		[[nodiscard, gnu::pure]] o2x_t get_index_of_nth_set_bit(o2x_t set_bit_index) const noexcept {
 			assert(set_bit_index < T::O2);

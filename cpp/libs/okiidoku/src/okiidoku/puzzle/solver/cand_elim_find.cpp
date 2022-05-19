@@ -3,6 +3,8 @@
 #include <okiidoku/house_mask.hpp>
 
 #include <algorithm>
+#include <array>
+#include <vector>
 #include <compare>
 
 namespace okiidoku::mono::detail::solver { namespace {
@@ -10,11 +12,12 @@ namespace okiidoku::mono::detail::solver { namespace {
 	// opening boilerplate. #undef-ed before end of namespace.
 	#define OKIIDOKU_CAND_ELIM_FINDER_PRELUDE \
 		using T = Ints<O>; \
+		using o2x_smol_t [[maybe_unused]] = typename T::o2x_smol_t; \
+		using o2x_t [[maybe_unused]] = typename T::o2x_t; \
 		using o2i_t = typename T::o2i_t; \
-		using val_t = typename T::o2x_smol_t; \
-		using rmi_t = typename T::o4x_smol_t; \
-		using o4i_t = typename T::o4i_t; \
-		using cand_syms_t = typename EngineObj<O>::cand_syms_t;
+		using o3i_t [[maybe_unused]] = typename T::o3i_t; \
+		using rmi_t [[maybe_unused]] = typename T::o4x_smol_t; \
+		using o4i_t [[maybe_unused]] = typename T::o4i_t;
 
 
 	template<Order O> requires(is_order_compiled(O))
@@ -38,16 +41,22 @@ namespace okiidoku::mono::detail::solver { namespace {
 
 	namespace subsets {
 
-		template<Order O> requires(is_order_compiled(O))
-		static constexpr unsigned max_subset_size {};
+		// Note: from sudopedia: the hidden/naked subsets of size greater than
+		//  (O2+1)//2 have complements of the other kind of smaller subset size.
+		//  I am not using this property for any optimization because my finder
+		//  for subsets searches for all subset-sizes in a single pass.
+		// template<Order O> requires(is_order_compiled(O))
+		// static constexpr unsigned max_subset_size {(Ints<O>::O2 + 1U) / 2U};
 
 		template<Order O> requires(is_order_compiled(O))
 		struct GroupMe final {
 			HouseMask<O> cands;
-			typename Ints<O>::o2i_smol_t cand_count;
 			typename Ints<O>::o2x_smol_t who;
 		};
 
+		// TODO templating the whole helper just for the part that does emplace
+		// may be wasteful in terms of generated code-size. Consider "erasing"
+		// the template into the form of a callback parameter.
 		template<Order O, class DescT> requires(is_order_compiled(O)
 			&& (std::is_same_v<DescT, cand_elim_desc::CellsRequireSymbols<O>>
 			 || std::is_same_v<DescT, cand_elim_desc::SymbolsRequireCells<O>>
@@ -61,12 +70,9 @@ namespace okiidoku::mono::detail::solver { namespace {
 			std::array<GroupMe<O>, Ints<O>::O2>& searcher
 		) noexcept {
 			OKIIDOKU_CAND_ELIM_FINDER_PRELUDE
-			using o3i_t = typename T::o3i_t;
 			const auto group_me_cmp {[&](const GroupMe<O>& a, const GroupMe<O>& b){
-				// TODO.asap wait... is there really a point in first sorting by cand_count? I... don;t think so...
-				if (const auto cmp {a.cand_count <=> b.cand_count}; std::is_neq(cmp)) [[likely]] {
-					return cmp;
-				}
+				// below line commented out because there is no point in first sorting by cand_count.
+				// if (const auto cmp {a.cand_count <=> b.cand_count}; std::is_neq(cmp)) [[likely]] { return cmp; }
 				return HouseMask<O>::unspecified_strong_cmp(
 					cells_cands.at_rmi(house_cell_to_rmi<O>(house_type, house, a.who)),
 					cells_cands.at_rmi(house_cell_to_rmi<O>(house_type, house, b.who))
@@ -83,13 +89,17 @@ namespace okiidoku::mono::detail::solver { namespace {
 				) {
 					const auto alike_size {static_cast<o2i_t>(alike_cur - alike_begin)};
 					assert(alike_size > 0);
-					if (alike_size == 1) { continue; } // /we have custom implementation for subsets of size one.
+					if (alike_size == 1) { continue; } // we have a custom finder implementation for subset-size == 1.
 					const auto& group {searcher[alike_cur-1]};
-					if (alike_size == group.cand_count) {
+					if (alike_size == group.cands.count()) {
 						HouseMask<O> who_requires {};
 						for (o2i_t a_who {alike_begin}; a_who < alike_cur; ++a_who) {
-							who_requires.set(a_who);
+							who_requires.set(static_cast<o2x_t>(a_who));
 						}
+						// TODO give the queue a config field for whether to insert new entries
+						//  auto-sorted by subset size. currently unsorted. If we uncomment the
+						//  above sort-by-cand-count in `group_me_cmp`, we may be able to leverage
+						//  some kind of merge-sorted-arrays algorithm.
 						cand_elim_queues.emplace(DescT{group.cands, who_requires, house, house_type});
 					}
 					alike_begin = static_cast<decltype(alike_begin)>(alike_cur);
@@ -111,24 +121,21 @@ namespace okiidoku::mono::detail::solver { namespace {
 		CandElimQueues<O>& cand_elim_queues
 	) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_PRELUDE
-		// TODO
-		for (HouseType house_type : HouseTypes) {
+		for (HouseType house_type : house_types) {
 		for (o2i_t house {0}; house < T::O2; ++house) {
 			std::array<subsets::GroupMe<O>, T::O2> searcher;
 			for (o2i_t house_cell {0}; house_cell < T::O2; ++house_cell) {
 				const auto rmi {house_cell_to_rmi<O>(house_type, house, house_cell)};
-				const auto& cands {cells_cands.at_rmi(rmi)};
 				searcher[house_cell] = subsets::GroupMe<O>{
-					.cands{cands},
-					.cand_count{static_cast<typename T::o2i_smol_t>(cands.count())},
-					.who{static_cast<typename T::o2x_smol_t>(house_cell)}
+					.cands{cells_cands.at_rmi(rmi)},
+					.who{static_cast<o2x_smol_t>(house_cell)}
 				};
 			}
 			subsets::helper_find<O, cand_elim_desc::CellsRequireSymbols<O>>(
-				cells_cands, cand_elim_queues, house_type, house, searcher
+				cells_cands, cand_elim_queues,
+				house_type, static_cast<o2x_t>(house), searcher
 			);
 		}}
-		const o2i_t house {0};
 	}
 
 
@@ -138,10 +145,26 @@ namespace okiidoku::mono::detail::solver { namespace {
 		CandElimQueues<O>& cand_elim_queues
 	) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_PRELUDE
-		// for each house type, for each house of that type, for each symbol
-		// get a mask for each symbol of which cells it can be in in that house.
-		// then apply the same technique.
-		// TODO
+		for (HouseType house_type : house_types) {
+		for (o2i_t house {0}; house < T::O2; ++house) {
+			std::array<subsets::GroupMe<O>, T::O2> searcher {};
+			for (o2i_t symbol {0}; symbol < T::O2; ++symbol) {
+				searcher[symbol].who = static_cast<o2x_smol_t>(symbol);
+				for (o2i_t house_cell {0}; house_cell < T::O2; ++house_cell) {
+					// Note: not a very cache-locality-friendly loop, but I can't
+					// think of how to do better. Inverting the loop dimensions is
+					// worse, since GroupMe has the additional, unused-here .who member.
+					const auto rmi {house_cell_to_rmi<O>(house_type, house, house_cell)};
+					searcher[symbol].cands.set(
+						cells_cands.at_rmi(rmi).test(static_cast<o2x_t>(symbol))
+					);
+				}
+			}
+			subsets::helper_find<O, cand_elim_desc::CellsRequireSymbols<O>>(
+				cells_cands, cand_elim_queues,
+				house_type, static_cast<o2x_t>(house), searcher
+			);
+		}}
 	}
 
 
@@ -152,6 +175,68 @@ namespace okiidoku::mono::detail::solver { namespace {
 	) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_PRELUDE
 		// TODO
+	}
+
+
+	template<Order O> requires(is_order_compiled(O))
+	typename EngineObj<O>::Guess find_good_guess_candidate(
+		const typename EngineObj<O>::CandSymsGrid& cells_cands,
+		const typename Ints<O>::o4i_t num_puzzle_cells_remaining
+	) noexcept{
+		OKIIDOKU_CAND_ELIM_FINDER_PRELUDE
+		using guess_t = typename EngineObj<O>::Guess;
+		// some guiding intuition:
+		// choose a guess which is likely to cascade into the most candidate
+		// elimination deductions before the next required guess point. choose
+		// a guess where finding out the guess is wrong will enable many
+		// candidate elimination deductions.
+
+		// start by finding cells with the fewest number of candidate-symbols.
+		// Note: no combinations of std algorithms seems specialized enough for what I want.
+		std::vector<rmi_t> cell_tags; {
+			const o2i_t best_count {(num_puzzle_cells_remaining == T::O4) ? T::O2 : static_cast<o2i_t>(T::O2-1U)};
+			for (o4i_t rmi {1}; rmi < T::O4; ++rmi) {
+				const auto& cell_cands {cells_cands.at_rmi(rmi)};
+				const auto cmp {cell_cands.count() <=> best_count};
+				if (std::is_eq(cmp)) {
+					cell_tags.push_back(static_cast<rmi_t>(rmi));
+				} else if (std::is_lt(cmp) && cell_cands.count() > 1) {
+					cell_tags.clear();
+					cell_tags.push_back(static_cast<rmi_t>(rmi));
+				}
+			}
+		}
+		assert(cell_tags.size() > 0);
+		return guess_t{
+			.rmi{cell_tags[0]},
+			.val{cells_cands.at_rmi(cell_tags[0]).count_lower_zeros_assuming_non_empty_mask()}
+		};
+
+		// then, for those cells, find the one whose candidate-symbols have
+		// very few candidate-house-cells.
+		// using house_cand_counts_t = std::array<o2i_t, house_types.size()>;
+		// std::vector<house_cand_counts_t> cell_tag_sym_major_cand_count;
+		// cell_tag_sym_major_cand_count.capacity(cell_tags.size());
+		// for (const auto& tag_rmi : cell_tags) {
+		// 	// TODO alternate design: instead of looping over the tag-cell's symbols
+		// 	// to count, use (tag_cell_cands & nb_cell_cands).count().
+		// 	for (const o2i_t sym : cells_cands.at_rmi(tag_rmi).set_bits_iter()) {
+		// 		house_cand_counts_t house_cand_counts {{0}};
+		// 		for (const auto& house_type : house_types) {
+		// 		for (o2i_t nb_house_cell {0}; nb_house_cell < T::O2; ++nb_house_cell) {
+		// 			const auto nb_rmi {house_cell_to_rmi<O>(
+		// 				house_type,
+		// 				rmi_to_house<O>(house_type, tag_rmi),
+		// 				nb_house_cell
+		// 			)}
+		// 			if (cells_cands.at_rmi(nb_rmi).test(symbol)) {
+		// 				++house_cand_counts[house_type];
+		// 			}
+		// 		}}
+		// 		std::ranges::sort(house_cand_counts);
+		// 	}
+		// }
+		// return guess_t{.rmi{rmi}, .val{val}};
 	}
 
 
@@ -189,6 +274,12 @@ namespace okiidoku::mono::detail::solver {
 	void CandElimFind<O>::locked_candidates(EngineObj<O>& engine) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_PRELUDE
 		return find_locked_candidates(engine.cells_cands_, engine.cand_elim_queues_);
+	}
+
+	template<Order O> requires(is_order_compiled(O))
+	typename EngineObj<O>::Guess CandElimFind<O>::good_guess_candidate(const EngineObj<O>& engine) noexcept {
+		assert(!engine.no_solutions_remain());
+		return find_good_guess_candidate<O>(engine.cells_cands_, engine.get_num_puzzle_cells_remaining());
 	}
 
 

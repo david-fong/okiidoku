@@ -46,7 +46,7 @@ namespace okiidoku::mono {
 		using array_t = std::array<val_t, T::O4>;
 
 		// lexicographical comparison over row-major-order traversal of cells.
-		[[nodiscard, gnu::const]] friend std::strong_ordering operator<=>(const Gridlike<O, V_>& a, const Gridlike<O, V_>& b) noexcept = default;
+		[[nodiscard, gnu::pure]] friend std::strong_ordering operator<=>(const Gridlike<O, V_>& a, const Gridlike<O, V_>& b) noexcept = default;
 
 		// For regular grids, always default initialize as an empty grid (to be safe).
 		// Note: Making this constexpr results in a 1% speed gain, but 45% program
@@ -56,8 +56,8 @@ namespace okiidoku::mono {
 		}
 		Gridlike() noexcept requires(!std::is_same_v<V_, grid_val_t<O>>) = default;
 
-		[[nodiscard]]       array_t& get_underlying_array()       noexcept { return arr_; };
-		[[nodiscard]] const array_t& get_underlying_array() const noexcept { return arr_; };
+		[[nodiscard, gnu::pure]]       array_t& get_underlying_array()       noexcept { return arr_; };
+		[[nodiscard, gnu::pure]] const array_t& get_underlying_array() const noexcept { return arr_; };
 
 		// contract: `rmi` is in [0, O4).
 		template<class T_rmi> requires(Any_o4x<O, T_rmi>)
@@ -89,38 +89,6 @@ namespace okiidoku::mono {
 		array_t arr_;
 	};
 
-
-	// TODO.asap consider moving these to ints.hpp?
-	template<Order O> [[nodiscard, gnu::const]] constexpr typename Ints<O>::o2i_t rmi_to_row(const typename Ints<O>::o4i_t index) noexcept { return static_cast<typename Ints<O>::o2i_t>(index / (Ints<O>::O2)); }
-	template<Order O> [[nodiscard, gnu::const]] constexpr typename Ints<O>::o2i_t rmi_to_col(const typename Ints<O>::o4i_t index) noexcept { return static_cast<typename Ints<O>::o2i_t>(index % (Ints<O>::O2)); }
-	template<Order O> [[nodiscard, gnu::const]] constexpr typename Ints<O>::o2i_t rmi_to_box(const typename Ints<O>::o2i_t row, const typename Ints<O>::o2i_t col) noexcept {
-		return static_cast<typename Ints<O>::o2i_t>((row / O) * O) + (col / O);
-	}
-	template<Order O> [[nodiscard, gnu::const]]
-	constexpr typename Ints<O>::o2i_t rmi_to_box(const typename Ints<O>::o4i_t index) noexcept {
-		return rmi_to_box<O>(rmi_to_row<O>(index), rmi_to_col<O>(index));
-	}
-
-	template<Order O, class T_house, class T_house_cell>
-	requires(Any_o2x<O, T_house> && Any_o2x<O, T_house_cell>) [[nodiscard, gnu::const]]
-	constexpr typename Ints<O>::o4i_t box_cell_to_rmi(const T_house box, const T_house_cell box_cell) noexcept {
-		using T = Ints<O>;
-		const auto row {static_cast<typename T::o4i_t>(((box/T::O1)*T::O1) + (box_cell/T::O1))};
-		const auto col {static_cast<typename T::o4i_t>(((box%T::O1)*T::O1) + (box_cell%T::O1))};
-		return (Ints<O>::O4 * row) + col;
-	}
-
-	template<Order O, class T_house, class T_house_cell>
-	requires(Any_o2x<O, T_house> && Any_o2x<O, T_house_cell>) [[nodiscard, gnu::const]]
-	constexpr typename Ints<O>::o4i_t house_cell_to_rmi(HouseType house_type, const T_house house, const T_house_cell house_cell) noexcept {
-		using T = Ints<O>;
-		using o4i_t = typename T::o4i_t;
-		switch (house_type) {
-		case HouseType::row: return static_cast<o4i_t>((T::O2*house)+house_cell);
-		case HouseType::col: return static_cast<o4i_t>((T::O2*house_cell)+house);
-		case HouseType::box: return box_cell_to_rmi<O>(house, house_cell);
-		}
-	}
 
 	template<Order O> [[nodiscard, gnu::const]]
 	constexpr bool cells_share_house(typename Ints<O>::o4i_t c1, typename Ints<O>::o4i_t c2) noexcept {
