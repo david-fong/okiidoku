@@ -54,7 +54,7 @@ namespace okiidoku::mono {
 			// TODO.mid investigate how good compilers are at optimizing these member functions.
 			return static_cast<o2i_t>(std::transform_reduce(
 				ints_.cbegin(), ints_.cend(), 0, std::plus{},
-				[&](const auto int_){ return static_cast<o2i_t>(std::popcount(int_)); }
+				[](const auto int_){ return static_cast<o2i_t>(std::popcount(int_)); }
 			));
 		}
 		// count the number of set bits below the specified bit index.
@@ -124,54 +124,10 @@ namespace okiidoku::mono {
 
 		// contract: this mask has at least one set bit.
 		// a suitably long and ugly name for a sharp, niche, optimized knife.
-		[[nodiscard, gnu::pure]] o2x_smol_t count_lower_zeros_assuming_non_empty_mask() const noexcept {
-			assert(count() > 0);
-			o2x_smol_t count {0};
-			for (const auto& int_ : ints_) {
-				if (int_ == 0) {
-					count += int_t_num_bits;
-				} else {
-					count += static_cast<o2x_smol_t>(std::countr_zero(int_));
-					// Note: without the non-empty-mask assumption, we'd have to
-					// handle discounting excess top zeros in the empty-mask case.
-					break;
-				}
-			}
-			return count;
-		}
+		[[nodiscard, gnu::pure]] o2x_smol_t count_lower_zeros_assuming_non_empty_mask() const noexcept;
 
-		// TODO.asap move definition to a cpp file. it is big.
 		// contract: `set_bit_index` < O2 and there are at least `set_bit_index+1` set bits.
-		[[nodiscard, gnu::pure]] o2x_t get_index_of_nth_set_bit(o2x_t set_bit_index) const noexcept {
-			assert(set_bit_index < T::O2);
-			assert(count() > o2i_t{set_bit_index});
-			for (std::size_t int_i {0}; int_i < num_ints; ++int_i) {
-				auto& int_ {ints_[int_i]};
-				const auto int_popcount {std::popcount(int_)};
-				if constexpr (num_ints > 1) {
-					if (static_cast<o2x_t>(int_popcount) <= set_bit_index) [[likely]] {
-						set_bit_index -= static_cast<o2x_t>(int_popcount);
-						continue;
-					}
-				}
-				for (unsigned bit_i {0}; bit_i < int_t_num_bits; ++bit_i) { // TODO.mid possible optimization: skip consecutive set bits by somehow using std::countr_<>
-					const auto bit_mask {int_t{1} << bit_i};
-					if (int_ & bit_mask) {
-						if (set_bit_index == 0) {
-							// int_ &= ~bit_mask;
-							return static_cast<o2x_t>((int_t_num_bits * int_i) + bit_i);
-						}
-						--set_bit_index;
-					}
-				}
-				// TODO.high if has pdep instruction:
-				// const auto bit_mask {_pdep_u64(1 << set_bit_index, int_)};
-				//// int_ &= ~bit_mask;
-				// return std::countr_zero(bit_mask);
-			}
-			assert(false); // TODO.wait c++23 std::unreachable
-			return 0;
-		}
+		[[nodiscard, gnu::pure]] o2x_t get_index_of_nth_set_bit(o2x_t set_bit_index) const noexcept;
 
 		// Defines a strong ordering between masks. Its semantics are unspecified.
 		// It is indended to be time-performant. Can be used to partition by masks

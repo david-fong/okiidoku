@@ -63,13 +63,13 @@ namespace okiidoku::mono {
 namespace okiidoku::visitor {
 
 	bool grid_follows_rule(const Grid& vis_grid) noexcept {
-		return std::visit([&](auto& mono_grid){
+		return std::visit([](auto& mono_grid){
 			return mono::grid_follows_rule(mono_grid);
 		}, vis_grid.get_mono_variant());
 	}
 
 	bool grid_is_filled(const Grid& vis_grid) noexcept {
-		return std::visit([&](auto& mono_grid){
+		return std::visit([](auto& mono_grid){
 			return mono::grid_is_filled(mono_grid);
 		}, vis_grid.get_mono_variant());
 	}

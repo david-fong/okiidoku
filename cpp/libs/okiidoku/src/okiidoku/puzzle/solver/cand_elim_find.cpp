@@ -54,29 +54,32 @@ namespace okiidoku::mono::detail::solver { namespace {
 			typename Ints<O>::o2x_smol_t who;
 		};
 
+		template<Order O> requires(is_order_compiled(O))
+		using enqueue_subset_desc_fn_t = void (*)(
+			CandElimQueues<O>& cand_elim_queues,
+			const HouseMask<O>& what_required,
+			const HouseMask<O>& who_requires,
+			const typename Ints<O>::o2x_t house,
+			const HouseType house_type
+		);
+
 		// TODO templating the whole helper just for the part that does emplace
 		// may be wasteful in terms of generated code-size. Consider "erasing"
 		// the template into the form of a callback parameter.
-		template<Order O, class DescT> requires(is_order_compiled(O)
-			&& (std::is_same_v<DescT, cand_elim_desc::CellsRequireSymbols<O>>
-			 || std::is_same_v<DescT, cand_elim_desc::SymbolsRequireCells<O>>
-			)
-		)
+		template<Order O> requires(is_order_compiled(O))
 		void helper_find(
 			const typename EngineObj<O>::CandSymsGrid& cells_cands,
 			CandElimQueues<O>& cand_elim_queues,
 			const HouseType house_type,
 			const typename Ints<O>::o2x_t house,
-			std::array<GroupMe<O>, Ints<O>::O2>& searcher
+			std::array<GroupMe<O>, Ints<O>::O2>& searcher,
+			enqueue_subset_desc_fn_t<O> enqueue_subset_desc_fn
 		) noexcept {
 			OKIIDOKU_CAND_ELIM_FINDER_PRELUDE
-			const auto group_me_cmp {[&](const GroupMe<O>& a, const GroupMe<O>& b){
+			const auto group_me_cmp {[](const GroupMe<O>& a, const GroupMe<O>& b){
 				// below line commented out because there is no point in first sorting by cand_count.
 				// if (const auto cmp {a.cand_count <=> b.cand_count}; std::is_neq(cmp)) [[likely]] { return cmp; }
-				return HouseMask<O>::unspecified_strong_cmp(
-					cells_cands.at_rmi(house_cell_to_rmi<O>(house_type, house, a.who)),
-					cells_cands.at_rmi(house_cell_to_rmi<O>(house_type, house, b.who))
-				);
+				return HouseMask<O>::unspecified_strong_cmp(a.cands, b.cands);
 			}};
 			std::sort(searcher.begin(), searcher.end(), [&](const GroupMe<O>& a, const GroupMe<O>& b){
 				return std::is_lt(group_me_cmp(a,b));
@@ -100,7 +103,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 						//  auto-sorted by subset size. currently unsorted. If we uncomment the
 						//  above sort-by-cand-count in `group_me_cmp`, we may be able to leverage
 						//  some kind of merge-sorted-arrays algorithm.
-						cand_elim_queues.emplace(DescT{group.cands, who_requires, house, house_type});
+						enqueue_subset_desc_fn(cand_elim_queues, group.cands, who_requires, house, house_type);
 					}
 					alike_begin = static_cast<decltype(alike_begin)>(alike_cur);
 				}
@@ -131,9 +134,14 @@ namespace okiidoku::mono::detail::solver { namespace {
 					.who{static_cast<o2x_smol_t>(house_cell)}
 				};
 			}
-			subsets::helper_find<O, cand_elim_desc::CellsRequireSymbols<O>>(
+			subsets::helper_find<O>(
 				cells_cands, cand_elim_queues,
-				house_type, static_cast<o2x_t>(house), searcher
+				house_type, static_cast<o2x_t>(house), searcher,
+				[](auto& queues, const auto& what, const auto& who, const auto house, const auto house_type){
+					queues.emplace(cand_elim_desc::CellsRequireSymbols<O>{
+						what, who, house, house_type
+					});
+				}
 			);
 		}}
 	}
@@ -148,21 +156,27 @@ namespace okiidoku::mono::detail::solver { namespace {
 		for (HouseType house_type : house_types) {
 		for (o2i_t house {0}; house < T::O2; ++house) {
 			std::array<subsets::GroupMe<O>, T::O2> searcher {};
+			// TODO.mid try applying loop-tiling to see if it improves cache-usage.
 			for (o2i_t symbol {0}; symbol < T::O2; ++symbol) {
 				searcher[symbol].who = static_cast<o2x_smol_t>(symbol);
 				for (o2i_t house_cell {0}; house_cell < T::O2; ++house_cell) {
 					// Note: not a very cache-locality-friendly loop, but I can't
-					// think of how to do better. Inverting the loop dimensions is
+					// think of how to do better. Inverting the loop dimensions may be
 					// worse, since GroupMe has the additional, unused-here .who member.
 					const auto rmi {house_cell_to_rmi<O>(house_type, house, house_cell)};
-					searcher[symbol].cands.set(
-						cells_cands.at_rmi(rmi).test(static_cast<o2x_t>(symbol))
-					);
+					if (cells_cands.at_rmi(rmi).test(static_cast<o2x_t>(symbol))) {
+						searcher[symbol].cands.set(static_cast<o2x_t>(house_cell));
+					}
 				}
 			}
-			subsets::helper_find<O, cand_elim_desc::CellsRequireSymbols<O>>(
+			subsets::helper_find<O>(
 				cells_cands, cand_elim_queues,
-				house_type, static_cast<o2x_t>(house), searcher
+				house_type, static_cast<o2x_t>(house), searcher,
+				[](auto& queues, const auto& what, const auto& who, const auto house, const auto house_type){
+					queues.emplace(cand_elim_desc::SymbolsRequireCells<O>{
+						what, who, house, house_type
+					});
+				}
 			);
 		}}
 	}

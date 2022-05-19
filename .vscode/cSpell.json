@@ -51,6 +51,7 @@
 		"speedup",
 		"stoi",
 		"stoul",
+		"subspan",
 		"sudoku",
 		"sudopedia",
 		"unsat"

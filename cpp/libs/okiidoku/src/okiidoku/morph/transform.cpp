@@ -89,7 +89,7 @@ namespace okiidoku::visitor {
 
 
 	Transformation Transformation::inverted() const noexcept {
-		return std::visit([&](const auto& mono_transform) {
+		return std::visit([](const auto& mono_transform) {
 			return static_cast<Transformation>(mono_transform.inverted());
 		}, this->get_mono_variant());
 	}

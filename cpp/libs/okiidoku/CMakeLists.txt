@@ -2,6 +2,7 @@
 # https://www.reddit.com/r/cpp/comments/m0rt7v/building_a_dual_shared_and_static_library_with/
 # TODO.low there's a lot of other good things in the above tutorial I'm not currently using
 add_library(okiidoku # uses BUILD_SHARED_LIBS
+	src/okiidoku/house_mask.cpp
 	src/okiidoku/grid.cpp
 	src/okiidoku/gen.cpp
 	src/okiidoku/print_2d.cpp

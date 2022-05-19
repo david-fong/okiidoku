@@ -97,7 +97,7 @@ namespace okiidoku::cli {
 				canonicalize(grid); // should we make a copy and print as a second grid image?
 			}
 			const auto palette_ {std::to_array<print_2d_grid_view>({
-				[&](auto rmi){ return grid.at_rmi(rmi); },
+				[&grid](const auto rmi){ return grid.at_rmi(rmi); },
 			})}; // TODO.low can this just be passed inline to the printer? if not, how can we make that possible?
 			print_2d(std::cout, config_.order(), palette_, shared_rng_);
 		}

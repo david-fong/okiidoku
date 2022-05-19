@@ -37,7 +37,7 @@ namespace okiidoku::visitor {
 
 	// contract: `vis_grid` is filled and follows the one rule.
 	Transformation canonicalize(Grid& vis_grid) noexcept {
-		return std::visit([&](auto& mono_grid) {
+		return std::visit([](auto& mono_grid) {
 			return static_cast<Transformation>(mono::canonicalize(mono_grid));
 		}, vis_grid.get_mono_variant());
 	}
