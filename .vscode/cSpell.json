@@ -12,27 +12,10 @@
 		"json",
 		"jsonc"
 	],
-	"words": [
-		"cands",
-		"deserialization",
-		"desmos",
-		"distrib",
-		"elim",
-		"elims",
-		"genpath",
-		"libokiidoku",
-		"ōkiidoku",
-		"opcount",
-		"prefetch",
-		"serdes",
-		"smol",
-		"soln",
-		"speedup",
-		"unsat"
-	],
 	"dictionaries": [
 		"okiidoku-sudoku",
-		"okiidoku-cpp"
+		"okiidoku-cpp",
+		"okiidoku-misc"
 	],
 	"dictionaryDefinitions": [
 		{
@@ -43,6 +26,11 @@
 		{
 			"name": "okiidoku-cpp",
 			"path": "./.cspell/cpp.txt",
+			"addWords": true
+		},
+		{
+			"name": "okiidoku-misc",
+			"path": "./.cspell/misc.txt",
 			"addWords": true
 		}
 	]

@@ -83,6 +83,17 @@ namespace okiidoku::mono {
 			ints_[at_int] &= ~at_int_bit_mask;
 		}
 
+		void remove(const HouseMask& to_remove) noexcept {
+			for (std::size_t i {0}; i < num_ints; ++i) {
+				ints_[i] &= ~to_remove.ints_[i];
+			}
+		}
+		void retain_only(const HouseMask& to_retain) noexcept {
+			for (std::size_t i {0}; i < num_ints; ++i) {
+				ints_[i] &= to_retain.ints_[i];
+			}
+		}
+
 		void unset_all() noexcept {
 			ints_.fill(0);
 		}

@@ -1,3 +1,5 @@
+#include <okiidoku/puzzle/make.hpp>
+#include <okiidoku/puzzle/solve.hpp>
 #include <okiidoku/morph/canon.hpp>
 #include <okiidoku/morph/scramble.hpp>
 #include <okiidoku/serdes.hpp>
@@ -40,6 +42,15 @@ unsigned test_morph(okiidoku::SharedRng& shared_rng, const unsigned num_rounds) 
 		std::exit(1);
 	}
 
+	Grid<O> puz_grid {gen_grid};
+	make_minimal_puzzle(puz_grid); {
+		const auto palette_ {std::to_array<print_2d_grid_view>({
+			[&](auto rmi){ return gen_grid.at_rmi(rmi); },
+			[&](auto rmi){ return puz_grid.at_rmi(rmi); },
+		})};
+		print_2d(std::clog, O, palette_, shared_rng);
+	}
+
 	Grid<O> canon_grid;
 
 	for (unsigned round {0}; round < num_rounds; ) {
@@ -57,10 +68,10 @@ unsigned test_morph(okiidoku::SharedRng& shared_rng, const unsigned num_rounds) 
 		if (gen_grid != canon_grid) {
 			++count_bad;
 			std::clog << "\n!bad\n";
-			const std::array<print_2d_grid_view, 2> palette_ {
+			const auto palette_ {std::to_array<print_2d_grid_view>({
 				[&](auto rmi){ return   gen_grid.at_rmi(rmi); },
 				[&](auto rmi){ return canon_grid.at_rmi(rmi); },
-			};
+			})};
 			print_2d(std::clog, O, palette_, shared_rng);
 			// std::clog << "\n";
 			std::clog << "\n==========\n";

@@ -22,7 +22,7 @@ namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
 	std::optional<Grid<O>> FastSolver<O>::get_next_solution() noexcept {
-		if (engine_) [[unlikely]] {
+		if (engine_.get() == nullptr) [[unlikely]] {
 			return std::nullopt;
 		}
 		engine_t& e {*engine_};
@@ -41,7 +41,7 @@ namespace okiidoku::mono {
 			Find::locked_candidates(e);     if (e.has_queued_cand_elims()) { continue; }
 			Find::cells_require_symbols(e); if (e.has_queued_cand_elims()) { continue; }
 			Find::symbols_require_cells(e); if (e.has_queued_cand_elims()) { continue; }
-			// TODO e.push_guess(rmi, val);
+			e.push_guess(Find::good_guess_candidate(e));
 		}
 		return std::optional<Grid<O>>{std::in_place, e.build_solution_obj()};
 	}
@@ -49,7 +49,7 @@ namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
 	std::optional<Grid<O>> VeryDeductiveSolver<O>::get_next_solution() noexcept {
-		if (engine_) [[unlikely]] {
+		if (engine_.get() == nullptr) [[unlikely]] {
 			return std::nullopt;
 		}
 		engine_t& e {*engine_};
@@ -71,7 +71,7 @@ namespace okiidoku::mono {
 					if (e.get_num_puzzle_cells_remaining() == 0) [[unlikely]] { break; }
 				}
 			} else {
-				// TODO e.push_guess(rmi, val);
+				e.push_guess(Find::good_guess_candidate(e));
 			}
 		}
 		return std::optional<Grid<O>>{std::in_place, e.build_solution_obj()};

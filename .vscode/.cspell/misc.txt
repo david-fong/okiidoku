@@ -1,0 +1,17 @@
+cands
+deserialization
+desmos
+distrib
+elim
+elims
+genpath
+gridlike
+libokiidoku
+ōkiidoku
+opcount
+prefetch
+serdes
+smol
+soln
+speedup
+unsat

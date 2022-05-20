@@ -34,8 +34,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 		// then OR= <house-type>_seen_cand_syms with the cell's candidate-symbols.
 		//  for true bits that are not also true in <house-type>_syms_with_multiple_cand_cells, add the house-cell index to the corresponding entry of <house-type>_seen_cand_syms.
 
-		// for any matches, _if the cell is not already committed (ie. if the cell still has more than one candidate-symbols),
-		//  call register_new_given_();
+		// for any matches, _if the cell is not already committed (ie. if the cell still has more than one candidate-symbols), enqueue.
 	}
 
 
@@ -68,7 +67,6 @@ namespace okiidoku::mono::detail::solver { namespace {
 		// the template into the form of a callback parameter.
 		template<Order O> requires(is_order_compiled(O))
 		void helper_find(
-			const typename EngineObj<O>::CandSymsGrid& cells_cands,
 			CandElimQueues<O>& cand_elim_queues,
 			const HouseType house_type,
 			const typename Ints<O>::o2x_t house,
@@ -96,7 +94,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 					const auto& group {searcher[alike_cur-1]};
 					if (alike_size == group.cands.count()) {
 						HouseMask<O> who_requires {};
-						for (o2i_t a_who {alike_begin}; a_who < alike_cur; ++a_who) {
+						for (o2i_t a_who {alike_begin}; static_cast<decltype(alike_cur)>(a_who) < alike_cur; ++a_who) {
 							who_requires.set(static_cast<o2x_t>(a_who));
 						}
 						// TODO give the queue a config field for whether to insert new entries
@@ -135,8 +133,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 				};
 			}
 			subsets::helper_find<O>(
-				cells_cands, cand_elim_queues,
-				house_type, static_cast<o2x_t>(house), searcher,
+				cand_elim_queues, house_type, static_cast<o2x_t>(house), searcher,
 				[](auto& queues, const auto& what, const auto& who, const auto house, const auto house_type){
 					queues.emplace(cand_elim_desc::CellsRequireSymbols<O>{
 						what, who, house, house_type
@@ -170,8 +167,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 				}
 			}
 			subsets::helper_find<O>(
-				cells_cands, cand_elim_queues,
-				house_type, static_cast<o2x_t>(house), searcher,
+				cand_elim_queues, house_type, static_cast<o2x_t>(house), searcher,
 				[](auto& queues, const auto& what, const auto& who, const auto house, const auto house_type){
 					queues.emplace(cand_elim_desc::SymbolsRequireCells<O>{
 						what, who, house, house_type
@@ -220,7 +216,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 				}
 			}
 		}
-		assert(cell_tags.size() > 0);
+		assert(cell_tags.empty());
 		return guess_t{
 			.rmi{cell_tags[0]},
 			.val{cells_cands.at_rmi(cell_tags[0]).count_lower_zeros_assuming_non_empty_mask()}

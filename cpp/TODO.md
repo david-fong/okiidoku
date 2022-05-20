@@ -29,6 +29,8 @@
 
 ## Misc List
 
+- look into cppitertools for writing my raw loops. see if people say anything about performance overhead.
+
 - Am I breaking any of these? https://en.cppreference.com/w/cpp/language/rule_of_three
 
 - boost has a `variant2` class that is never valueless by exception

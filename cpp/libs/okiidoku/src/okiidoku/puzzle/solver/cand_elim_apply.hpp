@@ -8,18 +8,25 @@ namespace okiidoku::mono::detail::solver {
 
 	template<Order O> requires(is_order_compiled(O))
 	class CandElimApply final {
+		using T = Ints<O>;
+		using o2x_t = typename T::o2x_t;
+		using o2i_t = typename T::o2i_t;
+		using rmi_t = typename T::o4x_smol_t;
 
-		static SolutionsRemain symbol_requires_cell(EngineObj<O>&, const cand_elim_desc::SymbolRequiresCell<O>&) noexcept;
+	public:
+		static SolutionsRemain apply(EngineObj<O>&, const cand_elim_desc::CellRequiresSymbol<O>&) noexcept;
+
+		static SolutionsRemain apply(EngineObj<O>&, const cand_elim_desc::SymbolRequiresCell<O>&) noexcept;
 
 		// AKA "naked subsets"
-		static SolutionsRemain cells_require_symbols(EngineObj<O>&, const cand_elim_desc::CellsRequireSymbols<O>&) noexcept;
+		static SolutionsRemain apply(EngineObj<O>&, const cand_elim_desc::CellsRequireSymbols<O>&) noexcept;
 
 		// AKA "hidden subsets"
-		static SolutionsRemain symbols_require_cells(EngineObj<O>&, const cand_elim_desc::SymbolsRequireCells<O>&) noexcept;
+		static SolutionsRemain apply(EngineObj<O>&, const cand_elim_desc::SymbolsRequireCells<O>&) noexcept;
 
-		static SolutionsRemain locked_candidates(EngineObj<O>&, const cand_elim_desc::LockedCandidate<O>&) noexcept;
+		static SolutionsRemain apply(EngineObj<O>&, const cand_elim_desc::LockedCandidate<O>&) noexcept;
 
-		// static SolutionsRemain fish(EngineObj<O>&, const cand_elim_desc::&) noexcept;
+		// static SolutionsRemain apply(EngineObj<O>&, const cand_elim_desc::&) noexcept;
 	};
 }
 #endif

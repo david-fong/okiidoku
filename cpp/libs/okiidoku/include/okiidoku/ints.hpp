@@ -132,21 +132,22 @@ namespace okiidoku::mono {
 
 	template<Order O, class T_house, class T_house_cell>
 	requires(Any_o2x<O, T_house> && Any_o2x<O, T_house_cell>) [[nodiscard, gnu::const]]
-	constexpr typename Ints<O>::o4i_t box_cell_to_rmi(const T_house box, const T_house_cell box_cell) noexcept {
+	constexpr typename Ints<O>::o4x_t box_cell_to_rmi(const T_house box, const T_house_cell box_cell) noexcept {
 		using T = Ints<O>;
-		const auto row {static_cast<typename T::o4i_t>(((box/T::O1)*T::O1) + (box_cell/T::O1))};
-		const auto col {static_cast<typename T::o4i_t>(((box%T::O1)*T::O1) + (box_cell%T::O1))};
-		return (Ints<O>::O4 * row) + col;
+		using o4x_t = typename T::o4x_t;
+		const auto row {static_cast<o4x_t>(((box/T::O1)*T::O1) + (box_cell/T::O1))};
+		const auto col {static_cast<o4x_t>(((box%T::O1)*T::O1) + (box_cell%T::O1))};
+		return static_cast<o4x_t>((Ints<O>::O2 * row) + col);
 	}
 
 	template<Order O, class T_house, class T_house_cell>
 	requires(Any_o2x<O, T_house> && Any_o2x<O, T_house_cell>) [[nodiscard, gnu::const]]
-	constexpr typename Ints<O>::o4i_t house_cell_to_rmi(const HouseType house_type, const T_house house, const T_house_cell house_cell) noexcept {
+	constexpr typename Ints<O>::o4x_t house_cell_to_rmi(const HouseType house_type, const T_house house, const T_house_cell house_cell) noexcept {
 		using T = Ints<O>;
-		using o4i_t = typename T::o4i_t;
+		using o4x_t = typename T::o4x_t;
 		switch (house_type) {
-		case HouseType::row: return static_cast<o4i_t>((T::O2*house)+house_cell);
-		case HouseType::col: return static_cast<o4i_t>((T::O2*house_cell)+house);
+		case HouseType::row: return static_cast<o4x_t>((T::O2*house)+house_cell);
+		case HouseType::col: return static_cast<o4x_t>((T::O2*house_cell)+house);
 		case HouseType::box: return box_cell_to_rmi<O>(house, house_cell);
 		}
 	}

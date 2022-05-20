@@ -37,7 +37,7 @@ namespace okiidoku::mono::detail::solver {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	SolutionsRemain EngineObj<O>::eliminate_candidate_sym_(
+	SolutionsRemain EngineObj<O>::cell_elim_cand_sym_(
 		const EngineObj<O>::rmi_t rmi,
 		const EngineObj<O>::val_t cand_to_elim
 	) noexcept {
@@ -49,6 +49,44 @@ namespace okiidoku::mono::detail::solver {
 		}
 		const auto old_cands_count {cell_cands.count()};
 		cell_cands.unset(cand_to_elim);
+		const auto new_cands_count {cell_cands.count()};
+		assert(new_cands_count <= old_cands_count);
+
+		if (new_cands_count == 0) [[unlikely]] {
+			return detail_engine_unwind_and_rule_out_bad_guesses_(*this);
+		}
+		if ((new_cands_count < old_cands_count) && (new_cands_count == 1)) [[unlikely]] {
+			enqueue_cand_elims_for_new_cell_requires_symbol_(rmi);
+		}
+		return SolutionsRemain::yes();
+	}
+	template<Order O> requires(is_order_compiled(O))
+	SolutionsRemain EngineObj<O>::cell_elim_cand_syms_(
+		const EngineObj<O>::rmi_t rmi,
+		const HouseMask<O>& to_remove
+	) noexcept {
+		auto& cell_cands {cells_cands_.at_rmi(rmi)};
+		const auto old_cands_count {cell_cands.count()};
+		cell_cands.remove(to_remove);
+		const auto new_cands_count {cell_cands.count()};
+		assert(new_cands_count <= old_cands_count);
+
+		if (new_cands_count == 0) [[unlikely]] {
+			return detail_engine_unwind_and_rule_out_bad_guesses_(*this);
+		}
+		if ((new_cands_count < old_cands_count) && (new_cands_count == 1)) [[unlikely]] {
+			enqueue_cand_elims_for_new_cell_requires_symbol_(rmi);
+		}
+		return SolutionsRemain::yes();
+	}
+	template<Order O> requires(is_order_compiled(O))
+	SolutionsRemain EngineObj<O>::cell_retain_only_cand_syms_(
+		const EngineObj<O>::rmi_t rmi,
+		const HouseMask<O>& to_retain
+	) noexcept {
+		auto& cell_cands {cells_cands_.at_rmi(rmi)};
+		const auto old_cands_count {cell_cands.count()};
+		cell_cands.retain_only(to_retain);
 		const auto new_cands_count {cell_cands.count()};
 		assert(new_cands_count <= old_cands_count);
 
@@ -92,8 +130,8 @@ namespace okiidoku::mono::detail::solver {
 		});
 		--num_puzzle_cells_remaining_;
 		assert(get_num_puzzle_cells_remaining() == static_cast<o4i_t>(std::count_if(
-			e.cells_cands_.get_underlying_array().cbegin(),
-			e.cells_cands_.get_underlying_array().cend(),
+			cells_cands_.get_underlying_array().cbegin(),
+			cells_cands_.get_underlying_array().cend(),
 			[](const auto& cell_cands){ return cell_cands.count() == 1; }
 		)));
 	}
@@ -101,7 +139,7 @@ namespace okiidoku::mono::detail::solver {
 
 	template<Order O> requires(is_order_compiled(O))
 	SolutionsRemain EngineObj<O>::process_first_queued_cand_elims() noexcept {
-		// TODO
+		// (... , cand_elim_queues_); // TODO.asap
 	}
 
 
@@ -119,15 +157,14 @@ namespace okiidoku::mono::detail::solver {
 
 	template<Order O> requires(is_order_compiled(O))
 	void EngineObj<O>::push_guess(
-		const EngineObj<O>::rmi_t rmi,
-		const EngineObj<O>::val_t val
+		const EngineObj<O>::Guess guess
 	) noexcept {
 		// assert(!has_queued_cand_elims()); // only a guideline. not a contract.
-		assert(cells_cands_.at_rmi(rmi).test(val));
-		assert(cells_cands_.at_rmi(rmi).count() > 1);
-		guess_stack_.emplace(cells_cands_, get_num_puzzle_cells_remaining(), rmi, val);
+		assert(cells_cands_.at_rmi(guess.rmi).test(guess.val));
+		assert(cells_cands_.at_rmi(guess.rmi).count() > 1);
+		guess_stack_.emplace(cells_cands_, get_num_puzzle_cells_remaining(), guess);
 
-		register_new_given_(rmi, val);
+		register_new_given_(guess.rmi, guess.val);
 	}
 
 
@@ -142,7 +179,7 @@ namespace okiidoku::mono::detail::solver {
 		e.guess_stack_.pop();
 		e.cells_cands_ = *std::move(frame.prev_cells_cands);
 		e.num_puzzle_cells_remaining_ = frame.num_puzzle_cells_remaining;
-		return e.eliminate_candidate_sym_(frame.guess.rmi, frame.guess.val);
+		return e.cell_elim_cand_sym_(frame.guess.rmi, frame.guess.val);
 	}
 
 

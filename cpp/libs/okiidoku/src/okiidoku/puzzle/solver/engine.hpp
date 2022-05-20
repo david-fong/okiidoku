@@ -88,8 +88,7 @@ namespace okiidoku::mono::detail::solver {
 		using val_t = typename T::o2x_smol_t;
 		using rmi_t = typename T::o4x_smol_t;
 		using o4i_t = typename T::o4i_t;
-		using cand_syms_t = HouseMask<O>;
-		using CandSymsGrid = detail::Gridlike<O, cand_syms_t>;
+		using CandSymsGrid = detail::Gridlike<O, HouseMask<O>>;
 		struct Guess final {
 			rmi_t rmi;
 			val_t val;
@@ -123,7 +122,7 @@ namespace okiidoku::mono::detail::solver {
 		//  is _never_ a good reason to make a guess when you have a deduction ready.
 		//  If you do otherwise, those queued candidate eliminations will be discarded
 		//  if/when a guess is popped. See design docs for fun discussion on why.
-		void push_guess(rmi_t rmi, val_t val) noexcept;
+		void push_guess(Guess) noexcept;
 
 		[[nodiscard, gnu::pure]]
 		std::size_t get_guess_stack_depth() const noexcept { return guess_stack_.size(); };
@@ -153,11 +152,14 @@ namespace okiidoku::mono::detail::solver {
 
 		// The specified candidate-symbol is allowed to already be removed.
 		OKIIDOKU_NO_EXPORT
-		SolutionsRemain eliminate_candidate_sym_(rmi_t rmi, val_t cand) noexcept;
+		SolutionsRemain cell_elim_cand_sym_(rmi_t rmi, val_t cand) noexcept;
 
 		// The specified candidate-symbols are allowed to already be removed.
 		OKIIDOKU_NO_EXPORT
-		SolutionsRemain eliminate_candidate_syms_(rmi_t rmi, val_t cand) noexcept;
+		SolutionsRemain cell_elim_cand_syms_(rmi_t rmi, const HouseMask<O>& to_remove) noexcept;
+
+		OKIIDOKU_NO_EXPORT
+		SolutionsRemain cell_retain_only_cand_syms_(rmi_t rmi, const HouseMask<O>& to_retain) noexcept;
 
 
 		// num_puzzles_found_t num_puzzles_found_ {0};
@@ -188,12 +190,11 @@ namespace okiidoku::mono::detail::solver {
 			GuessStackFrame(
 				const CandSymsGrid& prev_cells_cands_,
 				const o4i_t num_puzzle_cells_remaining_,
-				const rmi_t rmi,
-				const val_t val
+				const Guess guess_
 			) noexcept:
 				prev_cells_cands{std::make_unique<CandSymsGrid>(prev_cells_cands_)},
 				num_puzzle_cells_remaining{num_puzzle_cells_remaining_},
-				guess{.rmi{rmi}, .val{val}}
+				guess{guess_}
 			{}
 		};
 		using guess_stack_t = std::stack<GuessStackFrame/* , std::vector<GuessStackFrame> */>;

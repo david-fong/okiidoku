@@ -11,6 +11,10 @@ namespace okiidoku::mono::detail::solver {
 	template<Order O> requires(is_order_compiled(O))
 	struct CandElimQueues final {
 		std::tuple<
+			// TODO.asap the cell-requires-symbol queue should be separately, internally maintained by the engine.
+			//  for efficiency reasons, it should not be cleared along with the other ones during a clear operation,
+			//  since it is implicitly added to by the engine's `eliminate_` member functions instead of by a `find`
+			//  function, and so those that are enqueued by other cell-requires-symbol eliminations won't ever be re-found.
 			std::deque<cand_elim_desc::CellRequiresSymbol<O>>,
 			std::deque<cand_elim_desc::SymbolRequiresCell<O>>,
 			std::deque<cand_elim_desc::CellsRequireSymbols<O>>,
