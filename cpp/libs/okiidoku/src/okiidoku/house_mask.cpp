@@ -3,15 +3,15 @@
 namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
-	typename HouseMask<O>::o2x_smol_t
+	typename HouseMask<O>::o2xs_t
 	HouseMask<O>::count_lower_zeros_assuming_non_empty_mask() const noexcept {
 		assert(count() > 0);
-		o2x_smol_t count {0};
+		o2xs_t count {0};
 		for (const auto& int_ : ints_) {
 			if (int_ == 0) {
 				count += int_t_num_bits;
 			} else {
-				count += static_cast<o2x_smol_t>(std::countr_zero(int_));
+				count += static_cast<o2xs_t>(std::countr_zero(int_));
 				// Note: without the non-empty-mask assumption, we'd have to
 				// handle discounting excess top zeros in the empty-mask case.
 				break;
@@ -23,7 +23,7 @@ namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
 	typename HouseMask<O>::o2x_t
-	HouseMask<O>::get_index_of_nth_set_bit(HouseMask<O>::o2x_t set_bit_index) const noexcept {
+	HouseMask<O>::get_index_of_nth_set_bit(HouseMask::o2x_t set_bit_index) const noexcept {
 		assert(set_bit_index < T::O2);
 		assert(count() > o2i_t{set_bit_index});
 		for (std::size_t int_i {0}; int_i < num_ints; ++int_i) {
@@ -56,8 +56,8 @@ namespace okiidoku::mono {
 
 
 	#define OKIIDOKU_FOR_COMPILED_O(O_) \
-		template typename HouseMask<O_>::o2x_smol_t HouseMask<O_>::count_lower_zeros_assuming_non_empty_mask() const noexcept; \
-		template typename HouseMask<O_>::o2x_smol_t HouseMask<O_>::get_index_of_nth_set_bit(HouseMask<O_>::o2x_t set_bit_index) const noexcept;
+		template typename HouseMask<O_>::o2xs_t HouseMask<O_>::count_lower_zeros_assuming_non_empty_mask() const noexcept; \
+		template typename HouseMask<O_>::o2xs_t HouseMask<O_>::get_index_of_nth_set_bit(HouseMask<O_>::o2x_t set_bit_index) const noexcept;
 	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 	#undef OKIIDOKU_FOR_COMPILED_O
 }

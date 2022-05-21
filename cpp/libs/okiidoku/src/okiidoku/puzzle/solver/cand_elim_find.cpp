@@ -12,12 +12,12 @@ namespace okiidoku::mono::detail::solver { namespace {
 	// opening boilerplate. #undef-ed before end of namespace.
 	#define OKIIDOKU_CAND_ELIM_FINDER_PRELUDE \
 		using T = Ints<O>; \
-		using o2x_smol_t [[maybe_unused]] = typename T::o2x_smol_t; \
-		using o2x_t [[maybe_unused]] = typename T::o2x_t; \
-		using o2i_t = typename T::o2i_t; \
-		using o3i_t [[maybe_unused]] = typename T::o3i_t; \
-		using rmi_t [[maybe_unused]] = typename T::o4x_smol_t; \
-		using o4i_t [[maybe_unused]] = typename T::o4i_t;
+		using o2xs_t [[maybe_unused]] = int_ts::o2xs_t<O>; \
+		using o2x_t [[maybe_unused]] = int_ts::o2x_t<O>; \
+		using o2i_t = int_ts::o2i_t<O>; \
+		using o3i_t [[maybe_unused]] = int_ts::o3i_t<O>; \
+		using rmi_t [[maybe_unused]] = int_ts::o4xs_t<O>; \
+		using o4i_t [[maybe_unused]] = int_ts::o4i_t<O>;
 
 
 	template<Order O> requires(is_order_compiled(O))
@@ -50,7 +50,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 		template<Order O> requires(is_order_compiled(O))
 		struct GroupMe final {
 			HouseMask<O> cands;
-			typename Ints<O>::o2x_smol_t who;
+			int_ts::o2xs_t<O> who;
 		};
 
 		template<Order O> requires(is_order_compiled(O))
@@ -58,7 +58,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 			CandElimQueues<O>& cand_elim_queues,
 			const HouseMask<O>& what_required,
 			const HouseMask<O>& who_requires,
-			const typename Ints<O>::o2x_t house,
+			const int_ts::o2x_t<O> house,
 			const HouseType house_type
 		);
 
@@ -69,7 +69,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 		void helper_find(
 			CandElimQueues<O>& cand_elim_queues,
 			const HouseType house_type,
-			const typename Ints<O>::o2x_t house,
+			const int_ts::o2x_t<O> house,
 			std::array<GroupMe<O>, Ints<O>::O2>& searcher,
 			enqueue_subset_desc_fn_t<O> enqueue_subset_desc_fn
 		) noexcept {
@@ -129,7 +129,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 				const auto rmi {house_cell_to_rmi<O>(house_type, house, house_cell)};
 				searcher[house_cell] = subsets::GroupMe<O>{
 					.cands{cells_cands.at_rmi(rmi)},
-					.who{static_cast<o2x_smol_t>(house_cell)}
+					.who{static_cast<o2xs_t>(house_cell)}
 				};
 			}
 			subsets::helper_find<O>(
@@ -155,7 +155,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 			std::array<subsets::GroupMe<O>, T::O2> searcher {};
 			// TODO.mid try applying loop-tiling to see if it improves cache-usage.
 			for (o2i_t symbol {0}; symbol < T::O2; ++symbol) {
-				searcher[symbol].who = static_cast<o2x_smol_t>(symbol);
+				searcher[symbol].who = static_cast<o2xs_t>(symbol);
 				for (o2i_t house_cell {0}; house_cell < T::O2; ++house_cell) {
 					// Note: not a very cache-locality-friendly loop, but I can't
 					// think of how to do better. Inverting the loop dimensions may be
@@ -178,20 +178,20 @@ namespace okiidoku::mono::detail::solver { namespace {
 	}
 
 
-	template<Order O> requires(is_order_compiled(O))
-	void find_locked_candidates(
-		const typename EngineObj<O>::CandSymsGrid& cells_cands,
-		CandElimQueues<O>& cand_elim_queues
-	) noexcept {
-		OKIIDOKU_CAND_ELIM_FINDER_PRELUDE
-		// TODO
-	}
+	// template<Order O> requires(is_order_compiled(O))
+	// void find_locked_candidates(
+	// 	const typename EngineObj<O>::CandSymsGrid& cells_cands,
+	// 	CandElimQueues<O>& cand_elim_queues
+	// ) noexcept {
+	// 	OKIIDOKU_CAND_ELIM_FINDER_PRELUDE
+	// 	// TODO
+	// }
 
 
 	template<Order O> requires(is_order_compiled(O))
 	typename EngineObj<O>::Guess find_good_guess_candidate(
 		const typename EngineObj<O>::CandSymsGrid& cells_cands,
-		const typename Ints<O>::o4i_t num_puzzle_cells_remaining
+		const int_ts::o4i_t<O> num_puzzle_cells_remaining
 	) noexcept{
 		OKIIDOKU_CAND_ELIM_FINDER_PRELUDE
 		using guess_t = typename EngineObj<O>::Guess;
@@ -280,11 +280,11 @@ namespace okiidoku::mono::detail::solver {
 		return find_symbols_require_cells(engine.cells_cands_, engine.cand_elim_queues_);
 	}
 
-	template<Order O> requires(is_order_compiled(O))
-	void CandElimFind<O>::locked_candidates(EngineObj<O>& engine) noexcept {
-		OKIIDOKU_CAND_ELIM_FINDER_PRELUDE
-		return find_locked_candidates(engine.cells_cands_, engine.cand_elim_queues_);
-	}
+	// template<Order O> requires(is_order_compiled(O))
+	// void CandElimFind<O>::locked_candidates(EngineObj<O>& engine) noexcept {
+	// 	OKIIDOKU_CAND_ELIM_FINDER_PRELUDE
+	// 	return find_locked_candidates(engine.cells_cands_, engine.cand_elim_queues_);
+	// }
 
 	template<Order O> requires(is_order_compiled(O))
 	typename EngineObj<O>::Guess CandElimFind<O>::good_guess_candidate(const EngineObj<O>& engine) noexcept {

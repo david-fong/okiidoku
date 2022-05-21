@@ -14,9 +14,9 @@ namespace okiidoku::mono {
 	template<Order O> requires(is_order_compiled(O))
 	void make_minimal_puzzle(Grid<O>& grid) noexcept {
 		using T = Ints<O>;
-		// using o2i_t = typename T::o2i_t;
-		using rmi_t = typename T::o4x_smol_t;
-		using o4i_t = typename T::o4i_t;
+		// using o2i_t = int_ts::o2i_t<O>;
+		using rmi_t = int_ts::o4xs_t<O>;
+		using o4i_t = int_ts::o4i_t<O>;
 
 		using rng_t = std::minstd_rand;
 		rng_t rng {std::random_device{}()};

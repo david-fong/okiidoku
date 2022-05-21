@@ -21,11 +21,11 @@ namespace okiidoku::mono { namespace {
 	template<Order O> requires(is_order_compiled(O))
 	class CanonPlace final {
 		using T = Ints<O>;
-		using val_t = typename T::o2i_smol_t;
+		using val_t = int_ts::o2is_t<O>;
 		using mapping_t = typename Transformation<O>::mapping_t;
-		using o1i_t = typename T::o1i_t;
-		using o2i_t = typename T::o2i_t;
-		using o4i_t = typename T::o4i_t;
+		using o1i_t = int_ts::o1i_t<O>;
+		using o2i_t = int_ts::o2i_t<O>;
+		using o4i_t = int_ts::o4i_t<O>;
 
 	public:
 		// explicit CanonPlace(const Grid<O>& grid): src_grid{grid} {}

@@ -32,10 +32,10 @@ namespace okiidoku::mono { namespace {
 	template<Order O> requires(is_order_compiled(O))
 	detail::Gridlike<O, RelMasks<O>> make_rel_masks_(const Grid<O>& grid) noexcept {
 		using T = Ints<O>;
-		using val_t = typename T::o2i_smol_t;
-		using o1i_t = typename T::o1i_t;
-		using o2x_t = typename T::o2x_t;
-		using o2i_t = typename T::o2i_t;
+		using val_t = int_ts::o2is_t<O>;
+		using o1i_t = int_ts::o1i_t<O>;
+		using o2x_t = int_ts::o2x_t<O>;
+		using o2i_t = int_ts::o2i_t<O>;
 
 		// TODO.high for large grid sizes, this uses hundreds of KB of stack.
 		// stacks have limits defaulted by the OS. This is not good. Find a
@@ -83,8 +83,8 @@ namespace okiidoku::mono::detail {
 	detail::Gridlike<O, Rel<O>> make_rel_table(const Grid<O>& grid_in) noexcept {
 		using T = Ints<O>;
 		using rel_at_mask_t = HouseMask<O>;
-		using o1i_t = typename T::o1i_t;
-		using o2i_t = typename T::o2i_t;
+		using o1i_t = int_ts::o1i_t<O>;
+		using o2i_t = int_ts::o2i_t<O>;
 		using chute_imbalance_t = typename Rel<O>::chute_imbalance_t;
 
 		const detail::Gridlike<O, RelMasks<O>> masks {make_rel_masks_<O>(grid_in)};
@@ -99,7 +99,7 @@ namespace okiidoku::mono::detail {
 			}
 			const rel_at_mask_t rel_at_mask {mask.boxes_h | mask.boxes_v};
 			const auto count {rel_at_mask.count()};
-			rel.count = static_cast<typename T::o2i_smol_t>(count);
+			rel.count = static_cast<int_ts::o2is_t<O>>(count);
 			rel.polar_count_lesser = static_cast<typename Rel<O>::polar_count_lesser_t>(std::min(mask.boxes_h.count(), mask.boxes_v.count()));
 
 			std::array<chute_imbalance_t, T::O1> h_chute_imbalance; // NOLINT(cppcoreguidelines-pro-type-member-init) initialized in following loop

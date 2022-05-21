@@ -10,10 +10,10 @@ namespace okiidoku::mono::detail {
 
 	template<Order O> requires(is_order_compiled(O))
 	struct Rel final {
-		using polar_count_lesser_t = detail::uint_smolN_t<std::bit_width((O*O)/2)>;
-		using chute_imbalance_t = detail::uint_smolN_t<std::bit_width(2*(O/2)*(O-(O/2)))>;
+		using polar_count_lesser_t = detail::uintsN_t<std::bit_width((O*O)/2)>;
+		using chute_imbalance_t = detail::uintsN_t<std::bit_width(2*(O/2)*(O-(O/2)))>;
 
-		typename Ints<O>::o2i_smol_t count;
+		int_ts::o2is_t<O> count;
 		polar_count_lesser_t polar_count_lesser; // smaller value means more imbalance
 		chute_imbalance_t chute_imbalance_a;
 		chute_imbalance_t chute_imbalance_b;

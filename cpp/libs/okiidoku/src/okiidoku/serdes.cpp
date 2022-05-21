@@ -14,11 +14,11 @@ namespace okiidoku::mono { namespace {
 	class SerdesHelper final {
 		using T = Ints<O>;
 		using cands_t = HouseMask<O>;
-		using val_t = typename T::o2x_t;
-		using o4i_t = typename T::o4i_t;
+		using val_t = int_ts::o2x_t<O>;
+		using o4i_t = int_ts::o4i_t<O>;
 
 		static constexpr unsigned num_buf_bytes {1};
-		using buf_t = detail::uint_smolN_t<2*8*num_buf_bytes>; // x2 to prevent overflow
+		using buf_t = detail::uintsN_t<2*8*num_buf_bytes>; // x2 to prevent overflow
 		static_assert((1U<<(2*8*num_buf_bytes)) > (2U*T::O2)); // requirement to handle overflow
 
 	public:
@@ -92,7 +92,7 @@ namespace okiidoku::mono { namespace {
 				assert(buf_pos != 0 && buf_pos < buf_end);
 				buf_pos *= use_factor;
 				smol_val_buf /= static_cast<val_t>(use_factor);
-				smol_val_buf_remaining /= static_cast<typename T::o2i_t>(use_factor);
+				smol_val_buf_remaining /= static_cast<int_ts::o2i_t<O>>(use_factor);
 			}
 			if (buf_pos >= buf_end) { // TODO.asap should this be a while loop?
 				static_assert(num_buf_bytes == 1); // otherwise the below needs to change.
@@ -154,7 +154,7 @@ namespace okiidoku::mono {
 			if ((T::O1-1-row)/T::O1 == col/T::O1) {
 				continue; // skip cells in the anti-diagonal boxes
 			}
-			using val_t = typename Ints<O>::o2x_t;
+			using val_t = int_ts::o2x_t<O>;
 			const auto val {static_cast<val_t>(grid.at_rmi(helper.get_cell_rmi()))};
 			helper.print_val(os, val);
 		}

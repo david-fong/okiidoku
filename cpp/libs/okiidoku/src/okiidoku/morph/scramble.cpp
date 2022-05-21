@@ -15,7 +15,7 @@ namespace okiidoku::mono {
 			std::ranges::shuffle(t.label_map, shared_rng.rng);
 			std::ranges::shuffle(t.row_map, shared_rng.rng);
 			std::ranges::shuffle(t.col_map, shared_rng.rng);
-			for (typename T::o1i_t chute {0}; chute < T::O1; ++chute) {
+			for (int_ts::o1i_t<O> chute {0}; chute < T::O1; ++chute) {
 				std::ranges::shuffle(t.row_map[chute], shared_rng.rng);
 				std::ranges::shuffle(t.col_map[chute], shared_rng.rng);
 			}

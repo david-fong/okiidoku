@@ -12,21 +12,21 @@ namespace okiidoku::mono::detail::solver::cand_elim_desc {
 
 	template<Order O> requires(is_order_compiled(O))
 	struct CellRequiresSymbol final {
-		typename Ints<O>::o4x_smol_t rmi;
-		typename Ints<O>::o2x_smol_t val;
+		int_ts::o4xs_t<O> rmi;
+		int_ts::o2xs_t<O> val;
 	};
 
 	template<Order O> requires(is_order_compiled(O))
 	struct SymbolRequiresCell final {
-		typename Ints<O>::o4x_smol_t rmi;
-		typename Ints<O>::o2x_smol_t val;
+		int_ts::o4xs_t<O> rmi;
+		int_ts::o2xs_t<O> val;
 	};
 
 	template<Order O> requires(is_order_compiled(O))
 	struct CellsRequireSymbols final {
 		HouseMask<O> syms; // what is required
 		HouseMask<O> house_cells; // who requires it
-		typename Ints<O>::o2x_smol_t house; // where the require-er is
+		int_ts::o2xs_t<O> house; // where the require-er is
 		HouseType house_type; // where the require-er is
 	};
 
@@ -34,15 +34,15 @@ namespace okiidoku::mono::detail::solver::cand_elim_desc {
 	struct SymbolsRequireCells final {
 		HouseMask<O> house_cells; // what is required
 		HouseMask<O> syms; // who requires it
-		typename Ints<O>::o2x_smol_t house; // where the require-er is
+		int_ts::o2xs_t<O> house; // where the require-er is
 		HouseType house_type; // where the require-er is
 	};
 
 
 	template<Order O> requires(is_order_compiled(O))
 	struct LockedCandidate final {
-		typename Ints<O>::o2x_smol_t line;
-		typename Ints<O>::o1x_t intersecting_box;
+		int_ts::o2xs_t<O> line;
+		int_ts::o1x_t<O> intersecting_box;
 		enum Polarity { h, v } line_polarity;
 	};
 

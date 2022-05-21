@@ -9,9 +9,9 @@ namespace okiidoku::mono::detail::solver {
 	template<Order O> requires(is_order_compiled(O))
 	class CandElimApply final {
 		using T = Ints<O>;
-		using o2x_t = typename T::o2x_t;
-		using o2i_t = typename T::o2i_t;
-		using rmi_t = typename T::o4x_smol_t;
+		using o2x_t = int_ts::o2x_t<O>;
+		using o2i_t = int_ts::o2i_t<O>;
+		using rmi_t = int_ts::o4xs_t<O>;
 
 	public:
 		static SolutionsRemain apply(EngineObj<O>&, const cand_elim_desc::CellRequiresSymbol<O>&) noexcept;

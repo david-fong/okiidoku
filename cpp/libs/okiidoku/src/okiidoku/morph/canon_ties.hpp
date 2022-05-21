@@ -18,7 +18,7 @@ namespace okiidoku::mono::detail {
 	struct TieLinks final {
 		using T = Ints<O>;
 		static constexpr std::size_t size_ {(O1_OR_O2 == 1) ? T::O1 : T::O2};
-		using link_t = std::conditional_t<(O1_OR_O2 == 1), typename T::o1i_t, typename T::o2i_smol_t>;
+		using link_t = std::conditional_t<(O1_OR_O2 == 1), int_ts::o1i_t<O>, int_ts::o2is_t<O>>;
 		using links_t = std::array<link_t, size_>;
 
 		class Range final {

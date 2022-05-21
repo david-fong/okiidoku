@@ -38,7 +38,7 @@ namespace okiidoku::mono {
 
 			using Find = detail::solver::CandElimFind<O>;
 			Find::symbol_requires_cell(e);  if (e.has_queued_cand_elims()) { continue; }
-			Find::locked_candidates(e);     if (e.has_queued_cand_elims()) { continue; }
+			// Find::locked_candidates(e);     if (e.has_queued_cand_elims()) { continue; }
 			Find::cells_require_symbols(e); if (e.has_queued_cand_elims()) { continue; }
 			Find::symbols_require_cells(e); if (e.has_queued_cand_elims()) { continue; }
 			e.push_guess(Find::good_guess_candidate(e));
@@ -59,7 +59,7 @@ namespace okiidoku::mono {
 		while (e.get_num_puzzle_cells_remaining() > 0) [[likely]] {
 			using Find = detail::solver::CandElimFind<O>;
 			Find::symbol_requires_cell(e);
-			Find::locked_candidates(e);
+			// Find::locked_candidates(e);
 			// TODO call other techniques
 
 			if (e.has_queued_cand_elims()) {

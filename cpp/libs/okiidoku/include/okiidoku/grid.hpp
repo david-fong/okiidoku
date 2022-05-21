@@ -39,10 +39,10 @@ namespace okiidoku::mono {
 	public:
 		using val_t = V_;
 		using T = Ints<O>;
-		using o2x_t = typename T::o2x_t;
-		using o2i_t = typename T::o2i_t;
-		using o4x_t = typename T::o4x_t;
-		using o4i_t = typename T::o4i_t;
+		using o2x_t = int_ts::o2x_t<O>;
+		using o2i_t = int_ts::o2i_t<O>;
+		using o4x_t = int_ts::o4x_t<O>;
+		using o4i_t = int_ts::o4i_t<O>;
 		using array_t = std::array<val_t, T::O4>;
 
 		// lexicographical comparison over row-major-order traversal of cells.
@@ -60,27 +60,27 @@ namespace okiidoku::mono {
 		[[nodiscard, gnu::pure]] const array_t& get_underlying_array() const noexcept { return arr_; };
 
 		// contract: `rmi` is in [0, O4).
-		template<class T_rmi> requires(Any_o4x<O, T_rmi>)
+		template<class T_rmi> requires(Any_o4x_t<O, T_rmi>)
 		[[nodiscard]] constexpr       val_t& at_rmi(const T_rmi rmi)       noexcept { return arr_[rmi]; }
-		template<class T_rmi> requires(Any_o4x<O, T_rmi>)
+		template<class T_rmi> requires(Any_o4x_t<O, T_rmi>)
 		[[nodiscard]] constexpr const val_t& at_rmi(const T_rmi rmi) const noexcept { return arr_[rmi]; }
 
 		// contract: `row` and `col` are in [0, O2).
-		template<class T_row, class T_col> requires(Any_o2x<O, T_row> && Any_o2x<O, T_col>)
+		template<class T_row, class T_col> requires(Any_o2x_t<O, T_row> && Any_o2x_t<O, T_col>)
 		[[nodiscard]] constexpr       val_t& at(const T_row row, const T_col col)       noexcept { return arr_[(T::O2*row)+col]; }
-		template<class T_row, class T_col> requires(Any_o2x<O, T_row> && Any_o2x<O, T_col>)
+		template<class T_row, class T_col> requires(Any_o2x_t<O, T_row> && Any_o2x_t<O, T_col>)
 		[[nodiscard]] constexpr const val_t& at(const T_row row, const T_col col) const noexcept { return arr_[(T::O2*row)+col]; }
 
 		// contract: `box` and `box_cell` are in [0, O2).
-		template<class T_house, class T_house_cell> requires(Any_o2x<O, T_house> && Any_o2x<O, T_house_cell>)
+		template<class T_house, class T_house_cell> requires(Any_o2x_t<O, T_house> && Any_o2x_t<O, T_house_cell>)
 		[[nodiscard]] constexpr       val_t& at_box_cell(const T_house box, const T_house_cell box_cell)       noexcept { return arr_[box_cell_to_rmi<O>(box, box_cell)]; }
-		template<class T_house, class T_house_cell> requires(Any_o2x<O, T_house> && Any_o2x<O, T_house_cell>)
+		template<class T_house, class T_house_cell> requires(Any_o2x_t<O, T_house> && Any_o2x_t<O, T_house_cell>)
 		[[nodiscard]] constexpr const val_t& at_box_cell(const T_house box, const T_house_cell box_cell) const noexcept { return arr_[box_cell_to_rmi<O>(box, box_cell)]; }
 
 		// contract: `row` is in [0, O2).
-		template<class T_row> requires(Any_o2x<O, T_row>)
+		template<class T_row> requires(Any_o2x_t<O, T_row>)
 		[[nodiscard]] std::span<      val_t, T::O2> row_span_at(const T_row i)       noexcept { return static_cast<std::span<      val_t, T::O2>>(std::span(arr_).subspan(T::O2*i, T::O2)); }
-		template<class T_row> requires(Any_o2x<O, T_row>)
+		template<class T_row> requires(Any_o2x_t<O, T_row>)
 		[[nodiscard]] std::span<const val_t, T::O2> row_span_at(const T_row i) const noexcept { return static_cast<std::span<const val_t, T::O2>>(std::span(arr_).subspan(T::O2*i, T::O2)); }
 
 		// [[nodiscard]] auto row_spans() noexcept { namespace v = ranges::views; return v::iota(o2i_t{0}, o2i_t{T::O2}) | v::transform([&](auto r){ return row_span_at(r); }); }
@@ -91,7 +91,7 @@ namespace okiidoku::mono {
 
 
 	template<Order O> [[nodiscard, gnu::const]]
-	constexpr bool cells_share_house(typename Ints<O>::o4i_t c1, typename Ints<O>::o4i_t c2) noexcept {
+	constexpr bool cells_share_house(int_ts::o4i_t<O> c1, int_ts::o4i_t<O> c2) noexcept {
 		return (rmi_to_row<O>(c1) == rmi_to_row<O>(c2))
 			||  (rmi_to_col<O>(c1) == rmi_to_col<O>(c2))
 			||  (rmi_to_box<O>(c1) == rmi_to_box<O>(c2));
@@ -136,12 +136,12 @@ namespace okiidoku::visitor {
 		// Or we could just take the easy route and make setter methods.
 
 		// contract: `rmi` is in [0, O4).
-		// [[nodiscard]] common_val_t& at_rmi(const Ints::o4i_t rmi)       noexcept;
-		[[nodiscard]] common_val_t at_rmi(const Ints::o4i_t rmi) const noexcept;
+		// [[nodiscard]] common_val_t& at_rmi(const int_ts::o4i_t rmi)       noexcept;
+		[[nodiscard]] common_val_t at_rmi(const int_ts::o4i_t rmi) const noexcept;
 
 		// contract: `row` and `col` are in [0, O2).
-		// [[nodiscard]] common_val_t& at(const Ints::o2i_t row, const Ints::o2i_t col)       noexcept;
-		[[nodiscard]] common_val_t at(const Ints::o2i_t row, const Ints::o2i_t col) const noexcept;
+		// [[nodiscard]] common_val_t& at(const int_ts::o2i_t row, const int_ts::o2i_t col)       noexcept;
+		[[nodiscard]] common_val_t at(const int_ts::o2i_t row, const int_ts::o2i_t col) const noexcept;
 	};
 }
 #endif

@@ -16,12 +16,12 @@ namespace okiidoku::mono { namespace {
 	template<Order O> requires(is_order_compiled(O))
 	struct CountSymsInInvalidBox final {
 		using T = Ints<O>;
-		using V = typename T::o1i_t;
-		using o3i_t = typename T::o3i_t;
+		using V = int_ts::o1i_t<O>;
+		using o3i_t = int_ts::o3i_t<O>;
 		[[nodiscard]] o3i_t count_num_missing_syms() const noexcept { return static_cast<o3i_t>(std::ranges::count(store_, V{0})); }
-		template<class T_house, class T_sym> requires(Any_o1x<O, T_house> && Any_o2x<O, T_sym>)
+		template<class T_house, class T_sym> requires(Any_o1x_t<O, T_house> && Any_o2x_t<O, T_sym>)
 		[[nodiscard]] const V& box_count_sym(const T_house box, const T_sym sym) const noexcept { return store_[(T::O1*sym)+box]; }
-		template<class T_house, class T_sym> requires(Any_o1x<O, T_house> && Any_o2x<O, T_sym>)
+		template<class T_house, class T_sym> requires(Any_o1x_t<O, T_house> && Any_o2x_t<O, T_sym>)
 		[[nodiscard]]       V& box_count_sym(const T_house box, const T_sym sym)       noexcept { return store_[(T::O1*sym)+box]; }
 	private:
 		// rows for each symbol, entry-in-row for each box.
@@ -29,12 +29,12 @@ namespace okiidoku::mono { namespace {
 	};
 
 	template<Order O> requires(is_order_compiled(O))
-	void make_boxes_valid(Grid<O>& grid, const typename Ints<O>::o2i_t h_chute, rng_t& rng_) noexcept {
+	void make_boxes_valid(Grid<O>& grid, const int_ts::o2i_t<O> h_chute, rng_t& rng_) noexcept {
 		using T = Ints<O>;
-		using o1x_t = typename T::o1x_t;
-		using o2x_t = typename T::o2x_t;
-		using o2i_t = typename T::o2i_t;
-		using o3i_t = typename T::o3i_t;
+		using o1x_t = int_ts::o1x_t<O>;
+		using o2x_t = int_ts::o2x_t<O>;
+		using o2i_t = int_ts::o2i_t<O>;
+		using o3i_t = int_ts::o3i_t<O>;
 
 		// unsigned long long op_count {0};
 		CountSymsInInvalidBox<O> boxes_has {};
@@ -76,12 +76,12 @@ namespace okiidoku::mono { namespace {
 	template<Order O> requires(is_order_compiled(O))
 	struct CountSymsInInvalidCol final {
 		using T = Ints<O>;
-		using V = typename T::o2i_smol_t;
-		using o3i_t = typename T::o3i_t;
+		using V = int_ts::o2is_t<O>;
+		using o3i_t = int_ts::o3i_t<O>;
 		[[nodiscard]] o3i_t count_num_missing_syms() const noexcept { return static_cast<o3i_t>(std::ranges::count(store_, V{0})); }
-		template<class T_col, class T_sym> requires(Any_o1x<O, T_col> && Any_o2x<O, T_sym>)
+		template<class T_col, class T_sym> requires(Any_o1x_t<O, T_col> && Any_o2x_t<O, T_sym>)
 		[[nodiscard]] const V& col_count_sym(const T_col col, const T_sym sym) const noexcept { return store_[(T::O1*sym)+col]; }
-		template<class T_col, class T_sym> requires(Any_o1x<O, T_col> && Any_o2x<O, T_sym>)
+		template<class T_col, class T_sym> requires(Any_o1x_t<O, T_col> && Any_o2x_t<O, T_sym>)
 		[[nodiscard]]       V& col_count_sym(const T_col col, const T_sym sym)       noexcept { return store_[(T::O1*sym)+col]; }
 	private:
 		// rows for each symbol, entry-in-row for each col.
@@ -89,13 +89,13 @@ namespace okiidoku::mono { namespace {
 	};
 
 	template<Order O> requires(is_order_compiled(O))
-	void make_cols_valid(Grid<O>& grid, const typename Ints<O>::o2i_t v_chute, rng_t& rng_) noexcept {
+	void make_cols_valid(Grid<O>& grid, const int_ts::o2i_t<O> v_chute, rng_t& rng_) noexcept {
 		using T = Ints<O>;
-		using o1x_t = typename T::o1x_t;
-		using o1i_t = typename T::o1i_t;
-		using o2x_t = typename T::o2x_t;
-		using o2i_t = typename T::o2i_t;
-		using o3i_t = typename T::o3i_t;
+		using o1x_t = int_ts::o1x_t<O>;
+		using o1i_t = int_ts::o1i_t<O>;
+		using o2x_t = int_ts::o2x_t<O>;
+		using o2i_t = int_ts::o2i_t<O>;
+		using o3i_t = int_ts::o3i_t<O>;
 
 		// unsigned long long op_count {0};
 		CountSymsInInvalidCol<O> cols_has {};
@@ -136,7 +136,7 @@ namespace okiidoku::mono {
 	template<Order O> requires(is_order_compiled(O))
 	void generate(Grid<O>& grid, SharedRng& shared_rng) noexcept { // NOLINT(readability-function-cognitive-complexity) *laughs in cognitive complexity of 72
 		using T = Ints<O>;
-		using o2i_t = typename T::o2i_t;
+		using o2i_t = int_ts::o2i_t<O>;
 		{
 			std::array<grid_val_t<O>, T::O2> example_row;
 			std::iota(example_row.begin(), example_row.end(), grid_val_t<O>{0});

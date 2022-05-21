@@ -84,10 +84,10 @@ namespace okiidoku::mono::detail::solver {
 		friend SolutionsRemain detail_engine_unwind_and_rule_out_bad_guesses_<O>(EngineObj<O>&) noexcept;
 	public:
 		using T = Ints<O>;
-		using o2i_t = typename T::o2i_t;
-		using val_t = typename T::o2x_smol_t;
-		using rmi_t = typename T::o4x_smol_t;
-		using o4i_t = typename T::o4i_t;
+		using o2i_t = int_ts::o2i_t<O>;
+		using val_t = int_ts::o2xs_t<O>;
+		using rmi_t = int_ts::o4xs_t<O>;
+		using o4i_t = int_ts::o4i_t<O>;
 		using CandSymsGrid = detail::Gridlike<O, HouseMask<O>>;
 		struct Guess final {
 			rmi_t rmi;

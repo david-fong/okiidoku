@@ -18,9 +18,9 @@ namespace okiidoku::mono {
 	struct HouseMask final {
 	public:
 		using T = Ints<O>;
-		using o2x_smol_t = typename Ints<O>::o2x_smol_t;
-		using o2x_t = typename Ints<O>::o2x_t;
-		using o2i_t = typename Ints<O>::o2i_t;
+		using o2xs_t = int_ts::o2xs_t<O>;
+		using o2x_t = int_ts::o2x_t<O>;
+		using o2i_t = int_ts::o2i_t<O>;
 
 		using int_t = std::uint64_t;
 
@@ -35,7 +35,7 @@ namespace okiidoku::mono {
 		using ints_t = std::array<int_t, num_ints>;
 
 		// if user follows contracts, excess top bits are always zero; this
-		// property must not be dependended upon by users of this library.
+		// property must not be depended upon by users of this library.
 		ints_t ints_ {{0}};
 
 	public:
@@ -135,13 +135,13 @@ namespace okiidoku::mono {
 
 		// contract: this mask has at least one set bit.
 		// a suitably long and ugly name for a sharp, niche, optimized knife.
-		[[nodiscard, gnu::pure]] o2x_smol_t count_lower_zeros_assuming_non_empty_mask() const noexcept;
+		[[nodiscard, gnu::pure]] o2xs_t count_lower_zeros_assuming_non_empty_mask() const noexcept;
 
 		// contract: `set_bit_index` < O2 and there are at least `set_bit_index+1` set bits.
 		[[nodiscard, gnu::pure]] o2x_t get_index_of_nth_set_bit(o2x_t set_bit_index) const noexcept;
 
 		// Defines a strong ordering between masks. Its semantics are unspecified.
-		// It is indended to be time-performant. Can be used to partition by masks
+		// It is intended to be time-performant. Can be used to partition by masks
 		// where the relationship between partitions doesn't matter.
 		static std::strong_ordering unspecified_strong_cmp(const HouseMask& a, const HouseMask& b) noexcept {
 			return a.ints_ <=> b.ints_;
@@ -164,7 +164,7 @@ namespace okiidoku::mono {
 			std::array<M, O> mask;
 			for (unsigned chute {0}; chute < O; ++chute) {
 				for (unsigned i {0}; i < O; ++i) {
-					mask[chute].set(static_cast<typename Ints<O>::o2x_t>((O*chute) + i));
+					mask[chute].set(static_cast<int_ts::o2x_t<O>>((O*chute) + i));
 			}	}
 			return mask;
 		}()};
@@ -172,7 +172,7 @@ namespace okiidoku::mono {
 			std::array<M, O> mask;
 			for (unsigned chute {0}; chute < O; ++chute) {
 				for (unsigned i {0}; i < O; ++i) {
-					mask[chute].set(static_cast<typename Ints<O>::o2x_t>((O*i) + chute));
+					mask[chute].set(static_cast<int_ts::o2x_t<O>>((O*i) + chute));
 			}	}
 			return mask;
 		}()};
