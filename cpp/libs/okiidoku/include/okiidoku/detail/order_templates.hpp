@@ -49,7 +49,7 @@ namespace okiidoku {
 		// template parameters other than just the order.
 		template<typename T>
 		concept MonoToVisitorAdaptor = requires() {
-			std::is_same_v<decltype(T::is_borrowtype), bool>;
+			std::same_as<decltype(T::is_borrowtype), bool>;
 			#define OKIIDOKU_FOR_COMPILED_O(O_) typename T::template type<O_>;
 			OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 			#undef OKIIDOKU_FOR_COMPILED_O

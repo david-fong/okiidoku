@@ -1,14 +1,14 @@
 cmake_minimum_required(VERSION 3.21)
-if(NOT DEFINED EMSCRIPTEN)
-	message(FATAL_ERROR "call cmake wrapped with emcmake like `emcmake cmake <...>`")
-	# The emcmake wrapper adds command-line arguments to set toolchain file path and such.
-endif()
 project(okiidoku_emscripten
 	VERSION 0.0.1
 	DESCRIPTION "emscripten wrapper for libokiidoku"
 	HOMEPAGE_URL "https://github.com/david-fong/okiidoku"
 	LANGUAGES CXX
 )
+if(NOT DEFINED EMSCRIPTEN)
+	message(FATAL_ERROR "call cmake wrapped with emcmake like `emcmake cmake <...>`")
+	# The emcmake wrapper adds command-line arguments to set toolchain file path and such.
+endif()
 set(CMAKE_CXX_STANDARD 20 CACHE STRING "The C++ standard to use")
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_CXX_EXTENSIONS FALSE)

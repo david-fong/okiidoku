@@ -2,7 +2,7 @@
 #define HPP_OKIIDOKU__PUZZLE__SOLVER__CAND_ELIM_APPLY
 
 #include <okiidoku/puzzle/solver/engine.hpp>
-#include <okiidoku/puzzle/solver/cand_elim_desc.hpp>
+#include <okiidoku/puzzle/solver/found.hpp>
 
 namespace okiidoku::mono::detail::solver {
 
@@ -14,19 +14,19 @@ namespace okiidoku::mono::detail::solver {
 		using rmi_t = int_ts::o4xs_t<O>;
 
 	public:
-		static SolutionsRemain apply(EngineObj<O>&, const cand_elim_desc::CellRequiresSymbol<O>&) noexcept;
+		static SolutionsRemain apply(EngineObj<O>&, const found::CellClaimSym<O>&) noexcept;
 
-		static SolutionsRemain apply(EngineObj<O>&, const cand_elim_desc::SymbolRequiresCell<O>&) noexcept;
+		static SolutionsRemain apply(EngineObj<O>&, const found::SymClaimCell<O>&) noexcept;
 
 		// AKA "naked subsets"
-		static SolutionsRemain apply(EngineObj<O>&, const cand_elim_desc::CellsRequireSymbols<O>&) noexcept;
+		static SolutionsRemain apply(EngineObj<O>&, const found::CellsClaimSyms<O>&) noexcept;
 
 		// AKA "hidden subsets"
-		static SolutionsRemain apply(EngineObj<O>&, const cand_elim_desc::SymbolsRequireCells<O>&) noexcept;
+		static SolutionsRemain apply(EngineObj<O>&, const found::SymsClaimCells<O>&) noexcept;
 
-		static SolutionsRemain apply(EngineObj<O>&, const cand_elim_desc::LockedCandidate<O>&) noexcept;
+		static SolutionsRemain apply(EngineObj<O>&, const found::LockedCands<O>&) noexcept;
 
-		// static SolutionsRemain apply(EngineObj<O>&, const cand_elim_desc::&) noexcept;
+		// static SolutionsRemain apply(EngineObj<O>&, const found::&) noexcept;
 	};
 }
 #endif

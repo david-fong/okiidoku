@@ -22,7 +22,7 @@ namespace okiidoku::mono {
 			if (col == 0) [[unlikely]] { row_has = has_mask_t{}; }
 			if (row % T::O1 == 0) [[unlikely]] { h_chute_boxes_has.fill(has_mask_t{}); }
 
-			const auto val {grid.at(row,col)};
+			const auto& val {grid.at(row,col)};
 			assert(val <= T::O2);
 			if (val == T::O2) { continue; }
 
@@ -44,7 +44,7 @@ namespace okiidoku::mono {
 		using T = Ints<O>;
 		using o4i_t = int_ts::o4i_t<O>;
 		for (o4i_t i {0}; i < T::O4; ++i) {
-			const auto val {grid.at_rmi(i)};
+			const auto& val {grid.at_rmi(i)};
 			assert(val <= T::O2);
 			if (val == T::O2) { return false; }
 		}

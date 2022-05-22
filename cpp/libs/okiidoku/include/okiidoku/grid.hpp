@@ -51,10 +51,10 @@ namespace okiidoku::mono {
 		// For regular grids, always default initialize as an empty grid (to be safe).
 		// Note: Making this constexpr results in a 1% speed gain, but 45% program
 		// size increase with GCC. That speed doesn't seem worth it.
-		Gridlike() noexcept requires(std::is_same_v<V_, grid_val_t<O>>) {
+		Gridlike() noexcept requires(std::same_as<V_, grid_val_t<O>>) {
 			arr_.fill(T::O2);
 		}
-		Gridlike() noexcept requires(!std::is_same_v<V_, grid_val_t<O>>) = default;
+		Gridlike() noexcept requires(!std::same_as<V_, grid_val_t<O>>) = default;
 
 		[[nodiscard, gnu::pure]]       array_t& get_underlying_array()       noexcept { return arr_; };
 		[[nodiscard, gnu::pure]] const array_t& get_underlying_array() const noexcept { return arr_; };

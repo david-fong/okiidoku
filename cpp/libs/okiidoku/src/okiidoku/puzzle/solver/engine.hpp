@@ -1,7 +1,7 @@
 #ifndef HPP_OKIIDOKU__PUZZLE__SOLVER__ENGINE
 #define HPP_OKIIDOKU__PUZZLE__SOLVER__ENGINE
 
-#include <okiidoku/puzzle/solver/cand_elim_queues.hpp>
+#include <okiidoku/puzzle/solver/found_queue.hpp>
 #include <okiidoku/grid.hpp>
 #include <okiidoku/house_mask.hpp>
 #include <okiidoku/detail/export.h>
@@ -27,8 +27,8 @@ I imagine an average library _user_ would not be interested in such tinkering.
 Of course, anyone can clone the repo and do such tinkering within it if they wish.
 
 Examples of various ways this could be used:
-- FastSolver: eagerly/immediately consumes deduced candidate eliminations
-- VeryDeductive: "hoards"/accumulates deduced candidate eliminations until
+- FastSolver: eagerly/immediately consumes found candidate eliminations
+- VeryDeductive: "hoards"/accumulates found candidate eliminations until
 	no more can possibly be found without consuming any.
 - hypothetical "StupidSolver" purely uses the guess mechanism (_very_
    inefficient, but it would still be able to find all possible solutions)
@@ -76,6 +76,9 @@ namespace okiidoku::mono::detail::solver {
 	template<Order O> requires(is_order_compiled(O)) class CandElimFind;
 	template<Order O> requires(is_order_compiled(O)) class CandElimApply;
 
+	template<Order O> requires(is_order_compiled(O))
+	using CandsGrid = detail::Gridlike<O, HouseMask<O>>;
+
 
 	template<Order O> requires(is_order_compiled(O))
 	class EngineObj final {
@@ -88,7 +91,7 @@ namespace okiidoku::mono::detail::solver {
 		using val_t = int_ts::o2xs_t<O>;
 		using rmi_t = int_ts::o4xs_t<O>;
 		using o4i_t = int_ts::o4i_t<O>;
-		using CandSymsGrid = detail::Gridlike<O, HouseMask<O>>;
+
 		struct Guess final {
 			rmi_t rmi;
 			val_t val;
@@ -105,7 +108,7 @@ namespace okiidoku::mono::detail::solver {
 
 		// the candidate elimination queue is processed in the order of insertion.
 		[[nodiscard, gnu::pure]]
-		bool has_queued_cand_elims() const noexcept { return !cand_elim_queues_.is_empty(); }
+		bool has_queued_cand_elims() const noexcept { return !found_queues_.is_empty(); }
 
 		// contract: `has_queued_cand_elims` returns `true`.
 		SolutionsRemain process_first_queued_cand_elims() noexcept;
@@ -148,7 +151,7 @@ namespace okiidoku::mono::detail::solver {
 		// contract: (it follows that) the cell at `rmi` has exactly one candidate-symbol.
 		// post-condition: decrements `num_puzzle_cells_remaining`.
 		OKIIDOKU_NO_EXPORT
-		void enqueue_cand_elims_for_new_cell_requires_symbol_(rmi_t rmi) noexcept;
+		void enqueue_cand_elims_for_new_cell_claim_sym_(rmi_t rmi) noexcept;
 
 		// The specified candidate-symbol is allowed to already be removed.
 		OKIIDOKU_NO_EXPORT
@@ -164,7 +167,7 @@ namespace okiidoku::mono::detail::solver {
 
 		// num_puzzles_found_t num_puzzles_found_ {0};
 
-		CandSymsGrid cells_cands_;
+		CandsGrid<O> cells_cands_;
 
 		// (The alternative is to count the number of cells with only one candidate
 		// each time this property is queried). This is faster, but requires careful
@@ -175,7 +178,7 @@ namespace okiidoku::mono::detail::solver {
 
 
 		// TODO.asap consider a design where the queue is not a data member of the EngineObj
-		CandElimQueues<O> cand_elim_queues_ {};
+		CandElimQueues<O> found_queues_ {};
 
 
 		struct OKIIDOKU_NO_EXPORT GuessStackFrame final {
@@ -184,15 +187,15 @@ namespace okiidoku::mono::detail::solver {
 			// the entire restore-state. For large grids, that's a lot of memory for
 			// each `cells_cands`, so since the data is cold, it is allocated on the
 			// heap.
-			std::unique_ptr<CandSymsGrid> prev_cells_cands;
+			std::unique_ptr<CandsGrid<O>> prev_cells_cands;
 			o4i_t num_puzzle_cells_remaining;
 			Guess guess;
 			GuessStackFrame(
-				const CandSymsGrid& prev_cells_cands_,
+				const CandsGrid<O>& prev_cells_cands_,
 				const o4i_t num_puzzle_cells_remaining_,
 				const Guess guess_
 			) noexcept:
-				prev_cells_cands{std::make_unique<CandSymsGrid>(prev_cells_cands_)},
+				prev_cells_cands{std::make_unique<CandsGrid<O>>(prev_cells_cands_)},
 				num_puzzle_cells_remaining{num_puzzle_cells_remaining_},
 				guess{guess_}
 			{}

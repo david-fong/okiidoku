@@ -2,7 +2,7 @@
 #define HPP_OKIIDOKU__PUZZLE__SOLVER__CAND_ELIM_FIND
 
 #include <okiidoku/puzzle/solver/engine.hpp>
-#include <okiidoku/puzzle/solver/cand_elim_desc.hpp>
+#include <okiidoku/puzzle/solver/found.hpp>
 
 namespace okiidoku::mono::detail::solver {
 
@@ -23,15 +23,15 @@ namespace okiidoku::mono::detail::solver {
 
 		// TODO.high for finders that are not (relatively) trivial to perform a full scan of the grid,
 		//   provide a parameter enum `SearchEffort { find_first, find_all, };`
-		static void symbol_requires_cell(EngineObj<O>&) noexcept;
+		static void sym_claim_cell(EngineObj<O>&) noexcept;
 
-		static void locked_candidates(EngineObj<O>&) noexcept;
+		static void locked_cands(EngineObj<O>&) noexcept;
 
 		// AKA "naked subsets"
-		static void cells_require_symbols(EngineObj<O>&) noexcept;
+		static void cells_claim_syms(EngineObj<O>&) noexcept;
 
 		// AKA "hidden subsets"
-		static void symbols_require_cells(EngineObj<O>&) noexcept;
+		static void syms_claim_cells(EngineObj<O>&) noexcept;
 
 		// static void fish(EngineObj<O>&) noexcept;
 

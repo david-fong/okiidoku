@@ -24,8 +24,12 @@ namespace okiidoku::mono {
 	template<Order O> requires(is_order_compiled(O))
 	class OKIIDOKU_EXPORT FastSolver final {
 	public:
-		// contract: none. puzzle can even blatantly break the one rule,
+		// contract: none. puzzle can even blatantly break the one rule.
 		explicit FastSolver(const Grid<O>& puzzle) noexcept;
+
+		// return of `std::nullopt` means no more solutions exist for the puzzle.
+		// example usage: `while (const auto solution {solution_walker.get_next_solution()}; solution) {...}`
+		[[nodiscard]] std::optional<Grid<O>> get_next_solution() noexcept;
 
 		~FastSolver() noexcept;
 		FastSolver(const FastSolver&) = delete;
@@ -34,10 +38,6 @@ namespace okiidoku::mono {
 		// allow moves. an "empty" moved-from instance always returns no solutions.
 		FastSolver(FastSolver&&) = default;
 		FastSolver& operator=(FastSolver&&) = default;
-
-		// return of `std::nullopt` means no more solutions exist for the puzzle.
-		// example usage: `while (const auto solution {solution_walker.get_next_solution()}; solution) {...}`
-		[[nodiscard]] std::optional<Grid<O>> get_next_solution() noexcept;
 
 	private:
 		using engine_t = detail::solver::EngineObj<O>;
@@ -52,8 +52,12 @@ namespace okiidoku::mono {
 	template<Order O> requires(is_order_compiled(O))
 	class OKIIDOKU_EXPORT VeryDeductiveSolver final {
 	public:
-		// contract: none. puzzle can even blatantly break the one rule,
+		// contract: none. puzzle can even blatantly break the one rule.
 		explicit VeryDeductiveSolver(const Grid<O>& puzzle) noexcept;
+
+		// return of `std::nullopt` means no more solutions exist for the puzzle.
+		// example usage: `while (const auto solution {solution_walker.get_next_solution()}; solution) {...}`
+		[[nodiscard]] std::optional<Grid<O>> get_next_solution() noexcept;
 
 		~VeryDeductiveSolver() noexcept;
 		VeryDeductiveSolver(const VeryDeductiveSolver&) = delete;
@@ -62,10 +66,6 @@ namespace okiidoku::mono {
 		// allow moves. an "empty" moved-from instance always returns no solutions.
 		VeryDeductiveSolver(VeryDeductiveSolver&&) = default;
 		VeryDeductiveSolver& operator=(VeryDeductiveSolver&&) = default;
-
-		// return of `std::nullopt` means no more solutions exist for the puzzle.
-		// example usage: `while (const auto solution {solution_walker.get_next_solution()}; solution) {...}`
-		[[nodiscard]] std::optional<Grid<O>> get_next_solution() noexcept;
 
 	private:
 		using engine_t = detail::solver::EngineObj<O>;

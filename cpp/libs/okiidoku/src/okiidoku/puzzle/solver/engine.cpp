@@ -56,7 +56,7 @@ namespace okiidoku::mono::detail::solver {
 			return detail_engine_unwind_and_rule_out_bad_guesses_(*this);
 		}
 		if ((new_cands_count < old_cands_count) && (new_cands_count == 1)) [[unlikely]] {
-			enqueue_cand_elims_for_new_cell_requires_symbol_(rmi);
+			enqueue_cand_elims_for_new_cell_claim_sym_(rmi);
 		}
 		return SolutionsRemain::yes();
 	}
@@ -75,7 +75,7 @@ namespace okiidoku::mono::detail::solver {
 			return detail_engine_unwind_and_rule_out_bad_guesses_(*this);
 		}
 		if ((new_cands_count < old_cands_count) && (new_cands_count == 1)) [[unlikely]] {
-			enqueue_cand_elims_for_new_cell_requires_symbol_(rmi);
+			enqueue_cand_elims_for_new_cell_claim_sym_(rmi);
 		}
 		return SolutionsRemain::yes();
 	}
@@ -94,7 +94,7 @@ namespace okiidoku::mono::detail::solver {
 			return detail_engine_unwind_and_rule_out_bad_guesses_(*this);
 		}
 		if ((new_cands_count < old_cands_count) && (new_cands_count == 1)) [[unlikely]] {
-			enqueue_cand_elims_for_new_cell_requires_symbol_(rmi);
+			enqueue_cand_elims_for_new_cell_claim_sym_(rmi);
 		}
 		return SolutionsRemain::yes();
 	}
@@ -113,18 +113,18 @@ namespace okiidoku::mono::detail::solver {
 		cell_cands.set(val);
 		assert(cell_cands.test(val));
 		assert(cell_cands.count() == 1);
-		enqueue_cand_elims_for_new_cell_requires_symbol_(rmi);
+		enqueue_cand_elims_for_new_cell_claim_sym_(rmi);
 	}
 
 
 	template<Order O> requires(is_order_compiled(O))
-	void EngineObj<O>::enqueue_cand_elims_for_new_cell_requires_symbol_(
+	void EngineObj<O>::enqueue_cand_elims_for_new_cell_claim_sym_(
 		const EngineObj<O>::rmi_t rmi
 	) noexcept {
 		assert(num_puzzle_cells_remaining_ > 0);
 		auto& cell_cands {cells_cands_.at_rmi(rmi)};
 		assert(cell_cands.count() == 1);
-		cand_elim_queues_.emplace(cand_elim_desc::CellRequiresSymbol<O>{
+		found_queues_.emplace(found::CellClaimSym<O>{
 			.rmi{rmi},
 			.val{cell_cands.count_lower_zeros_assuming_non_empty_mask()}
 		});
@@ -139,7 +139,7 @@ namespace okiidoku::mono::detail::solver {
 
 	template<Order O> requires(is_order_compiled(O))
 	SolutionsRemain EngineObj<O>::process_first_queued_cand_elims() noexcept {
-		// (... , cand_elim_queues_); // TODO.asap
+		// (... , found_queues_); // TODO.asap
 	}
 
 
@@ -170,7 +170,7 @@ namespace okiidoku::mono::detail::solver {
 
 	template<Order O> requires(is_order_compiled(O))
 	SolutionsRemain detail_engine_unwind_and_rule_out_bad_guesses_(EngineObj<O>& e) noexcept {
-		e.cand_elim_queues_.clear();
+		e.found_queues_.clear();
 		if (e.guess_stack_.empty()) {
 			e.no_solutions_remain_ = true;
 			return SolutionsRemain{false};

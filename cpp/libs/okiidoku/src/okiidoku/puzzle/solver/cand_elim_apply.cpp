@@ -7,7 +7,7 @@ namespace okiidoku::mono::detail::solver {
 	template<Order O> requires(is_order_compiled(O))
 	SolutionsRemain CandElimApply<O>::apply(
 		EngineObj<O>& engine,
-		const cand_elim_desc::CellRequiresSymbol<O>& desc // TODO consider/try passing by value
+		const found::CellClaimSym<O>& desc // TODO consider/try passing by value
 	) noexcept {
 		// repetitive code. #undef-ed before end of function.
 		#define OKIIDOKU_TRY_ELIM_NB_CAND \
@@ -42,7 +42,7 @@ namespace okiidoku::mono::detail::solver {
 	template<Order O> requires(is_order_compiled(O))
 	SolutionsRemain CandElimApply<O>::apply(
 		EngineObj<O>& engine,
-		const cand_elim_desc::SymbolRequiresCell<O>& desc
+		const found::SymClaimCell<O>& desc
 	) noexcept {
 		auto& cell_cands {engine.cells_cands_.at_rmi(desc.rmi)};
 		assert(cell_cands.test(desc.val));
@@ -56,7 +56,7 @@ namespace okiidoku::mono::detail::solver {
 	template<Order O> requires(is_order_compiled(O))
 	SolutionsRemain CandElimApply<O>::apply(
 		EngineObj<O>& engine,
-		const cand_elim_desc::CellsRequireSymbols<O>& desc
+		const found::CellsClaimSyms<O>& desc
 	) noexcept {
 		for (o2i_t house_cell {0}; house_cell < T::O2; ++house_cell) {
 			// TODO likelihood attribute. hypothesis: desc.house_cells.count() is small. please empirically test.
@@ -74,7 +74,7 @@ namespace okiidoku::mono::detail::solver {
 	template<Order O> requires(is_order_compiled(O))
 	SolutionsRemain CandElimApply<O>::apply(
 		EngineObj<O>& engine,
-		const cand_elim_desc::SymbolsRequireCells<O>& desc
+		const found::SymsClaimCells<O>& desc
 	) noexcept {
 		// TODO.wait HouseMask<O>::set_bits_iter <- create and use instead.
 		for (o2i_t house_cell {0}; house_cell < T::O2; ++house_cell) {
