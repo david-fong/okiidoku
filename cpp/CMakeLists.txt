@@ -33,7 +33,9 @@ endif()
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 
 
-# use ${BUILD_SHARED_LIBS}, or (if specified), ${okiidoku_SHARED_LIBS}.
+# General use cases should use BUILD_SHARED_LIBS to choose whether to build
+# the library as shared or static. okiidoku_SHARED_LIBS should only be used
+#
 # DLLs are currently not supported (I had trouble attempting to get it working).
 # https://alexreinking.com/blog/building-a-dual-shared-and-static-library-with-cmake.html
 if(MSVC)
@@ -52,7 +54,6 @@ add_subdirectory(libs/cli_utils)
 add_subdirectory(libs/okiidoku)
 
 add_subdirectory(apps/cli)
-# add_subdirectory(apps/web)
 
 if(okiidoku_IS_TOP_LEVEL)
 	add_subdirectory(tools/okiidoku_translator)
@@ -64,7 +65,7 @@ endif()
 # export from the build tree. https://cmake.org/cmake/help/latest/guide/importing-exporting/index.html#exporting-targets-from-the-build-tree
 install(TARGETS
 	okiidoku okiidoku_cli
-	EXPORT okiidokuTargets
+	EXPORT okiidoku_installation_targets
 	RUNTIME  COMPONENT okiidoku_runtime
 	LIBRARY  COMPONENT okiidoku_runtime
 	NAMELINK_COMPONENT okiidoku_development
@@ -77,11 +78,19 @@ if(BUILD_SHARED_LIBS)
 else()
 	set(OKIIDOKU_LIB_TYPE_NAME static)
 endif()
-install(EXPORT okiidokuTargets
+
+# regular installation import support:
+install(EXPORT okiidoku_installation_targets
 	NAMESPACE okiidoku::
 	DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/okiidoku
-	FILE okiidoku-${OKIIDOKU_LIB_TYPE_NAME}-targets.cmake
+	FILE okiidoku_${OKIIDOKU_LIB_TYPE_NAME}_targets.cmake
 	COMPONENT okiidoku_development
+)
+# also support importing from this repo's build-tree (no installation):
+# https://cmake.org/cmake/help/latest/guide/importing-exporting/index.html#exporting-targets-from-the-build-tree
+export(EXPORT okiidoku_installation_targets
+	NAMESPACE okiidoku::
+	FILE ${CMAKE_CURRENT_BINARY_DIR}/cmake/okiidoku_targets.cmake
 )
 
 

@@ -132,7 +132,7 @@ namespace okiidoku::mono::detail::solver {
 		assert(get_num_puzzle_cells_remaining() == static_cast<o4i_t>(std::count_if(
 			cells_cands_.get_underlying_array().cbegin(),
 			cells_cands_.get_underlying_array().cend(),
-			[](const auto& cell_cands){ return cell_cands.count() == 1; }
+			[](const auto& c){ return c.count() == 1; }
 		)));
 	}
 

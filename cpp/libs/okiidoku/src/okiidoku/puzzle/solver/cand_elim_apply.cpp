@@ -49,6 +49,7 @@ namespace okiidoku::mono::detail::solver {
 		if (cell_cands.count() > 1) {
 			engine.register_new_given_(desc.rmi, desc.val);
 		}
+		return SolutionsRemain::yes();
 	}
 
 
@@ -61,10 +62,12 @@ namespace okiidoku::mono::detail::solver {
 			// TODO likelihood attribute. hypothesis: desc.house_cells.count() is small. please empirically test.
 			if (desc.house_cells.test(static_cast<o2x_t>(house_cell))) [[unlikely]] { continue; }
 			const auto rmi {house_cell_to_rmi<O>(desc.house_type, desc.house, house_cell)};
-			if (const auto check {engine.cell_elim_cand_syms_(rmi, desc.syms)}; check.no_solutions_remain()) [[unlikely]] {
+			const auto check {engine.cell_elim_cand_syms_(static_cast<rmi_t>(rmi), desc.syms)};
+			if (check.no_solutions_remain()) [[unlikely]] {
 				return check;
 			}
 		}
+		return SolutionsRemain::yes();
 	}
 
 
@@ -78,11 +81,13 @@ namespace okiidoku::mono::detail::solver {
 			// TODO likelihood attribute. hypothesis: desc.house_cells.count() is small. please empirically test.
 			if (desc.house_cells.test(static_cast<o2x_t>(house_cell))) [[unlikely]] {
 				const auto rmi {house_cell_to_rmi<O>(desc.house_type, desc.house, house_cell)};
-				if (const auto check {engine.cell_retain_only_cand_syms_(rmi, desc.syms)}; check.no_solutions_remain()) [[unlikely]] {
+				const auto check {engine.cell_elim_cand_syms_(static_cast<rmi_t>(rmi), desc.syms)};
+				if (check.no_solutions_remain()) [[unlikely]] {
 					return check;
 				}
 			}
 		}
+		return SolutionsRemain::yes();
 	}
 
 

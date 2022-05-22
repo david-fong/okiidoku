@@ -122,7 +122,7 @@ namespace okiidoku {
 		};
 
 		template<MonoToVisitorAdaptor Adaptor>
-		[[nodiscard, gnu::pure]] std::compare_three_way_result<typename Adaptor::template type<compiled_orders[0]>> operator<=>(
+		[[nodiscard, gnu::pure]] std::compare_three_way_result_t<typename Adaptor::template type<compiled_orders[0]>> operator<=>(
 			const ContainerBase<Adaptor>& vis_a,
 			const ContainerBase<Adaptor>& vis_b
 		) noexcept {
@@ -135,7 +135,7 @@ namespace okiidoku {
 			OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 			#undef OKIIDOKU_FOR_COMPILED_O
 			// TODO.wait std::unreachable
-			default: return std::compare_three_way_result<typename Adaptor::template type<compiled_orders[0]>>::equivalent;
+			default: return std::compare_three_way_result_t<typename Adaptor::template type<compiled_orders[0]>>::equivalent;
 			}
 		}
 	}

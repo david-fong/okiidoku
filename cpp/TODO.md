@@ -4,7 +4,6 @@
 
 - draft archive
   - (and update tests and examples)
-- test CMake config apple-clang and try to fix configuration issues
 - refactor and improve canonicalization
 - compare backtracking and stochastic search statistics
 - implement grid-serdes translator tool
@@ -58,8 +57,6 @@
 
 - move the emoji definitions out of the program binary and externalize as a configurable data read in at runtime?
 
-- try adding shortcuts to std::views::iota(0,N) and use them instead of all the raw loops. see how it impacts performance. Don't know if compilers will still do all their optimizations (simd, unrolling, etc.).
-
 - Go back and try the old canonicalization by rel row prob, but break ties by doing some brute force: try each tied permutation and valuate it according to some reduction of how it pushes rarer rel counts to the top left. Just be careful to shift to get rid of the main diagonal seam.
   - If there are multiple puddles of ties, the resolution of a puddle shouldn't depend on the resolution of any other puddle- only on the non-tied rows/columns. A consequence of this is that this resolution algorithm will not work if there are no non-tied rows/columns.
 
@@ -75,10 +72,7 @@
       - repl
         - https://github.com/daniele77/cli
       - command
-        - https://github.com/docopt/docopt.cpp
         - https://github.com/CLIUtils/CLI11
-        - http://tclap.sourceforge.net/manual.html
-        - https://github.com/Taywee/args
   - Can look into ncurses in the future? Or look into options for TUI libraries?
   - A web interface would be really nice.
 - C++20

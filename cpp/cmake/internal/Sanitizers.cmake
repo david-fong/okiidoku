@@ -19,5 +19,6 @@ else()
 
 	add_compile_options("$<$<CONFIG:Debug>:-fsanitize=address,undefined>")
 	add_link_options(   "$<$<CONFIG:Debug>:-fsanitize=address,undefined>")
+	# TODO.wait note for empscripten https://emscripten.org/docs/debugging/Sanitizers.html#address-sanitizer (may need to configure increased startup memory)
 
 endif()

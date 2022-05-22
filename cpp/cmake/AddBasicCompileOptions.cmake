@@ -10,10 +10,10 @@ if(MSVC)
 		/utf-8        # /source-charset:utf-8 (for preprocessor), and /execution-charset:utf8 (for compiler)
 		/wd5030       # warning disable: "unrecognized attribute". (unfortunately needed or else MSVC warns for gnu-prefixed attributes)
 	)
-else()
+elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
 	add_compile_options(
 		# -Wbidi-chars=any # warn on any usage of bidi text
-		# -Wnormalized # warn on identifiers that look the same but are not the same
+		-Wnormalized # warn on identifiers that look the same but are not the same
 	)
 endif()
 
@@ -69,7 +69,7 @@ else()
 		-Wunused-macros
 		-Wundef # warn on undefined identifier used in `#if`
 	)
-	if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+	if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR EMSCRIPTEN)
 		add_compile_options(
 			-Wimplicit-fallthrough
 		)
