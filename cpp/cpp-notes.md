@@ -92,3 +92,5 @@ things I got wrong before which I couldn't understand based on gcc's error messa
 - [How to write well-behaved value-wrappers](https://www.youtube.com/watch?v=J4A2B9eexiw&ab_channel=CppCon).
 
 - [](https://gcc.gnu.org/onlinedocs/gcc/Compatibility.html)
+
+- [non-exported dependencies of exported static libraries](https://gitlab.kitware.com/cmake/cmake/-/issues/17357)

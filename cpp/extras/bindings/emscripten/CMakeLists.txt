@@ -38,3 +38,16 @@ target_link_libraries(okiidoku_emscripten
 	PRIVATE okiidoku_compile_options_private
 	PRIVATE okiidoku
 )
+
+# https://emscripten.org/docs/compiling/Building-Projects.html#using-libraries
+# https://emscripten.org/docs/porting/connecting_cpp_and_javascript/embind.html#binding-libraries
+# https://cmake.org/cmake/help/latest/command/add_custom_command.html#build-events
+# TODO see if the output directory is consistent with MSVC and Ninja. Otherwise find a way to make it consistent
+add_custom_command(TARGET okiidoku_emscripten POST_BUILD
+	COMMAND emcc -lembind -o "okiidoku.js" # TODO currently outputs to root of binary dir. build types will overwrite each other. please nest according to build type/config.
+		-Wl,--whole-archive
+		$<TARGET_FILE:okiidoku>
+		$<TARGET_FILE:okiidoku_emscripten>
+		-Wl,--no-whole-archive
+	VERBATIM
+)

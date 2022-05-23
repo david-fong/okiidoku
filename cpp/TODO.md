@@ -15,10 +15,7 @@
 - puzzle creation experiments (see [research-questions.md](../writings/research-questions.md))
 - minlexing canonicalization
 - compare canonicalization methods (performance / time-complexity)
-- opencl stochastic generator
-  - some template/starter code can be found at commit 5a8d4c0 (deleted)
-- language bindings for other languages?
-  - python, java
+- language bindings for other languages? [see dedicated todo-file](./extras/bindings/todo.md)
 
 ## Periodic Checkups
 
@@ -28,8 +25,6 @@
 - Check which `#ifdef __EMSCRIPTEN__` blocks can be removed as emscripten updates its sysroot libc++.
 
 ## Misc List
-
-- set HeaderFilterRegex in .clang-tidy to only analyze include paths starting with "okiidoku". (I think) use regex `^okiidoku`.
 
 - look into cppitertools for writing my raw loops. see if people say anything about performance overhead.
 

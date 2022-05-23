@@ -3,8 +3,8 @@
 # and isn't less strict on itself than a very strict user's compiler
 # options might be on it.
 
-# add_library(okiidoku_compile_options_public  INTERFACE)
-add_library(okiidoku_compile_options_private INTERFACE)
+# add_library(okiidoku_compile_options_public  INTERFACE IMPORTED)
+add_library(okiidoku_compile_options_private INTERFACE IMPORTED)
 
 # source file and compiler option parsing rules:
 if(MSVC)

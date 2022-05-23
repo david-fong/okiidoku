@@ -26,7 +26,7 @@ if(NOT range-v3_POPULATED)
 	# Note: for some reason populated always seems to be false?
 	# But it seems ExternalProject_Add will still detect no-need for re-clone?
 	FetchContent_Populate(range-v3)
-	add_library(range-v3 INTERFACE)
+	add_library(range-v3 INTERFACE IMPORTED)
 	add_library(range-v3::range-v3 ALIAS range-v3)
 	target_include_directories(range-v3 SYSTEM INTERFACE "${range-v3_SOURCE_DIR}/include")
 endif()

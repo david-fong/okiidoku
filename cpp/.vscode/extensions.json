@@ -3,6 +3,5 @@
 		"ms-vscode.cpptools",
 		"twxs.cmake",
 		"ms-vscode.cmake-tools",
-		"galarius.vscode-opencl",
 	],
 }

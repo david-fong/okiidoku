@@ -4,7 +4,7 @@
 
 ```sh
 # run this for first-time setup / upon changing CMake configuration
-emcmake cmake -S . -B build/ -G 'Ninja Multi-Config'
+emcmake cmake -S . -B build/ -G 'Ninja Multi-Config' -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE
 
 # run this to build/rebuild
 cd build
