@@ -7,8 +7,12 @@
 #include <range/v3/view/take.hpp>
 #include <range/v3/view/join.hpp>
 #include <range/v3/view/transform.hpp>
+#include <range/v3/algorithm/sort.hpp>
+#include <range/v3/algorithm/equal.hpp>
+#include <range/v3/algorithm/lexicographical_compare.hpp>
 
 #include <algorithm> // sort
+#include <iterator>  // next
 #include <numeric>   // iota
 #include <cassert>
 
@@ -83,10 +87,13 @@ namespace okiidoku::mono { namespace {
 				std::array<o1i_t, T::O1> resolve; // TODO.high where is this being used?
 				std::iota(resolve.begin(), resolve.end(), o1i_t{0});
 				for (const auto t : ortho.chute_ties) {
-					namespace v = ranges::views;
-					std::ranges::sort(resolve | v::drop(t.begin_) | v::take(t.size()), [&](auto a, auto b){
-						return std::ranges::lexicographical_compare(row_sp.subspan(a*T::O1,T::O1), row_sp.subspan(b*T::O1,T::O1));
-					});
+					ranges::sort(
+						std::next(resolve.begin(), t.begin_),
+						std::next(resolve.begin(), t.end_),
+						[&](auto a, auto b){
+							return ranges::lexicographical_compare(row_sp.subspan(a*T::O1,T::O1), row_sp.subspan(b*T::O1,T::O1));
+						}
+					);
 				}
 				std::array<val_t, T::O2> copy; // NOLINT(cppcoreguidelines-pro-type-member-init) see next line
 				std::copy(row_sp.begin(), row_sp.end(), copy.begin());
@@ -114,7 +121,7 @@ namespace okiidoku::mono { namespace {
 			std::sort(
 				std::next(to_tied.begin(), tie.begin_),
 				std::next(to_tied.begin(), tie.end_),
-				[&](auto a, auto b){ return std::ranges::lexicographical_compare(table.row_span_at(a), table.row_span_at(b)); }
+				[&](auto a, auto b){ return ranges::lexicographical_compare(table.row_span_at(a), table.row_span_at(b)); }
 			);
 		}
 		const auto chute_tie_data {[&](o2i_t chute) {
@@ -127,17 +134,17 @@ namespace okiidoku::mono { namespace {
 			std::sort(
 				std::next(to_tied.begin(), tie.begin_), // TODO.high THIS IS WRONG.
 				std::next(to_tied.begin(), tie.end_),
-				[&](auto a, auto b){ return std::ranges::lexicographical_compare(
+				[&](auto a, auto b){ return ranges::lexicographical_compare(
 					chute_tie_data(a), chute_tie_data(b)
 				); }
 			);
 		}
 
 		line_ties.update([&](auto a, auto b){
-			return std::ranges::equal(table.row_span_at(to_tied[a]), table.row_span_at(to_tied[b]));
+			return ranges::equal(table.row_span_at(to_tied[a]), table.row_span_at(to_tied[b]));
 		});
 		chute_ties.update([&](o1i_t a, o1i_t b){
-			return std::ranges::equal(chute_tie_data(a), chute_tie_data(b));
+			return ranges::equal(chute_tie_data(a), chute_tie_data(b));
 		});
 		// TODO.high tie data for lines in chute currently are not updated after updates to chute ordering...
 

@@ -18,7 +18,7 @@ namespace okiidoku::mono { namespace {
 		using T = Ints<O>;
 		using V = int_ts::o1i_t<O>;
 		using o3i_t = int_ts::o3i_t<O>;
-		[[nodiscard]] o3i_t count_num_missing_syms() const noexcept { return static_cast<o3i_t>(std::ranges::count(store_, V{0})); }
+		[[nodiscard]] o3i_t count_num_missing_syms() const noexcept { return static_cast<o3i_t>(std::count(store_.cbegin(), store_.cend(), V{0})); }
 		template<class T_house, class T_sym> requires(Any_o1x_t<O, T_house> && Any_o2x_t<O, T_sym>)
 		[[nodiscard]] const V& box_count_sym(const T_house box, const T_sym sym) const noexcept { return store_[(T::O1*sym)+box]; }
 		template<class T_house, class T_sym> requires(Any_o1x_t<O, T_house> && Any_o2x_t<O, T_sym>)
@@ -78,7 +78,7 @@ namespace okiidoku::mono { namespace {
 		using T = Ints<O>;
 		using V = int_ts::o2is_t<O>;
 		using o3i_t = int_ts::o3i_t<O>;
-		[[nodiscard]] o3i_t count_num_missing_syms() const noexcept { return static_cast<o3i_t>(std::ranges::count(store_, V{0})); }
+		[[nodiscard]] o3i_t count_num_missing_syms() const noexcept { return static_cast<o3i_t>(std::count(store_.cbegin(), store_.cend(), V{0})); }
 		template<class T_col, class T_sym> requires(Any_o1x_t<O, T_col> && Any_o2x_t<O, T_sym>)
 		[[nodiscard]] const V& col_count_sym(const T_col col, const T_sym sym) const noexcept { return store_[(T::O1*sym)+col]; }
 		template<class T_col, class T_sym> requires(Any_o1x_t<O, T_col> && Any_o2x_t<O, T_sym>)
@@ -151,7 +151,7 @@ namespace okiidoku::mono {
 			rng_.seed(static_cast<unsigned int>(shared_rng.rng()));
 			for (o2i_t row {0}; row < T::O2; ++row) {
 				const auto row_sp {grid.row_span_at(row)};
-				std::ranges::shuffle(row_sp, shared_rng.rng);
+				std::shuffle(row_sp.begin(), row_sp.end(), shared_rng.rng);
 			}
 			// TODO.try should the shuffle just use `rng_`? Note: A data-parallel implementation would be much better that way.
 		}

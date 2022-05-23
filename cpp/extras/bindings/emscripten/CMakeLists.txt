@@ -13,16 +13,21 @@ set(CMAKE_CXX_STANDARD 20 CACHE STRING "The C++ standard to use")
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_CXX_EXTENSIONS FALSE)
 
+if(NOT DEFINED okiidoku_SOURCE_DIR)
+	set(okiidoku_SOURCE_DIR "../../../")
+endif()
+
 # You will need conan to fetch private dependencies required to build the library.
-set(OKIIDOKU_CONAN_DEPENDENCIES range-v3/0.11.0)
-include(../../../cmake/ConanPrivateDependencies.cmake)
+# set(OKIIDOKU_CONAN_DEPENDENCIES range-v3/0.11.0)
+# include(../../../cmake/ConanPrivateDependencies.cmake)
 
+include(${okiidoku_SOURCE_DIR}/cmake/FetchContent.cmake)
 
-include(../../../cmake/AddBasicCompileOptions.cmake)
+include(${okiidoku_SOURCE_DIR}/cmake/BasicCompileOptions.cmake)
 
 if(okiidoku_IS_TOP_LEVEL)
-	include(../../../cmake/internal/StaticAnalyzers.cmake)
-	include(../../../cmake/internal/Sanitizers.cmake)
+	include(${okiidoku_SOURCE_DIR}/cmake/internal/StaticAnalyzers.cmake)
+	include(${okiidoku_SOURCE_DIR}/cmake/internal/Sanitizers.cmake)
 	include(CTest) # https://cliutils.gitlab.io/modern-cmake/chapters/testing.html
 endif()
 
@@ -33,11 +38,12 @@ set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 set(BUILD_SHARED_LIBS FALSE)
 
 # Note: can't use CMake imports since emcsripten needs to build it from scratch.
-add_subdirectory(../../../libs/okiidoku okiidoku)
+add_subdirectory(${okiidoku_SOURCE_DIR}/libs/okiidoku okiidoku)
 
 add_library(okiidoku_emscripten
-	okiidoku.cpp
+	okiidoku.embind.cpp
 )
 target_link_libraries(okiidoku_emscripten
+	PRIVATE okiidoku_compile_options_private
 	PUBLIC okiidoku
 )

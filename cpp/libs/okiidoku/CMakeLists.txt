@@ -44,7 +44,8 @@ install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include" "${CMAKE_CURRENT_BINARY_
 
 # find_package(Threads REQUIRED)
 target_link_libraries(okiidoku
-	PRIVATE CONAN_PKG::range-v3
+	PRIVATE okiidoku_compile_options_private
+	PRIVATE range-v3::range-v3
 	# PRIVATE Threads::Threads
 )
 

@@ -9,13 +9,8 @@ set(CMAKE_CXX_STANDARD 20 CACHE STRING "The C++ standard to use")
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_CXX_EXTENSIONS FALSE)
 
-# You will need conan to fetch private dependencies required to build the library.
-set(OKIIDOKU_CONAN_DEPENDENCIES range-v3/0.11.0)
-# Note: later, I may add CLI11 as a dependency for the cli
-include(cmake/ConanPrivateDependencies.cmake)
 
-
-include(cmake/AddBasicCompileOptions.cmake)
+include(cmake/BasicCompileOptions.cmake)
 
 if(okiidoku_IS_TOP_LEVEL)
 	include(cmake/internal/StaticAnalyzers.cmake)
@@ -23,7 +18,16 @@ if(okiidoku_IS_TOP_LEVEL)
 	include(CTest) # https://cliutils.gitlab.io/modern-cmake/chapters/testing.html
 endif()
 
-if(NOT MSVC)
+if(MSVC)
+	if(okiidoku_IS_TOP_LEVEL)
+		add_compile_options(/EHsc) # MSVC recommended setting
+		# https://docs.microsoft.com/en-us/cpp/build/reference/eh-exception-handling-model#standard-c-exception-handling
+		# exception handling set _globally_ and _only if building as top level project_
+		# because the exception handling model must be consistent for the whole program
+		# and the user should decide for themselves what they want to use. This project
+		# doesn't throw exceptions, so any model should be okay.
+	endif()
+else()
 	add_compile_options(
 		-fno-semantic-interposition # disable ELF external overrides for more optimization (on by default for LLVM)
 		-march=native # enable optimizing for the compiling machine's instruction set architecture.
@@ -50,6 +54,14 @@ include(GNUInstallDirs)
 include(cmake/SharedLibThings.cmake)
 
 
+# You will need conan to fetch private dependencies required to build the library.
+# set(OKIIDOKU_CONAN_DEPENDENCIES range-v3/0.11.0)
+# Note: later, I may add CLI11 as a dependency for the cli
+# include(cmake/ConanPrivateDependencies.cmake)
+
+include(cmake/FetchContent.cmake)
+
+
 add_subdirectory(libs/cli_utils)
 add_subdirectory(libs/okiidoku)
 
@@ -60,9 +72,6 @@ if(okiidoku_IS_TOP_LEVEL)
 endif()
 
 
-# Note: I'm not sure if enabling installation is even useful.
-# This library is pretty niche. Perhaps it would be better just to
-# export from the build tree. https://cmake.org/cmake/help/latest/guide/importing-exporting/index.html#exporting-targets-from-the-build-tree
 install(TARGETS
 	okiidoku okiidoku_cli
 	EXPORT okiidoku_installation_targets

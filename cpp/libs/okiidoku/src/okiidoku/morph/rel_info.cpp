@@ -108,8 +108,8 @@ namespace okiidoku::mono::detail {
 				h_chute_imbalance[chute] = static_cast<chute_imbalance_t>((chute_box_masks<O>::row[chute] & rel_at_mask).count());
 				v_chute_imbalance[chute] = static_cast<chute_imbalance_t>((chute_box_masks<O>::col[chute] & rel_at_mask).count());
 			}
-			std::ranges::sort(h_chute_imbalance, std::greater{});
-			std::ranges::sort(v_chute_imbalance, std::greater{});
+			std::sort(h_chute_imbalance.begin(), h_chute_imbalance.end(), std::greater{});
+			std::sort(v_chute_imbalance.begin(), v_chute_imbalance.end(), std::greater{});
 			rel.chute_imbalance_a = 0;
 			rel.chute_imbalance_b = 0;
 			for (o1i_t i {0}; i < T::O1; ++i) {

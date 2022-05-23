@@ -1,5 +1,7 @@
 #include <okiidoku/morph/scramble.hpp>
 
+#include <range/v3/algorithm/shuffle.hpp>
+
 #include <array>
 #include <algorithm> // shuffle
 #include <cassert>
@@ -12,12 +14,12 @@ namespace okiidoku::mono {
 		Transformation<O> t {};
 		{
 			std::lock_guard lock_guard_{shared_rng.mutex};
-			std::ranges::shuffle(t.label_map, shared_rng.rng);
-			std::ranges::shuffle(t.row_map, shared_rng.rng);
-			std::ranges::shuffle(t.col_map, shared_rng.rng);
+			ranges::shuffle(t.label_map, shared_rng.rng);
+			ranges::shuffle(t.row_map, shared_rng.rng);
+			ranges::shuffle(t.col_map, shared_rng.rng);
 			for (int_ts::o1i_t<O> chute {0}; chute < T::O1; ++chute) {
-				std::ranges::shuffle(t.row_map[chute], shared_rng.rng);
-				std::ranges::shuffle(t.col_map[chute], shared_rng.rng);
+				ranges::shuffle(t.row_map[chute], shared_rng.rng);
+				ranges::shuffle(t.col_map[chute], shared_rng.rng);
 			}
 			// t.post_transpose = static_cast<bool>(shared_rng_() % 2); // TODO
 		}

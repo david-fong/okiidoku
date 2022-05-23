@@ -1,5 +1,2 @@
-
-# Build
 /build/
-.profile/
-gmon.out
+/external/

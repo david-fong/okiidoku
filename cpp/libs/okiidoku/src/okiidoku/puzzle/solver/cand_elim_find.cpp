@@ -26,6 +26,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 		CandElimQueues<O>& found_queues
 	) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_PRELUDE
+		(void)cells_cands, (void)found_queues;
 		// TODO for each house of all house-types, check if any symbol only has one candidate-house-cell.
 		// how to use masks to optimize? have an accumulator candidate-symbol mask "<house-type>_seen_cand_syms" that starts as zeros.
 		// have a <house-type>_syms_with_multiple_cand_cells accumulator that also starts as zeros.

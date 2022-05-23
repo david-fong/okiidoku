@@ -25,8 +25,11 @@
 - Examine contents of exported symbols (`nm -nCD libs/okiidoku/.../libokiidoku.so | less`) and make sure nothing is exported that isn't intended to be.
 - Ensure conan dependencies that should be private to the library aren't exposed in any way to the library interface.
 - Run aggressive static analyzers
+- Check which `#ifdef __EMSCRIPTEN__` blocks can be removed as emscripten updates its sysroot libc++.
 
 ## Misc List
+
+- set HeaderFilterRegex in .clang-tidy to only analyze include paths starting with "okiidoku". (I think) use regex `^okiidoku`.
 
 - look into cppitertools for writing my raw loops. see if people say anything about performance overhead.
 

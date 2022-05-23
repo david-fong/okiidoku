@@ -139,7 +139,7 @@ namespace okiidoku::mono::detail::solver {
 
 	template<Order O> requires(is_order_compiled(O))
 	SolutionsRemain EngineObj<O>::process_first_queued_cand_elims() noexcept {
-		// (... , found_queues_); // TODO.asap
+		return SolutionsRemain::yes(); // (... , found_queues_); // TODO.asap
 	}
 
 

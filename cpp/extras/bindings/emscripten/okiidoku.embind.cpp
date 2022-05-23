@@ -2,6 +2,7 @@
 // https://emscripten.org/docs/api_reference/bind.h.html
 #include <emscripten/bind.h>
 #include <emscripten/emscripten.h>
+#include <emscripten/val.h>
 static_assert(__EMSCRIPTEN__);
 // I think I need to put all these in a same file since EMSCRIPTEN_BINDINGS
 // uses static constructor functions and I'm assuming I can't define multiple
@@ -25,8 +26,8 @@ EMSCRIPTEN_BINDINGS(okiidoku) {
 	namespace oki = okiidoku;
 
 	em::class_<oki::visitor::Grid>("Grid")
-		.constructor<>()
-		.function("getMonoOrder", &oki::visitor::Grid::get_mono_order) // TODO do I need to define the base class to do this? https://emscripten.org/docs/porting/connecting_cpp_and_javascript/embind.html#base-classes
+		.constructor<oki::Order>()
+		// .function("getMonoOrder", &oki::visitor::Grid::get_mono_order) // TODO do I need to define the base class to do this? https://emscripten.org/docs/porting/connecting_cpp_and_javascript/embind.html#base-classes
 		// .function("atRmi", &oki::visitor::Grid::at_rmi)
 		// .function("at", &oki::visitor::Grid::at)
 		;

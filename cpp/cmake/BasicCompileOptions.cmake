@@ -3,15 +3,18 @@
 # and isn't less strict on itself than a very strict user's compiler
 # options might be on it.
 
+# add_library(okiidoku_compile_options_public  INTERFACE)
+add_library(okiidoku_compile_options_private INTERFACE)
+
 # source file and compiler option parsing rules:
 if(MSVC)
-	add_compile_options(
+	target_compile_options(okiidoku_compile_options_private INTERFACE
 		/options:strict # unrecognized compiler options are errors
 		/utf-8        # /source-charset:utf-8 (for preprocessor), and /execution-charset:utf8 (for compiler)
 		/wd5030       # warning disable: "unrecognized attribute". (unfortunately needed or else MSVC warns for gnu-prefixed attributes)
 	)
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-	add_compile_options(
+	target_compile_options(okiidoku_compile_options_private INTERFACE
 		# -Wbidi-chars=any # warn on any usage of bidi text
 		-Wnormalized # warn on identifiers that look the same but are not the same
 	)
@@ -19,25 +22,26 @@ endif()
 
 
 # diagnostics formatting:
-if(MSVC)
-	add_compile_options(
-		/diagnostics:caret
-	)
-else()
-	add_compile_options(
-	)
+if(okiidoku_IS_TOP_LEVEL)
+	if(MSVC)
+		target_compile_options(okiidoku_compile_options_private INTERFACE
+			/diagnostics:caret
+		)
+	else()
+		target_compile_options(okiidoku_compile_options_private INTERFACE
+		)
+	endif()
 endif()
 
 
 # standards compliance and abi:
 if(MSVC)
-	add_compile_options(
+	target_compile_options(okiidoku_compile_options_private INTERFACE
 		/permissive-  # https://discourse.cmake.org/t/cxx-extensions-and-permissive/1994
-		/EHsc         # https://docs.microsoft.com/en-us/cpp/build/reference/eh-exception-handling-model#standard-c-exception-handling
 		/volatile:iso # https://docs.microsoft.com/en-us/cpp/build/reference/volatile-volatile-keyword-interpretation#remarks
 	)
 else()
-	add_compile_options(
+	target_compile_options(okiidoku_compile_options_private INTERFACE
 		# -Wabi
 	)
 endif()
@@ -45,19 +49,20 @@ endif()
 
 # warnings:
 if(MSVC)
-	add_compile_options(
+	target_compile_options(okiidoku_compile_options_private INTERFACE
 		/W4 #/WX      # highest warning level #and treat warnings as errors.
 	)
 else()
-	add_compile_options(
+	target_compile_options(okiidoku_compile_options_private INTERFACE
 		-Wall -Wextra -Wpedantic -pedantic-errors #-Werror
 		-Wfatal-errors # stop compilation on first error. I found it hard to read multiple.
-		-Wold-style-cast -Wvla # maybe put this in the project-root cmake file
+		-Wold-style-cast
+		-Wvla # maybe put this in the project-root cmake file
 		-Wconversion # -Wsign-conversion -Warith-conversion
 		-Wdouble-promotion
 		# -Wframe-larger-than=byte-size -Wstack-usage=byte-size
 
-		-Wdisabled-optimization # not an error: functions too big. gcc gave up on optimizing.
+		-Wdisabled-optimization # not an error. notification that function is too big. gcc gave up on optimizing.
 
 		-Wformat=2
 		-Wcast-qual -Wcast-align
@@ -70,11 +75,11 @@ else()
 		-Wundef # warn on undefined identifier used in `#if`
 	)
 	if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR EMSCRIPTEN)
-		add_compile_options(
+		target_compile_options(okiidoku_compile_options_private INTERFACE
 			-Wimplicit-fallthrough
 		)
 	elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-		add_compile_options(
+		target_compile_options(okiidoku_compile_options_private INTERFACE
 			-Wuseless-cast
 			-Wimplicit-fallthrough=5
 			-Walloc-zero

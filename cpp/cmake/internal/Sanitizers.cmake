@@ -1,3 +1,6 @@
+# TODO.low iirc jason turner recommends also enabling for release builds
+#  _when doing test_ (not for actual release) https://youtu.be/4pKtPWcl1Go?t=12m49s
+
 if(MSVC)
 	# add_compile_options("$<$<CONFIG:Debug>:/RTC>")
 	# /RTC is incompatible with asan.

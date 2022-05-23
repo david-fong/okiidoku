@@ -15,6 +15,7 @@
 	// If you don't have a build system with multi-config, you may want to append "/${buildType}" to the below.
 	// TODO.try will the ${buildKitVendor} part have conflicts with MSVC for mingw-64 or cygwin?
 	"cmake.buildDirectory": "${workspaceFolder}/build/${buildKitVendor}",
+	"cmake.configureOnEdit": false,
 
 	"files.exclude": {
 		"build/": true,

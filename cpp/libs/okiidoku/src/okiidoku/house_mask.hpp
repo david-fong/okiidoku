@@ -4,7 +4,7 @@
 #include <okiidoku/ints.hpp>
 #include <okiidoku/detail/order_templates.hpp>
 
-#include <numeric> // accumulate
+#include <numeric>   // accumulate
 #include <array>
 #include <bit>
 #include <compare>
@@ -143,8 +143,15 @@ namespace okiidoku::mono {
 		// Defines a strong ordering between masks. Its semantics are unspecified.
 		// It is intended to be time-performant. Can be used to partition by masks
 		// where the relationship between partitions doesn't matter.
-		static std::strong_ordering unspecified_strong_cmp(const HouseMask& a, const HouseMask& b) noexcept {
+		[[nodiscard, gnu::pure]] static std::strong_ordering unspecified_strong_cmp(const HouseMask& a, const HouseMask& b) noexcept {
+			#ifdef __EMSCRIPTEN__
+			for (std::size_t i {0}; i < num_ints; ++i) {
+				if (const auto cmp {a.ints_[i] <=> b.ints_[i]}; std::is_neq(cmp)) [[likely]] { return cmp; }
+			}
+			return std::strong_ordering::equivalent;
+			#else
 			return a.ints_ <=> b.ints_;
+			#endif
 		}
 	};
 	#define OKIIDOKU_FOR_COMPILED_O(O_) \

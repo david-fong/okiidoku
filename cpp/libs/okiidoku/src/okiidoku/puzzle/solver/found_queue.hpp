@@ -12,7 +12,7 @@ namespace okiidoku::mono::detail::solver {
 	struct CandElimQueues final {
 	private:
 		template<class T>
-		using queue_t = std::deque<T, /* <backing container option> */>;
+		using queue_t = std::deque<T/*, <backing container option>*/>;
 
 		std::tuple<
 			// TODO.asap the cell-requires-symbol queue should be separately, internally maintained by the engine.
