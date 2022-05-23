@@ -44,6 +44,7 @@ target_link_libraries(okiidoku_emscripten
 # https://cmake.org/cmake/help/latest/command/add_custom_command.html#build-events
 # TODO see if the output directory is consistent with MSVC and Ninja. Otherwise find a way to make it consistent
 add_custom_command(TARGET okiidoku_emscripten POST_BUILD
+	COMMENT "linking okiidoku to produce wasm and js gluecode"
 	COMMAND emcc -lembind -o "okiidoku.js" # TODO currently outputs to root of binary dir. build types will overwrite each other. please nest according to build type/config.
 		-Wl,--whole-archive
 		$<TARGET_FILE:okiidoku>

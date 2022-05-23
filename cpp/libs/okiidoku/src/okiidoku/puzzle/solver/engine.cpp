@@ -121,7 +121,7 @@ namespace okiidoku::mono::detail::solver {
 	void EngineObj<O>::enqueue_cand_elims_for_new_cell_claim_sym_(
 		const EngineObj<O>::rmi_t rmi
 	) noexcept {
-		assert(num_puzzle_cells_remaining_ > 0);
+		assert(get_num_puzzle_cells_remaining() > 0);
 		auto& cell_cands {cells_cands_.at_rmi(rmi)};
 		assert(cell_cands.count() == 1);
 		found_queues_.emplace(found::CellClaimSym<O>{
