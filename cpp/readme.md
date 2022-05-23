@@ -7,7 +7,6 @@
   - CMake 3.21
   - a C++ compiler [supporting C++20](https://en.cppreference.com/w/cpp/compiler_support). I have tested on GCC 11, Visual Studio 17, and Clang 14. I have no interest in supporting other compilers (ex. apple-clang)
   - a build system (ex. Ninja, Visual Studio)
-  - [conan](https://conan.io/downloads.html)
 
 Refer to the [CMake guide](https://cmake.org/cmake/help/latest/guide/importing-exporting/index.html).
 

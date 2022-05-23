@@ -23,7 +23,7 @@
 ## Periodic Checkups
 
 - Examine contents of exported symbols (`nm -nCD libs/okiidoku/.../libokiidoku.so | less`) and make sure nothing is exported that isn't intended to be.
-- Ensure conan dependencies that should be private to the library aren't exposed in any way to the library interface.
+- Ensure dependencies that should be private to the library implementation aren't exposed in any way to the library interface.
 - Run aggressive static analyzers
 - Check which `#ifdef __EMSCRIPTEN__` blocks can be removed as emscripten updates its sysroot libc++.
 

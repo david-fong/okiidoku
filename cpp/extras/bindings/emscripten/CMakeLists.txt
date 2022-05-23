@@ -13,13 +13,7 @@ set(CMAKE_CXX_STANDARD 20 CACHE STRING "The C++ standard to use")
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_CXX_EXTENSIONS FALSE)
 
-if(NOT DEFINED okiidoku_SOURCE_DIR)
-	set(okiidoku_SOURCE_DIR "../../../")
-endif()
-
-# You will need conan to fetch private dependencies required to build the library.
-# set(OKIIDOKU_CONAN_DEPENDENCIES range-v3/0.11.0)
-# include(../../../cmake/ConanPrivateDependencies.cmake)
+set(okiidoku_SOURCE_DIR "${PROJECT_SOURCE_DIR}/../../../")
 
 include(${okiidoku_SOURCE_DIR}/cmake/FetchContent.cmake)
 
@@ -33,17 +27,14 @@ endif()
 
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 
-# dynamic libs have runtime overhead
-# https://emscripten.org/docs/compiling/Dynamic-Linking.html
-set(BUILD_SHARED_LIBS FALSE)
+
+set(BUILD_SHARED_LIBS FALSE) # https://emscripten.org/docs/compiling/Dynamic-Linking.html
 
 # Note: can't use CMake imports since emcsripten needs to build it from scratch.
 add_subdirectory(${okiidoku_SOURCE_DIR}/libs/okiidoku okiidoku)
 
-add_library(okiidoku_emscripten
-	okiidoku.embind.cpp
-)
+add_library(okiidoku_emscripten okiidoku.embind.cpp)
 target_link_libraries(okiidoku_emscripten
 	PRIVATE okiidoku_compile_options_private
-	PUBLIC okiidoku
+	PRIVATE okiidoku
 )

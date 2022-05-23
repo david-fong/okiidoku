@@ -37,7 +37,7 @@ target_include_directories(okiidoku PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_BI
 target_include_directories(okiidoku PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>")
 target_include_directories(okiidoku PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
 
-install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include" "${CMAKE_CURRENT_BINARY_DIR}/include"
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/okiidoku" "${CMAKE_CURRENT_BINARY_DIR}/include/okiidoku"
 	TYPE INCLUDE
 	COMPONENT okiidoku_development
 )

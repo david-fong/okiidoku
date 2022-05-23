@@ -54,13 +54,7 @@ include(GNUInstallDirs)
 include(cmake/SharedLibThings.cmake)
 
 
-# You will need conan to fetch private dependencies required to build the library.
-# set(OKIIDOKU_CONAN_DEPENDENCIES range-v3/0.11.0)
-# Note: later, I may add CLI11 as a dependency for the cli
-# include(cmake/ConanPrivateDependencies.cmake)
-
 include(cmake/FetchContent.cmake)
-
 
 add_subdirectory(libs/cli_utils)
 add_subdirectory(libs/okiidoku)

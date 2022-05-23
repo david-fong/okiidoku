@@ -18,6 +18,7 @@
 	"cmake.configureOnEdit": false,
 
 	"files.exclude": {
+		"external/": true,
 		"build/": true,
 	},
 

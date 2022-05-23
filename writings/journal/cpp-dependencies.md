@@ -36,6 +36,8 @@ Some people advocate for "cmake-non-intrusive" package-manager usage. Ie. keepin
 - The hack isn't pretty and it's not very scalable. I mean- I only have one dependency so I don't need to scale, but how do people navigate all these problems? (the answer is probably package managers).
 - So should I try vcpkg?
 - I feel so utterly done with running into walls like this. Did I bring this upon myself? I guess yeah since I'm being really picky.
+- Cherry on top: if using FetchContent_MakeAvailable with range-v3, range v3 install targets get installed with my own install targets (which I don't want and I thought shouldn't be done according to a vague memory I have of reading something like that in the CMake docs. I have no idea what's going on).
+  - [the GitHub issue that made be realize this](https://github.com/ericniebler/range-v3/issues/1689)
 
 - There are a couple of things range-v3 could do that would help me (of course- I'm not entitled to its help for my specific use case. I know that. I'm just doing some thinking):
   - Use really strict compile compiler warning options on itself such as disallowing c-style casts.
@@ -46,3 +48,4 @@ Some people advocate for "cmake-non-intrusive" package-manager usage. Ie. keepin
 
 - There's also the fact that FetchContent isn't super easy to share between multiple projects. You can set SOURCE_DIR to be a common directory, such as an `external` directory, but somewhat disappointingly, if you remove the build directory and reconfigure, CMake will try to clone again even though the clone is still there in the `external` directory untouched/unchanged.
   - [link to CMake discourse thread](https://discourse.cmake.org/t/share-fetchcontent-between-projects/4537/2)
+  - As a workaround, I've just set `FETCHCONTENT_UPDATES_DISCONNECTED` specifically for range-v3 so that it doesn't check for updates. it only does any networking (to clone) if the clone isn't there yet.
