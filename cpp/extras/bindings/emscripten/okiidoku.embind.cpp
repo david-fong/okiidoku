@@ -9,9 +9,15 @@ static_assert(__EMSCRIPTEN__);
 // with the same name.
 
 #include <okiidoku/grid.hpp>
+#include <okiidoku/shared_rng.hpp>
 
 // TODO.low learn what value types are and see if useful. https://emscripten.org/docs/porting/connecting_cpp_and_javascript/embind.html#value-types
 
+namespace okiidoku {
+	void seed_shared_rng(SharedRng& shared_rng, const unsigned long long seed) noexcept {
+		shared_rng.rng.seed(seed);
+	}
+}
 namespace okiidoku::mono {
 	;
 }
@@ -24,13 +30,23 @@ namespace okiidoku::visitor {
 EMSCRIPTEN_BINDINGS(okiidoku) {
 	namespace em = emscripten;
 	namespace oki = okiidoku;
+	namespace oki_m = okiidoku::mono;
+	namespace oki_v = okiidoku::visitor;
 
-	em::class_<oki::visitor::Grid>("Grid")
+	// em::constant("sharedRng", oki::shared_rng);
+	// TODO.wait currently noexcept functions can't be bound to classes (unintentionally) https://github.com/emscripten-core/emscripten/pull/15273
+	em::class_<oki::SharedRng>("SharedRng")
+		// .function("seed", &oki::seed_shared_rng)
+		;
+
+	em::class_<oki_v::Grid>("Grid")
 		.constructor<oki::Order>()
 		// .function("getMonoOrder", &oki::visitor::Grid::get_mono_order) // TODO do I need to define the base class to do this? https://emscripten.org/docs/porting/connecting_cpp_and_javascript/embind.html#base-classes
 		// .function("atRmi", &oki::visitor::Grid::at_rmi)
 		// .function("at", &oki::visitor::Grid::at)
+		// .function("followsRule", &oki_v::grid_follows_rule)
+		// .function("isFilled",    &oki_v::grid_is_filled)
 		;
-	em::function("gridFollowsRule", &oki::visitor::grid_follows_rule);
-	em::function("gridIsFilled", &oki::visitor::grid_is_filled);
+	em::function("gridFollowsRule", &oki_v::grid_follows_rule);
+	em::function("gridIsFilled",    &oki_v::grid_is_filled);
 }

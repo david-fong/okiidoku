@@ -33,21 +33,27 @@ set(BUILD_SHARED_LIBS FALSE) # https://emscripten.org/docs/compiling/Dynamic-Lin
 # Note: can't use CMake imports since emcsripten needs to build it from scratch.
 add_subdirectory(${okiidoku_SOURCE_DIR}/libs/okiidoku okiidoku)
 
-add_library(okiidoku_emscripten okiidoku.embind.cpp)
-target_link_libraries(okiidoku_emscripten
+# add_library(okiidoku_js okiidoku.embind.cpp)
+# target_link_libraries(okiidoku_js
+# 	PRIVATE okiidoku_compile_options_private
+# 	PRIVATE okiidoku
+# )
+add_executable(okiidoku_js okiidoku.embind.cpp)
+target_link_libraries(okiidoku_js
 	PRIVATE okiidoku_compile_options_private
 	PRIVATE okiidoku
+	PRIVATE embind
 )
 
 # https://emscripten.org/docs/compiling/Building-Projects.html#using-libraries
 # https://emscripten.org/docs/porting/connecting_cpp_and_javascript/embind.html#binding-libraries
 # https://cmake.org/cmake/help/latest/command/add_custom_command.html#build-events
-add_custom_command(TARGET okiidoku_emscripten POST_BUILD
-	COMMENT "linking okiidoku to produce wasm and js gluecode"
-	COMMAND emcc -lembind -o "okiidoku.js" # TODO currently outputs to root of binary dir. build types will overwrite each other. please nest according to build type/config. Make sure consistent between generators (MSVC, Ninja, etc.)
-		-Wl,--whole-archive
-		$<TARGET_FILE:okiidoku> # Note: this line is needed.
-		$<TARGET_FILE:okiidoku_emscripten>
-		-Wl,--no-whole-archive
-	VERBATIM
-)
+# add_custom_command(TARGET okiidoku_js POST_BUILD
+# 	COMMENT "linking okiidoku to produce wasm and js gluecode"
+# 	COMMAND emcc -lembind -o "okiidoku.js" # TODO currently outputs to root of binary dir. build types will overwrite each other. please nest according to build type/config. Make sure consistent between generators (MSVC, Ninja, etc.)
+# 		$<TARGET_FILE:okiidoku> # Note: this line is needed.
+# 		-Wl,--whole-archive
+# 		$<TARGET_FILE:okiidoku_js>
+# 		-Wl,--no-whole-archive
+# 	VERBATIM
+# )
