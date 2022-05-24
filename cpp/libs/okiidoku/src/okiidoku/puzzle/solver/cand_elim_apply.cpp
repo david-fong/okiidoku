@@ -6,7 +6,7 @@ namespace okiidoku::mono::detail::solver {
 
 	template<Order O> requires(is_order_compiled(O))
 	SolutionsRemain CandElimApply<O>::apply(
-		EngineObj<O>& engine,
+		Engine<O>& engine,
 		const found::CellClaimSym<O>& desc // TODO consider/try passing by value
 	) noexcept {
 		// repetitive code. #undef-ed before end of function.
@@ -41,10 +41,10 @@ namespace okiidoku::mono::detail::solver {
 
 	template<Order O> requires(is_order_compiled(O))
 	SolutionsRemain CandElimApply<O>::apply(
-		EngineObj<O>& engine,
+		Engine<O>& engine,
 		const found::SymClaimCell<O>& desc
 	) noexcept {
-		auto& cell_cands {engine.cells_cands_.at_rmi(desc.rmi)};
+		auto& cell_cands {engine.cells_cands().at_rmi(desc.rmi)};
 		assert(cell_cands.test(desc.val));
 		if (cell_cands.count() > 1) {
 			engine.register_new_given_(desc.rmi, desc.val);
@@ -55,7 +55,7 @@ namespace okiidoku::mono::detail::solver {
 
 	template<Order O> requires(is_order_compiled(O))
 	SolutionsRemain CandElimApply<O>::apply(
-		EngineObj<O>& engine,
+		Engine<O>& engine,
 		const found::CellsClaimSyms<O>& desc
 	) noexcept {
 		for (o2i_t house_cell {0}; house_cell < T::O2; ++house_cell) {
@@ -73,7 +73,7 @@ namespace okiidoku::mono::detail::solver {
 
 	template<Order O> requires(is_order_compiled(O))
 	SolutionsRemain CandElimApply<O>::apply(
-		EngineObj<O>& engine,
+		Engine<O>& engine,
 		const found::SymsClaimCells<O>& desc
 	) noexcept {
 		// TODO.wait HouseMask<O>::set_bits_iter <- create and use instead.

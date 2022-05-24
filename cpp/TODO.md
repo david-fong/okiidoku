@@ -46,6 +46,9 @@
 - try DLL's again? read the docs actually.
   - [general rules and limitations](https://docs.microsoft.com/en-us/cpp/cpp/general-rules-and-limitations)
 
+- profile guided optimization
+  - [msvc](https://docs.microsoft.com/en-us/cpp/build/profile-guided-optimizations)
+
 - try writing custom GDB python pretty-printer for `HouseMask`?
   - [how to write a gdb pretty-printer](https://sourceware.org/gdb/onlinedocs/gdb/Writing-a-Pretty_002dPrinter.html#Writing-a-Pretty_002dPrinter)
   - also look into [visual studio `.natvis` files](https://docs.microsoft.com/en-us/visualstudio/debugger/create-custom-views-of-native-objects)

@@ -30,7 +30,7 @@ Symbol-major does have an advantage in terms of spatial-locality of operation wh
 
 At this moment, I have no idea which one is actually better in practice. The above is just analysis.
 
-### Making Guesses while Before Reaping Found Deductions
+### Making Guesses while Before Applying Found Deductions
 
 My solver engine has a contract that guesses must not be made while the candidate elimination queue is not empty.
 
@@ -49,3 +49,5 @@ But what if it's a guideline and not a contract? How do you maintain correctness
 1. Add a field to deduction queue entries that contains the size of the guess stack at the time it was enqueued (a "foundation-guess" value). When unwinding a guess entry, only those queued deductions that have a foundation-guess equal to the guess being unwound should be removed. Still pretty simple, right? And it even sounds _cool_ because it handles this weird case that people might not have thought of! Here's what's not to like about it: we established that that weird case is wasteful. The engine is designed as a lower-level primitive to build two actual-user-facing-solvers with very different goals but which have no intention to use the engine in any way that is obviously wasteful. Why should the engine pessimize its memory-consumption and speed as seen by its intended use-cases for a use-case that is inexcusably illogical and wasteful? Nay. Death be to this proposed solution and dishonour on its cow.
 
 1. Do the same thing as if it was a contract: when unwinding a guess, clear the deduction queue. It would remove queued deductions that the wasteful user didn't use before making a guess. Fine. Let it be on their heads. Play stupid games, win stupid prizes.
+
+In the end, I actually decided to make this a contract instead of a guideline. Rationale: There's never a good reason for an engine user to ever break the guideline. It really does end up simplifying the engine implementation: the engine has queues for found candidate eliminations. The CellClaimSym queue is special due to the cell-major representation. I chose to make the finding of its entries "passive" (done automatically during the process of applying any kind of found candidate elimination). If I want to keep it completely passive with _no_ finder function _and_ allow guesses while its queue is not empty, then I can't automatically clear it upon unwinding since it will never regenerate the lost entries. I've already explained why I don't like the first two solutions (which is why I don't want to implement them).

@@ -11,7 +11,7 @@ namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
 	FastSolver<O>::FastSolver(const Grid<O>& puzzle) noexcept:
-		engine_{std::make_unique<detail::solver::EngineObj<O>>(puzzle)} {}
+		engine_{std::make_unique<detail::solver::Engine<O>>(puzzle)} {}
 
 	// Note: with pimpl, can't default in header since the impl class is not a
 	// complete type in the header (it is forward declared there). Defaulting
@@ -29,11 +29,11 @@ namespace okiidoku::mono {
 		if (e.no_solutions_remain()) [[unlikely]] {
 			return std::nullopt;
 		}
-		while (e.get_num_puzzle_cells_remaining() > 0) [[likely]] {
+		while (e.get_num_puzcells_remaining() > 0) [[likely]] {
 			{const auto check {e.process_all_queued_cand_elims()};
 				assert(!e.has_queued_cand_elims());
 				if (check.no_solutions_remain()) [[unlikely]] { return std::nullopt; }
-				if (e.get_num_puzzle_cells_remaining() == 0) [[unlikely]] { break; }
+				if (e.get_num_puzcells_remaining() == 0) [[unlikely]] { break; }
 			}
 
 			using Find = detail::solver::CandElimFind<O>;
@@ -56,10 +56,16 @@ namespace okiidoku::mono {
 		if (e.no_solutions_remain()) [[unlikely]] {
 			return std::nullopt;
 		}
-		while (e.get_num_puzzle_cells_remaining() > 0) [[likely]] {
+		while (e.get_num_puzcells_remaining() > 0) [[likely]] {
 			using Find = detail::solver::CandElimFind<O>;
-			Find::sym_claim_cell(e);
-			// Find::locked_cands(e);
+			const auto old_guess_stack_depth {e.get_guess_stack_depth()};
+			const auto did_unwind {[&]{
+				const auto new_depth {e.get_guess_stack_depth()};
+				assert(new_depth <= old_guess_stack_depth);
+				return new_depth < old_guess_stack_depth;
+			}};
+			Find::sym_claim_cell(e); if (did_unwind()) [[unlikely]] { continue; }
+			// Find::locked_cands(e); if (did_unwind()) [[unlikely]] { continue; }
 			// TODO call other techniques
 
 			if (e.has_queued_cand_elims()) {
@@ -68,7 +74,7 @@ namespace okiidoku::mono {
 				//  How to implement? seems to imply a degree of "BFS".
 				{const auto check {e.process_first_queued_cand_elims()};
 					if (check.no_solutions_remain()) [[unlikely]] { return std::nullopt; }
-					if (e.get_num_puzzle_cells_remaining() == 0) [[unlikely]] { break; }
+					if (e.get_num_puzcells_remaining() == 0) [[unlikely]] { break; }
 				}
 			} else {
 				e.push_guess(Find::good_guess_candidate(e));

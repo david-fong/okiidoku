@@ -13,7 +13,7 @@
 namespace okiidoku::mono::detail::solver {
 
 	template<Order O> requires(is_order_compiled(O))
-	class EngineObj /* final */;
+	class Engine /* final */;
 
 	// template<Order O> requires(is_order_compiled(O))
 	// class DynamicBuilder /* final */;
@@ -40,7 +40,7 @@ namespace okiidoku::mono {
 		FastSolver& operator=(FastSolver&&) = default;
 
 	private:
-		using engine_t = detail::solver::EngineObj<O>;
+		using engine_t = detail::solver::Engine<O>;
 		#if __has_include(<experimental/propagate_const>)
 		std::experimental::propagate_const<std::unique_ptr<engine_t>> engine_;
 		#else // fallback for MSVC
@@ -68,7 +68,7 @@ namespace okiidoku::mono {
 		VeryDeductiveSolver& operator=(VeryDeductiveSolver&&) = default;
 
 	private:
-		using engine_t = detail::solver::EngineObj<O>;
+		using engine_t = detail::solver::Engine<O>;
 		#if __has_include(<experimental/propagate_const>)
 		std::experimental::propagate_const<std::unique_ptr<engine_t>> engine_;
 		#else // fallback for MSVC

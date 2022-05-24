@@ -19,24 +19,24 @@ namespace okiidoku::mono::detail::solver {
 	public:
 		// common contracts and invariants for all finders:
 		// contract: `no_solutions_remain` returns `false`.
-		// behaviour: immediately returns if `get_num_puzzle_cells_remaining` returns zero.
+		// behaviour: immediately returns if `get_num_puzcells_remaining` returns zero.
 
 		// TODO.high for finders that are not (relatively) trivial to perform a full scan of the grid,
 		//   provide a parameter enum `SearchEffort { find_first, find_all, };`
-		static void sym_claim_cell(EngineObj<O>&) noexcept;
+		static void sym_claim_cell(Engine<O>&) noexcept;
 
-		static void locked_cands(EngineObj<O>&) noexcept;
+		static void locked_cands(Engine<O>&) noexcept;
 
 		// AKA "naked subsets"
-		static void cells_claim_syms(EngineObj<O>&) noexcept;
+		static void cells_claim_syms(Engine<O>&) noexcept;
 
 		// AKA "hidden subsets"
-		static void syms_claim_cells(EngineObj<O>&) noexcept;
+		static void syms_claim_cells(Engine<O>&) noexcept;
 
-		// static void fish(EngineObj<O>&) noexcept;
+		// static void fish(Engine<O>&) noexcept;
 
 
-		static typename EngineObj<O>::Guess good_guess_candidate(const EngineObj<O>&) noexcept;
+		static Guess<O> good_guess_candidate(const Engine<O>&) noexcept;
 	};
 }
 #endif

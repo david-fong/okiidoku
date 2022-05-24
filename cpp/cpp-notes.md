@@ -41,7 +41,7 @@ things I got wrong before which I couldn't understand based on gcc's error messa
 
 - For defining global mutable variables (not constants!) shared between cpp files, declare prefixed with `extern` in a hpp files, and then define it in one of the cpp files. Functions always have external linkage. Note: but is there a good design argument for having that global mutable variable?
 
-- `inline` means a name can have multiple _identical_ definitions. For defining _and defining_ global constants in headers with a single memory address, prefix the definition with `inline`. Same for functions in headers. Update: for constants, if the type supports constexpr construction, use constexpr instead. For functions, if the function makes sense to make constexpr, use constexpr instead.
+- `inline` means a name can have multiple _identical_ definitions. For declaring _and defining_ global constants in headers with a single memory address, prefix the definition with `inline`. Same for functions in headers. Update: for constants, if the type supports constexpr construction, use constexpr instead. For functions, if the function makes sense to make constexpr, use constexpr instead.
 
 - Do not use `static` inside a member function to hold a lambda that captures `this`, since `this` is not always at the same address. Seems obvious in retrospect.
 

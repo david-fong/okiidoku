@@ -11,10 +11,10 @@ namespace okiidoku::mono::detail::solver { namespace {
 
 	// opening boilerplate. #undef-ed before end of namespace.
 	#define OKIIDOKU_CAND_ELIM_FINDER_PRELUDE \
-		using T = Ints<O>; \
+		using T [[maybe_unused]] = Ints<O>; \
 		using o2xs_t [[maybe_unused]] = int_ts::o2xs_t<O>; \
 		using o2x_t [[maybe_unused]] = int_ts::o2x_t<O>; \
-		using o2i_t = int_ts::o2i_t<O>; \
+		using o2i_t [[maybe_unused]] = int_ts::o2i_t<O>; \
 		using o3i_t [[maybe_unused]] = int_ts::o3i_t<O>; \
 		using rmi_t [[maybe_unused]] = int_ts::o4xs_t<O>; \
 		using o4i_t [[maybe_unused]] = int_ts::o4i_t<O>;
@@ -190,12 +190,11 @@ namespace okiidoku::mono::detail::solver { namespace {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	typename EngineObj<O>::Guess find_good_guess_candidate(
+	Guess<O> find_good_guess_candidate(
 		const CandsGrid<O>& cells_cands,
-		const int_ts::o4i_t<O> num_puzzle_cells_remaining
+		const int_ts::o4i_t<O> num_puzcells_remaining
 	) noexcept{
 		OKIIDOKU_CAND_ELIM_FINDER_PRELUDE
-		using guess_t = typename EngineObj<O>::Guess;
 		// some guiding intuition:
 		// choose a guess which is likely to cascade into the most candidate
 		// elimination deductions before the next required guess point. choose
@@ -205,7 +204,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 		// start by finding cells with the fewest number of candidate-symbols.
 		// Note: no combinations of std algorithms seems specialized enough for what I want.
 		std::vector<rmi_t> cell_tags; {
-			const o2i_t best_count {(num_puzzle_cells_remaining == T::O4) ? T::O2 : static_cast<o2i_t>(T::O2-1U)};
+			const o2i_t best_count {(num_puzcells_remaining == T::O4) ? T::O2 : static_cast<o2i_t>(T::O2-1U)};
 			for (o4i_t rmi {1}; rmi < T::O4; ++rmi) {
 				const auto& cell_cands {cells_cands.at_rmi(rmi)};
 				const auto cmp {cell_cands.count() <=> best_count};
@@ -218,7 +217,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 			}
 		}
 		assert(cell_tags.empty());
-		return guess_t{
+		return Guess<O>{
 			.rmi{cell_tags[0]},
 			.val{cells_cands.at_rmi(cell_tags[0]).count_lower_zeros_assuming_non_empty_mask()}
 		};
@@ -247,7 +246,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 		// 		std::ranges::sort(house_cand_counts);
 		// 	}
 		// }
-		// return guess_t{.rmi{rmi}, .val{val}};
+		// return Guess<O>{.rmi{rmi}, .val{val}};
 	}
 
 
@@ -260,37 +259,37 @@ namespace okiidoku::mono::detail::solver {
 	// opening boilerplate. #undef-ed before end of namespace.
 	#define OKIIDOKU_CAND_ELIM_FINDER_PRELUDE \
 		assert(!engine.no_solutions_remain()); \
-		if (engine.get_num_puzzle_cells_remaining() == 0) [[unlikely]] { return; }
+		if (engine.get_num_puzcells_remaining() == 0) [[unlikely]] { return; }
 
 
 	template<Order O> requires(is_order_compiled(O))
-	void CandElimFind<O>::sym_claim_cell(EngineObj<O>& engine) noexcept {
+	void CandElimFind<O>::sym_claim_cell(Engine<O>& engine) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_PRELUDE
-		return find_sym_claim_cell(engine.cells_cands_, engine.found_queues_);
+		return find_sym_claim_cell(engine.cells_cands(), engine.found_queues());
 	}
 
 	template<Order O> requires(is_order_compiled(O))
-	void CandElimFind<O>::cells_claim_syms(EngineObj<O>& engine) noexcept {
+	void CandElimFind<O>::cells_claim_syms(Engine<O>& engine) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_PRELUDE
-		return find_cells_claim_syms(engine.cells_cands_, engine.found_queues_);
+		return find_cells_claim_syms(engine.cells_cands(), engine.found_queues());
 	}
 
 	template<Order O> requires(is_order_compiled(O))
-	void CandElimFind<O>::syms_claim_cells(EngineObj<O>& engine) noexcept {
+	void CandElimFind<O>::syms_claim_cells(Engine<O>& engine) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_PRELUDE
-		return find_syms_claim_cells(engine.cells_cands_, engine.found_queues_);
+		return find_syms_claim_cells(engine.cells_cands(), engine.found_queues());
 	}
 
 	// template<Order O> requires(is_order_compiled(O))
-	// void CandElimFind<O>::locked_cands(EngineObj<O>& engine) noexcept {
+	// void CandElimFind<O>::locked_cands(Engine<O>& engine) noexcept {
 	// 	OKIIDOKU_CAND_ELIM_FINDER_PRELUDE
-	// 	return find_locked_cands(engine.cells_cands_, engine.found_queues_);
+	// 	return find_locked_cands(engine.cells_cands(), engine.found_queues());
 	// }
 
 	template<Order O> requires(is_order_compiled(O))
-	typename EngineObj<O>::Guess CandElimFind<O>::good_guess_candidate(const EngineObj<O>& engine) noexcept {
+	Guess<O> CandElimFind<O>::good_guess_candidate(const Engine<O>& engine) noexcept {
 		assert(!engine.no_solutions_remain());
-		return find_good_guess_candidate<O>(engine.cells_cands_, engine.get_num_puzzle_cells_remaining());
+		return find_good_guess_candidate<O>(engine.cells_cands(), engine.get_num_puzcells_remaining());
 	}
 
 

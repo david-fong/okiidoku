@@ -14,19 +14,19 @@ namespace okiidoku::mono::detail::solver {
 		using rmi_t = int_ts::o4xs_t<O>;
 
 	public:
-		static SolutionsRemain apply(EngineObj<O>&, const found::CellClaimSym<O>&) noexcept;
+		static SolutionsRemain apply(Engine<O>&, const found::CellClaimSym<O>&) noexcept;
 
-		static SolutionsRemain apply(EngineObj<O>&, const found::SymClaimCell<O>&) noexcept;
+		static SolutionsRemain apply(Engine<O>&, const found::SymClaimCell<O>&) noexcept;
 
 		// AKA "naked subsets"
-		static SolutionsRemain apply(EngineObj<O>&, const found::CellsClaimSyms<O>&) noexcept;
+		static SolutionsRemain apply(Engine<O>&, const found::CellsClaimSyms<O>&) noexcept;
 
 		// AKA "hidden subsets"
-		static SolutionsRemain apply(EngineObj<O>&, const found::SymsClaimCells<O>&) noexcept;
+		static SolutionsRemain apply(Engine<O>&, const found::SymsClaimCells<O>&) noexcept;
 
-		static SolutionsRemain apply(EngineObj<O>&, const found::LockedCands<O>&) noexcept;
+		static SolutionsRemain apply(Engine<O>&, const found::LockedCands<O>&) noexcept;
 
-		// static SolutionsRemain apply(EngineObj<O>&, const found::&) noexcept;
+		// static SolutionsRemain apply(Engine<O>&, const found::&) noexcept;
 	};
 }
 #endif
