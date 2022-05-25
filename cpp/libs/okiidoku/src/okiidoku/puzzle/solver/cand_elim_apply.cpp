@@ -12,7 +12,7 @@ namespace okiidoku::mono::detail::solver {
 		// repetitive code. #undef-ed before end of function.
 		#define OKIIDOKU_TRY_ELIM_NB_CAND \
 			if (nb_rmi == desc.rmi) [[unlikely]] { continue; } \
-			const auto check {engine.cell_elim_cand_sym_(nb_rmi, desc.val)}; \
+			const auto check {engine.do_elim_remove_sym_(nb_rmi, desc.val)}; \
 			if (check.no_solutions_remain()) [[unlikely]] { return check; }
 
 		// TODO consider using the new house_cell_to_rmi function and house_types array.
@@ -62,7 +62,7 @@ namespace okiidoku::mono::detail::solver {
 			// TODO likelihood attribute. hypothesis: desc.house_cells.count() is small. please empirically test.
 			if (desc.house_cells.test(static_cast<o2x_t>(house_cell))) [[unlikely]] { continue; }
 			const auto rmi {house_cell_to_rmi<O>(desc.house_type, desc.house, house_cell)};
-			const auto check {engine.cell_elim_cand_syms_(static_cast<rmi_t>(rmi), desc.syms)};
+			const auto check {engine.do_elim_remove_syms_(static_cast<rmi_t>(rmi), desc.syms)};
 			if (check.no_solutions_remain()) [[unlikely]] {
 				return check;
 			}
@@ -81,7 +81,7 @@ namespace okiidoku::mono::detail::solver {
 			// TODO likelihood attribute. hypothesis: desc.house_cells.count() is small. please empirically test.
 			if (desc.house_cells.test(static_cast<o2x_t>(house_cell))) [[unlikely]] {
 				const auto rmi {house_cell_to_rmi<O>(desc.house_type, desc.house, house_cell)};
-				const auto check {engine.cell_elim_cand_syms_(static_cast<rmi_t>(rmi), desc.syms)};
+				const auto check {engine.do_elim_remove_syms_(static_cast<rmi_t>(rmi), desc.syms)};
 				if (check.no_solutions_remain()) [[unlikely]] {
 					return check;
 				}

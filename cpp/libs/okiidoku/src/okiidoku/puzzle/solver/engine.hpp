@@ -7,6 +7,7 @@
 
 #include <stack>
 #include <memory> // unique_ptr
+#include <type_traits>
 
 /**
 This class is a primitive for building a primarily-deductive solver.
@@ -84,12 +85,12 @@ namespace okiidoku::mono::detail::solver {
 	};
 
 
-	// Defines all lower-level operations on engine internals. Engine wraps
+	// Defines all lower-level operations on engine internals. `Engine` wraps
 	// it to enforce appropriate access control to the engine user and to the
 	// candidate elimination find and apply operations.
 	template<Order O> requires(is_order_compiled(O))
 	struct EngineImpl {
-		// The nice thing about separating Engine and EngineImpl is that EngineImpl
+		// The nice thing about separating `Engine` and `EngineImpl` is that `EngineImpl`
 		// no longer friends the find and apply functions (better encapsulation).
 		friend SolutionsRemain detail_engine_impl_guess_stack_unwind_<O>(EngineImpl<O>&) noexcept;
 		using T = Ints<O>;
@@ -148,6 +149,19 @@ namespace okiidoku::mono::detail::solver {
 		// post-condition: `val` is registered as the only candidate-symbol at `rmi`.
 		void register_new_given_(rmi_t rmi, val_t val) noexcept;
 
+		// The specified candidate-symbol is allowed to already be removed.
+		SolutionsRemain do_elim_remove_sym_(rmi_t rmi, val_t cand) noexcept;
+
+		// The specified candidate-symbols are allowed to already be removed.
+		SolutionsRemain do_elim_remove_syms_(rmi_t rmi, const HouseMask<O>& to_remove) noexcept;
+
+		SolutionsRemain do_elim_retain_syms_(rmi_t rmi, const HouseMask<O>& to_retain) noexcept;
+
+	private:
+		// The specified candidate-symbol is allowed to already be removed.
+		template<class F> requires(std::is_invocable_v<F, HouseMask<O>&>)
+		SolutionsRemain do_elim_generic_(rmi_t rmi, F elim_fn) noexcept;
+
 		// contract: must be called immediately when a cell's candidate-symbol count _changes_ to one.
 		// contract: (it follows that) no previous call in the context of the current
 		//  guess stack has been made with the same value of `rmi`.
@@ -155,16 +169,7 @@ namespace okiidoku::mono::detail::solver {
 		// post-condition: decrements `num_puzcells_remaining`.
 		void enqueue_cand_elims_for_new_cell_claim_sym_(rmi_t rmi) noexcept;
 
-		// The specified candidate-symbol is allowed to already be removed.
-		SolutionsRemain cell_elim_cand_sym_(rmi_t rmi, val_t cand) noexcept;
 
-		// The specified candidate-symbols are allowed to already be removed.
-		SolutionsRemain cell_elim_cand_syms_(rmi_t rmi, const HouseMask<O>& to_remove) noexcept;
-
-		SolutionsRemain cell_retain_only_cand_syms_(rmi_t rmi, const HouseMask<O>& to_retain) noexcept;
-
-
-	private:
 		// num_puzzles_found_t num_puzzles_found_ {0};
 
 		CandsGrid<O> cells_cands_;

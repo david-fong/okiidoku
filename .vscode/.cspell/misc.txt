@@ -4,6 +4,7 @@ desmos
 distrib
 elim
 elims
+Fong
 genpath
 gridlike
 libokiidoku

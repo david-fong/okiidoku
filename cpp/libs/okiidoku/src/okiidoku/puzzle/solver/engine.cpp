@@ -41,66 +41,50 @@ namespace okiidoku::mono::detail::solver {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	SolutionsRemain EngineImpl<O>::cell_elim_cand_sym_(
+	template<class F> requires(std::is_invocable_v<F, HouseMask<O>&>)
+	SolutionsRemain EngineImpl<O>::do_elim_generic_(
+		const EngineImpl<O>::rmi_t rmi,
+		F elim_fn
+	) noexcept {
+		auto& cell_cands {cells_cands_.at_rmi(rmi)};
+		const auto old_cands_count {cell_cands.count()};
+		elim_fn(cell_cands);
+		const auto new_cands_count {cell_cands.count()};
+		assert(new_cands_count <= old_cands_count);
+
+		if (new_cands_count == 0) [[unlikely]] {
+			return detail_engine_impl_guess_stack_unwind_(*this);
+		}
+		if ((new_cands_count < old_cands_count) && (new_cands_count == 1)) [[unlikely]] {
+			enqueue_cand_elims_for_new_cell_claim_sym_(rmi);
+		}
+		return SolutionsRemain::yes();
+	}
+	template<Order O> requires(is_order_compiled(O))
+	SolutionsRemain EngineImpl<O>::do_elim_remove_sym_(
 		const EngineImpl<O>::rmi_t rmi,
 		const EngineImpl<O>::val_t cand_to_elim
 	) noexcept {
-		auto& cell_cands {cells_cands_.at_rmi(rmi)};
-		if (!cell_cands.test(cand_to_elim)) {
+		if (!cells_cands_.at_rmi(rmi).test(cand_to_elim)) {
 			// TODO.try this if-block can technically be removed. need to benchmark to see whether it is beneficial.
 			// candidate was already eliminated.
 			return SolutionsRemain::yes();
 		}
-		const auto old_cands_count {cell_cands.count()};
-		cell_cands.unset(cand_to_elim);
-		const auto new_cands_count {cell_cands.count()};
-		assert(new_cands_count <= old_cands_count);
-
-		if (new_cands_count == 0) [[unlikely]] {
-			return detail_engine_impl_guess_stack_unwind_(*this);
-		}
-		if ((new_cands_count < old_cands_count) && (new_cands_count == 1)) [[unlikely]] {
-			enqueue_cand_elims_for_new_cell_claim_sym_(rmi);
-		}
-		return SolutionsRemain::yes();
+		return do_elim_generic_(rmi, [&](auto& cands){ cands.unset(cand_to_elim); });
 	}
 	template<Order O> requires(is_order_compiled(O))
-	SolutionsRemain EngineImpl<O>::cell_elim_cand_syms_(
+	SolutionsRemain EngineImpl<O>::do_elim_remove_syms_(
 		const EngineImpl<O>::rmi_t rmi,
 		const HouseMask<O>& to_remove
 	) noexcept {
-		auto& cell_cands {cells_cands_.at_rmi(rmi)};
-		const auto old_cands_count {cell_cands.count()};
-		cell_cands.remove(to_remove);
-		const auto new_cands_count {cell_cands.count()};
-		assert(new_cands_count <= old_cands_count);
-
-		if (new_cands_count == 0) [[unlikely]] {
-			return detail_engine_impl_guess_stack_unwind_(*this);
-		}
-		if ((new_cands_count < old_cands_count) && (new_cands_count == 1)) [[unlikely]] {
-			enqueue_cand_elims_for_new_cell_claim_sym_(rmi);
-		}
-		return SolutionsRemain::yes();
+		return do_elim_generic_(rmi, [&](auto& cands){ cands.remove(to_remove); });
 	}
 	template<Order O> requires(is_order_compiled(O))
-	SolutionsRemain EngineImpl<O>::cell_retain_only_cand_syms_(
+	SolutionsRemain EngineImpl<O>::do_elim_retain_syms_(
 		const EngineImpl<O>::rmi_t rmi,
 		const HouseMask<O>& to_retain
 	) noexcept {
-		auto& cell_cands {cells_cands_.at_rmi(rmi)};
-		const auto old_cands_count {cell_cands.count()};
-		cell_cands.retain_only(to_retain);
-		const auto new_cands_count {cell_cands.count()};
-		assert(new_cands_count <= old_cands_count);
-
-		if (new_cands_count == 0) [[unlikely]] {
-			return detail_engine_impl_guess_stack_unwind_(*this);
-		}
-		if ((new_cands_count < old_cands_count) && (new_cands_count == 1)) [[unlikely]] {
-			enqueue_cand_elims_for_new_cell_claim_sym_(rmi);
-		}
-		return SolutionsRemain::yes();
+		return do_elim_generic_(rmi, [&](auto& cands){ cands.retain_only(to_retain); });
 	}
 
 
@@ -183,7 +167,7 @@ namespace okiidoku::mono::detail::solver {
 		e.guess_stack_.pop();
 		e.cells_cands_ = *std::move(frame.prev_cells_cands);
 		e.num_puzcells_remaining_ = frame.num_puzcells_remaining;
-		return e.cell_elim_cand_sym_(frame.guess.rmi, frame.guess.val);
+		return e.do_elim_remove_sym_(frame.guess.rmi, frame.guess.val);
 	}
 
 
