@@ -1,5 +1,7 @@
 #include <okiidoku/puzzle/solver/engine.hpp>
 
+#include <okiidoku/puzzle/solver/cand_elim_apply.hpp>
+
 #include <algorithm>
 
 // TODO.low go through and see where it makes sense to add [[likely/unlikely]].
@@ -60,6 +62,7 @@ namespace okiidoku::mono::detail::solver {
 		}
 		return SolutionsRemain::yes();
 	}
+
 	template<Order O> requires(is_order_compiled(O))
 	SolutionsRemain EngineImpl<O>::do_elim_remove_sym_(
 		const EngineImpl<O>::rmi_t rmi,
@@ -72,6 +75,7 @@ namespace okiidoku::mono::detail::solver {
 		}
 		return do_elim_generic_(rmi, [&](auto& cands){ cands.unset(cand_to_elim); });
 	}
+
 	template<Order O> requires(is_order_compiled(O))
 	SolutionsRemain EngineImpl<O>::do_elim_remove_syms_(
 		const EngineImpl<O>::rmi_t rmi,
@@ -79,6 +83,7 @@ namespace okiidoku::mono::detail::solver {
 	) noexcept {
 		return do_elim_generic_(rmi, [&](auto& cands){ cands.remove(to_remove); });
 	}
+
 	template<Order O> requires(is_order_compiled(O))
 	SolutionsRemain EngineImpl<O>::do_elim_retain_syms_(
 		const EngineImpl<O>::rmi_t rmi,
@@ -114,7 +119,7 @@ namespace okiidoku::mono::detail::solver {
 		assert(cell_cands.count() == 1);
 		found_queues_.emplace(found::CellClaimSym<O>{
 			.rmi{rmi},
-			.val{cell_cands.count_lower_zeros_assuming_non_empty_mask()}
+			.val{cell_cands.count_lower_zeros_assuming_non_empty_mask()},
 		});
 		--num_puzcells_remaining_;
 		assert(get_num_puzcells_remaining() == static_cast<o4i_t>(std::count_if(
@@ -122,24 +127,6 @@ namespace okiidoku::mono::detail::solver {
 			cells_cands_.get_underlying_array().cend(),
 			[](const auto& c){ return c.count() == 1; }
 		)));
-	}
-
-
-	template<Order O> requires(is_order_compiled(O))
-	SolutionsRemain EngineImpl<O>::process_first_queued_cand_elims() noexcept {
-		return SolutionsRemain::yes(); // (... , found_queues_); // TODO.asap
-	}
-
-
-	template<Order O> requires(is_order_compiled(O))
-	SolutionsRemain EngineImpl<O>::process_all_queued_cand_elims() noexcept {
-		while (has_queued_cand_elims()) {
-			const auto check {process_first_queued_cand_elims()};
-			if (check.no_solutions_remain()) {
-				return check;
-			}
-		}
-		return SolutionsRemain::yes();
 	}
 
 

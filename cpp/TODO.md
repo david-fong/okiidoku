@@ -48,6 +48,7 @@
 
 - profile guided optimization
   - [msvc](https://docs.microsoft.com/en-us/cpp/build/profile-guided-optimizations)
+  - [clang](https://clang.llvm.org/docs/UsersManual.html#profile-guided-optimization)
 
 - try writing custom GDB python pretty-printer for `HouseMask`?
   - [how to write a gdb pretty-printer](https://sourceware.org/gdb/onlinedocs/gdb/Writing-a-Pretty_002dPrinter.html#Writing-a-Pretty_002dPrinter)

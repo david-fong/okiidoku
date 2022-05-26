@@ -16,7 +16,7 @@ namespace okiidoku::mono {
 	}
 	// contract: all entry values (contents) are in the range [0, O2].
 	// A numerically encoded value of O2 symbolizes an empty (non-given/puzzle) cell.
-	// Note: not exported. All public members are defined inline in the source code.
+	// Note: not exported. All public members are defined inline in this header.
 	template<Order O> requires(is_order_compiled(O))
 	using Grid = detail::Gridlike<O, grid_val_t<O>>;
 

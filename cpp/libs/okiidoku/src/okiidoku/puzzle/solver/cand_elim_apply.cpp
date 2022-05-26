@@ -4,8 +4,56 @@
 
 namespace okiidoku::mono::detail::solver {
 
+	namespace {
+		constexpr bool logical_and_loop_continue {true};
+		constexpr bool logical_and_loop_break {false};
+	}
+
+
 	template<Order O> requires(is_order_compiled(O))
-	SolutionsRemain CandElimApply<O>::apply(
+	SolutionsRemain CandElimApply<O>::apply_first_queued(Engine<O>& engine) noexcept {
+		assert(engine.has_queued_cand_elims());
+		auto check {SolutionsRemain::yes()};
+		// Note: I had to choose between easier-to-understand code, or making it
+		// impossible to forget to update this "boilerplate" if I implement more
+		// solving techniques. I chose the latter (sorry?).
+
+		// MSVC 19 seems to require logical_and_loop_body to be an lvalue for some reason.
+		const auto logical_and_loop_body {[&](auto& queue) -> bool {
+			if (queue.empty()) { return logical_and_loop_continue; }
+			check = CandElimApplyImpl<O>::apply(engine, queue.front());
+			queue.pop_front();
+			return logical_and_loop_break;
+		}};
+		std::apply([&](auto& ...queue){
+			// see https://en.cppreference.com/w/cpp/language/eval_order
+			return (... && logical_and_loop_body(queue));
+		}, engine.found_queues().tup_);
+		return check;
+	}
+
+
+	template<Order O> requires(is_order_compiled(O))
+	SolutionsRemain CandElimApply<O>::apply_all_queued(Engine<O>& engine) noexcept {
+		auto check {SolutionsRemain::yes()};
+		const auto logical_and_loop_body {[&](auto& queue) -> bool {
+			// in loop over queues, return `true` means continue, `false` means break.
+			while (!queue.empty()) {
+				check = CandElimApplyImpl<O>::apply(engine, queue.front());
+				queue.pop_front();
+				if (check.no_solutions_remain()) { return logical_and_loop_break; }
+			}
+			return logical_and_loop_continue;
+		}};
+		std::apply([&](auto& ...queue){
+			return (... && logical_and_loop_body(queue));
+		}, engine.found_queues().tup_);
+		return check;
+	}
+
+
+	template<Order O> requires(is_order_compiled(O))
+	SolutionsRemain CandElimApplyImpl<O>::apply(
 		Engine<O>& engine,
 		const found::CellClaimSym<O>& desc // TODO consider/try passing by value
 	) noexcept {
@@ -40,7 +88,7 @@ namespace okiidoku::mono::detail::solver {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	SolutionsRemain CandElimApply<O>::apply(
+	SolutionsRemain CandElimApplyImpl<O>::apply(
 		Engine<O>& engine,
 		const found::SymClaimCell<O>& desc
 	) noexcept {
@@ -54,7 +102,7 @@ namespace okiidoku::mono::detail::solver {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	SolutionsRemain CandElimApply<O>::apply(
+	SolutionsRemain CandElimApplyImpl<O>::apply(
 		Engine<O>& engine,
 		const found::CellsClaimSyms<O>& desc
 	) noexcept {
@@ -72,7 +120,7 @@ namespace okiidoku::mono::detail::solver {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	SolutionsRemain CandElimApply<O>::apply(
+	SolutionsRemain CandElimApplyImpl<O>::apply(
 		Engine<O>& engine,
 		const found::SymsClaimCells<O>& desc
 	) noexcept {
@@ -92,7 +140,8 @@ namespace okiidoku::mono::detail::solver {
 
 
 	#define OKIIDOKU_FOR_COMPILED_O(O_) \
-		template class CandElimApply<O_>;
+		template class CandElimApply<O_>; \
+		template class CandElimApplyImpl<O_>;
 	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 	#undef OKIIDOKU_FOR_COMPILED_O
 }

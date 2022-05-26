@@ -73,7 +73,7 @@ namespace okiidoku::mono::detail::solver {
 
 
 	template<Order O> requires(is_order_compiled(O)) class CandElimFind;
-	template<Order O> requires(is_order_compiled(O)) class CandElimApply;
+	template<Order O> requires(is_order_compiled(O)) class CandElimApplyImpl;
 
 	template<Order O> requires(is_order_compiled(O))
 	using CandsGrid = detail::Gridlike<O, HouseMask<O>>;
@@ -108,24 +108,13 @@ namespace okiidoku::mono::detail::solver {
 		[[nodiscard, gnu::pure]]
 		bool no_solutions_remain() const noexcept { return no_solutions_remain_; }
 
-		[[nodiscard, gnu::pure]]
-		const CandsGrid<O>& cells_cands() const noexcept { return cells_cands_; }
-
 		// the candidate elimination queue is processed in the order of insertion.
 		[[nodiscard, gnu::pure]]
 		bool has_queued_cand_elims() const noexcept { return !found_queues_.is_empty(); }
 
-		// contract: `has_queued_cand_elims` returns `true`.
-		SolutionsRemain process_first_queued_cand_elims() noexcept;
-
-		SolutionsRemain process_all_queued_cand_elims() noexcept;
-
 
 		[[nodiscard, gnu::pure]]
 		o4i_t get_num_puzcells_remaining() const noexcept { return num_puzcells_remaining_; }
-
-		[[nodiscard, gnu::pure]]
-		CandElimQueues<O>& found_queues() noexcept { return found_queues_; }
 
 		// contract: `val` is currently one of _multiple_ candidate-symbols at `rmi`.
 		// contract: only call when `has_queued_cand_elims` returns `false`. There
@@ -141,6 +130,13 @@ namespace okiidoku::mono::detail::solver {
 		// returns a filled grid following the one rule and containing all the puzzle's givens.
 		[[nodiscard, gnu::pure]]
 		Grid<O> build_solution_obj() const noexcept;
+
+
+		[[nodiscard, gnu::pure]]
+		const CandsGrid<O>& cells_cands() const noexcept { return cells_cands_; }
+
+		[[nodiscard, gnu::pure]]
+		CandElimQueues<O>& found_queues() noexcept { return found_queues_; }
 
 
 		// contract: `val` is currently one of _multiple_ candidate-symbols at `rmi`.
@@ -179,13 +175,13 @@ namespace okiidoku::mono::detail::solver {
 		CandElimQueues<O> found_queues_ {};
 
 		struct OKIIDOKU_NO_EXPORT GuessStackFrame final {
-			// do separate dynamic alloc for each CandsGrid to reduce resizing noise.
+			// do separate dynamic alloc for each `CandsGrid` to reduce resizing noise.
 			std::unique_ptr<CandsGrid<O>> prev_cells_cands;
 			o4i_t num_puzcells_remaining;
 			Guess<O> guess;
-			GuessStackFrame(const EngineImpl<O>& impl, const Guess<O> guess_) noexcept:
-				prev_cells_cands{std::make_unique<CandsGrid<O>>(impl.cells_cands())},
-				num_puzcells_remaining{impl.get_num_puzcells_remaining()},
+			GuessStackFrame(const EngineImpl<O>& engine, const Guess<O> guess_) noexcept:
+				prev_cells_cands{std::make_unique<CandsGrid<O>>(engine.cells_cands())},
+				num_puzcells_remaining{engine.get_num_puzcells_remaining()},
 				guess{guess_}
 			{}
 		};
@@ -196,10 +192,13 @@ namespace okiidoku::mono::detail::solver {
 	};
 
 
+	// Note: The current usage of inheritance (rather than composition) is _only_
+	// done to reduce boilerplate in writing the delegating member functions.
 	template<Order O> requires(is_order_compiled(O))
 	class Engine final : private EngineImpl<O> {
 		friend class CandElimFind<O>;  // the class wraps implementations that can only see what they need.
-		friend class CandElimApply<O>; // no wrapping. implementations need to see `eliminate_candidate_sym(s)_`.
+		friend class CandElimApply<O>;
+		friend class CandElimApplyImpl<O>;
 		using T = Ints<O>;
 		using val_t = int_ts::o2xs_t<O>;
 		using rmi_t = int_ts::o4xs_t<O>;
@@ -209,8 +208,6 @@ namespace okiidoku::mono::detail::solver {
 		// please read the contracts for the referenced functions.
 		using EngineImpl<O>::no_solutions_remain;
 		using EngineImpl<O>::has_queued_cand_elims;
-		using EngineImpl<O>::process_first_queued_cand_elims;
-		using EngineImpl<O>::process_all_queued_cand_elims;
 		using EngineImpl<O>::get_num_puzcells_remaining;
 		using EngineImpl<O>::push_guess;
 		using EngineImpl<O>::get_guess_stack_depth;

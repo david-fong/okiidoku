@@ -7,6 +7,10 @@
 #include <vector>
 #include <compare>
 
+// TODO.low if this translation unit becomes slow to compile and specific functions
+// are being frequently modified, consider experimenting with explicit instantiation
+// at the granularity of member functions in separate translation units.
+
 namespace okiidoku::mono::detail::solver { namespace {
 
 	// opening boilerplate. #undef-ed before end of namespace.
@@ -63,9 +67,6 @@ namespace okiidoku::mono::detail::solver { namespace {
 			const HouseType house_type
 		);
 
-		// TODO templating the whole helper just for the part that does emplace
-		// may be wasteful in terms of generated code-size. Consider "erasing"
-		// the template into the form of a callback parameter.
 		template<Order O> requires(is_order_compiled(O))
 		void helper_find(
 			CandElimQueues<O>& found_queues,
@@ -75,6 +76,9 @@ namespace okiidoku::mono::detail::solver { namespace {
 			enqueue_subset_desc_fn_t<O> enqueue_subset_desc_fn
 		) noexcept {
 			OKIIDOKU_CAND_ELIM_FINDER_PRELUDE
+			// TODO.asap not full implementation. should search for any combination of N
+			//  masks where OR-ed together have N bits set. Start from small N and go up.
+			//  whenever one is found, update the rest of the masks (and rescan?)
 			const auto group_me_cmp {[](const GroupMe<O>& a, const GroupMe<O>& b){
 				// below line commented out because there is no point in first sorting by cand_count.
 				// if (const auto cmp {a.cand_count <=> b.cand_count}; std::is_neq(cmp)) [[likely]] { return cmp; }
@@ -179,14 +183,14 @@ namespace okiidoku::mono::detail::solver { namespace {
 	}
 
 
-	// template<Order O> requires(is_order_compiled(O))
-	// void find_locked_cands(
-	// 	const CandsGrid<O>& cells_cands,
-	// 	CandElimQueues<O>& found_queues
-	// ) noexcept {
-	// 	OKIIDOKU_CAND_ELIM_FINDER_PRELUDE
-	// 	// TODO
-	// }
+	template<Order O> requires(is_order_compiled(O))
+	void find_locked_cands(
+		const CandsGrid<O>& cells_cands,
+		CandElimQueues<O>& found_queues
+	) noexcept {
+		OKIIDOKU_CAND_ELIM_FINDER_PRELUDE
+		(void)cells_cands, (void)found_queues;// TODO
+	}
 
 
 	template<Order O> requires(is_order_compiled(O))
@@ -280,11 +284,11 @@ namespace okiidoku::mono::detail::solver {
 		return find_syms_claim_cells(engine.cells_cands(), engine.found_queues());
 	}
 
-	// template<Order O> requires(is_order_compiled(O))
-	// void CandElimFind<O>::locked_cands(Engine<O>& engine) noexcept {
-	// 	OKIIDOKU_CAND_ELIM_FINDER_PRELUDE
-	// 	return find_locked_cands(engine.cells_cands(), engine.found_queues());
-	// }
+	template<Order O> requires(is_order_compiled(O))
+	void CandElimFind<O>::locked_cands(Engine<O>& engine) noexcept {
+		OKIIDOKU_CAND_ELIM_FINDER_PRELUDE
+		return find_locked_cands(engine.cells_cands(), engine.found_queues());
+	}
 
 	template<Order O> requires(is_order_compiled(O))
 	Guess<O> CandElimFind<O>::good_guess_candidate(const Engine<O>& engine) noexcept {

@@ -1,11 +1,8 @@
 #include <okiidoku/puzzle/solve.hpp>
 
-#include <okiidoku/puzzle/solver/engine.hpp>
+#include <okiidoku/puzzle/solver/cand_elim_apply.hpp>
 #include <okiidoku/puzzle/solver/cand_elim_find.hpp>
-
-// TODO.low if this translation unit becomes slow to compile and specific functions
-// are being frequently modified, consider experimenting with explicit instantiation
-// at the granularity of member functions in separate translation units.
+#include <okiidoku/puzzle/solver/engine.hpp>
 
 namespace okiidoku::mono {
 
@@ -30,7 +27,9 @@ namespace okiidoku::mono {
 			return std::nullopt;
 		}
 		while (e.get_num_puzcells_remaining() > 0) [[likely]] {
-			{const auto check {e.process_all_queued_cand_elims()};
+			{
+				using Apply = detail::solver::CandElimApply<O>;
+				const auto check {Apply::apply_all_queued(e)};
 				assert(!e.has_queued_cand_elims());
 				if (check.no_solutions_remain()) [[unlikely]] { return std::nullopt; }
 				if (e.get_num_puzcells_remaining() == 0) [[unlikely]] { break; }
@@ -40,7 +39,7 @@ namespace okiidoku::mono {
 			Find::sym_claim_cell(e);  if (e.has_queued_cand_elims()) { continue; }
 			// Find::locked_cands(e);     if (e.has_queued_cand_elims()) { continue; }
 			Find::cells_claim_syms(e); if (e.has_queued_cand_elims()) { continue; }
-			Find::syms_claim_cells(e); if (e.has_queued_cand_elims()) { continue; }
+			Find::syms_claim_cells(e); if (e.has_queued_cand_elims()) { continue; } // TODO.try apparently the two different types of subset techniques come in accompanying pairs. Perhaps we only need to call one of the finders then? Please investigate/experiment.
 			e.push_guess(Find::good_guess_candidate(e));
 		}
 		return std::optional<Grid<O>>{std::in_place, e.build_solution_obj()};
@@ -58,11 +57,11 @@ namespace okiidoku::mono {
 		}
 		while (e.get_num_puzcells_remaining() > 0) [[likely]] {
 			using Find = detail::solver::CandElimFind<O>;
-			const auto old_guess_stack_depth {e.get_guess_stack_depth()};
+			const auto prev_guess_stack_depth {e.get_guess_stack_depth()};
 			const auto did_unwind {[&]{
 				const auto new_depth {e.get_guess_stack_depth()};
-				assert(new_depth <= old_guess_stack_depth);
-				return new_depth < old_guess_stack_depth;
+				assert(new_depth <= prev_guess_stack_depth);
+				return new_depth <  prev_guess_stack_depth;
 			}};
 			Find::sym_claim_cell(e); if (did_unwind()) [[unlikely]] { continue; }
 			// Find::locked_cands(e); if (did_unwind()) [[unlikely]] { continue; }
@@ -72,7 +71,9 @@ namespace okiidoku::mono {
 				// TODO but I want to consume the deduction that would lead to the
 				//  most/technique-simplest newly-findable candidate eliminations.
 				//  How to implement? seems to imply a degree of "BFS".
-				{const auto check {e.process_first_queued_cand_elims()};
+				{
+					using Apply = detail::solver::CandElimApply<O>;
+					const auto check {Apply::apply_first_queued(e)};
 					if (check.no_solutions_remain()) [[unlikely]] { return std::nullopt; }
 					if (e.get_num_puzcells_remaining() == 0) [[unlikely]] { break; }
 				}

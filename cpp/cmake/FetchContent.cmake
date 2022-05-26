@@ -7,6 +7,7 @@ FetchContent_Declare(range-v3 # https://github.com/ericniebler/range-v3
 	GIT_SHALLOW TRUE
 	GIT_SUBMODULES "" # none. don't get the docs submodule
 	GIT_PROGRESS ON
+	# placement in `external/` to allow deleting `build/` without deleting the range-v3 clone.
 	PREFIX       "${PROJECT_SOURCE_DIR}/external/range-v3/cmake"
 	SOURCE_DIR   "${PROJECT_SOURCE_DIR}/external/range-v3/repo"
 	BINARY_DIR   "${PROJECT_SOURCE_DIR}/external/range-v3/build"

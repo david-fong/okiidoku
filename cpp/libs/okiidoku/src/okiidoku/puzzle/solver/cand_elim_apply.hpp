@@ -8,6 +8,16 @@ namespace okiidoku::mono::detail::solver {
 
 	template<Order O> requires(is_order_compiled(O))
 	class CandElimApply final {
+	public:
+		// contract: `engine.has_queued_cand_elims` returns `true`.
+		static SolutionsRemain apply_first_queued(Engine<O>&) noexcept;
+
+		static SolutionsRemain apply_all_queued(Engine<O>&) noexcept;
+	};
+
+
+	template<Order O> requires(is_order_compiled(O))
+	class CandElimApplyImpl final {
 		using T = Ints<O>;
 		using o2x_t = int_ts::o2x_t<O>;
 		using o2i_t = int_ts::o2i_t<O>;
@@ -16,6 +26,8 @@ namespace okiidoku::mono::detail::solver {
 	public:
 		static SolutionsRemain apply(Engine<O>&, const found::CellClaimSym<O>&) noexcept;
 
+		// contract: the specified symbol is a candidate-symbol at the specified rmi.
+		//  this contract is respected by the corresponding `find` function.
 		static SolutionsRemain apply(Engine<O>&, const found::SymClaimCell<O>&) noexcept;
 
 		// AKA "naked subsets"
