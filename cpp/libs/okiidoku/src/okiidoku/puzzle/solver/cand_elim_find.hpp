@@ -12,10 +12,8 @@ namespace okiidoku::mono::detail::solver {
 	//  be done via the prelude macro, albeit probably requiring some [[maybe_unused]] attributes.
 	template<Order O> requires(is_order_compiled(O))
 	class CandElimFind final {
-
 		// Internal (somewhat obvious) contract:
 		// finders must never incorrectly progress in solving a proper puzzle.
-
 	public:
 		// common contracts and invariants for all finders:
 		// contract: `no_solutions_remain` returns `false`.

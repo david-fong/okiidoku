@@ -139,6 +139,15 @@ namespace okiidoku::mono::detail::solver {
 	}
 
 
+	template<Order O> requires(is_order_compiled(O))
+	SolutionsRemain CandElimApplyImpl<O>::apply(
+		Engine<O>& engine,
+		const found::LockedCands<O>& desc
+	) noexcept {
+		(void)engine, (void)desc; return SolutionsRemain::yes();// TODO
+	}
+
+
 	#define OKIIDOKU_FOR_COMPILED_O(O_) \
 		template class CandElimApply<O_>; \
 		template class CandElimApplyImpl<O_>;

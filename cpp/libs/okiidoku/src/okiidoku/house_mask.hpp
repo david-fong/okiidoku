@@ -143,15 +143,12 @@ namespace okiidoku::mono {
 		// Defines a strong ordering between masks. Its semantics are unspecified.
 		// It is intended to be time-performant. Can be used to partition by masks
 		// where the relationship between partitions doesn't matter.
-		[[nodiscard, gnu::pure]] static std::strong_ordering unspecified_strong_cmp(const HouseMask& a, const HouseMask& b) noexcept {
-			#ifdef __EMSCRIPTEN__
+		[[nodiscard, gnu::pure]] static std::strong_ordering cmp_differences(const HouseMask& a, const HouseMask& b) noexcept {
 			for (std::size_t i {0}; i < num_ints; ++i) {
-				if (const auto cmp {a.ints_[i] <=> b.ints_[i]}; std::is_neq(cmp)) [[likely]] { return cmp; }
+				const auto diffs {a.ints_[i] ^ b.ints_[i]};
+				if (const auto cmp {(a.ints_[i]&diffs) <=> (b.ints_[i]&diffs)}; std::is_neq(cmp)) [[likely]] { return cmp; }
 			}
 			return std::strong_ordering::equivalent;
-			#else
-			return a.ints_ <=> b.ints_;
-			#endif
 		}
 	};
 	#define OKIIDOKU_FOR_COMPILED_O(O_) \

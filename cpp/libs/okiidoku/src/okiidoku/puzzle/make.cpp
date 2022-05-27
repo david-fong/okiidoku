@@ -32,7 +32,7 @@ namespace okiidoku::mono {
 		}};
 		// hypothesis: if removing a given breaks properness, the only way to change that
 		// is by adding back other removed givens. If this is true, once a given is known
-		// to break properness
+		// to break properness, if no backtracking is done, then it can never be removed.
 
 		while (num_puzcell_cands > 0) {
 			const auto puzcell_cand_i {static_cast<o4i_t>((rng() - rng_t::min()) % num_puzcell_cands)};

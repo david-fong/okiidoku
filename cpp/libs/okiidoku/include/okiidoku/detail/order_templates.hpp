@@ -22,7 +22,8 @@ namespace okiidoku {
 
 	namespace detail {
 		template<Order Ignored, Order... Orders>
-		struct CompiledOrdersHelper final {
+		class CompiledOrdersHelper final {
+		public:
 			static constexpr auto make_arr() { return std::to_array({Orders...}); }
 		};
 	}

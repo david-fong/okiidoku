@@ -11,6 +11,7 @@ libokiidoku
 ōkiidoku
 opcount
 prefetch
+puzcell
 puzcells
 serdes
 smol

@@ -114,7 +114,8 @@ namespace okiidoku::visitor {
 	bool grid_is_filled(const Grid&) noexcept;
 
 	namespace detail {
-		struct GridAdaptor final {
+		class GridAdaptor final {
+		public:
 			static constexpr bool is_borrowtype = false;
 			template<Order O>
 			using type = mono::Grid<O>;

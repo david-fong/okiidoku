@@ -1,7 +1,14 @@
 #include <okiidoku/puzzle/solver/cand_elim_find.hpp>
 
 #include <okiidoku/house_mask.hpp>
+#include <okiidoku/puzzle/solver/subset_combo_walker.hpp>
 
+#include <range/v3/view/take.hpp>
+#include <range/v3/view/transform.hpp>
+#include <range/v3/algorithm/find_if.hpp>
+#include <range/v3/algorithm/fold.hpp>
+
+#include <functional> // function, bit_or
 #include <algorithm>
 #include <array>
 #include <vector>
@@ -18,6 +25,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 		using T [[maybe_unused]] = Ints<O>; \
 		using o2xs_t [[maybe_unused]] = int_ts::o2xs_t<O>; \
 		using o2x_t [[maybe_unused]] = int_ts::o2x_t<O>; \
+		using o2is_t [[maybe_unused]] = int_ts::o2is_t<O>; \
 		using o2i_t [[maybe_unused]] = int_ts::o2i_t<O>; \
 		using o3i_t [[maybe_unused]] = int_ts::o3i_t<O>; \
 		using rmi_t [[maybe_unused]] = int_ts::o4xs_t<O>; \
@@ -55,62 +63,63 @@ namespace okiidoku::mono::detail::solver { namespace {
 		template<Order O> requires(is_order_compiled(O))
 		struct GroupMe final {
 			HouseMask<O> cands;
+			int_ts::o2is_t<O> cand_count;
 			int_ts::o2xs_t<O> who;
 		};
 
 		template<Order O> requires(is_order_compiled(O))
-		using enqueue_subset_desc_fn_t = void (*)(
-			CandElimQueues<O>& found_queues,
+		using enqueue_subset_desc_fn_t = std::function<void(
 			const HouseMask<O>& what_required,
-			const HouseMask<O>& who_requires,
-			const int_ts::o2x_t<O> house,
-			const HouseType house_type
-		);
+			const HouseMask<O>& who_requires
+		)>;
 
 		template<Order O> requires(is_order_compiled(O))
 		void helper_find(
-			CandElimQueues<O>& found_queues,
-			const HouseType house_type,
-			const int_ts::o2x_t<O> house,
-			std::array<GroupMe<O>, Ints<O>::O2>& searcher,
+			std::array<GroupMe<O>, Ints<O>::O2>& search_me,
 			enqueue_subset_desc_fn_t<O> enqueue_subset_desc_fn
 		) noexcept {
 			OKIIDOKU_CAND_ELIM_FINDER_PRELUDE
-			// TODO.asap not full implementation. should search for any combination of N
-			//  masks where OR-ed together have N bits set. Start from small N and go up.
-			//  whenever one is found, update the rest of the masks (and rescan?)
 			const auto group_me_cmp {[](const GroupMe<O>& a, const GroupMe<O>& b){
-				// below line commented out because there is no point in first sorting by cand_count.
-				// if (const auto cmp {a.cand_count <=> b.cand_count}; std::is_neq(cmp)) [[likely]] { return cmp; }
-				return HouseMask<O>::unspecified_strong_cmp(a.cands, b.cands);
+				if (const auto cmp {a.cand_count <=> b.cand_count}; std::is_neq(cmp)) [[likely]] { return cmp; }
+				return HouseMask<O>::cmp_differences(a.cands, b.cands); // TODO.try is this line beneficial? I actually don't even really know if it does what I intend, which is to put similar sets close together.
 			}};
-			std::sort(searcher.begin(), searcher.end(), [&](const GroupMe<O>& a, const GroupMe<O>& b){
+			std::sort(search_me.begin(), search_me.end(), [&](const auto& a, const auto& b){
 				return std::is_lt(group_me_cmp(a,b));
 			});
-			{o2i_t alike_begin {0};
-			for (o3i_t alike_cur {1}; alike_cur <= T::O2; ++alike_cur) {
-				assert(alike_cur > alike_begin);
-				if ((alike_cur == T::O2)
-				|| std::is_neq(group_me_cmp(searcher[alike_cur-1], searcher[alike_cur]))
-				) {
-					const auto alike_size {static_cast<o2i_t>(alike_cur - alike_begin)};
-					assert(alike_size > 0);
-					if (alike_size == 1) { continue; } // we have a custom finder implementation for subset-size == 1.
-					const auto& group {searcher[alike_cur-1]};
-					if (alike_size == group.cands.count()) {
+			for (o2x_t subset_size {2}; subset_size < T::O2; ++subset_size) {
+				const auto search_begin {ranges::find_if(search_me, [](const auto& gm){
+					return gm.cand_count > 1;
+				})};
+				const auto search_end {ranges::find_if(search_begin, search_me.end(), [&](const auto& gm){
+					return gm.cand_count > subset_size;
+				})};
+				if (std::distance(search_begin, search_end) < subset_size) { continue; }
+				// find all combinations of N sets where their union is size N.
+				// given that the union's size will never be less than N, and that
+				// any one set can only be part of one such finding.
+				SubsetComboWalker<O> combo_walker {
+					static_cast<o2x_t>(std::distance(search_me.begin(), search_begin)),
+					static_cast<o2i_t>(std::distance(search_me.begin(), search_end)),
+					subset_size,
+				};
+				for (; combo_walker.has_more(); combo_walker.advance()) {
+					// walk combinations.
+					// Note on "`*`". fold returns nullopt if range arg is empty and no init
+					// arg is passed. That will never happen here so no need to check for nullopt.
+					const auto combo_union {*ranges::fold_left_first(
+						ranges::views::take(combo_walker.get_combo_arr(), subset_size)
+						| ranges::views::transform([&](const auto i){ return search_me[i].cands; })
+					, std::bit_or{})
+					};
+					if (combo_union.count()) [[unlikely]] {
 						HouseMask<O> who_requires {};
-						for (o2i_t a_who {alike_begin}; static_cast<decltype(alike_cur)>(a_who) < alike_cur; ++a_who) {
-							who_requires.set(static_cast<o2x_t>(a_who));
+						for (o2x_t i {0}; i < subset_size; ++i) {
+							who_requires.set(search_me[combo_walker.combo_at(i)].who);
 						}
-						// TODO give the queue a config field for whether to insert new entries
-						//  auto-sorted by subset size. currently unsorted. If we uncomment the
-						//  above sort-by-cand-count in `group_me_cmp`, we may be able to leverage
-						//  some kind of merge-sorted-arrays algorithm.
-						enqueue_subset_desc_fn(found_queues, group.cands, who_requires, house, house_type);
+						enqueue_subset_desc_fn(combo_union, who_requires);
 					}
-					alike_begin = static_cast<decltype(alike_begin)>(alike_cur);
 				}
-			}}
+			}
 		}
 	}
 
@@ -129,22 +138,20 @@ namespace okiidoku::mono::detail::solver { namespace {
 		OKIIDOKU_CAND_ELIM_FINDER_PRELUDE
 		for (HouseType house_type : house_types) {
 		for (o2i_t house {0}; house < T::O2; ++house) {
-			std::array<subsets::GroupMe<O>, T::O2> searcher;
+			std::array<subsets::GroupMe<O>, T::O2> search_me;
 			for (o2i_t house_cell {0}; house_cell < T::O2; ++house_cell) {
-				const auto rmi {house_cell_to_rmi<O>(house_type, house, house_cell)};
-				searcher[house_cell] = subsets::GroupMe<O>{
-					.cands{cells_cands.at_rmi(rmi)},
-					.who{static_cast<o2xs_t>(house_cell)}
+				const auto& cell_cands {cells_cands.at_rmi(house_cell_to_rmi<O>(house_type, house, house_cell))};
+				search_me[house_cell] = subsets::GroupMe<O>{
+					.cands{cell_cands},
+					.cand_count{static_cast<o2is_t>(cell_cands.count())},
+					.who{static_cast<o2xs_t>(house_cell)},
 				};
 			}
-			subsets::helper_find<O>(
-				found_queues, house_type, static_cast<o2x_t>(house), searcher,
-				[](auto& queues, const auto& what, const auto& who, const auto house, const auto house_type){
-					queues.emplace(found::CellsClaimSyms<O>{
-						what, who, house, house_type
-					});
-				}
-			);
+			subsets::helper_find<O>(search_me, [&](const auto& what, const auto& who){
+				found_queues.emplace(found::CellsClaimSyms<O>{
+					what, who, static_cast<o2xs_t>(house), house_type
+				});
+			});
 		}}
 	}
 
@@ -157,28 +164,24 @@ namespace okiidoku::mono::detail::solver { namespace {
 		OKIIDOKU_CAND_ELIM_FINDER_PRELUDE
 		for (HouseType house_type : house_types) {
 		for (o2i_t house {0}; house < T::O2; ++house) {
-			std::array<subsets::GroupMe<O>, T::O2> searcher {};
+			std::array<subsets::GroupMe<O>, T::O2> search_me {};
 			// TODO.mid try applying loop-tiling to see if it improves cache-usage.
 			for (o2i_t symbol {0}; symbol < T::O2; ++symbol) {
-				searcher[symbol].who = static_cast<o2xs_t>(symbol);
+				auto& group_me {search_me[symbol]};
+				group_me.who = static_cast<o2xs_t>(symbol);
 				for (o2i_t house_cell {0}; house_cell < T::O2; ++house_cell) {
-					// Note: not a very cache-locality-friendly loop, but I can't
-					// think of how to do better. Inverting the loop dimensions may be
-					// worse, since GroupMe has the additional, unused-here .who member.
 					const auto rmi {house_cell_to_rmi<O>(house_type, house, house_cell)};
 					if (cells_cands.at_rmi(rmi).test(static_cast<o2x_t>(symbol))) {
-						searcher[symbol].cands.set(static_cast<o2x_t>(house_cell));
+						group_me.cands.set(static_cast<o2x_t>(house_cell));
 					}
 				}
+				group_me.cand_count = static_cast<o2is_t>(group_me.cands.count());
 			}
-			subsets::helper_find<O>(
-				found_queues, house_type, static_cast<o2x_t>(house), searcher,
-				[](auto& queues, const auto& what, const auto& who, const auto house, const auto house_type){
-					queues.emplace(found::SymsClaimCells<O>{
-						what, who, house, house_type
-					});
-				}
-			);
+			subsets::helper_find<O>(search_me, [&](const auto& what, const auto& who){
+				found_queues.emplace(found::SymsClaimCells<O>{
+					what, who, static_cast<o2xs_t>(house), house_type
+				});
+			});
 		}}
 	}
 
@@ -223,7 +226,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 		assert(cell_tags.empty());
 		return Guess<O>{
 			.rmi{cell_tags[0]},
-			.val{cells_cands.at_rmi(cell_tags[0]).count_lower_zeros_assuming_non_empty_mask()}
+			.val{cells_cands.at_rmi(cell_tags[0]).count_lower_zeros_assuming_non_empty_mask()},
 		};
 
 		// then, for those cells, find the one whose candidate-symbols have

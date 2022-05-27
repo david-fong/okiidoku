@@ -23,7 +23,8 @@ template class std::mersenne_twister_engine<std::uint_fast64_t, 64, 312, 156, 31
 
 namespace okiidoku {
 
-	struct SharedRng final {
+	class SharedRng final {
+	public:
 		// Internal Notes:
 		// - consider not using this for any hot-loop operations.
 		// - this is not thread-safe. guard with mutex where necessary.
