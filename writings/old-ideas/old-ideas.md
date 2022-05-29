@@ -1,5 +1,10 @@
 # Old Ideas
 
+## Learnings
+
+- I deliberately turned of inter-procedural optimization for debug builds because it was starting to take around 10 seconds each time. The runtime speed impact is slightly below a 10% hit.
+  - An alternative approach could be to have a separate build configuration that only builds order=3. It could be for "first-pass" testing, which would probably be faster to do IPO on. I didn't try implementing this because I'm still to lazy to figure out / learn how to make a good CMake interface for selecting grid orders to compile.
+
 ## Not Possible (?)
 
 - what: try using the GCC "section" function attribute to put same-order code in the same section. Ex. "text-okiidoku-o3". Test this on an older commit and see how it goes. May want to get rid of usages of `[[gnu::hot/cold]]`.

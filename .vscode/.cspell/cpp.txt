@@ -1,6 +1,8 @@
 builtin
 chrono
 cmake
+consteval
+countr
 cout
 cppcoreguidelines
 CTAD

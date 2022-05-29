@@ -2,6 +2,8 @@
 
 ## Roadmap
 
+- deductive reasoning + backtracking solver
+  - (add tests and examples)
 - draft archive
   - (and update tests and examples)
 - refactor and improve canonicalization
@@ -9,13 +11,11 @@
 - implement grid-serdes translator tool
 - refine archive
 - create a separate github repo for data. add as submodule?
-- deductive reasoning + backtracking solver
-  - (add tests and examples)
 - emscripten build and website
 - puzzle creation experiments (see [research-questions.md](../writings/research-questions.md))
 - minlexing canonicalization
 - compare canonicalization methods (performance / time-complexity)
-- language bindings for other languages? [see dedicated todo-file](./extras/bindings/todo.md)
+- language bindings for other languages [see dedicated todo-file](./extras/bindings/todo.md)
 
 ## Periodic Checkups
 
@@ -58,6 +58,8 @@
 - [it is allowed in c++ to have template functions and non-template functions with the same name. here are the resulting rules](https://stackoverflow.com/a/16865452/11107541). Could this be used to put the algorithm functions under the same namespace (not in separate "mono" and "visitor" namespace)?
 
 - move the emoji definitions out of the program binary and externalize as a configurable data read in at runtime?
+
+- [what's this? CMakePresets.json](https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html)
 
 - Go back and try the old canonicalization by rel row prob, but break ties by doing some brute force: try each tied permutation and valuate it according to some reduction of how it pushes rarer rel counts to the top left. Just be careful to shift to get rid of the main diagonal seam.
   - If there are multiple puddles of ties, the resolution of a puddle shouldn't depend on the resolution of any other puddle- only on the non-tied rows/columns. A consequence of this is that this resolution algorithm will not work if there are no non-tied rows/columns.

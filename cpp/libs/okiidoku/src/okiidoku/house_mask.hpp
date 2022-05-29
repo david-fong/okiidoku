@@ -50,34 +50,45 @@ namespace okiidoku::mono {
 		}
 
 		// count the number of set bits.
-		[[nodiscard, gnu::pure]] o2i_t count() const noexcept {
+		[[nodiscard, gnu::pure]] constexpr o2i_t count() const noexcept {
 			// TODO.mid investigate how good compilers are at optimizing these member functions.
 			return static_cast<o2i_t>(std::transform_reduce(
-				ints_.cbegin(), ints_.cend(), 0, std::plus{},
-				[](const auto int_){ return static_cast<o2i_t>(std::popcount(int_)); }
+				ints_.cbegin(), ints_.cend(), static_cast<o2i_t>(0U), std::plus{},
+				[](const auto& int_){ return static_cast<o2i_t>(std::popcount(int_)); }
 			));
 		}
 		// count the number of set bits below the specified bit index.
-		[[nodiscard, gnu::pure]] o2i_t count_bits_below(const o2i_t top_exclusive) const noexcept {
-			auto count {static_cast<o2i_t>(std::popcount(ints_[num_ints-1] & static_cast<o2i_t>(top_exclusive - 1u)))};
-			if constexpr (num_ints == 0) { return count; }
-			for (std::size_t i {0}; i < num_ints - 1; ++i) {
-				count += static_cast<o2i_t>(std::popcount(ints_[i]));
+		// contract: `end < O2`.
+		[[nodiscard, gnu::pure]] o2x_t count_set_bits_below(const o2x_t end) const noexcept {
+			assert(end < T::O2);
+			const auto end_at_int {bit_index_to_int_index(end)};
+			assert(end_at_int < num_ints);
+			auto count {static_cast<o2x_t>(std::popcount(
+				ints_[end_at_int] & static_cast<int_t>(
+					(static_cast<int_t>(1U) << (end % int_t_num_bits))
+					- static_cast<int_t>(1U)
+				)
+			))};
+			for (std::size_t i {0}; i < end_at_int; ++i) {
+				count += static_cast<o2x_t>(std::popcount(ints_[i]));
 			}
 			return count;
 		}
 
 		[[nodiscard, gnu::pure]] bool test(const o2x_t at) const noexcept {
+			assert(at < T::O2);
 			const auto at_int {bit_index_to_int_index(at)};
 			const int_t at_int_bit_mask {int_t{1} << (at % int_t_num_bits)};
-			return static_cast<bool>(ints_[at_int] & at_int_bit_mask);
+			return (ints_[at_int] & at_int_bit_mask) != 0;
 		}
 		constexpr void set(const o2x_t at) noexcept {
+			assert(at < T::O2);
 			const auto at_int {bit_index_to_int_index(at)};
 			const int_t at_int_bit_mask {int_t{1} << (at % int_t_num_bits)};
 			ints_[at_int] |= at_int_bit_mask;
 		}
 		constexpr void unset(const o2x_t at) noexcept {
+			assert(at < T::O2);
 			const auto at_int {bit_index_to_int_index(at)};
 			const int_t at_int_bit_mask {int_t{1} << (at % int_t_num_bits)};
 			ints_[at_int] &= ~at_int_bit_mask;
@@ -99,11 +110,13 @@ namespace okiidoku::mono {
 		}
 
 		[[nodiscard, gnu::pure]] static bool test_any3(const o2x_t at, const HouseMask& a, const HouseMask& b, const HouseMask& c) noexcept {
+			assert(at < T::O2);
 			const auto at_int {bit_index_to_int_index(at)};
 			const int_t at_int_bit_mask {int_t{1} << (at % int_t_num_bits)};
 			return static_cast<bool>((a.ints_[at_int] | b.ints_[at_int] | c.ints_[at_int]) & at_int_bit_mask);
 		}
 		static void set3(const o2x_t at, HouseMask& a, HouseMask& b, HouseMask& c) noexcept {
+			assert(at < T::O2);
 			const auto at_int {bit_index_to_int_index(at)};
 			const int_t at_int_bit_mask {int_t{1} << (at % int_t_num_bits)};
 			a.ints_[at_int] |= at_int_bit_mask;
@@ -111,6 +124,7 @@ namespace okiidoku::mono {
 			c.ints_[at_int] |= at_int_bit_mask;
 		}
 		static void unset3(const o2x_t at, HouseMask& a, HouseMask& b, HouseMask& c) noexcept {
+			assert(at < T::O2);
 			const auto at_int {bit_index_to_int_index(at)};
 			const int_t at_int_bit_mask {int_t{1} << (at % int_t_num_bits)};
 			a.ints_[at_int] &= ~at_int_bit_mask;

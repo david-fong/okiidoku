@@ -7,5 +7,6 @@ target_link_libraries(okiidoku_test
 	PRIVATE okiidoku_cli_utils
    PRIVATE okiidoku
 )
+target_include_directories(okiidoku_test PRIVATE ../src/)
 
 # add_test(NAME test COMMAND okiidoku_test)

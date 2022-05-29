@@ -35,6 +35,9 @@ else()
 endif()
 
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+if(okiidoku_IS_TOP_LEVEL)
+	set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_DEBUG FALSE)
+endif()
 
 
 # General use cases should use BUILD_SHARED_LIBS to choose whether to build

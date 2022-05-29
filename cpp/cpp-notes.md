@@ -30,6 +30,7 @@ g++ -E -Icpp/libs/okiidoku/include/ -Icpp/build/Release/libs/okiidoku/ cpp/libs/
 - https://cliutils.gitlab.io/modern-cmake/
 - [Jason Turner example/template](https://github.com/lefticus/cpp_weekly_game_project)
 - [cmake for dynamic library developers](https://www.youtube.com/watch?v=m0DwB4OvDXk)
+- [alex reinking tutorial part 2](https://alexreinking.com/blog/how-to-use-cmake-without-the-agonizing-pain-part-2.html)
 
 ## Conan Things
 

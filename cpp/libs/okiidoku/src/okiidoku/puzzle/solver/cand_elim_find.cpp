@@ -148,7 +148,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 				};
 			}
 			subsets::helper_find<O>(search_me, [&](const auto& what, const auto& who){
-				found_queues.emplace(found::CellsClaimSyms<O>{
+				found_queues.push_back(found::CellsClaimSyms<O>{
 					what, who, static_cast<o2xs_t>(house), house_type
 				});
 			});
@@ -178,7 +178,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 				group_me.cand_count = static_cast<o2is_t>(group_me.cands.count());
 			}
 			subsets::helper_find<O>(search_me, [&](const auto& what, const auto& who){
-				found_queues.emplace(found::SymsClaimCells<O>{
+				found_queues.push_back(found::SymsClaimCells<O>{
 					what, who, static_cast<o2xs_t>(house), house_type
 				});
 			});
@@ -223,7 +223,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 				}
 			}
 		}
-		assert(cell_tags.empty());
+		assert(!cell_tags.empty());
 		return Guess<O>{
 			.rmi{cell_tags[0]},
 			.val{cells_cands.at_rmi(cell_tags[0]).count_lower_zeros_assuming_non_empty_mask()},

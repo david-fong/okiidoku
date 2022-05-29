@@ -40,11 +40,11 @@ namespace okiidoku::mono::detail::solver {
 		// 	// TODO.low consider whether resizing down is a good idea here?
 		// }
 
-		void emplace(found::CellClaimSym  <O>&& desc) noexcept { std::get<queue_t<found::CellClaimSym  <O>>>(tup_).emplace_front(std::move(desc)); }
-		void emplace(found::SymClaimCell  <O>&& desc) noexcept { std::get<queue_t<found::SymClaimCell  <O>>>(tup_).emplace_front(std::move(desc)); }
-		void emplace(found::CellsClaimSyms<O>&& desc) noexcept { std::get<queue_t<found::CellsClaimSyms<O>>>(tup_).emplace_front(std::move(desc)); }
-		void emplace(found::SymsClaimCells<O>&& desc) noexcept { std::get<queue_t<found::SymsClaimCells<O>>>(tup_).emplace_front(std::move(desc)); }
-		void emplace(found::LockedCands   <O>&& desc) noexcept { std::get<queue_t<found::LockedCands   <O>>>(tup_).emplace_front(std::move(desc)); }
+		void push_back(found::CellClaimSym  <O>&& desc) noexcept { std::get<queue_t<found::CellClaimSym  <O>>>(tup_).emplace_back(std::move(desc)); }
+		void push_back(found::SymClaimCell  <O>&& desc) noexcept { std::get<queue_t<found::SymClaimCell  <O>>>(tup_).emplace_back(std::move(desc)); }
+		void push_back(found::CellsClaimSyms<O>&& desc) noexcept { std::get<queue_t<found::CellsClaimSyms<O>>>(tup_).emplace_back(std::move(desc)); }
+		void push_back(found::SymsClaimCells<O>&& desc) noexcept { std::get<queue_t<found::SymsClaimCells<O>>>(tup_).emplace_back(std::move(desc)); }
+		void push_back(found::LockedCands   <O>&& desc) noexcept { std::get<queue_t<found::LockedCands   <O>>>(tup_).emplace_back(std::move(desc)); }
 	};
 }
 #endif

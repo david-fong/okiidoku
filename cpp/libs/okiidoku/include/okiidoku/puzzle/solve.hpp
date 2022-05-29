@@ -21,6 +21,9 @@ namespace okiidoku::mono::detail::solver {
 
 namespace okiidoku::mono {
 
+	using num_solns_found_t = unsigned long long;
+
+
 	template<Order O> requires(is_order_compiled(O))
 	class OKIIDOKU_EXPORT FastSolver final {
 	public:
@@ -30,6 +33,9 @@ namespace okiidoku::mono {
 		// return of `std::nullopt` means no more solutions exist for the puzzle.
 		// example usage: `while (const auto solution {solution_walker.get_next_solution()}; solution) {...}`
 		[[nodiscard]] std::optional<Grid<O>> get_next_solution() noexcept;
+
+		[[nodiscard, gnu::pure]]
+		num_solns_found_t num_solns_found() const noexcept { return num_solns_found_; }
 
 		~FastSolver() noexcept;
 		FastSolver(const FastSolver&) = delete;
@@ -46,6 +52,8 @@ namespace okiidoku::mono {
 		#else // fallback for MSVC
 		std::unique_ptr<engine_t> engine_;
 		#endif
+
+		num_solns_found_t num_solns_found_ {0};
 	};
 
 
@@ -58,6 +66,9 @@ namespace okiidoku::mono {
 		// return of `std::nullopt` means no more solutions exist for the puzzle.
 		// example usage: `while (const auto solution {solution_walker.get_next_solution()}; solution) {...}`
 		[[nodiscard]] std::optional<Grid<O>> get_next_solution() noexcept;
+
+		[[nodiscard, gnu::pure]]
+		num_solns_found_t num_solns_found() const noexcept { return num_solns_found_; }
 
 		~VeryDeductiveSolver() noexcept;
 		VeryDeductiveSolver(const VeryDeductiveSolver&) = delete;
@@ -74,6 +85,8 @@ namespace okiidoku::mono {
 		#else // fallback for MSVC
 		std::unique_ptr<engine_t> engine_;
 		#endif
+
+		num_solns_found_t num_solns_found_ {0};
 	};
 }
 

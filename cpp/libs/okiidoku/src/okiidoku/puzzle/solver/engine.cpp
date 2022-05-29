@@ -1,7 +1,5 @@
 #include <okiidoku/puzzle/solver/engine.hpp>
 
-#include <okiidoku/puzzle/solver/cand_elim_apply.hpp>
-
 #include <algorithm>
 
 // TODO.low go through and see where it makes sense to add [[likely/unlikely]].
@@ -19,6 +17,7 @@ namespace okiidoku::mono::detail::solver {
 			assert(given <= T::O2);
 			if (given >= T::O2) { continue; }
 			register_new_given_(static_cast<rmi_t>(rmi), static_cast<val_t>(given));
+			assert(cells_cands_.at_rmi(rmi).count() > 0);
 		}
 	}
 
@@ -48,6 +47,7 @@ namespace okiidoku::mono::detail::solver {
 		const EngineImpl<O>::rmi_t rmi,
 		F elim_fn
 	) noexcept {
+		assert(!no_solutions_remain());
 		auto& cell_cands {cells_cands_.at_rmi(rmi)};
 		const auto old_cands_count {cell_cands.count()};
 		elim_fn(cell_cands);
@@ -55,7 +55,8 @@ namespace okiidoku::mono::detail::solver {
 		assert(new_cands_count <= old_cands_count);
 
 		if (new_cands_count == 0) [[unlikely]] {
-			return detail_engine_impl_guess_stack_unwind_(*this);
+			assert(false); // TODO.asap delete this
+			return engine_unwind_guess_(*this);
 		}
 		if ((new_cands_count < old_cands_count) && (new_cands_count == 1)) [[unlikely]] {
 			enqueue_cand_elims_for_new_cell_claim_sym_(rmi);
@@ -68,6 +69,7 @@ namespace okiidoku::mono::detail::solver {
 		const EngineImpl<O>::rmi_t rmi,
 		const EngineImpl<O>::val_t cand_to_elim
 	) noexcept {
+		assert(!no_solutions_remain());
 		if (!cells_cands_.at_rmi(rmi).test(cand_to_elim)) {
 			// TODO.try this if-block can technically be removed. need to benchmark to see whether it is beneficial.
 			// candidate was already eliminated.
@@ -81,6 +83,7 @@ namespace okiidoku::mono::detail::solver {
 		const EngineImpl<O>::rmi_t rmi,
 		const HouseMask<O>& to_remove
 	) noexcept {
+		assert(!no_solutions_remain());
 		return do_elim_generic_(rmi, [&](auto& cands){ cands.remove(to_remove); });
 	}
 
@@ -89,6 +92,7 @@ namespace okiidoku::mono::detail::solver {
 		const EngineImpl<O>::rmi_t rmi,
 		const HouseMask<O>& to_retain
 	) noexcept {
+		assert(!no_solutions_remain());
 		return do_elim_generic_(rmi, [&](auto& cands){ cands.retain_only(to_retain); });
 	}
 
@@ -98,6 +102,7 @@ namespace okiidoku::mono::detail::solver {
 		const EngineImpl<O>::rmi_t rmi,
 		const EngineImpl<O>::val_t val
 	) noexcept {
+		assert(!no_solutions_remain());
 		assert(val < T::O2);
 		auto& cell_cands {cells_cands_.at_rmi(rmi)};
 		assert(cell_cands.test(val));
@@ -114,15 +119,17 @@ namespace okiidoku::mono::detail::solver {
 	void EngineImpl<O>::enqueue_cand_elims_for_new_cell_claim_sym_(
 		const EngineImpl<O>::rmi_t rmi
 	) noexcept {
+		assert(!no_solutions_remain());
 		assert(get_num_puzcells_remaining() > 0);
 		auto& cell_cands {cells_cands_.at_rmi(rmi)};
 		assert(cell_cands.count() == 1);
-		found_queues_.emplace(found::CellClaimSym<O>{
+		assert(cell_cands.test(cell_cands.count_lower_zeros_assuming_non_empty_mask()));
+		found_queues_.push_back(found::CellClaimSym<O>{
 			.rmi{rmi},
 			.val{cell_cands.count_lower_zeros_assuming_non_empty_mask()},
 		});
 		--num_puzcells_remaining_;
-		assert(get_num_puzcells_remaining() == static_cast<o4i_t>(std::count_if(
+		assert(get_num_puzcells_remaining() == T::O4 - static_cast<o4i_t>(std::count_if(
 			cells_cands_.get_underlying_array().cbegin(),
 			cells_cands_.get_underlying_array().cend(),
 			[](const auto& c){ return c.count() == 1; }
@@ -134,6 +141,7 @@ namespace okiidoku::mono::detail::solver {
 	void EngineImpl<O>::push_guess(
 		const Guess<O> guess
 	) noexcept {
+		assert(!no_solutions_remain());
 		assert(!has_queued_cand_elims());
 		assert(cells_cands_.at_rmi(guess.rmi).test(guess.val));
 		assert(cells_cands_.at_rmi(guess.rmi).count() > 1);
@@ -144,7 +152,8 @@ namespace okiidoku::mono::detail::solver {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	SolutionsRemain detail_engine_impl_guess_stack_unwind_(EngineImpl<O>& e) noexcept {
+	SolutionsRemain engine_unwind_guess_(EngineImpl<O>& e) noexcept {
+		assert(!e.no_solutions_remain());
 		// e.found_queues_.clear(); // Not necessary due to contract.
 		if (e.guess_stack_.empty()) {
 			e.no_solutions_remain_ = true;
@@ -155,6 +164,12 @@ namespace okiidoku::mono::detail::solver {
 		e.cells_cands_ = *std::move(frame.prev_cells_cands);
 		e.num_puzcells_remaining_ = frame.num_puzcells_remaining;
 		return e.do_elim_remove_sym_(frame.guess.rmi, frame.guess.val);
+	}
+
+
+	template<Order O> requires(is_order_compiled(O))
+	SolutionsRemain Engine<O>::unwind_guess() noexcept {
+		return engine_unwind_guess_(static_cast<EngineImpl<O>&>(*this));
 	}
 
 

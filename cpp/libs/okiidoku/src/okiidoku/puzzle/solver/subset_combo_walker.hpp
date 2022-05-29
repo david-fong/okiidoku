@@ -26,7 +26,8 @@ namespace okiidoku::mono::detail::solver {
 			begin_{begin}, end_{end}, subset_size_{subset_size},
 			has_more_{begin + subset_size <= end}
 		{
-			assert(end_ < T::O2);
+			assert(end_ <= T::O2);
+			assert(subset_size < T::O2);
 			assert(begin_ + subset_size_ <= T::O2);
 			set_subset_size(subset_size_);
 		}

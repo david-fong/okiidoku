@@ -37,18 +37,17 @@ Examples of various ways this could be used:
 namespace okiidoku::mono::detail::solver {
 
 	template<Order O> requires(is_order_compiled(O)) struct EngineImpl;
+	template<Order O> requires(is_order_compiled(O)) class Engine;
 
 	struct SolutionsRemain;
 
 	// usage: must be called immediately when a cell's candidate-symbol count
-	//  changes to zero.
+	//  changes to zero. call to prepare to find another solution.
 	// the most-recent guess gets eliminated, which may also change the guessed cell's
 	//  candidate-symbol count to become zero, in which case it "recurses".
 	// returns that no solutions remain if the guess stack is empty.
 	template<Order O> requires(is_order_compiled(O))
-	SolutionsRemain detail_engine_impl_guess_stack_unwind_(EngineImpl<O>&) noexcept;
-	// Note: ^I wanted this to be a private `EngineImpl` member, but friendship got ugly.
-	// TODO hm... but now I don't like that this function is free and visible. maybe try private again.
+	SolutionsRemain engine_unwind_guess_(EngineImpl<O>&) noexcept;
 
 
 	// This class exists to make it difficult for me to forget to internally
@@ -56,7 +55,7 @@ namespace okiidoku::mono::detail::solver {
 	// side to check the result in an always-readable way.
 	struct [[nodiscard("must stop if no solutions remain")]] SolutionsRemain final {
 		#define OKIIDOKU_FOR_COMPILED_O(O_) \
-		friend SolutionsRemain detail_engine_impl_guess_stack_unwind_<O_>(EngineImpl<O_>&) noexcept;
+		friend SolutionsRemain engine_unwind_guess_<O_>(EngineImpl<O_>&) noexcept;
 		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 		#undef OKIIDOKU_FOR_COMPILED_O
 
@@ -92,7 +91,7 @@ namespace okiidoku::mono::detail::solver {
 	struct EngineImpl {
 		// The nice thing about separating `Engine` and `EngineImpl` is that `EngineImpl`
 		// no longer friends the find and apply functions (better encapsulation).
-		friend SolutionsRemain detail_engine_impl_guess_stack_unwind_<O>(EngineImpl<O>&) noexcept;
+		friend SolutionsRemain engine_unwind_guess_<O>(EngineImpl<O>&) noexcept;
 		using T = Ints<O>;
 		using o2i_t = int_ts::o2i_t<O>;
 		using val_t = int_ts::o2xs_t<O>;
@@ -105,6 +104,7 @@ namespace okiidoku::mono::detail::solver {
 		// if this returns `true`.
 		//
 		// Note: All candidate elimination techniques have a contract that this returns `false`.
+		// contract: All other non-const member functions require that this return `false`.
 		[[nodiscard, gnu::pure]]
 		bool no_solutions_remain() const noexcept { return no_solutions_remain_; }
 
@@ -166,8 +166,6 @@ namespace okiidoku::mono::detail::solver {
 		void enqueue_cand_elims_for_new_cell_claim_sym_(rmi_t rmi) noexcept;
 
 
-		// num_puzzles_found_t num_puzzles_found_ {0};
-
 		CandsGrid<O> cells_cands_;
 
 		o4i_t num_puzcells_remaining_ {T::O4};
@@ -212,6 +210,7 @@ namespace okiidoku::mono::detail::solver {
 		using EngineImpl<O>::push_guess;
 		using EngineImpl<O>::get_guess_stack_depth;
 		using EngineImpl<O>::build_solution_obj;
+		SolutionsRemain unwind_guess() noexcept;
 	};
 
 

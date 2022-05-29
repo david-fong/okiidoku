@@ -6,6 +6,7 @@
 #include <okiidoku/print_2d.hpp>
 #include <okiidoku/gen.hpp>
 #include <okiidoku/grid.hpp>
+#include <okiidoku/house_mask.hpp>
 #include <okiidoku/shared_rng.hpp>
 
 #include <okiidoku_cli_utils/console_setup.hpp>
@@ -16,8 +17,12 @@
 #include <string_view>
 #include <random>    // random_device,
 #include <array>
+#include <cassert>
 
 // OKIIDOKU_DEFINE_MT19937_64
+#ifdef NDEBUG
+#undef NDEBUG
+#endif
 
 
 // TODO.high it should probably just return right away if it encounters any failure.
@@ -27,8 +32,18 @@ unsigned test_morph(okiidoku::SharedRng& shared_rng, const unsigned num_rounds) 
 	using namespace okiidoku;
 	using namespace okiidoku::mono;
 	using T = Ints<O>;
+	using o2i_t = int_ts::o2i_t<O>;
+	// using o4i_t = int_ts::o4i_t<O>;
 	std::cout << "\n\ntesting for order " << O << std::endl;
 	// Note: if gen_path gets un-deprecated, assert that paths are valid.
+
+	assert(house_mask_ones<O>.count() == T::O2);
+
+	for (o2i_t i {0}; i < T::O2; ++i) {
+	for (o2i_t j {0}; j < T::O2; ++j) {
+		const auto rmi {box_cell_to_rmi<O>(i,j)};
+		assert(rmi_to_box<O>(rmi) == i);
+	}}
 
 	unsigned int count_bad {0};
 
@@ -42,20 +57,22 @@ unsigned test_morph(okiidoku::SharedRng& shared_rng, const unsigned num_rounds) 
 		std::exit(1);
 	}
 
-	Grid<O> puz_grid {gen_grid};
-	make_minimal_puzzle(puz_grid); {
-		const auto palette_ {std::to_array<print_2d_grid_view>({
-			[&](auto rmi){ return gen_grid.at_rmi(rmi); },
-			[&](auto rmi){ return puz_grid.at_rmi(rmi); },
-		})};
-		print_2d(std::clog, O, palette_, shared_rng);
-	}
-
 	Grid<O> canon_grid;
 
 	for (unsigned round {0}; round < num_rounds; ) {
 		generate(gen_grid, shared_rng);
-		const auto gen_canon_transform {canonicalize(gen_grid)};
+
+		std::clog << "\nmaking puzzle";
+		Grid<O> puz_grid {gen_grid};
+		make_minimal_puzzle(puz_grid); {
+			const auto palette_ {std::to_array<print_2d_grid_view>({
+				[&](auto rmi){ return gen_grid.at_rmi(rmi); },
+				[&](auto rmi){ return puz_grid.at_rmi(rmi); },
+			})};
+			print_2d(std::clog, O, palette_, shared_rng);
+		}
+
+		/* const auto gen_canon_transform {canonicalize(gen_grid)};
 		if (gen_canon_transform.inverted().inverted() != gen_canon_transform) {
 			std::clog << "\ntransformation twice-inverted must equal itself.";
 			std::exit(1);
@@ -77,7 +94,7 @@ unsigned test_morph(okiidoku::SharedRng& shared_rng, const unsigned num_rounds) 
 			std::clog << "\n==========\n";
 		} else {
 			std::clog << ".";
-		}
+		} */
 		++round;
 	}
 	std::clog.flush();

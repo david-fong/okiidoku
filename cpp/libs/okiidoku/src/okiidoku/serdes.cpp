@@ -74,6 +74,7 @@ namespace okiidoku::mono { namespace {
 
 	template<Order O> requires(is_order_compiled(O))
 	void SerdesHelper<O>::print_val(std::ostream& os, const typename SerdesHelper<O>::val_t val) noexcept {
+		assert(cell_cands.test(val));
 		// The number of possible different values that this cell could be
 		// based on the values that have already been encountered.
 		auto smol_val_buf_remaining {cell_cands.count()};
@@ -82,7 +83,7 @@ namespace okiidoku::mono { namespace {
 		// Some slightly-weird-looking logic stems from the fact that it is
 		// a "null" action to try to print something that can only take on one
 		// value (as in- the buffer will be unchanged). Just keep that in mind.
-		auto smol_val_buf {static_cast<val_t>(cell_cands.count_bits_below(val))};
+		auto smol_val_buf {static_cast<val_t>(cell_cands.count_set_bits_below(val))};
 		assert(smol_val_buf < smol_val_buf_remaining);
 		while (smol_val_buf_remaining > 1) {
 			buf += static_cast<buf_t>(buf_pos * smol_val_buf); // should never overflow

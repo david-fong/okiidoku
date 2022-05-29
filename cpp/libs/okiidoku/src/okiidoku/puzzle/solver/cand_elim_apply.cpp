@@ -55,7 +55,7 @@ namespace okiidoku::mono::detail::solver {
 	template<Order O> requires(is_order_compiled(O))
 	SolutionsRemain CandElimApplyImpl<O>::apply(
 		Engine<O>& engine,
-		const found::CellClaimSym<O>& desc // TODO consider/try passing by value
+		const found::CellClaimSym<O> desc // TODO consider/try passing by value
 	) noexcept {
 		// repetitive code. #undef-ed before end of function.
 		#define OKIIDOKU_TRY_ELIM_NB_CAND \

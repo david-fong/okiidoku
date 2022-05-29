@@ -11,6 +11,7 @@
 #include <limits>      // numeric_limits<T>::max
 #include <type_traits> // conditional_t
 #include <concepts>    // unsigned_integral
+#include <cassert>
 
 namespace okiidoku {
 
@@ -136,16 +137,21 @@ namespace okiidoku::mono {
 	requires(Any_o2x_t<O, T_house> && Any_o2x_t<O, T_house_cell>) [[nodiscard, gnu::const]]
 	constexpr int_ts::o4x_t<O> box_cell_to_rmi(const T_house box, const T_house_cell box_cell) noexcept {
 		using T = Ints<O>;
+		assert(box < T::O2);
+		assert(box_cell < T::O2);
 		using o4x_t = int_ts::o4x_t<O>;
-		const auto row {static_cast<o4x_t>(((box/T::O1)*T::O1) + (box_cell/T::O1))};
-		const auto col {static_cast<o4x_t>(((box%T::O1)*T::O1) + (box_cell%T::O1))};
-		return static_cast<o4x_t>((Ints<O>::O2 * row) + col);
+		const auto row {static_cast<o4x_t>(((box/T::O1)*T::O1) + (box_cell/T::O1))}; assert(row < T::O2);
+		const auto col {static_cast<o4x_t>(((box%T::O1)*T::O1) + (box_cell%T::O1))}; assert(col < T::O2);
+		const auto rmi {static_cast<o4x_t>((Ints<O>::O2 * row) + col)};
+		return rmi;
 	}
 
 	template<Order O, class T_house, class T_house_cell>
 	requires(Any_o2x_t<O, T_house> && Any_o2x_t<O, T_house_cell>) [[nodiscard, gnu::const]]
 	constexpr int_ts::o4x_t<O> house_cell_to_rmi(const HouseType house_type, const T_house house, const T_house_cell house_cell) noexcept {
 		using T = Ints<O>;
+		assert(house < T::O2);
+		assert(house_cell < T::O2);
 		using o4x_t = int_ts::o4x_t<O>;
 		switch (house_type) {
 		case HouseType::row: return static_cast<o4x_t>((T::O2*house)+house_cell);

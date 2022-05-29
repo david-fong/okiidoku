@@ -16,5 +16,6 @@ puzcells
 serdes
 smol
 soln
+solns
 speedup
 unsat

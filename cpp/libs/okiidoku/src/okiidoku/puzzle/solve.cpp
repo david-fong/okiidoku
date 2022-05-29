@@ -4,6 +4,8 @@
 #include <okiidoku/puzzle/solver/cand_elim_find.hpp>
 #include <okiidoku/puzzle/solver/engine.hpp>
 
+#include <iostream>
+
 namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
@@ -26,6 +28,10 @@ namespace okiidoku::mono {
 		if (e.no_solutions_remain()) [[unlikely]] {
 			return std::nullopt;
 		}
+		if ((num_solns_found() > 0) && (e.get_num_puzcells_remaining() == 0)) {
+			const auto check {e.unwind_guess()};
+			if (check.no_solutions_remain()) { return std::nullopt; }
+		}
 		while (e.get_num_puzcells_remaining() > 0) [[likely]] {
 			{
 				using Apply = detail::solver::CandElimApply<O>;
@@ -36,12 +42,15 @@ namespace okiidoku::mono {
 			}
 
 			using Find = detail::solver::CandElimFind<O>;
-			Find::sym_claim_cell(e);  if (e.has_queued_cand_elims()) { continue; }
+			// Find::sym_claim_cell(e);  if (e.has_queued_cand_elims()) { continue; }
 			// Find::locked_cands(e);     if (e.has_queued_cand_elims()) { continue; }
-			Find::cells_claim_syms(e); if (e.has_queued_cand_elims()) { continue; }
-			Find::syms_claim_cells(e); if (e.has_queued_cand_elims()) { continue; } // TODO.try apparently the two different types of subset techniques come in accompanying pairs. Perhaps we only need to call one of the finders then? Please investigate/experiment.
+			// Find::cells_claim_syms(e); if (e.has_queued_cand_elims()) { continue; }
+			// Find::syms_claim_cells(e); if (e.has_queued_cand_elims()) { continue; } // TODO.try apparently the two different types of subset techniques come in accompanying pairs. Perhaps we only need to call one of the finders then? Please investigate/experiment.
+
+			std::clog << "\npushing guess";
 			e.push_guess(Find::good_guess_candidate(e));
 		}
+		++num_solns_found_;
 		return std::optional<Grid<O>>{std::in_place, e.build_solution_obj()};
 	}
 
@@ -54,6 +63,10 @@ namespace okiidoku::mono {
 		engine_t& e {*engine_};
 		if (e.no_solutions_remain()) [[unlikely]] {
 			return std::nullopt;
+		}
+		if ((num_solns_found() > 0) && (e.get_num_puzcells_remaining() == 0)) {
+			const auto check {e.unwind_guess()};
+			if (check.no_solutions_remain()) { return std::nullopt; }
 		}
 		while (e.get_num_puzcells_remaining() > 0) [[likely]] {
 			using Find = detail::solver::CandElimFind<O>;
@@ -81,6 +94,7 @@ namespace okiidoku::mono {
 				e.push_guess(Find::good_guess_candidate(e));
 			}
 		}
+		++num_solns_found_;
 		return std::optional<Grid<O>>{std::in_place, e.build_solution_obj()};
 	}
 

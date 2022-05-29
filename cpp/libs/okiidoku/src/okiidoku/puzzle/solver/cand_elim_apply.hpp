@@ -24,7 +24,11 @@ namespace okiidoku::mono::detail::solver {
 		using rmi_t = int_ts::o4xs_t<O>;
 
 	public:
-		static SolutionsRemain apply(Engine<O>&, const found::CellClaimSym<O>&) noexcept;
+		// note: takes desc by-value instead of by-reference since unlike the rest of
+		// the queues, the CellRequireSym queue can be passively updated while applying
+		// an element of the queue. If using by-reference, such an update could invalidate
+		// the referred-to desc (ex. by memcpy during resize)
+		static SolutionsRemain apply(Engine<O>&, const found::CellClaimSym<O>) noexcept;
 
 		// contract: the specified symbol is a candidate-symbol at the specified rmi.
 		//  this contract is respected by the corresponding `find` function.
