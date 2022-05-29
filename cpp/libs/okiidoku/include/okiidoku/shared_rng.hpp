@@ -3,6 +3,7 @@
 
 #include <random>
 #include <mutex>
+#include <cstdint>
 
 /* #define OKIIDOKU_DEFINE_MT19937_64 \
 template class std::mersenne_twister_engine<std::uint_fast64_t, 64, 312, 156, 31, \
@@ -30,6 +31,11 @@ namespace okiidoku {
 		// - this is not thread-safe. guard with mutex where necessary.
 		std::mt19937_64 rng;
 		mutable std::mutex mutex;
+
+		[[nodiscard]] std::uint_least64_t get_u64() noexcept {
+			std::lock_guard lock_guard {mutex};
+			return rng() - decltype(rng)::min();
+		}
 	};
 }
 #endif

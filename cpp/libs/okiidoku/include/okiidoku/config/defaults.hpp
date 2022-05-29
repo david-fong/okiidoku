@@ -11,7 +11,7 @@
 // unfortunately we can't use the constexpr variable/function flavour of
 // tweak configs since they aren't accessible to the preprocessor.
 #ifndef OKIIDOKU_COMPILE_O2
-#define OKIIDOKU_COMPILE_O2 false
+#define OKIIDOKU_COMPILE_O2 true
 #endif
 
 #ifndef OKIIDOKU_COMPILE_O3

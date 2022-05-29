@@ -13,11 +13,14 @@ namespace okiidoku::mono::detail::solver {
 	EngineImpl<O>::EngineImpl(const Grid<O>& puzzle) noexcept {
 		cells_cands_.get_underlying_array().fill(house_mask_ones<O>);
 		for (o4i_t rmi {0}; rmi < T::O4; ++rmi) {
-			const auto& given {puzzle.at_rmi(rmi)};
-			assert(given <= T::O2);
-			if (given >= T::O2) { continue; }
-			register_new_given_(static_cast<rmi_t>(rmi), static_cast<val_t>(given));
-			assert(cells_cands_.at_rmi(rmi).count() > 0);
+			const auto& val {puzzle.at_rmi(rmi)};
+			assert(val <= T::O2);
+			if (val < T::O2) {
+				register_new_given_(static_cast<rmi_t>(rmi), static_cast<val_t>(val));
+				assert(cells_cands_.at_rmi(rmi).count() == 1);
+			} else {
+				assert(cells_cands_.at_rmi(rmi).count() == T::O2);
+			}
 		}
 	}
 
@@ -122,12 +125,10 @@ namespace okiidoku::mono::detail::solver {
 		assert(!no_solutions_remain());
 		assert(get_num_puzcells_remaining() > 0);
 		auto& cell_cands {cells_cands_.at_rmi(rmi)};
+		const auto val {cell_cands.count_lower_zeros_assuming_non_empty_mask()};
+		assert(cell_cands.test(val));
 		assert(cell_cands.count() == 1);
-		assert(cell_cands.test(cell_cands.count_lower_zeros_assuming_non_empty_mask()));
-		found_queues_.push_back(found::CellClaimSym<O>{
-			.rmi{rmi},
-			.val{cell_cands.count_lower_zeros_assuming_non_empty_mask()},
-		});
+		found_queues_.push_back(found::CellClaimSym<O>{.rmi{rmi},.val{val}});
 		--num_puzcells_remaining_;
 		assert(get_num_puzcells_remaining() == T::O4 - static_cast<o4i_t>(std::count_if(
 			cells_cands_.get_underlying_array().cbegin(),

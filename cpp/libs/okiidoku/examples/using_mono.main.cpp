@@ -30,14 +30,14 @@ int main([[maybe_unused]] const int argc, [[maybe_unused]] char const *const arg
 	constexpr oki::Order O {3};
 
 	oki::Grid<O> gen_grid;
-	oki::generate(gen_grid, shared_rng);
+	oki::generate(gen_grid, shared_rng.get_u64());
 	oki::Grid<O> puz_grid;
 	// TODO.wait oki::make_minimal_puzzle(gen_grid, puz_of_gen_grid);
 	auto canon_transform_for_gen_grid {oki::canonicalize(gen_grid)};
 	canon_transform_for_gen_grid.apply_in_place(puz_grid);
 
 	oki::Grid<O> canon_grid {gen_grid};
-	oki::scramble(canon_grid, shared_rng);
+	oki::scramble(canon_grid, shared_rng.get_u64());
 	oki::canonicalize(canon_grid);
 
 	if (gen_grid != canon_grid) {
@@ -46,13 +46,7 @@ int main([[maybe_unused]] const int argc, [[maybe_unused]] char const *const arg
 		std::abort();
 	}
 
-	{
-		const auto palette_ {std::to_array<oki::print_2d_grid_view>({
-			[&](auto rmi){ return   gen_grid.at_rmi(rmi); },
-			[&](auto rmi){ return canon_grid.at_rmi(rmi); },
-		})};
-		oki::print_2d(std::clog, O, palette_, shared_rng);
-	}
+	oki::print_2d<O>(std::clog, shared_rng.get_u64(), gen_grid, canon_grid);
 
 	return 0;
 }

@@ -8,8 +8,6 @@
 
 namespace okiidoku::mono { namespace {
 
-	// Note: using a scoped rng to avoid holding the shared_rng mutex
-	// during the long-running parts of this function body.
 	using rng_t = std::minstd_rand; // other good LCG parameters: https://arxiv.org/pdf/2001.05304v3.pdf
 
 
@@ -29,7 +27,7 @@ namespace okiidoku::mono { namespace {
 	};
 
 	template<Order O> requires(is_order_compiled(O))
-	void make_boxes_valid(Grid<O>& grid, const int_ts::o2i_t<O> h_chute, rng_t& rng_) noexcept {
+	void make_boxes_valid(Grid<O>& grid, const int_ts::o2i_t<O> h_chute, rng_t& rng) noexcept {
 		using T = Ints<O>;
 		using o1x_t = int_ts::o1x_t<O>;
 		using o2x_t = int_ts::o2x_t<O>;
@@ -44,12 +42,12 @@ namespace okiidoku::mono { namespace {
 		}}
 		o3i_t num_missing_syms {boxes_has.count_num_missing_syms()};
 		while (num_missing_syms != 0) [[likely]] {
-			const auto a_col {static_cast<o2x_t>((rng_() - rng_t::min()) % T::O2)};
-			const auto b_col {static_cast<o2x_t>((rng_() - rng_t::min()) % T::O2)};
+			const auto a_col {static_cast<o2x_t>((rng() - rng_t::min()) % T::O2)};
+			const auto b_col {static_cast<o2x_t>((rng() - rng_t::min()) % T::O2)};
 			const auto a_box {static_cast<o1x_t>(a_col/T::O1)};
 			const auto b_box {static_cast<o1x_t>(b_col/T::O1)};
 			if (a_box == b_box) [[unlikely]] { continue; }
-			const auto row {static_cast<o2x_t>(h_chute + ((rng_() - rng_t::min()) % T::O1))};
+			const auto row {static_cast<o2x_t>(h_chute + ((rng() - rng_t::min()) % T::O1))};
 			auto& a_sym {grid.at(row,a_col)};
 			auto& b_sym {grid.at(row,b_col)};
 			assert(a_sym != b_sym);
@@ -89,7 +87,7 @@ namespace okiidoku::mono { namespace {
 	};
 
 	template<Order O> requires(is_order_compiled(O))
-	void make_cols_valid(Grid<O>& grid, const int_ts::o2i_t<O> v_chute, rng_t& rng_) noexcept {
+	void make_cols_valid(Grid<O>& grid, const int_ts::o2i_t<O> v_chute, rng_t& rng) noexcept {
 		using T = Ints<O>;
 		using o1x_t = int_ts::o1x_t<O>;
 		using o1i_t = int_ts::o1i_t<O>;
@@ -105,10 +103,10 @@ namespace okiidoku::mono { namespace {
 		}}
 		o3i_t num_missing_syms {cols_has.count_num_missing_syms()};
 		while (num_missing_syms != 0) [[likely]] {
-			const auto a_col {static_cast<o1x_t>((rng_() - rng_t::min()) % T::O1)};
-			const auto b_col {static_cast<o1x_t>((rng_() - rng_t::min()) % T::O1)};
+			const auto a_col {static_cast<o1x_t>((rng() - rng_t::min()) % T::O1)};
+			const auto b_col {static_cast<o1x_t>((rng() - rng_t::min()) % T::O1)};
 			if (a_col == b_col) [[unlikely]] { continue; }
-			const auto row {static_cast<o2x_t>((rng_() - rng_t::min()) % (T::O2))};
+			const auto row {static_cast<o2x_t>((rng() - rng_t::min()) % (T::O2))};
 			auto& a_sym {grid.at(row, static_cast<o2i_t>(v_chute + a_col))};
 			auto& b_sym {grid.at(row, static_cast<o2i_t>(v_chute + b_col))};
 			assert(a_sym != b_sym);
@@ -134,7 +132,7 @@ namespace okiidoku::mono { namespace {
 namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
-	void generate(Grid<O>& grid, SharedRng& shared_rng) noexcept { // NOLINT(readability-function-cognitive-complexity) *laughs in cognitive complexity of 72
+	void generate(Grid<O>& grid, rng_seed_t rng_seed) noexcept {
 		using T = Ints<O>;
 		using o2i_t = int_ts::o2i_t<O>;
 		{
@@ -145,24 +143,21 @@ namespace okiidoku::mono {
 				std::copy(example_row.cbegin(), example_row.cend(), span.begin());
 			}
 		}
-		rng_t rng_; // NOLINT(cert-msc32-c,cert-msc51-cpp) deferred seeding
+		rng_t rng {rng_seed};
 		{
-			std::lock_guard lock_guard {shared_rng.mutex};
-			rng_.seed(static_cast<unsigned int>(shared_rng.rng()));
 			for (o2i_t row {0}; row < T::O2; ++row) {
 				const auto row_sp {grid.row_span_at(row)};
-				std::shuffle(row_sp.begin(), row_sp.end(), shared_rng.rng);
+				std::shuffle(row_sp.begin(), row_sp.end(), rng);
 			}
-			// TODO.try should the shuffle just use `rng_`? Note: A data-parallel implementation would be much better that way.
 		}
 		/* Note: when making boxes valid, keeping one line untouched works,
 		but is actually slower. same for making columns valid and one box. */
 
 		for (o2i_t h_chute {0}; h_chute < T::O2; h_chute += T::O1) {
-			make_boxes_valid(grid, h_chute, rng_);
+			make_boxes_valid(grid, h_chute, rng);
 		}
 		for (o2i_t v_chute {0}; v_chute < T::O2; v_chute += T::O1) {
-			make_cols_valid(grid, v_chute, rng_);
+			make_cols_valid(grid, v_chute, rng);
 		}
 
 		assert(grid_follows_rule<O>(grid));
@@ -170,7 +165,7 @@ namespace okiidoku::mono {
 
 
 	#define OKIIDOKU_FOR_COMPILED_O(O_) \
-		template void generate<O_>(Grid<O_>&, SharedRng&) noexcept;
+		template void generate<O_>(Grid<O_>&, rng_seed_t) noexcept;
 	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 	#undef OKIIDOKU_FOR_COMPILED_O
 }
@@ -178,9 +173,9 @@ namespace okiidoku::mono {
 
 namespace okiidoku::visitor {
 
-	void generate(Grid& vis_sink, SharedRng& shared_rng) noexcept {
+	void generate(Grid& vis_sink, const rng_seed_t rng_seed) noexcept {
 		return std::visit([&](auto& mono_sink) {
-			return mono::generate(mono_sink, shared_rng);
+			return mono::generate(mono_sink, rng_seed);
 		}, vis_sink.get_mono_variant());
 	}
 }

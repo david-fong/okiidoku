@@ -60,17 +60,13 @@ unsigned test_morph(okiidoku::SharedRng& shared_rng, const unsigned num_rounds) 
 	Grid<O> canon_grid;
 
 	for (unsigned round {0}; round < num_rounds; ) {
-		generate(gen_grid, shared_rng);
+		generate(gen_grid, shared_rng.get_u64());
 
 		std::clog << "\nmaking puzzle";
 		Grid<O> puz_grid {gen_grid};
-		make_minimal_puzzle(puz_grid); {
-			const auto palette_ {std::to_array<print_2d_grid_view>({
-				[&](auto rmi){ return gen_grid.at_rmi(rmi); },
-				[&](auto rmi){ return puz_grid.at_rmi(rmi); },
-			})};
-			print_2d(std::clog, O, palette_, shared_rng);
-		}
+		make_minimal_puzzle(puz_grid, shared_rng.get_u64());
+		print_2d<O>(std::clog, shared_rng.get_u64(), gen_grid, puz_grid);
+
 
 		/* const auto gen_canon_transform {canonicalize(gen_grid)};
 		if (gen_canon_transform.inverted().inverted() != gen_canon_transform) {
@@ -79,17 +75,13 @@ unsigned test_morph(okiidoku::SharedRng& shared_rng, const unsigned num_rounds) 
 		}
 
 		canon_grid = gen_grid;
-		scramble(canon_grid, shared_rng);
+		scramble(canon_grid, shared_rng.get_u64());
 		canonicalize(canon_grid);
 
 		if (gen_grid != canon_grid) {
 			++count_bad;
 			std::clog << "\n!bad\n";
-			const auto palette_ {std::to_array<print_2d_grid_view>({
-				[&](auto rmi){ return   gen_grid.at_rmi(rmi); },
-				[&](auto rmi){ return canon_grid.at_rmi(rmi); },
-			})};
-			print_2d(std::clog, O, palette_, shared_rng);
+			print_2d<O>(std::clog, shared_rng.get_u64(), gen_grid, canon_grid);
 			// std::clog << "\n";
 			std::clog << "\n==========\n";
 		} else {

@@ -25,7 +25,7 @@ namespace okiidoku::mono::detail::solver {
 
 	public:
 		// note: takes desc by-value instead of by-reference since unlike the rest of
-		// the queues, the CellRequireSym queue can be passively updated while applying
+		// the queues, the CellClaimSym queue can be passively updated while applying
 		// an element of the queue. If using by-reference, such an update could invalidate
 		// the referred-to desc (ex. by memcpy during resize)
 		static SolutionsRemain apply(Engine<O>&, const found::CellClaimSym<O>) noexcept;

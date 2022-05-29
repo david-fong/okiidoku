@@ -15,6 +15,8 @@
 
 namespace okiidoku {
 
+	using rng_seed_t = std::uint_least64_t;
+
 	enum class HouseType : unsigned char {
 		box, row, col,
 	};
@@ -163,6 +165,8 @@ namespace okiidoku::mono {
 
 
 namespace okiidoku::visitor {
+
+	// using Ints = mono::Ints<largest_compiled_order>;
 
 	namespace int_ts {
 		using o1x_t = mono::int_ts::o1x_t<largest_compiled_order>;

@@ -14,7 +14,7 @@ namespace okiidoku::mono { namespace {
 namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
-	void make_minimal_puzzle(Grid<O>& grid) noexcept {
+	void make_minimal_puzzle(Grid<O>& grid, const rng_seed_t rng_seed) noexcept {
 		assert(grid_follows_rule(grid));
 
 		#ifndef NDEBUG
@@ -36,7 +36,7 @@ namespace okiidoku::mono {
 		#endif
 
 		using rng_t = std::minstd_rand;
-		rng_t rng {std::random_device{}()};
+		rng_t rng {rng_seed};
 
 		using T = Ints<O>;
 		// using o2i_t = int_ts::o2i_t<O>;
@@ -93,7 +93,7 @@ namespace okiidoku::mono {
 
 
 	#define OKIIDOKU_FOR_COMPILED_O(O_) \
-		template void make_minimal_puzzle<O_>(Grid<O_>&) noexcept;
+		template void make_minimal_puzzle<O_>(Grid<O_>&, rng_seed_t) noexcept;
 	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 	#undef OKIIDOKU_FOR_COMPILED_O
 }
