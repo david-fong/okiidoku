@@ -71,21 +71,22 @@ namespace okiidoku::mono {
 			const auto val {std::exchange(grid.at_rmi(rmi), T::O2)};
 			assert(val < T::O2);
 			FastSolver solver {grid};
+			std::clog << "\n\n" << int(num_puzcell_cands) << ' ';
 			if (const auto soln1_opt {solver.get_next_solution()}; soln1_opt) {
-				std::clog << '\n' << int(num_puzcell_cands) << ' ';
 				if (const auto soln2_opt {solver.get_next_solution()}; soln2_opt) {
 					// multiple solutions now possible. removal would break properness. don't remove.
 					grid.at_rmi(rmi) = val;
-					std::clog << "rm failed " << int(rmi) << std::flush; // TODO delete this
+					std::clog << "\nrm failed " << int(rmi) << std::flush; // TODO delete this
 				} else {
 					// puzzle still proper (still only one solution possible). ok to remove.
-					assert(*soln1_opt == og_soln);
-					std::clog << "rm " << int(rmi) << std::flush; // TODO delete this
+					assert(soln1_opt.value() == og_soln);
+					std::clog << "\nrm " << int(rmi) << std::flush; // TODO delete this
 				}
 				remove_puzcell_cand_at(puzcell_cand_i);
 				assert(grid_follows_rule(grid));
 			} else {
 				// impossible. removing givens _never decreases_ the number of possible solutions.
+				// also contract that input is a proper puzzle.
 				assert(false);
 			}
 		}

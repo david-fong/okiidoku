@@ -32,12 +32,16 @@ unsigned test_morph(okiidoku::SharedRng& shared_rng, const unsigned num_rounds) 
 	using namespace okiidoku;
 	using namespace okiidoku::mono;
 	using T = Ints<O>;
+	using o2x_t = int_ts::o2x_t<O>;
 	using o2i_t = int_ts::o2i_t<O>;
 	// using o4i_t = int_ts::o4i_t<O>;
 	std::cout << "\n\ntesting for order " << O << std::endl;
 	// Note: if gen_path gets un-deprecated, assert that paths are valid.
 
 	assert(house_mask_ones<O>.count() == T::O2);
+	for (o2i_t i {0}; i < T::O2; ++i) {
+		assert(house_mask_ones<O>.count_set_bits_below(static_cast<o2x_t>(i)) == i);
+	}
 
 	for (o2i_t i {0}; i < T::O2; ++i) {
 	for (o2i_t j {0}; j < T::O2; ++j) {
@@ -48,14 +52,11 @@ unsigned test_morph(okiidoku::SharedRng& shared_rng, const unsigned num_rounds) 
 	unsigned int count_bad {0};
 
 	Grid<O> gen_grid;
-	if (!std::all_of(
+	assert(std::all_of(
 		gen_grid.get_underlying_array().cbegin(),
 		gen_grid.get_underlying_array().cend(),
 		[](const auto val){ return val == T::O2; }
-	)) {
-		std::clog << "\ngrid must be initialized to an empty grid.";
-		std::exit(1);
-	}
+	)); // grid must be initialized to an empty grid
 
 	Grid<O> canon_grid;
 

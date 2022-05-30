@@ -29,7 +29,7 @@ namespace okiidoku::mono {
 		static constexpr unsigned int num_ints        {(T::O2 + int_t_num_bits-1) / int_t_num_bits}; static_assert(num_ints != 0);
 		static constexpr unsigned int ints_t_num_bits {num_ints * int_t_num_bits};
 		static constexpr unsigned int num_excess_bits {ints_t_num_bits - T::O2};
-		[[nodiscard, gnu::const]] static constexpr unsigned char bit_index_to_int_index(const o2x_t bit_index) noexcept {
+		[[nodiscard, gnu::const]] static constexpr unsigned int bit_index_to_int_index(const o2x_t bit_index) noexcept {
 			return bit_index / int_t_num_bits;
 		}
 		using ints_t = std::array<int_t, num_ints>;

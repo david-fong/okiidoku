@@ -35,7 +35,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 	template<Order O> requires(is_order_compiled(O))
 	void find_sym_claim_cell(
 		const CandsGrid<O>& cells_cands,
-		CandElimQueues<O>& found_queues
+		FoundQueues<O>& found_queues
 	) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_PRELUDE
 		(void)cells_cands, (void)found_queues;
@@ -133,7 +133,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 	template<Order O> requires(is_order_compiled(O))
 	void find_cells_claim_syms(
 		const CandsGrid<O>& cells_cands,
-		CandElimQueues<O>& found_queues
+		FoundQueues<O>& found_queues
 	) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_PRELUDE
 		for (HouseType house_type : house_types) {
@@ -159,7 +159,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 	template<Order O> requires(is_order_compiled(O))
 	void find_syms_claim_cells(
 		const CandsGrid<O>& cells_cands,
-		CandElimQueues<O>& found_queues
+		FoundQueues<O>& found_queues
 	) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_PRELUDE
 		for (HouseType house_type : house_types) {
@@ -189,7 +189,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 	template<Order O> requires(is_order_compiled(O))
 	void find_locked_cands(
 		const CandsGrid<O>& cells_cands,
-		CandElimQueues<O>& found_queues
+		FoundQueues<O>& found_queues
 	) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_PRELUDE
 		(void)cells_cands, (void)found_queues;// TODO

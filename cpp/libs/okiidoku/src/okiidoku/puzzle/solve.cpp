@@ -28,7 +28,8 @@ namespace okiidoku::mono {
 		if (e.no_solutions_remain()) [[unlikely]] {
 			return std::nullopt;
 		}
-		if ((num_solns_found() > 0) && (e.get_num_puzcells_remaining() == 0)) {
+		if (num_solns_found() > 0) {
+			assert(e.get_num_puzcells_remaining() == 0);
 			const auto check {e.unwind_guess()};
 			if (check.no_solutions_remain()) { return std::nullopt; }
 		}
@@ -36,8 +37,8 @@ namespace okiidoku::mono {
 			{
 				using Apply = detail::solver::CandElimApply<O>;
 				const auto check {Apply::apply_all_queued(e)};
-				assert(!e.has_queued_cand_elims());
 				if (check.no_solutions_remain()) [[unlikely]] { return std::nullopt; }
+				assert(!e.has_queued_cand_elims());
 				if (e.get_num_puzcells_remaining() == 0) [[unlikely]] { break; }
 			}
 
@@ -50,6 +51,7 @@ namespace okiidoku::mono {
 			std::clog << "\npushing guess";
 			e.push_guess(Find::good_guess_candidate(e));
 		}
+		std::clog << "\nfinished guess stack depth: " << e.get_guess_stack_depth();
 		++num_solns_found_;
 		return std::optional<Grid<O>>{std::in_place, e.build_solution_obj()};
 	}
@@ -64,7 +66,8 @@ namespace okiidoku::mono {
 		if (e.no_solutions_remain()) [[unlikely]] {
 			return std::nullopt;
 		}
-		if ((num_solns_found() > 0) && (e.get_num_puzcells_remaining() == 0)) {
+		if (num_solns_found() > 0) {
+			assert(e.get_num_puzcells_remaining() == 0);
 			const auto check {e.unwind_guess()};
 			if (check.no_solutions_remain()) { return std::nullopt; }
 		}

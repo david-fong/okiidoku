@@ -5,19 +5,20 @@
 
 #include <deque>
 #include <tuple>
+#include <type_traits>
 
 namespace okiidoku::mono::detail::solver {
 
 	template<Order O> requires(is_order_compiled(O)) class CandElimApply;
 
 	template<Order O> requires(is_order_compiled(O))
-	struct CandElimQueues final {
+	struct FoundQueues final {
 		friend class CandElimApply<O>;
-	private:
+	public:
 		template<class T>
 		using queue_t = std::deque<T/*, <backing container option>*/>;
 
-		std::tuple<
+		using queues_t = std::tuple<
 			// in this cell-major engine, this queue is special- it is pushed to
 			// passively by the engine instead of by a `find` function, so keep in
 			// mind that consuming from other queues can result in pushes to it.
@@ -27,7 +28,10 @@ namespace okiidoku::mono::detail::solver {
 			queue_t<found::CellsClaimSyms<O>>,
 			queue_t<found::SymsClaimCells<O>>,
 			queue_t<found::LockedCands<O>>
-		> tup_;
+		>;
+
+	private:
+		queues_t tup_;
 
 	public:
 		[[nodiscard, gnu::pure]]
@@ -35,10 +39,12 @@ namespace okiidoku::mono::detail::solver {
 			return std::apply([](const auto& ...q){ return (... || q.empty()); }, tup_);
 		}
 
-		// void clear() noexcept {
-		// 	return std::apply([](auto& ...dq){ (... , dq.clear()); }, tup_);
-		// 	// TODO.low consider whether resizing down is a good idea here?
-		// }
+		// TODO consider making private and friending the unwind method
+		void clear() noexcept {
+			return std::apply([](auto& ...dq){ (... , dq.clear()); }, tup_);
+			assert(is_empty());
+			// TODO.low consider whether resizing down is a good idea here?
+		}
 
 		void push_back(found::CellClaimSym  <O>&& desc) noexcept { std::get<queue_t<found::CellClaimSym  <O>>>(tup_).emplace_back(std::move(desc)); }
 		void push_back(found::SymClaimCell  <O>&& desc) noexcept { std::get<queue_t<found::SymClaimCell  <O>>>(tup_).emplace_back(std::move(desc)); }

@@ -7,6 +7,27 @@ namespace okiidoku::mono::detail::solver {
 	namespace {
 		constexpr bool logical_and_loop_continue {true};
 		constexpr bool logical_and_loop_break {false};
+
+		template<Order O, class QueueT> requires(is_order_compiled(O))
+		void queue_apply_one(Engine<O>& engine, QueueT& queue, SolutionsRemain& check) noexcept {
+			assert(!queue.empty());
+			if constexpr (std::is_same_v<decltype(queue), typename FoundQueues<O>::template queue_t<found::CellClaimSym<O>>&>) {
+			// if constexpr (FoundQueues<O>::queue_has_passive_find(queue)) {
+				auto desc {std::move(queue.front())}; // handle passive find during apply
+				queue.pop_front();
+				check = CandElimApplyImpl<O>::apply(engine, std::move(desc));
+			} else {
+				const auto old_front_addr {&queue.front()};
+				check = CandElimApplyImpl<O>::apply(engine, queue.front());
+				if (!check.no_solutions_remain()) {
+					assert(old_front_addr == &queue.front()); // no passive find during apply
+					assert(!queue.empty());
+					queue.pop_front();
+				} else {
+					assert(queue.empty());
+				}
+			}
+		}
 	}
 
 
@@ -21,8 +42,7 @@ namespace okiidoku::mono::detail::solver {
 		// MSVC 19 seems to require logical_and_loop_body to be an lvalue for some reason.
 		const auto logical_and_loop_body {[&](auto& queue) -> bool {
 			if (queue.empty()) { return logical_and_loop_continue; }
-			check = CandElimApplyImpl<O>::apply(engine, queue.front());
-			queue.pop_front();
+			queue_apply_one(engine, queue, check);
 			return logical_and_loop_break;
 		}};
 		std::apply([&](auto& ...queue){
@@ -37,10 +57,8 @@ namespace okiidoku::mono::detail::solver {
 	SolutionsRemain CandElimApply<O>::apply_all_queued(Engine<O>& engine) noexcept {
 		auto check {SolutionsRemain::yes()};
 		const auto logical_and_loop_body {[&](auto& queue) -> bool {
-			// in loop over queues, return `true` means continue, `false` means break.
 			while (!queue.empty()) {
-				check = CandElimApplyImpl<O>::apply(engine, queue.front());
-				queue.pop_front();
+				queue_apply_one(engine, queue, check);
 				if (check.no_solutions_remain()) { return logical_and_loop_break; }
 			}
 			return logical_and_loop_continue;
@@ -48,6 +66,14 @@ namespace okiidoku::mono::detail::solver {
 		std::apply([&](auto& ...queue){
 			return (... && logical_and_loop_body(queue));
 		}, engine.found_queues().tup_);
+		if (check.no_solutions_remain()) [[unlikely]] { return check; }
+
+		using queues_t = typename FoundQueues<O>::queues_t;
+		using last_queue_t = std::tuple_element_t<std::tuple_size<queues_t>()-1, queues_t>;
+		using passive_queue_t = typename FoundQueues<O>::template queue_t<found::CellClaimSym<O>>;
+		if constexpr (!std::is_same_v<last_queue_t, passive_queue_t>) {
+			logical_and_loop_body(std::get<passive_queue_t>(engine.found_queues().tup_));
+		}
 		return check;
 	}
 

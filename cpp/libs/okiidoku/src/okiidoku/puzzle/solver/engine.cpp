@@ -17,9 +17,9 @@ namespace okiidoku::mono::detail::solver {
 			assert(val <= T::O2);
 			if (val < T::O2) {
 				register_new_given_(static_cast<rmi_t>(rmi), static_cast<val_t>(val));
-				assert(cells_cands_.at_rmi(rmi).count() == 1);
+				assert(cells_cands().at_rmi(rmi).count() == 1);
 			} else {
-				assert(cells_cands_.at_rmi(rmi).count() == T::O2);
+				assert(cells_cands().at_rmi(rmi).count() == T::O2);
 			}
 		}
 	}
@@ -30,16 +30,18 @@ namespace okiidoku::mono::detail::solver {
 		assert(!no_solutions_remain());
 		assert(get_num_puzcells_remaining() == 0);
 		assert(( std::all_of(
-			cells_cands_.get_underlying_array().cbegin(),
-			cells_cands_.get_underlying_array().cend(),
+			cells_cands().get_underlying_array().cbegin(),
+			cells_cands().get_underlying_array().cend(),
 			[](const auto& cands){ return cands.count() == 1; }
 		) ));
 		Grid<O> soln;
 		for (o4i_t rmi {0}; rmi < T::O4; ++rmi) {
-			const auto& cell_cands {cells_cands_.at_rmi(rmi)};
+			const auto& cell_cands {cells_cands().at_rmi(rmi)};
 			assert(cell_cands.count() == 1);
 			soln.at_rmi(rmi) = cell_cands.count_lower_zeros_assuming_non_empty_mask();
 		}
+		assert(grid_is_filled(soln));
+		assert(grid_follows_rule(soln));
 		return soln;
 	}
 
@@ -58,7 +60,6 @@ namespace okiidoku::mono::detail::solver {
 		assert(new_cands_count <= old_cands_count);
 
 		if (new_cands_count == 0) [[unlikely]] {
-			assert(false); // TODO.asap delete this
 			return engine_unwind_guess_(*this);
 		}
 		if ((new_cands_count < old_cands_count) && (new_cands_count == 1)) [[unlikely]] {
@@ -73,7 +74,7 @@ namespace okiidoku::mono::detail::solver {
 		const EngineImpl<O>::val_t cand_to_elim
 	) noexcept {
 		assert(!no_solutions_remain());
-		if (!cells_cands_.at_rmi(rmi).test(cand_to_elim)) {
+		if (!cells_cands().at_rmi(rmi).test(cand_to_elim)) {
 			// TODO.try this if-block can technically be removed. need to benchmark to see whether it is beneficial.
 			// candidate was already eliminated.
 			return SolutionsRemain::yes();
@@ -124,15 +125,15 @@ namespace okiidoku::mono::detail::solver {
 	) noexcept {
 		assert(!no_solutions_remain());
 		assert(get_num_puzcells_remaining() > 0);
-		auto& cell_cands {cells_cands_.at_rmi(rmi)};
+		const auto& cell_cands {cells_cands().at_rmi(rmi)};
 		const auto val {cell_cands.count_lower_zeros_assuming_non_empty_mask()};
 		assert(cell_cands.test(val));
 		assert(cell_cands.count() == 1);
 		found_queues_.push_back(found::CellClaimSym<O>{.rmi{rmi},.val{val}});
 		--num_puzcells_remaining_;
 		assert(get_num_puzcells_remaining() == T::O4 - static_cast<o4i_t>(std::count_if(
-			cells_cands_.get_underlying_array().cbegin(),
-			cells_cands_.get_underlying_array().cend(),
+			cells_cands().get_underlying_array().cbegin(),
+			cells_cands().get_underlying_array().cend(),
 			[](const auto& c){ return c.count() == 1; }
 		)));
 	}
@@ -155,15 +156,28 @@ namespace okiidoku::mono::detail::solver {
 	template<Order O> requires(is_order_compiled(O))
 	SolutionsRemain engine_unwind_guess_(EngineImpl<O>& e) noexcept {
 		assert(!e.no_solutions_remain());
-		// e.found_queues_.clear(); // Not necessary due to contract.
+		e.found_queues_.clear();
 		if (e.guess_stack_.empty()) {
 			e.no_solutions_remain_ = true;
 			return SolutionsRemain{false};
 		}
-		const auto frame {std::move(e.guess_stack_.top())};
+		auto frame {std::move(e.guess_stack_.top())};
+		static_assert(std::is_same_v<decltype(frame), typename EngineImpl<O>::GuessStackFrame>);
 		e.guess_stack_.pop();
-		e.cells_cands_ = *std::move(frame.prev_cells_cands);
+
+		assert(frame.prev_cells_cands.get() != nullptr);
+		// e.cells_cands_ = *std::move(frame.prev_cells_cands);
+		e.cells_cands_ = *frame.prev_cells_cands;
+
 		e.num_puzcells_remaining_ = frame.num_puzcells_remaining;
+		assert(e.get_num_puzcells_remaining() == Ints<O>::O4 - static_cast<int_ts::o4i_t<O>>(std::count_if(
+			e.cells_cands().get_underlying_array().cbegin(),
+			e.cells_cands().get_underlying_array().cend(),
+			[](const auto& c){ return c.count() == 1; }
+		)));
+		const auto& cell_cands {e.cells_cands().at_rmi(frame.guess.rmi)};
+		assert(cell_cands.test(frame.guess.val));
+		assert(cell_cands.count() > 1);
 		return e.do_elim_remove_sym_(frame.guess.rmi, frame.guess.val);
 	}
 

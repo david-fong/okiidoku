@@ -127,7 +127,7 @@ namespace okiidoku::mono::detail::solver {
 
 		// contract: `no_solutions_remain` returns `false`.
 		// contract: `get_num_puzcells_remaining` returns zero.
-		// returns a filled grid following the one rule and containing all the puzzle's givens.
+		// returns a filled grid that follows the one rule and contains all the puzzle's givens.
 		[[nodiscard, gnu::pure]]
 		Grid<O> build_solution_obj() const noexcept;
 
@@ -136,7 +136,7 @@ namespace okiidoku::mono::detail::solver {
 		const CandsGrid<O>& cells_cands() const noexcept { return cells_cands_; }
 
 		[[nodiscard, gnu::pure]]
-		CandElimQueues<O>& found_queues() noexcept { return found_queues_; }
+		FoundQueues<O>& found_queues() noexcept { return found_queues_; }
 
 
 		// contract: `val` is currently one of _multiple_ candidate-symbols at `rmi`.
@@ -170,7 +170,7 @@ namespace okiidoku::mono::detail::solver {
 
 		o4i_t num_puzcells_remaining_ {T::O4};
 
-		CandElimQueues<O> found_queues_ {};
+		FoundQueues<O> found_queues_ {};
 
 		struct OKIIDOKU_NO_EXPORT GuessStackFrame final {
 			// do separate dynamic alloc for each `CandsGrid` to reduce resizing noise.
