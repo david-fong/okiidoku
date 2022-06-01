@@ -22,9 +22,13 @@ namespace okiidoku::mono::detail::solver {
 		using o2x_t = int_ts::o2x_t<O>;
 		using o2i_t = int_ts::o2i_t<O>;
 		using rmi_t = int_ts::o4xs_t<O>;
+		// Important implementation reminder: if any candidate elimination done
+		// as part of an `apply` function unwinds the guess stack, any remaining
+		// eliminations that would have been done as part of the `apply` must not
+		// be done- the `apply` must immediately short-circuit.
 
 	public:
-		// note: takes desc by-value instead of by-reference since unlike the rest of
+		// Note: takes desc by-value instead of by-reference since unlike the rest of
 		// the queues, the CellClaimSym queue can be passively updated while applying
 		// an element of the queue. If using by-reference, such an update could invalidate
 		// the referred-to desc (ex. by memcpy during resize)

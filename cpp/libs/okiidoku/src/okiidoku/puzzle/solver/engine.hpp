@@ -132,10 +132,10 @@ namespace okiidoku::mono::detail::solver {
 		Grid<O> build_solution_obj() const noexcept;
 
 
-		[[nodiscard, gnu::pure]]
+		[[nodiscard/* , gnu::pure */]]
 		const CandsGrid<O>& cells_cands() const noexcept { return cells_cands_; }
 
-		[[nodiscard, gnu::pure]]
+		[[nodiscard/* , gnu::pure */]]
 		FoundQueues<O>& found_queues() noexcept { return found_queues_; }
 
 
@@ -165,6 +165,8 @@ namespace okiidoku::mono::detail::solver {
 		// post-condition: decrements `num_puzcells_remaining`.
 		void enqueue_cand_elims_for_new_cell_claim_sym_(rmi_t rmi) noexcept;
 
+		void debug_print_cells_cands_() const noexcept;
+
 
 		CandsGrid<O> cells_cands_;
 
@@ -172,6 +174,12 @@ namespace okiidoku::mono::detail::solver {
 
 		FoundQueues<O> found_queues_ {};
 
+		// TODO consider a different design: cells_cands_ and num_puzcells_remaining_ are just the top
+		// entry of the guess_stack_. no_solutions_remain_ is implied when the guess stack size is zero.
+		// Change SolutionsRemain to be UnwindInfo. it has a private member that is zero if no unwind
+		// happened, and otherwise is the guess_stack_depth value from before the unwind happened. Or
+		// just make it DidUnwind and hold a bool. This means the receiver needs to check engine.no_solutions_remain
+		// if DidUnwind is true. Or have two bitfields (or just two bools): one being "did unwind", and the other being "unwound root"
 		struct OKIIDOKU_NO_EXPORT GuessStackFrame final {
 			// do separate dynamic alloc for each `CandsGrid` to reduce resizing noise.
 			std::unique_ptr<CandsGrid<O>> prev_cells_cands;

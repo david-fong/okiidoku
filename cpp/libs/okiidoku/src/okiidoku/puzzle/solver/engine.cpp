@@ -2,6 +2,8 @@
 
 #include <algorithm>
 
+#include <iostream> // TODO delete
+
 // TODO.low go through and see where it makes sense to add [[likely/unlikely]].
 namespace okiidoku::mono::detail::solver {
 
@@ -22,6 +24,8 @@ namespace okiidoku::mono::detail::solver {
 				assert(cells_cands().at_rmi(rmi).count() == T::O2);
 			}
 		}
+
+		debug_print_cells_cands_();
 	}
 
 
@@ -150,6 +154,10 @@ namespace okiidoku::mono::detail::solver {
 		guess_stack_.emplace(*this, guess);
 
 		register_new_given_(guess.rmi, guess.val);
+		std::clog << "\npushing guess: " << int(guess.rmi) << " " << int(guess.val)
+			<< ". new depth: " << get_guess_stack_depth();
+		std::clog << ". cells_cands: ";
+		debug_print_cells_cands_();
 	}
 
 
@@ -157,6 +165,7 @@ namespace okiidoku::mono::detail::solver {
 	SolutionsRemain engine_unwind_guess_(EngineImpl<O>& e) noexcept {
 		assert(!e.no_solutions_remain());
 		e.found_queues_.clear();
+		assert(!e.has_queued_cand_elims());
 		if (e.guess_stack_.empty()) {
 			e.no_solutions_remain_ = true;
 			return SolutionsRemain{false};
@@ -178,13 +187,32 @@ namespace okiidoku::mono::detail::solver {
 		const auto& cell_cands {e.cells_cands().at_rmi(frame.guess.rmi)};
 		assert(cell_cands.test(frame.guess.val));
 		assert(cell_cands.count() > 1);
-		return e.do_elim_remove_sym_(frame.guess.rmi, frame.guess.val);
+		const auto check {e.do_elim_remove_sym_(frame.guess.rmi, frame.guess.val)};
+		assert(!check.no_solutions_remain());
+		// TODO consider changing the above do_elim call to something more specialized since it never recurses. maybe test on larger grid sizes just for fun to make sure that's the case first though.
+		std::clog << "\npopping guess: " << int(frame.guess.rmi) << " " << int(frame.guess.val)
+			<< ". new depth: " << e.get_guess_stack_depth();
+		std::clog << ". cells_cands: ";
+		e.debug_print_cells_cands_();
+		return check;
 	}
 
 
 	template<Order O> requires(is_order_compiled(O))
 	SolutionsRemain Engine<O>::unwind_guess() noexcept {
 		return engine_unwind_guess_(static_cast<EngineImpl<O>&>(*this));
+	}
+
+
+	template<Order O> requires(is_order_compiled(O))
+	void EngineImpl<O>::debug_print_cells_cands_() const noexcept {
+		for (o4i_t rmi {0}; rmi < T::O4; ++rmi) {
+			if (rmi % T::O2 == 0) { std::clog << '\n'; }
+			const auto& mask {cells_cands_.at_rmi(rmi)};
+			const auto chars {mask.to_stringbuf()};
+			std::clog.write(chars.data(), chars.size());
+			std::clog << "  " << std::flush;
+		}
 	}
 
 

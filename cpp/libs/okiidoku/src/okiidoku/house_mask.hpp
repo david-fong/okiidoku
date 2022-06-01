@@ -4,7 +4,8 @@
 #include <okiidoku/ints.hpp>
 #include <okiidoku/detail/order_templates.hpp>
 
-#include <numeric>   // accumulate
+#include <execution>
+#include <numeric>   // transform_reduce
 #include <array>
 #include <bit>
 #include <compare>
@@ -51,9 +52,8 @@ namespace okiidoku::mono {
 
 		// count the number of set bits.
 		[[nodiscard, gnu::pure]] constexpr o2i_t count() const noexcept {
-			// TODO.mid investigate how good compilers are at optimizing these member functions.
-			return static_cast<o2i_t>(std::transform_reduce(
-				ints_.cbegin(), ints_.cend(), static_cast<o2i_t>(0U), std::plus{},
+			return static_cast<o2i_t>(std::transform_reduce(std::execution::par_unseq,
+				ints_.cbegin(), ints_.cend(), static_cast<o2i_t>(0U), std::plus<o2i_t>{},
 				[](const auto& int_){ return static_cast<o2i_t>(std::popcount(int_)); }
 			));
 		}
@@ -63,16 +63,18 @@ namespace okiidoku::mono {
 			assert(end < T::O2);
 			const auto end_at_int {bit_index_to_int_index(end)};
 			assert(end_at_int < num_ints);
-			auto count {static_cast<o2x_t>(std::popcount(
-				ints_[end_at_int] & static_cast<int_t>(
-					(static_cast<int_t>(1U) << (end % int_t_num_bits))
-					- static_cast<int_t>(1U)
-				)
-			))};
-			for (std::size_t i {0}; i < end_at_int; ++i) {
-				count += static_cast<o2x_t>(std::popcount(ints_[i]));
-			}
-			return count;
+			return static_cast<o2x_t>(std::transform_reduce(
+				std::execution::par_unseq,
+				ints_.cbegin(), std::next(ints_.cbegin(), end_at_int),
+				static_cast<o2x_t>(std::popcount(
+					ints_[end_at_int] & static_cast<int_t>(
+						(static_cast<int_t>(1U) << (end % int_t_num_bits))
+						- static_cast<int_t>(1U)
+					)
+				)),
+				std::plus<o2x_t>{},
+				[](const auto& int_){ return static_cast<o2x_t>(std::popcount(int_)); }
+			));
 		}
 
 		[[nodiscard, gnu::pure]] bool test(const o2x_t at) const noexcept {
@@ -163,6 +165,16 @@ namespace okiidoku::mono {
 				if (const auto cmp {(a.ints_[i]&diffs) <=> (b.ints_[i]&diffs)}; std::is_neq(cmp)) [[likely]] { return cmp; }
 			}
 			return std::strong_ordering::equivalent;
+		}
+
+		// least-significant bit is the least-significant (left-most) character.
+		[[nodiscard, gnu::pure]] std::array<char, T::O2> to_stringbuf() const noexcept {
+			std::array<char, T::O2> _;
+			_.fill('.');
+			for (o2i_t i {0}; i < T::O2; ++i) {
+				if (test(static_cast<o2x_t>(i))) { _[i] = '1'; }
+			}
+			return _;
 		}
 	};
 	#define OKIIDOKU_FOR_COMPILED_O(O_) \

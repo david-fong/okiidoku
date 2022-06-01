@@ -43,10 +43,11 @@ unsigned test_morph(okiidoku::SharedRng& shared_rng, const unsigned num_rounds) 
 		assert(house_mask_ones<O>.count_set_bits_below(static_cast<o2x_t>(i)) == i);
 	}
 
-	for (o2i_t i {0}; i < T::O2; ++i) {
-	for (o2i_t j {0}; j < T::O2; ++j) {
-		const auto rmi {box_cell_to_rmi<O>(i,j)};
-		assert(rmi_to_box<O>(rmi) == i);
+	for (o2i_t box {0}; box < T::O2; ++box) {
+	for (o2i_t box_cell {0}; box_cell < T::O2; ++box_cell) {
+		const auto rmi {box_cell_to_rmi<O>(box,box_cell)};
+		assert(rmi_to_box<O>(rmi) == box);
+		assert(rmi_to_box_cell<O>(rmi) == box_cell);
 	}}
 
 	unsigned int count_bad {0};
@@ -63,7 +64,7 @@ unsigned test_morph(okiidoku::SharedRng& shared_rng, const unsigned num_rounds) 
 	for (unsigned round {0}; round < num_rounds; ) {
 		generate(gen_grid, shared_rng.get_u64());
 
-		std::clog << "\nmaking puzzle";
+		std::clog << "\nmaking puzzle #" << int(round);
 		Grid<O> puz_grid {gen_grid};
 		make_minimal_puzzle(puz_grid, shared_rng.get_u64());
 		print_2d<O>(std::clog, shared_rng.get_u64(), gen_grid, puz_grid);

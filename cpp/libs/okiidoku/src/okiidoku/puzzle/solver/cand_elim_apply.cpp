@@ -19,7 +19,7 @@ namespace okiidoku::mono::detail::solver {
 			} else {
 				const auto old_front_addr {&queue.front()};
 				check = CandElimApplyImpl<O>::apply(engine, queue.front());
-				if (!check.no_solutions_remain()) {
+				if (!check.no_solutions_remain()) [[likely]] {
 					assert(old_front_addr == &queue.front()); // no passive find during apply
 					assert(!queue.empty());
 					queue.pop_front();

@@ -114,14 +114,21 @@ namespace okiidoku::mono {
 	using grid_val_t = int_ts::o2is_t<O>;
 
 
-	template<Order O> [[nodiscard, gnu::const]] constexpr int_ts::o2i_t<O> rmi_to_row(const int_ts::o4i_t<O> index) noexcept { return static_cast<int_ts::o2i_t<O>>(index / (Ints<O>::O2)); }
-	template<Order O> [[nodiscard, gnu::const]] constexpr int_ts::o2i_t<O> rmi_to_col(const int_ts::o4i_t<O> index) noexcept { return static_cast<int_ts::o2i_t<O>>(index % (Ints<O>::O2)); }
+	template<Order O> [[nodiscard, gnu::const]] constexpr int_ts::o2i_t<O> rmi_to_row(const int_ts::o4i_t<O> rmi) noexcept { return static_cast<int_ts::o2i_t<O>>(rmi / (Ints<O>::O2)); }
+	template<Order O> [[nodiscard, gnu::const]] constexpr int_ts::o2i_t<O> rmi_to_col(const int_ts::o4i_t<O> rmi) noexcept { return static_cast<int_ts::o2i_t<O>>(rmi % (Ints<O>::O2)); }
 	template<Order O> [[nodiscard, gnu::const]] constexpr int_ts::o2i_t<O> rmi_to_box(const int_ts::o2i_t<O> row, const int_ts::o2i_t<O> col) noexcept {
 		return static_cast<int_ts::o2i_t<O>>((row / O) * O) + (col / O);
 	}
 	template<Order O> [[nodiscard, gnu::const]]
-	constexpr int_ts::o2i_t<O> rmi_to_box(const int_ts::o4i_t<O> index) noexcept {
-		return rmi_to_box<O>(rmi_to_row<O>(index), rmi_to_col<O>(index));
+	constexpr int_ts::o2i_t<O> rmi_to_box(const int_ts::o4i_t<O> rmi) noexcept {
+		return rmi_to_box<O>(rmi_to_row<O>(rmi), rmi_to_col<O>(rmi));
+	}
+	template<Order O> [[nodiscard, gnu::const]]
+	constexpr int_ts::o2i_t<O> rmi_to_box_cell(const int_ts::o4i_t<O> rmi) noexcept {
+		using T = Ints<O>;
+		const auto boxrow {(rmi/T::O2)%T::O1};
+		const auto boxcol {rmi%T::O1};
+		return static_cast<int_ts::o2i_t<O>>((T::O1*boxrow)+boxcol);
 	}
 	template<Order O, class T_rmi>
 	requires(Any_o4x_t<O, T_rmi>) [[nodiscard, gnu::const]]

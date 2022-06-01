@@ -48,7 +48,6 @@ namespace okiidoku::mono {
 			// Find::cells_claim_syms(e); if (e.has_queued_cand_elims()) { continue; }
 			// Find::syms_claim_cells(e); if (e.has_queued_cand_elims()) { continue; } // TODO.try apparently the two different types of subset techniques come in accompanying pairs. Perhaps we only need to call one of the finders then? Please investigate/experiment.
 
-			std::clog << "\npushing guess";
 			e.push_guess(Find::good_guess_candidate(e));
 		}
 		std::clog << "\nfinished guess stack depth: " << e.get_guess_stack_depth();
@@ -73,26 +72,17 @@ namespace okiidoku::mono {
 		}
 		while (e.get_num_puzcells_remaining() > 0) [[likely]] {
 			using Find = detail::solver::CandElimFind<O>;
-			const auto prev_guess_stack_depth {e.get_guess_stack_depth()};
-			const auto did_unwind {[&]{
-				const auto new_depth {e.get_guess_stack_depth()};
-				assert(new_depth <= prev_guess_stack_depth);
-				return new_depth <  prev_guess_stack_depth;
-			}};
-			Find::sym_claim_cell(e); if (did_unwind()) [[unlikely]] { continue; }
-			// Find::locked_cands(e); if (did_unwind()) [[unlikely]] { continue; }
+			Find::sym_claim_cell(e);
+			// Find::locked_cands(e);
 			// TODO call other techniques
 
 			if (e.has_queued_cand_elims()) {
 				// TODO but I want to consume the deduction that would lead to the
 				//  most/technique-simplest newly-findable candidate eliminations.
 				//  How to implement? seems to imply a degree of "BFS".
-				{
-					using Apply = detail::solver::CandElimApply<O>;
-					const auto check {Apply::apply_first_queued(e)};
-					if (check.no_solutions_remain()) [[unlikely]] { return std::nullopt; }
-					if (e.get_num_puzcells_remaining() == 0) [[unlikely]] { break; }
-				}
+				using Apply = detail::solver::CandElimApply<O>;
+				const auto check {Apply::apply_first_queued(e)};
+				if (check.no_solutions_remain()) [[unlikely]] { return std::nullopt; }
 			} else {
 				e.push_guess(Find::good_guess_candidate(e));
 			}

@@ -202,6 +202,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 		const int_ts::o4i_t<O> num_puzcells_remaining
 	) noexcept{
 		OKIIDOKU_CAND_ELIM_FINDER_PRELUDE
+		assert(num_puzcells_remaining > 1);
 		// some guiding intuition:
 		// choose a guess which is likely to cascade into the most candidate
 		// elimination deductions before the next required guess point. choose
@@ -210,31 +211,35 @@ namespace okiidoku::mono::detail::solver { namespace {
 
 		// start by finding cells with the fewest number of candidate-symbols.
 		// Note: no combinations of std algorithms seems specialized enough for what I want.
-		std::vector<rmi_t> cell_tags; {
-			const o2i_t best_count {(num_puzcells_remaining == T::O4) ? T::O2 : static_cast<o2i_t>(T::O2-1U)};
-			for (o4i_t rmi {1}; rmi < T::O4; ++rmi) {
-				const auto& cell_cands {cells_cands.at_rmi(rmi)};
-				const auto cmp {cell_cands.count() <=> best_count};
-				if (std::is_eq(cmp)) {
-					cell_tags.push_back(static_cast<rmi_t>(rmi));
-				} else if (std::is_lt(cmp) && cell_cands.count() > 1) {
-					cell_tags.clear();
-					cell_tags.push_back(static_cast<rmi_t>(rmi));
+		std::vector<rmi_t> cand_rmis; {
+			o2i_t best_count {(num_puzcells_remaining == T::O4) ? T::O2 : static_cast<o2i_t>(T::O2-1U)};
+			for (o4i_t rmi {0}; rmi < T::O4; ++rmi) {
+				const auto cand_count {cells_cands.at_rmi(rmi).count()};
+				if (cand_count == best_count) {
+					cand_rmis.push_back(static_cast<rmi_t>(rmi));
+				} else if (cand_count < best_count && cand_count > 1U) {
+					best_count = cand_count;
+					cand_rmis.clear();
+					cand_rmis.push_back(static_cast<rmi_t>(rmi));
 				}
 			}
 		}
-		assert(!cell_tags.empty());
+		assert(!cand_rmis.empty());
+		assert(std::all_of(cand_rmis.cbegin(), cand_rmis.cend(), [&](const auto& rmi){
+			const auto& cell_cands {cells_cands.at_rmi(rmi)};
+			return cell_cands.count() > 1;
+		}));
 		return Guess<O>{
-			.rmi{cell_tags[0]},
-			.val{cells_cands.at_rmi(cell_tags[0]).count_lower_zeros_assuming_non_empty_mask()},
+			.rmi{cand_rmis[0]},
+			.val{cells_cands.at_rmi(cand_rmis[0]).count_lower_zeros_assuming_non_empty_mask()},
 		};
 
 		// then, for those cells, find the one whose candidate-symbols have
 		// very few candidate-house-cells.
 		// using house_cand_counts_t = std::array<o2i_t, house_types.size()>;
 		// std::vector<house_cand_counts_t> cell_tag_sym_major_cand_count;
-		// cell_tag_sym_major_cand_count.capacity(cell_tags.size());
-		// for (const auto& tag_rmi : cell_tags) {
+		// cell_tag_sym_major_cand_count.capacity(cand_rmis.size());
+		// for (const auto& tag_rmi : cand_rmis) {
 		// 	// TODO alternate design: instead of looping over the tag-cell's symbols
 		// 	// to count, use (tag_cell_cands & nb_cell_cands).count().
 		// 	for (const o2i_t sym : cells_cands.at_rmi(tag_rmi).set_bits_iter()) {
