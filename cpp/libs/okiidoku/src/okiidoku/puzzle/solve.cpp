@@ -4,8 +4,6 @@
 #include <okiidoku/puzzle/solver/cand_elim_find.hpp>
 #include <okiidoku/puzzle/solver/engine.hpp>
 
-#include <iostream>
-
 namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
@@ -30,14 +28,14 @@ namespace okiidoku::mono {
 		}
 		if (num_solns_found() > 0) {
 			assert(e.get_num_puzcells_remaining() == 0);
-			const auto check {e.unwind_guess()};
-			if (check.no_solutions_remain()) { return std::nullopt; }
+			const auto check {e.unwind_one_stack_frame()};
+			if (check.did_unwind_root()) { return std::nullopt; }
 		}
 		while (e.get_num_puzcells_remaining() > 0) [[likely]] {
 			{
 				using Apply = detail::solver::CandElimApply<O>;
 				const auto check {Apply::apply_all_queued(e)};
-				if (check.no_solutions_remain()) [[unlikely]] { return std::nullopt; }
+				if (check.did_unwind_root()) [[unlikely]] { return std::nullopt; }
 				assert(!e.has_queued_cand_elims());
 				if (e.get_num_puzcells_remaining() == 0) [[unlikely]] { break; }
 			}
@@ -50,7 +48,6 @@ namespace okiidoku::mono {
 
 			e.push_guess(Find::good_guess_candidate(e));
 		}
-		std::clog << "\nfinished guess stack depth: " << e.get_guess_stack_depth();
 		++num_solns_found_;
 		return std::optional<Grid<O>>{std::in_place, e.build_solution_obj()};
 	}
@@ -67,8 +64,8 @@ namespace okiidoku::mono {
 		}
 		if (num_solns_found() > 0) {
 			assert(e.get_num_puzcells_remaining() == 0);
-			const auto check {e.unwind_guess()};
-			if (check.no_solutions_remain()) { return std::nullopt; }
+			const auto check {e.unwind_one_stack_frame()};
+			if (check.did_unwind_root()) { return std::nullopt; }
 		}
 		while (e.get_num_puzcells_remaining() > 0) [[likely]] {
 			using Find = detail::solver::CandElimFind<O>;
@@ -82,7 +79,7 @@ namespace okiidoku::mono {
 				//  How to implement? seems to imply a degree of "BFS".
 				using Apply = detail::solver::CandElimApply<O>;
 				const auto check {Apply::apply_first_queued(e)};
-				if (check.no_solutions_remain()) [[unlikely]] { return std::nullopt; }
+				if (check.did_unwind_root()) [[unlikely]] { return std::nullopt; }
 			} else {
 				e.push_guess(Find::good_guess_candidate(e));
 			}

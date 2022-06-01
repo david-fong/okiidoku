@@ -39,35 +39,36 @@ namespace okiidoku::mono::detail::solver {
 	template<Order O> requires(is_order_compiled(O)) struct EngineImpl;
 	template<Order O> requires(is_order_compiled(O)) class Engine;
 
-	struct SolutionsRemain;
+	struct UnwindInfo;
 
 	// usage: must be called immediately when a cell's candidate-symbol count
 	//  changes to zero. call to prepare to find another solution.
-	// the most-recent guess gets eliminated, which may also change the guessed cell's
-	//  candidate-symbol count to become zero, in which case it "recurses".
-	// returns that no solutions remain if the guess stack is empty.
 	template<Order O> requires(is_order_compiled(O))
-	SolutionsRemain engine_unwind_guess_(EngineImpl<O>&) noexcept;
+	UnwindInfo unwind_one_stack_frame_of_(EngineImpl<O>&) noexcept;
 
 
-	// This class exists to make it difficult for me to forget to internally
-	// attempt to unwind the guess stack when required, and to enforce the receiver
-	// side to check the result in an always-readable way.
-	struct [[nodiscard("must stop if no solutions remain")]] SolutionsRemain final {
+	struct [[nodiscard]] UnwindInfo final {
 		#define OKIIDOKU_FOR_COMPILED_O(O_) \
-		friend SolutionsRemain engine_unwind_guess_<O_>(EngineImpl<O_>&) noexcept;
+		friend UnwindInfo unwind_one_stack_frame_of_<O_>(EngineImpl<O_>&) noexcept;
 		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 		#undef OKIIDOKU_FOR_COMPILED_O
 
 		[[nodiscard, gnu::pure]]
-		bool no_solutions_remain() const noexcept { return !solutions_remain_; }
-		// Note: to-bool conversion operator not used because it is not always-readable.
+		bool did_unwind() const noexcept { return did_unwind_; }
 
-		SolutionsRemain() = delete;
-		static constexpr SolutionsRemain yes() noexcept { return SolutionsRemain{true}; }
+		[[nodiscard, gnu::pure]]
+		bool did_unwind_root() const noexcept { return did_unwind_root_; }
+
+		UnwindInfo() = delete;
+		static constexpr UnwindInfo make_no_unwind() noexcept { return UnwindInfo{false, false}; }
 	private:
-		explicit constexpr SolutionsRemain(bool val): solutions_remain_{val} {}
-		bool solutions_remain_;
+		explicit constexpr UnwindInfo(bool did_unwind, bool did_unwind_root) noexcept:
+			did_unwind_{did_unwind}, did_unwind_root_{did_unwind_root} {}
+		static constexpr UnwindInfo make_did_unwind_one_stack_frame() noexcept { return UnwindInfo{true, false}; }
+		static constexpr UnwindInfo make_did_unwind_root() noexcept { return UnwindInfo{true, true}; }
+
+		bool did_unwind_;
+		bool did_unwind_root_;
 	};
 
 
@@ -91,7 +92,7 @@ namespace okiidoku::mono::detail::solver {
 	struct EngineImpl {
 		// The nice thing about separating `Engine` and `EngineImpl` is that `EngineImpl`
 		// no longer friends the find and apply functions (better encapsulation).
-		friend SolutionsRemain engine_unwind_guess_<O>(EngineImpl<O>&) noexcept;
+		friend UnwindInfo unwind_one_stack_frame_of_<O>(EngineImpl<O>&) noexcept;
 		using T = Ints<O>;
 		using o2i_t = int_ts::o2i_t<O>;
 		using val_t = int_ts::o2xs_t<O>;
@@ -146,17 +147,17 @@ namespace okiidoku::mono::detail::solver {
 		void register_new_given_(rmi_t rmi, val_t val) noexcept;
 
 		// The specified candidate-symbol is allowed to already be removed.
-		SolutionsRemain do_elim_remove_sym_(rmi_t rmi, val_t cand) noexcept;
+		UnwindInfo do_elim_remove_sym_(rmi_t rmi, val_t cand) noexcept;
 
 		// The specified candidate-symbols are allowed to already be removed.
-		SolutionsRemain do_elim_remove_syms_(rmi_t rmi, const HouseMask<O>& to_remove) noexcept;
+		UnwindInfo do_elim_remove_syms_(rmi_t rmi, const HouseMask<O>& to_remove) noexcept;
 
-		SolutionsRemain do_elim_retain_syms_(rmi_t rmi, const HouseMask<O>& to_retain) noexcept;
+		UnwindInfo do_elim_retain_syms_(rmi_t rmi, const HouseMask<O>& to_retain) noexcept;
 
 	private:
 		// The specified candidate-symbol is allowed to already be removed.
 		template<class F> requires(std::is_invocable_v<F, HouseMask<O>&>)
-		SolutionsRemain do_elim_generic_(rmi_t rmi, F elim_fn) noexcept;
+		UnwindInfo do_elim_generic_(rmi_t rmi, F elim_fn) noexcept;
 
 		// contract: must be called immediately when a cell's candidate-symbol count _changes_ to one.
 		// contract: (it follows that) no previous call in the context of the current
@@ -176,7 +177,7 @@ namespace okiidoku::mono::detail::solver {
 
 		// TODO consider a different design: cells_cands_ and num_puzcells_remaining_ are just the top
 		// entry of the guess_stack_. no_solutions_remain_ is implied when the guess stack size is zero.
-		// Change SolutionsRemain to be UnwindInfo. it has a private member that is zero if no unwind
+		// Change UnwindInfo to be UnwindInfo. it has a private member that is zero if no unwind
 		// happened, and otherwise is the guess_stack_depth value from before the unwind happened. Or
 		// just make it DidUnwind and hold a bool. This means the receiver needs to check engine.no_solutions_remain
 		// if DidUnwind is true. Or have two bitfields (or just two bools): one being "did unwind", and the other being "unwound root"
@@ -218,7 +219,7 @@ namespace okiidoku::mono::detail::solver {
 		using EngineImpl<O>::push_guess;
 		using EngineImpl<O>::get_guess_stack_depth;
 		using EngineImpl<O>::build_solution_obj;
-		SolutionsRemain unwind_guess() noexcept;
+		UnwindInfo unwind_one_stack_frame() noexcept;
 	};
 
 

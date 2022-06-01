@@ -25,7 +25,7 @@ namespace okiidoku::mono::detail::solver {
 			}
 		}
 
-		debug_print_cells_cands_();
+		// debug_print_cells_cands_();
 	}
 
 
@@ -52,7 +52,7 @@ namespace okiidoku::mono::detail::solver {
 
 	template<Order O> requires(is_order_compiled(O))
 	template<class F> requires(std::is_invocable_v<F, HouseMask<O>&>)
-	SolutionsRemain EngineImpl<O>::do_elim_generic_(
+	UnwindInfo EngineImpl<O>::do_elim_generic_(
 		const EngineImpl<O>::rmi_t rmi,
 		F elim_fn
 	) noexcept {
@@ -64,16 +64,16 @@ namespace okiidoku::mono::detail::solver {
 		assert(new_cands_count <= old_cands_count);
 
 		if (new_cands_count == 0) [[unlikely]] {
-			return engine_unwind_guess_(*this);
+			return unwind_one_stack_frame_of_(*this);
 		}
 		if ((new_cands_count < old_cands_count) && (new_cands_count == 1)) [[unlikely]] {
 			enqueue_cand_elims_for_new_cell_claim_sym_(rmi);
 		}
-		return SolutionsRemain::yes();
+		return UnwindInfo::make_no_unwind();
 	}
 
 	template<Order O> requires(is_order_compiled(O))
-	SolutionsRemain EngineImpl<O>::do_elim_remove_sym_(
+	UnwindInfo EngineImpl<O>::do_elim_remove_sym_(
 		const EngineImpl<O>::rmi_t rmi,
 		const EngineImpl<O>::val_t cand_to_elim
 	) noexcept {
@@ -81,13 +81,13 @@ namespace okiidoku::mono::detail::solver {
 		if (!cells_cands().at_rmi(rmi).test(cand_to_elim)) {
 			// TODO.try this if-block can technically be removed. need to benchmark to see whether it is beneficial.
 			// candidate was already eliminated.
-			return SolutionsRemain::yes();
+			return UnwindInfo::make_no_unwind();
 		}
 		return do_elim_generic_(rmi, [&](auto& cands){ cands.unset(cand_to_elim); });
 	}
 
 	template<Order O> requires(is_order_compiled(O))
-	SolutionsRemain EngineImpl<O>::do_elim_remove_syms_(
+	UnwindInfo EngineImpl<O>::do_elim_remove_syms_(
 		const EngineImpl<O>::rmi_t rmi,
 		const HouseMask<O>& to_remove
 	) noexcept {
@@ -96,7 +96,7 @@ namespace okiidoku::mono::detail::solver {
 	}
 
 	template<Order O> requires(is_order_compiled(O))
-	SolutionsRemain EngineImpl<O>::do_elim_retain_syms_(
+	UnwindInfo EngineImpl<O>::do_elim_retain_syms_(
 		const EngineImpl<O>::rmi_t rmi,
 		const HouseMask<O>& to_retain
 	) noexcept {
@@ -154,21 +154,19 @@ namespace okiidoku::mono::detail::solver {
 		guess_stack_.emplace(*this, guess);
 
 		register_new_given_(guess.rmi, guess.val);
-		std::clog << "\npushing guess: " << int(guess.rmi) << " " << int(guess.val)
-			<< ". new depth: " << get_guess_stack_depth();
-		std::clog << ". cells_cands: ";
-		debug_print_cells_cands_();
+		std::clog << "\npushed guess: " << int(guess.rmi) << " " << int(guess.val) << ". new depth: " << get_guess_stack_depth() << ". cells_cands: ";
+		// debug_print_cells_cands_();
 	}
 
 
 	template<Order O> requires(is_order_compiled(O))
-	SolutionsRemain engine_unwind_guess_(EngineImpl<O>& e) noexcept {
+	UnwindInfo unwind_one_stack_frame_of_(EngineImpl<O>& e) noexcept {
 		assert(!e.no_solutions_remain());
 		e.found_queues_.clear();
 		assert(!e.has_queued_cand_elims());
 		if (e.guess_stack_.empty()) {
 			e.no_solutions_remain_ = true;
-			return SolutionsRemain{false};
+			return UnwindInfo::make_did_unwind_root();
 		}
 		auto frame {std::move(e.guess_stack_.top())};
 		static_assert(std::is_same_v<decltype(frame), typename EngineImpl<O>::GuessStackFrame>);
@@ -184,23 +182,22 @@ namespace okiidoku::mono::detail::solver {
 			e.cells_cands().get_underlying_array().cend(),
 			[](const auto& c){ return c.count() == 1; }
 		)));
-		const auto& cell_cands {e.cells_cands().at_rmi(frame.guess.rmi)};
+		auto& cell_cands {e.cells_cands_.at_rmi(frame.guess.rmi)};
 		assert(cell_cands.test(frame.guess.val));
 		assert(cell_cands.count() > 1);
-		const auto check {e.do_elim_remove_sym_(frame.guess.rmi, frame.guess.val)};
-		assert(!check.no_solutions_remain());
-		// TODO consider changing the above do_elim call to something more specialized since it never recurses. maybe test on larger grid sizes just for fun to make sure that's the case first though.
-		std::clog << "\npopping guess: " << int(frame.guess.rmi) << " " << int(frame.guess.val)
-			<< ". new depth: " << e.get_guess_stack_depth();
-		std::clog << ". cells_cands: ";
-		e.debug_print_cells_cands_();
-		return check;
+		cell_cands.unset(frame.guess.val);
+		if (cell_cands.count() == 1) {
+			e.enqueue_cand_elims_for_new_cell_claim_sym_(frame.guess.rmi);
+		}
+		std::clog << "\npopped guess: " << int(frame.guess.rmi) << " " << int(frame.guess.val) << ". new depth: " << e.get_guess_stack_depth() << ". cells_cands: ";
+		// e.debug_print_cells_cands_();
+		return UnwindInfo::make_did_unwind_one_stack_frame();
 	}
 
 
 	template<Order O> requires(is_order_compiled(O))
-	SolutionsRemain Engine<O>::unwind_guess() noexcept {
-		return engine_unwind_guess_(static_cast<EngineImpl<O>&>(*this));
+	UnwindInfo Engine<O>::unwind_one_stack_frame() noexcept {
+		return unwind_one_stack_frame_of_(static_cast<EngineImpl<O>&>(*this));
 	}
 
 

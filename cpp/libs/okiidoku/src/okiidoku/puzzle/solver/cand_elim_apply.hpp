@@ -10,9 +10,9 @@ namespace okiidoku::mono::detail::solver {
 	class CandElimApply final {
 	public:
 		// contract: `engine.has_queued_cand_elims` returns `true`.
-		static SolutionsRemain apply_first_queued(Engine<O>&) noexcept;
+		static UnwindInfo apply_first_queued(Engine<O>&) noexcept;
 
-		static SolutionsRemain apply_all_queued(Engine<O>&) noexcept;
+		static UnwindInfo apply_all_queued(Engine<O>&) noexcept;
 	};
 
 
@@ -32,21 +32,21 @@ namespace okiidoku::mono::detail::solver {
 		// the queues, the CellClaimSym queue can be passively updated while applying
 		// an element of the queue. If using by-reference, such an update could invalidate
 		// the referred-to desc (ex. by memcpy during resize)
-		static SolutionsRemain apply(Engine<O>&, const found::CellClaimSym<O>) noexcept;
+		static UnwindInfo apply(Engine<O>&, const found::CellClaimSym<O>) noexcept;
 
 		// contract: the specified symbol is a candidate-symbol at the specified rmi.
 		//  this contract is respected by the corresponding `find` function.
-		static SolutionsRemain apply(Engine<O>&, const found::SymClaimCell<O>&) noexcept;
+		static UnwindInfo apply(Engine<O>&, const found::SymClaimCell<O>&) noexcept;
 
 		// AKA "naked subsets"
-		static SolutionsRemain apply(Engine<O>&, const found::CellsClaimSyms<O>&) noexcept;
+		static UnwindInfo apply(Engine<O>&, const found::CellsClaimSyms<O>&) noexcept;
 
 		// AKA "hidden subsets"
-		static SolutionsRemain apply(Engine<O>&, const found::SymsClaimCells<O>&) noexcept;
+		static UnwindInfo apply(Engine<O>&, const found::SymsClaimCells<O>&) noexcept;
 
-		static SolutionsRemain apply(Engine<O>&, const found::LockedCands<O>&) noexcept;
+		static UnwindInfo apply(Engine<O>&, const found::LockedCands<O>&) noexcept;
 
-		// static SolutionsRemain apply(Engine<O>&, const found::&) noexcept;
+		// static UnwindInfo apply(Engine<O>&, const found::&) noexcept;
 	};
 }
 #endif

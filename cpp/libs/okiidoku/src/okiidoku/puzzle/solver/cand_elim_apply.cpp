@@ -9,7 +9,7 @@ namespace okiidoku::mono::detail::solver {
 		constexpr bool logical_and_loop_break {false};
 
 		template<Order O, class QueueT> requires(is_order_compiled(O))
-		void queue_apply_one(Engine<O>& engine, QueueT& queue, SolutionsRemain& check) noexcept {
+		void queue_apply_one(Engine<O>& engine, QueueT& queue, UnwindInfo& check) noexcept {
 			assert(!queue.empty());
 			if constexpr (std::is_same_v<decltype(queue), typename FoundQueues<O>::template queue_t<found::CellClaimSym<O>>&>) {
 			// if constexpr (FoundQueues<O>::queue_has_passive_find(queue)) {
@@ -19,7 +19,7 @@ namespace okiidoku::mono::detail::solver {
 			} else {
 				const auto old_front_addr {&queue.front()};
 				check = CandElimApplyImpl<O>::apply(engine, queue.front());
-				if (!check.no_solutions_remain()) [[likely]] {
+				if (!check.did_unwind_root()) [[likely]] {
 					assert(old_front_addr == &queue.front()); // no passive find during apply
 					assert(!queue.empty());
 					queue.pop_front();
@@ -32,9 +32,9 @@ namespace okiidoku::mono::detail::solver {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	SolutionsRemain CandElimApply<O>::apply_first_queued(Engine<O>& engine) noexcept {
+	UnwindInfo CandElimApply<O>::apply_first_queued(Engine<O>& engine) noexcept {
 		assert(engine.has_queued_cand_elims());
-		auto check {SolutionsRemain::yes()};
+		auto check {UnwindInfo::make_no_unwind()};
 		// Note: I had to choose between easier-to-understand code, or making it
 		// impossible to forget to update this "boilerplate" if I implement more
 		// solving techniques. I chose the latter (sorry?).
@@ -54,19 +54,19 @@ namespace okiidoku::mono::detail::solver {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	SolutionsRemain CandElimApply<O>::apply_all_queued(Engine<O>& engine) noexcept {
-		auto check {SolutionsRemain::yes()};
+	UnwindInfo CandElimApply<O>::apply_all_queued(Engine<O>& engine) noexcept {
+		auto check {UnwindInfo::make_no_unwind()};
 		const auto logical_and_loop_body {[&](auto& queue) -> bool {
 			while (!queue.empty()) {
 				queue_apply_one(engine, queue, check);
-				if (check.no_solutions_remain()) { return logical_and_loop_break; }
+				if (check.did_unwind_root()) { return logical_and_loop_break; }
 			}
 			return logical_and_loop_continue;
 		}};
 		std::apply([&](auto& ...queue){
 			return (... && logical_and_loop_body(queue));
 		}, engine.found_queues().tup_);
-		if (check.no_solutions_remain()) [[unlikely]] { return check; }
+		if (check.did_unwind_root()) [[unlikely]] { return check; }
 
 		using queues_t = typename FoundQueues<O>::queues_t;
 		using last_queue_t = std::tuple_element_t<std::tuple_size<queues_t>()-1, queues_t>;
@@ -79,7 +79,7 @@ namespace okiidoku::mono::detail::solver {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	SolutionsRemain CandElimApplyImpl<O>::apply(
+	UnwindInfo CandElimApplyImpl<O>::apply(
 		Engine<O>& engine,
 		const found::CellClaimSym<O> desc // TODO consider/try passing by value
 	) noexcept {
@@ -87,7 +87,7 @@ namespace okiidoku::mono::detail::solver {
 		#define OKIIDOKU_TRY_ELIM_NB_CAND \
 			if (nb_rmi == desc.rmi) [[unlikely]] { continue; } \
 			const auto check {engine.do_elim_remove_sym_(nb_rmi, desc.val)}; \
-			if (check.no_solutions_remain()) [[unlikely]] { return check; }
+			if (check.did_unwind()) [[unlikely]] { return check; }
 
 		// TODO consider using the new house_cell_to_rmi function and house_types array.
 		{
@@ -109,12 +109,12 @@ namespace okiidoku::mono::detail::solver {
 				OKIIDOKU_TRY_ELIM_NB_CAND
 		}	}
 		#undef OKIIDOKU_TRY_ELIM_NB_CAND
-		return SolutionsRemain::yes();
+		return UnwindInfo::make_no_unwind();
 	}
 
 
 	template<Order O> requires(is_order_compiled(O))
-	SolutionsRemain CandElimApplyImpl<O>::apply(
+	UnwindInfo CandElimApplyImpl<O>::apply(
 		Engine<O>& engine,
 		const found::SymClaimCell<O>& desc
 	) noexcept {
@@ -123,12 +123,12 @@ namespace okiidoku::mono::detail::solver {
 		if (cell_cands.count() > 1) {
 			engine.register_new_given_(desc.rmi, desc.val);
 		}
-		return SolutionsRemain::yes();
+		return UnwindInfo::make_no_unwind();
 	}
 
 
 	template<Order O> requires(is_order_compiled(O))
-	SolutionsRemain CandElimApplyImpl<O>::apply(
+	UnwindInfo CandElimApplyImpl<O>::apply(
 		Engine<O>& engine,
 		const found::CellsClaimSyms<O>& desc
 	) noexcept {
@@ -137,16 +137,16 @@ namespace okiidoku::mono::detail::solver {
 			if (desc.house_cells.test(static_cast<o2x_t>(house_cell))) [[unlikely]] { continue; }
 			const auto rmi {house_cell_to_rmi<O>(desc.house_type, desc.house, house_cell)};
 			const auto check {engine.do_elim_remove_syms_(static_cast<rmi_t>(rmi), desc.syms)};
-			if (check.no_solutions_remain()) [[unlikely]] {
+			if (check.did_unwind_root()) [[unlikely]] {
 				return check;
 			}
 		}
-		return SolutionsRemain::yes();
+		return UnwindInfo::make_no_unwind();
 	}
 
 
 	template<Order O> requires(is_order_compiled(O))
-	SolutionsRemain CandElimApplyImpl<O>::apply(
+	UnwindInfo CandElimApplyImpl<O>::apply(
 		Engine<O>& engine,
 		const found::SymsClaimCells<O>& desc
 	) noexcept {
@@ -156,21 +156,21 @@ namespace okiidoku::mono::detail::solver {
 			if (desc.house_cells.test(static_cast<o2x_t>(house_cell))) [[unlikely]] {
 				const auto rmi {house_cell_to_rmi<O>(desc.house_type, desc.house, house_cell)};
 				const auto check {engine.do_elim_remove_syms_(static_cast<rmi_t>(rmi), desc.syms)};
-				if (check.no_solutions_remain()) [[unlikely]] {
+				if (check.did_unwind()) [[unlikely]] {
 					return check;
 				}
 			}
 		}
-		return SolutionsRemain::yes();
+		return UnwindInfo::make_no_unwind();
 	}
 
 
 	template<Order O> requires(is_order_compiled(O))
-	SolutionsRemain CandElimApplyImpl<O>::apply(
+	UnwindInfo CandElimApplyImpl<O>::apply(
 		Engine<O>& engine,
 		const found::LockedCands<O>& desc
 	) noexcept {
-		(void)engine, (void)desc; return SolutionsRemain::yes();// TODO
+		(void)engine, (void)desc; return UnwindInfo::make_no_unwind();// TODO
 	}
 
 
