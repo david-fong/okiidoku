@@ -174,7 +174,7 @@ namespace okiidoku::mono {
 namespace okiidoku::visitor {
 
 	void generate(Grid& vis_sink, const rng_seed_t rng_seed) noexcept {
-		return std::visit([&](auto& mono_sink) {
+		return std::visit([&](auto& mono_sink){
 			return mono::generate(mono_sink, rng_seed);
 		}, vis_sink.get_mono_variant());
 	}

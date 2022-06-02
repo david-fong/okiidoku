@@ -44,7 +44,7 @@ namespace okiidoku::mono {
 		>>>>;
 
 		template<unsigned int N>
-		using uintsN_t =
+		using uint_smolN_t =
 			std::conditional_t<(N <=   8U), std::uint_least8_t,
 			std::conditional_t<(N <=  16U), std::uint_least16_t,
 			std::conditional_t<(N <=  32U), std::uint_least32_t,
@@ -72,15 +72,15 @@ namespace okiidoku::mono {
 
 		template<Order O> using o2x_t = detail::uint_fastN_t<std::bit_width(O*O-1)>;
 		template<Order O> using o2i_t = detail::uint_fastN_t<std::bit_width(O*O)>;
-		template<Order O> using o2xs_t = detail::uintsN_t<std::bit_width(O*O-1)>;
-		template<Order O> using o2is_t = detail::uintsN_t<std::bit_width(O*O)>;
+		template<Order O> using o2xs_t = detail::uint_smolN_t<std::bit_width(O*O-1)>;
+		template<Order O> using o2is_t = detail::uint_smolN_t<std::bit_width(O*O)>;
 
 		template<Order O> using o3i_t = detail::uint_fastN_t<std::bit_width(O*O*O)>;
 
 		template<Order O> using o4x_t = detail::uint_fastN_t<std::bit_width(O*O*O*O-1)>;
 		template<Order O> using o4i_t = detail::uint_fastN_t<std::bit_width(O*O*O*O)>;
-		template<Order O> using o4xs_t = detail::uintsN_t<std::bit_width(O*O*O*O-1)>;
-		template<Order O> using o4is_t = detail::uintsN_t<std::bit_width(O*O*O*O)>;
+		template<Order O> using o4xs_t = detail::uint_smolN_t<std::bit_width(O*O*O*O-1)>;
+		template<Order O> using o4is_t = detail::uint_smolN_t<std::bit_width(O*O*O*O)>;
 
 		template<Order O> using o5i = detail::uint_fastN_t<std::bit_width(O*O*O*O*O)>;
 

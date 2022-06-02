@@ -32,7 +32,7 @@ namespace okiidoku::mono { namespace {
 		using o4i_t = int_ts::o4i_t<O>;
 
 	public:
-		// explicit CanonPlace(const Grid<O>& grid): src_grid{grid} {}
+		// explicit CanonPlace(const Grid<O>& grid) noexcept: src_grid{grid} {}
 
 	private:
 		// Grid<O>& src_grid;
@@ -54,7 +54,7 @@ namespace okiidoku::mono { namespace {
 		static Grid<O> make_table_for_a_pass(const Grid<O>& src_grid, bool is_post_transpose, const PolarState& row, const PolarState& col) noexcept;
 
 	public:
-		static Transformation<O> do_it(Grid<O>& src_grid) noexcept ;
+		static Transformation<O> do_it(Grid<O>& src_grid) noexcept;
 	};
 
 

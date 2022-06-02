@@ -50,8 +50,8 @@ namespace okiidoku { namespace {
 namespace okiidoku {
 
 	void print_2d_base( // NOLINT(readability-function-cognitive-complexity) :B
-		std::ostream& os,
 		const Order O,
+		std::ostream& os,
 		const rng_seed_t rng_seed,
 		const std::span<const print_2d_grid_view> grid_views
 	) noexcept {
@@ -69,7 +69,7 @@ namespace okiidoku {
 				for (unsigned i {0}; i < 1U + (2U * O); ++i) {
 					os << "─";
 				}
-				if (box_col < O - 1U) { M_NOOK("┬", "┼", "┴") }
+				if (box_col < O - 1U) [[likely]] { M_NOOK("┬", "┼", "┴") }
 			}
 			M_NOOK("┐", "┤", "┘")
 			#undef M_NOOK
@@ -86,13 +86,13 @@ namespace okiidoku {
 		const auto emoji_sets {make_random_emoji_set(O, rng_seed)};
 
 		for (o2is_t row {0}; row < O2; ++row) {
-			if (row % O == 0) {
+			if (row % O == 0) [[unlikely]] {
 				print_box_row_sep_strings(row / O);
 			}
 			os << '\n';
 			for (unsigned grid_i {0}; grid_i < grid_views.size(); ++grid_i) {
 				for (o2is_t col {0}; col < O2; ++col) {
-					if ((col % O) == 0) { os << " │"; }
+					if ((col % O) == 0) [[unlikely]] { os << " │"; }
 
 					auto val {size_t{grid_views[grid_i].operator()(static_cast<o4xs_t>((row * O2) + col))}};
 					if (val == O2) {

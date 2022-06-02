@@ -61,13 +61,10 @@ namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
 	std::optional<Grid<O>> VeryDeductiveSolver<O>::get_next_solution() noexcept {
-		if (engine_.get() == nullptr) [[unlikely]] {
+		if (!engine_ || engine_->no_solutions_remain()) [[unlikely]] {
 			return std::nullopt;
 		}
 		engine_t& e {*engine_};
-		if (e.no_solutions_remain()) [[unlikely]] {
-			return std::nullopt;
-		}
 		if (num_solns_found() > 0) {
 			assert(e.get_num_puzcells_remaining() == 0);
 			const auto check {e.unwind_one_stack_frame()};

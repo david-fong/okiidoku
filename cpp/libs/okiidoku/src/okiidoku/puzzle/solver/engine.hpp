@@ -56,12 +56,8 @@ namespace okiidoku::mono::detail::solver {
 		explicit consteval UnwindInfo(bool did_unwind, bool did_unwind_root) noexcept:
 			did_unwind_{did_unwind}, did_unwind_root_{did_unwind_root} {}
 	public:
-		[[nodiscard, gnu::pure]]
-		bool did_unwind() const noexcept { return did_unwind_; }
-
-		[[nodiscard, gnu::pure]]
-		bool did_unwind_root() const noexcept { return did_unwind_root_; }
-
+		[[nodiscard, gnu::pure]] bool did_unwind() const noexcept { return did_unwind_; }
+		[[nodiscard, gnu::pure]] bool did_unwind_root() const noexcept { return did_unwind_root_; }
 		UnwindInfo() = delete;
 		static constexpr UnwindInfo make_no_unwind() noexcept { return UnwindInfo{false, false}; }
 	private:

@@ -9,21 +9,14 @@
 #include <iostream>
 
 namespace okiidoku::mono { namespace {
-	//
-}}
-namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
-	void make_minimal_puzzle(Grid<O>& grid, const rng_seed_t rng_seed) noexcept {
-		assert(grid_follows_rule(grid));
-
-		#ifndef NDEBUG
-		// setup for assertion that input and output have the same solution.
+	Grid<O> get_og_soln_of_proper_puzzle_for_debug(const Grid<O>& proper_puzzle) noexcept {
 		Grid<O> og_soln;
-		if (grid_is_filled(grid)) {
-			og_soln = grid;
+		if (grid_is_filled(proper_puzzle)) {
+			og_soln = proper_puzzle;
 		} else {
-			FastSolver solver {grid};
+			FastSolver solver {proper_puzzle};
 			if (const auto soln1_opt {solver.get_next_solution()}; soln1_opt) {
 				og_soln = soln1_opt.value();
 				if (const auto soln2_opt {solver.get_next_solution()}; soln2_opt) {
@@ -33,6 +26,18 @@ namespace okiidoku::mono {
 				assert(false); // contract: input puzzle is proper
 			}
 		}
+		return og_soln;
+	}
+}}
+namespace okiidoku::mono {
+
+	template<Order O> requires(is_order_compiled(O))
+	void make_minimal_puzzle(Grid<O>& grid, const rng_seed_t rng_seed) noexcept {
+		assert(grid_follows_rule(grid));
+
+		#ifndef NDEBUG
+		// setup for assertion that input and output have the same solution.
+		Grid<O> og_soln {get_og_soln_of_proper_puzzle_for_debug(grid)};
 		#endif
 
 		using rng_t = std::minstd_rand;
@@ -44,15 +49,12 @@ namespace okiidoku::mono {
 		using o4i_t = int_ts::o4i_t<O>;
 
 		o4i_t num_puzcell_cands {0};
-		std::array<rmi_t, T::O4> puzcell_cand_rmis;
-		// everything at or above the index `num_puzcell_cands` is either removed,
-		// or would cause loss of properness if removed.
+		std::array<rmi_t, T::O4> puzcell_cand_rmis; // non-candidates: either removed, or can't be removed.
 		for (o4i_t rmi {0}; rmi < T::O4; ++rmi) {
 			if (grid.at_rmi(rmi) < T::O2) [[likely]] {
 				puzcell_cand_rmis[num_puzcell_cands] = static_cast<rmi_t>(rmi);
 				++num_puzcell_cands;
-			}
-		}
+		}	}
 		assert(num_puzcell_cands > 0); // partially enforces contract: input is proper puzzle.
 
 		const auto remove_puzcell_cand_at {[&](const o4i_t cand_i){
@@ -60,9 +62,6 @@ namespace okiidoku::mono {
 			--num_puzcell_cands;
 			puzcell_cand_rmis[cand_i] = std::move(puzcell_cand_rmis[num_puzcell_cands]);
 		}};
-		// hypothesis: if removing a given breaks properness, the only way to change that
-		// is by adding back other removed givens. If this is true, once a given is known
-		// to break properness, if no backtracking is done, then it can never be removed.
 
 		while (num_puzcell_cands > 0) {
 			const auto puzcell_cand_i {static_cast<o4i_t>((rng() - rng_t::min()) % num_puzcell_cands)};

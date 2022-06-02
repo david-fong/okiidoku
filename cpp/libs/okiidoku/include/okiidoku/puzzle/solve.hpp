@@ -42,8 +42,8 @@ namespace okiidoku::mono {
 		FastSolver& operator=(const FastSolver&) = delete;
 
 		// allow moves. an "empty" moved-from instance always returns no solutions.
-		FastSolver(FastSolver&&) = default;
-		FastSolver& operator=(FastSolver&&) = default;
+		FastSolver(FastSolver&&) noexcept = default;
+		FastSolver& operator=(FastSolver&&) noexcept = default;
 
 	private:
 		using engine_t = detail::solver::Engine<O>;
@@ -75,8 +75,8 @@ namespace okiidoku::mono {
 		VeryDeductiveSolver& operator=(const VeryDeductiveSolver&) = delete;
 
 		// allow moves. an "empty" moved-from instance always returns no solutions.
-		VeryDeductiveSolver(VeryDeductiveSolver&&) = default;
-		VeryDeductiveSolver& operator=(VeryDeductiveSolver&&) = default;
+		VeryDeductiveSolver(VeryDeductiveSolver&&) noexcept = default;
+		VeryDeductiveSolver& operator=(VeryDeductiveSolver&&) noexcept = default;
 
 	private:
 		using engine_t = detail::solver::Engine<O>;

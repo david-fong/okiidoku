@@ -104,6 +104,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 				return std::is_lt(group_me_cmp(a,b));
 			});
 			for (o2x_t subset_size {2}; subset_size < T::O2; ++subset_size) {
+				// TODO optimizations for this search
 				const auto search_begin {ranges::find_if(search_me, [](const auto& gm){
 					return gm.cand_count > 1;
 				})};
@@ -172,9 +173,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 				found_queues.push_back(found::CellsClaimSyms<O>{
 					what, who, static_cast<o2xs_t>(house), house_type
 				});
-			})) {
-				return true;
-			}
+			})) { return true; }
 		}}
 		return false;
 	}
@@ -201,13 +200,11 @@ namespace okiidoku::mono::detail::solver { namespace {
 				}
 				group_me.cand_count = static_cast<o2is_t>(group_me.cands.count());
 			}
-			if (subsets::helper_find_and_check_needs_unwind<O>(search_me, [&](const auto& what, const auto& who){
+			if (subsets::helper_find_and_check_needs_unwind<O>(search_me, [&](const auto& what, const auto& who) noexcept {
 				found_queues.push_back(found::SymsClaimCells<O>{
 					what, who, static_cast<o2xs_t>(house), house_type
 				});
-			})) {
-				return true;
-			}
+			})) { return true; }
 		}}
 		return false;
 	}
@@ -298,45 +295,21 @@ namespace okiidoku::mono::detail::solver {
 
 	// opening boilerplate. #undef-ed before end of namespace.
 	#define OKIIDOKU_CAND_ELIM_FINDER(TECHNIQUE_NAME) \
-		template<Order O> requires(is_order_compiled(O)) \
-		UnwindInfo CandElimFind<O>::TECHNIQUE_NAME(Engine<O>& engine) noexcept { \
+	template<Order O> requires(is_order_compiled(O)) \
+	UnwindInfo CandElimFind<O>::TECHNIQUE_NAME(Engine<O>& engine) noexcept { \
 		assert(!engine.no_solutions_remain()); \
 		if (engine.get_num_puzcells_remaining() == 0) [[unlikely]] { return UnwindInfo::make_no_unwind(); } \
-			const auto needs_unwind {find_ ## TECHNIQUE_NAME ## _and_check_needs_unwind(engine.cells_cands(), engine.found_queues())}; \
-			if (needs_unwind) { return engine.unwind_one_stack_frame(); } \
-			return UnwindInfo::make_no_unwind(); \
-		}
+		const auto needs_unwind {find_ ## TECHNIQUE_NAME ## _and_check_needs_unwind(engine.cells_cands(), engine.found_queues())}; \
+		if (needs_unwind) { return engine.unwind_one_stack_frame(); } \
+		return UnwindInfo::make_no_unwind(); \
+	}
 
 	OKIIDOKU_CAND_ELIM_FINDER(sym_claim_cell)
 	OKIIDOKU_CAND_ELIM_FINDER(cells_claim_syms)
 	OKIIDOKU_CAND_ELIM_FINDER(syms_claim_cells)
 	OKIIDOKU_CAND_ELIM_FINDER(locked_cands)
+	#undef OKIIDOKU_CAND_ELIM_FINDER
 
-
-	/* template<Order O> requires(is_order_compiled(O))
-	UnwindInfo CandElimFind<O>::sym_claim_cell(Engine<O>& engine) noexcept {
-		const auto needs_unwind {find_sym_claim_cell_and_check_needs_unwind(engine.cells_cands(), engine.found_queues())};
-		if (needs_unwind) { return engine.unwind_one_stack_frame(); }
-		return UnwindInfo::make_no_unwind();
-	}
-
-	template<Order O> requires(is_order_compiled(O))
-	UnwindInfo CandElimFind<O>::cells_claim_syms(Engine<O>& engine) noexcept {
-		OKIIDOKU_CAND_ELIM_FINDER_PRELUDE
-		return find_cells_claim_syms_and_check_needs_unwind(engine.cells_cands(), engine.found_queues());
-	}
-
-	template<Order O> requires(is_order_compiled(O))
-	UnwindInfo CandElimFind<O>::syms_claim_cells(Engine<O>& engine) noexcept {
-		OKIIDOKU_CAND_ELIM_FINDER_PRELUDE
-		return find_syms_claim_cells_and_check_needs_unwind(engine.cells_cands(), engine.found_queues());
-	}
-
-	template<Order O> requires(is_order_compiled(O))
-	UnwindInfo CandElimFind<O>::locked_cands(Engine<O>& engine) noexcept {
-		OKIIDOKU_CAND_ELIM_FINDER_PRELUDE
-		return find_locked_cands(engine.cells_cands(), engine.found_queues());
-	} */
 
 	template<Order O> requires(is_order_compiled(O))
 	Guess<O> CandElimFind<O>::good_guess_candidate(const Engine<O>& engine) noexcept {
@@ -344,8 +317,6 @@ namespace okiidoku::mono::detail::solver {
 		return find_good_guess_candidate<O>(engine.cells_cands(), engine.get_num_puzcells_remaining());
 	}
 
-
-	#undef OKIIDOKU_CAND_ELIM_FINDER_PRELUDE
 
 	#define OKIIDOKU_FOR_COMPILED_O(O_) \
 		template class CandElimFind<O_>;

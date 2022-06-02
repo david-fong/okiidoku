@@ -17,9 +17,9 @@ namespace okiidoku::mono {
 		using label_map_t = std::array<mapping_t, T::O2>;
 		using  line_map_t = std::array<std::array<mapping_t, T::O1>, T::O1>;
 
-		static constexpr label_map_t identity_label_map {[]{ label_map_t _; for (o2i_t i {0}; i < T::O2; ++i) { _[i] = static_cast<mapping_t>(i); } return _; }()};
-		static constexpr  line_map_t identity_row_map   {[]{ line_map_t _;  for (o2i_t i {0}; i < T::O2; ++i) { _[i/T::O1][i%T::O1] = static_cast<mapping_t>(i); } return _; }()};
-		static constexpr  line_map_t identity_col_map   {[]{ line_map_t _;  for (o2i_t i {0}; i < T::O2; ++i) { _[i/T::O1][i%T::O1] = static_cast<mapping_t>(i); } return _; }()};
+		static constexpr label_map_t identity_label_map {[]{ label_map_t _{}; for (o2i_t i {0}; i < T::O2; ++i) { _[i] = static_cast<mapping_t>(i); } return _; }()};
+		static constexpr  line_map_t identity_row_map   {[]{ line_map_t _{};  for (o2i_t i {0}; i < T::O2; ++i) { _[i/T::O1][i%T::O1] = static_cast<mapping_t>(i); } return _; }()};
+		static constexpr  line_map_t identity_col_map   {[]{ line_map_t _{};  for (o2i_t i {0}; i < T::O2; ++i) { _[i/T::O1][i%T::O1] = static_cast<mapping_t>(i); } return _; }()};
 		static constexpr        bool identity_post_transpose {false};
 
 		label_map_t label_map {identity_label_map};

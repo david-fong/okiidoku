@@ -61,3 +61,9 @@ In the end, I actually decided to make this a contract instead of a guideline. R
 - After SymClaimCell at A, can check:
   - CellClaimSym: n/a
   - LockedCands: box of A to see if any symbols removed from A can now go only in one line intersecting A.
+
+## Puzzle Making
+
+hypothesis: if removing a given breaks properness, the only way to change that is by adding back other removed givens. If this is true, once a given is known to break properness, if no backtracking is done, then it can never be removed.
+
+If a puzzle is known to be proper, and then a given G is removed, it is known that there is always exactly one solution to the derived puzzle where the cell at G.rmi takes on G.val, and that solution is the solution of the base puzzle. perhaps it can be faster to check whether the derived puzzle is no longer proper by focusing the first guess in the stack at the cell of G. Also, can at least remove G from all the guess stack frames if the goal is to check that the derived puzzle is still proper or not.

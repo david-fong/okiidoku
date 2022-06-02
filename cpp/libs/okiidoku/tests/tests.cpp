@@ -66,7 +66,7 @@ unsigned test_morph(okiidoku::SharedRng& shared_rng, const unsigned num_rounds) 
 		[](const auto val){ return val == T::O2; }
 	)); // grid must be initialized to an empty grid
 
-	Grid<O> canon_grid;
+	// Grid<O> canon_grid;
 
 	for (unsigned round {0}; round < num_rounds; ) {
 		generate(gen_grid, shared_rng.get_u64());

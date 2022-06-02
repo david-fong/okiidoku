@@ -13,6 +13,7 @@
 - create a separate github repo for data. add as submodule?
 - emscripten build and website
 - puzzle creation experiments (see [research-questions.md](../writings/research-questions.md))
+- optional async and batch-threading wrappers for long-running things
 - minlexing canonicalization
 - compare canonicalization methods (performance / time-complexity)
 - language bindings for other languages [see dedicated todo-file](./extras/bindings/todo.md)
@@ -21,12 +22,14 @@
 
 - Examine contents of exported symbols (`nm -nCD libs/okiidoku/.../libokiidoku.so | less`) and make sure nothing is exported that isn't intended to be.
 - Ensure dependencies that should be private to the library implementation aren't exposed in any way to the library interface.
-- Run aggressive static analyzers
+- Run static analyzers
 - Check which `#ifdef __EMSCRIPTEN__` blocks can be removed as emscripten updates its sysroot libc++.
 
 ## Misc List
 
-- https://crascit.com/2016/01/31/enhanced-source-file-handling-with-target_sources/
+- experiment with optimizations for solving smaller grids.
+  - less `unique_ptr` usage.
+  - specializing `O2BitArr` to use int sizes smaller than u64.
 
 - look into cppitertools for writing my raw loops. see if people say anything about performance overhead.
 

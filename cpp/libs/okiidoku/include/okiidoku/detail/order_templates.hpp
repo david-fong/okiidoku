@@ -13,7 +13,7 @@ namespace okiidoku {
 
 	using Order = unsigned;
 
-	constexpr bool is_order_compiled(const Order O) {
+	constexpr bool is_order_compiled(const Order O) noexcept {
 		#define OKIIDOKU_FOR_COMPILED_O(O_) if (O == O_) { return true; }
 		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 		#undef OKIIDOKU_FOR_COMPILED_O
@@ -24,7 +24,7 @@ namespace okiidoku {
 		template<Order Ignored, Order... Orders>
 		class CompiledOrdersHelper final {
 		public:
-			static constexpr auto make_arr() { return std::to_array({Orders...}); }
+			static consteval auto make_arr() noexcept { return std::to_array({Orders...}); }
 		};
 	}
 	// exists because my template instantiation macro has no delimiter

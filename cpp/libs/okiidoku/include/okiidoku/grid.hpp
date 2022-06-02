@@ -18,7 +18,12 @@ namespace okiidoku::mono {
 	// A numerically encoded value of O2 symbolizes an empty (non-given/puzzle) cell.
 	// Note: not exported. All public members are defined inline in this header.
 	template<Order O> requires(is_order_compiled(O))
-	using Grid = detail::Gridlike<O, grid_val_t<O>>;
+	// using Grid = detail::Gridlike<O, grid_val_t<O>>;
+	// Note: the above commented-out type alias results in large exported, mangled
+	//  symbol names from `int_ts`'s heavy usage of `std::conditional_t` (but why?).
+	//  Using inheritance gains nice mangled symbol names. Speed seems to suffer a
+	//  negligible drop (~1%?) or maybe it doesn't. I am happy with this outcome.
+	struct Grid final : public detail::Gridlike<O, grid_val_t<O>> {};
 
 
 	// Returns `false` if any cells in a same house contain the same value.
@@ -35,7 +40,7 @@ namespace okiidoku::mono {
 
 	template<Order O, class V_>
 	requires(is_order_compiled(O) && !std::is_reference_v<V_>)
-	struct detail::Gridlike final {
+	struct detail::Gridlike {
 	public:
 		using val_t = V_;
 		using T = Ints<O>;

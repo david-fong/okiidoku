@@ -16,8 +16,8 @@ namespace okiidoku {
 	// contract: each grid view's domain is [0, O4), and range is [0, O2].
 	// Note: tradeoff: fewer template instantiations for slightly worse perf.
 	OKIIDOKU_EXPORT void print_2d_base(
-		std::ostream&,
 		Order O,
+		std::ostream&,
 		rng_seed_t,
 		std::span<const print_2d_grid_view>
 	) noexcept;
@@ -26,12 +26,13 @@ namespace okiidoku {
 	namespace mono {
 		template<Order O, std::same_as<Grid<O>>... Gs> requires(is_order_compiled(O))
 		void print_2d(std::ostream& os, rng_seed_t rng_seed, const Gs&... grids) noexcept {
+			static_assert(sizeof...(grids) > 0);
 			const auto printers {std::to_array<print_2d_grid_view>({
 				[&](const visitor::int_ts::o4xs_t rmi){
 					return static_cast<visitor::int_ts::o2is_t>(grids.at_rmi(rmi));
-				}...
+				}...,
 			})};
-			return print_2d_base(os, O, rng_seed, printers);
+			return print_2d_base(O, os, rng_seed, printers);
 		}
 
 		// Note: I like how the initializer list param doesn't have to be the last
@@ -59,9 +60,10 @@ namespace okiidoku {
 		// does nothing if not all the grids have the same grid-order.
 		template<std::same_as<Grid>... Gs>
 		void print_2d(std::ostream& os, const rng_seed_t rng_seed, const Gs&... grids) noexcept {
-			if (sizeof...(grids) == 0) [[unlikely]] { return; }
+			static_assert(sizeof...(grids) > 0);
+			// if (sizeof...(grids) == 0) [[unlikely]] { return; }
 			const auto tup {std::forward_as_tuple(grids...)};
-			if ((... && (std::get<0>(tup).get_mono_order() == grids.get_mono_order()))) [[unlikely]] { return; }
+			if (!(... && (std::get<0>(tup).get_mono_order() == grids.get_mono_order()))) [[unlikely]] { return; }
 
 			switch (std::get<0>(tup).get_mono_order()) {
 			#define OKIIDOKU_FOR_COMPILED_O(O_) \

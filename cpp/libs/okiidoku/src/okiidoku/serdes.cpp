@@ -18,7 +18,7 @@ namespace okiidoku::mono { namespace {
 		using o4i_t = int_ts::o4i_t<O>;
 
 		static constexpr unsigned num_buf_bytes {1};
-		using buf_t = detail::uintsN_t<2*8*num_buf_bytes>; // x2 to prevent overflow
+		using buf_t = detail::uint_smolN_t<2*8*num_buf_bytes>; // x2 to prevent overflow
 		static_assert((1U<<(2*8*num_buf_bytes)) > (2U*T::O2)); // requirement to handle overflow
 
 	public:

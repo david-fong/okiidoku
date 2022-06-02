@@ -9,8 +9,6 @@ namespace okiidoku::mono::detail::solver {
 	template<Order O> requires(is_order_compiled(O))
 	class CandElimFind final {
 		// Note: use of class wrapper instead of individual template functions eases friending.
-		// Internal (somewhat obvious) contract:
-		//  finders must never incorrectly progress in solving a proper puzzle.
 	public:
 		// common contracts and invariants for all finders:
 		// contract: `no_solutions_remain` returns `false`.
@@ -28,7 +26,7 @@ namespace okiidoku::mono::detail::solver {
 		// AKA "hidden subsets"
 		static UnwindInfo syms_claim_cells(Engine<O>&) noexcept;
 
-		// static void fish(Engine<O>&) noexcept;
+		// static UnwindInfo fish(Engine<O>&) noexcept;
 
 
 		static Guess<O> good_guess_candidate(const Engine<O>&) noexcept;

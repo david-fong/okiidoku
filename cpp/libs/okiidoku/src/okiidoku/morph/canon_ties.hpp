@@ -64,7 +64,7 @@ namespace okiidoku::mono::detail {
 
 		template<class IsEq>
 		// requires (std::regular_invocable<IsEq, link_t, link_t>)
-		void update(const IsEq is_eq) {
+		void update(const IsEq is_eq) noexcept {
 			for (const auto tie : *this) {
 				assert(tie.begin_ < tie.end_);
 				auto cursor {tie.begin_};
