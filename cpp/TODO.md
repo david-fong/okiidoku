@@ -26,6 +26,8 @@
 
 ## Misc List
 
+- https://crascit.com/2016/01/31/enhanced-source-file-handling-with-target_sources/
+
 - look into cppitertools for writing my raw loops. see if people say anything about performance overhead.
 
 - Am I breaking any of these? https://en.cppreference.com/w/cpp/language/rule_of_three
@@ -50,7 +52,7 @@
   - [msvc](https://docs.microsoft.com/en-us/cpp/build/profile-guided-optimizations)
   - [clang](https://clang.llvm.org/docs/UsersManual.html#profile-guided-optimization)
 
-- try writing custom GDB python pretty-printer for `HouseMask`?
+- try writing custom GDB python pretty-printer for `O2BitArr`?
   - [how to write a gdb pretty-printer](https://sourceware.org/gdb/onlinedocs/gdb/Writing-a-Pretty_002dPrinter.html#Writing-a-Pretty_002dPrinter)
   - also look into [visual studio `.natvis` files](https://docs.microsoft.com/en-us/visualstudio/debugger/create-custom-views-of-native-objects)
   - interesting: https://github.com/asarium/gdb-natvis

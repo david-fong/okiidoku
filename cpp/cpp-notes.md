@@ -5,6 +5,7 @@
 - [isocpp core guidelines](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines)
 - [pitchfork layout](https://api.csswg.org/bikeshed/?force=1&url=https://raw.githubusercontent.com/vector-of-bool/pitchfork/develop/data/spec.bs)
 - [google cppguide](https://google.github.io/styleguide/cppguide.html)
+- [clang tidy checks list](https://clang.llvm.org/extra/clang-tidy/checks/list.html)
 
 ## Project Style Guide
 
@@ -31,6 +32,7 @@ g++ -E -Icpp/libs/okiidoku/include/ -Icpp/build/Release/libs/okiidoku/ cpp/libs/
 - [Jason Turner example/template](https://github.com/lefticus/cpp_weekly_game_project)
 - [cmake for dynamic library developers](https://www.youtube.com/watch?v=m0DwB4OvDXk)
 - [alex reinking tutorial part 2](https://alexreinking.com/blog/how-to-use-cmake-without-the-agonizing-pain-part-2.html)
+- [](https://crascit.com/2016/01/31/enhanced-source-file-handling-with-target_sources/)
 
 ## Conan Things
 

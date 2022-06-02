@@ -20,12 +20,11 @@ endif()
 
 if(MSVC)
 	if(okiidoku_IS_TOP_LEVEL)
-		add_compile_options(/EHsc) # MSVC recommended setting
+		add_compile_options(/EHsc) # exception handling: standard-compliant
 		# https://docs.microsoft.com/en-us/cpp/build/reference/eh-exception-handling-model#standard-c-exception-handling
-		# exception handling set _globally_ and _only if building as top level project_
-		# because the exception handling model must be consistent for the whole program
-		# and the user should decide for themselves what they want to use. This project
-		# doesn't throw exceptions, so any model should be okay.
+		# the exception handling model must be consistent for the whole program(s).
+		# the user should decide for themselves what they want to use.
+		# This project doesn't throw exceptions, so any model should be okay.
 	endif()
 else()
 	add_compile_options(

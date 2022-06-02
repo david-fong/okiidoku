@@ -41,7 +41,12 @@ namespace okiidoku::mono {
 			}
 
 			using Find = detail::solver::CandElimFind<O>;
-			// Find::sym_claim_cell(e);  if (e.has_queued_cand_elims()) { continue; }
+			{
+				const auto check {Find::sym_claim_cell(e)};
+				if (check.did_unwind_root()) [[unlikely]] { return std::nullopt; }
+				if (check.did_unwind()) { continue; }
+				if (e.has_queued_cand_elims()) { continue; }
+			}
 			// Find::locked_cands(e);     if (e.has_queued_cand_elims()) { continue; }
 			// Find::cells_claim_syms(e); if (e.has_queued_cand_elims()) { continue; }
 			// Find::syms_claim_cells(e); if (e.has_queued_cand_elims()) { continue; } // TODO.try apparently the two different types of subset techniques come in accompanying pairs. Perhaps we only need to call one of the finders then? Please investigate/experiment.
@@ -69,7 +74,7 @@ namespace okiidoku::mono {
 		}
 		while (e.get_num_puzcells_remaining() > 0) [[likely]] {
 			using Find = detail::solver::CandElimFind<O>;
-			Find::sym_claim_cell(e);
+			if (Find::sym_claim_cell(e).did_unwind()) [[unlikely]] { continue; }
 			// Find::locked_cands(e);
 			// TODO call other techniques
 

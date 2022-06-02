@@ -1,6 +1,6 @@
 #include <okiidoku/morph/rel_info.hpp>
 
-#include <okiidoku/house_mask.hpp>
+#include <okiidoku/o2_bit_arr.hpp>
 
 #include <algorithm> // swap, sort, ranges::next_permutation
 #include <numeric>   // abs
@@ -9,8 +9,8 @@ namespace okiidoku::mono { namespace {
 
 	template<Order O> requires(is_order_compiled(O))
 	struct RelMasks final {
-		HouseMask<O> boxes_h;
-		HouseMask<O> boxes_v;
+		O2BitArr<O> boxes_h;
+		O2BitArr<O> boxes_v;
 	};
 
 	// A structure to avoid duplicating information from the diagonal symmetry
@@ -82,7 +82,7 @@ namespace okiidoku::mono::detail {
 	template<Order O> requires(is_order_compiled(O))
 	detail::Gridlike<O, Rel<O>> make_rel_table(const Grid<O>& grid_in) noexcept {
 		using T = Ints<O>;
-		using rel_at_mask_t = HouseMask<O>;
+		using rel_at_mask_t = O2BitArr<O>;
 		using o1i_t = int_ts::o1i_t<O>;
 		using o2i_t = int_ts::o2i_t<O>;
 		using chute_imbalance_t = typename Rel<O>::chute_imbalance_t;

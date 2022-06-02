@@ -1,7 +1,7 @@
 import gdb.printing
 # https://sourceware.org/gdb/onlinedocs/gdb/Writing-a-Pretty_002dPrinter.html
 
-class HouseMaskPrinter:
+class O2BitArrPrinter:
 	def __init__(self, val):
 		self.val = val
 	def to_string(self):
@@ -11,7 +11,7 @@ class HouseMaskPrinter:
 
 def okiidoku_build_pretty_printer():
 	pp = gdb.printing.RegexpCollectionPrettyPrinter('okiidoku')
-	pp.add_printer('HouseMask', '^okiidoku::mono::HouseMask<.*>$', HouseMaskPrinter)
+	pp.add_printer('O2BitArr', '^okiidoku::mono::O2BitArr<.*>$', O2BitArrPrinter)
 	return pp
 
 

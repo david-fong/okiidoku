@@ -1,6 +1,6 @@
 #include <okiidoku/grid.hpp>
 
-#include <okiidoku/house_mask.hpp>
+#include <okiidoku/o2_bit_arr.hpp>
 
 #include <algorithm>
 
@@ -11,7 +11,7 @@ namespace okiidoku::mono {
 		using T = Ints<O>;
 		using o2x_t = int_ts::o2x_t<O>;
 		using o2i_t = int_ts::o2i_t<O>;
-		using has_mask_t = HouseMask<O>;
+		using has_mask_t = O2BitArr<O>;
 
 		has_mask_t row_has;
 		std::array<has_mask_t, T::O1> h_chute_boxes_has;

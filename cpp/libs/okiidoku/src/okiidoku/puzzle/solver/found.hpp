@@ -1,7 +1,7 @@
 #ifndef HPP_OKIIDOKU__PUZZLE__SOLVER__FOUND
 #define HPP_OKIIDOKU__PUZZLE__SOLVER__FOUND
 
-#include <okiidoku/house_mask.hpp>
+#include <okiidoku/o2_bit_arr.hpp>
 #include <okiidoku/ints.hpp>
 
 #include <type_traits>
@@ -24,16 +24,16 @@ namespace okiidoku::mono::detail::solver::found {
 
 	template<Order O> requires(is_order_compiled(O))
 	struct CellsClaimSyms final {
-		HouseMask<O> syms; // what is required
-		HouseMask<O> house_cells; // who requires it
+		O2BitArr<O> syms; // what is required
+		O2BitArr<O> house_cells; // who requires it
 		int_ts::o2xs_t<O> house; // where the require-er is
 		HouseType house_type; // where the require-er is
 	};
 
 	template<Order O> requires(is_order_compiled(O))
 	struct SymsClaimCells final {
-		HouseMask<O> house_cells; // what is required
-		HouseMask<O> syms; // who requires it
+		O2BitArr<O> house_cells; // what is required
+		O2BitArr<O> syms; // who requires it
 		int_ts::o2xs_t<O> house; // where the require-er is
 		HouseType house_type; // where the require-er is
 	};

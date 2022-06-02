@@ -1,6 +1,6 @@
 #include <okiidoku/serdes.hpp>
 
-#include <okiidoku/house_mask.hpp>
+#include <okiidoku/o2_bit_arr.hpp>
 
 #include <iostream>
 #include <algorithm>
@@ -13,7 +13,7 @@ namespace okiidoku::mono { namespace {
 	template<Order O> requires(is_order_compiled(O))
 	class SerdesHelper final {
 		using T = Ints<O>;
-		using cands_t = HouseMask<O>;
+		using cands_t = O2BitArr<O>;
 		using val_t = int_ts::o2x_t<O>;
 		using o4i_t = int_ts::o4i_t<O>;
 
@@ -23,11 +23,11 @@ namespace okiidoku::mono { namespace {
 
 	public:
 		SerdesHelper() noexcept:
-			row_cands {house_mask_ones<O>},
-			cell_cands {house_mask_ones<O>}
+			row_cands {O2BitArr_ones<O>},
+			cell_cands {O2BitArr_ones<O>}
 		{
-			h_chute_boxes_cands.fill(house_mask_ones<O>);
-			cols_cands.fill(house_mask_ones<O>);
+			h_chute_boxes_cands.fill(O2BitArr_ones<O>);
+			cols_cands.fill(O2BitArr_ones<O>);
 		}
 		[[nodiscard]] o4i_t get_cell_rmi() const noexcept { return cell_rmi; }
 		void advance() noexcept;
@@ -63,8 +63,8 @@ namespace okiidoku::mono { namespace {
 	template<Order O> requires(is_order_compiled(O))
 	void SerdesHelper<O>::advance() noexcept {
 		++cell_rmi;
-		if (cell_rmi % T::O2 == 0) [[unlikely]] { row_cands = house_mask_ones<O>; }
-		if (cell_rmi % T::O3 == 0) [[unlikely]] { h_chute_boxes_cands.fill(house_mask_ones<O>); }
+		if (cell_rmi % T::O2 == 0) [[unlikely]] { row_cands = O2BitArr_ones<O>; }
+		if (cell_rmi % T::O3 == 0) [[unlikely]] { h_chute_boxes_cands.fill(O2BitArr_ones<O>); }
 
 		auto& box_cands {h_chute_boxes_cands[cell_rmi / T::O3]};
 		auto& col_cands {cols_cands[cell_rmi / T::O2]};
@@ -124,7 +124,7 @@ namespace okiidoku::mono { namespace {
 		(void)smol_val_buf_remaining; (void)is;
 
 		val_t smol_val_buf {0};
-		// TODO.asap
+		// TODO
 
 		assert(smol_val_buf < smol_val_buf_remaining);
 		const auto val {cell_cands.get_index_of_nth_set_bit(smol_val_buf)};
@@ -177,7 +177,7 @@ namespace okiidoku::mono {
 			const auto val {helper.parse_val(is)};
 			grid.at_rmi(helper.get_cell_rmi()) = static_cast<grid_val_t<O>>(val);
 		}
-		// TODO.asap infer cells in anti-diagonal boxes.
+		// TODO infer cells in anti-diagonal boxes.
 
 		assert(grid_is_filled(grid));
 		assert(grid_follows_rule(grid));

@@ -32,6 +32,9 @@
 		// "visualizerFile": "${workspaceFolder}/tools/debug.natvis",
 	},
 
+	"[cmake]": {
+	},
+
 	"files.exclude": {
 		"external/": true,
 		"build/": true,

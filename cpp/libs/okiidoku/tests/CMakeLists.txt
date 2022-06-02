@@ -1,5 +1,8 @@
 # todo: learn how to do functions/other mechanisms to share config between test targets
 add_executable(okiidoku_test tests.cpp)
+target_sources(okiidoku_test PRIVATE
+	"${CMAKE_CURRENT_LIST_DIR}/../src/okiidoku/o2_bit_arr.cpp" # hack to be able to test it.
+)
 target_include_directories(okiidoku_test PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
 
 target_link_libraries(okiidoku_test

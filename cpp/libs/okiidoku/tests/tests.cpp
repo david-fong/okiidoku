@@ -6,7 +6,7 @@
 #include <okiidoku/print_2d.hpp>
 #include <okiidoku/gen.hpp>
 #include <okiidoku/grid.hpp>
-#include <okiidoku/house_mask.hpp>
+#include <okiidoku/o2_bit_arr.hpp>
 #include <okiidoku/shared_rng.hpp>
 
 #include <okiidoku_cli_utils/console_setup.hpp>
@@ -17,12 +17,11 @@
 #include <string_view>
 #include <random>    // random_device,
 #include <array>
-#include <cassert>
 
-// OKIIDOKU_DEFINE_MT19937_64
 #ifdef NDEBUG
 #undef NDEBUG
 #endif
+#include <cassert>
 
 
 // TODO.high it should probably just return right away if it encounters any failure.
@@ -38,9 +37,17 @@ unsigned test_morph(okiidoku::SharedRng& shared_rng, const unsigned num_rounds) 
 	std::cout << "\n\ntesting for order " << O << std::endl;
 	// Note: if gen_path gets un-deprecated, assert that paths are valid.
 
-	assert(house_mask_ones<O>.count() == T::O2);
+	assert(O2BitArr_ones<O>.count() == T::O2);
 	for (o2i_t i {0}; i < T::O2; ++i) {
-		assert(house_mask_ones<O>.count_set_bits_below(static_cast<o2x_t>(i)) == i);
+		assert(O2BitArr_ones<O>.count_set_bits_below(static_cast<o2x_t>(i)) == i);
+	}
+	{
+		o2i_t count {0};
+		for (auto walker {O2BitArr_ones<O>.set_bits_walker()}; walker.has_more(); walker.advance()) {
+			assert(walker.value() == count);
+			++count;
+		}
+		assert(count == T::O2);
 	}
 
 	for (o2i_t box {0}; box < T::O2; ++box) {

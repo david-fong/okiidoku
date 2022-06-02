@@ -12,14 +12,15 @@ namespace okiidoku::mono::detail::solver {
 		void queue_apply_one(Engine<O>& engine, QueueT& queue, UnwindInfo& check) noexcept {
 			assert(!queue.empty());
 			if constexpr (std::is_same_v<decltype(queue), typename FoundQueues<O>::template queue_t<found::CellClaimSym<O>>&>) {
-			// if constexpr (FoundQueues<O>::queue_has_passive_find(queue)) {
 				auto desc {std::move(queue.front())}; // handle passive find during apply
 				queue.pop_front();
 				check = CandElimApplyImpl<O>::apply(engine, std::move(desc));
 			} else {
+				#ifndef NDEBUG
 				const auto old_front_addr {&queue.front()};
+				#endif
 				check = CandElimApplyImpl<O>::apply(engine, queue.front());
-				if (!check.did_unwind_root()) [[likely]] {
+				if (!check.did_unwind()) [[likely]] {
 					assert(old_front_addr == &queue.front()); // no passive find during apply
 					assert(!queue.empty());
 					queue.pop_front();
@@ -81,7 +82,7 @@ namespace okiidoku::mono::detail::solver {
 	template<Order O> requires(is_order_compiled(O))
 	UnwindInfo CandElimApplyImpl<O>::apply(
 		Engine<O>& engine,
-		const found::CellClaimSym<O> desc // TODO consider/try passing by value
+		const found::CellClaimSym<O> desc
 	) noexcept {
 		// repetitive code. #undef-ed before end of function.
 		#define OKIIDOKU_TRY_ELIM_NB_CAND \
@@ -119,6 +120,9 @@ namespace okiidoku::mono::detail::solver {
 		const found::SymClaimCell<O>& desc
 	) noexcept {
 		auto& cell_cands {engine.cells_cands().at_rmi(desc.rmi)};
+		if (!cell_cands.test(desc.val)) {
+			return engine.unwind_one_stack_frame();
+		}
 		assert(cell_cands.test(desc.val));
 		if (cell_cands.count() > 1) {
 			engine.register_new_given_(desc.rmi, desc.val);
@@ -150,15 +154,11 @@ namespace okiidoku::mono::detail::solver {
 		Engine<O>& engine,
 		const found::SymsClaimCells<O>& desc
 	) noexcept {
-		// TODO.wait HouseMask<O>::set_bits_iter <- create and use instead.
-		for (o2i_t house_cell {0}; house_cell < T::O2; ++house_cell) {
-			// TODO likelihood attribute. hypothesis: desc.house_cells.count() is small. please empirically test.
-			if (desc.house_cells.test(static_cast<o2x_t>(house_cell))) [[unlikely]] {
-				const auto rmi {house_cell_to_rmi<O>(desc.house_type, desc.house, house_cell)};
-				const auto check {engine.do_elim_remove_syms_(static_cast<rmi_t>(rmi), desc.syms)};
-				if (check.did_unwind()) [[unlikely]] {
-					return check;
-				}
+		for (auto walker {desc.house_cells.set_bits_walker()}; walker.has_more(); walker.advance()) {
+			const auto rmi {house_cell_to_rmi<O>(desc.house_type, desc.house, walker.value())};
+			const auto check {engine.do_elim_remove_syms_(static_cast<rmi_t>(rmi), desc.syms)};
+			if (check.did_unwind()) [[unlikely]] {
+				return check;
 			}
 		}
 		return UnwindInfo::make_no_unwind();

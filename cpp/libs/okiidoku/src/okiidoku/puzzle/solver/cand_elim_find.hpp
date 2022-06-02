@@ -6,14 +6,11 @@
 
 namespace okiidoku::mono::detail::solver {
 
-	// TODO.asap consider wrapping in a namespace instead of a class.
-	//  The only reason I'm using a class is as a trick to share common type
-	//  aliases with all the member functions. The "sharing" could alternatively
-	//  be done via the prelude macro, albeit probably requiring some [[maybe_unused]] attributes.
 	template<Order O> requires(is_order_compiled(O))
 	class CandElimFind final {
+		// Note: use of class wrapper instead of individual template functions eases friending.
 		// Internal (somewhat obvious) contract:
-		// finders must never incorrectly progress in solving a proper puzzle.
+		//  finders must never incorrectly progress in solving a proper puzzle.
 	public:
 		// common contracts and invariants for all finders:
 		// contract: `no_solutions_remain` returns `false`.
@@ -21,7 +18,7 @@ namespace okiidoku::mono::detail::solver {
 
 		// TODO.high for finders that are not (relatively) trivial to perform a full scan of the grid,
 		//   provide a parameter enum `SearchEffort { find_first, find_all, };`
-		static void sym_claim_cell(Engine<O>&) noexcept;
+		static UnwindInfo sym_claim_cell(Engine<O>&) noexcept;
 
 		static void locked_cands(Engine<O>&) noexcept;
 

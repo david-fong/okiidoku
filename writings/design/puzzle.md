@@ -52,3 +52,12 @@ But what if it's a guideline and not a contract? How do you maintain correctness
 1. Do the same thing as if it was a contract: when unwinding a guess, clear the deduction queue. It would remove queued deductions that the wasteful user didn't use before making a guess. Fine. Let it be on their heads. Play stupid games, win stupid prizes.
 
 In the end, I actually decided to make this a contract instead of a guideline. Rationale: There's never a good reason for an engine user to ever break the guideline. It really does end up simplifying the engine implementation: the engine has queues for found candidate eliminations. The CellClaimSym queue is special due to the cell-major representation. I chose to make the finding of its entries "passive" (done automatically during the process of applying any kind of found candidate elimination). If I want to keep it completely passive with _no_ finder function _and_ allow guesses while its queue is not empty, then I can't automatically clear it upon unwinding since it will never regenerate the lost entries. I've already explained why I don't like the first two solutions (which is why I don't want to implement them).
+
+### Candidate Elimination Independencies
+
+- After CellClaimSym at A, can check
+  - SymClaimCell: all houses neighbouring A for any symbols that were removed from A.
+
+- After SymClaimCell at A, can check:
+  - CellClaimSym: n/a
+  - LockedCands: box of A to see if any symbols removed from A can now go only in one line intersecting A.

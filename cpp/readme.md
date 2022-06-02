@@ -50,3 +50,16 @@ The project is set up for use with VS Code. After installing and enabling the re
 Don't open the cpp folder or the repo's root folder in VS Code directly. Open [the repo's workspace file](../okiidoku.code-workspace).
 
 Note: if you installed cmake via snap (like I did on my Ubuntu machine): https://github.com/microsoft/vscode-cmake-tools/issues/838#issuecomment-1035123514
+
+## Acknowledgements
+
+This project wouldn't be possible without the hard work of those who author
+
+- The C++ language standard and standard library
+- GCC, Clang, MSVC, and Emscripten
+- CMake and Ninja
+- The range-v3 library
+- Educational materials and documentation for the above technologies
+- Computers
+
+Perhaps it's a silly thing to say since it's so obvious, but I can't help but be amazed at what powerful technologies are made available to me at largely no cost. Any inkling of amazement anyone could have at this project pales in comparison to the shoulders of the giants it stands on.

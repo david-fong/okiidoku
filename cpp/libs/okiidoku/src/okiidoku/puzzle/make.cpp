@@ -70,7 +70,7 @@ namespace okiidoku::mono {
 			const auto rmi {puzcell_cand_rmis[puzcell_cand_i]};
 			const auto val {std::exchange(grid.at_rmi(rmi), T::O2)};
 			assert(val < T::O2);
-			std::clog << "\n\n" << int(num_puzcell_cands) << " puzcell candidates remain. attempting to remove the one at rmi=" << int(rmi) << std::flush;
+			std::clog << "\n\n" << int(num_puzcell_cands) << " puzcell candidates remain. attempting remove at rmi=" << int(rmi) << std::flush;
 			FastSolver solver {grid};
 			if (const auto soln1_opt {solver.get_next_solution()}; soln1_opt) {
 				if (const auto soln2_opt {solver.get_next_solution()}; soln2_opt) {

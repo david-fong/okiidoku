@@ -39,7 +39,7 @@ namespace okiidoku::mono::detail::solver {
 			return std::apply([](const auto& ...q){ return (... || q.empty()); }, tup_);
 		}
 
-		// TODO consider making private and friending the unwind method
+		// Note: only used when unwinding the engine's guess stack.
 		void clear() noexcept {
 			return std::apply([](auto& ...dq){ (... , dq.clear()); }, tup_);
 			assert(is_empty());

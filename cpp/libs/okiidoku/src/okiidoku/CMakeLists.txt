@@ -1,0 +1,19 @@
+target_sources(okiidoku PRIVATE
+	o2_bit_arr.cpp
+	grid.cpp
+	gen.cpp
+	print_2d.cpp
+	serdes.cpp
+	archive.cpp
+	morph/transform.cpp
+	morph/scramble.cpp
+	morph/rel_info.cpp
+	morph/canon_label.cpp
+	morph/canon_place.cpp
+	morph/canon.cpp
+	puzzle/solver/engine.cpp
+	puzzle/solver/cand_elim_find.cpp
+	puzzle/solver/cand_elim_apply.cpp
+	puzzle/solve.cpp
+	puzzle/make.cpp
+)

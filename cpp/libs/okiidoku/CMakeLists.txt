@@ -1,25 +1,8 @@
 # https://alexreinking.com/blog/building-a-dual-shared-and-static-library-with-cmake.html
 # https://www.reddit.com/r/cpp/comments/m0rt7v/building_a_dual_shared_and_static_library_with/
-# TODO.low there's a lot of other good things in the above tutorial I'm not currently using
-add_library(okiidoku # uses BUILD_SHARED_LIBS
-	src/okiidoku/house_mask.cpp
-	src/okiidoku/grid.cpp
-	src/okiidoku/gen.cpp
-	src/okiidoku/print_2d.cpp
-	src/okiidoku/serdes.cpp
-	src/okiidoku/archive.cpp
-	src/okiidoku/morph/transform.cpp
-	src/okiidoku/morph/scramble.cpp
-	src/okiidoku/morph/rel_info.cpp
-	src/okiidoku/morph/canon_label.cpp
-	src/okiidoku/morph/canon_place.cpp
-	src/okiidoku/morph/canon.cpp
-	src/okiidoku/puzzle/solver/engine.cpp
-	src/okiidoku/puzzle/solver/cand_elim_find.cpp
-	src/okiidoku/puzzle/solver/cand_elim_apply.cpp
-	src/okiidoku/puzzle/solve.cpp
-	src/okiidoku/puzzle/make.cpp
-)
+# TODO.low try Alex's tutorial things for installation utilities.
+add_library(okiidoku #[[ uses BUILD_SHARED_LIBS ]] "")
+add_subdirectory(src/okiidoku)
 add_library(okiidoku::okiidoku ALIAS okiidoku)
 set_target_properties(okiidoku PROPERTIES
 	# https://www.youtube.com/watch?v=m0DwB4OvDXk&ab_channel=CppCon&t=17m13s
@@ -31,13 +14,17 @@ set_target_properties(okiidoku PROPERTIES
 include(GenerateExportHeader)
 generate_export_header(okiidoku EXPORT_FILE_NAME include/okiidoku/detail/export.h)
 target_compile_definitions(okiidoku PUBLIC "$<$<NOT:$<BOOL:${BUILD_SHARED_LIBS}>>:OKIIDOKU_STATIC_DEFINE>")
-target_include_directories(okiidoku PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>")
-# Future Note: if switching back to FILE_SET, make sure headers get installed. not sure why they weren't when previously using FILE_SET.
 
-target_include_directories(okiidoku PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>")
-target_include_directories(okiidoku PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
+target_include_directories(okiidoku
+	PUBLIC  "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>"
+	PUBLIC  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+	PRIVATE "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>"
+)
 
-install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/okiidoku" "${CMAKE_CURRENT_BINARY_DIR}/include/okiidoku"
+# Future Note: if switching back to FILE_SET, make sure headers get installed. not sure why they weren't when previously using FILE_SET. maybe each header file needs to be listed out explicitly?
+install(DIRECTORY
+	"${CMAKE_CURRENT_BINARY_DIR}/include/okiidoku"
+	"${CMAKE_CURRENT_SOURCE_DIR}/include/okiidoku"
 	TYPE INCLUDE
 	COMPONENT okiidoku_development
 )

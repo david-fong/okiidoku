@@ -1,6 +1,6 @@
 #include <okiidoku/puzzle/solver/cand_elim_find.hpp>
 
-#include <okiidoku/house_mask.hpp>
+#include <okiidoku/o2_bit_arr.hpp>
 #include <okiidoku/puzzle/solver/subset_combo_walker.hpp>
 
 #include <range/v3/view/take.hpp>
@@ -33,21 +33,38 @@ namespace okiidoku::mono::detail::solver { namespace {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	void find_sym_claim_cell(
+	[[nodiscard]] bool find_sym_claim_cell_and_check_needs_unwind(
 		const CandsGrid<O>& cells_cands,
 		FoundQueues<O>& found_queues
 	) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_PRELUDE
-		(void)cells_cands, (void)found_queues;
-		// TODO for each house of all house-types, check if any symbol only has one candidate-house-cell.
-		// how to use masks to optimize? have an accumulator candidate-symbol mask "<house-type>_seen_cand_syms" that starts as zeros.
-		// have a <house-type>_syms_with_multiple_cand_cells accumulator that also starts as zeros.
-		// for each cell in the house, OR= the <house-type>_syms_with_multiple_cand_cells with the AND of <house-type>_seen_cand_syms and the cell's candidate-symbols.
-		//  for bits that have changed value, remove the corresponding entry from <house-type>_single_cand_house_cell_for_sym.
-		// then OR= <house-type>_seen_cand_syms with the cell's candidate-symbols.
-		//  for true bits that are not also true in <house-type>_syms_with_multiple_cand_cells, add the house-cell index to the corresponding entry of <house-type>_seen_cand_syms.
-
-		// for any matches, _if the cell is not already committed (ie. if the cell still has more than one candidate-symbols), enqueue.
+		for (auto house_type : house_types) {
+		for (o2i_t house {0}; house < T::O2; ++house) {
+			std::array<o2is_t, T::O2> syms_seen_once_at_house_cell;
+			syms_seen_once_at_house_cell.fill(T::O2);
+			O2BitArr<O> syms_seen {};
+			O2BitArr<O> syms_seen_once {O2BitArr_ones<O>};
+			for (o2i_t house_cell {0}; house_cell < T::O2; ++house_cell) {
+				const auto& cell_cands {cells_cands.at_rmi(house_cell_to_rmi<O>(house_type, house, house_cell))};
+				syms_seen_once.remove(syms_seen & cell_cands);
+				for (auto walker {(syms_seen_once & cell_cands).set_bits_walker()}; walker.has_more(); walker.advance()) {
+					syms_seen_once_at_house_cell[walker.value()] = static_cast<o2is_t>(house_cell);
+				}
+				syms_seen |= cell_cands;
+			}
+			if (syms_seen.count() < T::O2) [[unlikely]] {
+				return true; // needs unwind; some sym(s) have no cand cells.
+			}
+			for (auto walker {syms_seen_once.set_bits_walker()}; walker.has_more(); walker.advance()) {
+				const auto rmi {house_cell_to_rmi<O>(house_type, house, syms_seen_once_at_house_cell[walker.value()])};
+				if (cells_cands.at_rmi(rmi).count() > 1) {
+					found_queues.push_back(found::SymClaimCell<O>{
+						.rmi{static_cast<rmi_t>(rmi)},
+						.val{static_cast<o2xs_t>(walker.value())},
+					});
+			}	}
+		}}
+		return false;
 	}
 
 
@@ -62,15 +79,15 @@ namespace okiidoku::mono::detail::solver { namespace {
 
 		template<Order O> requires(is_order_compiled(O))
 		struct GroupMe final {
-			HouseMask<O> cands;
+			O2BitArr<O> cands;
 			int_ts::o2is_t<O> cand_count;
 			int_ts::o2xs_t<O> who;
 		};
 
 		template<Order O> requires(is_order_compiled(O))
 		using enqueue_subset_desc_fn_t = std::function<void(
-			const HouseMask<O>& what_required,
-			const HouseMask<O>& who_requires
+			const O2BitArr<O>& what_required,
+			const O2BitArr<O>& who_requires
 		)>;
 
 		template<Order O> requires(is_order_compiled(O))
@@ -81,7 +98,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 			OKIIDOKU_CAND_ELIM_FINDER_PRELUDE
 			const auto group_me_cmp {[](const GroupMe<O>& a, const GroupMe<O>& b){
 				if (const auto cmp {a.cand_count <=> b.cand_count}; std::is_neq(cmp)) [[likely]] { return cmp; }
-				return HouseMask<O>::cmp_differences(a.cands, b.cands); // TODO.try is this line beneficial? I actually don't even really know if it does what I intend, which is to put similar sets close together.
+				return O2BitArr<O>::cmp_differences(a.cands, b.cands); // TODO.try is this line beneficial? I actually don't even really know if it does what I intend, which is to put similar sets close together.
 			}};
 			std::sort(search_me.begin(), search_me.end(), [&](const auto& a, const auto& b){
 				return std::is_lt(group_me_cmp(a,b));
@@ -112,7 +129,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 					, std::bit_or{})
 					};
 					if (combo_union.count()) [[unlikely]] {
-						HouseMask<O> who_requires {};
+						O2BitArr<O> who_requires {};
 						for (o2x_t i {0}; i < subset_size; ++i) {
 							who_requires.set(search_me[combo_walker.combo_at(i)].who);
 						}
@@ -136,7 +153,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 		FoundQueues<O>& found_queues
 	) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_PRELUDE
-		for (HouseType house_type : house_types) {
+		for (auto house_type : house_types) {
 		for (o2i_t house {0}; house < T::O2; ++house) {
 			std::array<subsets::GroupMe<O>, T::O2> search_me;
 			for (o2i_t house_cell {0}; house_cell < T::O2; ++house_cell) {
@@ -162,7 +179,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 		FoundQueues<O>& found_queues
 	) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_PRELUDE
-		for (HouseType house_type : house_types) {
+		for (auto house_type : house_types) {
 		for (o2i_t house {0}; house < T::O2; ++house) {
 			std::array<subsets::GroupMe<O>, T::O2> search_me {};
 			// TODO.mid try applying loop-tiling to see if it improves cache-usage.
@@ -244,7 +261,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 		// 	// to count, use (tag_cell_cands & nb_cell_cands).count().
 		// 	for (const o2i_t sym : cells_cands.at_rmi(tag_rmi).set_bits_iter()) {
 		// 		house_cand_counts_t house_cand_counts {{0}};
-		// 		for (const auto& house_type : house_types) {
+		// 		for (auto house_type : house_types) {
 		// 		for (o2i_t nb_house_cell {0}; nb_house_cell < T::O2; ++nb_house_cell) {
 		// 			const auto nb_rmi {house_cell_to_rmi<O>(
 		// 				house_type,
@@ -275,9 +292,14 @@ namespace okiidoku::mono::detail::solver {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	void CandElimFind<O>::sym_claim_cell(Engine<O>& engine) noexcept {
-		OKIIDOKU_CAND_ELIM_FINDER_PRELUDE
-		return find_sym_claim_cell(engine.cells_cands(), engine.found_queues());
+	UnwindInfo CandElimFind<O>::sym_claim_cell(Engine<O>& engine) noexcept {
+		assert(!engine.no_solutions_remain());
+		if (engine.get_num_puzcells_remaining() == 0) [[unlikely]] { return UnwindInfo::make_no_unwind(); }
+		const auto needs_unwind {find_sym_claim_cell_and_check_needs_unwind(engine.cells_cands(), engine.found_queues())};
+		if (needs_unwind) {
+			return engine.unwind_one_stack_frame();
+		}
+		return UnwindInfo::make_no_unwind();
 	}
 
 	template<Order O> requires(is_order_compiled(O))

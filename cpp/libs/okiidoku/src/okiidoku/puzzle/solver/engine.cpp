@@ -5,6 +5,10 @@
 #include <iostream> // TODO delete
 
 // TODO.low go through and see where it makes sense to add [[likely/unlikely]].
+//  also, many current annotations are based on a _wrong_ assumption of no guessing,
+//  the assumption was naively made upon the _merit_ of optimizing upon the assumption
+//  that an input puzzle has at least one solution- I forgot about guesses being a thing.
+//  It would be good to actually profile instead.
 namespace okiidoku::mono::detail::solver {
 
 	template<Order O> requires(is_order_compiled(O))
@@ -13,7 +17,7 @@ namespace okiidoku::mono::detail::solver {
 
 	template<Order O> requires(is_order_compiled(O))
 	EngineImpl<O>::EngineImpl(const Grid<O>& puzzle) noexcept {
-		cells_cands_.get_underlying_array().fill(house_mask_ones<O>);
+		cells_cands_.get_underlying_array().fill(O2BitArr_ones<O>);
 		for (o4i_t rmi {0}; rmi < T::O4; ++rmi) {
 			const auto& val {puzzle.at_rmi(rmi)};
 			assert(val <= T::O2);
@@ -51,7 +55,7 @@ namespace okiidoku::mono::detail::solver {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	template<class F> requires(std::is_invocable_v<F, HouseMask<O>&>)
+	template<class F> requires(std::is_invocable_v<F, O2BitArr<O>&>)
 	UnwindInfo EngineImpl<O>::do_elim_generic_(
 		const EngineImpl<O>::rmi_t rmi,
 		F elim_fn
@@ -59,7 +63,9 @@ namespace okiidoku::mono::detail::solver {
 		assert(!no_solutions_remain());
 		auto& cell_cands {cells_cands_.at_rmi(rmi)};
 		const auto old_cands_count {cell_cands.count()};
+
 		elim_fn(cell_cands);
+
 		const auto new_cands_count {cell_cands.count()};
 		assert(new_cands_count <= old_cands_count);
 
@@ -89,7 +95,7 @@ namespace okiidoku::mono::detail::solver {
 	template<Order O> requires(is_order_compiled(O))
 	UnwindInfo EngineImpl<O>::do_elim_remove_syms_(
 		const EngineImpl<O>::rmi_t rmi,
-		const HouseMask<O>& to_remove
+		const O2BitArr<O>& to_remove
 	) noexcept {
 		assert(!no_solutions_remain());
 		return do_elim_generic_(rmi, [&](auto& cands){ cands.remove(to_remove); });
@@ -98,7 +104,7 @@ namespace okiidoku::mono::detail::solver {
 	template<Order O> requires(is_order_compiled(O))
 	UnwindInfo EngineImpl<O>::do_elim_retain_syms_(
 		const EngineImpl<O>::rmi_t rmi,
-		const HouseMask<O>& to_retain
+		const O2BitArr<O>& to_retain
 	) noexcept {
 		assert(!no_solutions_remain());
 		return do_elim_generic_(rmi, [&](auto& cands){ cands.retain_only(to_retain); });
@@ -154,7 +160,7 @@ namespace okiidoku::mono::detail::solver {
 		guess_stack_.emplace(*this, guess);
 
 		register_new_given_(guess.rmi, guess.val);
-		std::clog << "\npushed guess: " << int(guess.rmi) << " " << int(guess.val) << ". new depth: " << get_guess_stack_depth() << ". cells_cands: ";
+		std::clog << "\nguess+(" << get_guess_stack_depth() << ") " << int(guess.rmi) << " " << int(guess.val);
 		// debug_print_cells_cands_();
 	}
 
@@ -189,9 +195,9 @@ namespace okiidoku::mono::detail::solver {
 		if (cell_cands.count() == 1) {
 			e.enqueue_cand_elims_for_new_cell_claim_sym_(frame.guess.rmi);
 		}
-		std::clog << "\npopped guess: " << int(frame.guess.rmi) << " " << int(frame.guess.val) << ". new depth: " << e.get_guess_stack_depth() << ". cells_cands: ";
+		std::clog << "\nguess-(" << e.get_guess_stack_depth() << ") " << int(frame.guess.rmi) << " " << int(frame.guess.val);
 		// e.debug_print_cells_cands_();
-		return UnwindInfo::make_did_unwind_one_stack_frame();
+		return UnwindInfo::make_did_unwind();
 	}
 
 

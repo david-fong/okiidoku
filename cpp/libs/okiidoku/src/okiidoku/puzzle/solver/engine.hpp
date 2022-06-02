@@ -3,7 +3,7 @@
 
 #include <okiidoku/puzzle/solver/found_queue.hpp>
 #include <okiidoku/grid.hpp>
-#include <okiidoku/house_mask.hpp>
+#include <okiidoku/o2_bit_arr.hpp>
 
 #include <stack>
 #include <memory> // unique_ptr
@@ -52,7 +52,10 @@ namespace okiidoku::mono::detail::solver {
 		friend UnwindInfo unwind_one_stack_frame_of_<O_>(EngineImpl<O_>&) noexcept;
 		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 		#undef OKIIDOKU_FOR_COMPILED_O
-
+	private:
+		explicit consteval UnwindInfo(bool did_unwind, bool did_unwind_root) noexcept:
+			did_unwind_{did_unwind}, did_unwind_root_{did_unwind_root} {}
+	public:
 		[[nodiscard, gnu::pure]]
 		bool did_unwind() const noexcept { return did_unwind_; }
 
@@ -62,9 +65,7 @@ namespace okiidoku::mono::detail::solver {
 		UnwindInfo() = delete;
 		static constexpr UnwindInfo make_no_unwind() noexcept { return UnwindInfo{false, false}; }
 	private:
-		explicit constexpr UnwindInfo(bool did_unwind, bool did_unwind_root) noexcept:
-			did_unwind_{did_unwind}, did_unwind_root_{did_unwind_root} {}
-		static constexpr UnwindInfo make_did_unwind_one_stack_frame() noexcept { return UnwindInfo{true, false}; }
+		static constexpr UnwindInfo make_did_unwind() noexcept { return UnwindInfo{true, false}; }
 		static constexpr UnwindInfo make_did_unwind_root() noexcept { return UnwindInfo{true, true}; }
 
 		bool did_unwind_;
@@ -76,7 +77,7 @@ namespace okiidoku::mono::detail::solver {
 	template<Order O> requires(is_order_compiled(O)) class CandElimApplyImpl;
 
 	template<Order O> requires(is_order_compiled(O))
-	using CandsGrid = detail::Gridlike<O, HouseMask<O>>;
+	using CandsGrid = detail::Gridlike<O, O2BitArr<O>>;
 
 	template<Order O> requires(is_order_compiled(O))
 	struct Guess final {
@@ -133,10 +134,10 @@ namespace okiidoku::mono::detail::solver {
 		Grid<O> build_solution_obj() const noexcept;
 
 
-		[[nodiscard/* , gnu::pure */]]
+		[[nodiscard, gnu::pure]]
 		const CandsGrid<O>& cells_cands() const noexcept { return cells_cands_; }
 
-		[[nodiscard/* , gnu::pure */]]
+		[[nodiscard, gnu::pure]]
 		FoundQueues<O>& found_queues() noexcept { return found_queues_; }
 
 
@@ -150,13 +151,13 @@ namespace okiidoku::mono::detail::solver {
 		UnwindInfo do_elim_remove_sym_(rmi_t rmi, val_t cand) noexcept;
 
 		// The specified candidate-symbols are allowed to already be removed.
-		UnwindInfo do_elim_remove_syms_(rmi_t rmi, const HouseMask<O>& to_remove) noexcept;
+		UnwindInfo do_elim_remove_syms_(rmi_t rmi, const O2BitArr<O>& to_remove) noexcept;
 
-		UnwindInfo do_elim_retain_syms_(rmi_t rmi, const HouseMask<O>& to_retain) noexcept;
+		UnwindInfo do_elim_retain_syms_(rmi_t rmi, const O2BitArr<O>& to_retain) noexcept;
 
 	private:
 		// The specified candidate-symbol is allowed to already be removed.
-		template<class F> requires(std::is_invocable_v<F, HouseMask<O>&>)
+		template<class F> requires(std::is_invocable_v<F, O2BitArr<O>&>)
 		UnwindInfo do_elim_generic_(rmi_t rmi, F elim_fn) noexcept;
 
 		// contract: must be called immediately when a cell's candidate-symbol count _changes_ to one.
@@ -177,10 +178,8 @@ namespace okiidoku::mono::detail::solver {
 
 		// TODO consider a different design: cells_cands_ and num_puzcells_remaining_ are just the top
 		// entry of the guess_stack_. no_solutions_remain_ is implied when the guess stack size is zero.
-		// Change UnwindInfo to be UnwindInfo. it has a private member that is zero if no unwind
-		// happened, and otherwise is the guess_stack_depth value from before the unwind happened. Or
-		// just make it DidUnwind and hold a bool. This means the receiver needs to check engine.no_solutions_remain
-		// if DidUnwind is true. Or have two bitfields (or just two bools): one being "did unwind", and the other being "unwound root"
+		//  This would make the EngineImpl struct size small enough to probably justify no longer wrapping
+		//   Engine with unique_ptr in the Solver classes.
 		struct OKIIDOKU_NO_EXPORT GuessStackFrame final {
 			// do separate dynamic alloc for each `CandsGrid` to reduce resizing noise.
 			std::unique_ptr<CandsGrid<O>> prev_cells_cands;
