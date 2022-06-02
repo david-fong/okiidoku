@@ -197,7 +197,7 @@ namespace okiidoku::mono::detail::solver {
 		}
 		std::clog << "\nguess-(" << e.get_guess_stack_depth() << ") " << int(frame.guess.rmi) << " " << int(frame.guess.val);
 		// e.debug_print_cells_cands_();
-		return UnwindInfo::make_did_unwind();
+		return UnwindInfo::make_did_unwind_guess();
 	}
 
 

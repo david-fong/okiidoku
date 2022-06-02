@@ -65,7 +65,7 @@ namespace okiidoku::mono::detail::solver {
 		UnwindInfo() = delete;
 		static constexpr UnwindInfo make_no_unwind() noexcept { return UnwindInfo{false, false}; }
 	private:
-		static constexpr UnwindInfo make_did_unwind() noexcept { return UnwindInfo{true, false}; }
+		static constexpr UnwindInfo make_did_unwind_guess() noexcept { return UnwindInfo{true, false}; }
 		static constexpr UnwindInfo make_did_unwind_root() noexcept { return UnwindInfo{true, true}; }
 
 		bool did_unwind_;

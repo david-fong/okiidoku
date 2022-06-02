@@ -64,7 +64,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 					});
 			}	}
 		}}
-		return false;
+		return false; // no unwind needed.
 	}
 
 
@@ -91,7 +91,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 		)>;
 
 		template<Order O> requires(is_order_compiled(O))
-		void helper_find(
+		[[nodiscard]] bool helper_find_and_check_needs_unwind(
 			std::array<GroupMe<O>, Ints<O>::O2>& search_me,
 			enqueue_subset_desc_fn_t<O> enqueue_subset_desc_fn
 		) noexcept {
@@ -128,7 +128,10 @@ namespace okiidoku::mono::detail::solver { namespace {
 						| ranges::views::transform([&](const auto i){ return search_me[i].cands; })
 					, std::bit_or{})
 					};
-					if (combo_union.count()) [[unlikely]] {
+					if (combo_union.count() < subset_size) [[unlikely]] {
+						return true; // needs unwind.
+					}
+					if (combo_union.count() == subset_size) [[unlikely]] {
 						O2BitArr<O> who_requires {};
 						for (o2x_t i {0}; i < subset_size; ++i) {
 							who_requires.set(search_me[combo_walker.combo_at(i)].who);
@@ -137,6 +140,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 					}
 				}
 			}
+			return false; // no unwind needed.
 		}
 	}
 
@@ -148,7 +152,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 	//  are already in cache. but is that a significant enough benefit? probably needs benchmark to justify...
 	//  The eager function wrapper takes an argument for find_one vs find_all. the queueing wrapper returns void.
 	template<Order O> requires(is_order_compiled(O))
-	void find_cells_claim_syms(
+	[[nodiscard]] bool find_cells_claim_syms_and_check_needs_unwind(
 		const CandsGrid<O>& cells_cands,
 		FoundQueues<O>& found_queues
 	) noexcept {
@@ -164,17 +168,20 @@ namespace okiidoku::mono::detail::solver { namespace {
 					.who{static_cast<o2xs_t>(house_cell)},
 				};
 			}
-			subsets::helper_find<O>(search_me, [&](const auto& what, const auto& who){
+			if (subsets::helper_find_and_check_needs_unwind<O>(search_me, [&](const auto& what, const auto& who){
 				found_queues.push_back(found::CellsClaimSyms<O>{
 					what, who, static_cast<o2xs_t>(house), house_type
 				});
-			});
+			})) {
+				return true;
+			}
 		}}
+		return false;
 	}
 
 
 	template<Order O> requires(is_order_compiled(O))
-	void find_syms_claim_cells(
+	[[nodiscard]] bool find_syms_claim_cells_and_check_needs_unwind(
 		const CandsGrid<O>& cells_cands,
 		FoundQueues<O>& found_queues
 	) noexcept {
@@ -194,22 +201,26 @@ namespace okiidoku::mono::detail::solver { namespace {
 				}
 				group_me.cand_count = static_cast<o2is_t>(group_me.cands.count());
 			}
-			subsets::helper_find<O>(search_me, [&](const auto& what, const auto& who){
+			if (subsets::helper_find_and_check_needs_unwind<O>(search_me, [&](const auto& what, const auto& who){
 				found_queues.push_back(found::SymsClaimCells<O>{
 					what, who, static_cast<o2xs_t>(house), house_type
 				});
-			});
+			})) {
+				return true;
+			}
 		}}
+		return false;
 	}
 
 
 	template<Order O> requires(is_order_compiled(O))
-	void find_locked_cands(
+	[[nodiscard]] bool find_locked_cands_and_check_needs_unwind(
 		const CandsGrid<O>& cells_cands,
 		FoundQueues<O>& found_queues
 	) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_PRELUDE
 		(void)cells_cands, (void)found_queues;// TODO
+		return false;
 	}
 
 
@@ -286,39 +297,46 @@ namespace okiidoku::mono::detail::solver { namespace {
 namespace okiidoku::mono::detail::solver {
 
 	// opening boilerplate. #undef-ed before end of namespace.
-	#define OKIIDOKU_CAND_ELIM_FINDER_PRELUDE \
+	#define OKIIDOKU_CAND_ELIM_FINDER(TECHNIQUE_NAME) \
+		template<Order O> requires(is_order_compiled(O)) \
+		UnwindInfo CandElimFind<O>::TECHNIQUE_NAME(Engine<O>& engine) noexcept { \
 		assert(!engine.no_solutions_remain()); \
-		if (engine.get_num_puzcells_remaining() == 0) [[unlikely]] { return; }
-
-
-	template<Order O> requires(is_order_compiled(O))
-	UnwindInfo CandElimFind<O>::sym_claim_cell(Engine<O>& engine) noexcept {
-		assert(!engine.no_solutions_remain());
-		if (engine.get_num_puzcells_remaining() == 0) [[unlikely]] { return UnwindInfo::make_no_unwind(); }
-		const auto needs_unwind {find_sym_claim_cell_and_check_needs_unwind(engine.cells_cands(), engine.found_queues())};
-		if (needs_unwind) {
-			return engine.unwind_one_stack_frame();
+		if (engine.get_num_puzcells_remaining() == 0) [[unlikely]] { return UnwindInfo::make_no_unwind(); } \
+			const auto needs_unwind {find_ ## TECHNIQUE_NAME ## _and_check_needs_unwind(engine.cells_cands(), engine.found_queues())}; \
+			if (needs_unwind) { return engine.unwind_one_stack_frame(); } \
+			return UnwindInfo::make_no_unwind(); \
 		}
+
+	OKIIDOKU_CAND_ELIM_FINDER(sym_claim_cell)
+	OKIIDOKU_CAND_ELIM_FINDER(cells_claim_syms)
+	OKIIDOKU_CAND_ELIM_FINDER(syms_claim_cells)
+	OKIIDOKU_CAND_ELIM_FINDER(locked_cands)
+
+
+	/* template<Order O> requires(is_order_compiled(O))
+	UnwindInfo CandElimFind<O>::sym_claim_cell(Engine<O>& engine) noexcept {
+		const auto needs_unwind {find_sym_claim_cell_and_check_needs_unwind(engine.cells_cands(), engine.found_queues())};
+		if (needs_unwind) { return engine.unwind_one_stack_frame(); }
 		return UnwindInfo::make_no_unwind();
 	}
 
 	template<Order O> requires(is_order_compiled(O))
-	void CandElimFind<O>::cells_claim_syms(Engine<O>& engine) noexcept {
+	UnwindInfo CandElimFind<O>::cells_claim_syms(Engine<O>& engine) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_PRELUDE
-		return find_cells_claim_syms(engine.cells_cands(), engine.found_queues());
+		return find_cells_claim_syms_and_check_needs_unwind(engine.cells_cands(), engine.found_queues());
 	}
 
 	template<Order O> requires(is_order_compiled(O))
-	void CandElimFind<O>::syms_claim_cells(Engine<O>& engine) noexcept {
+	UnwindInfo CandElimFind<O>::syms_claim_cells(Engine<O>& engine) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_PRELUDE
-		return find_syms_claim_cells(engine.cells_cands(), engine.found_queues());
+		return find_syms_claim_cells_and_check_needs_unwind(engine.cells_cands(), engine.found_queues());
 	}
 
 	template<Order O> requires(is_order_compiled(O))
-	void CandElimFind<O>::locked_cands(Engine<O>& engine) noexcept {
+	UnwindInfo CandElimFind<O>::locked_cands(Engine<O>& engine) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_PRELUDE
 		return find_locked_cands(engine.cells_cands(), engine.found_queues());
-	}
+	} */
 
 	template<Order O> requires(is_order_compiled(O))
 	Guess<O> CandElimFind<O>::good_guess_candidate(const Engine<O>& engine) noexcept {

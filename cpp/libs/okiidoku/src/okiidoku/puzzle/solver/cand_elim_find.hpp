@@ -20,13 +20,13 @@ namespace okiidoku::mono::detail::solver {
 		//   provide a parameter enum `SearchEffort { find_first, find_all, };`
 		static UnwindInfo sym_claim_cell(Engine<O>&) noexcept;
 
-		static void locked_cands(Engine<O>&) noexcept;
+		static UnwindInfo locked_cands(Engine<O>&) noexcept;
 
 		// AKA "naked subsets"
-		static void cells_claim_syms(Engine<O>&) noexcept;
+		static UnwindInfo cells_claim_syms(Engine<O>&) noexcept;
 
 		// AKA "hidden subsets"
-		static void syms_claim_cells(Engine<O>&) noexcept;
+		static UnwindInfo syms_claim_cells(Engine<O>&) noexcept;
 
 		// static void fish(Engine<O>&) noexcept;
 

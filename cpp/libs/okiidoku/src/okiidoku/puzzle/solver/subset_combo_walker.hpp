@@ -20,7 +20,8 @@ namespace okiidoku::mono::detail::solver {
 		using combo_t = std::array<o2xs_t, T::O2-1>;
 
 		// contract: `end <= O2`
-		// contract: `subset_size < O2`. Reason: there is always exactly _one_ subset of size O2. Nothing to learn.
+		// contract: `subset_size < O2`. Reason: for a puzzle with at least one
+		//  solution, there is always exactly one subset of size O2.
 		// contract: `begin + subset_size <= O2`
 		SubsetComboWalker(const o2x_t begin, const o2i_t end, const o2x_t subset_size) noexcept:
 			begin_{begin}, end_{end}, subset_size_{subset_size},
@@ -29,18 +30,15 @@ namespace okiidoku::mono::detail::solver {
 			assert(end_ <= T::O2);
 			assert(subset_size < T::O2);
 			assert(begin_ + subset_size_ <= T::O2);
-			set_subset_size(subset_size_);
-		}
-
-		void set_subset_size(o2x_t subset_size) noexcept {
-			subset_size_ = subset_size;
-			for (o2x_t i {0}; i < subset_size_; ++i) {
-				combo_[i] = static_cast<o2xs_t>(begin_ + i);
+			if (has_more()) [[likely]] {
+				for (o2x_t i {0}; i < subset_size_; ++i) {
+					combo_[i] = static_cast<o2xs_t>(begin_ + i);
+				}
+				assert_is_state_valid_();
 			}
-			assert_is_state_valid_();
 		}
 
-		[[nodiscard, gnu::pure]] bool has_more() noexcept {
+		[[nodiscard, gnu::pure]] bool has_more() const noexcept {
 			return has_more_;
 		}
 
@@ -49,12 +47,16 @@ namespace okiidoku::mono::detail::solver {
 			assert(i < subset_size_);
 			return combo_[i];
 		}
+		// contract: `has_more` returns `true`.
 		[[nodiscard, gnu::pure]] const combo_t& get_combo_arr() const noexcept {
+			assert(has_more());
 			return combo_;
 		}
 
+		// contract: `has_more` returns `true`.
 		void advance() noexcept {
-			if (!has_more()) [[unlikely]] { return; }
+			assert(has_more());
+			// if (!has_more()) [[unlikely]] { return; }
 			auto i {static_cast<o2x_t>(subset_size_-1U)};
 			++combo_[i];
 			while (combo_[i] > end_ - subset_size_ + i) [[likely]] {
@@ -66,7 +68,7 @@ namespace okiidoku::mono::detail::solver {
 					return;
 				}
 			}
-			for (++i; i < end_; ++i) {
+			for (++i; i < subset_size_; ++i) {
 				combo_[i] = static_cast<o2xs_t>(combo_[i-1U] + 1U);
 			}
 			assert_is_state_valid_();
@@ -84,6 +86,11 @@ namespace okiidoku::mono::detail::solver {
 
 		void assert_is_state_valid_() const noexcept {
 			#ifndef NDEBUG
+			if (begin_ + subset_size_ > end_) {
+				assert(!has_more_);
+				return;
+			}
+			assert(combo_[0] >= begin_);
 			assert(combo_[subset_size_-1] < end_);
 			for (o2x_t i {1}; i < subset_size_; ++i) {
 				assert(combo_[i-1] < combo_[i]);

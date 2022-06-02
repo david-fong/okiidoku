@@ -11,7 +11,7 @@ namespace okiidoku::mono::detail::solver {
 		template<Order O, class QueueT> requires(is_order_compiled(O))
 		void queue_apply_one(Engine<O>& engine, QueueT& queue, UnwindInfo& check) noexcept {
 			assert(!queue.empty());
-			if constexpr (std::is_same_v<decltype(queue), typename FoundQueues<O>::template queue_t<found::CellClaimSym<O>>&>) {
+			if constexpr (std::is_same_v<std::decay_t<decltype(queue)>, typename FoundQueues<O>::template queue_t<found::CellClaimSym<O>>>) {
 				auto desc {std::move(queue.front())}; // handle passive find during apply
 				queue.pop_front();
 				check = CandElimApplyImpl<O>::apply(engine, std::move(desc));
@@ -75,6 +75,7 @@ namespace okiidoku::mono::detail::solver {
 		if constexpr (!std::is_same_v<last_queue_t, passive_queue_t>) {
 			logical_and_loop_body(std::get<passive_queue_t>(engine.found_queues().tup_));
 		}
+		assert(!engine.has_queued_cand_elims());
 		return check;
 	}
 
@@ -138,10 +139,12 @@ namespace okiidoku::mono::detail::solver {
 	) noexcept {
 		for (o2i_t house_cell {0}; house_cell < T::O2; ++house_cell) {
 			// TODO likelihood attribute. hypothesis: desc.house_cells.count() is small. please empirically test.
-			if (desc.house_cells.test(static_cast<o2x_t>(house_cell))) [[unlikely]] { continue; }
+			if (desc.house_cells.test(static_cast<o2x_t>(house_cell))) [[unlikely]] {
+				continue;
+			}
 			const auto rmi {house_cell_to_rmi<O>(desc.house_type, desc.house, house_cell)};
 			const auto check {engine.do_elim_remove_syms_(static_cast<rmi_t>(rmi), desc.syms)};
-			if (check.did_unwind_root()) [[unlikely]] {
+			if (check.did_unwind()) [[unlikely]] {
 				return check;
 			}
 		}
@@ -156,7 +159,7 @@ namespace okiidoku::mono::detail::solver {
 	) noexcept {
 		for (auto walker {desc.house_cells.set_bits_walker()}; walker.has_more(); walker.advance()) {
 			const auto rmi {house_cell_to_rmi<O>(desc.house_type, desc.house, walker.value())};
-			const auto check {engine.do_elim_remove_syms_(static_cast<rmi_t>(rmi), desc.syms)};
+			const auto check {engine.do_elim_retain_syms_(static_cast<rmi_t>(rmi), desc.syms)};
 			if (check.did_unwind()) [[unlikely]] {
 				return check;
 			}
