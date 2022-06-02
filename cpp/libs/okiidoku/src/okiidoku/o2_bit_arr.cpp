@@ -1,7 +1,7 @@
 #include <okiidoku/o2_bit_arr.hpp>
 
+#include <numeric> // transform_reduce
 #include <execution>
-#include <numeric>   // transform_reduce
 
 namespace okiidoku::mono {
 

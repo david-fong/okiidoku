@@ -3,6 +3,7 @@
 #include <okiidoku/o2_bit_arr.hpp>
 
 #include <algorithm>
+#include <execution>
 
 namespace okiidoku::mono {
 
@@ -52,9 +53,22 @@ namespace okiidoku::mono {
 	}
 
 
+	template<Order O> requires(is_order_compiled(O))
+	bool grid_is_empty(const Grid<O>& grid) noexcept {
+		using T = Ints<O>;
+		return std::all_of(
+			std::execution::par_unseq,
+			grid.get_underlying_array().cbegin(),
+			grid.get_underlying_array().cend(),
+			[](const auto val){ return val == T::O2; }
+		);
+	}
+
+
 	#define OKIIDOKU_FOR_COMPILED_O(O_) \
 		template bool grid_follows_rule<O_>(const Grid<O_>&) noexcept; \
-		template bool grid_is_filled<O_>(const Grid<O_>&) noexcept;
+		template bool grid_is_filled<O_>(const Grid<O_>&) noexcept; \
+		template bool grid_is_empty<O_>(const Grid<O_>&) noexcept;
 	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 	#undef OKIIDOKU_FOR_COMPILED_O
 }
@@ -71,6 +85,12 @@ namespace okiidoku::visitor {
 	bool grid_is_filled(const Grid& vis_grid) noexcept {
 		return std::visit([](auto& mono_grid){
 			return mono::grid_is_filled(mono_grid);
+		}, vis_grid.get_mono_variant());
+	}
+
+	bool grid_is_empty(const Grid& vis_grid) noexcept {
+		return std::visit([](auto& mono_grid){
+			return mono::grid_is_empty(mono_grid);
 		}, vis_grid.get_mono_variant());
 	}
 

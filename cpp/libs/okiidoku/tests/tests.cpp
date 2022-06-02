@@ -60,11 +60,7 @@ unsigned test_morph(okiidoku::SharedRng& shared_rng, const unsigned num_rounds) 
 	unsigned int count_bad {0};
 
 	Grid<O> gen_grid;
-	assert(std::all_of(
-		gen_grid.get_underlying_array().cbegin(),
-		gen_grid.get_underlying_array().cend(),
-		[](const auto val){ return val == T::O2; }
-	)); // grid must be initialized to an empty grid
+	assert(grid_is_empty(gen_grid)); // grid by default-construction must be initialized to an empty grid
 
 	// Grid<O> canon_grid;
 

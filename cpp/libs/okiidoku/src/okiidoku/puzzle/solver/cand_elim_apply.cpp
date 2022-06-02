@@ -124,7 +124,6 @@ namespace okiidoku::mono::detail::solver {
 		if (!cell_cands.test(desc.val)) {
 			return engine.unwind_one_stack_frame();
 		}
-		assert(cell_cands.test(desc.val));
 		if (cell_cands.count() > 1) {
 			engine.register_new_given_(desc.rmi, desc.val);
 		}

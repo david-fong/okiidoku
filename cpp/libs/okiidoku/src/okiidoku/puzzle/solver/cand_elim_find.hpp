@@ -2,7 +2,6 @@
 #define HPP_OKIIDOKU__PUZZLE__SOLVER__CAND_ELIM_FIND
 
 #include <okiidoku/puzzle/solver/engine.hpp>
-#include <okiidoku/puzzle/solver/found.hpp>
 
 namespace okiidoku::mono::detail::solver {
 

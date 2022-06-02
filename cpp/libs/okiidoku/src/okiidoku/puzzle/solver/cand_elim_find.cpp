@@ -1,7 +1,8 @@
 #include <okiidoku/puzzle/solver/cand_elim_find.hpp>
 
-#include <okiidoku/o2_bit_arr.hpp>
 #include <okiidoku/puzzle/solver/subset_combo_walker.hpp>
+#include <okiidoku/puzzle/solver/found.hpp>
+#include <okiidoku/o2_bit_arr.hpp>
 
 #include <range/v3/view/take.hpp>
 #include <range/v3/view/transform.hpp>
@@ -225,7 +226,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 	Guess<O> find_good_guess_candidate(
 		const CandsGrid<O>& cells_cands,
 		const int_ts::o4i_t<O> num_puzcells_remaining
-	) noexcept{
+	) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_PRELUDE
 		assert(num_puzcells_remaining > 1);
 		// some guiding intuition:

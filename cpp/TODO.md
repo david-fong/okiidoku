@@ -27,6 +27,8 @@
 
 ## Misc List
 
+- include execution after algorithm
+
 - experiment with optimizations for solving smaller grids.
   - less `unique_ptr` usage.
   - specializing `O2BitArr` to use int sizes smaller than u64.

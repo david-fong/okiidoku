@@ -23,7 +23,9 @@ namespace okiidoku::mono {
 	//  symbol names from `int_ts`'s heavy usage of `std::conditional_t` (but why?).
 	//  Using inheritance gains nice mangled symbol names. Speed seems to suffer a
 	//  negligible drop (~1%?) or maybe it doesn't. I am happy with this outcome.
-	struct Grid final : public detail::Gridlike<O, grid_val_t<O>> {};
+	struct Grid final : public detail::Gridlike<O, grid_val_t<O>> {
+		Grid() noexcept: detail::Gridlike<O, grid_val_t<O>>{} {};
+	};
 
 
 	// Returns `false` if any cells in a same house contain the same value.
@@ -36,6 +38,11 @@ namespace okiidoku::mono {
 	template<Order O> requires(is_order_compiled(O))
 	[[nodiscard, gnu::pure]] OKIIDOKU_EXPORT
 	bool grid_is_filled(const Grid<O>&) noexcept;
+
+	// Returns `true` if all of the cells are empty (equal to O2).
+	template<Order O> requires(is_order_compiled(O))
+	[[nodiscard, gnu::pure]] OKIIDOKU_EXPORT
+	bool grid_is_empty(const Grid<O>&) noexcept;
 
 
 	template<Order O, class V_>
@@ -117,6 +124,11 @@ namespace okiidoku::visitor {
 	// Returns true if none of the cells are empty (equal to O2). Does _not_ check if sudoku is valid.
 	[[nodiscard, gnu::pure]] OKIIDOKU_EXPORT
 	bool grid_is_filled(const Grid&) noexcept;
+
+	// Returns true if all of the cells are empty (equal to O2).
+	[[nodiscard, gnu::pure]] OKIIDOKU_EXPORT
+	bool grid_is_empty(const Grid&) noexcept;
+
 
 	namespace detail {
 		class GridAdaptor final {

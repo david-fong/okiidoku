@@ -27,8 +27,16 @@ namespace okiidoku::mono {
 	template<Order O> requires(is_order_compiled(O))
 	class OKIIDOKU_EXPORT FastSolver final {
 	public:
+		FastSolver() noexcept;
+		~FastSolver() noexcept;
+
+		struct CandSymToIgnore final {
+			int_ts::o4xs_t<O> rmi;
+			int_ts::o2x_t<O> val;
+		};
+
 		// contract: none. puzzle can even blatantly break the one rule.
-		explicit FastSolver(const Grid<O>& puzzle) noexcept;
+		void reinit_with_puzzle(const Grid<O>& puzzle, const std::optional<CandSymToIgnore> = {}) noexcept;
 
 		// return of `std::nullopt` means no more solutions exist for the puzzle.
 		// example usage: `while (const auto solution {solution_walker.get_next_solution()}; solution) {...}`
@@ -37,7 +45,6 @@ namespace okiidoku::mono {
 		[[nodiscard, gnu::pure]]
 		num_solns_found_t num_solns_found() const noexcept { return num_solns_found_; }
 
-		~FastSolver() noexcept;
 		FastSolver(const FastSolver&) = delete;
 		FastSolver& operator=(const FastSolver&) = delete;
 
@@ -60,8 +67,11 @@ namespace okiidoku::mono {
 	template<Order O> requires(is_order_compiled(O))
 	class OKIIDOKU_EXPORT VeryDeductiveSolver final {
 	public:
+		VeryDeductiveSolver() noexcept;
+		~VeryDeductiveSolver() noexcept;
+
 		// contract: none. puzzle can even blatantly break the one rule.
-		explicit VeryDeductiveSolver(const Grid<O>& puzzle) noexcept;
+		void reinit_with_puzzle(const Grid<O>& puzzle) noexcept;
 
 		// return of `std::nullopt` means no more solutions exist for the puzzle.
 		// example usage: `while (const auto solution {solution_walker.get_next_solution()}; solution) {...}`
@@ -70,7 +80,6 @@ namespace okiidoku::mono {
 		[[nodiscard, gnu::pure]]
 		num_solns_found_t num_solns_found() const noexcept { return num_solns_found_; }
 
-		~VeryDeductiveSolver() noexcept;
 		VeryDeductiveSolver(const VeryDeductiveSolver&) = delete;
 		VeryDeductiveSolver& operator=(const VeryDeductiveSolver&) = delete;
 

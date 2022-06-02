@@ -5,18 +5,32 @@
 #include <okiidoku/puzzle/solver/engine.hpp>
 
 #include <functional> // cref
+#include <array> // to_array
 
 namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
-	FastSolver<O>::FastSolver(const Grid<O>& puzzle) noexcept:
-		engine_{std::make_unique<detail::solver::Engine<O>>(puzzle)} {}
+	FastSolver<O>::FastSolver() noexcept: engine_{std::make_unique<detail::solver::Engine<O>>()} {}
+
 
 	// Note: with pimpl, can't default in header since the impl class is not a
 	// complete type in the header (it is forward declared there). Defaulting
 	// dtor requires a complete type.
 	template<Order O> requires(is_order_compiled(O))
 	FastSolver<O>::~FastSolver() noexcept = default;
+
+
+	template<Order O> requires(is_order_compiled(O))
+	void FastSolver<O>::reinit_with_puzzle(const Grid<O>& puzzle, const std::optional<CandSymToIgnore> cand_sym_to_ignore) noexcept {
+		if (!engine_) { return; }
+		engine_->reinit_with_puzzle(puzzle);
+		if (cand_sym_to_ignore) {
+			const auto& ignore {cand_sym_to_ignore.value()};
+			const auto check {engine_->do_elim_remove_sym_(ignore.rmi, ignore.val)};
+			(void)check; // `no_solutions_remain` will be handled by `get_next_solution`.
+		}
+		num_solns_found_ = 0;
+	}
 
 
 	template<Order O> requires(is_order_compiled(O))
@@ -56,6 +70,22 @@ namespace okiidoku::mono {
 		}
 		++num_solns_found_;
 		return std::optional<Grid<O>>{std::in_place, e.build_solution_obj()};
+	}
+
+
+	template<Order O> requires(is_order_compiled(O))
+	VeryDeductiveSolver<O>::VeryDeductiveSolver() noexcept: engine_{std::make_unique<detail::solver::Engine<O>>()} {}
+
+
+	template<Order O> requires(is_order_compiled(O))
+	VeryDeductiveSolver<O>::~VeryDeductiveSolver() noexcept = default;
+
+
+	template<Order O> requires(is_order_compiled(O))
+	void VeryDeductiveSolver<O>::reinit_with_puzzle(const Grid<O>& puzzle) noexcept {
+		if (!engine_) { return; }
+		engine_->reinit_with_puzzle(puzzle);
+		num_solns_found_ = 0;
 	}
 
 

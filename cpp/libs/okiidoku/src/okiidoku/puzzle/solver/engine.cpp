@@ -1,6 +1,7 @@
 #include <okiidoku/puzzle/solver/engine.hpp>
 
-#include <algorithm>
+#include <algorithm> // count_if
+#include <execution>
 
 #include <iostream> // TODO delete
 
@@ -11,24 +12,22 @@
 //  It would be good to actually profile instead.
 namespace okiidoku::mono::detail::solver {
 
-	template<Order O> requires(is_order_compiled(O))
-	Engine<O>::Engine(const Grid<O>& puzzle) noexcept: EngineImpl<O>{puzzle} {}
-
 
 	template<Order O> requires(is_order_compiled(O))
-	EngineImpl<O>::EngineImpl(const Grid<O>& puzzle) noexcept {
+	void EngineImpl<O>::reinit_with_puzzle(const Grid<O>& puzzle) noexcept {
 		cells_cands_.get_underlying_array().fill(O2BitArr_ones<O>);
+		num_puzcells_remaining_ = T::O4;
+		found_queues_.clear();
+		while (!guess_stack_.empty()) { guess_stack_.pop(); }
+		no_solutions_remain_ = false;
+
 		for (o4i_t rmi {0}; rmi < T::O4; ++rmi) {
 			const auto& val {puzzle.at_rmi(rmi)};
 			assert(val <= T::O2);
 			if (val < T::O2) {
 				register_new_given_(static_cast<rmi_t>(rmi), static_cast<val_t>(val));
-				assert(cells_cands().at_rmi(rmi).count() == 1);
-			} else {
-				assert(cells_cands().at_rmi(rmi).count() == T::O2);
 			}
 		}
-
 		// debug_print_cells_cands_();
 	}
 
@@ -37,11 +36,6 @@ namespace okiidoku::mono::detail::solver {
 	Grid<O> EngineImpl<O>::build_solution_obj() const noexcept {
 		assert(!no_solutions_remain());
 		assert(get_num_puzcells_remaining() == 0);
-		assert(( std::all_of(
-			cells_cands().get_underlying_array().cbegin(),
-			cells_cands().get_underlying_array().cend(),
-			[](const auto& cands){ return cands.count() == 1; }
-		) ));
 		Grid<O> soln;
 		for (o4i_t rmi {0}; rmi < T::O4; ++rmi) {
 			const auto& cell_cands {cells_cands().at_rmi(rmi)};
@@ -142,6 +136,7 @@ namespace okiidoku::mono::detail::solver {
 		found_queues_.push_back(found::CellClaimSym<O>{.rmi{rmi},.val{val}});
 		--num_puzcells_remaining_;
 		assert(get_num_puzcells_remaining() == T::O4 - static_cast<o4i_t>(std::count_if(
+			std::execution::par_unseq,
 			cells_cands().get_underlying_array().cbegin(),
 			cells_cands().get_underlying_array().cend(),
 			[](const auto& c){ return c.count() == 1; }
@@ -184,6 +179,7 @@ namespace okiidoku::mono::detail::solver {
 
 		e.num_puzcells_remaining_ = frame.num_puzcells_remaining;
 		assert(e.get_num_puzcells_remaining() == Ints<O>::O4 - static_cast<int_ts::o4i_t<O>>(std::count_if(
+			std::execution::par_unseq,
 			e.cells_cands().get_underlying_array().cbegin(),
 			e.cells_cands().get_underlying_array().cend(),
 			[](const auto& c){ return c.count() == 1; }

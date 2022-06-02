@@ -43,6 +43,7 @@ namespace okiidoku::mono::detail::solver {
 
 	// usage: must be called immediately when a cell's candidate-symbol count
 	//  changes to zero. call to prepare to find another solution.
+	// contract: `engine.no_solutions_remain` returns `false`.
 	template<Order O> requires(is_order_compiled(O))
 	UnwindInfo unwind_one_stack_frame_of_(EngineImpl<O>&) noexcept;
 
@@ -87,8 +88,6 @@ namespace okiidoku::mono::detail::solver {
 	// candidate elimination find and apply operations.
 	template<Order O> requires(is_order_compiled(O))
 	struct EngineImpl {
-		// The nice thing about separating `Engine` and `EngineImpl` is that `EngineImpl`
-		// no longer friends the find and apply functions (better encapsulation).
 		friend UnwindInfo unwind_one_stack_frame_of_<O>(EngineImpl<O>&) noexcept;
 		using T = Ints<O>;
 		using o2i_t = int_ts::o2i_t<O>;
@@ -96,7 +95,10 @@ namespace okiidoku::mono::detail::solver {
 		using rmi_t = int_ts::o4xs_t<O>;
 		using o4i_t = int_ts::o4i_t<O>;
 	public:
-		explicit EngineImpl(const Grid<O>& puzzle) noexcept;
+		EngineImpl() noexcept = default;
+
+		// contract: none. puzzle can even blatantly break the one rule.
+		void reinit_with_puzzle(const Grid<O>& puzzle) noexcept;
 
 		// The user of the engine must respond to `get_next_solution` with `std::nullopt`
 		// if this returns `true`.
@@ -166,7 +168,7 @@ namespace okiidoku::mono::detail::solver {
 		void debug_print_cells_cands_() const noexcept;
 
 
-		CandsGrid<O> cells_cands_;
+		CandsGrid<O> cells_cands_ {};
 
 		o4i_t num_puzcells_remaining_ {T::O4};
 
@@ -190,7 +192,7 @@ namespace okiidoku::mono::detail::solver {
 		using guess_stack_t = std::stack<GuessStackFrame/* , std::vector<GuessStackFrame> */>;
 		guess_stack_t guess_stack_ {};
 
-		bool no_solutions_remain_ {false};
+		bool no_solutions_remain_ {true};
 	};
 
 
@@ -205,16 +207,21 @@ namespace okiidoku::mono::detail::solver {
 		using val_t = int_ts::o2xs_t<O>;
 		using rmi_t = int_ts::o4xs_t<O>;
 	public:
-		explicit Engine(const Grid<O>& puzzle) noexcept;
+		Engine() noexcept = default;
 
 		// please read the contracts for the referenced functions.
+		using EngineImpl<O>::reinit_with_puzzle;
 		using EngineImpl<O>::no_solutions_remain;
 		using EngineImpl<O>::has_queued_cand_elims;
 		using EngineImpl<O>::get_num_puzcells_remaining;
 		using EngineImpl<O>::push_guess;
 		using EngineImpl<O>::get_guess_stack_depth;
 		using EngineImpl<O>::build_solution_obj;
+
+		// contract: `no_solutions_remain` returns `false`.
 		UnwindInfo unwind_one_stack_frame() noexcept;
+
+		using EngineImpl<O>::do_elim_remove_sym_;
 	};
 
 
