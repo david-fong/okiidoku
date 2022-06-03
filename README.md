@@ -8,11 +8,13 @@ The project can:
 - (WIP) efficiently(?) put full grids in a canonical form
 - (WIP) archive collections of grids in highly-compressed form
 
-It supports parametric grid size in a performant manner. In the future, it will have language bindings for WASM/JS and Python.
+It supports parametric grid size in a performant manner.
+
+In the future, it will have language bindings for WASM/JS and Python.
 
 Language-implementation independent design notes can be found in the [design folder](./writings/design/). These are not specs or usage documentation. They are collections of the goals I have and the considerations I made in designing the containers and algorithms for the library.
 
-In Japanese, "ookii" means "big". I chose the name because one of my priorities for this project is to support variable grid sizes, and to find and engineer (ie. cache and memory efficiency) algorithms that scale well with large grids. Also, I thought the name had a nice ring- like "okey-dokey". I decided not to call the project "ookiidoku" (despite that being the proper romanization) out of fear of english speakers like myself mispronouncing it like a monkey sound.
+In Japanese, "ookii" (大きい) means "big". I chose the name because one of my priorities for this project is to support variable grid sizes, and to find and engineer (ie. cache and memory efficiency) algorithms that scale well with large grids. Also, I thought the name had a nice ring- like "okey-dokey". I decided not to call the project "ookiidoku" (despite that being the proper romanization) out of fear of english speakers like myself mispronouncing it like [this](https://en.wikipedia.org/wiki/Close_back_rounded_vowel) instead of like [this](https://en.wikipedia.org/wiki/Mid_back_rounded_vowel).
 
 I work on this project for fun. I like sudoku. I want to learn how to develop high-performance software libraries. I like reasoning about trade-offs. The algorithm design is like the puzzle to me; I don't want to "look at answers" until I have tried my best come up with my own. Perhaps in doing so, I will come up with something new, and maybe even something that is better in some ways than existing approaches.
 
@@ -20,7 +22,7 @@ Here is [the roadmap](./cpp/TODO.md) (subject to violent rearrangements at the m
 
 ## Usage
 
-See the readme in the [cpp](./cpp/readme.md) directory.
+[See the readme in the cpp directory](./cpp/readme.md).
 
 This project is MIT licensed.
 

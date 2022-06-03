@@ -85,11 +85,11 @@ namespace okiidoku::mono::detail::solver { namespace {
 		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
 		std::sort(set.begin(), set.end());
 
-		auto search_begin {ranges::find_if(set, [](const auto& gm){ return gm.cand_count > 1; })};
-		auto search_end {search_begin};
 		// find all combinations of N sets where their union is size N.
 		// given that any one set can only be part of one such finding.
-		for (o2x_t subset_size {2}; subset_size < T::O2; ++subset_size) {
+		auto search_begin {ranges::find_if(set, [](const auto& gm){ return gm.cand_count > 1; })};
+		auto search_end {search_begin};
+		for (o2x_t subset_size {2}; subset_size <= (std::distance(search_begin, set.end())/2U); ++subset_size) {
 			search_end = ranges::find_if(search_begin, set.end(), [&](const auto& gm){
 				return gm.cand_count > subset_size;
 			});
@@ -107,29 +107,29 @@ namespace okiidoku::mono::detail::solver { namespace {
 				if (combo_union.count() < subset_size) [[unlikely]] {
 					return true; // needs unwind.
 				}
-				if (combo_union.count() == subset_size) [[unlikely]] {
-					O2BitArr<O> who_requires {};
-					for (o2x_t i {0}; i < subset_size; ++i) {
-						auto& member {set[combo_walker.combo_at(i)]};
-						who_requires.set(member.who);
-						member.cand_count = 0;
-						assert(search_begin != set.end());
-						std::swap(*search_begin, member);
-						++search_begin;
-					}
-					for (auto it {search_begin}; it != set.end(); ++it) {
-						it->cands.remove(combo_union);
-						it->cand_count = static_cast<o2is_t>(it->cands.count());
-						if (it->cand_count == 0) [[unlikely]] { return true; }
-						// ^short-circuit not really necessary. will be detected later during
-						//  apply. last I benchmarked on O=3, only had a 1% time improvement.
-					}
-					std::sort(search_begin, set.end());
-					search_begin = ranges::find_if(search_begin, set.end(), [](const auto& gm){ return gm.cand_count > 1; });
-					enqueue_found_fn(combo_union, who_requires);
-					subset_size = 2;
-					break;
+				if (combo_union.count() > subset_size) [[likely]] {
+					continue;
 				}
+				O2BitArr<O> who_requires {};
+				for (o2x_t i {0}; i < subset_size; ++i) {
+					auto& member {set[combo_walker.combo_at(i)]};
+					who_requires.set(member.who);
+					assert(search_begin != set.end());
+					std::swap(*search_begin, member);
+					++search_begin;
+				}
+				for (auto it {search_begin}; it != set.end(); ++it) {
+					it->cands.remove(combo_union);
+					it->cand_count = static_cast<o2is_t>(it->cands.count());
+					if (it->cand_count == 0) [[unlikely]] { return true; }
+					// ^short-circuit not really necessary. will be detected later during
+					//  apply. last I benchmarked on O=3, only had a 1% time improvement.
+				}
+				std::sort(search_begin, set.end());
+				search_begin = ranges::find_if(search_begin, set.end(), [](const auto& gm){ return gm.cand_count > 1; });
+				enqueue_found_fn(combo_union, who_requires);
+				subset_size = 2;
+				break; // exit combo_walker loop.
 		}	}
 		return false; // no unwind needed.
 	}
