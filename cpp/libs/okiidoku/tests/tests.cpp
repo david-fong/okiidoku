@@ -19,6 +19,7 @@
 #include <array>
 
 #ifdef NDEBUG
+#define OKIIDOKU_NO_LOGGING
 #undef NDEBUG
 #endif
 #include <cassert>
@@ -70,7 +71,9 @@ unsigned test_morph(okiidoku::SharedRng& shared_rng, const unsigned num_rounds) 
 		std::clog << "\nmaking puzzle #" << int(round);
 		Grid<O> puz_grid {gen_grid};
 		make_minimal_puzzle(puz_grid, shared_rng.get_u64());
+		#ifndef OKIIDOKU_NO_LOGGING
 		print_2d<O>(std::clog, shared_rng.get_u64(), gen_grid, puz_grid);
+		#endif
 
 
 		/* const auto gen_canon_transform {canonicalize(gen_grid)};
@@ -135,10 +138,11 @@ int main(const int argc, char const *const argv[]) {
 	okiidoku::SharedRng shared_rng;
 	shared_rng.rng.seed(srand_key);
 
-	#define OKIIDOKU_FOR_COMPILED_O(O_) \
-	if (test_morph<O_>(shared_rng, num_rounds) != 0) { return 1; }
-	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-	#undef OKIIDOKU_FOR_COMPILED_O
+	if (test_morph<3>(shared_rng, num_rounds) != 0) { return 1; }
+	// #define OKIIDOKU_FOR_COMPILED_O(O_) \
+	// if (test_morph<O_>(shared_rng, num_rounds) != 0) { return 1; }
+	// OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
+	// #undef OKIIDOKU_FOR_COMPILED_O
 
 	return 0;
 }

@@ -152,8 +152,10 @@ namespace okiidoku::mono::detail::solver {
 		guess_stack_.emplace(*this, guess);
 
 		register_new_given_(guess.rmi, guess.val);
+		#ifndef NDEBUG
 		std::clog << "\nguess+(" << get_guess_stack_depth() << ") " << int(guess.rmi) << " " << int(guess.val);
 		// debug_print_cells_cands_();
+		#endif
 	}
 
 
@@ -183,8 +185,10 @@ namespace okiidoku::mono::detail::solver {
 		if (cell_cands.count() == 1) {
 			e.enqueue_cand_elims_for_new_cell_claim_sym_(frame.guess.rmi);
 		}
+		#ifndef NDEBUG
 		std::clog << "\nguess-(" << e.get_guess_stack_depth() << ") " << int(frame.guess.rmi) << " " << int(frame.guess.val);
 		// e.debug_print_cells_cands_();
+		#endif
 		return UnwindInfo::make_did_unwind_guess();
 	}
 

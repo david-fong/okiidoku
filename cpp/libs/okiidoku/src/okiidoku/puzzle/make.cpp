@@ -63,12 +63,16 @@ namespace okiidoku::mono {
 			const auto val {std::exchange(grid.at_rmi(rmi), T::O2)};
 			assert(val < T::O2);
 
+			#ifndef NDEBUG
 			std::clog << "\n\n#puzcell cands: " << int(num_puzcell_cands) << ". try rm @ " << int(rmi) << std::flush;
+			#endif
 			solver.reinit_with_puzzle(grid, {{.rmi{rmi}, .val{static_cast<o2x_t>(val)}}});
 
 			if (const auto new_soln_opt {solver.get_next_solution()}; new_soln_opt) {
 				// multiple solutions now possible. removal would break properness. don't remove.
+				#ifndef NDEBUG
 				std::clog << "\nmultiple solutions possible! rm failed" << std::flush;
+				#endif
 				grid.at_rmi(rmi) = val;
 			}
 			remove_puzcell_cand_at(puzcell_cand_i);
