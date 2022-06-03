@@ -11,7 +11,7 @@
 
 - Requirements to build from source:
   - CMake 3.21
-  - a C++ compiler [supporting C++20](https://en.cppreference.com/w/cpp/compiler_support). I have tested on GCC 11, Visual Studio 17, and Clang 14. I have no interest in supporting other compilers (ex. apple-clang)
+  - a C++ compiler [supporting C++20](https://en.cppreference.com/w/cpp/compiler_support). I have tested on GCC 11, Visual Studio 17, and Clang 14. I have no interest in supporting other compilers (ex. apple-clang) or lower versions of the above compilers.
   - a build system (ex. Ninja, Visual Studio)
 
 - The library uses templates for each compiled grid size for optimization purposes. The templates are accessible under the `okiidoku::mono` namespace, and a visitor-pattern interface is exposed under the `okiidoku::visitor` namespace. The visitor pattern is intended to make it more convenient to write code that uses an order selected at runtime.
@@ -53,13 +53,13 @@ Note: if you installed cmake via snap (like I did on my Ubuntu machine): https:/
 
 ## Acknowledgements
 
-This project wouldn't be possible without the hard work of those who author
+This project wouldn't be possible without the hard work of those who develop
 
 - The C++ language standard and standard library
 - GCC, Clang, MSVC, and Emscripten
 - CMake and Ninja
 - The range-v3 library
-- Educational materials and documentation for the above technologies
+- Educational materials for the above technologies
 - Computers
 
 Perhaps it's a silly thing to say since it's so obvious, but I can't help but be amazed at what powerful technologies are made available to me at largely no cost. Any inkling of amazement anyone could have at this project pales in comparison to the shoulders of the giants it stands on.

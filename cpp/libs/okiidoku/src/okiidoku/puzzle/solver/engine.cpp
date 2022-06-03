@@ -1,7 +1,9 @@
 #include <okiidoku/puzzle/solver/engine.hpp>
 
+#ifndef NDEBUG
 #include <algorithm> // count_if
 #include <execution>
+#endif
 
 #include <iostream> // TODO delete
 

@@ -13,6 +13,7 @@ target_sources(okiidoku PRIVATE
 	morph/canon.cpp
 	puzzle/solver/engine.cpp
 	puzzle/solver/cand_elim_find.cpp
+	puzzle/solver/cand_elim_find.subsets.cpp
 	puzzle/solver/cand_elim_apply.cpp
 	puzzle/solve.cpp
 	puzzle/make.cpp
