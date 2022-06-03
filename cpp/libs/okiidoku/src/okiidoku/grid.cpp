@@ -57,7 +57,9 @@ namespace okiidoku::mono {
 	bool grid_is_empty(const Grid<O>& grid) noexcept {
 		using T = Ints<O>;
 		return std::all_of(
-			std::execution::par_unseq,
+			#ifdef __cpp_lib_execution
+			std::execution::unseq,
+			#endif
 			grid.get_underlying_array().cbegin(),
 			grid.get_underlying_array().cend(),
 			[](const auto val){ return val == T::O2; }

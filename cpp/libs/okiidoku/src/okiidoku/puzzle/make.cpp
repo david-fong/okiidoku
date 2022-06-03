@@ -31,7 +31,7 @@ namespace okiidoku::mono {
 		assert(puzzle_is_proper(grid));
 
 		using rng_t = std::minstd_rand;
-		rng_t rng {rng_seed};
+		rng_t rng {static_cast<rng_t::result_type>(rng_seed)};
 
 		using T = Ints<O>;
 		using o2x_t = int_ts::o2x_t<O>;

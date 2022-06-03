@@ -19,7 +19,7 @@ namespace okiidoku { namespace {
 		std::iota(shuffled_sets.begin(), shuffled_sets.end(), size_t{0});
 		{
 			using rng_t = std::minstd_rand; // other good LCG parameters: https://arxiv.org/pdf/2001.05304v3.pdf
-			rng_t rng {rng_seed};
+			rng_t rng {static_cast<rng_t::result_type>(rng_seed)};
 			for (
 				size_t b {0}, e_i_ {0}, e {prefs[e_i_]};
 				b != prefs.back();

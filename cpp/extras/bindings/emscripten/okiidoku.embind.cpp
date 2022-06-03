@@ -1,9 +1,9 @@
 // https://emscripten.org/docs/porting/connecting_cpp_and_javascript/embind.html
 // https://emscripten.org/docs/api_reference/bind.h.html
+static_assert(__EMSCRIPTEN__);
 #include <emscripten/bind.h>
 #include <emscripten/emscripten.h>
 #include <emscripten/val.h>
-static_assert(__EMSCRIPTEN__);
 // I think I need to put all these in a same file since EMSCRIPTEN_BINDINGS
 // uses static constructor functions and I'm assuming I can't define multiple
 // with the same name.

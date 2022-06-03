@@ -137,12 +137,7 @@ namespace okiidoku::mono::detail::solver {
 		assert(cell_cands.count() == 1);
 		found_queues_.push_back(found::CellClaimSym<O>{.rmi{rmi},.val{val}});
 		--num_puzcells_remaining_;
-		assert(get_num_puzcells_remaining() == T::O4 - static_cast<o4i_t>(std::count_if(
-			std::execution::par_unseq,
-			cells_cands().get_underlying_array().cbegin(),
-			cells_cands().get_underlying_array().cend(),
-			[](const auto& c){ return c.count() == 1; }
-		)));
+		assert(debug_check_correct_num_puzcells_remaining_());
 	}
 
 
@@ -180,12 +175,7 @@ namespace okiidoku::mono::detail::solver {
 		e.cells_cands_ = *frame.prev_cells_cands;
 
 		e.num_puzcells_remaining_ = frame.num_puzcells_remaining;
-		assert(e.get_num_puzcells_remaining() == Ints<O>::O4 - static_cast<int_ts::o4i_t<O>>(std::count_if(
-			std::execution::par_unseq,
-			e.cells_cands().get_underlying_array().cbegin(),
-			e.cells_cands().get_underlying_array().cend(),
-			[](const auto& c){ return c.count() == 1; }
-		)));
+		assert(e.debug_check_correct_num_puzcells_remaining_());
 		auto& cell_cands {e.cells_cands_.at_rmi(frame.guess.rmi)};
 		assert(cell_cands.test(frame.guess.val));
 		assert(cell_cands.count() > 1);
@@ -214,6 +204,18 @@ namespace okiidoku::mono::detail::solver {
 			std::clog.write(chars.data(), chars.size());
 			std::clog << "  " << std::flush;
 		}
+	}
+
+	template<Order O> requires(is_order_compiled(O))
+	bool EngineImpl<O>::debug_check_correct_num_puzcells_remaining_() const noexcept {
+		return get_num_puzcells_remaining() == Ints<O>::O4 - static_cast<int_ts::o4i_t<O>>(std::count_if(
+			#ifdef __cpp_lib_execution
+			std::execution::unseq,
+			#endif
+			cells_cands().get_underlying_array().cbegin(),
+			cells_cands().get_underlying_array().cend(),
+			[](const auto& c){ return c.count() == 1; }
+		));
 	}
 
 

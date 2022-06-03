@@ -1,14 +1,10 @@
 cmake_minimum_required(VERSION 3.21)
-project(okiidoku_emscripten
+project(okiidoku_py
 	VERSION 0.0.1
-	DESCRIPTION "emscripten build of libokiidoku"
+	DESCRIPTION "pybind11 build of libokiidoku"
 	HOMEPAGE_URL "https://github.com/david-fong/okiidoku"
 	LANGUAGES CXX
 )
-if(NOT DEFINED EMSCRIPTEN)
-	message(FATAL_ERROR "call cmake wrapped with emcmake like `emcmake cmake <...>`")
-	# The emcmake wrapper adds command-line arguments to set toolchain file path and such.
-endif()
 set(CMAKE_CXX_STANDARD 20 CACHE STRING "The C++ standard to use")
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_CXX_EXTENSIONS FALSE)
@@ -25,17 +21,17 @@ if(okiidoku_IS_TOP_LEVEL)
 endif()
 
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
-set(BUILD_SHARED_LIBS FALSE) # https://emscripten.org/docs/compiling/Dynamic-Linking.html
+# set(BUILD_SHARED_LIBS FALSE)
 
-# Note: can't use CMake imports since emcsripten needs to build it from scratch.
+FetchContent_MakeAvailable(pybind11)
+# https://github.com/pybind/cmake_example
+# https://pybind11.readthedocs.io/en/stable/cmake/index.html
+
 add_subdirectory(${okiidoku_SOURCE_DIR}/libs/okiidoku okiidoku)
 
-# https://emscripten.org/docs/compiling/Building-Projects.html#using-libraries
-# https://emscripten.org/docs/porting/connecting_cpp_and_javascript/embind.html#binding-libraries
-add_executable(okiidoku_js okiidoku.embind.cpp)
-set_target_properties(okiidoku_js PROPERTIES OUTPUT_NAME "okiidoku")
-target_link_libraries(okiidoku_js
+pybind11_add_module(okiidoku_py okiidoku.pybind.cpp)
+set_target_properties(okiidoku_py PROPERTIES OUTPUT_NAME "okiidoku")
+target_link_libraries(okiidoku_py
 	PRIVATE okiidoku_compile_options_private
 	PRIVATE okiidoku
-	PRIVATE embind
 )

@@ -16,6 +16,7 @@ NOLINTEND
 nullopt
 pimpl
 popcount
+PYBIND
 stoi
 stoul
 subspan

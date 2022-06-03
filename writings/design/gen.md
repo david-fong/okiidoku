@@ -34,3 +34,5 @@ Note: I explored the difference in starting with valid boxes instead of valid li
 - naively extending the current implementation to solve puzzles will not terminate if the puzzle is not solvable.
 
 - if used for solving, must be the final step in a "hybrid solver" pipeline (even if used as an intermediate step as a brute force part, it wouldn't be deterministic, and can hardly be controlled), which may not be the most optimal approach compared to combining deductive reasoning with backtracking. It is also unable to measure "difficulty" of a puzzle according to deductive reasoning techniques.
+
+- hypothesis (not verified): a stochastic approach may not shine (in terms of throughput (which is pretty much all that is cared about)) when used as part of a puzzle solver; when used as a generator, it only needs to randomly land itself on one of the myriad of possible "solutions" of the empty grid "puzzle". With a proper puzzle, there is only one success state to land on.

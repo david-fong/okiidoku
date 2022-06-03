@@ -23,11 +23,9 @@
 - Examine contents of exported symbols (`nm -nCD libs/okiidoku/.../libokiidoku.so | less`) and make sure nothing is exported that isn't intended to be.
 - Ensure dependencies that should be private to the library implementation aren't exposed in any way to the library interface.
 - Run static analyzers
-- Check which `#ifdef __EMSCRIPTEN__` blocks can be removed as emscripten updates its sysroot libc++.
+- Check which `#ifdef __EMSCRIPTEN__` / `__cpp_lib_...` blocks can be removed as emscripten updates its sysroot libc++.
 
 ## Misc List
-
-- include execution after algorithm
 
 - experiment with optimizations for solving smaller grids.
   - less `unique_ptr` usage.

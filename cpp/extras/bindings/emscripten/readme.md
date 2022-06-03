@@ -2,7 +2,7 @@
 
 ## Required Tools
 
-- [the Emscripten SDK](https://emscripten.org/docs/getting_started/downloads.html)
+- [Emscripten](https://emscripten.org/docs/getting_started/downloads.html)
 - CMake 3.21 or greater
 - A C/C++ build system. Recommended: Ninja
 

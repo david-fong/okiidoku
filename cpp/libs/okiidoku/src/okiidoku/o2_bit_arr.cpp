@@ -8,7 +8,10 @@ namespace okiidoku::mono {
 	template<Order O> requires(is_order_compiled(O))
 	typename O2BitArr<O>::o2i_t
 	O2BitArr<O>::count() const noexcept {
-		return static_cast<o2i_t>(std::transform_reduce(std::execution::par_unseq,
+		return static_cast<o2i_t>(std::transform_reduce(
+			#ifdef __cpp_lib_execution
+			std::execution::unseq,
+			#endif
 			words_.cbegin(), words_.cend(), static_cast<o2i_t>(0U), std::plus<o2i_t>{},
 			[](const auto& word){ return static_cast<o2i_t>(std::popcount(word)); }
 		));
@@ -22,9 +25,11 @@ namespace okiidoku::mono {
 		const auto end_at_int {bit_i_to_word_i(end)};
 		assert(end_at_int < num_words);
 		return static_cast<o2x_t>(std::transform_reduce(
-			std::execution::par_unseq,
+			#ifdef __cpp_lib_execution
+			std::execution::unseq,
+			#endif
 			words_.cbegin(), std::next(words_.cbegin(), end_at_int),
-			static_cast<o2x_t>(std::popcount(
+			/* init value: */static_cast<o2x_t>(std::popcount(
 				words_[end_at_int] & static_cast<word_t>(
 					(static_cast<word_t>(1U) << (end % word_t_num_bits))
 					- static_cast<word_t>(1U)
