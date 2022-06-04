@@ -27,7 +27,11 @@
 
 ## Misc List
 
+- in the `house_types` loops, can the auto loop var be const?
 - solver: finding locked-candidates
+- For FastSolver, if a finder ever finds something that was already found, then won't the FastSolver always loop back and keep re-finding the same thing again and never try any more-advanced techniques? That would definitely be unintended and bad. Maybe we need to make the queues keep things that have been found before and already applied, so that they don't get "re-found".
+  - Having such history may also be useful for making guesses:
+    - some subsets may have chainable deductions
 - experiment with optimizations for solving smaller grids.
   - less `unique_ptr` usage.
 

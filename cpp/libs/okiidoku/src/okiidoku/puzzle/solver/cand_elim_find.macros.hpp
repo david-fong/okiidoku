@@ -13,6 +13,7 @@ namespace okiidoku::mono::detail::solver {
 		using o2x_t [[maybe_unused]] = int_ts::o2x_t<O>; \
 		using o2is_t [[maybe_unused]] = int_ts::o2is_t<O>; \
 		using o2i_t [[maybe_unused]] = int_ts::o2i_t<O>; \
+		using o3xs_t [[maybe_unused]] = int_ts::o3xs_t<O>; \
 		using o3i_t [[maybe_unused]] = int_ts::o3i_t<O>; \
 		using rmi_t [[maybe_unused]] = int_ts::o4xs_t<O>; \
 		using o4i_t [[maybe_unused]] = int_ts::o4i_t<O>;
@@ -23,7 +24,7 @@ namespace okiidoku::mono::detail::solver {
 	UnwindInfo CandElimFind<O>::TECHNIQUE_NAME(Engine<O>& engine) noexcept { \
 		assert(!engine.no_solutions_remain()); \
 		if (engine.get_num_puzcells_remaining() == 0) [[unlikely]] { return UnwindInfo::make_no_unwind(); } \
-		const auto needs_unwind {find_ ## TECHNIQUE_NAME ## _and_check_needs_unwind(engine.cells_cands(), engine.found_queues())}; \
+		const auto needs_unwind {find_ ## TECHNIQUE_NAME ## _and_check_needs_unwind(engine.cells_cands(), engine.get_found_queues_())}; \
 		if (needs_unwind) { return engine.unwind_one_stack_frame(); } \
 		return UnwindInfo::make_no_unwind(); \
 	}

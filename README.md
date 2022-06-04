@@ -1,10 +1,10 @@
 # ōkiidoku
 
-The project can:
+A C++ library to:
 
 - generate random, full grids
 - generate puzzles
-- solve puzzles using logic and brute-force
+- find all solutions to a puzzle using logic and brute-force
 - (WIP) efficiently(?) put full grids in a canonical form
 - (WIP) archive collections of grids in highly-compressed form
 
@@ -16,7 +16,7 @@ Language-implementation independent design notes can be found in the [design fol
 
 In Japanese, "ookii" (大きい) means "big". I chose the name because one of my priorities for this project is to support variable grid sizes, and to find and engineer (ie. cache and memory efficiency) algorithms that scale well with large grids. Also, I thought the name had a nice ring- like "okey-dokey". I decided not to call the project "ookiidoku" (despite that being the proper romanization) out of fear of english speakers like myself mispronouncing it like [this](https://en.wikipedia.org/wiki/Close_back_rounded_vowel) instead of like [this](https://en.wikipedia.org/wiki/Mid_back_rounded_vowel).
 
-I work on this project for fun. I like sudoku. I want to learn how to develop high-performance software libraries. I like reasoning about trade-offs. The algorithm design is like the puzzle to me; I don't want to "look at answers" until I have tried my best come up with my own. Perhaps in doing so, I will come up with something new, and maybe even something that is better in some ways than existing approaches.
+I work on this project for fun. I like sudoku. I want to learn how to develop high-performance software libraries. I like reasoning about trade-offs. The algorithm design is like the puzzle to me; I always want to try to come up with things on my own before looking at how other people do things. Perhaps in doing so, I will come up with something new, and maybe even something that is better in some ways than existing approaches.
 
 Here is [the roadmap](./cpp/TODO.md) (subject to violent rearrangements at the mercy of my whim and fancy).
 
@@ -34,6 +34,7 @@ If you do something cool with it, that's great! I'd love to hear about it.
 
 - [codegolf competition](https://codegolf.stackexchange.com/questions/190727/the-fastest-sudoku-solver)
   - [the winner, tdoku](https://t-dillon.github.io/tdoku/)
+- [jczsolve](http://forum.enjoysudoku.com/3-77us-solver-2-8g-cpu-testcase-17sodoku-t30470-210.html#p249309)
 - [Emerentius/sudoku](https://github.com/Emerentius/sudoku)
 - [Peter Norvig](https://norvig.com/sudoku.html)
 - There are more. Google it.

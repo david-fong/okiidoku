@@ -1,8 +1,11 @@
-sudoku
 boxcol
 boxrow
 canonicalizer
+Emerentius
 givens
+jczsolve
 minlexing
 pencilmark
+sudoku
 sudopedia
+tdoku

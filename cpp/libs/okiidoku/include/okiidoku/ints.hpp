@@ -1,7 +1,5 @@
 #ifndef HPP_OKIIDOKU__INTS
 #define HPP_OKIIDOKU__INTS
-// Note: the byte width type logic could be done with boost, but I don't
-// have any other reason to add boost as a dependency, so I won't.
 
 #include <okiidoku/detail/order_templates.hpp> // Order, largest_compiled_order
 
@@ -33,6 +31,10 @@ namespace okiidoku {
 		LineType::row,
 		LineType::col
 	})};
+
+	enum class BoxOrLine : unsigned char {
+		box, line,
+	};
 }
 
 
@@ -84,6 +86,8 @@ namespace okiidoku::mono {
 
 		template<Order O> using o3x_t = detail::uint_fastN_t<std::bit_width(O*O*O-1)>;
 		template<Order O> using o3i_t = detail::uint_fastN_t<std::bit_width(O*O*O)>;
+		template<Order O> using o3xs_t = detail::uint_smolN_t<std::bit_width(O*O*O-1)>;
+		template<Order O> using o3is_t = detail::uint_smolN_t<std::bit_width(O*O*O)>;
 
 		template<Order O> using o4x_t = detail::uint_fastN_t<std::bit_width(O*O*O*O-1)>;
 		template<Order O> using o4i_t = detail::uint_fastN_t<std::bit_width(O*O*O*O)>;

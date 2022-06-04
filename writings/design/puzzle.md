@@ -6,6 +6,8 @@ Goals: Generate minimal, difficult puzzles. TODO: by what definition of difficul
 
 ## Solver
 
+[sudopedia - solving techniques](https://www.sudopedia.org/wiki/Solving_Technique)
+
 There are two paths here: one is to create a solver that purely optimizes for speed/throughput ("fast solver"), and the other is to prioritize using human solving strategies and be able to rank the difficulty of the puzzle based on the difficulty of techniques used ("reasoning solver").
 
 Another design decision: should the solver be able to detect when there are multiple solutions and no solutions? Or should it assume proper puzzles (puzzles with exactly one solution)?
@@ -63,6 +65,12 @@ In the end, I actually decided to make this a contract instead of a guideline. R
   - LockedCands: box of A to see if any symbols removed from A can now go only in one line intersecting A.
 
 ## Puzzle Making
+
+How is it done?
+
+- Perhaps by searching for the next given to remove that retains the most symbol and cell candidates?
+
+- Perhaps there is some correlation to the properties currently being used for canonicalizing labels?
 
 hypothesis: if removing a given breaks properness, the only way to change that is by adding back other removed givens ("backtracking" of removing a given). If this is true, once a given is known to break properness if removed, if no backtracking is done ever, then it can never be removed.
 

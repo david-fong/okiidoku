@@ -49,7 +49,7 @@ namespace okiidoku::mono::detail::solver {
 		std::apply([&](auto& ...queue){
 			// see https://en.cppreference.com/w/cpp/language/eval_order
 			return (... && logical_and_loop_body(queue));
-		}, engine.found_queues().tup_);
+		}, engine.get_found_queues_().tup_);
 		return check;
 	}
 
@@ -66,14 +66,14 @@ namespace okiidoku::mono::detail::solver {
 		}};
 		std::apply([&](auto& ...queue){
 			return (... && logical_and_loop_body(queue));
-		}, engine.found_queues().tup_);
+		}, engine.get_found_queues_().tup_);
 		if (check.did_unwind_root()) [[unlikely]] { return check; }
 
 		using queues_t = typename FoundQueues<O>::queues_t;
 		using last_queue_t = std::tuple_element_t<std::tuple_size<queues_t>()-1, queues_t>;
 		using passive_queue_t = typename FoundQueues<O>::template queue_t<found::CellClaimSym<O>>;
 		if constexpr (!std::is_same_v<last_queue_t, passive_queue_t>) {
-			logical_and_loop_body(std::get<passive_queue_t>(engine.found_queues().tup_));
+			logical_and_loop_body(std::get<passive_queue_t>(engine.get_found_queues_().tup_));
 		}
 		assert(!engine.has_queued_cand_elims());
 		return check;

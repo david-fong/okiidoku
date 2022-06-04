@@ -26,23 +26,24 @@ namespace okiidoku::mono::detail::solver { namespace {
 		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
 		for (auto house_type : house_types) {
 		for (o2i_t house {0}; house < T::O2; ++house) {
-			O2BitArr<O> syms_seen {};
-			O2BitArr<O> syms_seen_only_once {O2BitArr_ones<O>};
-			for (o2i_t house_cell {0}; house_cell < T::O2; ++house_cell) {
-				const auto& cell_cands {cells_cands.at_rmi(house_cell_to_rmi<O>(house_type, house, house_cell))};
-				syms_seen_only_once.remove(syms_seen & cell_cands);
-				syms_seen |= cell_cands;
-			}
-			if (syms_seen.count() < T::O2) [[unlikely]] {
-				return true; // needs unwind; some sym(s) have no cand cells.
+			O2BitArr<O> syms_claiming_a_cell {O2BitArr_ones<O>}; {
+				O2BitArr<O> syms_seen {};
+				for (o2i_t house_cell {0}; house_cell < T::O2; ++house_cell) {
+					const auto& cell_cands {cells_cands.at_rmi(house_cell_to_rmi<O>(house_type, house, house_cell))};
+					syms_claiming_a_cell.remove(syms_seen & cell_cands);
+					syms_seen |= cell_cands;
+				}
+				if (syms_seen.count() < T::O2) [[unlikely]] {
+					return true; // sym(s) with no cand cells.
+				}
 			}
 			for (o2i_t house_cell {0}; house_cell < T::O2; ++house_cell) {
 				const auto rmi {house_cell_to_rmi<O>(house_type, house, house_cell)};
 				const auto& cell_cands {cells_cands.at_rmi(rmi)};
-				const auto isec {cell_cands & syms_seen_only_once};
-				if (isec.count() > 0) [[unlikely]] {
-					if (isec.count() > 1) [[unlikely]] { return true; } // multiple syms want same cell.
-					const auto sym {isec.count_lower_zeros_assuming_non_empty_mask()};
+				const auto match_cands {cell_cands & syms_claiming_a_cell};
+				if (match_cands.count() > 0) [[unlikely]] {
+					if (match_cands.count() > 1) [[unlikely]] { return true; } // multiple syms want same cell.
+					const auto sym {match_cands.count_lower_zeros_assuming_non_empty_mask()};
 					if (cell_cands.count() > 1) {
 						found_queues.push_back(found::SymClaimCell<O>{
 							.rmi{static_cast<rmi_t>(rmi)},

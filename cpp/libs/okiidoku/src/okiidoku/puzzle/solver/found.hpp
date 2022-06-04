@@ -41,9 +41,10 @@ namespace okiidoku::mono::detail::solver::found {
 
 	template<Order O> requires(is_order_compiled(O))
 	struct LockedCands final {
-		int_ts::o2xs_t<O> line;
-		int_ts::o1x_t<O> intersecting_box;
+		O2BitArr<O> syms;
+		int_ts::o3xs_t<O> isec;
 		LineType line_type;
+		BoxOrLine remove_from_rest_of;
 	};
 
 

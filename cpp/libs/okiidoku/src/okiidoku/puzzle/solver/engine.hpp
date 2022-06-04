@@ -136,7 +136,7 @@ namespace okiidoku::mono::detail::solver {
 		const CandsGrid<O>& cells_cands() const noexcept { return cells_cands_; }
 
 		[[nodiscard, gnu::pure]]
-		FoundQueues<O>& found_queues() noexcept { return found_queues_; }
+		FoundQueues<O>& get_found_queues_() noexcept { return found_queues_; }
 
 
 		// contract: `val` is currently one of _multiple_ candidate-symbols at `rmi`.

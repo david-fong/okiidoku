@@ -6,3 +6,5 @@
 - It got to learn a lot from its predecessors.
 
 - https://www.reddit.com/r/rust/comments/uum5re/what_are_legitimate_problems_with_rust/
+
+I feel really envious of how clean and declarative the project configuration files are when I look at emerentius's projects.
