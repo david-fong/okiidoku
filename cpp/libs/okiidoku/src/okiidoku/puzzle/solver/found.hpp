@@ -43,7 +43,7 @@ namespace okiidoku::mono::detail::solver::found {
 	struct LockedCands final {
 		int_ts::o2xs_t<O> line;
 		int_ts::o1x_t<O> intersecting_box;
-		enum Polarity { h, v } line_polarity;
+		LineType line_type;
 	};
 
 

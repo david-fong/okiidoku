@@ -16,7 +16,7 @@ NOLINTEND
 nullopt
 pimpl
 popcount
-PYBIND
+pybind
 stoi
 stoul
 subspan

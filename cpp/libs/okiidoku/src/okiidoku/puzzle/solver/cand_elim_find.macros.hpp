@@ -8,6 +8,7 @@ namespace okiidoku::mono::detail::solver {
 
 	#define OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS \
 		using T [[maybe_unused]] = Ints<O>; \
+		using o1i_t [[maybe_unused]] = int_ts::o1i_t<O>; \
 		using o2xs_t [[maybe_unused]] = int_ts::o2xs_t<O>; \
 		using o2x_t [[maybe_unused]] = int_ts::o2x_t<O>; \
 		using o2is_t [[maybe_unused]] = int_ts::o2is_t<O>; \

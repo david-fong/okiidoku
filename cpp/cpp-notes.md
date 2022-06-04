@@ -97,3 +97,5 @@ things I got wrong before which I couldn't understand based on gcc's error messa
 - [](https://gcc.gnu.org/onlinedocs/gcc/Compatibility.html)
 
 - [non-exported dependencies of exported static libraries](https://gitlab.kitware.com/cmake/cmake/-/issues/17357)
+
+- [moving to c++ modules](https://devblogs.microsoft.com/cppblog/moving-a-project-to-cpp-named-modules/)

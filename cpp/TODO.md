@@ -27,9 +27,9 @@
 
 ## Misc List
 
+- solver: finding locked-candidates
 - experiment with optimizations for solving smaller grids.
   - less `unique_ptr` usage.
-  - specializing `O2BitArr` to use int sizes smaller than u64.
 
 - look into cppitertools for writing my raw loops. see if people say anything about performance overhead.
 

@@ -64,6 +64,8 @@ In the end, I actually decided to make this a contract instead of a guideline. R
 
 ## Puzzle Making
 
-hypothesis: if removing a given breaks properness, the only way to change that is by adding back other removed givens. If this is true, once a given is known to break properness, if no backtracking is done, then it can never be removed.
+hypothesis: if removing a given breaks properness, the only way to change that is by adding back other removed givens ("backtracking" of removing a given). If this is true, once a given is known to break properness if removed, if no backtracking is done ever, then it can never be removed.
+
+hypothesis: making guesses all packed in the same / nearby line-box intersections increases the probability of finding "contradictory" guesses earlier, since those guesses will concentrate their eliminations in the same lines and boxes.
 
 If a base puzzle is known to be proper, and then a given G is removed to create a derived puzzle, it is known that there is always exactly one solution to the derived puzzle where the cell at G.rmi takes on G.val, and that solution is the solution of the base puzzle. Therefore, if the goal is to check that the derived puzzle is still proper or not, one can remove G as a candidate from all the guess stack frames. Also- I wonder if it would be more efficient to focus the first guess in the stack at the cell of G.

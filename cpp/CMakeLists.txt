@@ -20,11 +20,11 @@ endif()
 
 if(MSVC)
 	if(okiidoku_IS_TOP_LEVEL)
-		add_compile_options(/EHsc) # exception handling: standard-compliant
+		add_compile_options(/EHsc)
 		# https://docs.microsoft.com/en-us/cpp/build/reference/eh-exception-handling-model#standard-c-exception-handling
-		# the exception handling model must be consistent for the whole program(s).
-		# the user should decide for themselves what they want to use.
+		# must be consistent for whole program(s). do not hijack user's choice.
 		# This project doesn't throw exceptions, so any model should be okay.
+		# TODO wat https://gitlab.kitware.com/cmake/cmake/-/issues/20610
 	endif()
 else()
 	add_compile_options(

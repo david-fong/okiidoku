@@ -7,12 +7,11 @@
 #include <array>
 #include <bit>
 #include <compare>
+#include <type_traits> // conditional_t
 #include <cassert>
 
 namespace okiidoku::mono {
 
-	// Like `bitset` but with only what's needed, and a get index of nth
-	// set bit operation with cool optimization.
 	template<Order O> requires(is_order_compiled(O))
 	struct O2BitArr final {
 	public:
@@ -21,7 +20,9 @@ namespace okiidoku::mono {
 		using o2x_t = int_ts::o2x_t<O>;
 		using o2i_t = int_ts::o2i_t<O>;
 
-		using word_t = std::uint64_t;
+		// using word_t = std::uint64_t;
+		// using smaller word size when O<=8 has ~5% time improvement for O=3 solver
+		using word_t = std::conditional_t<(O <= 8), detail::uint_smolN_t<T::O2>, std::uint_least64_t>;
 
 		// Note: use of unsigned char is safe for grid-orders < 128. That should be fine.
 		using word_i_t = unsigned char;
@@ -35,6 +36,10 @@ namespace okiidoku::mono {
 		[[nodiscard, gnu::const]]
 		static constexpr word_i_t bit_i_to_word_i(const o2x_t bit_i) noexcept {
 			return bit_i / word_t_num_bits;
+		}
+		[[nodiscard, gnu::const]]
+		static constexpr word_t word_bit_mask_for_bit_i(const o2x_t bit_i) noexcept {
+			return static_cast<word_t>(word_t{1} << static_cast<word_bit_i_t>(bit_i % word_t_num_bits));
 		}
 
 		// Internal Note: If user follows contracts, excess top bits are always zero.
@@ -52,6 +57,8 @@ namespace okiidoku::mono {
 			return _;
 		}
 
+		[[nodiscard, gnu::pure]] friend bool operator==(const O2BitArr& a, const O2BitArr& b) noexcept = default;
+
 		// count the number of set bits.
 		[[nodiscard, gnu::pure]] o2i_t count() const noexcept;
 		// count the number of set bits below the specified bit index.
@@ -60,17 +67,17 @@ namespace okiidoku::mono {
 
 		[[nodiscard, gnu::pure]] bool test(const o2x_t at) const noexcept {
 			assert(at < T::O2);
-			const word_t word_bit_mask {word_t{1} << (at % word_t_num_bits)};
+			const word_t word_bit_mask {word_bit_mask_for_bit_i(at)};
 			return (words_[bit_i_to_word_i(at)] & word_bit_mask) != 0;
 		}
 		constexpr void set(const o2x_t at) noexcept {
 			assert(at < T::O2);
-			const word_t word_bit_mask {word_t{1} << (at % word_t_num_bits)};
+			const word_t word_bit_mask {word_bit_mask_for_bit_i(at)};
 			words_[bit_i_to_word_i(at)] |= word_bit_mask;
 		}
 		constexpr void unset(const o2x_t at) noexcept {
 			assert(at < T::O2);
-			const word_t word_bit_mask {word_t{1} << (at % word_t_num_bits)};
+			const word_t word_bit_mask {word_bit_mask_for_bit_i(at)};
 			words_[bit_i_to_word_i(at)] &= ~word_bit_mask;
 		}
 
@@ -92,13 +99,13 @@ namespace okiidoku::mono {
 		[[nodiscard, gnu::pure]] static bool test_any3(const o2x_t at, const O2BitArr& a, const O2BitArr& b, const O2BitArr& c) noexcept {
 			assert(at < T::O2);
 			const auto word_i {bit_i_to_word_i(at)};
-			const word_t word_bit_mask {word_t{1} << (at % word_t_num_bits)};
-			return static_cast<bool>((a.words_[word_i] | b.words_[word_i] | c.words_[word_i]) & word_bit_mask);
+			const word_t word_bit_mask {word_bit_mask_for_bit_i(at)};
+			return ((a.words_[word_i] | b.words_[word_i] | c.words_[word_i]) & word_bit_mask) != 0;
 		}
 		static void set3(const o2x_t at, O2BitArr& a, O2BitArr& b, O2BitArr& c) noexcept {
 			assert(at < T::O2);
 			const auto word_i {bit_i_to_word_i(at)};
-			const word_t word_bit_mask {word_t{1} << (at % word_t_num_bits)};
+			const word_t word_bit_mask {word_bit_mask_for_bit_i(at)};
 			a.words_[word_i] |= word_bit_mask;
 			b.words_[word_i] |= word_bit_mask;
 			c.words_[word_i] |= word_bit_mask;
@@ -106,7 +113,7 @@ namespace okiidoku::mono {
 		static void unset3(const o2x_t at, O2BitArr& a, O2BitArr& b, O2BitArr& c) noexcept {
 			assert(at < T::O2);
 			const auto word_i {bit_i_to_word_i(at)};
-			const word_t word_bit_mask {word_t{1} << (at % word_t_num_bits)};
+			const word_t word_bit_mask {word_bit_mask_for_bit_i(at)};
 			a.words_[word_i] &= ~word_bit_mask;
 			b.words_[word_i] &= ~word_bit_mask;
 			c.words_[word_i] &= ~word_bit_mask;

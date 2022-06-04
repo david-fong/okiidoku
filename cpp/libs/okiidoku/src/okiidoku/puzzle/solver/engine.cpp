@@ -224,6 +224,7 @@ namespace okiidoku::mono::detail::solver {
 
 
 	#define OKIIDOKU_FOR_COMPILED_O(O_) \
+		template struct FoundQueues<O_>; \
 		template struct EngineImpl<O_>; \
 		template class Engine<O_>;
 	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES

@@ -26,29 +26,30 @@ namespace okiidoku::mono::detail::solver { namespace {
 		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
 		for (auto house_type : house_types) {
 		for (o2i_t house {0}; house < T::O2; ++house) {
-			std::array<o2is_t, T::O2> syms_seen_only_once_at_house_cell;
-			syms_seen_only_once_at_house_cell.fill(T::O2);
 			O2BitArr<O> syms_seen {};
 			O2BitArr<O> syms_seen_only_once {O2BitArr_ones<O>};
 			for (o2i_t house_cell {0}; house_cell < T::O2; ++house_cell) {
 				const auto& cell_cands {cells_cands.at_rmi(house_cell_to_rmi<O>(house_type, house, house_cell))};
 				syms_seen_only_once.remove(syms_seen & cell_cands);
-				for (auto walker {(syms_seen_only_once & cell_cands).set_bits_walker()}; walker.has_more(); walker.advance()) {
-					syms_seen_only_once_at_house_cell[walker.value()] = static_cast<o2is_t>(house_cell);
-				}
 				syms_seen |= cell_cands;
 			}
 			if (syms_seen.count() < T::O2) [[unlikely]] {
 				return true; // needs unwind; some sym(s) have no cand cells.
 			}
-			for (auto walker {syms_seen_only_once.set_bits_walker()}; walker.has_more(); walker.advance()) {
-				const auto rmi {house_cell_to_rmi<O>(house_type, house, syms_seen_only_once_at_house_cell[walker.value()])};
-				if (cells_cands.at_rmi(rmi).count() > 1) {
-					found_queues.push_back(found::SymClaimCell<O>{
-						.rmi{static_cast<rmi_t>(rmi)},
-						.val{static_cast<o2xs_t>(walker.value())},
-					});
-			}	}
+			for (o2i_t house_cell {0}; house_cell < T::O2; ++house_cell) {
+				const auto rmi {house_cell_to_rmi<O>(house_type, house, house_cell)};
+				const auto& cell_cands {cells_cands.at_rmi(rmi)};
+				const auto isec {cell_cands & syms_seen_only_once};
+				if (isec.count() > 0) [[unlikely]] {
+					if (isec.count() > 1) [[unlikely]] { return true; } // multiple syms want same cell.
+					const auto sym {isec.count_lower_zeros_assuming_non_empty_mask()};
+					if (cell_cands.count() > 1) {
+						found_queues.push_back(found::SymClaimCell<O>{
+							.rmi{static_cast<rmi_t>(rmi)},
+							.val{static_cast<o2xs_t>(sym)},
+						});
+				}	}
+			}
 		}}
 		return false; // no unwind needed.
 	}

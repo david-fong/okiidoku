@@ -14,6 +14,7 @@ target_sources(okiidoku PRIVATE
 	puzzle/solver/engine.cpp
 	puzzle/solver/cand_elim_find.cpp
 	puzzle/solver/cand_elim_find.subsets.cpp
+	puzzle/solver/cand_elim_find.intersections.cpp
 	puzzle/solver/cand_elim_apply.cpp
 	puzzle/solve.cpp
 	puzzle/make.cpp

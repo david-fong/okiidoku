@@ -32,8 +32,10 @@ unsigned test_morph(okiidoku::SharedRng& shared_rng, const unsigned num_rounds) 
 	using namespace okiidoku;
 	using namespace okiidoku::mono;
 	using T = Ints<O>;
+	using o1x_t = int_ts::o1x_t<O>;
 	using o2x_t = int_ts::o2x_t<O>;
 	using o2i_t = int_ts::o2i_t<O>;
+	using o3x_t = int_ts::o3x_t<O>;
 	// using o4i_t = int_ts::o4i_t<O>;
 	std::cout << "\n\ntesting for order " << O << std::endl;
 	// Note: if gen_path gets un-deprecated, assert that paths are valid.
@@ -51,11 +53,18 @@ unsigned test_morph(okiidoku::SharedRng& shared_rng, const unsigned num_rounds) 
 		assert(count == T::O2);
 	}
 
-	for (o2i_t box {0}; box < T::O2; ++box) {
-	for (o2i_t box_cell {0}; box_cell < T::O2; ++box_cell) {
-		const auto rmi {box_cell_to_rmi<O>(box,box_cell)};
-		assert(rmi_to_box<O>(rmi) == box);
-		assert(rmi_to_box_cell<O>(rmi) == box_cell);
+	for (o2i_t i {0}; i < T::O2; ++i) {
+	for (o2i_t j {0}; j < T::O2; ++j) {
+		const auto box_cell_rmi {box_cell_to_rmi<O>(i,j)};
+		assert(rmi_to_box<O>(box_cell_rmi) == i);
+		assert(rmi_to_box_cell<O>(box_cell_rmi) == j);
+
+		const auto chute {static_cast<o1x_t>(i/T::O1)};
+		const auto chute_cell {static_cast<o3x_t>(((i%T::O1)*T::O2)+j)};
+		const auto h_chute_cell_rmi {chute_cell_to_rmi<O>(LineType::row, chute, chute_cell)};
+		const auto v_chute_cell_rmi {chute_cell_to_rmi<O>(LineType::col, chute, chute_cell)};
+		assert(h_chute_cell_rmi == ((i*T::O2)+j));
+		assert(v_chute_cell_rmi == ((j*T::O2)+i));
 	}}
 
 	unsigned int count_bad {0};

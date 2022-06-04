@@ -29,12 +29,9 @@ namespace okiidoku::mono {
 			std::execution::unseq,
 			#endif
 			words_.cbegin(), std::next(words_.cbegin(), end_at_int),
-			/* init value: */static_cast<o2x_t>(std::popcount(
-				words_[end_at_int] & static_cast<word_t>(
-					(static_cast<word_t>(1U) << (end % word_t_num_bits))
-					- static_cast<word_t>(1U)
-				)
-			)),
+			/* init value: */static_cast<o2x_t>(std::popcount(static_cast<word_t>(
+				words_[end_at_int] & (word_bit_mask_for_bit_i(end) - static_cast<word_t>(1U))
+			))),
 			std::plus<o2x_t>{},
 			[](const auto& word){ return static_cast<o2x_t>(std::popcount(word)); }
 		));

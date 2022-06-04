@@ -10,18 +10,6 @@
 
 namespace okiidoku::mono::detail::solver { namespace {
 
-
-	template<Order O> requires(is_order_compiled(O))
-	[[nodiscard]] bool find_locked_cands_and_check_needs_unwind(
-		const CandsGrid<O>& cells_cands,
-		FoundQueues<O>& found_queues
-	) noexcept {
-		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
-		(void)cells_cands, (void)found_queues;// TODO
-		return false;
-	}
-
-
 	template<Order O> requires(is_order_compiled(O))
 	Guess<O> find_good_guess_candidate(
 		const CandsGrid<O>& cells_cands,
@@ -65,16 +53,16 @@ namespace okiidoku::mono::detail::solver { namespace {
 		// using house_cand_counts_t = std::array<o2i_t, house_types.size()>;
 		// std::vector<house_cand_counts_t> cell_tag_sym_major_cand_count;
 		// cell_tag_sym_major_cand_count.capacity(cand_rmis.size());
-		// for (const auto& tag_rmi : cand_rmis) {
+		// for (const auto& guess_rmi : cand_rmis) {
 		// 	// TODO alternate design: instead of looping over the tag-cell's symbols
 		// 	// to count, use (tag_cell_cands & nb_cell_cands).count().
-		// 	for (const o2i_t sym : cells_cands.at_rmi(tag_rmi).set_bits_iter()) {
+		// 	for (const o2i_t sym : cells_cands.at_rmi(guess_rmi).set_bits_iter()) {
 		// 		house_cand_counts_t house_cand_counts {{0}};
 		// 		for (auto house_type : house_types) {
 		// 		for (o2i_t nb_house_cell {0}; nb_house_cell < T::O2; ++nb_house_cell) {
 		// 			const auto nb_rmi {house_cell_to_rmi<O>(
 		// 				house_type,
-		// 				rmi_to_house<O>(house_type, tag_rmi),
+		// 				rmi_to_house<O>(house_type, guess_rmi),
 		// 				nb_house_cell
 		// 			)}
 		// 			if (cells_cands.at_rmi(nb_rmi).test(symbol)) {
@@ -94,19 +82,13 @@ namespace okiidoku::mono::detail::solver { namespace {
 
 namespace okiidoku::mono::detail::solver {
 
-	OKIIDOKU_CAND_ELIM_FINDER_DEF(locked_cands)
-	#undef OKIIDOKU_CAND_ELIM_FINDER_DEF
-
-
 	template<Order O> requires(is_order_compiled(O))
 	Guess<O> CandElimFind<O>::good_guess_candidate(const Engine<O>& engine) noexcept {
 		assert(!engine.no_solutions_remain());
 		return find_good_guess_candidate<O>(engine.cells_cands(), engine.get_num_puzcells_remaining());
 	}
 
-
 	#define OKIIDOKU_FOR_COMPILED_O(O_) \
-		template UnwindInfo CandElimFind<O_>::locked_cands(Engine<O_>&) noexcept; \
 		template Guess<O_> CandElimFind<O_>::good_guess_candidate(const Engine<O_>&) noexcept;
 	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 	#undef OKIIDOKU_FOR_COMPILED_O

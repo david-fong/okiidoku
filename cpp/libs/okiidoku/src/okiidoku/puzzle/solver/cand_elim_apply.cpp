@@ -91,7 +91,7 @@ namespace okiidoku::mono::detail::solver {
 			const auto check {engine.do_elim_remove_sym_(nb_rmi, desc.val)}; \
 			if (check.did_unwind()) [[unlikely]] { return check; }
 
-		// TODO consider using the new house_cell_to_rmi function and house_types array.
+		// The "unrolled" version is ~3% faster for O=3 :/
 		{
 			const auto desc_row {rmi_to_row<O>(desc.rmi)};
 			for (o2i_t nb_col {0}; nb_col < T::O2; ++nb_col) {
@@ -110,6 +110,13 @@ namespace okiidoku::mono::detail::solver {
 				const auto nb_rmi {static_cast<rmi_t>(box_cell_to_rmi<O>(desc_box, nb_box_cell))};
 				OKIIDOKU_TRY_ELIM_NB_CAND
 		}	}
+		// for (auto house_type : house_types) {
+		// 	const auto desc_house {rmi_to_house<O>(house_type, desc.rmi)};
+		// 	for (o2i_t nb_house_cell {0}; nb_house_cell < T::O2; ++nb_house_cell) {
+		// 		const auto nb_rmi {static_cast<rmi_t>(house_cell_to_rmi<O>(house_type, desc_house, nb_house_cell))};
+		// 		OKIIDOKU_TRY_ELIM_NB_CAND
+		// 	}
+		// }
 		#undef OKIIDOKU_TRY_ELIM_NB_CAND
 		return UnwindInfo::make_no_unwind();
 	}

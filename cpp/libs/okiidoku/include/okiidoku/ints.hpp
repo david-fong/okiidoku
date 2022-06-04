@@ -20,11 +20,18 @@ namespace okiidoku {
 	enum class HouseType : unsigned char {
 		box, row, col,
 	};
-
 	constexpr auto house_types {std::to_array<HouseType>({
 		HouseType::row,
 		HouseType::col,
 		HouseType::box
+	})};
+
+	enum class LineType : unsigned char {
+		row, col,
+	};
+	constexpr auto line_types {std::to_array<LineType>({
+		LineType::row,
+		LineType::col
 	})};
 }
 
@@ -75,6 +82,7 @@ namespace okiidoku::mono {
 		template<Order O> using o2xs_t = detail::uint_smolN_t<std::bit_width(O*O-1)>;
 		template<Order O> using o2is_t = detail::uint_smolN_t<std::bit_width(O*O)>;
 
+		template<Order O> using o3x_t = detail::uint_fastN_t<std::bit_width(O*O*O-1)>;
 		template<Order O> using o3i_t = detail::uint_fastN_t<std::bit_width(O*O*O)>;
 
 		template<Order O> using o4x_t = detail::uint_fastN_t<std::bit_width(O*O*O*O-1)>;
@@ -105,6 +113,9 @@ namespace okiidoku::mono {
 
 	template<Order O, typename T>
 	concept Any_o2x_t = std::unsigned_integral<T> && std::numeric_limits<T>::max() >= (Ints<O>::O2-1);
+
+	template<Order O, typename T>
+	concept Any_o3x_t = std::unsigned_integral<T> && std::numeric_limits<T>::max() >= (Ints<O>::O3-1);
 
 	template<Order O, typename T>
 	concept Any_o4x_t = std::unsigned_integral<T> && std::numeric_limits<T>::max() >= (Ints<O>::O4-1);
@@ -166,6 +177,19 @@ namespace okiidoku::mono {
 		case HouseType::row: return static_cast<o4x_t>((T::O2*house)+house_cell);
 		case HouseType::col: return static_cast<o4x_t>((T::O2*house_cell)+house);
 		case HouseType::box: return box_cell_to_rmi<O>(house, house_cell);
+		}
+	}
+
+	template<Order O, class T_chute, class T_chute_cell>
+	requires(Any_o1x_t<O, T_chute> && Any_o3x_t<O, T_chute_cell>) [[nodiscard, gnu::const]]
+	constexpr int_ts::o4x_t<O> chute_cell_to_rmi(const LineType line_type, const T_chute chute, const T_chute_cell chute_cell) noexcept {
+		using T = Ints<O>;
+		assert(chute < T::O1);
+		assert(chute_cell < T::O3);
+		using o4x_t = int_ts::o4x_t<O>;
+		switch (line_type) {
+		case LineType::row: return static_cast<o4x_t>((T::O3*chute)+chute_cell);
+		case LineType::col: return static_cast<o4x_t>((T::O1*chute)+((chute_cell%T::O2)*T::O2)+(chute_cell/T::O2));
 		}
 	}
 }

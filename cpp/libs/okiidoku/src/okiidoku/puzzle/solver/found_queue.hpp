@@ -52,5 +52,11 @@ namespace okiidoku::mono::detail::solver {
 		void push_back(found::SymsClaimCells<O>&& desc) noexcept { std::get<queue_t<found::SymsClaimCells<O>>>(tup_).emplace_back(std::move(desc)); }
 		void push_back(found::LockedCands   <O>&& desc) noexcept { std::get<queue_t<found::LockedCands   <O>>>(tup_).emplace_back(std::move(desc)); }
 	};
+
+
+	#define OKIIDOKU_FOR_COMPILED_O(O_) \
+		extern template struct FoundQueues<O_>; // currently instantiated in engine.cpp
+	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
+	#undef OKIIDOKU_FOR_COMPILED_O
 }
 #endif
