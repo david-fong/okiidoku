@@ -125,6 +125,9 @@ namespace okiidoku::mono::detail::solver {
 		[[nodiscard, gnu::pure]]
 		std::size_t get_guess_stack_depth() const noexcept { return guess_stack_.size(); };
 
+		[[nodiscard, gnu::pure]]
+		std::uint_fast64_t get_total_guesses() const noexcept { return total_guesses_; };
+
 		// contract: `no_solutions_remain` returns `false`.
 		// contract: `get_num_puzcells_remaining` returns zero.
 		// returns a filled grid that follows the one rule and contains all the puzzle's givens.
@@ -193,6 +196,8 @@ namespace okiidoku::mono::detail::solver {
 		using guess_stack_t = std::stack<GuessStackFrame/* , std::vector<GuessStackFrame> */>;
 		guess_stack_t guess_stack_ {};
 
+		std::uint_fast64_t total_guesses_ {0};
+
 		bool no_solutions_remain_ {true};
 	};
 
@@ -217,6 +222,7 @@ namespace okiidoku::mono::detail::solver {
 		using EngineImpl<O>::get_num_puzcells_remaining;
 		using EngineImpl<O>::push_guess;
 		using EngineImpl<O>::get_guess_stack_depth;
+		using EngineImpl<O>::get_total_guesses;
 		using EngineImpl<O>::build_solution_obj;
 
 		// contract: `no_solutions_remain` returns `false`.

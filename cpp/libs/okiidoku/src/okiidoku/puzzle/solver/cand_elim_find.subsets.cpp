@@ -44,7 +44,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 				if (match_cands.count() > 0) [[unlikely]] {
 					if (match_cands.count() > 1) [[unlikely]] { return true; } // multiple syms want same cell.
 					const auto sym {match_cands.count_lower_zeros_assuming_non_empty_mask()};
-					if (cell_cands.count() > 1) {
+					if (cell_cands.count() > 1) /* [[?likely]] */ {
 						found_queues.push_back(found::SymClaimCell<O>{
 							.rmi{static_cast<rmi_t>(rmi)},
 							.val{static_cast<o2xs_t>(sym)},

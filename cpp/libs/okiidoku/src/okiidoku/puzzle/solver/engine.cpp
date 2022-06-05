@@ -21,12 +21,13 @@ namespace okiidoku::mono::detail::solver {
 		num_puzcells_remaining_ = T::O4;
 		found_queues_.clear();
 		while (!guess_stack_.empty()) { guess_stack_.pop(); }
+		total_guesses_ = 0;
 		no_solutions_remain_ = false;
 
 		for (o4i_t rmi {0}; rmi < T::O4; ++rmi) {
 			const auto& val {puzzle.at_rmi(rmi)};
 			assert(val <= T::O2);
-			if (val < T::O2) {
+			if (val < T::O2) [[likely]] {
 				register_new_given_(static_cast<rmi_t>(rmi), static_cast<val_t>(val));
 			}
 		}
@@ -80,10 +81,8 @@ namespace okiidoku::mono::detail::solver {
 		const EngineImpl<O>::val_t cand_to_elim
 	) noexcept {
 		assert(!no_solutions_remain());
-		if (!cells_cands().at_rmi(rmi).test(cand_to_elim)) {
-			// TODO.try this if-block can technically be removed. need to benchmark to see whether it is beneficial.
-			// candidate was already eliminated.
-			return UnwindInfo::make_no_unwind();
+		if (!cells_cands().at_rmi(rmi).test(cand_to_elim)) [[unlikely]] {
+			return UnwindInfo::make_no_unwind(); // perf optimization
 		}
 		return do_elim_generic_(rmi, [&](auto& cands){ cands.unset(cand_to_elim); });
 	}
@@ -152,6 +151,7 @@ namespace okiidoku::mono::detail::solver {
 		guess_stack_.emplace(*this, guess);
 
 		register_new_given_(guess.rmi, guess.val);
+		++total_guesses_;
 		#ifndef NDEBUG
 		std::clog << "\nguess+(" << get_guess_stack_depth() << ") " << int(guess.rmi) << " " << int(guess.val);
 		// debug_print_cells_cands_();
@@ -182,11 +182,11 @@ namespace okiidoku::mono::detail::solver {
 		assert(cell_cands.test(frame.guess.val));
 		assert(cell_cands.count() > 1);
 		cell_cands.unset(frame.guess.val);
-		if (cell_cands.count() == 1) {
+		if (cell_cands.count() == 1) [[unlikely]] {
 			e.enqueue_cand_elims_for_new_cell_claim_sym_(frame.guess.rmi);
 		}
 		#ifndef NDEBUG
-		std::clog << "\nguess-(" << e.get_guess_stack_depth() << ") " << int(frame.guess.rmi) << " " << int(frame.guess.val);
+		// std::clog << "\nguess-(" << e.get_guess_stack_depth() << ") " << int(frame.guess.rmi) << " " << int(frame.guess.val);
 		// e.debug_print_cells_cands_();
 		#endif
 		return UnwindInfo::make_did_unwind_guess();

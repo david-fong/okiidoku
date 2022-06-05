@@ -47,6 +47,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 				const auto house {rmi_to_house<O>(house_type, rmi)};
 				_[ht] = houses_solved_counts[house][ht];
 			}
+			std::sort(_.begin(), _.end(), std::less{});
 			return _;
 		}};
 		o4i_t best_rmi {T::O4};
@@ -63,9 +64,9 @@ namespace okiidoku::mono::detail::solver { namespace {
 		for (o4i_t rmi {static_cast<o4i_t>(best_rmi+1U)}; rmi < T::O4; ++rmi) {
 			const auto cand_count {cells_cands.at_rmi(rmi).count()};
 			if (cand_count <= 1) [[unlikely]] { continue; } // no guessing for solved cell.
+			if (cand_count > best_count) [[likely]] { continue; }
 			auto house_solved_counts {get_house_solved_counts(rmi)};
-			// if (cand_count < best_count) [[unlikely]] {
-			if (cand_count < best_count || (cand_count == best_count && house_solved_counts > best_house_solved_counts)) [[unlikely]] {
+			if (cand_count < best_count || (house_solved_counts < best_house_solved_counts)) [[unlikely]] {
 				best_rmi = rmi;
 				best_count = cand_count;
 				best_house_solved_counts = house_solved_counts;
