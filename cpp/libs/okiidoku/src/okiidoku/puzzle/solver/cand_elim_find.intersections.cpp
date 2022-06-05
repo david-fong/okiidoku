@@ -33,7 +33,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 		// for intersection I of block B and line L, and symbol S,
 		// if S's only candidate cells in L are in I, the same must hold true for B
 		// if S's only candidate cells in B are in I, the same must hold true for L
-		const auto line_type {LineType::row};
+		const auto line_type {LineType::row}; // TODO.asap add the outer loop to also try LineType::col
 		for (o1i_t chute {0}; chute < T::O1; ++chute) {
 			// TODO optimize by interleaving entries of syms_non_single and syms
 			ChuteIsecsSyms<O> chute_isecs_syms_non_single {}; // syms with multiple cand cells in each chute isec

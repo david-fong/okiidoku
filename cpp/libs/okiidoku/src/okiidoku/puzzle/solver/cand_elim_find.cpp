@@ -58,7 +58,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 		// 	// to count, use (tag_cell_cands & nb_cell_cands).count().
 		// 	for (const o2i_t sym : cells_cands.at_rmi(guess_rmi).set_bits_iter()) {
 		// 		house_cand_counts_t house_cand_counts {{0}};
-		// 		for (auto house_type : house_types) {
+		// 		for (const auto house_type : house_types) {
 		// 		for (o2i_t nb_house_cell {0}; nb_house_cell < T::O2; ++nb_house_cell) {
 		// 			const auto nb_rmi {house_cell_to_rmi<O>(
 		// 				house_type,

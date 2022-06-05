@@ -19,8 +19,10 @@ namespace okiidoku::mono::detail::solver {
 	template<Order O> requires(is_order_compiled(O))
 	class CandElimApplyImpl final {
 		using T = Ints<O>;
+		using o1i_t = int_ts::o1i_t<O>;
 		using o2x_t = int_ts::o2x_t<O>;
 		using o2i_t = int_ts::o2i_t<O>;
+		using o3i_t = int_ts::o3i_t<O>;
 		using rmi_t = int_ts::o4xs_t<O>;
 		// Important implementation reminder: if any candidate elimination done
 		// as part of an `apply` function unwinds the guess stack, any remaining

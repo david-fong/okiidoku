@@ -24,7 +24,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 		FoundQueues<O>& found_queues
 	) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
-		for (auto house_type : house_types) {
+		for (const auto house_type : house_types) {
 		for (o2i_t house {0}; house < T::O2; ++house) {
 			O2BitArr<O> syms_claiming_a_cell {O2BitArr_ones<O>}; {
 				O2BitArr<O> syms_seen {};
@@ -137,19 +137,13 @@ namespace okiidoku::mono::detail::solver { namespace {
 	}
 
 
-	// TODO consider adding an argument about whether to do candidate elimination eagerly or queue them.
-	//  the annoying thing is that then the return type for the queue case doesn't need to be UnwindInfo...
-	//  in that case, we could make it a wrapper than just discards (void-casts) the result because it knows that it should never be UnwindInfo(false) if queueing. can also assert that that is so.
-	//  the main question: why would that be beneficial? in the eager case, I think there's the benefit of operating on masks that
-	//  are already in cache. but is that a significant enough benefit? probably needs benchmark to justify...
-	//  The eager function wrapper takes an argument for find_one vs find_all. the queueing wrapper returns void.
 	template<Order O> requires(is_order_compiled(O))
 	[[nodiscard]] bool find_cells_claim_syms_and_check_needs_unwind(
 		const CandsGrid<O>& cells_cands,
 		FoundQueues<O>& found_queues
 	) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
-		for (auto house_type : house_types) {
+		for (const auto house_type : house_types) {
 		for (o2i_t house {0}; house < T::O2; ++house) {
 			std::array<GroupMe<O>, T::O2> set;
 			for (o2i_t house_cell {0}; house_cell < T::O2; ++house_cell) {
@@ -176,7 +170,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 		FoundQueues<O>& found_queues
 	) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
-		for (auto house_type : house_types) {
+		for (const auto house_type : house_types) {
 		for (o2i_t house {0}; house < T::O2; ++house) {
 			std::array<GroupMe<O>, T::O2> set {};
 			// TODO.mid try applying loop-tiling to see if it improves cache-usage.
