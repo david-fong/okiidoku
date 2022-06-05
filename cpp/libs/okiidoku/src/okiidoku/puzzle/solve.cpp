@@ -55,8 +55,8 @@ namespace okiidoku::mono {
 			static constexpr auto finders {std::to_array({
 				std::cref(Find::sym_claim_cell),
 				// std::cref(Find::locked_cands), // draft implementation not yet tested. please debug and check it behaves as intended.
-				std::cref(Find::cells_claim_syms),
-				std::cref(Find::syms_claim_cells),
+				// std::cref(Find::cells_claim_syms),
+				// std::cref(Find::syms_claim_cells),
 			})};
 			{
 				auto check {detail::solver::UnwindInfo::make_no_unwind()};

@@ -3,6 +3,7 @@
 #include <okiidoku/puzzle/solver/found.hpp>
 
 #include <algorithm>
+#include <execution>
 #include <array>
 #include <vector>
 
@@ -10,69 +11,70 @@
 
 namespace okiidoku::mono::detail::solver { namespace {
 
+	/*
+	hypothesis: making guesses all packed in the same / nearby line-box intersections
+	increases the probability of finding "contradictory" guesses earlier, since those
+	guesses will concentrate their eliminations in the same lines and boxes.
+
+	question: could there be a correlation between good guess candidates and cells that
+	could not be removed as givens ("keepers")? Try making a guess-suggester that favours
+	guessing at a cell which sees many keepers.
+	*/
+
 	template<Order O> requires(is_order_compiled(O))
 	Guess<O> find_good_guess_candidate(
-		const CandsGrid<O>& cells_cands,
-		const int_ts::o4i_t<O> num_puzcells_remaining
+		const CandsGrid<O>& cells_cands
 	) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
-		assert(num_puzcells_remaining > 1);
 		// some guiding intuition:
 		// choose a guess which is likely to cascade into the most candidate
 		// elimination deductions before the next required guess point. choose
 		// a guess where finding out the guess is wrong will enable many
 		// candidate elimination deductions.
 
-		// start by finding cells with the fewest number of candidate-symbols.
-		// Note: no combinations of std algorithms seems specialized enough for what I want.
-		std::vector<rmi_t> cand_rmis; {
-			o2i_t best_count {(num_puzcells_remaining == T::O4) ? T::O2 : static_cast<o2i_t>(T::O2-1U)};
-			for (o4i_t rmi {0}; rmi < T::O4; ++rmi) {
-				const auto cand_count {cells_cands.at_rmi(rmi).count()};
-				if (cand_count == best_count) {
-					cand_rmis.push_back(static_cast<rmi_t>(rmi));
-				} else if (cand_count < best_count && cand_count > 1U) {
-					best_count = cand_count;
-					cand_rmis.clear();
-					cand_rmis.push_back(static_cast<rmi_t>(rmi));
-				}
+		using house_solved_counts_t = std::array<o2is_t, house_types.size()>;
+		std::array<house_solved_counts_t, T::O2> houses_solved_counts {};
+		for (o4i_t rmi {0}; rmi < T::O4; ++rmi) {
+			const auto cand_count {cells_cands.at_rmi(rmi).count()};
+			for (const auto house_type : house_types) {
+				if (cand_count == 1) [[unlikely]] {
+					++(houses_solved_counts[rmi_to_house<O>(house_type, rmi)][static_cast<unsigned char>(house_type)]);
+		}	}	}
+		const auto get_house_solved_counts {[&](const o4i_t rmi){
+			house_solved_counts_t _ {0};
+			for (const auto house_type : house_types) {
+				const auto ht {static_cast<unsigned char>(house_type)};
+				const auto house {rmi_to_house<O>(house_type, rmi)};
+				_[ht] = houses_solved_counts[house][ht];
+			}
+			return _;
+		}};
+		o4i_t best_rmi {T::O4};
+		for (o4i_t rmi {0}; rmi < T::O4; ++rmi) {
+			if (cells_cands.at_rmi(rmi).count() > 1) [[likely]] {
+				best_rmi = rmi;
+				break;
 			}
 		}
-		assert(!cand_rmis.empty());
-		assert(std::all_of(cand_rmis.cbegin(), cand_rmis.cend(), [&](const auto& rmi){
-			const auto& cell_cands {cells_cands.at_rmi(rmi)};
-			return cell_cands.count() > 1;
-		}));
-		return Guess<O>{
-			.rmi{cand_rmis[0]},
-			.val{cells_cands.at_rmi(cand_rmis[0]).count_lower_zeros_assuming_non_empty_mask()},
-		};
+		assert(best_rmi < T::O4);
+		o2i_t best_count {cells_cands.at_rmi(best_rmi).count()};
+		auto best_house_solved_counts {get_house_solved_counts(best_rmi)};
 
-		// then, for those cells, find the one whose candidate-symbols have
-		// very few candidate-house-cells.
-		// using house_cand_counts_t = std::array<o2i_t, house_types.size()>;
-		// std::vector<house_cand_counts_t> cell_tag_sym_major_cand_count;
-		// cell_tag_sym_major_cand_count.capacity(cand_rmis.size());
-		// for (const auto& guess_rmi : cand_rmis) {
-		// 	// TODO alternate design: instead of looping over the tag-cell's symbols
-		// 	// to count, use (tag_cell_cands & nb_cell_cands).count().
-		// 	for (const o2i_t sym : cells_cands.at_rmi(guess_rmi).set_bits_iter()) {
-		// 		house_cand_counts_t house_cand_counts {{0}};
-		// 		for (const auto house_type : house_types) {
-		// 		for (o2i_t nb_house_cell {0}; nb_house_cell < T::O2; ++nb_house_cell) {
-		// 			const auto nb_rmi {house_cell_to_rmi<O>(
-		// 				house_type,
-		// 				rmi_to_house<O>(house_type, guess_rmi),
-		// 				nb_house_cell
-		// 			)}
-		// 			if (cells_cands.at_rmi(nb_rmi).test(symbol)) {
-		// 				++house_cand_counts[house_type];
-		// 			}
-		// 		}}
-		// 		std::ranges::sort(house_cand_counts);
-		// 	}
-		// }
-		// return Guess<O>{.rmi{rmi}, .val{val}};
+		for (o4i_t rmi {static_cast<o4i_t>(best_rmi+1U)}; rmi < T::O4; ++rmi) {
+			const auto cand_count {cells_cands.at_rmi(rmi).count()};
+			if (cand_count <= 1) [[unlikely]] { continue; } // no guessing for solved cell.
+			auto house_solved_counts {get_house_solved_counts(rmi)};
+			// if (cand_count < best_count) [[unlikely]] {
+			if (cand_count < best_count || (cand_count == best_count && house_solved_counts > best_house_solved_counts)) [[unlikely]] {
+				best_rmi = rmi;
+				best_count = cand_count;
+				best_house_solved_counts = house_solved_counts;
+			}
+		}
+		return Guess<O>{
+			.rmi{static_cast<rmi_t>(best_rmi)},
+			.val{cells_cands.at_rmi(best_rmi).count_lower_zeros_assuming_non_empty_mask()},
+		};
 	}
 
 
@@ -85,7 +87,8 @@ namespace okiidoku::mono::detail::solver {
 	template<Order O> requires(is_order_compiled(O))
 	Guess<O> CandElimFind<O>::good_guess_candidate(const Engine<O>& engine) noexcept {
 		assert(!engine.no_solutions_remain());
-		return find_good_guess_candidate<O>(engine.cells_cands(), engine.get_num_puzcells_remaining());
+		assert(engine.get_num_puzcells_remaining() > 0); // why guess when solved?
+		return find_good_guess_candidate<O>(engine.cells_cands());
 	}
 
 	#define OKIIDOKU_FOR_COMPILED_O(O_) \

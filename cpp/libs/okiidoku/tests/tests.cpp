@@ -147,7 +147,7 @@ int main(const int argc, char const *const argv[]) {
 	okiidoku::SharedRng shared_rng;
 	shared_rng.rng.seed(srand_key);
 
-	if (test_morph<5>(shared_rng, num_rounds) != 0) { return 1; }
+	if (test_morph<4>(shared_rng, num_rounds) != 0) { return 1; }
 	// #define OKIIDOKU_FOR_COMPILED_O(O_) \
 	// if (test_morph<O_>(shared_rng, num_rounds) != 0) { return 1; }
 	// OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
