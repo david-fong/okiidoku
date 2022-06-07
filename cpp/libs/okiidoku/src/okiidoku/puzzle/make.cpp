@@ -53,6 +53,7 @@ namespace okiidoku::mono {
 			--num_puzcell_cands;
 			puzcell_cand_rmis[cand_i] = std::move(puzcell_cand_rmis[num_puzcell_cands]);
 		}};
+		o4i_t num_keepers {0};
 
 		FastSolver<O> solver {};
 		while (num_puzcell_cands > 0) {
@@ -74,6 +75,7 @@ namespace okiidoku::mono {
 				std::clog << "\nmultiple solutions possible! rm failed" << std::flush;
 				#endif
 				grid.at_rmi(rmi) = val;
+				++num_keepers;
 			}
 			remove_puzcell_cand_at(puzcell_cand_i);
 			// assert(grid_follows_rule(grid)); // a bit gratuitous

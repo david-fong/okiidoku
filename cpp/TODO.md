@@ -27,6 +27,10 @@
 
 ## Misc List
 
+- The subset finders don't detect when something has already been found, so it will currently cause an infinite loop in the FastSolver of detecting the same things over and over again and never going to guessing.
+- control of subset size when finding subset things
+- I'm curious to step through the current guess things to see what things look like
+
 - experiment with optimizations for solving smaller grids.
   - less `unique_ptr` usage.
 

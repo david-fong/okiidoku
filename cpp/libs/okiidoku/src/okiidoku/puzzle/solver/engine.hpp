@@ -6,6 +6,7 @@
 #include <okiidoku/o2_bit_arr.hpp>
 
 #include <stack>
+#include <vector>
 #include <memory> // unique_ptr
 #include <type_traits>
 
@@ -94,6 +95,24 @@ namespace okiidoku::mono::detail::solver {
 		using val_t = int_ts::o2xs_t<O>;
 		using rmi_t = int_ts::o4xs_t<O>;
 		using o4i_t = int_ts::o4i_t<O>;
+
+		// TODO consider a different design: cells_cands_ and num_puzcells_remaining_ are just the top
+		// entry of the guess_stack_. no_solutions_remain_ is implied when the guess stack size is zero.
+		//  This would make the EngineImpl struct size small enough to probably justify no longer wrapping
+		//   Engine with unique_ptr in the Solver classes.
+		struct OKIIDOKU_NO_EXPORT GuessStackFrame final {
+			// do separate dynamic alloc for each `CandsGrid` to reduce resizing noise.
+			std::unique_ptr<CandsGrid<O>> prev_cells_cands;
+			o4i_t num_puzcells_remaining;
+			Guess<O> guess;
+			GuessStackFrame(const EngineImpl<O>& engine, const Guess<O> guess_) noexcept:
+				prev_cells_cands{std::make_unique<CandsGrid<O>>(engine.cells_cands())},
+				num_puzcells_remaining{engine.get_num_puzcells_remaining()},
+				guess{guess_}
+			{}
+		};
+		using guess_stack_t = std::vector<GuessStackFrame>;
+		// using guess_stack_t = std::stack<GuessStackFrame/* , std::vector<GuessStackFrame> */>;
 	public:
 		EngineImpl() noexcept = default;
 
@@ -141,6 +160,9 @@ namespace okiidoku::mono::detail::solver {
 		[[nodiscard, gnu::pure]]
 		FoundQueues<O>& get_found_queues_() noexcept { return found_queues_; }
 
+		[[nodiscard, gnu::pure]]
+		const guess_stack_t& get_guess_stack_() const noexcept { return guess_stack_; }
+
 
 		// contract: `val` is currently one of _multiple_ candidate-symbols at `rmi`.
 		// contract: no previous call in context of the current guess stack has been
@@ -173,31 +195,10 @@ namespace okiidoku::mono::detail::solver {
 
 
 		CandsGrid<O> cells_cands_ {};
-
 		o4i_t num_puzcells_remaining_ {T::O4};
-
 		FoundQueues<O> found_queues_ {};
-
-		// TODO consider a different design: cells_cands_ and num_puzcells_remaining_ are just the top
-		// entry of the guess_stack_. no_solutions_remain_ is implied when the guess stack size is zero.
-		//  This would make the EngineImpl struct size small enough to probably justify no longer wrapping
-		//   Engine with unique_ptr in the Solver classes.
-		struct OKIIDOKU_NO_EXPORT GuessStackFrame final {
-			// do separate dynamic alloc for each `CandsGrid` to reduce resizing noise.
-			std::unique_ptr<CandsGrid<O>> prev_cells_cands;
-			o4i_t num_puzcells_remaining;
-			Guess<O> guess;
-			GuessStackFrame(const EngineImpl<O>& engine, const Guess<O> guess_) noexcept:
-				prev_cells_cands{std::make_unique<CandsGrid<O>>(engine.cells_cands())},
-				num_puzcells_remaining{engine.get_num_puzcells_remaining()},
-				guess{guess_}
-			{}
-		};
-		using guess_stack_t = std::stack<GuessStackFrame/* , std::vector<GuessStackFrame> */>;
 		guess_stack_t guess_stack_ {};
-
 		std::uint_fast64_t total_guesses_ {0};
-
 		bool no_solutions_remain_ {true};
 	};
 

@@ -8,7 +8,7 @@ A C++ library to:
 - (WIP) efficiently(?) put full grids in a canonical form
 - (WIP) archive collections of grids in highly-compressed form
 
-It supports parametric grid size in a performant manner.
+It supports parametric grid size.
 
 In the future, it will have language bindings for WASM/JS and Python.
 

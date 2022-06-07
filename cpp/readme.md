@@ -27,7 +27,7 @@
 
 Refer to the [CMake guide](https://cmake.org/cmake/help/latest/guide/importing-exporting/index.html).
 
-- You can build okiidoku and then import from it's build tree.
+- You can build okiidoku and then import from its build tree.
 
 - If using [`FetchContent`](https://cmake.org/cmake/help/latest/module/FetchContent.html), to fetch from this GitHub repo, declare the [`SOURCE_SUBDIR`] option to point to the `cpp` subdirectory of the repo.
 
@@ -39,7 +39,7 @@ Refer to the [CMake guide](https://cmake.org/cmake/help/latest/guide/importing-e
 
 ## Building and Running okiidoku\_cli
 
-If you are familiar enough with CMake, you know what to do and I don't need to give you instructions. If you're not, just use the VS Code CMake-Tools extension to build the project.
+You can use CMake from the command list, or just use the VS Code CMake-Tools extension to build the project.
 
 You can use `tput rmam` to disable the terminal's line wrapping, and `tput smam` to enable it again afterward.
 

@@ -44,6 +44,7 @@ namespace okiidoku::mono {
 			const auto check {e.unwind_one_stack_frame()};
 			if (check.did_unwind_root()) { return std::nullopt; }
 		}
+		unsigned times_used_more_finders {0};
 		while (e.get_num_puzcells_remaining() > 0) [[likely]] {
 			{
 				using Apply = detail::solver::CandElimApply<O>;
@@ -60,12 +61,13 @@ namespace okiidoku::mono {
 			})};
 			{
 				auto check {detail::solver::UnwindInfo::make_no_unwind()};
+				// using finder_t = typename decltype(finders)::value_type;
 				for (const auto& finder : finders) {
 					check = finder(e);
 					if (check.did_unwind() || e.has_queued_cand_elims()) { break; }
 				}
 				if (check.did_unwind_root()) [[unlikely]] { return std::nullopt; }
-				if (check.did_unwind() || e.has_queued_cand_elims()) { continue; }
+				if (check.did_unwind() || e.has_queued_cand_elims()) { times_used_more_finders = 0; continue; }
 			}
 			e.push_guess(Find::good_guess_candidate(e));
 		}

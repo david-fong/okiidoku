@@ -20,7 +20,8 @@ namespace okiidoku::mono::detail::solver {
 		cells_cands_.get_underlying_array().fill(O2BitArr_ones<O>);
 		num_puzcells_remaining_ = T::O4;
 		found_queues_.clear();
-		while (!guess_stack_.empty()) { guess_stack_.pop(); }
+		// while (!guess_stack_.empty()) { guess_stack_.pop(); }
+		guess_stack_.clear();
 		total_guesses_ = 0;
 		no_solutions_remain_ = false;
 
@@ -148,7 +149,7 @@ namespace okiidoku::mono::detail::solver {
 		assert(!has_queued_cand_elims());
 		assert(cells_cands_.at_rmi(guess.rmi).test(guess.val));
 		assert(cells_cands_.at_rmi(guess.rmi).count() > 1);
-		guess_stack_.emplace(*this, guess);
+		guess_stack_.emplace_back(*this, guess);
 
 		register_new_given_(guess.rmi, guess.val);
 		++total_guesses_;
@@ -168,9 +169,7 @@ namespace okiidoku::mono::detail::solver {
 			e.no_solutions_remain_ = true;
 			return UnwindInfo::make_did_unwind_root();
 		}
-		auto frame {std::move(e.guess_stack_.top())};
-		static_assert(std::is_same_v<decltype(frame), typename EngineImpl<O>::GuessStackFrame>);
-		e.guess_stack_.pop();
+		auto& frame {e.guess_stack_.back()};
 
 		assert(frame.prev_cells_cands.get() != nullptr);
 		// e.cells_cands_ = *std::move(frame.prev_cells_cands);
@@ -178,6 +177,7 @@ namespace okiidoku::mono::detail::solver {
 
 		e.num_puzcells_remaining_ = frame.num_puzcells_remaining;
 		assert(e.debug_check_correct_num_puzcells_remaining_());
+
 		auto& cell_cands {e.cells_cands_.at_rmi(frame.guess.rmi)};
 		assert(cell_cands.test(frame.guess.val));
 		assert(cell_cands.count() > 1);
@@ -185,6 +185,7 @@ namespace okiidoku::mono::detail::solver {
 		if (cell_cands.count() == 1) [[unlikely]] {
 			e.enqueue_cand_elims_for_new_cell_claim_sym_(frame.guess.rmi);
 		}
+		e.guess_stack_.pop_back();
 		#ifndef NDEBUG
 		// std::clog << "\nguess-(" << e.get_guess_stack_depth() << ") " << int(frame.guess.rmi) << " " << int(frame.guess.val);
 		// e.debug_print_cells_cands_();
