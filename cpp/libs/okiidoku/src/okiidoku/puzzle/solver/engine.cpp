@@ -17,9 +17,19 @@ namespace okiidoku::mono::detail::solver {
 
 	template<Order O> requires(is_order_compiled(O))
 	void EngineImpl<O>::reinit_with_puzzle(const Grid<O>& puzzle) noexcept {
-		cells_cands_.get_underlying_array().fill(O2BitArr_ones<O>);
 		num_puzcells_remaining_ = T::O4;
+		cells_cands_.get_underlying_array().fill(O2BitArr_ones<O>);
 		found_queues_.clear();
+		for (const auto house_type : house_types) {
+		for (o2i_t house {0}; house < T::O2; ++house) {
+			auto& house_clusters {houses_subset_clusters_[static_cast<unsigned char>(house_type)][house]};
+			for (o2i_t house_cell {0}; house_cell < T::O2; ++house_cell) {
+				auto& entry {house_clusters[house_cell]};
+				entry.rmi = static_cast<rmi_t>(house_cell_to_rmi<O>(house_type, house, house_cell));
+				entry.is_cluster_begin = false;
+			}
+			house_clusters[0].is_cluster_begin = true;
+		}}
 		// while (!guess_stack_.empty()) { guess_stack_.pop(); }
 		guess_stack_.clear();
 		total_guesses_ = 0;
@@ -171,11 +181,14 @@ namespace okiidoku::mono::detail::solver {
 		}
 		auto& frame {e.guess_stack_.back()};
 
+		e.num_puzcells_remaining_ = frame.num_puzcells_remaining;
+
 		assert(frame.prev_cells_cands.get() != nullptr);
 		// e.cells_cands_ = *std::move(frame.prev_cells_cands);
-		e.cells_cands_ = *frame.prev_cells_cands;
+		e.cells_cands_ = *std::move(frame.prev_cells_cands);
 
-		e.num_puzcells_remaining_ = frame.num_puzcells_remaining;
+		e.houses_subset_clusters_ = std::move(frame.houses_subset_clusters);
+
 		assert(e.debug_check_correct_num_puzcells_remaining_());
 
 		auto& cell_cands {e.cells_cands_.at_rmi(frame.guess.rmi)};

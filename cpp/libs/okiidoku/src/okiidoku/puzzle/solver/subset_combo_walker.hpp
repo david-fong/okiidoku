@@ -48,9 +48,9 @@ namespace okiidoku::mono::detail::solver {
 			return combo_[i];
 		}
 		// contract: `has_more` returns `true`.
-		[[nodiscard, gnu::pure]] const combo_t& get_combo_arr() const noexcept {
+		[[nodiscard, gnu::pure]] auto at_it() const noexcept {
 			assert(has_more());
-			return combo_;
+			return combo_.cbegin();
 		}
 
 		// contract: `has_more` returns `true`.

@@ -96,18 +96,27 @@ namespace okiidoku::mono::detail::solver {
 		using rmi_t = int_ts::o4xs_t<O>;
 		using o4i_t = int_ts::o4i_t<O>;
 
+		struct SubsetCacheEntry final {
+			rmi_t rmi;
+			bool is_cluster_begin; // TODO.asap consider refactoring into separate O2BitArr
+		};
+		using house_subset_cluster_t = std::array<SubsetCacheEntry, T::O2>;
+		using houses_subset_clusters_t = std::array<std::array<house_subset_cluster_t, T::O2>, house_types.size()>;
+
 		// TODO consider a different design: cells_cands_ and num_puzcells_remaining_ are just the top
 		// entry of the guess_stack_. no_solutions_remain_ is implied when the guess stack size is zero.
 		//  This would make the EngineImpl struct size small enough to probably justify no longer wrapping
 		//   Engine with unique_ptr in the Solver classes.
 		struct OKIIDOKU_NO_EXPORT GuessStackFrame final {
 			// do separate dynamic alloc for each `CandsGrid` to reduce resizing noise.
-			std::unique_ptr<CandsGrid<O>> prev_cells_cands;
 			o4i_t num_puzcells_remaining;
+			std::unique_ptr<CandsGrid<O>> prev_cells_cands;
+			houses_subset_clusters_t houses_subset_clusters;
 			Guess<O> guess;
 			GuessStackFrame(const EngineImpl<O>& engine, const Guess<O> guess_) noexcept:
-				prev_cells_cands{std::make_unique<CandsGrid<O>>(engine.cells_cands())},
 				num_puzcells_remaining{engine.get_num_puzcells_remaining()},
+				prev_cells_cands{std::make_unique<CandsGrid<O>>(engine.cells_cands())},
+				houses_subset_clusters{engine.houses_subset_clusters_},
 				guess{guess_}
 			{}
 		};
@@ -194,8 +203,9 @@ namespace okiidoku::mono::detail::solver {
 		[[nodiscard]] bool debug_check_correct_num_puzcells_remaining_() const noexcept;
 
 
-		CandsGrid<O> cells_cands_ {};
 		o4i_t num_puzcells_remaining_ {T::O4};
+		CandsGrid<O> cells_cands_ {};
+		houses_subset_clusters_t houses_subset_clusters_ {};
 		FoundQueues<O> found_queues_ {};
 		guess_stack_t guess_stack_ {};
 		std::uint_fast64_t total_guesses_ {0};

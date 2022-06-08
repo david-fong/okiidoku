@@ -2,13 +2,14 @@
 # https://www.reddit.com/r/cpp/comments/m0rt7v/building_a_dual_shared_and_static_library_with/
 # TODO.low try Alex's tutorial things for installation utilities.
 add_library(okiidoku #[[ uses BUILD_SHARED_LIBS ]] "")
-add_subdirectory(src/okiidoku)
 add_library(okiidoku::okiidoku ALIAS okiidoku)
 set_target_properties(okiidoku PROPERTIES
 	# https://www.youtube.com/watch?v=m0DwB4OvDXk&ab_channel=CppCon&t=17m13s
 	VERSION   ${okiidoku_VERSION}
 	SOVERSION ${okiidoku_VERSION_MAJOR}
 )
+target_compile_features(okiidoku PUBLIC cxx_std_20)
+add_subdirectory(src/okiidoku)
 
 # https://cmake.org/cmake/help/latest/module/GenerateExportHeader.html
 include(GenerateExportHeader)

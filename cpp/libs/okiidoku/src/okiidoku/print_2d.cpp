@@ -75,7 +75,7 @@ namespace okiidoku {
 			#undef M_NOOK
 		}};
 
-		auto print_box_row_sep_strings {[&](const unsigned border_i) mutable {
+		const auto print_box_row_sep_strings {[&](const unsigned border_i){
 			os << '\n';
 			print_box_row_sep_string_(border_i);
 			for (unsigned i {1}; i < grid_views.size(); ++i) {

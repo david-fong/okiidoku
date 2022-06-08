@@ -12,6 +12,8 @@ if(MSVC)
 		/options:strict # unrecognized compiler options are errors
 		/utf-8        # /source-charset:utf-8 (for preprocessor), and /execution-charset:utf8 (for compiler)
 		/wd5030       # warning disable: "unrecognized attribute". (unfortunately needed or else MSVC warns for gnu-prefixed attributes)
+		# TODO 5030 and utf-8 may not work as a private-only compiler option... we can either make it a public
+		# otpion, or use https://docs.microsoft.com/en-us/cpp/preprocessor/warning?view=msvc-170
 	)
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
 	target_compile_options(okiidoku_compile_options_private INTERFACE

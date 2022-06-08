@@ -59,7 +59,7 @@ namespace okiidoku::mono::detail {
 		Iterator begin() const noexcept { return Iterator(links_); }
 		Iterator end()   const noexcept { return Iterator(links_, size_); }
 
-		[[nodiscard, gnu::pure]] bool has_unresolved() const noexcept { return std::any_of(links_.cbegin(), links_.cend(), [](const auto& e)noexcept{ return e == 0; }); }
+		[[nodiscard, gnu::pure]] bool has_unresolved() const noexcept { return std::any_of(links_.cbegin(), links_.cend(), [](const auto& e){ return e == 0; }); }
 		[[nodiscard, gnu::pure]] bool is_completely_unresolved() const noexcept { return links_[0] == size_; }
 
 		template<class IsEq>

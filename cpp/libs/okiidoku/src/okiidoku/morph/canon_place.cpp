@@ -169,8 +169,8 @@ namespace okiidoku::mono { namespace {
 		while (row_state.has_ties() || col_state.has_ties()) {
 			const auto old_row_state {row_state};
 			const auto old_col_state {col_state};
-			[&]{ auto table_ {make_table_for_a_pass(src_grid, false, old_row_state, old_col_state)}; row_state.do_a_pass(table_); }();
-			[&]{ auto table_ {make_table_for_a_pass(src_grid, true,  old_row_state, old_col_state)}; col_state.do_a_pass(table_); }();
+			{ auto table_ {make_table_for_a_pass(src_grid, false, old_row_state, old_col_state)}; row_state.do_a_pass(table_); }
+			{ auto table_ {make_table_for_a_pass(src_grid, true,  old_row_state, old_col_state)}; col_state.do_a_pass(table_); }
 
 			if (  old_row_state.line_ties  == row_state.line_ties
 				&& old_row_state.chute_ties == row_state.chute_ties

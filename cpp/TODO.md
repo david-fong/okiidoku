@@ -30,6 +30,7 @@
 - The subset finders don't detect when something has already been found, so it will currently cause an infinite loop in the FastSolver of detecting the same things over and over again and never going to guessing.
 - control of subset size when finding subset things
 - I'm curious to step through the current guess things to see what things look like
+- I think actually the combination walking should be no more expensive for finding small hidden subsets as finding the corresponding naked subsets. If that's the case, then we should just never look for hidden subsets, since that one requires extra setup to translate from the cell-major representation.
 
 - experiment with optimizations for solving smaller grids.
   - less `unique_ptr` usage.
@@ -44,6 +45,8 @@
 
 - experiment with using compiler "assume" hints (asserts are checked at runtime. assumptions are not checked and used for optimizations (to do the opposite: "remove checks")).
   - [GSL](https://conan.io/center/ms-gsl) has a macro ["`GSL_ASSUME`"](https://github.com/microsoft/GSL/blob/main/include/gsl/assert) to do this on MSVC, Clang, and GCC. Feels weird to add an entire dependency just for a tiny macro though...
+  - [standardization proposal](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p1774r4.pdf)
+  - [interesting clang thing](https://github.com/microsoft/GSL/pull/608)
 
 - see if grid qualities (like being a solution, being a proper puzzle, being a minimal puzzle), can be encoded through the type system and make it so that always-safe conversions (such as ) are easy, but "unsafe" (not always true) have to either go through an `unsafe_cast_X_grid_to_Y_grid` function, or go through a `checked_cast_X_grid_to_Y_grid`, which may have a non-trivial performance penalty.
   - This would allow making many of the current contracts part of the type system; turning-runtime-error-into-compiler-errors-TM. I would no longer need to write such contract and post-condition comments.
