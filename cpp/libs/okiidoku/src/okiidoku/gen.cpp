@@ -1,5 +1,7 @@
 #include <okiidoku/gen.hpp>
 
+#include <okiidoku/detail/contract.hpp>
+
 #include <random>    // minstd_rand
 #include <algorithm> // swap, copy, shuffle, count
 #include <numeric>   // iota
@@ -50,7 +52,7 @@ namespace okiidoku::mono { namespace {
 			const auto row {static_cast<o2x_t>(h_chute + ((rng() - rng_t::min()) % T::O1))};
 			auto& a_sym {grid.at(row,a_col)};
 			auto& b_sym {grid.at(row,b_col)};
-			assert(a_sym != b_sym);
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(a_sym != b_sym);
 			const auto num_missing_syms_resolved {static_cast<signed char>(
 				(boxes_has.box_count_sym(a_box,a_sym) == 1 ? -1 : 0) + // regression
 				(boxes_has.box_count_sym(a_box,b_sym) == 0 ?  1 : 0) + // improvement
@@ -109,7 +111,7 @@ namespace okiidoku::mono { namespace {
 			const auto row {static_cast<o2x_t>((rng() - rng_t::min()) % (T::O2))};
 			auto& a_sym {grid.at(row, static_cast<o2i_t>(v_chute + a_col))};
 			auto& b_sym {grid.at(row, static_cast<o2i_t>(v_chute + b_col))};
-			assert(a_sym != b_sym);
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(a_sym != b_sym);
 			const auto num_missing_syms_resolved {static_cast<signed char>(
 				(cols_has.col_count_sym(a_col,a_sym) == 1 ? -1 : 0) + // regression
 				(cols_has.col_count_sym(a_col,b_sym) == 0 ?  1 : 0) + // improvement

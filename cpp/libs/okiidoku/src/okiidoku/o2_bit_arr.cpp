@@ -2,12 +2,16 @@
 
 #include <numeric> // transform_reduce
 #include <execution>
+#include <cassert>
 
 namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
 	typename O2BitArr<O>::o2i_t
 	O2BitArr<O>::count() const noexcept {
+		if constexpr (num_words == 1) {
+			return static_cast<o2i_t>(std::popcount(words_[0]));
+		}
 		return static_cast<o2i_t>(std::transform_reduce(
 			#ifdef __cpp_lib_execution
 			std::execution::unseq,
@@ -21,9 +25,9 @@ namespace okiidoku::mono {
 	template<Order O> requires(is_order_compiled(O))
 	typename O2BitArr<O>::o2x_t
 	O2BitArr<O>::count_set_bits_below(const typename O2BitArr<O>::o2x_t end) const noexcept {
-		assert(end < T::O2);
+		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(end < T::O2);
 		const auto end_at_int {bit_i_to_word_i(end)};
-		assert(end_at_int < num_words);
+		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(end_at_int < num_words);
 		return static_cast<o2x_t>(std::transform_reduce(
 			#ifdef __cpp_lib_execution
 			std::execution::unseq,
@@ -41,15 +45,18 @@ namespace okiidoku::mono {
 	template<Order O> requires(is_order_compiled(O))
 	typename O2BitArr<O>::o2xs_t
 	O2BitArr<O>::count_lower_zeros_assuming_non_empty_mask() const noexcept {
+		// Note: without the non-empty-mask assumption, we'd have to
+		//  handle discounting excess top zeros in the empty-mask case.
 		assert(count() > 0);
+		if constexpr (num_words == 1) {
+			return static_cast<o2xs_t>(std::countr_zero(words_[0]));
+		}
 		o2xs_t count {0};
 		for (const auto& word : words_) {
 			if (word == 0) {
 				count += word_t_num_bits;
 			} else {
 				count += static_cast<o2xs_t>(std::countr_zero(word));
-				// Note: without the non-empty-mask assumption, we'd have to
-				// handle discounting excess top zeros in the empty-mask case.
 				break;
 			}
 		}
@@ -60,7 +67,7 @@ namespace okiidoku::mono {
 	template<Order O> requires(is_order_compiled(O))
 	typename O2BitArr<O>::o2x_t
 	O2BitArr<O>::get_index_of_nth_set_bit(O2BitArr::o2x_t set_bit_index) const noexcept {
-		assert(set_bit_index < T::O2);
+		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(set_bit_index < T::O2);
 		assert(count() > o2i_t{set_bit_index});
 		for (word_i_t word_i {0}; word_i < num_words; ++word_i) {
 			auto& word {words_[word_i]};

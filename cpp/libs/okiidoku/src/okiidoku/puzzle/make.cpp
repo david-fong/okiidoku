@@ -1,6 +1,7 @@
 #include <okiidoku/puzzle/make.hpp>
 
 #include <okiidoku/puzzle/solve.hpp>
+#include <okiidoku/detail/contract.hpp>
 
 #include <algorithm>
 #include <numeric> // iota
@@ -42,13 +43,14 @@ namespace okiidoku::mono {
 		o4i_t num_puzcell_cands {0};
 		std::array<rmi_t, T::O4> puzcell_cand_rmis; // non-candidates: either removed, or can't be removed.
 		for (o4i_t rmi {0}; rmi < T::O4; ++rmi) {
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(grid.at_rmi(rmi) <= T::O2);
 			if (grid.at_rmi(rmi) < T::O2) [[likely]] {
 				puzcell_cand_rmis[num_puzcell_cands] = static_cast<rmi_t>(rmi);
 				++num_puzcell_cands;
 		}	}
 
 		const auto remove_puzcell_cand_at {[&](const o4i_t cand_i){
-			assert(cand_i < num_puzcell_cands);
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(cand_i < num_puzcell_cands);
 			--num_puzcell_cands;
 			puzcell_cand_rmis[cand_i] = std::move(puzcell_cand_rmis[num_puzcell_cands]);
 		}};
@@ -57,11 +59,11 @@ namespace okiidoku::mono {
 		FastSolver<O> solver {};
 		while (num_puzcell_cands > 0) {
 			const auto puzcell_cand_i {static_cast<o4i_t>((rng() - rng_t::min()) % num_puzcell_cands)};
-			assert(puzcell_cand_i < num_puzcell_cands);
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(puzcell_cand_i < num_puzcell_cands);
 
 			const auto rmi {puzcell_cand_rmis[puzcell_cand_i]};
 			const auto val {std::exchange(grid.at_rmi(rmi), T::O2)};
-			assert(val < T::O2);
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(val < T::O2);
 
 			#ifndef NDEBUG
 			std::clog << "\n\n#puzcell cands: " << int(num_puzcell_cands) << ". try rm @ " << int(rmi) << std::flush;

@@ -8,8 +8,8 @@
 #include <array>
 #include <string_view>
 #include <type_traits>
+#include <cassert>
 
-//
 namespace okiidoku::util::str {
 
 	struct SgrPair final {

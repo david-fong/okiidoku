@@ -43,6 +43,7 @@
 - boost has a `variant2` class that is never valueless by exception
 
 - find out how to use the [cppcoreguidelines checker](https://docs.microsoft.com/en-us/cpp/code-quality/using-the-cpp-core-guidelines-checkers?view=msvc-170)
+  - I want to use it in a way that is driven by cmake
 
 - experiment with using compiler "assume" hints (asserts are checked at runtime. assumptions are not checked and used for optimizations (to do the opposite: "remove checks")).
   - [GSL](https://conan.io/center/ms-gsl) has a macro ["`GSL_ASSUME`"](https://github.com/microsoft/GSL/blob/main/include/gsl/assert) to do this on MSVC, Clang, and GCC. Feels weird to add an entire dependency just for a tiny macro though...

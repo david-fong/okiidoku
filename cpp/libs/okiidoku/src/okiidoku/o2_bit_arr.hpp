@@ -3,12 +3,12 @@
 
 #include <okiidoku/ints.hpp>
 #include <okiidoku/detail/order_templates.hpp>
+#include <okiidoku/detail/contract.hpp>
 
 #include <array>
 #include <bit>
 #include <compare>
 #include <type_traits> // conditional_t
-#include <cassert>
 
 namespace okiidoku::mono {
 
@@ -66,17 +66,17 @@ namespace okiidoku::mono {
 		[[nodiscard, gnu::pure]] o2x_t count_set_bits_below(const o2x_t end) const noexcept;
 
 		[[nodiscard, gnu::pure]] bool test(const o2x_t at) const noexcept {
-			assert(at < T::O2);
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(at < T::O2);
 			const word_t word_bit_mask {word_bit_mask_for_bit_i(at)};
 			return (words_[bit_i_to_word_i(at)] & word_bit_mask) != 0;
 		}
 		constexpr void set(const o2x_t at) noexcept {
-			assert(at < T::O2);
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(at < T::O2);
 			const word_t word_bit_mask {word_bit_mask_for_bit_i(at)};
 			words_[bit_i_to_word_i(at)] |= word_bit_mask;
 		}
 		constexpr void unset(const o2x_t at) noexcept {
-			assert(at < T::O2);
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(at < T::O2);
 			const word_t word_bit_mask {word_bit_mask_for_bit_i(at)};
 			words_[bit_i_to_word_i(at)] &= ~word_bit_mask;
 		}
@@ -97,13 +97,13 @@ namespace okiidoku::mono {
 		}
 
 		[[nodiscard, gnu::pure]] static bool test_any3(const o2x_t at, const O2BitArr& a, const O2BitArr& b, const O2BitArr& c) noexcept {
-			assert(at < T::O2);
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(at < T::O2);
 			const auto word_i {bit_i_to_word_i(at)};
 			const word_t word_bit_mask {word_bit_mask_for_bit_i(at)};
 			return ((a.words_[word_i] | b.words_[word_i] | c.words_[word_i]) & word_bit_mask) != 0;
 		}
 		static void set3(const o2x_t at, O2BitArr& a, O2BitArr& b, O2BitArr& c) noexcept {
-			assert(at < T::O2);
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(at < T::O2);
 			const auto word_i {bit_i_to_word_i(at)};
 			const word_t word_bit_mask {word_bit_mask_for_bit_i(at)};
 			a.words_[word_i] |= word_bit_mask;
@@ -111,7 +111,7 @@ namespace okiidoku::mono {
 			c.words_[word_i] |= word_bit_mask;
 		}
 		static void unset3(const o2x_t at, O2BitArr& a, O2BitArr& b, O2BitArr& c) noexcept {
-			assert(at < T::O2);
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(at < T::O2);
 			const auto word_i {bit_i_to_word_i(at)};
 			const word_t word_bit_mask {word_bit_mask_for_bit_i(at)};
 			a.words_[word_i] &= ~word_bit_mask;
@@ -148,11 +148,11 @@ namespace okiidoku::mono {
 			}
 			[[nodiscard, gnu::pure]] bool has_more() const noexcept { return word_i < num_words; }
 			[[nodiscard, gnu::pure]] o2x_t value() const noexcept {
-				assert(has_more());
+				OKIIDOKU_CONTRACT_TRIVIAL_EVAL(has_more());
 				return static_cast<o2x_t>((word_i * word_t_num_bits) + word_bit_i);
 			}
 			void advance() noexcept {
-				assert(has_more());
+				OKIIDOKU_CONTRACT_TRIVIAL_EVAL(has_more());
 				while (word_i < num_words && arr_.words_[word_i] == 0) { ++word_i; }
 				if (has_more()) {
 					auto& word {arr_.words_[word_i]};

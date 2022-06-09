@@ -2,6 +2,7 @@
 #define HPP_OKIIDOKU__PUZZLE__SOLVER__SUBSET_COMBO_WALKER
 
 #include <okiidoku/ints.hpp>
+#include <okiidoku/detail/contract.hpp>
 #include <okiidoku/detail/export.h>
 
 #include <array>
@@ -20,6 +21,7 @@ namespace okiidoku::mono::detail::solver {
 		using combo_t = std::array<o2xs_t, T::O2-1>;
 
 		// contract: `end <= O2`
+		// contract: `subset_size > 0`
 		// contract: `subset_size < O2`. Reason: for a puzzle with at least one
 		//  solution, there is always exactly one subset of size O2.
 		// contract: `begin + subset_size <= O2`
@@ -27,9 +29,10 @@ namespace okiidoku::mono::detail::solver {
 			begin_{begin}, end_{end}, subset_size_{subset_size},
 			has_more_{begin + subset_size <= end}
 		{
-			assert(end_ <= T::O2);
-			assert(subset_size < T::O2);
-			assert(begin_ + subset_size_ <= T::O2);
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(end_ <= T::O2);
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(subset_size_ > 0);
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(subset_size_ < T::O2);
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(begin_ + subset_size_ <= T::O2);
 			if (has_more()) [[likely]] {
 				for (o2x_t i {0}; i < subset_size_; ++i) {
 					combo_[i] = static_cast<o2xs_t>(begin_ + i);
@@ -44,7 +47,7 @@ namespace okiidoku::mono::detail::solver {
 
 		// contract: `i < subset_size`
 		[[nodiscard, gnu::pure]] o2xs_t combo_at(const o2x_t i) const noexcept {
-			assert(i < subset_size_);
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(i < subset_size_);
 			return combo_[i];
 		}
 		// contract: `has_more` returns `true`.
@@ -57,6 +60,9 @@ namespace okiidoku::mono::detail::solver {
 		void advance() noexcept {
 			assert(has_more());
 			// if (!has_more()) [[unlikely]] { return; }
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(end_ <= T::O2);
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(subset_size_ > 0);
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(subset_size_ < T::O2);
 			auto i {static_cast<o2x_t>(subset_size_-1U)};
 			++combo_[i];
 			while (combo_[i] > end_ - subset_size_ + i) [[likely]] {

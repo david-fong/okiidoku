@@ -3,13 +3,13 @@
 
 #include <okiidoku/ints.hpp>
 #include <okiidoku/detail/order_templates.hpp>
+#include <okiidoku/detail/contract.hpp>
 
 #include <range/v3/view/iota.hpp>
 
 #include <algorithm>
 #include <array>
 #include <type_traits>
-#include <cassert>
 
 namespace okiidoku::mono::detail {
 
@@ -66,10 +66,10 @@ namespace okiidoku::mono::detail {
 		// requires (std::regular_invocable<IsEq, link_t, link_t>)
 		void update(const IsEq is_eq) noexcept {
 			for (const auto tie : *this) {
-				assert(tie.begin_ < tie.end_);
+				OKIIDOKU_CONTRACT_TRIVIAL_EVAL(tie.begin_ < tie.end_);
 				auto cursor {tie.begin_};
 				for (auto i {static_cast<link_t>(cursor+1)}; i < tie.end_; ++i) {
-					assert(cursor < i);
+					OKIIDOKU_CONTRACT_TRIVIAL_EVAL(cursor < i);
 					if (!std::invoke(is_eq, static_cast<link_t>(i-1), i)) [[likely]] {
 						links_[cursor] = i;
 						cursor = i;

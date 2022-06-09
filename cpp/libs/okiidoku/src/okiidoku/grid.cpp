@@ -1,6 +1,7 @@
 #include <okiidoku/grid.hpp>
 
 #include <okiidoku/o2_bit_arr.hpp>
+#include <okiidoku/detail/contract.hpp>
 
 #include <algorithm>
 #include <execution>
@@ -24,7 +25,7 @@ namespace okiidoku::mono {
 			if (row % T::O1 == 0) [[unlikely]] { h_chute_boxes_has.fill(has_mask_t{}); }
 
 			const auto& val {grid.at(row,col)};
-			assert(val <= T::O2);
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(val <= T::O2);
 			if (val == T::O2) { continue; }
 
 			auto& col_has {cols_has[col]};
@@ -46,7 +47,7 @@ namespace okiidoku::mono {
 		using o4i_t = int_ts::o4i_t<O>;
 		for (o4i_t i {0}; i < T::O4; ++i) {
 			const auto& val {grid.at_rmi(i)};
-			assert(val <= T::O2);
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(val <= T::O2);
 			if (val == T::O2) { return false; }
 		}
 		return true;

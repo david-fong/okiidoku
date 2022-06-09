@@ -2,6 +2,7 @@
 #define HPP_OKIIDOKU__INTS
 
 #include <okiidoku/detail/order_templates.hpp> // Order, largest_compiled_order
+#include <okiidoku/detail/contract.hpp>
 
 #include <array>
 #include <bit>         // bit_width
@@ -9,7 +10,6 @@
 #include <limits>      // numeric_limits<T>::max
 #include <type_traits> // conditional_t
 #include <concepts>    // unsigned_integral
-#include <cassert>
 
 namespace okiidoku {
 
@@ -161,11 +161,13 @@ namespace okiidoku::mono {
 	requires(Any_o2x_t<O, T_house> && Any_o2x_t<O, T_house_cell>) [[nodiscard, gnu::const]]
 	constexpr int_ts::o4x_t<O> box_cell_to_rmi(const T_house box, const T_house_cell box_cell) noexcept {
 		using T = Ints<O>;
-		assert(box < T::O2);
-		assert(box_cell < T::O2);
+		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(box < T::O2);
+		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(box_cell < T::O2);
 		using o4x_t = int_ts::o4x_t<O>;
-		const auto row {static_cast<o4x_t>(((box/T::O1)*T::O1) + (box_cell/T::O1))}; assert(row < T::O2);
-		const auto col {static_cast<o4x_t>(((box%T::O1)*T::O1) + (box_cell%T::O1))}; assert(col < T::O2);
+		const auto row {static_cast<o4x_t>(((box/T::O1)*T::O1) + (box_cell/T::O1))};
+		const auto col {static_cast<o4x_t>(((box%T::O1)*T::O1) + (box_cell%T::O1))};
+		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(row < T::O2);
+		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(col < T::O2);
 		const auto rmi {static_cast<o4x_t>((Ints<O>::O2 * row) + col)};
 		return rmi;
 	}
@@ -174,8 +176,8 @@ namespace okiidoku::mono {
 	requires(Any_o2x_t<O, T_house> && Any_o2x_t<O, T_house_cell>) [[nodiscard, gnu::const]]
 	constexpr int_ts::o4x_t<O> house_cell_to_rmi(const HouseType house_type, const T_house house, const T_house_cell house_cell) noexcept {
 		using T = Ints<O>;
-		assert(house < T::O2);
-		assert(house_cell < T::O2);
+		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(house < T::O2);
+		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(house_cell < T::O2);
 		using o4x_t = int_ts::o4x_t<O>;
 		switch (house_type) {
 		case HouseType::row: return static_cast<o4x_t>((T::O2*house)+house_cell);
@@ -188,8 +190,8 @@ namespace okiidoku::mono {
 	requires(Any_o1x_t<O, T_chute> && Any_o3x_t<O, T_chute_cell>) [[nodiscard, gnu::const]]
 	constexpr int_ts::o4x_t<O> chute_cell_to_rmi(const LineType line_type, const T_chute chute, const T_chute_cell chute_cell) noexcept {
 		using T = Ints<O>;
-		assert(chute < T::O1);
-		assert(chute_cell < T::O3);
+		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(chute < T::O1);
+		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(chute_cell < T::O3);
 		using o4x_t = int_ts::o4x_t<O>;
 		switch (line_type) {
 		case LineType::row: return static_cast<o4x_t>((T::O3*chute)+chute_cell);

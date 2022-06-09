@@ -6,6 +6,7 @@
 #include <deque>
 #include <tuple>
 #include <type_traits>
+#include <cassert>
 
 namespace okiidoku::mono::detail::solver {
 

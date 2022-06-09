@@ -1,5 +1,7 @@
 #include <okiidoku/puzzle/solver/engine.hpp>
 
+#include <okiidoku/detail/contract.hpp>
+
 // #ifndef NDEBUG
 #include <algorithm> // count_if
 #include <execution>
@@ -37,7 +39,7 @@ namespace okiidoku::mono::detail::solver {
 
 		for (o4i_t rmi {0}; rmi < T::O4; ++rmi) {
 			const auto& val {puzzle.at_rmi(rmi)};
-			assert(val <= T::O2);
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(val <= T::O2);
 			if (val < T::O2) [[likely]] {
 				register_new_given_(static_cast<rmi_t>(rmi), static_cast<val_t>(val));
 			}
@@ -75,7 +77,7 @@ namespace okiidoku::mono::detail::solver {
 		elim_fn(cell_cands);
 
 		const auto new_cands_count {cell_cands.count()};
-		assert(new_cands_count <= old_cands_count);
+		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(new_cands_count <= old_cands_count);
 
 		if (new_cands_count == 0) [[unlikely]] {
 			return unwind_one_stack_frame_of_(*this);
@@ -123,7 +125,7 @@ namespace okiidoku::mono::detail::solver {
 		const EngineImpl<O>::val_t val
 	) noexcept {
 		assert(!no_solutions_remain());
-		assert(val < T::O2);
+		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(val < T::O2);
 		auto& cell_cands {mut_cells_cands().at_rmi(rmi)};
 		assert(cell_cands.test(val));
 		assert(cell_cands.count() > 1);
@@ -142,9 +144,9 @@ namespace okiidoku::mono::detail::solver {
 		assert(!no_solutions_remain());
 		assert(get_num_puzcells_remaining() > 0);
 		const auto& cell_cands {cells_cands().at_rmi(rmi)};
+		assert(cell_cands.count() == 1);
 		const auto val {cell_cands.count_lower_zeros_assuming_non_empty_mask()};
 		assert(cell_cands.test(val));
-		assert(cell_cands.count() == 1);
 		found_queues_.push_back(found::CellClaimSym<O>{.rmi{rmi},.val{val}});
 		--frame_.num_puzcells_remaining;
 		assert(debug_check_correct_num_puzcells_remaining_());

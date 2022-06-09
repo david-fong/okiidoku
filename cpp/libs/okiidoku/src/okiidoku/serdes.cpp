@@ -1,6 +1,7 @@
 #include <okiidoku/serdes.hpp>
 
 #include <okiidoku/o2_bit_arr.hpp>
+#include <okiidoku/detail/contract.hpp>
 
 #include <iostream>
 #include <algorithm>
@@ -78,19 +79,19 @@ namespace okiidoku::mono { namespace {
 		// The number of possible different values that this cell could be
 		// based on the values that have already been encountered.
 		auto smol_val_buf_remaining {cell_cands.count()};
-		assert(smol_val_buf_remaining > 0); // implied by contract (grid_follows_rule)
+		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(smol_val_buf_remaining > 0); // implied by contract (grid_follows_rule)
 
 		// Some slightly-weird-looking logic stems from the fact that it is
 		// a "null" action to try to print something that can only take on one
 		// value (as in- the buffer will be unchanged). Just keep that in mind.
 		auto smol_val_buf {static_cast<val_t>(cell_cands.count_set_bits_below(val))};
-		assert(smol_val_buf < smol_val_buf_remaining);
+		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(smol_val_buf < smol_val_buf_remaining);
 		while (smol_val_buf_remaining > 1) {
 			buf += static_cast<buf_t>(buf_pos * smol_val_buf); // should never overflow
 			// const auto buf_remaining {(buf_pos == 1) ? buf_end : static_cast<buf_t>(buf_end - buf_pos)};
 			{
 				const auto use_factor {static_cast<buf_t>(smol_val_buf_remaining)};
-				assert(buf_pos != 0 && buf_pos < buf_end);
+				OKIIDOKU_CONTRACT_TRIVIAL_EVAL(buf_pos != 0 && buf_pos < buf_end);
 				buf_pos *= use_factor;
 				smol_val_buf /= static_cast<val_t>(use_factor);
 				smol_val_buf_remaining /= static_cast<int_ts::o2i_t<O>>(use_factor);
@@ -120,13 +121,13 @@ namespace okiidoku::mono { namespace {
 		// The number of possible different values that this cell could be
 		// based on the values that have already been encountered.
 		auto smol_val_buf_remaining {cell_cands.count()};
-		assert(smol_val_buf_remaining > 0); // implied by contract (grid_follows_rule)
+		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(smol_val_buf_remaining > 0); // implied by contract (grid_follows_rule)
 		(void)smol_val_buf_remaining; (void)is;
 
 		val_t smol_val_buf {0};
 		// TODO
 
-		assert(smol_val_buf < smol_val_buf_remaining);
+		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(smol_val_buf < smol_val_buf_remaining);
 		const auto val {cell_cands.get_index_of_nth_set_bit(smol_val_buf)};
 		remove_cand_at_current_rmi_(val);
 		return val;

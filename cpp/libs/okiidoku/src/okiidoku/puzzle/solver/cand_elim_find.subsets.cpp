@@ -3,6 +3,7 @@
 #include <okiidoku/puzzle/solver/subset_combo_walker.hpp>
 #include <okiidoku/puzzle/solver/found.hpp>
 #include <okiidoku/o2_bit_arr.hpp>
+#include <okiidoku/detail/contract.hpp>
 
 #include <functional> // bit_or
 #include <algorithm> // find_if, transform_reduce
@@ -60,7 +61,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 		const int_ts::o2i_t<O> sub_z,
 		int_ts::o2x_t<O>& subset_size
 	) noexcept {
-		assert(sub_a+subset_size+1 < sub_z);
+		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(sub_a+subset_size+1 < sub_z);
 		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
 		auto& cells_cands {engine.cells_cands()};
 		SubsetComboWalker<O> combo_walker {
@@ -122,8 +123,8 @@ namespace okiidoku::mono::detail::solver { namespace {
 
 		while (sub_a < T::O2) {
 			update_sub_z();
-			assert(sub_z <= T::O2);
-			assert(sub_a < sub_z);
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(sub_z <= T::O2);
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(sub_a < sub_z);
 			assert(subs.is_begin.test(static_cast<o2x_t>(sub_a)));
 			#ifndef NDEBUG
 			for (auto i {static_cast<o2i_t>(sub_a+1)}; i < sub_z; ++i) { assert(!subs.is_begin.test(static_cast<o2x_t>(i))); }
