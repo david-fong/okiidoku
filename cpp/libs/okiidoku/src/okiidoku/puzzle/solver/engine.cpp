@@ -1,9 +1,9 @@
 #include <okiidoku/puzzle/solver/engine.hpp>
 
-#ifndef NDEBUG
+// #ifndef NDEBUG
 #include <algorithm> // count_if
 #include <execution>
-#endif
+// #endif
 
 #include <iostream> // TODO delete
 
@@ -22,13 +22,12 @@ namespace okiidoku::mono::detail::solver {
 		found_queues_.clear();
 		for (const auto house_type : house_types) {
 		for (o2i_t house {0}; house < T::O2; ++house) {
-			auto& house_clusters {houses_subset_clusters_[static_cast<unsigned char>(house_type)][house]};
+			auto& subs {houses_subsets_[static_cast<unsigned char>(house_type)][house]};
 			for (o2i_t house_cell {0}; house_cell < T::O2; ++house_cell) {
-				auto& entry {house_clusters[house_cell]};
-				entry.rmi = static_cast<rmi_t>(house_cell_to_rmi<O>(house_type, house, house_cell));
-				entry.is_cluster_begin = false;
+				subs.rmi[house_cell] = static_cast<rmi_t>(house_cell_to_rmi<O>(house_type, house, house_cell));
 			}
-			house_clusters[0].is_cluster_begin = true;
+			subs.is_begin.unset_all();
+			subs.is_begin.set(0);
 		}}
 		// while (!guess_stack_.empty()) { guess_stack_.pop(); }
 		guess_stack_.clear();
@@ -187,7 +186,7 @@ namespace okiidoku::mono::detail::solver {
 		// e.cells_cands_ = *std::move(frame.prev_cells_cands);
 		e.cells_cands_ = *std::move(frame.prev_cells_cands);
 
-		e.houses_subset_clusters_ = std::move(frame.houses_subset_clusters);
+		e.houses_subsets_ = std::move(frame.houses_subsets);
 
 		assert(e.debug_check_correct_num_puzcells_remaining_());
 

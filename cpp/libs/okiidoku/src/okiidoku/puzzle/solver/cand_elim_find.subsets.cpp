@@ -4,11 +4,10 @@
 #include <okiidoku/puzzle/solver/found.hpp>
 #include <okiidoku/o2_bit_arr.hpp>
 
-#include <functional> // function, bit_or
+#include <functional> // bit_or
 #include <algorithm> // find_if, transform_reduce
 #include <execution>
 #include <array>
-#include <compare>
 
 #include <okiidoku/puzzle/solver/cand_elim_find.macros.hpp>
 
@@ -54,111 +53,121 @@ namespace okiidoku::mono::detail::solver { namespace {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	[[nodiscard]] bool helper_find_and_check_needs_unwind(
-		typename EngineImpl<O>::CandsGrid& cells_cands,
-		typename EngineImpl<O>::house_subset_clusters_t& clusters
+	UnwindInfo try_find_subset_for_size(
+		EngineImpl<O>& engine,
+		typename EngineImpl<O>::HouseSubsets& subs,
+		int_ts::o2i_t<O>& sub_a,
+		const int_ts::o2i_t<O> sub_z,
+		int_ts::o2x_t<O>& subset_size
 	) noexcept {
+		assert(sub_a+subset_size+1 < sub_z);
 		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
-		auto cluster_begin {clusters.begin()};
-		auto cluster_end {cluster_begin};
-		const auto update_cluster_end {[&]{
-			cluster_end = std::find_if(std::next(cluster_begin), clusters.end(), [&](const auto& e){
-				return e.is_cluster_begin;
-			});
-		}};
-		update_cluster_end();
-		auto subset_size {static_cast<o2x_t>(2)};
-
-		while (cluster_begin != clusters.end()) {
-			assert(std::distance(cluster_begin, cluster_end) > 0);
-			assert(cluster_begin->is_cluster_begin);
-			assert(std::none_of(std::next(cluster_begin), cluster_end, [](const auto& e){ return e.is_cluster_begin; }));
-			{
-				// sort to enable the `cluster_sub_end` and size-one-cluster-skip optimizations.
-				cluster_begin->is_cluster_begin = false;
-				std::sort(cluster_begin, cluster_end, [&](const auto& a, const auto& b){
-					return cells_cands.at_rmi(a.rmi).count() < cells_cands.at_rmi(b.rmi).count();
-				});
-				cluster_begin->is_cluster_begin = true;
-			}
-			// size-one-cluster-skip optimization:
-			if (cells_cands.at_rmi(cluster_begin->rmi).count() == 1) [[unlikely]] {
-				do {
-					++cluster_begin;
-					cluster_begin->is_cluster_begin = true;
-				} while (cells_cands.at_rmi(cluster_begin->rmi).count() == 1);
-				update_cluster_end();
-				continue;
-			}
-			// check if no more subset sizes to search:
-			if (subset_size+1 >= std::distance(cluster_begin, cluster_end)) {
-				// ^plus one to skip finding hidden singles. // TODO or also try to find them?
-				subset_size = 2;
-				cluster_begin = cluster_end;
-				update_cluster_end();
-				continue;
-			}
-			const auto cluster_sub_end {std::find_if(cluster_begin, cluster_end, [&](const auto& e){
-				return cells_cands.at_rmi(e.rmi).count() > subset_size;
-			})};
-			SubsetComboWalker<O> combo_walker {
-				static_cast<o2x_t>(std::distance(clusters.begin(), cluster_begin)),
-				static_cast<o2i_t>(std::distance(clusters.begin(), cluster_sub_end)),
-				subset_size,
-			};
-			O2BitArr<O> combo_syms {};
-			for (; combo_walker.has_more(); combo_walker.advance()) {
-				combo_syms = std::transform_reduce(
-					std::execution::unseq,
-					combo_walker.at_it(), std::next(combo_walker.at_it(), subset_size),
-					O2BitArr<O>{}, std::bit_or{}, [&](const auto i) -> auto& {
-						return cells_cands.at_rmi(clusters[i].rmi);
-					}
-				);
-				if (combo_syms.count() <  subset_size) [[unlikely]] { return true; }
-				if (combo_syms.count() == subset_size) [[unlikely]] { break; }
-			}
-			if (combo_syms.count() == subset_size) [[unlikely]] {
-				const auto old_cluster_begin {cluster_begin};
-				old_cluster_begin->is_cluster_begin = false;
-				for (o2x_t i {0}; i < subset_size; ++i) {
-					auto& entry {clusters[combo_walker.combo_at(i)]};
-					std::swap(*cluster_begin, entry);
-					++cluster_begin;
+		auto& cells_cands {engine.mut_cells_cands()};
+		SubsetComboWalker<O> combo_walker {
+			static_cast<o2x_t>(sub_a),
+			[&]{
+				for (auto i {sub_a}; i < sub_z; ++i) {
+					if (cells_cands.at_rmi(subs.rmi[i]).count() > subset_size) { return i; }
 				}
-				old_cluster_begin->is_cluster_begin = true;
-				cluster_begin->is_cluster_begin = true;
-				for (auto it {cluster_begin}; it != cluster_end; ++it) {
-					auto& other {cells_cands.at_rmi(it->rmi)};
-					const auto old_count {other.count()};
-					other.remove(combo_syms);
-					if (other.count() == 0) [[unlikely]] { return true; }
-					if (other.count() == 1 && other.count() < old_count) [[unlikely]] {
-						engine.enqueue_cand_elims_for_new_cell_claim_sym_(it->rmi);
-					}
+				return sub_z;
+			}(),
+			subset_size,
+		};
+		O2BitArr<O> combo_syms {};
+		for (; combo_walker.has_more(); combo_walker.advance()) {
+			combo_syms = std::transform_reduce(
+				std::execution::unseq,
+				combo_walker.at_it(),
+				std::next(combo_walker.at_it(), subset_size),
+				O2BitArr<O>{}, std::bit_or{}, [&](const auto i) -> auto& {
+					return cells_cands.at_rmi(subs.rmi[i]);
 				}
-				subset_size = 2;
-			} else {
-				++subset_size;
-			}
+			);
+			if (combo_syms.count() <  subset_size) [[unlikely]] { return unwind_one_stack_frame_of_(engine); }
+			if (combo_syms.count() == subset_size) [[unlikely]] { break; }
 		}
-		return false; // no unwind needed.
+		if (combo_syms.count() == subset_size) [[unlikely]] {
+			for (o2x_t combo_at {0}; combo_at < subset_size; ++combo_at) {
+				auto& entry {subs.rmi[combo_walker.combo_at(combo_at)]};
+				std::swap(subs.rmi[sub_a], entry);
+				++sub_a;
+			}
+			subs.is_begin.set(static_cast<o2x_t>(sub_a));
+			for (auto i {sub_a}; i < sub_z; ++i) {
+				const auto check {engine.do_elim_remove_syms_(subs.rmi[i], combo_syms)};
+				if (check.did_unwind()) [[unlikely]] { return check; }
+			}
+			subset_size = 2;
+		} else {
+			++subset_size;
+		}
+		return UnwindInfo::make_no_unwind();
 	}
 
 
 	template<Order O> requires(is_order_compiled(O))
-	[[nodiscard]] bool find_cells_claim_syms_and_check_needs_unwind(
-		const CandsGrid<O>& cells_cands,
-		FoundQueues<O>& found_queues
+	UnwindInfo helper_find_and_check_needs_unwind(
+		EngineImpl<O>& engine,
+		typename EngineImpl<O>::HouseSubsets& subs
+	) noexcept {
+		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
+		const auto& cells_cands {engine.cells_cands()};
+		o2i_t sub_a {0};
+		o2i_t sub_z {0};
+		const auto update_sub_z {[&]{
+			for (sub_z = sub_a; sub_z < T::O2 && !subs.is_begin.test((static_cast<o2x_t>(sub_z))); ++sub_z);
+		}};
+		o2x_t subset_size {2};
+
+		while (sub_a < T::O2) {
+			update_sub_z();
+			assert(sub_z > sub_a);
+			assert(subs.is_begin.test(static_cast<o2x_t>(sub_a)));
+			#ifndef NDEBUG
+			for (o2i_t i {sub_a}; i < sub_z; ++i) { assert(!subs.is_begin.test(static_cast<o2x_t>(i))); }
+			#endif
+			// sort to enable the `sub_sized_end` and size-one-cluster-skip optimizations.
+			std::sort(
+				std::next(subs.rmi.begin(), static_cast<long>(sub_a)),
+				std::next(subs.rmi.begin(), static_cast<long>(sub_z)),
+				[&](const auto& rmi_a, const auto& rmi_b){
+					return cells_cands.at_rmi(rmi_a).count() < cells_cands.at_rmi(rmi_b).count();
+				}
+			);
+			// size-one-cluster-skip optimization:
+			if (cells_cands.at_rmi(subs.rmi[sub_a]).count() == 1) [[unlikely]] {
+				while (sub_a < sub_z && cells_cands.at_rmi(subs.rmi[sub_a]).count() == 1) {
+					subs.is_begin.set(static_cast<o2x_t>(sub_a));
+					++sub_a;
+				}
+				continue;
+			}
+			// check if no more subset sizes to search:
+			while (sub_a+subset_size+1 < sub_z) {
+				// ^plus one to skip finding hidden singles. // TODO or also try to find them?
+				const auto check {try_find_subset_for_size(engine, subs, sub_a, sub_z, subset_size)};
+				if (check.did_unwind()) [[unlikely]] { return check; }
+			}
+			subset_size = 2;
+			sub_a = sub_z;
+		}
+		return UnwindInfo::make_no_unwind();
+	}
+
+
+	template<Order O> requires(is_order_compiled(O))
+	UnwindInfo find_cells_claim_syms_and_check_needs_unwind(
+		EngineImpl<O>& engine
 	) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
 		for (const auto house_type : house_types) {
 		for (o2i_t house {0}; house < T::O2; ++house) {
-			if (helper_find_and_check_needs_unwind<O>(
-				engine.cells_cands, engine.houses_subset_clusters
-			)) [[unlikely]] { return true; }
+			const auto check {helper_find_and_check_needs_unwind<O>(
+				engine, engine.houses_subsets()[static_cast<unsigned char>(house_type)][house]
+			)};
+			if (check.did_unwind()) [[unlikely]] { return check; }
 		}}
-		return false;
+		return UnwindInfo::make_no_unwind();
 	}
 
 
@@ -195,7 +204,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 namespace okiidoku::mono::detail::solver {
 
 	OKIIDOKU_CAND_ELIM_FINDER_DEF(sym_claim_cell)
-	OKIIDOKU_CAND_ELIM_FINDER_DEF(cells_claim_syms)
+	OKIIDOKU_CAND_ELIM_FINDER_DEF_ALT(cells_claim_syms)
 	// OKIIDOKU_CAND_ELIM_FINDER_DEF(syms_claim_cells)
 	#undef OKIIDOKU_CAND_ELIM_FINDER
 
