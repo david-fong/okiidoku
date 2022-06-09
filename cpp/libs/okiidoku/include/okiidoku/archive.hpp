@@ -20,7 +20,7 @@ namespace okiidoku::mono::archive {
 		Reader& operator=(const Reader&) = delete;
 
 	private:
-		/* OKIIDOKU_NO_EXPORT */ class Impl;
+		class Impl;
 		#if __has_include(<experimental/propagate_const>)
 		std::experimental::propagate_const<std::unique_ptr<Impl>> impl_;
 		#else // fallback for MSVC

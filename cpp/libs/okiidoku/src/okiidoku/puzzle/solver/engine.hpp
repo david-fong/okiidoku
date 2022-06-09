@@ -105,20 +105,22 @@ namespace okiidoku::mono::detail::solver {
 			house_types.size()
 		>;
 
+		struct Frame final {
+			o4i_t num_puzcells_remaining;
+			CandsGrid<O> cells_cands;
+			houses_subsets_t houses_subsets;
+		};
+
 		// TODO consider a different design: cells_cands_ and num_puzcells_remaining_ are just the top
 		// entry of the guess_stack_. no_solutions_remain_ is implied when the guess stack size is zero.
 		//  This would make the EngineImpl struct size small enough to probably justify no longer wrapping
 		//   Engine with unique_ptr in the Solver classes.
-		struct OKIIDOKU_NO_EXPORT GuessStackFrame final {
+		struct GuessStackFrame final {
 			// do separate dynamic alloc for each `CandsGrid` to reduce resizing noise.
-			o4i_t num_puzcells_remaining;
-			std::unique_ptr<CandsGrid<O>> prev_cells_cands;
-			houses_subsets_t houses_subsets;
+			std::unique_ptr<Frame> frame;
 			Guess<O> guess;
-			GuessStackFrame(const EngineImpl<O>& engine, const Guess<O> guess_) noexcept:
-				num_puzcells_remaining{engine.get_num_puzcells_remaining()},
-				prev_cells_cands{std::make_unique<CandsGrid<O>>(engine.cells_cands())},
-				houses_subsets{engine.houses_subsets_},
+			GuessStackFrame(const Frame& frame_, const Guess<O> guess_) noexcept:
+				frame{std::make_unique<Frame>(frame_)},
 				guess{guess_}
 			{}
 		};
@@ -144,7 +146,7 @@ namespace okiidoku::mono::detail::solver {
 
 
 		[[nodiscard, gnu::pure]]
-		o4i_t get_num_puzcells_remaining() const noexcept { return num_puzcells_remaining_; }
+		auto get_num_puzcells_remaining() const noexcept { return frame_.num_puzcells_remaining; }
 
 		// contract: `val` is currently one of _multiple_ candidate-symbols at `rmi`.
 		// contract: only call when `has_queued_cand_elims` returns `false`. There
@@ -165,11 +167,10 @@ namespace okiidoku::mono::detail::solver {
 		Grid<O> build_solution_obj() const noexcept;
 
 
-		[[nodiscard, gnu::pure]] const CandsGrid<O>& cells_cands() const noexcept { return cells_cands_; }
-		[[nodiscard, gnu::pure]] CandsGrid<O>& mut_cells_cands() noexcept { return cells_cands_; }
-		[[nodiscard, gnu::pure]] houses_subsets_t& houses_subsets() noexcept { return houses_subsets_; }
-		[[nodiscard, gnu::pure]] FoundQueues<O>& get_found_queues_() noexcept { return found_queues_; }
-		[[nodiscard, gnu::pure]] const guess_stack_t& get_guess_stack_() const noexcept { return guess_stack_; }
+		[[nodiscard, gnu::pure]] const auto& cells_cands() const noexcept { return frame_.cells_cands; }
+		[[nodiscard, gnu::pure]] auto& houses_subsets() noexcept { return frame_.houses_subsets; }
+		[[nodiscard, gnu::pure]] auto& get_found_queues_() noexcept { return found_queues_; }
+		[[nodiscard, gnu::pure]] const auto& get_guess_stack_() const noexcept { return guess_stack_; }
 
 
 		// contract: `val` is currently one of _multiple_ candidate-symbols at `rmi`.
@@ -187,6 +188,8 @@ namespace okiidoku::mono::detail::solver {
 		UnwindInfo do_elim_retain_syms_(rmi_t rmi, const O2BitArr<O>& to_retain) noexcept;
 
 	private:
+		[[nodiscard, gnu::pure]] auto& mut_cells_cands() noexcept { return frame_.cells_cands; }
+
 		// The specified candidate-symbol is allowed to already be removed.
 		template<class F> requires(std::is_invocable_v<F, O2BitArr<O>&>)
 		UnwindInfo do_elim_generic_(rmi_t rmi, F elim_fn) noexcept;
@@ -202,9 +205,12 @@ namespace okiidoku::mono::detail::solver {
 		[[nodiscard]] bool debug_check_correct_num_puzcells_remaining_() const noexcept;
 
 
-		o4i_t num_puzcells_remaining_ {T::O4};
-		CandsGrid<O> cells_cands_ {};
-		houses_subsets_t houses_subsets_ {};
+		Frame frame_ {
+			.num_puzcells_remaining {T::O4},
+			.cells_cands {},
+			.houses_subsets {},
+		};
+
 		FoundQueues<O> found_queues_ {};
 		guess_stack_t guess_stack_ {};
 		std::uint_fast64_t total_guesses_ {0};

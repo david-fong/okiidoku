@@ -136,7 +136,7 @@ namespace okiidoku::mono {
 		using T = Ints<O>;
 		using o2i_t = int_ts::o2i_t<O>;
 		{
-			std::array<grid_val_t<O>, T::O2> example_row;
+			std::array<grid_val_t<O>, T::O2> example_row; // NOLINT(cppcoreguidelines-pro-type-member-init) see next line
 			std::iota(example_row.begin(), example_row.end(), grid_val_t<O>{0});
 			for (o2i_t row {0}; row < T::O2; ++row) {
 				const auto span {grid.row_span_at(row)};

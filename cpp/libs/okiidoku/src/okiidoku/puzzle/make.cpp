@@ -14,14 +14,13 @@ namespace okiidoku::mono { namespace {
 	[[nodiscard]] bool puzzle_is_proper(const Grid<O>& proper_puzzle) noexcept {
 		if (grid_is_filled(proper_puzzle)) {
 			return grid_follows_rule(proper_puzzle);
-		} else {
-			// a quick check for obvious big mistake (empty grid):
-			if (grid_is_empty(proper_puzzle)) { return false; }
-
-			FastSolver<O> solver {};
-			solver.reinit_with_puzzle(proper_puzzle);
-			return solver.get_next_solution().has_value() && !solver.get_next_solution().has_value();
 		}
+		// a quick check for obvious big mistake (empty grid):
+		if (grid_is_empty(proper_puzzle)) { return false; }
+
+		FastSolver<O> solver {};
+		solver.reinit_with_puzzle(proper_puzzle);
+		return solver.get_next_solution().has_value() && !solver.get_next_solution().has_value();
 	}
 }}
 namespace okiidoku::mono {

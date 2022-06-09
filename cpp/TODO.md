@@ -27,10 +27,11 @@
 
 ## Misc List
 
-- The subset finders don't detect when something has already been found, so it will currently cause an infinite loop in the FastSolver of detecting the same things over and over again and never going to guessing.
 - control of subset size when finding subset things
-- I'm curious to step through the current guess things to see what things look like
-- I think actually the combination walking should be no more expensive for finding small hidden subsets as finding the corresponding naked subsets. If that's the case, then we should just never look for hidden subsets, since that one requires extra setup to translate from the cell-major representation.
+- consider a finder-heuristic that only starts using more powerful finders when then guess stack gets to a certain depth- at which point it unwinds to one-above the last frame that used more powerful finders, and uses more powerful finders.
+  - will have to create some modified version of unwinding which doesn't rule out the guess.
+  - or more fine grained: each guess stack frame has a "logic depth/effort" field that describes the finders that were used before the guess was made. Ex. used up to finding subsets of size 2 before the guess was made.
+- play around with giving puzzle maker a threshold to stop trying to solve a candidate puzzle after N guesses.
 
 - experiment with optimizations for solving smaller grids.
   - less `unique_ptr` usage.

@@ -62,7 +62,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 	) noexcept {
 		assert(sub_a+subset_size+1 < sub_z);
 		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
-		auto& cells_cands {engine.mut_cells_cands()};
+		auto& cells_cands {engine.cells_cands()};
 		SubsetComboWalker<O> combo_walker {
 			static_cast<o2x_t>(sub_a),
 			[&]{
@@ -79,7 +79,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 				std::execution::unseq,
 				combo_walker.at_it(),
 				std::next(combo_walker.at_it(), subset_size),
-				O2BitArr<O>{}, std::bit_or{}, [&](const auto i) -> auto& {
+				O2BitArr<O>{}, std::bit_or{}, [&](const auto i) -> const auto& {
 					return cells_cands.at_rmi(subs.rmi[i]);
 				}
 			);
@@ -98,6 +98,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 				if (check.did_unwind()) [[unlikely]] { return check; }
 			}
 			subset_size = 2;
+			engine.get_found_queues_().push_back(found::CellsClaimSyms<O>{}); // TODO currently pushing a dummy desc just to get proper finder looping in FastSolver
 		} else {
 			++subset_size;
 		}
@@ -115,7 +116,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 		o2i_t sub_a {0};
 		o2i_t sub_z {0};
 		const auto update_sub_z {[&]{
-			for (sub_z = sub_a+1; sub_z < T::O2 && !subs.is_begin.test(static_cast<o2x_t>(sub_z)); ++sub_z);
+			for (sub_z = sub_a+1; sub_z < T::O2 && !subs.is_begin.test(static_cast<o2x_t>(sub_z)); ++sub_z) {}
 		}};
 		o2x_t subset_size {2};
 
@@ -148,7 +149,9 @@ namespace okiidoku::mono::detail::solver { namespace {
 				// ^plus one to skip finding hidden singles. // TODO or also try to find them?
 				const auto check {try_find_subset_for_size(engine, subs, sub_a, sub_z, subset_size)};
 				if (check.did_unwind()) [[unlikely]] { return check; }
-				if (subset_size == 2) [[unlikely]] { break; } // TODO currently ugly detection of successful subset find
+				if (subset_size == 2) [[unlikely]] {
+					break;
+				} // TODO currently ugly detection of successful subset find
 			}
 			if (!(sub_a+subset_size+1 < sub_z)) [[likely]] {
 				subset_size = 2;

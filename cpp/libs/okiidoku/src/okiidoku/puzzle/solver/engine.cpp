@@ -17,18 +17,19 @@ namespace okiidoku::mono::detail::solver {
 
 	template<Order O> requires(is_order_compiled(O))
 	void EngineImpl<O>::reinit_with_puzzle(const Grid<O>& puzzle) noexcept {
-		num_puzcells_remaining_ = T::O4;
-		cells_cands_.get_underlying_array().fill(O2BitArr_ones<O>);
-		found_queues_.clear();
+		frame_.num_puzcells_remaining = T::O4;
+		mut_cells_cands().get_underlying_array().fill(O2BitArr_ones<O>);
 		for (const auto house_type : house_types) {
 		for (o2i_t house {0}; house < T::O2; ++house) {
-			auto& subs {houses_subsets_[static_cast<unsigned char>(house_type)][house]};
+			auto& subs {frame_.houses_subsets[static_cast<unsigned char>(house_type)][house]};
 			for (o2i_t house_cell {0}; house_cell < T::O2; ++house_cell) {
 				subs.rmi[house_cell] = static_cast<rmi_t>(house_cell_to_rmi<O>(house_type, house, house_cell));
 			}
 			subs.is_begin.unset_all();
 			subs.is_begin.set(0);
 		}}
+
+		found_queues_.clear();
 		// while (!guess_stack_.empty()) { guess_stack_.pop(); }
 		guess_stack_.clear();
 		total_guesses_ = 0;
@@ -68,7 +69,7 @@ namespace okiidoku::mono::detail::solver {
 		F elim_fn
 	) noexcept {
 		assert(!no_solutions_remain());
-		auto& cell_cands {cells_cands_.at_rmi(rmi)};
+		auto& cell_cands {mut_cells_cands().at_rmi(rmi)};
 		const auto old_cands_count {cell_cands.count()};
 
 		elim_fn(cell_cands);
@@ -123,7 +124,7 @@ namespace okiidoku::mono::detail::solver {
 	) noexcept {
 		assert(!no_solutions_remain());
 		assert(val < T::O2);
-		auto& cell_cands {cells_cands_.at_rmi(rmi)};
+		auto& cell_cands {mut_cells_cands().at_rmi(rmi)};
 		assert(cell_cands.test(val));
 		assert(cell_cands.count() > 1);
 		cell_cands.unset_all();
@@ -145,7 +146,7 @@ namespace okiidoku::mono::detail::solver {
 		assert(cell_cands.test(val));
 		assert(cell_cands.count() == 1);
 		found_queues_.push_back(found::CellClaimSym<O>{.rmi{rmi},.val{val}});
-		--num_puzcells_remaining_;
+		--frame_.num_puzcells_remaining;
 		assert(debug_check_correct_num_puzcells_remaining_());
 	}
 
@@ -156,9 +157,9 @@ namespace okiidoku::mono::detail::solver {
 	) noexcept {
 		assert(!no_solutions_remain());
 		assert(!has_queued_cand_elims());
-		assert(cells_cands_.at_rmi(guess.rmi).test(guess.val));
-		assert(cells_cands_.at_rmi(guess.rmi).count() > 1);
-		guess_stack_.emplace_back(*this, guess);
+		assert(cells_cands().at_rmi(guess.rmi).test(guess.val));
+		assert(cells_cands().at_rmi(guess.rmi).count() > 1);
+		guess_stack_.emplace_back(frame_, guess);
 
 		register_new_given_(guess.rmi, guess.val);
 		++total_guesses_;
@@ -173,35 +174,28 @@ namespace okiidoku::mono::detail::solver {
 	UnwindInfo unwind_one_stack_frame_of_(EngineImpl<O>& e) noexcept {
 		assert(!e.no_solutions_remain());
 		e.found_queues_.clear();
-		assert(!e.has_queued_cand_elims());
 		if (e.guess_stack_.empty()) {
 			e.no_solutions_remain_ = true;
 			return UnwindInfo::make_did_unwind_root();
 		}
-		auto& frame {e.guess_stack_.back()};
-
-		e.num_puzcells_remaining_ = frame.num_puzcells_remaining;
-
-		assert(frame.prev_cells_cands.get() != nullptr);
-		// e.cells_cands_ = *std::move(frame.prev_cells_cands);
-		e.cells_cands_ = *std::move(frame.prev_cells_cands);
-
-		e.houses_subsets_ = std::move(frame.houses_subsets);
-
+		auto& guess_frame {e.guess_stack_.back()};
+		e.frame_ = *std::move(guess_frame.frame);
 		assert(e.debug_check_correct_num_puzcells_remaining_());
 
-		auto& cell_cands {e.cells_cands_.at_rmi(frame.guess.rmi)};
-		assert(cell_cands.test(frame.guess.val));
+		const auto guess {std::move(guess_frame.guess)};
+		auto& cell_cands {e.mut_cells_cands().at_rmi(guess.rmi)};
+		assert(cell_cands.test(guess.val));
 		assert(cell_cands.count() > 1);
-		cell_cands.unset(frame.guess.val);
+		cell_cands.unset(guess.val);
 		if (cell_cands.count() == 1) [[unlikely]] {
-			e.enqueue_cand_elims_for_new_cell_claim_sym_(frame.guess.rmi);
+			e.enqueue_cand_elims_for_new_cell_claim_sym_(guess.rmi);
 		}
+
 		e.guess_stack_.pop_back();
-		#ifndef NDEBUG
-		// std::clog << "\nguess-(" << e.get_guess_stack_depth() << ") " << int(frame.guess.rmi) << " " << int(frame.guess.val);
+		// #ifndef NDEBUG
+		// std::clog << "\nguess-(" << e.get_guess_stack_depth() << ") " << int(guess.rmi) << " " << int(guess.val);
 		// e.debug_print_cells_cands_();
-		#endif
+		// #endif
 		return UnwindInfo::make_did_unwind_guess();
 	}
 
@@ -216,7 +210,7 @@ namespace okiidoku::mono::detail::solver {
 	void EngineImpl<O>::debug_print_cells_cands_() const noexcept {
 		for (o4i_t rmi {0}; rmi < T::O4; ++rmi) {
 			if (rmi % T::O2 == 0) { std::clog << '\n'; }
-			const auto& mask {cells_cands_.at_rmi(rmi)};
+			const auto& mask {cells_cands().at_rmi(rmi)};
 			const auto chars {mask.to_stringbuf()};
 			std::clog.write(chars.data(), chars.size());
 			std::clog << "  " << std::flush;
