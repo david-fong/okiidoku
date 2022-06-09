@@ -44,7 +44,7 @@ namespace okiidoku::mono {
 			const auto check {e.unwind_one_stack_frame()};
 			if (check.did_unwind_root()) { return std::nullopt; }
 		}
-		unsigned times_used_more_finders {0};
+		// unsigned times_used_more_finders {0};
 		while (e.get_num_puzcells_remaining() > 0) [[likely]] {
 			{
 				using Apply = detail::solver::CandElimApply<O>;
@@ -56,8 +56,8 @@ namespace okiidoku::mono {
 			static constexpr auto finders {std::to_array({
 				std::cref(Find::sym_claim_cell),
 				// std::cref(Find::locked_cands), // draft implementation not yet tested. please debug and check it behaves as intended.
-				std::cref(Find::cells_claim_syms),
-				// std::cref(Find::syms_claim_cells),
+				// std::cref(Find::cells_claim_syms),
+				// // std::cref(Find::syms_claim_cells),
 			})};
 			// TODO after finding hidden singles, can apply and then go straight to finding subsets
 			{
@@ -68,7 +68,7 @@ namespace okiidoku::mono {
 					if (check.did_unwind() || e.has_queued_cand_elims()) { break; }
 				}
 				if (check.did_unwind_root()) [[unlikely]] { return std::nullopt; }
-				if (check.did_unwind() || e.has_queued_cand_elims()) { times_used_more_finders = 0; continue; }
+				if (check.did_unwind() || e.has_queued_cand_elims()) { /* times_used_more_finders = 0; */ continue; }
 			}
 			e.push_guess(Find::good_guess_candidate(e));
 		}

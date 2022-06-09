@@ -36,7 +36,7 @@ namespace okiidoku::mono::detail::solver {
 	public:
 		[[nodiscard, gnu::pure]]
 		bool is_empty() const noexcept {
-			return std::apply([](const auto& ...q){ return (... || q.empty()); }, tup_);
+			return std::apply([](const auto& ...q){ return (... && q.empty()); }, tup_);
 		}
 
 		// Note: only used when unwinding the engine's guess stack.

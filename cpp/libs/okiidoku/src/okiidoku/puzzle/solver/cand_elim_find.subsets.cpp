@@ -115,18 +115,19 @@ namespace okiidoku::mono::detail::solver { namespace {
 		o2i_t sub_a {0};
 		o2i_t sub_z {0};
 		const auto update_sub_z {[&]{
-			for (sub_z = sub_a; sub_z < T::O2 && !subs.is_begin.test((static_cast<o2x_t>(sub_z))); ++sub_z);
+			for (sub_z = sub_a+1; sub_z < T::O2 && !subs.is_begin.test(static_cast<o2x_t>(sub_z)); ++sub_z);
 		}};
 		o2x_t subset_size {2};
 
 		while (sub_a < T::O2) {
 			update_sub_z();
-			assert(sub_z > sub_a);
+			assert(sub_z <= T::O2);
+			assert(sub_a < sub_z);
 			assert(subs.is_begin.test(static_cast<o2x_t>(sub_a)));
 			#ifndef NDEBUG
-			for (o2i_t i {sub_a}; i < sub_z; ++i) { assert(!subs.is_begin.test(static_cast<o2x_t>(i))); }
+			for (auto i {static_cast<o2i_t>(sub_a+1)}; i < sub_z; ++i) { assert(!subs.is_begin.test(static_cast<o2x_t>(i))); }
 			#endif
-			// sort to enable the `sub_sized_end` and size-one-cluster-skip optimizations.
+			// sort to enable the `sub_sized_end` optimization and size-one-subset updates.
 			std::sort(
 				std::next(subs.rmi.begin(), static_cast<long>(sub_a)),
 				std::next(subs.rmi.begin(), static_cast<long>(sub_z)),
@@ -134,22 +135,25 @@ namespace okiidoku::mono::detail::solver { namespace {
 					return cells_cands.at_rmi(rmi_a).count() < cells_cands.at_rmi(rmi_b).count();
 				}
 			);
-			// size-one-cluster-skip optimization:
+			// size-one-subset detect and update:
 			if (cells_cands.at_rmi(subs.rmi[sub_a]).count() == 1) [[unlikely]] {
-				while (sub_a < sub_z && cells_cands.at_rmi(subs.rmi[sub_a]).count() == 1) {
-					subs.is_begin.set(static_cast<o2x_t>(sub_a));
+				do {
 					++sub_a;
-				}
-				continue;
+					if (sub_a == T::O2) [[unlikely]] { break; }
+					subs.is_begin.set(static_cast<o2x_t>(sub_a));
+				} while (sub_a < sub_z && cells_cands.at_rmi(subs.rmi[sub_a]).count() == 1);
+				continue; // TODO optimize to skip sort when re-loop?
 			}
-			// check if no more subset sizes to search:
 			while (sub_a+subset_size+1 < sub_z) {
 				// ^plus one to skip finding hidden singles. // TODO or also try to find them?
 				const auto check {try_find_subset_for_size(engine, subs, sub_a, sub_z, subset_size)};
 				if (check.did_unwind()) [[unlikely]] { return check; }
+				if (subset_size == 2) [[unlikely]] { break; } // TODO currently ugly detection of successful subset find
 			}
-			subset_size = 2;
-			sub_a = sub_z;
+			if (!(sub_a+subset_size+1 < sub_z)) [[likely]] {
+				subset_size = 2;
+				sub_a = sub_z;
+			}
 		}
 		return UnwindInfo::make_no_unwind();
 	}
