@@ -1,6 +1,8 @@
 #include <okiidoku/morph/transform.hpp>
 
-#include <algorithm> // copy
+#include <okiidoku/detail/contract.hpp>
+
+#include <utility> // swap
 
 namespace okiidoku::mono {
 
@@ -69,6 +71,7 @@ namespace okiidoku::visitor {
 		);
 		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 		#undef OKIIDOKU_FOR_COMPILED_O
+		default: OKIIDOKU_CONTRACT_TRIVIAL_EVAL(false); // std::unreachable
 		}
 	}
 
@@ -84,6 +87,7 @@ namespace okiidoku::visitor {
 		);
 		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 		#undef OKIIDOKU_FOR_COMPILED_O
+		default: OKIIDOKU_CONTRACT_TRIVIAL_EVAL(false); // std::unreachable
 		}
 	}
 

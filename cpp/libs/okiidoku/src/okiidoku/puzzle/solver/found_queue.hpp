@@ -42,7 +42,7 @@ namespace okiidoku::mono::detail::solver {
 
 		// Note: only used when unwinding the engine's guess stack.
 		void clear() noexcept {
-			return std::apply([](auto& ...dq){ (... , dq.clear()); }, tup_);
+			std::apply([](auto& ...dq){ (... , dq.clear()); }, tup_);
 			assert(is_empty());
 			// TODO.low consider whether resizing down is a good idea here?
 		}

@@ -3,6 +3,7 @@
 
 #include <okiidoku/config/defaults.hpp>
 #include <okiidoku/detail/order_templates.macros.hpp>
+#include <okiidoku/detail/contract.hpp>
 #include <okiidoku/detail/export.h>
 
 #include <array>
@@ -51,6 +52,10 @@ namespace okiidoku {
 		template<typename T>
 		concept MonoToVisitorAdaptor = requires() {
 			std::same_as<decltype(T::is_borrow_type), bool>;
+			// TODO consider creating a `dynamic_allocation_floor` constant, or a bool-returning
+			//  `use_dynamic_allocation` template function, or a use_dynamic_allocation constant.
+			//  the bool constant is the simplest.
+
 			#define OKIIDOKU_FOR_COMPILED_O(O_) typename T::template type<O_>;
 			OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 			#undef OKIIDOKU_FOR_COMPILED_O
@@ -71,6 +76,8 @@ namespace okiidoku {
 		>;
 
 
+		// unless otherwise specified by functions on derived classes, calling such
+		// functions on moved-from instances is UB.
 		template<MonoToVisitorAdaptor Adaptor>
 		struct ContainerBase {
 		public:
@@ -79,9 +86,9 @@ namespace okiidoku {
 			// delete the default constructor if Adaptor::is_borrow_type is true.
 			ContainerBase() requires(Adaptor::is_borrow_type) = delete;
 
-			// copy-from-mono constructor
+			// move-from-mono constructor
 			template<Order O>
-			explicit ContainerBase(typename Adaptor::template type<O> mono_obj) noexcept: variant_(mono_obj) {}
+			explicit ContainerBase(typename Adaptor::template type<O>&& mono_obj) noexcept: variant_(std::move(mono_obj)) {}
 
 			// default-for-order constructor.
 			// If the provided order is not compiled, defaults to the lowest compiled order.
@@ -135,8 +142,7 @@ namespace okiidoku {
 			case O_: return vis_a.template unchecked_get_mono_exact<O_>() <=> vis_b.template unchecked_get_mono_exact<O_>();
 			OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 			#undef OKIIDOKU_FOR_COMPILED_O
-			// TODO.wait std::unreachable
-			default: return std::compare_three_way_result_t<typename Adaptor::template type<compiled_orders[0]>>::equivalent;
+			default: OKIIDOKU_CONTRACT_TRIVIAL_EVAL(false); // std::unreachable
 			}
 		}
 	}

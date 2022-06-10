@@ -3,6 +3,7 @@
 
 #include <okiidoku/ints.hpp>
 #include <okiidoku/detail/order_templates.hpp>
+#include <okiidoku/detail/contract.hpp>
 
 #include <array>
 #include <span>
@@ -58,7 +59,7 @@ namespace okiidoku::mono {
 		using array_t = std::array<val_t, T::O4>;
 
 		// lexicographical comparison over row-major-order traversal of cells.
-		[[nodiscard, gnu::pure]] friend std::strong_ordering operator<=>(const Gridlike<O, V_>& a, const Gridlike<O, V_>& b) noexcept = default;
+		[[nodiscard, gnu::pure]] friend std::strong_ordering operator<=>(const Gridlike& a, const Gridlike& b) noexcept = default;
 
 		// For regular grids, always default initialize as an empty grid (to be safe).
 		// Note: Making this constexpr results in a 1% speed gain, but 45% program
@@ -73,10 +74,11 @@ namespace okiidoku::mono {
 
 		// contract: `rmi` is in [0, O4).
 		template<class T_rmi> requires(Any_o4x_t<O, T_rmi>)
-		[[nodiscard]] constexpr       val_t& at_rmi(const T_rmi rmi)       noexcept { return arr_[rmi]; }
+		[[nodiscard]] constexpr       val_t& at_rmi(const T_rmi rmi)       noexcept { OKIIDOKU_CONTRACT_TRIVIAL_EVAL(rmi < T::O4); return arr_[rmi]; }
 		template<class T_rmi> requires(Any_o4x_t<O, T_rmi>)
-		[[nodiscard]] constexpr const val_t& at_rmi(const T_rmi rmi) const noexcept { return arr_[rmi]; }
+		[[nodiscard]] constexpr const val_t& at_rmi(const T_rmi rmi) const noexcept { OKIIDOKU_CONTRACT_TRIVIAL_EVAL(rmi < T::O4); return arr_[rmi]; }
 
+		// TODO.low why is using row_col_to_rmi slower than "inlining" the expression here? Is it because of the return-type cast? even adding bounds assumptions seems to increase code size...
 		// contract: `row` and `col` are in [0, O2).
 		template<class T_row, class T_col> requires(Any_o2x_t<O, T_row> && Any_o2x_t<O, T_col>)
 		[[nodiscard]] constexpr       val_t& at(const T_row row, const T_col col)       noexcept { return arr_[(T::O2*row)+col]; }

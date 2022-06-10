@@ -6,6 +6,8 @@
 - CMake 3.21 or greater
 - A C/C++ build system. Recommended: Ninja
 
+I have no intention to support versions of Emscripten older than the latest.
+
 ## Build Commands
 
 ```sh

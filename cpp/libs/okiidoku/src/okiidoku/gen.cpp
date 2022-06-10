@@ -69,6 +69,7 @@ namespace okiidoku::mono { namespace {
 			const auto row {static_cast<o2x_t>(h_chute + ((rng() - rng_t::min()) % T::O1))};
 			auto& a_sym {grid.at(row,a_col)};
 			auto& b_sym {grid.at(row,b_col)};
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(&a_sym != &b_sym);
 			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(a_sym != b_sym);
 			const auto num_resolved {static_cast<signed char>(
 				(boxes_has.ch_count_sym(a_box,a_sym) == 1 ? -1 : 0) + // regression
@@ -120,6 +121,7 @@ namespace okiidoku::mono { namespace {
 			const auto row {static_cast<o2x_t>((rng() - rng_t::min()) % (T::O2))};
 			auto& a_sym {grid.at(row, static_cast<o2x_t>(v_chute + a_col))};
 			auto& b_sym {grid.at(row, static_cast<o2x_t>(v_chute + b_col))};
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(&a_sym != &b_sym);
 			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(a_sym != b_sym);
 			const auto num_resolved {static_cast<signed char>(
 				(cols_has.ch_count_sym(a_col,a_sym) == 1 ? -1 : 0) + // regression

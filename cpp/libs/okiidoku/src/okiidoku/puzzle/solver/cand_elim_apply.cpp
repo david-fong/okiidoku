@@ -97,13 +97,13 @@ namespace okiidoku::mono::detail::solver {
 		{
 			const auto desc_row {rmi_to_row<O>(desc.rmi)};
 			for (o2i_t nb_col {0}; nb_col < T::O2; ++nb_col) {
-				const auto nb_rmi {static_cast<rmi_t>((T::O2*desc_row)+nb_col)};
+				const auto nb_rmi {static_cast<rmi_t>(row_col_to_rmi<O>(desc_row, nb_col))};
 				OKIIDOKU_TRY_ELIM_NB_CAND
 		}	}
 		{
 			const auto desc_col {rmi_to_col<O>(desc.rmi)};
 			for (o2i_t nb_row {0}; nb_row < T::O2; ++nb_row) {
-				const auto nb_rmi {static_cast<rmi_t>((T::O2*nb_row)+desc_col)};
+				const auto nb_rmi {static_cast<rmi_t>(row_col_to_rmi<O>(nb_row, desc_col))};
 				OKIIDOKU_TRY_ELIM_NB_CAND
 		}	}
 		{

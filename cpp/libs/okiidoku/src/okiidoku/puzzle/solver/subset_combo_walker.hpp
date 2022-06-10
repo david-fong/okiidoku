@@ -27,7 +27,7 @@ namespace okiidoku::mono::detail::solver {
 		// contract: `begin + subset_size <= O2`
 		SubsetComboWalker(const o2x_t begin, const o2i_t end, const o2x_t subset_size) noexcept:
 			begin_{begin}, end_{end}, subset_size_{subset_size},
-			has_more_{begin + subset_size <= end}
+			has_more_{static_cast<o2i_t>(begin + subset_size) <= end}
 		{
 			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(end_ <= T::O2);
 			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(subset_size_ > 0);
@@ -58,8 +58,7 @@ namespace okiidoku::mono::detail::solver {
 
 		// contract: `has_more` returns `true`.
 		void advance() noexcept {
-			assert(has_more());
-			// if (!has_more()) [[unlikely]] { return; }
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(has_more());
 			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(end_ <= T::O2);
 			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(subset_size_ > 0);
 			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(subset_size_ < T::O2);
@@ -92,7 +91,7 @@ namespace okiidoku::mono::detail::solver {
 
 		void assert_is_state_valid_() const noexcept {
 			#ifndef NDEBUG
-			if (begin_ + subset_size_ > end_) {
+			if (static_cast<o2i_t>(begin_ + subset_size_) > end_) {
 				assert(!has_more_);
 				return;
 			}

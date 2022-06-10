@@ -38,7 +38,7 @@ namespace okiidoku::mono { namespace {
 		// Grid<O>& src_grid;
 
 		struct PolarState final {
-			line_map_t<O> to_og {Transformation<O>::identity_row_map};
+			line_map_t<O> to_og {Transformation<O>::identity_line_map};
 			detail::TieLinks<O, 2> line_ties {};
 			detail::TieLinks<O, 1> chute_ties {};
 

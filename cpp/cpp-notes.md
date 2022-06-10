@@ -106,4 +106,5 @@ filter source code: `*.hpp,*.cpp`
 
 ```regex
 static_cast<(int_ts|o[1-5])
+const [^{]*&
 ```

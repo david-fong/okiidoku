@@ -10,25 +10,32 @@
 #include <iostream>
 
 namespace okiidoku::mono { namespace {
-
-	template<Order O> requires(is_order_compiled(O))
-	[[nodiscard]] bool puzzle_is_proper(const Grid<O>& proper_puzzle) noexcept {
-		if (grid_is_filled(proper_puzzle)) {
-			return grid_follows_rule(proper_puzzle);
-		}
-		// a quick check for obvious big mistake (empty grid):
-		if (grid_is_empty(proper_puzzle)) { return false; }
-
-		FastSolver<O> solver {};
-		solver.reinit_with_puzzle(proper_puzzle);
-		return solver.get_next_solution().has_value() && !solver.get_next_solution().has_value();
-	}
 }}
 namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
+	DeadlyPatterns<O> find_deadly_patterns(const Grid<O>&) noexcept {
+		return DeadlyPatterns<O>{}; // TODO
+	}
+
+
+	template<Order O> requires(is_order_compiled(O))
+	bool grid_is_proper_puzzle(const Grid<O>& puzzle) noexcept {
+		if (grid_is_filled(puzzle)) {
+			return grid_follows_rule(puzzle);
+		}
+		// a quick check for obvious big mistake (empty grid):
+		if (grid_is_empty(puzzle)) { return false; }
+
+		FastSolver<O> solver {};
+		solver.reinit_with_puzzle(puzzle);
+		return solver.get_next_solution().has_value() && !solver.get_next_solution().has_value();
+	}
+
+
+	template<Order O> requires(is_order_compiled(O))
 	void make_minimal_puzzle(Grid<O>& grid, const rng_seed_t rng_seed) noexcept {
-		assert(puzzle_is_proper(grid));
+		assert(grid_is_proper_puzzle(grid));
 
 		using rng_t = std::minstd_rand;
 		rng_t rng {static_cast<rng_t::result_type>(rng_seed)};
@@ -62,7 +69,7 @@ namespace okiidoku::mono {
 			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(puzcell_cand_i < num_puzcell_cands);
 
 			const auto rmi {puzcell_cand_rmis[puzcell_cand_i]};
-			const auto val {std::exchange(grid.at_rmi(rmi), T::O2)};
+			const auto val {std::exchange(grid.at_rmi(rmi), static_cast<grid_val_t<O>>(T::O2))};
 			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(val < T::O2);
 
 			#ifndef NDEBUG
@@ -81,12 +88,14 @@ namespace okiidoku::mono {
 			remove_puzcell_cand_at(puzcell_cand_i);
 			// assert(grid_follows_rule(grid)); // a bit gratuitous
 		}
-		assert(puzzle_is_proper(grid));
+		assert(grid_is_proper_puzzle(grid));
 	}
 
 
 	#define OKIIDOKU_FOR_COMPILED_O(O_) \
-		template void make_minimal_puzzle<O_>(Grid<O_>&, rng_seed_t) noexcept;
+		template DeadlyPatterns<O_> find_deadly_patterns<O_>(const Grid<O_>&) noexcept; \
+		template void make_minimal_puzzle<O_>(Grid<O_>&, rng_seed_t) noexcept; \
+		template bool grid_is_proper_puzzle<O_>(const Grid<O_>&) noexcept;
 	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 	#undef OKIIDOKU_FOR_COMPILED_O
 }

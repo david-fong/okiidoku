@@ -3,9 +3,7 @@
 ## Roadmap
 
 - deductive reasoning + backtracking solver
-  - (add tests and examples)
 - draft archive
-  - (and update tests and examples)
 - refactor and improve canonicalization
 - compare backtracking and stochastic search statistics
 - implement grid-serdes translator tool
@@ -28,6 +26,7 @@
 ## Misc List
 
 - re-test network size thing. there was previously a bug in checking same-column.
+- try to use [unavoidable set](https://www.sudopedia.org/wiki/Unavoidable_Set) / deadly pattern detection to optimize proper-puzzle-making.
 - control of subset size when finding subset things
 - consider a finder-heuristic that only starts using more powerful finders when then guess stack gets to a certain depth- at which point it unwinds to one-above the last frame that used more powerful finders, and uses more powerful finders.
   - will have to create some modified version of unwinding which doesn't rule out the guess.
@@ -97,6 +96,7 @@
   - `using enum`. Might want to wait for CLANG to support?
 - C++23
   - http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/p2214r0.html#does-adjacent-mean-2-or-n
+  - `std::to_underlying()`
   - `std::unreachable()`
   - `std::ranges::iota()`
   - `std::views::chunk()`

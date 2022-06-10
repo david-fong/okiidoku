@@ -111,7 +111,6 @@ namespace okiidoku::mono {
 		static constexpr int_ts::o4i_t<O> O4 {O*O*O*O};
 	};
 
-	// TODO.low consider changing all these allow signed integers as well? Not sure what pros and cons are.
 	template<Order O, typename T>
 	concept Any_o1x_t = std::unsigned_integral<T> && std::numeric_limits<T>::max() >= (Ints<O>::O1-1);
 
@@ -129,13 +128,29 @@ namespace okiidoku::mono {
 	using grid_val_t = int_ts::o2is_t<O>;
 
 
-	template<Order O> [[nodiscard, gnu::const]] constexpr int_ts::o2i_t<O> rmi_to_row(const int_ts::o4i_t<O> rmi) noexcept { return static_cast<int_ts::o2i_t<O>>(rmi / (Ints<O>::O2)); }
-	template<Order O> [[nodiscard, gnu::const]] constexpr int_ts::o2i_t<O> rmi_to_col(const int_ts::o4i_t<O> rmi) noexcept { return static_cast<int_ts::o2i_t<O>>(rmi % (Ints<O>::O2)); }
+	template<Order O> [[nodiscard, gnu::const]] constexpr int_ts::o2i_t<O> rmi_to_row(const int_ts::o4i_t<O> rmi) noexcept {
+		using T = Ints<O>;
+		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(rmi < T::O4);
+		return static_cast<int_ts::o2i_t<O>>(rmi / (Ints<O>::O2));
+	}
+	template<Order O> [[nodiscard, gnu::const]] constexpr int_ts::o2i_t<O> rmi_to_col(const int_ts::o4i_t<O> rmi) noexcept {
+		using T = Ints<O>;
+		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(rmi < T::O4);
+		return static_cast<int_ts::o2i_t<O>>(rmi % (Ints<O>::O2));
+	}
 	template<Order O> [[nodiscard, gnu::const]] constexpr int_ts::o2i_t<O> rmi_to_box(const int_ts::o2i_t<O> row, const int_ts::o2i_t<O> col) noexcept {
-		return static_cast<int_ts::o2i_t<O>>((row / O) * O) + (col / O);
+		using T = Ints<O>;
+		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(row < T::O2);
+		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(col < T::O2);
+		using o2i_t = int_ts::o2i_t<O>;
+		const auto box {static_cast<o2i_t>(static_cast<o2i_t>((row / O) * O) + (col / O))};
+		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(box < T::O2);
+		return box;
 	}
 	template<Order O> [[nodiscard, gnu::const]]
 	constexpr int_ts::o2i_t<O> rmi_to_box(const int_ts::o4i_t<O> rmi) noexcept {
+		using T = Ints<O>;
+		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(rmi < T::O4);
 		return rmi_to_box<O>(rmi_to_row<O>(rmi), rmi_to_col<O>(rmi));
 	}
 	template<Order O> [[nodiscard, gnu::const]]
@@ -163,6 +178,19 @@ namespace okiidoku::mono {
 	}
 
 
+	template<Order O, class T_row, class T_col>
+	requires(Any_o2x_t<O, T_row>, Any_o2x_t<O, T_col>) [[nodiscard, gnu::const]]
+	constexpr int_ts::o4x_t<O> row_col_to_rmi(const T_row row, const T_col col) noexcept {
+		using T = Ints<O>;
+		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(row < T::O2);
+		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(col < T::O2);
+		using o4x_t = int_ts::o4x_t<O>;
+		const auto rmi {static_cast<o4x_t>((T::O2 * row) + col)};
+		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(rmi < T::O4);
+		return rmi;
+	}
+
+
 	template<Order O, class T_house, class T_house_cell>
 	requires(Any_o2x_t<O, T_house> && Any_o2x_t<O, T_house_cell>) [[nodiscard, gnu::const]]
 	constexpr int_ts::o4x_t<O> box_cell_to_rmi(const T_house box, const T_house_cell box_cell) noexcept {
@@ -172,23 +200,15 @@ namespace okiidoku::mono {
 		using o4x_t = int_ts::o4x_t<O>;
 		const auto row {static_cast<o4x_t>(((box/T::O1)*T::O1) + (box_cell/T::O1))};
 		const auto col {static_cast<o4x_t>(((box%T::O1)*T::O1) + (box_cell%T::O1))};
-		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(row < T::O2);
-		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(col < T::O2);
-		const auto rmi {static_cast<o4x_t>((Ints<O>::O2 * row) + col)};
-		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(rmi < T::O4);
-		return rmi;
+		return row_col_to_rmi<O>(row, col);
 	}
 
 	template<Order O, class T_house, class T_house_cell>
 	requires(Any_o2x_t<O, T_house> && Any_o2x_t<O, T_house_cell>) [[nodiscard, gnu::const]]
 	constexpr int_ts::o4x_t<O> house_cell_to_rmi(const HouseType house_type, const T_house house, const T_house_cell house_cell) noexcept {
-		using T = Ints<O>;
-		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(house < T::O2);
-		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(house_cell < T::O2);
-		using o4x_t = int_ts::o4x_t<O>;
 		switch (house_type) {
-		case HouseType::row: return static_cast<o4x_t>((T::O2*house)+house_cell);
-		case HouseType::col: return static_cast<o4x_t>((T::O2*house_cell)+house);
+		case HouseType::row: return row_col_to_rmi<O>(house, house_cell);
+		case HouseType::col: return row_col_to_rmi<O>(house_cell, house);
 		case HouseType::box: return box_cell_to_rmi<O>(house, house_cell);
 		default: OKIIDOKU_CONTRACT_TRIVIAL_EVAL(false); // std::unreachable
 		}

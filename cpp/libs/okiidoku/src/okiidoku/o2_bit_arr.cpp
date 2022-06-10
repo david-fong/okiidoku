@@ -11,14 +11,15 @@ namespace okiidoku::mono {
 	O2BitArr<O>::count() const noexcept {
 		if constexpr (num_words == 1) {
 			return static_cast<o2i_t>(std::popcount(words_[0]));
+		} else {
+			return static_cast<o2i_t>(std::transform_reduce(
+				#ifdef __cpp_lib_execution
+				std::execution::unseq,
+				#endif
+				words_.cbegin(), words_.cend(), static_cast<o2i_t>(0U), std::plus<o2i_t>{},
+				[](const auto& word){ return static_cast<o2i_t>(std::popcount(word)); }
+			));
 		}
-		return static_cast<o2i_t>(std::transform_reduce(
-			#ifdef __cpp_lib_execution
-			std::execution::unseq,
-			#endif
-			words_.cbegin(), words_.cend(), static_cast<o2i_t>(0U), std::plus<o2i_t>{},
-			[](const auto& word){ return static_cast<o2i_t>(std::popcount(word)); }
-		));
 	}
 
 
@@ -50,17 +51,18 @@ namespace okiidoku::mono {
 		assert(count() > 0);
 		if constexpr (num_words == 1) {
 			return static_cast<o2xs_t>(std::countr_zero(words_[0]));
-		}
-		o2xs_t count {0};
-		for (const auto& word : words_) {
-			if (word == 0) {
-				count += word_t_num_bits;
-			} else {
-				count += static_cast<o2xs_t>(std::countr_zero(word));
-				break;
+		} else {
+			o2xs_t count {0};
+			for (const auto& word : words_) {
+				if (word == 0) {
+					count += word_t_num_bits;
+				} else {
+					count += static_cast<o2xs_t>(std::countr_zero(word));
+					break;
+				}
 			}
+			return count;
 		}
-		return count;
 	}
 
 

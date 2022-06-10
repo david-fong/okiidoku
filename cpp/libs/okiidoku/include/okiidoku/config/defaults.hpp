@@ -43,7 +43,7 @@
 #endif
 
 #ifndef OKIIDOKU_COMPILE_O10
-#define OKIIDOKU_COMPILE_O10 true
+#define OKIIDOKU_COMPILE_O10 false
 #endif
 
 #ifndef OKIIDOKU_COMPILE_O11

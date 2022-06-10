@@ -63,8 +63,8 @@ unsigned test_morph(okiidoku::SharedRng& shared_rng, const unsigned num_rounds) 
 		const auto chute_cell {static_cast<o3x_t>(((i%T::O1)*T::O2)+j)};
 		const auto h_chute_cell_rmi {chute_cell_to_rmi<O>(LineType::row, chute, chute_cell)};
 		const auto v_chute_cell_rmi {chute_cell_to_rmi<O>(LineType::col, chute, chute_cell)};
-		assert(h_chute_cell_rmi == ((i*T::O2)+j));
-		assert(v_chute_cell_rmi == ((j*T::O2)+i));
+		assert(h_chute_cell_rmi == row_col_to_rmi<O>(i,j));
+		assert(v_chute_cell_rmi == row_col_to_rmi<O>(j,i));
 	}}
 
 	unsigned int count_bad {0};
@@ -147,7 +147,7 @@ int main(const int argc, char const *const argv[]) {
 	okiidoku::SharedRng shared_rng;
 	shared_rng.rng.seed(srand_key);
 
-	if (test_morph<3>(shared_rng, num_rounds) != 0) { return 1; }
+	if (test_morph<5>(shared_rng, num_rounds) != 0) { return 1; }
 	// #define OKIIDOKU_FOR_COMPILED_O(O_) \
 	// if (test_morph<O_>(shared_rng, num_rounds) != 0) { return 1; }
 	// OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
