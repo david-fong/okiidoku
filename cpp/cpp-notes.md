@@ -99,3 +99,11 @@ things I got wrong before which I couldn't understand based on gcc's error messa
 - [non-exported dependencies of exported static libraries](https://gitlab.kitware.com/cmake/cmake/-/issues/17357)
 
 - [moving to c++ modules](https://devblogs.microsoft.com/cppblog/moving-a-project-to-cpp-named-modules/)
+
+## misc VS Code regexes
+
+filter source code: `*.hpp,*.cpp`
+
+```regex
+static_cast<(int_ts|o[1-5])
+```

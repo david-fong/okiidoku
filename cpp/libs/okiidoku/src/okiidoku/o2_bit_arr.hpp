@@ -65,20 +65,24 @@ namespace okiidoku::mono {
 
 		// count the number of set bits.
 		[[nodiscard, gnu::pure]] o2i_t count() const noexcept;
+
 		// count the number of set bits below the specified bit index.
 		// contract: `end < O2`.
 		[[nodiscard, gnu::pure]] o2x_t count_set_bits_below(const o2x_t end) const noexcept;
 
+		// contract: `at < O2`
 		[[nodiscard, gnu::pure]] bool test(const o2x_t at) const noexcept {
 			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(at < T::O2);
 			const word_t word_bit_mask {word_bit_mask_for_bit_i(at)};
 			return (words_[bit_i_to_word_i(at)] & word_bit_mask) != 0;
 		}
+		// contract: `at < O2`
 		constexpr void set(const o2x_t at) noexcept {
 			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(at < T::O2);
 			const word_t word_bit_mask {word_bit_mask_for_bit_i(at)};
 			words_[bit_i_to_word_i(at)] |= word_bit_mask;
 		}
+		// contract: `at < O2`
 		constexpr void unset(const o2x_t at) noexcept {
 			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(at < T::O2);
 			const word_t word_bit_mask {word_bit_mask_for_bit_i(at)};
@@ -100,12 +104,14 @@ namespace okiidoku::mono {
 			words_.fill(0);
 		}
 
+		// contract: `at < O2`
 		[[nodiscard, gnu::pure]] static bool test_any3(const o2x_t at, const O2BitArr& a, const O2BitArr& b, const O2BitArr& c) noexcept {
 			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(at < T::O2);
 			const auto word_i {bit_i_to_word_i(at)};
 			const word_t word_bit_mask {word_bit_mask_for_bit_i(at)};
 			return ((a.words_[word_i] | b.words_[word_i] | c.words_[word_i]) & word_bit_mask) != 0;
 		}
+		// contract: `at < O2`
 		static void set3(const o2x_t at, O2BitArr& a, O2BitArr& b, O2BitArr& c) noexcept {
 			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(at < T::O2);
 			const auto word_i {bit_i_to_word_i(at)};
@@ -114,6 +120,7 @@ namespace okiidoku::mono {
 			b.words_[word_i] |= word_bit_mask;
 			c.words_[word_i] |= word_bit_mask;
 		}
+		// contract: `at < O2`
 		static void unset3(const o2x_t at, O2BitArr& a, O2BitArr& b, O2BitArr& c) noexcept {
 			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(at < T::O2);
 			const auto word_i {bit_i_to_word_i(at)};
@@ -139,7 +146,7 @@ namespace okiidoku::mono {
 		}
 
 		// contract: this mask has at least one set bit.
-		// a suitably long and ugly name for a sharp, niche, optimized knife.
+		// Note: a suitably long and ugly function name for a sharp, niche, optimized knife.
 		[[nodiscard, gnu::pure]] o2xs_t count_lower_zeros_assuming_non_empty_mask() const noexcept;
 
 		// contract: `set_bit_i` < O2 and there are at least `set_bit_i+1` set bits.
@@ -191,17 +198,16 @@ namespace okiidoku::mono {
 
 	template<Order O>
 	struct chute_box_masks final {
-		using M = O2BitArr<O>;
-		static constexpr std::array<M, O> row {[]{
-			std::array<M, O> mask;
+		static constexpr std::array<O2BitArr<O>, O> row {[]{
+			std::array<O2BitArr<O>, O> mask;
 			for (unsigned chute {0}; chute < O; ++chute) {
 				for (unsigned i {0}; i < O; ++i) {
 					mask[chute].set(static_cast<int_ts::o2x_t<O>>((O*chute) + i));
 			}	}
 			return mask;
 		}()};
-		static constexpr std::array<M, O> col {[]{
-			std::array<M, O> mask;
+		static constexpr std::array<O2BitArr<O>, O> col {[]{
+			std::array<O2BitArr<O>, O> mask;
 			for (unsigned chute {0}; chute < O; ++chute) {
 				for (unsigned i {0}; i < O; ++i) {
 					mask[chute].set(static_cast<int_ts::o2x_t<O>>((O*i) + chute));
