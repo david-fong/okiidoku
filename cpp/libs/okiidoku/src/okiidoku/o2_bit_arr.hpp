@@ -33,12 +33,16 @@ namespace okiidoku::mono {
 		static constexpr word_i_t num_words {(T::O2 + word_t_num_bits-1) / word_t_num_bits}; static_assert(num_words != 0);
 		static constexpr word_bit_i_t num_excess_bits {(num_words * word_t_num_bits) - T::O2};
 
+		// contract: `bit_i < T::O2`
 		[[nodiscard, gnu::const]]
 		static constexpr word_i_t bit_i_to_word_i(const o2x_t bit_i) noexcept {
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(bit_i < T::O2);
 			return bit_i / word_t_num_bits;
 		}
+		// contract: `bit_i < T::O2`
 		[[nodiscard, gnu::const]]
 		static constexpr word_t word_bit_mask_for_bit_i(const o2x_t bit_i) noexcept {
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(bit_i < T::O2);
 			return static_cast<word_t>(word_t{1} << static_cast<word_bit_i_t>(bit_i % word_t_num_bits));
 		}
 
@@ -53,7 +57,7 @@ namespace okiidoku::mono {
 		static consteval O2BitArr create_ones_() noexcept {
 			O2BitArr<O> _ {};
 			for (auto& word : _.words_) { word = ~word; }
-			_.words_.back() >>= O2BitArr<O>::num_excess_bits;
+			_.words_.back() = static_cast<word_t>(_.words_.back() >> O2BitArr<O>::num_excess_bits);
 			return _;
 		}
 
@@ -83,7 +87,7 @@ namespace okiidoku::mono {
 
 		void remove(const O2BitArr& to_remove) noexcept {
 			for (word_i_t i {0}; i < num_words; ++i) {
-				words_[i] &= ~to_remove.words_[i];
+				words_[i] &= static_cast<word_t>(~to_remove.words_[i]);
 			}
 		}
 		void retain_only(const O2BitArr& to_retain) noexcept {

@@ -2,6 +2,7 @@
 
 #include <range/v3/algorithm/shuffle.hpp>
 
+#include <random> // minstd_rand
 #include <array>
 #include <cassert>
 

@@ -202,7 +202,7 @@ namespace okiidoku::mono::detail::solver {
 		void enqueue_cand_elims_for_new_cell_claim_sym_(rmi_t rmi) noexcept;
 
 		void debug_print_cells_cands_() const noexcept;
-		[[nodiscard]] bool debug_check_correct_num_puzcells_remaining_() const noexcept;
+		[[nodiscard, gnu::pure]] bool debug_check_correct_num_puzcells_remaining_() const noexcept;
 
 
 		Frame frame_ {

@@ -133,7 +133,7 @@ namespace okiidoku::visitor {
 	namespace detail {
 		class GridAdaptor final {
 		public:
-			static constexpr bool is_borrowtype = false;
+			static constexpr bool is_borrow_type = false;
 			template<Order O>
 			using type = mono::Grid<O>;
 		};

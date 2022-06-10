@@ -50,7 +50,7 @@ namespace okiidoku {
 		// template parameters other than just the order.
 		template<typename T>
 		concept MonoToVisitorAdaptor = requires() {
-			std::same_as<decltype(T::is_borrowtype), bool>;
+			std::same_as<decltype(T::is_borrow_type), bool>;
 			#define OKIIDOKU_FOR_COMPILED_O(O_) typename T::template type<O_>;
 			OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 			#undef OKIIDOKU_FOR_COMPILED_O
@@ -76,8 +76,8 @@ namespace okiidoku {
 		public:
 			using variant_t = OrderVariantFor<Adaptor>;
 
-			// delete the default constructor if Adaptor::is_borrowtype is true.
-			ContainerBase() requires(Adaptor::is_borrowtype) = delete;
+			// delete the default constructor if Adaptor::is_borrow_type is true.
+			ContainerBase() requires(Adaptor::is_borrow_type) = delete;
 
 			// copy-from-mono constructor
 			template<Order O>
@@ -86,7 +86,7 @@ namespace okiidoku {
 			// default-for-order constructor.
 			// If the provided order is not compiled, defaults to the lowest compiled order.
 			explicit ContainerBase(const Order O) noexcept requires(
-				!Adaptor::is_borrowtype
+				!Adaptor::is_borrow_type
 				#define OKIIDOKU_FOR_COMPILED_O(O_) \
 				&& std::is_nothrow_default_constructible_v<typename Adaptor::template type<O_>>
 				OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES

@@ -42,7 +42,7 @@ namespace okiidoku::mono {
 namespace okiidoku::visitor::detail {
 	class TransformationAdaptor final {
 	public:
-		static constexpr bool is_borrowtype = false;
+		static constexpr bool is_borrow_type = false;
 		template<Order O>
 		using type = okiidoku::mono::Transformation<O>;
 	};

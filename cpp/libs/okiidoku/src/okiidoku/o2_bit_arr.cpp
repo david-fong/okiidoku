@@ -93,7 +93,7 @@ namespace okiidoku::mono {
 			//// word &= ~bit_mask;
 			// return std::countr_zero(bit_mask);
 		}
-		assert(false); // TODO.wait c++23 std::unreachable
+		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(false); // TODO.wait c++23 std::unreachable
 		return 0;
 	}
 

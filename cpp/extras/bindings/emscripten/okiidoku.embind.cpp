@@ -34,7 +34,9 @@ EMSCRIPTEN_BINDINGS(okiidoku) {
 	namespace oki_v = okiidoku::visitor;
 
 	// em::constant("sharedRng", oki::shared_rng);
-	// TODO.wait currently noexcept functions can't be bound to classes (unintentionally) https://github.com/emscripten-core/emscripten/pull/15273
+	// TODO.wait currently noexcept functions can't be bound to classes (unintentionally)
+	//  https://github.com/emscripten-core/emscripten/pull/15273
+	//  https://github.com/emscripten-core/emscripten/pull/17140
 	em::class_<oki::SharedRng>("SharedRng")
 		// .function("seed", &oki::seed_shared_rng)
 		;

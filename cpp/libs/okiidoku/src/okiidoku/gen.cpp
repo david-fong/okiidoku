@@ -18,11 +18,23 @@ namespace okiidoku::mono { namespace {
 		using T = Ints<O>;
 		using V = int_ts::o1i_t<O>;
 		using o3i_t = int_ts::o3i_t<O>;
-		[[nodiscard]] o3i_t count_num_missing_syms() const noexcept { return static_cast<o3i_t>(std::count(store_.cbegin(), store_.cend(), V{0})); }
-		template<class T_house, class T_sym> requires(Any_o1x_t<O, T_house> && Any_o2x_t<O, T_sym>)
-		[[nodiscard]] const V& box_count_sym(const T_house box, const T_sym sym) const noexcept { return store_[(T::O1*sym)+box]; }
-		template<class T_house, class T_sym> requires(Any_o1x_t<O, T_house> && Any_o2x_t<O, T_sym>)
-		[[nodiscard]]       V& box_count_sym(const T_house box, const T_sym sym)       noexcept { return store_[(T::O1*sym)+box]; }
+		[[nodiscard, gnu::pure]] o3i_t count_num_missing_syms() const noexcept {
+			return static_cast<o3i_t>(std::count(store_.cbegin(), store_.cend(), V{0}));
+		}
+		template<class T_house, class T_sym>
+		requires(Any_o1x_t<O, T_house> && Any_o2x_t<O, T_sym>)
+		[[nodiscard, gnu::pure]] const V& box_count_sym(const T_house box, const T_sym sym) const noexcept {
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(box < T::O1);
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(sym < T::O2);
+			return store_[(T::O1*sym)+box];
+		}
+		template<class T_house, class T_sym>
+		requires(Any_o1x_t<O, T_house> && Any_o2x_t<O, T_sym>)
+		[[nodiscard, gnu::pure]] V& box_count_sym(const T_house box, const T_sym sym) noexcept {
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(box < T::O1);
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(sym < T::O2);
+			return store_[(T::O1*sym)+box];
+		}
 	private:
 		// rows for each symbol, entry-in-row for each box.
 		std::array<V, T::O3> store_ {0};
@@ -35,12 +47,15 @@ namespace okiidoku::mono { namespace {
 		using o2x_t = int_ts::o2x_t<O>;
 		using o2i_t = int_ts::o2i_t<O>;
 		using o3i_t = int_ts::o3i_t<O>;
+		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(h_chute <= T::O2-T::O1);
 
 		// unsigned long long op_count {0};
 		CountSymsInInvalidBox<O> boxes_has {};
 		for (o2i_t row {h_chute}; row < h_chute+T::O1; ++row) {
 		for (o2i_t col {0}; col < T::O2; ++col) {
-			++(boxes_has.box_count_sym(static_cast<o1x_t>(col/T::O1), grid.at(row,col)));
+			auto& count {boxes_has.box_count_sym(static_cast<o1x_t>(col/T::O1), grid.at(row,col))};
+			++count;
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(count <= T::O1);
 		}}
 		o3i_t num_missing_syms {boxes_has.count_num_missing_syms()};
 		while (num_missing_syms != 0) [[likely]] {
@@ -60,6 +75,7 @@ namespace okiidoku::mono { namespace {
 				(boxes_has.box_count_sym(b_box,a_sym) == 0 ?  1 : 0)   // improvement
 			)};
 			if (num_missing_syms_resolved >= 0) [[unlikely]] { // TODO.low for fun: find out on average at what op_count it starts being unlikely
+				OKIIDOKU_CONTRACT_TRIVIAL_EVAL(num_missing_syms >= static_cast<o3i_t>(num_missing_syms_resolved));
 				num_missing_syms = static_cast<o3i_t>(num_missing_syms - static_cast<o3i_t>(num_missing_syms_resolved));
 				--boxes_has.box_count_sym(a_box,a_sym);
 				++boxes_has.box_count_sym(a_box,b_sym);
@@ -78,11 +94,23 @@ namespace okiidoku::mono { namespace {
 		using T = Ints<O>;
 		using V = int_ts::o2is_t<O>;
 		using o3i_t = int_ts::o3i_t<O>;
-		[[nodiscard]] o3i_t count_num_missing_syms() const noexcept { return static_cast<o3i_t>(std::count(store_.cbegin(), store_.cend(), V{0})); }
-		template<class T_col, class T_sym> requires(Any_o1x_t<O, T_col> && Any_o2x_t<O, T_sym>)
-		[[nodiscard]] const V& col_count_sym(const T_col col, const T_sym sym) const noexcept { return store_[(T::O1*sym)+col]; }
-		template<class T_col, class T_sym> requires(Any_o1x_t<O, T_col> && Any_o2x_t<O, T_sym>)
-		[[nodiscard]]       V& col_count_sym(const T_col col, const T_sym sym)       noexcept { return store_[(T::O1*sym)+col]; }
+		[[nodiscard, gnu::pure]] o3i_t count_num_missing_syms() const noexcept {
+			return static_cast<o3i_t>(std::count(store_.cbegin(), store_.cend(), V{0}));
+		}
+		template<class T_col, class T_sym>
+		requires(Any_o1x_t<O, T_col> && Any_o2x_t<O, T_sym>)
+		[[nodiscard, gnu::pure]] const V& col_count_sym(const T_col col, const T_sym sym) const noexcept {
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(col < T::O1);
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(sym < T::O2);
+			return store_[(T::O1*sym)+col];
+		}
+		template<class T_col, class T_sym>
+		requires(Any_o1x_t<O, T_col> && Any_o2x_t<O, T_sym>)
+		[[nodiscard, gnu::pure]] V& col_count_sym(const T_col col, const T_sym sym) noexcept {
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(col < T::O1);
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(sym < T::O2);
+			return store_[(T::O1*sym)+col];
+		}
 	private:
 		// rows for each symbol, entry-in-row for each col.
 		std::array<V, T::O3> store_ {0};
@@ -96,12 +124,15 @@ namespace okiidoku::mono { namespace {
 		using o2x_t = int_ts::o2x_t<O>;
 		using o2i_t = int_ts::o2i_t<O>;
 		using o3i_t = int_ts::o3i_t<O>;
+		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(v_chute <= T::O2-T::O1);
 
 		// unsigned long long op_count {0};
 		CountSymsInInvalidCol<O> cols_has {};
 		for (o2i_t row {0}; row < T::O2; ++row) {
 		for (o1i_t box_col {0}; box_col < T::O1; ++box_col) {
-			++(cols_has.col_count_sym(box_col, grid.at(row, static_cast<o2x_t>(v_chute + box_col))));
+			auto& count {cols_has.col_count_sym(box_col, grid.at(row, static_cast<o2x_t>(v_chute + box_col)))};
+			++count;
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(count <= T::O1);
 		}}
 		o3i_t num_missing_syms {cols_has.count_num_missing_syms()};
 		while (num_missing_syms != 0) [[likely]] {
@@ -109,8 +140,8 @@ namespace okiidoku::mono { namespace {
 			const auto b_col {static_cast<o1x_t>((rng() - rng_t::min()) % T::O1)};
 			if (a_col == b_col) [[unlikely]] { continue; }
 			const auto row {static_cast<o2x_t>((rng() - rng_t::min()) % (T::O2))};
-			auto& a_sym {grid.at(row, static_cast<o2i_t>(v_chute + a_col))};
-			auto& b_sym {grid.at(row, static_cast<o2i_t>(v_chute + b_col))};
+			auto& a_sym {grid.at(row, static_cast<o2x_t>(v_chute + a_col))};
+			auto& b_sym {grid.at(row, static_cast<o2x_t>(v_chute + b_col))};
 			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(a_sym != b_sym);
 			const auto num_missing_syms_resolved {static_cast<signed char>(
 				(cols_has.col_count_sym(a_col,a_sym) == 1 ? -1 : 0) + // regression
@@ -119,6 +150,7 @@ namespace okiidoku::mono { namespace {
 				(cols_has.col_count_sym(b_col,a_sym) == 0 ?  1 : 0)   // improvement
 			)};
 			if (num_missing_syms_resolved >= 0) [[unlikely]] {
+				OKIIDOKU_CONTRACT_TRIVIAL_EVAL(num_missing_syms >= static_cast<o3i_t>(num_missing_syms_resolved));
 				num_missing_syms = static_cast<o3i_t>(num_missing_syms - static_cast<o3i_t>(num_missing_syms_resolved));
 				--cols_has.col_count_sym(a_col,a_sym);
 				++cols_has.col_count_sym(a_col,b_sym);
@@ -134,7 +166,7 @@ namespace okiidoku::mono { namespace {
 namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
-	void generate(Grid<O>& grid, rng_seed_t rng_seed) noexcept {
+	void generate(Grid<O>& grid, const rng_seed_t rng_seed) noexcept {
 		using T = Ints<O>;
 		using o2i_t = int_ts::o2i_t<O>;
 		{
@@ -155,6 +187,7 @@ namespace okiidoku::mono {
 		/* Note: when making boxes valid, keeping one line untouched works,
 		but is actually slower. same for making columns valid and one box. */
 
+		// Note: iterations _can_ safely run in parallel.
 		for (o2i_t h_chute {0}; h_chute < T::O2; h_chute += T::O1) {
 			make_boxes_valid(grid, h_chute, rng);
 		}

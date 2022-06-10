@@ -6,7 +6,8 @@
 #include <okiidoku/detail/contract.hpp>
 
 #include <functional> // bit_or
-#include <algorithm> // find_if, transform_reduce
+#include <numeric> // transform_reduce
+#include <algorithm> // sort
 #include <execution>
 #include <array>
 
@@ -77,7 +78,9 @@ namespace okiidoku::mono::detail::solver { namespace {
 		O2BitArr<O> combo_syms {};
 		for (; combo_walker.has_more(); combo_walker.advance()) {
 			combo_syms = std::transform_reduce(
+				#ifdef __cpp_lib_execution
 				std::execution::unseq,
+				#endif
 				combo_walker.at_it(),
 				std::next(combo_walker.at_it(), subset_size),
 				O2BitArr<O>{}, std::bit_or{}, [&](const auto i) -> const auto& {

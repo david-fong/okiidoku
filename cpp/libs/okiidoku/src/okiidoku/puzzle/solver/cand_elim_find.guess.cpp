@@ -2,10 +2,11 @@
 
 #include <okiidoku/puzzle/solver/found.hpp>
 
-#include <algorithm>
+#include <numeric> // transform_reduce
+#include <algorithm> // sort
 #include <execution>
 #include <array>
-#include <tuple>
+#include <tuple> // tie (for comparisons)
 
 #include <okiidoku/puzzle/solver/cand_elim_find.macros.hpp>
 
@@ -63,13 +64,15 @@ namespace okiidoku::mono::detail::solver { namespace {
 		}};
 		[[maybe_unused]] const auto get_network_size {[&](const o4i_t rmi) -> o3i_t {
 			return std::transform_reduce(
+				#ifdef __cpp_lib_execution
 				std::execution::unseq,
+				#endif
 				guess_stack.cbegin(), guess_stack.cend(), static_cast<o3i_t>(0), std::plus<o3i_t>{},
 				[rmi](const auto& frame) -> o3i_t {
 					o3i_t count {0};
 					const auto other_rmi {frame.guess.rmi};
 					if (rmi_to_row<O>(rmi) == rmi_to_row<O>(other_rmi)) [[unlikely]] { ++count; }
-					if (rmi_to_col<O>(rmi) == rmi_to_box<O>(other_rmi)) [[unlikely]] { ++count; }
+					if (rmi_to_col<O>(rmi) == rmi_to_col<O>(other_rmi)) [[unlikely]] { ++count; }
 					if (rmi_to_box<O>(rmi) == rmi_to_box<O>(other_rmi)) [[unlikely]] { ++count; }
 					return count;
 				}
@@ -84,7 +87,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 		assert(best_rmi < T::O4);
 		auto best_cand_count {cells_cands.at_rmi(best_rmi).count()}; // lower is better
 		auto best_house_solved_counts {get_house_solved_counts(best_rmi)}; // lex smaller is better (?)
-		auto best_network_size {get_network_size(best_rmi)}; // larger is better (I think?)
+		[[maybe_unused]] auto best_network_size {get_network_size(best_rmi)}; // larger is better (I think?)
 
 		for (o4i_t rmi {static_cast<o4i_t>(best_rmi+1U)}; rmi < T::O4; ++rmi) {
 			const auto cand_count {cells_cands.at_rmi(rmi).count()};

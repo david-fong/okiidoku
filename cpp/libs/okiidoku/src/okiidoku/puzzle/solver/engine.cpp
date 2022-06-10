@@ -55,7 +55,7 @@ namespace okiidoku::mono::detail::solver {
 		Grid<O> soln;
 		for (o4i_t rmi {0}; rmi < T::O4; ++rmi) {
 			const auto& cell_cands {cells_cands().at_rmi(rmi)};
-			assert(cell_cands.count() == 1);
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(cell_cands.count() == 1);
 			soln.at_rmi(rmi) = cell_cands.count_lower_zeros_assuming_non_empty_mask();
 		}
 		assert(grid_is_filled(soln));
@@ -128,11 +128,11 @@ namespace okiidoku::mono::detail::solver {
 		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(val < T::O2);
 		auto& cell_cands {mut_cells_cands().at_rmi(rmi)};
 		assert(cell_cands.test(val));
-		assert(cell_cands.count() > 1);
+		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(cell_cands.count() > 1);
 		cell_cands.unset_all();
 		cell_cands.set(val);
 		assert(cell_cands.test(val));
-		assert(cell_cands.count() == 1);
+		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(cell_cands.count() == 1);
 		enqueue_cand_elims_for_new_cell_claim_sym_(rmi);
 	}
 
@@ -144,7 +144,7 @@ namespace okiidoku::mono::detail::solver {
 		assert(!no_solutions_remain());
 		assert(get_num_puzcells_remaining() > 0);
 		const auto& cell_cands {cells_cands().at_rmi(rmi)};
-		assert(cell_cands.count() == 1);
+		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(cell_cands.count() == 1);
 		const auto val {cell_cands.count_lower_zeros_assuming_non_empty_mask()};
 		assert(cell_cands.test(val));
 		found_queues_.push_back(found::CellClaimSym<O>{.rmi{rmi},.val{val}});
@@ -160,7 +160,7 @@ namespace okiidoku::mono::detail::solver {
 		assert(!no_solutions_remain());
 		assert(!has_queued_cand_elims());
 		assert(cells_cands().at_rmi(guess.rmi).test(guess.val));
-		assert(cells_cands().at_rmi(guess.rmi).count() > 1);
+		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(cells_cands().at_rmi(guess.rmi).count() > 1);
 		guess_stack_.emplace_back(frame_, guess);
 
 		register_new_given_(guess.rmi, guess.val);
@@ -187,7 +187,7 @@ namespace okiidoku::mono::detail::solver {
 		const auto guess {std::move(guess_frame.guess)};
 		auto& cell_cands {e.mut_cells_cands().at_rmi(guess.rmi)};
 		assert(cell_cands.test(guess.val));
-		assert(cell_cands.count() > 1);
+		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(cell_cands.count() > 1);
 		cell_cands.unset(guess.val);
 		if (cell_cands.count() == 1) [[unlikely]] {
 			e.enqueue_cand_elims_for_new_cell_claim_sym_(guess.rmi);

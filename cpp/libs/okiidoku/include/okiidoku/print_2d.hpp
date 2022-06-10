@@ -5,6 +5,7 @@
 
 #include <iosfwd>
 #include <functional> // function
+#include <tuple>
 #include <span>
 
 namespace okiidoku {

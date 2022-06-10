@@ -6,7 +6,6 @@
 #include <algorithm>
 #include <numeric> // iota
 #include <vector>
-#include <tuple>
 #include <cassert>
 
 namespace okiidoku { namespace {

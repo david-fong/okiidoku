@@ -27,6 +27,7 @@
 
 ## Misc List
 
+- re-test network size thing. there was previously a bug in checking same-column.
 - control of subset size when finding subset things
 - consider a finder-heuristic that only starts using more powerful finders when then guess stack gets to a certain depth- at which point it unwinds to one-above the last frame that used more powerful finders, and uses more powerful finders.
   - will have to create some modified version of unwinding which doesn't rule out the guess.
