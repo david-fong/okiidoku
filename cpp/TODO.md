@@ -25,6 +25,7 @@
 
 ## Misc List
 
+- see the TODO for `get_guess_grouping`.
 - consider changing O2BitArr test to take an o2i_t instead of o2x_t. The caller-side casting is annoying.
 - try to use [unavoidable set](https://www.sudopedia.org/wiki/Unavoidable_Set) / deadly pattern detection to optimize proper-puzzle-making.
 - control of subset size when finding subset things
@@ -33,6 +34,7 @@
   - will have to create some modified version of unwinding which doesn't rule out the guess.
   - or more fine grained: each guess stack frame has a "logic depth/effort" field that describes the finders that were used before the guess was made. Ex. used up to finding subsets of size 2 before the guess was made.
 - play around with giving puzzle maker a threshold to stop trying to solve a candidate puzzle after N guesses, or give up (or mark as try-again-later) seeing if a given is safe to remove after N guesses.
+- try actually working through turning on warnings for sign conversion and see how it affect code readability and performance.
 
 - experiment with optimizations for solving smaller grids.
   - less `unique_ptr` usage.
@@ -45,11 +47,6 @@
 
 - find out how to use the [cppcoreguidelines checker](https://docs.microsoft.com/en-us/cpp/code-quality/using-the-cpp-core-guidelines-checkers?view=msvc-170)
   - I want to use it in a way that is driven by cmake
-
-- experiment with using compiler "assume" hints (asserts are checked at runtime. assumptions are not checked and used for optimizations (to do the opposite: "remove checks")).
-  - [GSL](https://conan.io/center/ms-gsl) has a macro ["`GSL_ASSUME`"](https://github.com/microsoft/GSL/blob/main/include/gsl/assert) to do this on MSVC, Clang, and GCC. Feels weird to add an entire dependency just for a tiny macro though...
-  - [standardization proposal](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p1774r4.pdf)
-  - [interesting clang thing](https://github.com/microsoft/GSL/pull/608)
 
 - see if grid qualities (like being a solution, being a proper puzzle, being a minimal puzzle), can be encoded through the type system and make it so that always-safe conversions (such as ) are easy, but "unsafe" (not always true) have to either go through an `unsafe_cast_X_grid_to_Y_grid` function, or go through a `checked_cast_X_grid_to_Y_grid`, which may have a non-trivial performance penalty.
   - This would allow making many of the current contracts part of the type system; turning-runtime-error-into-compiler-errors-TM. I would no longer need to write such contract and post-condition comments.

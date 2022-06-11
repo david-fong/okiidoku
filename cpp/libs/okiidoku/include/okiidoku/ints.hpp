@@ -23,6 +23,16 @@ namespace okiidoku {
 		HouseType::col,
 		HouseType::box
 	})};
+	template<typename V> requires(!std::is_reference_v<V>)
+	struct HouseTypeMap final {
+		// HouseTypeMap();
+		[[nodiscard, gnu::pure]] const V& at(const HouseType key) const noexcept { return arr_[static_cast<unsigned char>(key)]; };
+		[[nodiscard, gnu::pure]]       V& at(const HouseType key)       noexcept { return arr_[static_cast<unsigned char>(key)]; };
+		[[nodiscard, gnu::pure]] const auto& get_underlying_arr() const noexcept { return arr_; };
+		[[nodiscard, gnu::pure]]       auto& get_underlying_arr()       noexcept { return arr_; };
+	private:
+		std::array<V, house_types.size()> arr_;
+	};
 
 	enum class LineType : unsigned char {
 		row, col,

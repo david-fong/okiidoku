@@ -23,7 +23,7 @@ namespace okiidoku::mono::detail::solver {
 		mut_cells_cands().get_underlying_array().fill(O2BitArr_ones<O>);
 		for (const auto house_type : house_types) {
 		for (o2i_t house {0}; house < T::O2; ++house) {
-			auto& subs {frame_.houses_subsets[static_cast<unsigned char>(house_type)][house]};
+			auto& subs {frame_.houses_subsets.at(house_type)[house]};
 			for (o2i_t house_cell {0}; house_cell < T::O2; ++house_cell) {
 				auto& cell_tag {subs.cell_tags[house_cell]};
 				cell_tag.rmi = static_cast<rmi_t>(house_cell_to_rmi<O>(house_type, house, house_cell));

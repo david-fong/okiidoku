@@ -62,16 +62,16 @@ namespace okiidoku::mono::detail::solver { namespace {
 		const int_ts::o2i_t<O> sub_z,
 		int_ts::o2x_t<O>& subset_size
 	) noexcept {
-		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(sub_a+subset_size+1 < sub_z);
 		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
-		auto& cells_cands {engine.cells_cands()};
+		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(subset_size > 0);
+		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(subset_size < T::O2);
+		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(sub_a+subset_size+1 < sub_z);
 		SubsetComboWalker<O> combo_walker {
 			static_cast<o2x_t>(sub_a),
 			[&]{
-				for (auto i {sub_a}; i < sub_z; ++i) {
-					if (subs.cell_tags[i].count_cache > subset_size) { return i; }
-				}
-				return sub_z;
+				auto sized_z {sub_a};
+				while (sized_z < T::O2 && subs.cell_tags[sized_z].count_cache <= subset_size) { ++sized_z; }
+				return sized_z;
 			}(),
 			subset_size,
 		};
@@ -84,7 +84,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 				combo_walker.at_it(),
 				std::next(combo_walker.at_it(), subset_size),
 				O2BitArr<O>{}, std::bit_or{}, [&](const auto i) -> const auto& {
-					return cells_cands.at_rmi(subs.cell_tags[i].rmi);
+					return engine.cells_cands().at_rmi(subs.cell_tags[i].rmi);
 				}
 			);
 			if (combo_syms.count() <  subset_size) [[unlikely]] { return unwind_one_stack_frame_of_(engine); }
@@ -122,6 +122,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 		const auto get_next_sub_a {[&]{
 			auto next {static_cast<o2i_t>(sub_a+1)};
 			while (next < T::O2 && !subs.is_begin.test(static_cast<o2x_t>(next))) { ++next; }
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(next <= T::O2);
 			return next;
 		}};
 		o2x_t subset_size {2};
@@ -134,6 +135,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 			for (auto i {static_cast<o2i_t>(sub_a+1)}; i < sub_z; ++i) {
 				assert(!subs.is_begin.test(static_cast<o2x_t>(i)));
 			}
+			// TODO consider adding some optimization to very quickly skip past consecutive singles (subsets of size 1).j probably by implementing some custom O2BitArr member function
 			// update candidate-symbol count cache fields for the subset:
 			{
 				// TODO profile and add likelihood attributes
@@ -195,7 +197,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 		for (const auto house_type : house_types) {
 		for (o2i_t house {0}; house < T::O2; ++house) {
 			const auto check {helper_find_and_check_needs_unwind<O>(
-				engine, engine.houses_subsets()[static_cast<unsigned char>(house_type)][house]
+				engine, engine.houses_subsets().at(house_type)[house]
 			)};
 			if (check.did_unwind()) [[unlikely]] { return check; }
 		}}

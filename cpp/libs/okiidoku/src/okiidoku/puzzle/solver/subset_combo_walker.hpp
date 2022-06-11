@@ -87,7 +87,7 @@ namespace okiidoku::mono::detail::solver {
 
 		// there are `subset_size` entries with strictly increasing values in the
 		// range [`begin`, `end`).
-		combo_t combo_ {};
+		combo_t combo_ {}; // TODO consider intentionally not default initializing for performance. may need to add NOLINT. We have assertions.
 
 		void assert_is_state_valid_() const noexcept {
 			#ifndef NDEBUG

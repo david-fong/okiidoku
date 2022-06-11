@@ -101,6 +101,11 @@ things I got wrong before which I couldn't understand based on gcc's error messa
 
 - [moving to c++ modules](https://devblogs.microsoft.com/cppblog/moving-a-project-to-cpp-named-modules/)
 
+- compiler "assume" hints (asserts are checked at runtime. assumptions are not checked and used for optimizations (to do the opposite: "remove checks")).
+  - [GSL](https://conan.io/center/ms-gsl) has a macro ["`GSL_ASSUME`"](https://github.com/microsoft/GSL/blob/main/include/gsl/assert) to do this on MSVC, Clang, and GCC.
+  - [standardization proposal](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p1774r4.pdf)
+  - [interesting clang thing](https://github.com/microsoft/GSL/pull/608)
+
 ## misc VS Code regexes
 
 filter source code: `*.hpp,*.cpp`

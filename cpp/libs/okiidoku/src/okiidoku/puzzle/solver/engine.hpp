@@ -104,9 +104,8 @@ namespace okiidoku::mono::detail::solver {
 			std::array<CellTag, T::O2> cell_tags;
 			O2BitArr<O> is_begin;
 		};
-		using houses_subsets_t = std::array<
-			std::array<HouseSubsets, T::O2>,
-			house_types.size()
+		using houses_subsets_t = HouseTypeMap<
+			std::array<HouseSubsets, T::O2>
 		>;
 
 		struct Frame final {

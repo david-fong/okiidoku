@@ -40,6 +40,7 @@ If you do something cool with it, that's great! I'd love to hear about it.
 - There are more. Google it.
   - [github:sudoku-generator](https://github.com/topics/sudoku-generator), [github:sudoku-puzzle](https://github.com/topics/sudoku-puzzle)
   - [sudopedia programs list](http://sudopedia.enjoysudoku.com/Sudoku_Programs.html)
+  - [repos I've starred on github](https://github.com/stars/david-fong/lists/sudoku)
 
 ## My Past and Future Related Works
 
