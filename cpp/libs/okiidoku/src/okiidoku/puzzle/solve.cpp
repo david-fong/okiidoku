@@ -56,15 +56,19 @@ namespace okiidoku::mono {
 			static constexpr auto finders {std::to_array({
 				std::cref(Find::sym_claim_cell),
 				// std::cref(Find::locked_cands), // TODO draft implementation not yet tested. please debug and check it behaves as intended.
-				// std::cref(Find::cells_claim_syms),
+				std::cref(Find::cells_claim_syms),
 			})};
 			// TODO after finding hidden singles, can apply and then go straight to finding subsets
 			{
 				auto check {detail::solver::UnwindInfo::make_no_unwind()};
 				// using finder_t = typename decltype(finders)::value_type;
+				int i = 0;
 				for (const auto& finder : finders) {
+					using T = Ints<O>;
+					if (i >= 1 && e.get_guess_stack_depth() /* % (T::O1) */ != 0) [[likely]] { break; }
 					check = finder(e);
 					if (check.did_unwind() || e.has_queued_cand_elims()) { break; }
+					++i;
 				}
 				if (check.did_unwind_root()) [[unlikely]] { return std::nullopt; }
 				if (check.did_unwind() || e.has_queued_cand_elims()) { /* times_used_more_finders = 0; */ continue; }

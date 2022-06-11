@@ -62,7 +62,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 				return _;
 			}
 		}};
-		[[maybe_unused]] const auto get_network_size {[&](const o4i_t rmi) -> o3i_t {
+		[[maybe_unused]] const auto get_guess_grouping {[&](const o4i_t rmi) -> o3i_t {
 			return std::transform_reduce(
 				#ifdef __cpp_lib_execution
 				std::execution::unseq,
@@ -87,7 +87,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 		assert(best_rmi < T::O4);
 		auto best_cand_count {cells_cands.at_rmi(best_rmi).count()}; // lower is better
 		auto best_house_solved_counts {get_house_solved_counts(best_rmi)}; // lex smaller is better (?)
-		[[maybe_unused]] auto best_network_size {get_network_size(best_rmi)}; // larger is better (I think?)
+		[[maybe_unused]] auto best_guess_grouping {get_guess_grouping(best_rmi)}; // larger is better (I think?)
 
 		for (o4i_t rmi {static_cast<o4i_t>(best_rmi+1U)}; rmi < T::O4; ++rmi) {
 			const auto cand_count {cells_cands.at_rmi(rmi).count()};
@@ -96,15 +96,22 @@ namespace okiidoku::mono::detail::solver { namespace {
 			// consider alternatively writing as saving cmp vars for each comparison
 			// so can "early exit" as soon as one is not better (before calculating
 			// ingredients for future comparisons).
-			const auto network_size {get_network_size(rmi)}; // TODO this doesn't seem to help :/
+			const auto guess_grouping {get_guess_grouping(rmi)}; // TODO this doesn't seem to help :/
 			const auto house_solved_counts {get_house_solved_counts(rmi)};
-			if (std::tie(/* best_network_size,  */     cand_count,      house_solved_counts)
-			  < std::tie(/*      network_size,  */best_cand_count, best_house_solved_counts)
-			) [[unlikely]] {
+
+			if ([&]{
+				if constexpr (O < 5) {
+					return std::tie(     cand_count,      house_solved_counts)
+			  		     < std::tie(best_cand_count, best_house_solved_counts);
+				} else {
+					return std::tie(     cand_count,      guess_grouping,      house_solved_counts)
+			  		     < std::tie(best_cand_count, best_guess_grouping, best_house_solved_counts);
+				}
+			}()) [[unlikely]] {
 				best_rmi = rmi;
 				best_cand_count = cand_count;
 				best_house_solved_counts = house_solved_counts;
-				best_network_size = network_size;
+				best_guess_grouping = guess_grouping;
 			}
 		}
 		return Guess<O>{

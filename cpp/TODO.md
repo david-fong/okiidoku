@@ -25,7 +25,6 @@
 
 ## Misc List
 
-- re-test network size thing. there was previously a bug in checking same-column.
 - try to use [unavoidable set](https://www.sudopedia.org/wiki/Unavoidable_Set) / deadly pattern detection to optimize proper-puzzle-making.
 - control of subset size when finding subset things
 - consider a finder-heuristic that only starts using more powerful finders when then guess stack gets to a certain depth- at which point it unwinds to one-above the last frame that used more powerful finders, and uses more powerful finders.
