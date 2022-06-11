@@ -37,8 +37,8 @@ namespace okiidoku::mono::detail::solver {
 				for (o2x_t i {0}; i < subset_size_; ++i) {
 					combo_[i] = static_cast<o2xs_t>(begin_ + i);
 				}
-				assert_is_state_valid_();
 			}
+			assert_is_state_valid_();
 		}
 
 		[[nodiscard, gnu::pure]] bool has_more() const noexcept {

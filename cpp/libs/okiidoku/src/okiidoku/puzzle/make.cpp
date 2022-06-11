@@ -63,6 +63,17 @@ namespace okiidoku::mono {
 		}};
 		o4i_t num_keepers {0};
 
+		// Note: will remove the logging once I'm done working on solver (ie. far in the future)
+		const auto call_debug_log_fn {[&](auto&& fn){
+			if constexpr (O < 5) {
+				#ifndef NDEBUG
+				fn();
+				#endif
+			} else {
+				fn();
+			}
+		}};
+
 		FastSolver<O> solver {};
 		while (num_puzcell_cands > 0) {
 			const auto puzcell_cand_i {static_cast<o4i_t>((rng() - rng_t::min()) % num_puzcell_cands)};
@@ -72,16 +83,16 @@ namespace okiidoku::mono {
 			const auto val {std::exchange(grid.at_rmi(rmi), static_cast<grid_val_t<O>>(T::O2))};
 			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(val < T::O2);
 
-			#ifndef NDEBUG
-			std::clog << "\n\n#puzcell cands: " << int(num_puzcell_cands) << ". try rm @ " << int(rmi) << std::flush;
-			#endif
-			solver.reinit_with_puzzle(grid, {{.rmi{rmi}, .val{static_cast<o2x_t>(val)}}});
+			call_debug_log_fn([&]{
+				std::clog << "\n\n#puzcell cands: " << int(num_puzcell_cands) << ". try rm @ " << int(rmi) << std::flush;
+			});
 
+			solver.reinit_with_puzzle(grid, {{.rmi{rmi}, .val{static_cast<o2x_t>(val)}}});
 			if (const auto new_soln_opt {solver.get_next_solution()}; new_soln_opt) {
 				// multiple solutions now possible. removal would break properness. don't remove.
-				#ifndef NDEBUG
-				std::clog << "\nmultiple solutions possible! rm failed" << std::flush;
-				#endif
+				call_debug_log_fn([&]{
+					std::clog << "\nmultiple solutions possible! rm failed" << std::flush;
+				});
 				grid.at_rmi(rmi) = val;
 				++num_keepers;
 			}

@@ -10,7 +10,7 @@ ARGUMENTS
 1: grid order (default defined in compiled_orders).
 2: scramble random key (default: device random number).
 */
-int main([[maybe_unused]] const int argc, [[maybe_unused]] char const *const argv[]) {
+int main(const int argc, char const *const argv[]) {
 	okiidoku::util::setup_console();
 
 	// unsigned int user_order; // 1
@@ -20,7 +20,7 @@ int main([[maybe_unused]] const int argc, [[maybe_unused]] char const *const arg
 	// << "\n- ARG 1 [[ grid order ]] : " << user_order
 	// << std::endl;
 
-	// TODO.high
+	(void)argc; (void)argv; // TODO
 
 	return 0;
 }

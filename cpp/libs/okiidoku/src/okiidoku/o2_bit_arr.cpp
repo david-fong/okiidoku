@@ -10,15 +10,19 @@ namespace okiidoku::mono {
 	typename O2BitArr<O>::o2i_t
 	O2BitArr<O>::count() const noexcept {
 		if constexpr (num_words == 1) {
-			return static_cast<o2i_t>(std::popcount(words_[0]));
+			const auto count {std::popcount(words_[0])};
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(count <= T::O2);
+			return static_cast<o2i_t>(count);
 		} else {
-			return static_cast<o2i_t>(std::transform_reduce(
+			const auto count {std::transform_reduce(
 				#ifdef __cpp_lib_execution
 				std::execution::unseq,
 				#endif
 				words_.cbegin(), words_.cend(), static_cast<o2i_t>(0U), std::plus<o2i_t>{},
 				[](const auto& word){ return static_cast<o2i_t>(std::popcount(word)); }
-			));
+			)};
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(count <= T::O2);
+			return static_cast<o2i_t>(count);
 		}
 	}
 

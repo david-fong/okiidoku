@@ -97,7 +97,11 @@ namespace okiidoku::mono::detail::solver {
 		using o4i_t = int_ts::o4i_t<O>;
 
 		struct HouseSubsets final {
-			std::array<rmi_t, T::O2> rmi;
+			struct CellTag {
+				rmi_t rmi;
+				int_ts::o2is_t<O> count_cache;
+			};
+			std::array<CellTag, T::O2> cell_tags;
 			O2BitArr<O> is_begin;
 		};
 		using houses_subsets_t = std::array<

@@ -79,3 +79,8 @@ hypothesis: making guesses all packed in the same / nearby line-box intersection
 question: could there be a correlation between good guess candidates and cells that could not be removed as givens ("keepers")? Try making a guess-suggester that favours guessing at a cell which sees many keepers.
 
 If a base puzzle is known to be proper, and then a given G is removed to create a derived puzzle, it is known that there is always exactly one solution to the derived puzzle where the cell at G.rmi takes on G.val, and that solution is the solution of the base puzzle. Therefore, if the goal is to check that the derived puzzle is still proper or not, one can remove G as a candidate from all the guess stack frames. Also- I wonder if it would be more efficient to focus the first guess in the stack at the cell of G.
+
+If the guess stack is size N and a guess needs to be popped, currently, the popped guess is ruled out for the guess stack frame beneath it. Is there any way to
+-  Is there any such thing as re-ordering the guess stack entries? If so, is there any potential usefulness from doing that?
+  - Is it possible that for a given guess stack at a state where it is not yet known whether the guesses result in a valid or invalid solution, that the entries could have been made in a different order (and result in the same knowledge of what candidates still remain)?
+    - The FastSolver currently still promises to visit all possible solutions to a puzzle, for which I think the guess stack behaviour as a stack is essential.

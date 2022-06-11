@@ -69,6 +69,7 @@ things I got wrong before which I couldn't understand based on gcc's error messa
 - [file open mode shorthands](https://en.cppreference.com/w/cpp/io/basic_filebuf/open)
 
 - [move simply - herb sutter](https://herbsutter.com/2020/02/17/move-simply/)
+- [forwarding](https://medium.com/factset/modern-c-in-depth-perfect-forwarding-570f242261f8)
 
 - [modern iterators](https://www.internalpointers.com/post/writing-custom-iterators-modern-cpp)
 

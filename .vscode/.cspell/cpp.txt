@@ -5,6 +5,7 @@ consteval
 countr
 cout
 cppcoreguidelines
+cppref
 CTAD
 emscripten
 gteq

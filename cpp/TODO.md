@@ -25,12 +25,14 @@
 
 ## Misc List
 
+- consider changing O2BitArr test to take an o2i_t instead of o2x_t. The caller-side casting is annoying.
 - try to use [unavoidable set](https://www.sudopedia.org/wiki/Unavoidable_Set) / deadly pattern detection to optimize proper-puzzle-making.
 - control of subset size when finding subset things
-- consider a finder-heuristic that only starts using more powerful finders when then guess stack gets to a certain depth- at which point it unwinds to one-above the last frame that used more powerful finders, and uses more powerful finders.
+- consider a finder-heuristic that only starts using more powerful finders when the guess stack gets to a certain depth- at which point it unwinds to one-above the last frame that used more powerful finders, and uses more powerful finders.
+  - Hm. But the guess stack depth doesn't necessarily correspond to when it may make the most sense to again use more expensive deduction techniques, since I don't know if there's any saying how much further deduction a guess may enable.
   - will have to create some modified version of unwinding which doesn't rule out the guess.
   - or more fine grained: each guess stack frame has a "logic depth/effort" field that describes the finders that were used before the guess was made. Ex. used up to finding subsets of size 2 before the guess was made.
-- play around with giving puzzle maker a threshold to stop trying to solve a candidate puzzle after N guesses.
+- play around with giving puzzle maker a threshold to stop trying to solve a candidate puzzle after N guesses, or give up (or mark as try-again-later) seeing if a given is safe to remove after N guesses.
 
 - experiment with optimizations for solving smaller grids.
   - less `unique_ptr` usage.
@@ -95,7 +97,7 @@
   - `using enum`. Might want to wait for CLANG to support?
 - C++23
   - http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/p2214r0.html#does-adjacent-mean-2-or-n
-  - `std::to_underlying()`
+  - `std::to_underlying()` strange since cppref says all my standard library versions support it already? but it doesn't compile?
   - `std::unreachable()`
   - `std::ranges::iota()`
   - `std::views::chunk()`

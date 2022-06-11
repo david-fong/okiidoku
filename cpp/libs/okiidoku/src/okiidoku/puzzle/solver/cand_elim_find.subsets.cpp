@@ -69,7 +69,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 			static_cast<o2x_t>(sub_a),
 			[&]{
 				for (auto i {sub_a}; i < sub_z; ++i) {
-					if (cells_cands.at_rmi(subs.rmi[i]).count() > subset_size) { return i; }
+					if (subs.cell_tags[i].count_cache > subset_size) { return i; }
 				}
 				return sub_z;
 			}(),
@@ -84,7 +84,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 				combo_walker.at_it(),
 				std::next(combo_walker.at_it(), subset_size),
 				O2BitArr<O>{}, std::bit_or{}, [&](const auto i) -> const auto& {
-					return cells_cands.at_rmi(subs.rmi[i]);
+					return cells_cands.at_rmi(subs.cell_tags[i].rmi);
 				}
 			);
 			if (combo_syms.count() <  subset_size) [[unlikely]] { return unwind_one_stack_frame_of_(engine); }
@@ -92,13 +92,13 @@ namespace okiidoku::mono::detail::solver { namespace {
 		}
 		if (combo_syms.count() == subset_size) [[unlikely]] {
 			for (o2x_t combo_at {0}; combo_at < subset_size; ++combo_at) {
-				auto& entry {subs.rmi[combo_walker.combo_at(combo_at)]};
-				std::swap(subs.rmi[sub_a], entry);
+				auto& entry {subs.cell_tags[combo_walker.combo_at(combo_at)]};
+				std::swap(subs.cell_tags[sub_a], entry);
 				++sub_a;
 			}
 			subs.is_begin.set(static_cast<o2x_t>(sub_a));
 			for (auto i {sub_a}; i < sub_z; ++i) {
-				const auto check {engine.do_elim_remove_syms_(subs.rmi[i], combo_syms)};
+				const auto check {engine.do_elim_remove_syms_(subs.cell_tags[i].rmi, combo_syms)};
 				if (check.did_unwind()) [[unlikely]] { return check; }
 			}
 			subset_size = 2;
@@ -119,43 +119,64 @@ namespace okiidoku::mono::detail::solver { namespace {
 		const auto& cells_cands {engine.cells_cands()};
 		o2i_t sub_a {0};
 		o2i_t sub_z {0};
-		const auto update_sub_z {[&]{
-			for (sub_z = sub_a+1; sub_z < T::O2 && !subs.is_begin.test(static_cast<o2x_t>(sub_z)); ++sub_z) {}
+		const auto get_next_sub_a {[&]{
+			auto next {static_cast<o2i_t>(sub_a+1)};
+			while (next < T::O2 && !subs.is_begin.test(static_cast<o2x_t>(next))) { ++next; }
+			return next;
 		}};
 		o2x_t subset_size {2};
 
 		while (sub_a < T::O2) {
-			update_sub_z();
+			sub_z = get_next_sub_a();
 			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(sub_z <= T::O2);
 			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(sub_a < sub_z);
 			assert(subs.is_begin.test(static_cast<o2x_t>(sub_a)));
-			#ifndef NDEBUG
-			for (auto i {static_cast<o2i_t>(sub_a+1)}; i < sub_z; ++i) { assert(!subs.is_begin.test(static_cast<o2x_t>(i))); }
-			#endif
-			// sort to enable the `sub_sized_end` optimization and size-one-subset updates.
+			for (auto i {static_cast<o2i_t>(sub_a+1)}; i < sub_z; ++i) {
+				assert(!subs.is_begin.test(static_cast<o2x_t>(i)));
+			}
+			// update candidate-symbol count cache fields for the subset:
+			{
+				// TODO profile and add likelihood attributes
+				bool no_change {true};
+				for (o2i_t i {sub_a}; i < sub_z; ++i) {
+					auto& cell_tag {subs.cell_tags[i]};
+					OKIIDOKU_CONTRACT_TRIVIAL_EVAL(cell_tag.count_cache >= cells_cands.at_rmi(cell_tag.rmi).count());
+					const auto count {static_cast<int_ts::o2is_t<O>>(cells_cands.at_rmi(cell_tag.rmi).count())};
+					if (cell_tag.count_cache > count) {
+						no_change = false;
+						cell_tag.count_cache = count;
+					}
+				}
+				if (no_change) {
+					sub_a = sub_z;
+					continue;
+				}
+			}
+			// sort to enable the `sub_sized_end` optimization and size-one-subset updates:
 			std::sort(
-				std::next(subs.rmi.begin(), static_cast<long>(sub_a)),
-				std::next(subs.rmi.begin(), static_cast<long>(sub_z)),
-				[&](const auto& rmi_a, const auto& rmi_b){
-					return cells_cands.at_rmi(rmi_a).count() < cells_cands.at_rmi(rmi_b).count();
+				std::next(subs.cell_tags.begin(), static_cast<long>(sub_a)),
+				std::next(subs.cell_tags.begin(), static_cast<long>(sub_z)),
+				[&](const auto& tag_a, const auto& tag_b){
+					return tag_a.count_cache < tag_b.count_cache;
 				}
 			);
-			// size-one-subset detect and update:
-			if (cells_cands.at_rmi(subs.rmi[sub_a]).count() == 1) [[unlikely]] {
+			// detect and update state for already-found CellClaimSym:
+			if (subs.cell_tags[sub_a].count_cache == 1) [[unlikely]] {
 				do {
 					++sub_a;
 					if (sub_a == T::O2) [[unlikely]] { break; }
 					subs.is_begin.set(static_cast<o2x_t>(sub_a));
-				} while (sub_a < sub_z && cells_cands.at_rmi(subs.rmi[sub_a]).count() == 1);
+				} while (sub_a < sub_z && subs.cell_tags[sub_a].count_cache == 1);
 				continue; // TODO optimize to skip sort when re-loop?
 			}
+			// try to find sub-subsets:
 			while (sub_a+subset_size+1 < sub_z) {
 				// ^plus one to skip finding hidden singles. // TODO or also try to find them?
 				const auto check {try_find_subset_for_size(engine, subs, sub_a, sub_z, subset_size)};
 				if (check.did_unwind()) [[unlikely]] { return check; }
 				if (subset_size == 2) [[unlikely]] {
 					break;
-				} // TODO currently ugly detection of successful subset find
+				} // TODO currently ugly/fairly-unreadable method of detection of successful subset find
 			}
 			if (!(sub_a+subset_size+1 < sub_z)) [[likely]] {
 				subset_size = 2;

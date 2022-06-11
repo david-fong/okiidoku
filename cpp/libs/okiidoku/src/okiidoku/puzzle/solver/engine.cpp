@@ -25,7 +25,9 @@ namespace okiidoku::mono::detail::solver {
 		for (o2i_t house {0}; house < T::O2; ++house) {
 			auto& subs {frame_.houses_subsets[static_cast<unsigned char>(house_type)][house]};
 			for (o2i_t house_cell {0}; house_cell < T::O2; ++house_cell) {
-				subs.rmi[house_cell] = static_cast<rmi_t>(house_cell_to_rmi<O>(house_type, house, house_cell));
+				auto& cell_tag {subs.cell_tags[house_cell]};
+				cell_tag.rmi = static_cast<rmi_t>(house_cell_to_rmi<O>(house_type, house, house_cell));
+				cell_tag.count_cache = T::O2;
 			}
 			subs.is_begin.unset_all();
 			subs.is_begin.set(0);

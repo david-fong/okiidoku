@@ -72,11 +72,20 @@ namespace okiidoku::mono {
 		[[nodiscard, gnu::pure]]       array_t& get_underlying_array()       noexcept { return arr_; };
 		[[nodiscard, gnu::pure]] const array_t& get_underlying_array() const noexcept { return arr_; };
 
+		// TODO.low why does adding an assumption that the value is lteq T::O2 result in increased code size on clang?
 		// contract: `rmi` is in [0, O4).
 		template<class T_rmi> requires(Any_o4x_t<O, T_rmi>)
-		[[nodiscard]] constexpr       val_t& at_rmi(const T_rmi rmi)       noexcept { OKIIDOKU_CONTRACT_TRIVIAL_EVAL(rmi < T::O4); return arr_[rmi]; }
+		[[nodiscard]] constexpr       val_t& at_rmi(const T_rmi rmi)       noexcept {
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(rmi < T::O4);
+			// if constexpr (std::same_as<V_, grid_val_t<O>>) { OKIIDOKU_CONTRACT_TRIVIAL_EVAL(arr_[rmi] <= T::O2); }
+			return arr_[rmi];
+		}
 		template<class T_rmi> requires(Any_o4x_t<O, T_rmi>)
-		[[nodiscard]] constexpr const val_t& at_rmi(const T_rmi rmi) const noexcept { OKIIDOKU_CONTRACT_TRIVIAL_EVAL(rmi < T::O4); return arr_[rmi]; }
+		[[nodiscard]] constexpr const val_t& at_rmi(const T_rmi rmi) const noexcept {
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(rmi < T::O4);
+			// if constexpr (std::same_as<V_, grid_val_t<O>>) { OKIIDOKU_CONTRACT_TRIVIAL_EVAL(arr_[rmi] <= T::O2); }
+			return arr_[rmi];
+		}
 
 		// TODO.low why is using row_col_to_rmi slower than "inlining" the expression here? Is it because of the return-type cast? even adding bounds assumptions seems to increase code size...
 		// contract: `row` and `col` are in [0, O2).
