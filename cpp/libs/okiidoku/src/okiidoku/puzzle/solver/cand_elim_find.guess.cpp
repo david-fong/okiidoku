@@ -14,10 +14,6 @@
 namespace okiidoku::mono::detail::solver { namespace {
 
 	/*
-	hypothesis: making guesses all packed in the same / nearby line-box intersections
-	increases the probability of finding "contradictory" guesses earlier, since those
-	guesses will concentrate their eliminations in the same lines and boxes.
-
 	question: could there be a correlation between good guess candidates and cells that
 	could not be removed as givens ("keepers")? Try making a guess-suggester that favours
 	guessing at a cell which sees many keepers.
@@ -78,7 +74,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 				best_rmi = rmi;
 				break;
 		}	}
-		assert(best_rmi < T::O4);
+		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(best_rmi < T::O4);
 		auto best_cand_count {cells_cands.at_rmi(best_rmi).count()};
 		auto best_house_solved_counts {get_house_solved_counts(best_rmi)};
 		[[maybe_unused]] auto best_guess_grouping {get_guess_grouping(best_rmi)};
@@ -110,6 +106,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 		return Guess<O>{
 			.rmi{static_cast<rmi_t>(best_rmi)},
 			.val{cells_cands.at_rmi(best_rmi).count_lower_zeros_assuming_non_empty_mask()},
+			// TODO search for better way to choose which sym to guess.
 		};
 	}
 

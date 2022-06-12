@@ -168,7 +168,7 @@ namespace okiidoku::mono::detail::solver {
 		register_new_given_(guess.rmi, guess.val);
 		++total_guesses_;
 		#ifndef NDEBUG
-		std::clog << "\nguess+(" << get_guess_stack_depth() << ") " << int(guess.rmi) << " " << int(guess.val);
+		std::clog << "\nguess+(" << get_guess_stack_depth() << ") " << int(guess.rmi) << ":" << int(guess.val);
 		// debug_print_cells_cands_();
 		#endif
 	}

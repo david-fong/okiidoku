@@ -19,11 +19,7 @@ namespace okiidoku::mono::detail::solver {
 
 		static UnwindInfo locked_cands(Engine<O>&) noexcept;
 
-		// AKA "naked subsets"
-		static UnwindInfo cells_claim_syms(Engine<O>&) noexcept;
-
-		// AKA "hidden subsets"
-		static UnwindInfo syms_claim_cells(Engine<O>&) noexcept;
+		static UnwindInfo subsets(Engine<O>&) noexcept;
 
 		// static UnwindInfo fish(Engine<O>&) noexcept;
 

@@ -11,29 +11,17 @@
 #include <type_traits>
 
 /**
-This class is a primitive for building a primarily-deductive solver.
-It uses a cell-major representation. See the design docs for more info.
-It exposes a mechanism to use backtracking (guessing)- intended as a
- fallback after applying at least _some_ deductive techniques.
+The "engine" is a primitive for building a solver capable of finding all
+ solutions to a puzzle. It uses a cell-major representation, and implements
+ simple solving techniques: singles, subsets, and locked candidates. To enable
+ finding all solutions, the guess mechanism is a backtrack-able stack. The
+ engine user may- for example- optimize for speed by favouring guessing over
+ more expensive deduction techniques, or vice versa to act more like a puzzle
+ difficulty ranker.
 
-Currently it is private to the library and used to build the public
- FastSolver and VeryDeductiveSolver.
-
-The contracts require dutiful care to follow. Ie. where it sees fit, it
- optimizes for the performance of its intended use-cases at the cost of
- the mental overhead of knowing and following the resulting contracts.
-
-I imagine an average library _user_ would not be interested in such tinkering.
-Of course, anyone can clone the repo and do such tinkering within it if they wish.
-
-Examples of various ways this could be used:
-- FastSolver: eagerly/immediately consumes found candidate eliminations
-- VeryDeductive: "hoards"/accumulates found candidate eliminations until
-	no more can possibly be found without consuming any.
-- hypothetical "StupidSolver" purely uses the guess mechanism (_very_
-   inefficient, but it would still be able to find all possible solutions)
-  - note that the engine saves large restore-states for each guess based
-     on the assumption that guesses shouldn't be used excessively.
+I don't expect the average person checking out this library to be interested
+ in such tinkering, and there are more usage contracts to follow than there
+ are in the rest of the library, so it is not part of the library interface.
 */
 namespace okiidoku::mono::detail::solver {
 
@@ -236,6 +224,7 @@ namespace okiidoku::mono::detail::solver {
 
 		// please read the contracts for the referenced functions.
 		using EngineImpl<O>::reinit_with_puzzle;
+		using EngineImpl<O>::do_elim_remove_sym_;
 		using EngineImpl<O>::no_solutions_remain;
 		using EngineImpl<O>::has_queued_cand_elims;
 		using EngineImpl<O>::get_num_puzcells_remaining;
@@ -246,8 +235,6 @@ namespace okiidoku::mono::detail::solver {
 
 		// contract: `no_solutions_remain` returns `false`.
 		UnwindInfo unwind_one_stack_frame() noexcept;
-
-		using EngineImpl<O>::do_elim_remove_sym_;
 	};
 
 

@@ -55,7 +55,56 @@ namespace okiidoku::mono::detail::solver { namespace {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	UnwindInfo try_find_subset_for_size(
+	[[nodiscard]] bool prepare_find_in_subset_and_check_can_skip(
+		const CandsGrid<O>& cells_cands,
+		typename EngineImpl<O>::HouseSubsets& subs,
+		int_ts::o2i_t<O>& sub_a,
+		const int_ts::o2i_t<O> sub_z
+	) noexcept {
+		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
+		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(sub_a < sub_z);
+		// TODO consider adding some optimization to very quickly skip past consecutive singles (subsets of size 1).j probably by implementing some custom O2BitArr member function
+		// update candidate-symbol count cache fields for the subset:
+		{
+			// TODO profile and add likelihood attributes
+			bool no_change {true};
+			for (o2i_t i {sub_a}; i < sub_z; ++i) {
+				auto& cell_tag {subs.cell_tags[i]};
+				OKIIDOKU_CONTRACT_TRIVIAL_EVAL(cell_tag.count_cache >= cells_cands.at_rmi(cell_tag.rmi).count());
+				const auto count {static_cast<int_ts::o2is_t<O>>(cells_cands.at_rmi(cell_tag.rmi).count())};
+				if (cell_tag.count_cache > count) {
+					no_change = false;
+					cell_tag.count_cache = count;
+				}
+			}
+			if (no_change) {
+				sub_a = sub_z;
+				return true;
+			}
+		}
+		// sort to enable the `sub_sized_end` optimization and size-one-subset updates:
+		std::sort(
+			std::next(subs.cell_tags.begin(), static_cast<long>(sub_a)),
+			std::next(subs.cell_tags.begin(), static_cast<long>(sub_z)),
+			[&](const auto& tag_a, const auto& tag_b){
+				return tag_a.count_cache < tag_b.count_cache;
+			}
+		);
+		// detect and update state for already-found CellClaimSym:
+		if (subs.cell_tags[sub_a].count_cache == 1) [[unlikely]] {
+			do {
+				++sub_a;
+				if (sub_a == T::O2) [[unlikely]] { break; }
+				subs.is_begin.set(static_cast<o2x_t>(sub_a));
+			} while (sub_a < sub_z && subs.cell_tags[sub_a].count_cache == 1);
+			return true; // TODO somehow optimize to skip the above sort when re-loop?
+		}
+		return false;
+	}
+
+
+	template<Order O> requires(is_order_compiled(O))
+	UnwindInfo find_in_subset(
 		EngineImpl<O>& engine,
 		typename EngineImpl<O>::HouseSubsets& subs,
 		int_ts::o2i_t<O>& sub_a,
@@ -111,15 +160,15 @@ namespace okiidoku::mono::detail::solver { namespace {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	UnwindInfo helper_find_and_check_needs_unwind(
+	UnwindInfo find_subsets_for_house_and_check_needs_unwind(
 		EngineImpl<O>& engine,
 		typename EngineImpl<O>::HouseSubsets& subs
 	) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
-		const auto& cells_cands {engine.cells_cands()};
 		o2i_t sub_a {0};
 		o2i_t sub_z {0};
 		const auto get_next_sub_a {[&]{
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(sub_a < T::O2);
 			auto next {static_cast<o2i_t>(sub_a+1)};
 			while (next < T::O2 && !subs.is_begin.test(static_cast<o2x_t>(next))) { ++next; }
 			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(next <= T::O2);
@@ -135,46 +184,15 @@ namespace okiidoku::mono::detail::solver { namespace {
 			for (auto i {static_cast<o2i_t>(sub_a+1)}; i < sub_z; ++i) {
 				assert(!subs.is_begin.test(static_cast<o2x_t>(i)));
 			}
-			// TODO consider adding some optimization to very quickly skip past consecutive singles (subsets of size 1).j probably by implementing some custom O2BitArr member function
-			// update candidate-symbol count cache fields for the subset:
-			{
-				// TODO profile and add likelihood attributes
-				bool no_change {true};
-				for (o2i_t i {sub_a}; i < sub_z; ++i) {
-					auto& cell_tag {subs.cell_tags[i]};
-					OKIIDOKU_CONTRACT_TRIVIAL_EVAL(cell_tag.count_cache >= cells_cands.at_rmi(cell_tag.rmi).count());
-					const auto count {static_cast<int_ts::o2is_t<O>>(cells_cands.at_rmi(cell_tag.rmi).count())};
-					if (cell_tag.count_cache > count) {
-						no_change = false;
-						cell_tag.count_cache = count;
-					}
-				}
-				if (no_change) {
-					sub_a = sub_z;
-					continue;
-				}
-			}
-			// sort to enable the `sub_sized_end` optimization and size-one-subset updates:
-			std::sort(
-				std::next(subs.cell_tags.begin(), static_cast<long>(sub_a)),
-				std::next(subs.cell_tags.begin(), static_cast<long>(sub_z)),
-				[&](const auto& tag_a, const auto& tag_b){
-					return tag_a.count_cache < tag_b.count_cache;
-				}
-			);
-			// detect and update state for already-found CellClaimSym:
-			if (subs.cell_tags[sub_a].count_cache == 1) [[unlikely]] {
-				do {
-					++sub_a;
-					if (sub_a == T::O2) [[unlikely]] { break; }
-					subs.is_begin.set(static_cast<o2x_t>(sub_a));
-				} while (sub_a < sub_z && subs.cell_tags[sub_a].count_cache == 1);
-				continue; // TODO optimize to skip sort when re-loop?
+			if (prepare_find_in_subset_and_check_can_skip(
+				engine.cells_cands(), subs, sub_a, sub_z
+			)) {
+				continue;
 			}
 			// try to find sub-subsets:
 			while (sub_a+subset_size+1 < sub_z) {
 				// ^plus one to skip finding hidden singles. // TODO or also try to find them?
-				const auto check {try_find_subset_for_size(engine, subs, sub_a, sub_z, subset_size)};
+				const auto check {find_in_subset(engine, subs, sub_a, sub_z, subset_size)};
 				if (check.did_unwind()) [[unlikely]] { return check; }
 				if (subset_size == 2) [[unlikely]] {
 					break;
@@ -190,62 +208,29 @@ namespace okiidoku::mono::detail::solver { namespace {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	UnwindInfo find_cells_claim_syms_and_check_needs_unwind(
+	UnwindInfo find_subsets_and_check_needs_unwind(
 		EngineImpl<O>& engine
 	) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
 		for (const auto house_type : house_types) {
 		for (o2i_t house {0}; house < T::O2; ++house) {
-			const auto check {helper_find_and_check_needs_unwind<O>(
+			const auto check {find_subsets_for_house_and_check_needs_unwind<O>(
 				engine, engine.houses_subsets().at(house_type)[house]
 			)};
 			if (check.did_unwind()) [[unlikely]] { return check; }
 		}}
 		return UnwindInfo::make_no_unwind();
 	}
-
-
-	/* template<Order O> requires(is_order_compiled(O))
-	[[nodiscard]] bool find_syms_claim_cells_and_check_needs_unwind(
-		const CandsGrid<O>& cells_cands,
-		FoundQueues<O>& found_queues
-	) noexcept {
-		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
-		for (const auto house_type : house_types) {
-		for (o2i_t house {0}; house < T::O2; ++house) {
-			std::array<GroupMe<O>, T::O2> set {};
-			// TODO.mid try applying loop-tiling to see if it improves cache-usage.
-			for (o2i_t symbol {0}; symbol < T::O2; ++symbol) {
-				auto& group_me {set[symbol]};
-				group_me.who = static_cast<o2xs_t>(symbol);
-				for (o2i_t house_cell {0}; house_cell < T::O2; ++house_cell) {
-					const auto rmi {house_cell_to_rmi<O>(house_type, house, house_cell)};
-					if (cells_cands.at_rmi(rmi).test(static_cast<o2x_t>(symbol))) {
-						group_me.cands.set(static_cast<o2x_t>(house_cell));
-					}
-				}
-				group_me.cand_count = static_cast<o2is_t>(group_me.cands.count());
-			}
-			if (helper_find_and_check_needs_unwind<O>(set, [&](auto&& what, auto&& who) noexcept {
-				found_queues.push_back(found::SymsClaimCells<O>{
-					std::move(what), std::move(who), static_cast<o2xs_t>(house), house_type
-				});
-			})) { return true; }
-		}}
-		return false;
-	} */
 }}
 namespace okiidoku::mono::detail::solver {
 
 	OKIIDOKU_CAND_ELIM_FINDER_DEF(sym_claim_cell)
-	OKIIDOKU_CAND_ELIM_FINDER_DEF_ALT(cells_claim_syms)
-	// OKIIDOKU_CAND_ELIM_FINDER_DEF(syms_claim_cells)
+	OKIIDOKU_CAND_ELIM_FINDER_DEF_ALT(subsets)
 	#undef OKIIDOKU_CAND_ELIM_FINDER
 
 	#define OKIIDOKU_FOR_COMPILED_O(O_) \
 		template UnwindInfo CandElimFind<O_>::sym_claim_cell(Engine<O_>&) noexcept; \
-		template UnwindInfo CandElimFind<O_>::cells_claim_syms(Engine<O_>&) noexcept; \
-		// template UnwindInfo CandElimFind<O_>::syms_claim_cells(Engine<O_>&) noexcept;
+		template UnwindInfo CandElimFind<O_>::subsets(Engine<O_>&) noexcept;
 	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 	#undef OKIIDOKU_FOR_COMPILED_O
 }

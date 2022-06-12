@@ -52,9 +52,11 @@ namespace okiidoku::mono {
 	O2BitArr<O>::count_lower_zeros_assuming_non_empty_mask() const noexcept {
 		// Note: without the non-empty-mask assumption, we'd have to
 		//  handle discounting excess top zeros in the empty-mask case.
-		assert(count() > 0);
+		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(count() > 0);
 		if constexpr (num_words == 1) {
-			return static_cast<o2xs_t>(std::countr_zero(words_[0]));
+			const auto count {static_cast<o2xs_t>(std::countr_zero(words_[0]))};
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(count < T::O2);
+			return count;
 		} else {
 			o2xs_t count {0};
 			for (const auto& word : words_) {
@@ -65,6 +67,7 @@ namespace okiidoku::mono {
 					break;
 				}
 			}
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(count < T::O2);
 			return count;
 		}
 	}
