@@ -183,7 +183,7 @@ namespace okiidoku::mono::detail::solver {
 			return UnwindInfo::make_did_unwind_root();
 		}
 		auto& guess_frame {e.guess_stack_.back()};
-		e.frame_ = *std::move(guess_frame.frame);
+		e.frame_ = std::move(guess_frame.frame);
 		assert(e.debug_check_correct_num_puzcells_remaining_());
 
 		const auto guess {std::move(guess_frame.guess)};

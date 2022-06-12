@@ -5,9 +5,8 @@
 #include <okiidoku/grid.hpp>
 #include <okiidoku/o2_bit_arr.hpp>
 
-#include <stack>
+// #include <stack>
 #include <vector>
-#include <memory> // unique_ptr
 #include <type_traits>
 
 /**
@@ -107,11 +106,10 @@ namespace okiidoku::mono::detail::solver {
 		//  This would make the EngineImpl struct size small enough to probably justify no longer wrapping
 		//   Engine with unique_ptr in the Solver classes.
 		struct GuessStackFrame final {
-			// do separate dynamic alloc for each `CandsGrid` to reduce resizing noise.
-			std::unique_ptr<Frame> frame;
+			Frame frame;
 			Guess<O> guess;
 			GuessStackFrame(const Frame& frame_, const Guess<O> guess_) noexcept:
-				frame{std::make_unique<Frame>(frame_)},
+				frame{frame_},
 				guess{guess_}
 			{}
 		};
