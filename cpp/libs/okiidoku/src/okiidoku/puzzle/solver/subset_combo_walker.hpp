@@ -41,6 +41,8 @@ namespace okiidoku::mono::detail::solver {
 			assert_is_state_valid_();
 		}
 
+		[[nodiscard, gnu::pure]] o2x_t get_subset_size() const noexcept { return subset_size_; }
+
 		[[nodiscard, gnu::pure]] bool has_more() const noexcept {
 			return has_more_;
 		}

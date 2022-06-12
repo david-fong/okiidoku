@@ -10,6 +10,7 @@
 #include <algorithm> // sort
 #include <execution>
 #include <array>
+#include <optional>
 
 #include <okiidoku/puzzle/solver/cand_elim_find.macros.hpp>
 
@@ -55,14 +56,16 @@ namespace okiidoku::mono::detail::solver { namespace {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	[[nodiscard]] bool prepare_find_in_subset_and_check_can_skip(
+	[[nodiscard]] bool prepare_try_decompose_subset_and_check_can_skip(
 		const CandsGrid<O>& cells_cands,
 		typename EngineImpl<O>::HouseSubsets& subs,
 		int_ts::o2i_t<O>& sub_a,
 		const int_ts::o2i_t<O> sub_z
 	) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
+		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(sub_a < T::O2);
 		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(sub_a < sub_z);
+		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(sub_z <= T::O2);
 		// TODO consider adding some optimization to very quickly skip past consecutive singles (subsets of size 1).j probably by implementing some custom O2BitArr member function
 		// update candidate-symbol count cache fields for the subset:
 		{
@@ -90,7 +93,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 				return tag_a.count_cache < tag_b.count_cache;
 			}
 		);
-		// detect and update state for already-found CellClaimSym:
+		// detect and update state for already-found `CellClaimSym`:
 		if (subs.cell_tags[sub_a].count_cache == 1) [[unlikely]] {
 			do {
 				++sub_a;
@@ -104,58 +107,57 @@ namespace okiidoku::mono::detail::solver { namespace {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	UnwindInfo find_in_subset(
-		EngineImpl<O>& engine,
-		typename EngineImpl<O>::HouseSubsets& subs,
-		int_ts::o2i_t<O>& sub_a,
-		const int_ts::o2i_t<O> sub_z,
-		int_ts::o2x_t<O>& subset_size
+	struct FoundSubsetInfo final {
+		SubsetComboWalker<O> combo_walker;
+		O2BitArr<O> combo_syms;
+	};
+
+
+	template<Order O> requires(is_order_compiled(O))
+	std::optional<FoundSubsetInfo<O>> try_decompose_subset(
+		const CandsGrid<O>& cells_cands,
+		const typename EngineImpl<O>::HouseSubsets& subs,
+		const int_ts::o2i_t<O> sub_a,
+		const int_ts::o2i_t<O> sub_z
 	) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
-		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(subset_size > 0);
-		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(subset_size < T::O2);
-		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(sub_a+subset_size+1 < sub_z);
-		SubsetComboWalker<O> combo_walker {
-			static_cast<o2x_t>(sub_a),
-			[&]{
-				auto sized_z {sub_a};
-				while (sized_z < T::O2 && subs.cell_tags[sized_z].count_cache <= subset_size) { ++sized_z; }
-				return sized_z;
-			}(),
-			subset_size,
-		};
-		O2BitArr<O> combo_syms {};
-		for (; combo_walker.has_more(); combo_walker.advance()) {
-			combo_syms = std::transform_reduce(
-				#ifdef __cpp_lib_execution
-				std::execution::unseq,
-				#endif
-				combo_walker.at_it(),
-				std::next(combo_walker.at_it(), subset_size),
-				O2BitArr<O>{}, std::bit_or{}, [&](const auto i) -> const auto& {
-					return engine.cells_cands().at_rmi(subs.cell_tags[i].rmi);
+		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(sub_a < T::O2);
+		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(sub_a < sub_z);
+		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(sub_z <= T::O2);
+		o2x_t subset_size {2};
+		while (sub_a+subset_size+1 < sub_z) {
+			// ^plus one to skip finding hidden singles. // TODO or also try to find them?
+			FoundSubsetInfo<O> found {
+				.combo_walker {
+					static_cast<o2x_t>(sub_a),
+					[&]{
+						auto sized_z {sub_a};
+						while (sized_z < T::O2 && subs.cell_tags[sized_z].count_cache <= subset_size) { ++sized_z; }
+						return sized_z;
+					}(),
+					subset_size,
+				},
+				.combo_syms {},
+			};
+			auto& [combo_walker, combo_syms] {found};
+			for (; combo_walker.has_more(); combo_walker.advance()) {
+				combo_syms = std::transform_reduce(
+					#ifdef __cpp_lib_execution
+					std::execution::unseq,
+					#endif
+					combo_walker.at_it(),
+					std::next(combo_walker.at_it(), subset_size),
+					O2BitArr<O>{}, std::bit_or{}, [&](const auto i) -> const auto& {
+						return cells_cands.at_rmi(subs.cell_tags[i].rmi);
+					}
+				);
+				if (combo_syms.count() <= subset_size) [[unlikely]] {
+					return found;
 				}
-			);
-			if (combo_syms.count() <  subset_size) [[unlikely]] { return unwind_one_stack_frame_of_(engine); }
-			if (combo_syms.count() == subset_size) [[unlikely]] { break; }
-		}
-		if (combo_syms.count() == subset_size) [[unlikely]] {
-			for (o2x_t combo_at {0}; combo_at < subset_size; ++combo_at) {
-				auto& entry {subs.cell_tags[combo_walker.combo_at(combo_at)]};
-				std::swap(subs.cell_tags[sub_a], entry);
-				++sub_a;
 			}
-			subs.is_begin.set(static_cast<o2x_t>(sub_a));
-			for (auto i {sub_a}; i < sub_z; ++i) {
-				const auto check {engine.do_elim_remove_syms_(subs.cell_tags[i].rmi, combo_syms)};
-				if (check.did_unwind()) [[unlikely]] { return check; }
-			}
-			subset_size = 2;
-			engine.get_found_queues_().push_back(found::CellsClaimSyms<O>{}); // TODO currently pushing a dummy desc just to get proper finder looping in FastSolver
-		} else {
 			++subset_size;
 		}
-		return UnwindInfo::make_no_unwind();
+		return std::nullopt;
 	}
 
 
@@ -174,7 +176,6 @@ namespace okiidoku::mono::detail::solver { namespace {
 			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(next <= T::O2);
 			return next;
 		}};
-		o2x_t subset_size {2};
 
 		while (sub_a < T::O2) {
 			sub_z = get_next_sub_a();
@@ -184,23 +185,29 @@ namespace okiidoku::mono::detail::solver { namespace {
 			for (auto i {static_cast<o2i_t>(sub_a+1)}; i < sub_z; ++i) {
 				assert(!subs.is_begin.test(static_cast<o2x_t>(i)));
 			}
-			if (prepare_find_in_subset_and_check_can_skip(
-				engine.cells_cands(), subs, sub_a, sub_z
-			)) {
+			if (prepare_try_decompose_subset_and_check_can_skip(engine.cells_cands(), subs, sub_a, sub_z)) {
 				continue;
 			}
-			// try to find sub-subsets:
-			while (sub_a+subset_size+1 < sub_z) {
-				// ^plus one to skip finding hidden singles. // TODO or also try to find them?
-				const auto check {find_in_subset(engine, subs, sub_a, sub_z, subset_size)};
-				if (check.did_unwind()) [[unlikely]] { return check; }
-				if (subset_size == 2) [[unlikely]] {
-					break;
-				} // TODO currently ugly/fairly-unreadable method of detection of successful subset find
-			}
-			if (!(sub_a+subset_size+1 < sub_z)) [[likely]] {
-				subset_size = 2;
+			const auto found {try_decompose_subset(engine.cells_cands(), subs, sub_a, sub_z)};
+			if (!found.has_value()) [[likely]] {
 				sub_a = sub_z;
+				continue;
+			}
+			const auto& [combo_walker, combo_syms] {found.value()};
+			const auto subset_size {combo_walker.get_subset_size()};
+			if (combo_syms.count() <  subset_size) [[unlikely]] { return unwind_one_stack_frame_of_(engine); }
+			if (combo_syms.count() == subset_size) [[unlikely]] {
+				for (o2x_t combo_at {0}; combo_at < subset_size; ++combo_at) {
+					auto& entry {subs.cell_tags[combo_walker.combo_at(combo_at)]};
+					std::swap(subs.cell_tags[sub_a], entry);
+					++sub_a;
+				}
+				subs.is_begin.set(static_cast<o2x_t>(sub_a));
+				for (auto i {sub_a}; i < sub_z; ++i) {
+					const auto check {engine.do_elim_remove_syms_(subs.cell_tags[i].rmi, combo_syms)};
+					if (check.did_unwind()) [[unlikely]] { return check; }
+				}
+				engine.get_found_queues_().push_back(found::CellsClaimSyms<O>{}); // TODO currently pushing a dummy desc just to get proper finder looping in FastSolver
 			}
 		}
 		return UnwindInfo::make_no_unwind();

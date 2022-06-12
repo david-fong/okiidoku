@@ -2,7 +2,7 @@
 
 #include <okiidoku/puzzle/solver/found.hpp>
 
-#include <numeric> // transform_reduce
+#include <numeric> // transform_reduce <- will not be needed if we do the get_guess_grouping bookkeeping optimization
 #include <algorithm> // sort
 #include <execution>
 #include <ranges>
