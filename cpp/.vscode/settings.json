@@ -10,9 +10,9 @@
 
 	// https://vector-of-bool.github.io/docs/vscode-cmake-tools/settings.html
 
-	// I found it annoying.
-	"cmake.configureOnOpen": false,
-	"cmake.configureOnEdit": false,
+	"cmake.configureSettings": {
+		"CMAKE_COLOR_DIAGNOSTICS": "ON",
+	},
 
 	// prefer multi-config generators when available
 	// TODO.wait the fallback seems to have broken in extension version 0.11.0. I've resorted to setting this per user-local-kit.

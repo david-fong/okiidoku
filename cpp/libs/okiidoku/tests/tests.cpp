@@ -21,6 +21,9 @@
 #ifdef NDEBUG
 #define OKIIDOKU_NO_LOGGING
 #undef NDEBUG
+// TODO the above as a general practice can cause multiple different definitions of
+//  things which depend (code, data members) on the value of NDEBUG. the best thing
+//  would be to switch from asserts to an actual test framework.
 #endif
 #include <cassert>
 
@@ -113,9 +116,6 @@ unsigned test_morph(okiidoku::SharedRng& shared_rng, const unsigned num_rounds) 
 	}
 	return count_bad;
 }
-
-
-// TODO.high test serdes
 
 
 /**

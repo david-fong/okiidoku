@@ -6,10 +6,10 @@
 
 #include <array>
 #include <bit>         // bit_width
-#include <cstdint>     // uint_...
 #include <limits>      // numeric_limits<T>::max
 #include <type_traits> // conditional_t
 #include <concepts>    // unsigned_integral
+#include <cstdint>     // uint_...
 
 namespace okiidoku {
 
@@ -21,12 +21,12 @@ namespace okiidoku {
 	constexpr auto house_types {std::to_array<HouseType>({
 		HouseType::row,
 		HouseType::col,
-		HouseType::box
+		HouseType::box,
 	})};
 	template<typename V> requires(!std::is_reference_v<V>)
 	struct HouseTypeMap final {
 		// HouseTypeMap();
-		[[nodiscard, gnu::pure]] const V& at(const HouseType key) const noexcept { return arr_[static_cast<unsigned char>(key)]; };
+		[[nodiscard, gnu::pure]] const V& at(const HouseType key) const noexcept { return arr_[static_cast<unsigned char>(key)]; }; // TODO.wait std::to_underlying
 		[[nodiscard, gnu::pure]]       V& at(const HouseType key)       noexcept { return arr_[static_cast<unsigned char>(key)]; };
 		[[nodiscard, gnu::pure]] const auto& get_underlying_arr() const noexcept { return arr_; };
 		[[nodiscard, gnu::pure]]       auto& get_underlying_arr()       noexcept { return arr_; };
@@ -39,7 +39,7 @@ namespace okiidoku {
 	};
 	constexpr auto line_types {std::to_array<LineType>({
 		LineType::row,
-		LineType::col
+		LineType::col,
 	})};
 
 	enum class BoxOrLine : unsigned char {

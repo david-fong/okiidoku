@@ -63,10 +63,8 @@ namespace okiidoku::mono::detail::solver { namespace {
 		const int_ts::o2i_t<O> sub_z
 	) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
-		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(sub_a < T::O2);
-		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(sub_a < sub_z);
 		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(sub_z <= T::O2);
-		// TODO consider adding some optimization to very quickly skip past consecutive singles (subsets of size 1).j probably by implementing some custom O2BitArr member function
+		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(sub_a < sub_z);
 		// update candidate-symbol count cache fields for the subset:
 		{
 			// TODO profile and add likelihood attributes
@@ -121,13 +119,23 @@ namespace okiidoku::mono::detail::solver { namespace {
 		const int_ts::o2i_t<O> sub_z
 	) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
-		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(sub_a < T::O2);
-		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(sub_a < sub_z);
 		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(sub_z <= T::O2);
-		o2x_t subset_size {2};
-		while (sub_a+subset_size+1 < sub_z) {
+		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(sub_a < sub_z);
+		const auto get_subset_size {[&](const o2x_t i) -> o2x_t {
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(i < (sub_z-sub_a)-3);
+			if (i % 2 == 0) {
+				return 2+(i/2);
+			} else {
+				return static_cast<o2x_t>((sub_z-sub_a)-2-(i/2));
+			}
+			// return 2+i;
+		}};
+		// for (o2x_t subset_size {2}; sub_a+subset_size+1 < sub_z; ++subset_size) {
+		for (o2x_t subset_i {0}; subset_i < (sub_z-sub_a-3) && subset_i < 4; ++subset_i) {
+			const auto subset_size {get_subset_size(subset_i)};
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(sub_a+subset_size+1 < sub_z);
 			// ^plus one to skip finding hidden singles. // TODO or also try to find them?
-			FoundSubsetInfo<O> found {
+			std::optional<FoundSubsetInfo<O>> found {{ // Note: wrap optional to allow NRVO
 				.combo_walker {
 					static_cast<o2x_t>(sub_a),
 					[&]{
@@ -138,8 +146,8 @@ namespace okiidoku::mono::detail::solver { namespace {
 					subset_size,
 				},
 				.combo_syms {},
-			};
-			auto& [combo_walker, combo_syms] {found};
+			}};
+			auto& [combo_walker, combo_syms] {found.value()};
 			for (; combo_walker.has_more(); combo_walker.advance()) {
 				combo_syms = std::transform_reduce(
 					#ifdef __cpp_lib_execution
@@ -155,7 +163,6 @@ namespace okiidoku::mono::detail::solver { namespace {
 					return found;
 				}
 			}
-			++subset_size;
 		}
 		return std::nullopt;
 	}
@@ -174,9 +181,14 @@ namespace okiidoku::mono::detail::solver { namespace {
 			auto next {static_cast<o2i_t>(sub_a+1)};
 			while (next < T::O2 && !subs.is_begin.test(static_cast<o2x_t>(next))) { ++next; }
 			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(next <= T::O2);
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(next > sub_a);
 			return next;
 		}};
 
+		// TODO this optimization seems to not have significant benefit. maybe try benchmarking again later?
+		// while (sub_a+1 < T::O2 && subs.is_begin.test(static_cast<o2x_t>(sub_a+1))) [[likely]] {
+		// 	++sub_a;
+		// }
 		while (sub_a < T::O2) {
 			sub_z = get_next_sub_a();
 			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(sub_z <= T::O2);
@@ -195,20 +207,32 @@ namespace okiidoku::mono::detail::solver { namespace {
 			}
 			const auto& [combo_walker, combo_syms] {found.value()};
 			const auto subset_size {combo_walker.get_subset_size()};
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(combo_syms.count() <= subset_size);
 			if (combo_syms.count() <  subset_size) [[unlikely]] { return unwind_one_stack_frame_of_(engine); }
-			if (combo_syms.count() == subset_size) [[unlikely]] {
+			const bool is_syms_claim_cells {subset_size <= ((sub_z-sub_a+1)/2)};
+			if (is_syms_claim_cells) {
 				for (o2x_t combo_at {0}; combo_at < subset_size; ++combo_at) {
 					auto& entry {subs.cell_tags[combo_walker.combo_at(combo_at)]};
 					std::swap(subs.cell_tags[sub_a], entry);
 					++sub_a;
 				}
 				subs.is_begin.set(static_cast<o2x_t>(sub_a));
-				for (auto i {sub_a}; i < sub_z; ++i) {
-					const auto check {engine.do_elim_remove_syms_(subs.cell_tags[i].rmi, combo_syms)};
-					if (check.did_unwind()) [[unlikely]] { return check; }
+			} else {
+				for (o2x_t combo_at {0}; combo_at < subset_size; ++combo_at) {
+					auto& entry {subs.cell_tags[combo_walker.combo_at(subset_size-1-combo_at)]};
+					std::swap(subs.cell_tags[sub_z-1], entry);
+					--sub_z;
 				}
-				engine.get_found_queues_().push_back(found::CellsClaimSyms<O>{}); // TODO currently pushing a dummy desc just to get proper finder looping in FastSolver
+				subs.is_begin.set(static_cast<o2x_t>(sub_z));
 			}
+			for (auto i {sub_a}; i < sub_z; ++i) {
+				const auto check {engine.do_elim_remove_syms_(subs.cell_tags[i].rmi, combo_syms)};
+				if (check.did_unwind()) [[unlikely]] { return check; }
+			}
+			if (!is_syms_claim_cells) {
+				sub_a = sub_z;
+			}
+			engine.get_found_queues_().push_back(found::CellsClaimSyms<O>{}); // TODO currently pushing a dummy desc just to get proper finder looping in FastSolver
 		}
 		return UnwindInfo::make_no_unwind();
 	}

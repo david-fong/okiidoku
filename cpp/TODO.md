@@ -25,6 +25,7 @@
 
 ## Misc List
 
+- try focusing guesses on the cell ruling out a known solution
 - see the TODO for `get_guess_grouping`.
 - consider changing O2BitArr test to take an o2i_t instead of o2x_t. The caller-side casting is annoying.
 - try to use [unavoidable set](https://www.sudopedia.org/wiki/Unavoidable_Set) / deadly pattern detection to optimize proper-puzzle-making.

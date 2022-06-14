@@ -123,8 +123,20 @@ namespace okiidoku {
 
 			// Sugar wrapper around an unchecked dereference of `std::get_if` for the underlying variant.
 			// Note: not using `std::get` since it could throw and we're going all in with the unchecked thing here.
-			template<Order O> [[nodiscard, gnu::pure]]       typename Adaptor::template type<O>& unchecked_get_mono_exact()       noexcept { return *std::get_if<typename Adaptor::template type<O>>(&variant_); }
-			template<Order O> [[nodiscard, gnu::pure]] const typename Adaptor::template type<O>& unchecked_get_mono_exact() const noexcept { return *std::get_if<typename Adaptor::template type<O>>(&variant_); }
+			template<Order O> [[nodiscard, gnu::pure]]
+			typename Adaptor::template type<O>& unchecked_get_mono_exact() noexcept {
+				using T_var = typename Adaptor::template type<O>;
+				OKIIDOKU_CONTRACT_TRIVIAL_EVAL(std::holds_alternative<T_var>(variant_));
+				OKIIDOKU_CONTRACT_TRIVIAL_EVAL(std::get_if<T_var>(&variant_) != nullptr);
+				return *std::get_if<T_var>(&variant_);
+			}
+			template<Order O> [[nodiscard, gnu::pure]]
+			const typename Adaptor::template type<O>& unchecked_get_mono_exact() const noexcept {
+				using T_var = typename Adaptor::template type<O>;
+				OKIIDOKU_CONTRACT_TRIVIAL_EVAL(std::holds_alternative<T_var>(variant_));
+				OKIIDOKU_CONTRACT_TRIVIAL_EVAL(std::get_if<T_var>(&variant_) != nullptr);
+				return *std::get_if<T_var>(&variant_);
+			}
 		private:
 			variant_t variant_;
 		};

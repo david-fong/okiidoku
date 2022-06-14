@@ -65,7 +65,7 @@ namespace okiidoku::mono {
 				int i = 0;
 				for (const auto& finder : finders) {
 					using T [[maybe_unused]] = Ints<O>;
-					if (i >= 1 && (O < 5 || e.get_guess_stack_depth() /* % (T::O1) */ != 0)) [[likely]] { break; }
+					// if (i >= 1 && (O < 5 || e.get_guess_stack_depth() /* % (T::O1) */ != 0)) [[likely]] { break; }
 					check = finder(e);
 					if (check.did_unwind() || e.has_queued_cand_elims()) { break; }
 					++i;

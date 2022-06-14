@@ -16,6 +16,7 @@ nodiscard
 NOLINT
 NOLINTBEGIN
 NOLINTEND
+NRVO
 nullopt
 pimpl
 popcount

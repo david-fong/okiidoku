@@ -14,9 +14,6 @@ namespace okiidoku::mono::detail::solver {
 
 	template<Order O> requires(is_order_compiled(O))
 	class Engine /* final */;
-
-	// template<Order O> requires(is_order_compiled(O))
-	// class DynamicBuilder /* final */;
 }
 
 namespace okiidoku::mono {
