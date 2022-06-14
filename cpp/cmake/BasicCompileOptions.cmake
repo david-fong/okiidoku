@@ -60,7 +60,7 @@ else()
 		-Wfatal-errors # stop compilation on first error. I found it hard to read multiple.
 		-Wold-style-cast
 		-Wvla # maybe put this in the project-root cmake file
-		-Wconversion # -Wsign-conversion -Warith-conversion
+		-Wconversion -Wsign-conversion #-Warith-conversion
 		-Wdouble-promotion
 		# -Wframe-larger-than=byte-size -Wstack-usage=byte-size
 

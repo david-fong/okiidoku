@@ -90,9 +90,9 @@ namespace okiidoku::mono {
 		// TODO.low why is using row_col_to_rmi slower than "inlining" the expression here? Is it because of the return-type cast? even adding bounds assumptions seems to increase code size...
 		// contract: `row` and `col` are in [0, O2).
 		template<class T_row, class T_col> requires(Any_o2x_t<O, T_row> && Any_o2x_t<O, T_col>)
-		[[nodiscard]] constexpr       val_t& at(const T_row row, const T_col col)       noexcept { return arr_[(T::O2*row)+col]; }
+		[[nodiscard]] constexpr       val_t& at(const T_row row, const T_col col)       noexcept { return arr_[static_cast<o4x_t>(static_cast<o4x_t>(T::O2*row)+col)]; }
 		template<class T_row, class T_col> requires(Any_o2x_t<O, T_row> && Any_o2x_t<O, T_col>)
-		[[nodiscard]] constexpr const val_t& at(const T_row row, const T_col col) const noexcept { return arr_[(T::O2*row)+col]; }
+		[[nodiscard]] constexpr const val_t& at(const T_row row, const T_col col) const noexcept { return arr_[static_cast<o4x_t>(static_cast<o4x_t>(T::O2*row)+col)]; }
 
 		// contract: `box` and `box_cell` are in [0, O2).
 		template<class T_house, class T_house_cell> requires(Any_o2x_t<O, T_house> && Any_o2x_t<O, T_house_cell>)

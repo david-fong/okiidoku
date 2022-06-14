@@ -44,7 +44,7 @@ namespace okiidoku::mono {
 			const auto check {e.unwind_one_stack_frame()};
 			if (check.did_unwind_root()) { return std::nullopt; }
 		}
-		using T = Ints<O>;
+		// using T = Ints<O>;
 		using Find = detail::solver::CandElimFind<O>;
 		static constexpr auto find_subsets {[](detail::solver::Engine<O>& e_) noexcept {
 			if constexpr (O < 5) {

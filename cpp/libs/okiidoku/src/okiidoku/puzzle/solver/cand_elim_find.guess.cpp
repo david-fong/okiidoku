@@ -61,10 +61,10 @@ namespace okiidoku::mono::detail::solver { namespace {
 				guess_stack.cbegin(), guess_stack.cend(), static_cast<o3i_t>(0), std::plus<o3i_t>{},
 				[rmi](const auto& frame) -> o3i_t {
 					const auto other_rmi {frame.guess.rmi};
-					return // TODO consider using gcc's __builtin_expect to annotate as unlikely. standard attribute cannot be used for ternary.
-					  (rmi_to_row<O>(rmi) == rmi_to_row<O>(other_rmi) ? 1 : 0)
-					+ (rmi_to_col<O>(rmi) == rmi_to_col<O>(other_rmi) ? 1 : 0)
-					+ (rmi_to_box<O>(rmi) == rmi_to_box<O>(other_rmi) ? 1 : 0);
+					return static_cast<o3i_t>(// TODO consider using gcc's __builtin_expect to annotate as unlikely. standard attribute cannot be used for ternary.
+					  (rmi_to_row<O>(rmi) == rmi_to_row<O>(other_rmi) ? o3i_t{1} : o3i_t{0})
+					+ (rmi_to_col<O>(rmi) == rmi_to_col<O>(other_rmi) ? o3i_t{1} : o3i_t{0})
+					+ (rmi_to_box<O>(rmi) == rmi_to_box<O>(other_rmi) ? o3i_t{1} : o3i_t{0}));
 				}
 			);
 		}};

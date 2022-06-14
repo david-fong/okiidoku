@@ -18,8 +18,8 @@ namespace okiidoku::mono::detail::solver { namespace {
 		// inner dimension is for intersections in a line, outer dimension for intersections in a box.
 		[[nodiscard, gnu::pure]] const O2BitArr<O>& at_isec(const o2i_t isec_i) const noexcept { return arr_[isec_i]; }
 		[[nodiscard, gnu::pure]]       O2BitArr<O>& at_isec(const o2i_t isec_i)       noexcept { return arr_[isec_i]; }
-		[[nodiscard, gnu::pure]] const O2BitArr<O>& at_isec(const o1i_t box_isec_i, const o1i_t line_isec_i) const noexcept { return arr_[(T::O1*box_isec_i)+line_isec_i]; }
-		[[nodiscard, gnu::pure]]       O2BitArr<O>& at_isec(const o1i_t box_isec_i, const o1i_t line_isec_i)       noexcept { return arr_[(T::O1*box_isec_i)+line_isec_i]; }
+		[[nodiscard, gnu::pure]] const O2BitArr<O>& at_isec(const o1i_t box_isec_i, const o1i_t line_isec_i) const noexcept { return arr_[static_cast<o2i_t>(static_cast<o2i_t>(T::O1*box_isec_i)+line_isec_i)]; }
+		[[nodiscard, gnu::pure]]       O2BitArr<O>& at_isec(const o1i_t box_isec_i, const o1i_t line_isec_i)       noexcept { return arr_[static_cast<o2i_t>(static_cast<o2i_t>(T::O1*box_isec_i)+line_isec_i)]; }
 	private:
 		std::array<O2BitArr<O>, T::O2> arr_ {};
 	};
@@ -71,7 +71,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 				const auto& isec_syms_non_single {chute_isecs_syms_non_single.at_isec(box_isec, line_isec)};
 				const auto line_match {lines_syms_claiming_an_isec[box_isec] & isec_syms_non_single & box_minus_isec};
 				const auto box_match {boxes_syms_claiming_an_isec[line_isec] & isec_syms_non_single & line_minus_isec};
-				const auto isec {static_cast<o3xs_t>((T::O2*chute)+(T::O1*box_isec)+line_isec)};
+				const auto isec {static_cast<o3xs_t>(static_cast<o3xs_t>(T::O2*chute)+static_cast<o3xs_t>(T::O1*box_isec)+line_isec)};
 				if (line_match.count() > 0) [[unlikely]] {
 					found_queues.push_back(found::LockedCands<O>{
 						.syms{line_match},

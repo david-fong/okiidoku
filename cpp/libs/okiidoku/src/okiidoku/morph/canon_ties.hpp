@@ -25,10 +25,10 @@ namespace okiidoku::mono::detail {
 		public:
 			link_t begin_;
 			link_t end_;
-			Range(const link_t begin, const link_t end) noexcept: begin_{begin}, end_{end} {}
-			[[nodiscard]] link_t size() const noexcept { return end_ - begin_; }
-			auto begin() const noexcept { return ranges::views::iota(begin_, end_).begin(); }
-			auto end()   const noexcept { return ranges::views::iota(begin_, end_).end(); }
+			Range(const link_t begin, const link_t end) noexcept: begin_{begin}, end_{end} { assert(begin_ < end_); }
+			[[nodiscard]] link_t size() const noexcept { OKIIDOKU_CONTRACT_TRIVIAL_EVAL(begin_ < end_); return static_cast<link_t>(end_ - begin_); }
+			auto begin() const noexcept { assert(begin_ < end_); return ranges::views::iota(begin_, end_).begin(); }
+			auto end()   const noexcept { assert(begin_ < end_); return ranges::views::iota(begin_, end_).end(); }
 		};
 
 		class Iterator final {
@@ -46,7 +46,7 @@ namespace okiidoku::mono::detail {
 
 			Range operator*()  const noexcept { return Range{i_, links_[i_]}; }
 			Range operator->() const noexcept { return Range{i_, links_[i_]}; }
-			Iterator& operator++() noexcept { i_ = links_[i_]; return *this; }
+			Iterator& operator++() noexcept { assert(links_[i_] > i_); i_ = links_[i_]; return *this; }
 			Iterator operator++(int) noexcept { Iterator tmp = *this; ++(*this); return tmp; }
 			[[nodiscard, gnu::pure]] friend bool operator==(const Iterator& a, const Iterator& b) noexcept { return (&a.links_ == &b.links_) && (a.i_ == b.i_); }
 			[[nodiscard, gnu::pure]] friend bool operator!=(const Iterator& a, const Iterator& b) noexcept { return (&a.links_ != &b.links_) || (a.i_ != b.i_); }

@@ -102,9 +102,9 @@ namespace okiidoku::mono::detail::solver {
 				return;
 			}
 			assert(combo_[0] >= begin_);
-			assert(combo_[naked_subset_size_-1] < end_);
+			assert(combo_[static_cast<o2x_t>(naked_subset_size_-1)] < end_);
 			for (o2x_t i {1}; i < naked_subset_size_; ++i) {
-				assert(combo_[i-1] < combo_[i]);
+				assert(combo_[static_cast<o2x_t>(i-1)] < combo_[i]);
 			}
 			#endif
 		}

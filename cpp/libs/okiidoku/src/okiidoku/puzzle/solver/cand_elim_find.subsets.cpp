@@ -127,7 +127,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 		for (o2x_t subset_i {0}; subset_i < (sub_z-sub_a-3) && subset_i+2 < 2*max_subset_size; ++subset_i) {
 			const auto naked_subset_size {[&]() -> o2x_t {
 				if (subset_i % 2 == 0) {
-					return 2+(subset_i/2);
+					return static_cast<o2x_t>(2+(subset_i/2));
 				} else {
 					return static_cast<o2x_t>((sub_z-sub_a)-2-(subset_i/2));
 				}
@@ -225,8 +225,8 @@ namespace okiidoku::mono::detail::solver { namespace {
 				subs.is_begin.set(static_cast<o2x_t>(sub_a));
 			} else {
 				for (o2x_t combo_at {0}; combo_at < naked_subset_size; ++combo_at) {
-					auto& entry {subs.cell_tags[combo_walker.combo_at(naked_subset_size-1-combo_at)]};
-					std::swap(subs.cell_tags[sub_z-1], entry);
+					auto& entry {subs.cell_tags[combo_walker.combo_at(static_cast<o2x_t>(naked_subset_size-1-combo_at))]};
+					std::swap(subs.cell_tags[static_cast<o2x_t>(sub_z-1)], entry);
 					--sub_z;
 				}
 				subs.is_begin.set(static_cast<o2x_t>(sub_z));

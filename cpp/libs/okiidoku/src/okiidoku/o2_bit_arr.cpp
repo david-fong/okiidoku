@@ -59,6 +59,7 @@ namespace okiidoku::mono {
 			return count;
 		} else {
 			o2xs_t count {0};
+			// TODO consider rewriting this using std::find_if
 			for (const auto& word : words_) {
 				if (word == 0) {
 					count += word_t_num_bits;
@@ -83,7 +84,7 @@ namespace okiidoku::mono {
 			const auto word_popcount {std::popcount(word)};
 			if constexpr (num_words > 1) {
 				if (static_cast<o2x_t>(word_popcount) <= set_bit_index) [[likely]] {
-					set_bit_index -= static_cast<o2x_t>(word_popcount);
+					set_bit_index = static_cast<o2x_t>(set_bit_index - word_popcount);
 					continue;
 				}
 			}

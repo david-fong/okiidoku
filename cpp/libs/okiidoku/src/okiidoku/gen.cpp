@@ -31,7 +31,7 @@ namespace okiidoku::mono { namespace {
 		[[nodiscard, gnu::pure]] V& ch_count_sym(const ch_t ch, const sym_t sym) noexcept {
 			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(ch < T::O1);
 			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(sym < T::O2);
-			return store_[(T::O1*sym)+ch];
+			return store_[static_cast<o3i_t>(static_cast<o3i_t>(T::O1*sym)+ch)];
 		}
 	private:
 		// outer dimension (rows) for each of the O2 symbols

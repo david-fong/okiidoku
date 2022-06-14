@@ -37,6 +37,8 @@
 - play around with giving puzzle maker a threshold to stop trying to solve a candidate puzzle after N guesses, or give up (or mark as try-again-later) seeing if a given is safe to remove after N guesses.
 - try actually working through turning on warnings for sign conversion and see how it affect code readability and performance.
 
+- cppcoreguidelines C.2: use class if there is an invariant, and struct otherwise.
+
 - look into cppitertools for writing my raw loops. see if people say anything about performance overhead.
 
 - Am I breaking any of these? https://en.cppreference.com/w/cpp/language/rule_of_three
