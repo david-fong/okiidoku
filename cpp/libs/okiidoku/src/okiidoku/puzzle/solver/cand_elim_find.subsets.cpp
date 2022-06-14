@@ -42,7 +42,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 				if (match_cands.count() > 0) [[unlikely]] {
 					if (match_cands.count() > 1) [[unlikely]] { return true; } // multiple syms want same cell.
 					const auto sym {match_cands.count_lower_zeros_assuming_non_empty_mask()};
-					if (cell_cands.count() > 1) /* [[?likely]] */ {
+					if (cell_cands.count() > 1) [[likely]] {
 						found_queues.push_back(found::SymClaimCell<O>{
 							.rmi{static_cast<rmi_t>(rmi)},
 							.val{static_cast<o2xs_t>(sym)},
@@ -116,34 +116,33 @@ namespace okiidoku::mono::detail::solver { namespace {
 		const CandsGrid<O>& cells_cands,
 		const typename EngineImpl<O>::HouseSubsets& subs,
 		const int_ts::o2i_t<O> sub_a,
-		const int_ts::o2i_t<O> sub_z
+		const int_ts::o2i_t<O> sub_z,
+		const int_ts::o2x_t<O> max_subset_size // try up-to-and-including this size
 	) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
 		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(sub_z <= T::O2);
 		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(sub_a < sub_z);
-		const auto get_subset_size {[&](const o2x_t i) -> o2x_t {
-			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(i < (sub_z-sub_a)-3);
-			if (i % 2 == 0) {
-				return 2+(i/2);
-			} else {
-				return static_cast<o2x_t>((sub_z-sub_a)-2-(i/2));
-			}
-			// return 2+i;
-		}};
-		// for (o2x_t subset_size {2}; sub_a+subset_size+1 < sub_z; ++subset_size) {
-		for (o2x_t subset_i {0}; subset_i < (sub_z-sub_a-3) && subset_i < 4; ++subset_i) {
-			const auto subset_size {get_subset_size(subset_i)};
-			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(sub_a+subset_size+1 < sub_z);
+		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(max_subset_size >= 2);
+		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(max_subset_size <= static_cast<o2x_t>((T::O2+1)/2));
+		for (o2x_t subset_i {0}; subset_i < (sub_z-sub_a-3) && subset_i+2 < 2*max_subset_size; ++subset_i) {
+			const auto naked_subset_size {[&]() -> o2x_t {
+				if (subset_i % 2 == 0) {
+					return 2+(subset_i/2);
+				} else {
+					return static_cast<o2x_t>((sub_z-sub_a)-2-(subset_i/2));
+				}
+			}()};
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(sub_a+naked_subset_size+1 < sub_z);
 			// ^plus one to skip finding hidden singles. // TODO or also try to find them?
-			std::optional<FoundSubsetInfo<O>> found {{ // Note: wrap optional to allow NRVO
+			std::optional<FoundSubsetInfo<O>> found {{ // Note: wrap with optional to allow NRVO
 				.combo_walker {
 					static_cast<o2x_t>(sub_a),
 					[&]{
 						auto sized_z {sub_a};
-						while (sized_z < T::O2 && subs.cell_tags[sized_z].count_cache <= subset_size) { ++sized_z; }
+						while (sized_z < T::O2 && subs.cell_tags[sized_z].count_cache <= naked_subset_size) { ++sized_z; }
 						return sized_z;
 					}(),
-					subset_size,
+					naked_subset_size,
 				},
 				.combo_syms {},
 			}};
@@ -154,12 +153,12 @@ namespace okiidoku::mono::detail::solver { namespace {
 					std::execution::unseq,
 					#endif
 					combo_walker.at_it(),
-					std::next(combo_walker.at_it(), subset_size),
+					std::next(combo_walker.at_it(), naked_subset_size),
 					O2BitArr<O>{}, std::bit_or{}, [&](const auto i) -> const auto& {
 						return cells_cands.at_rmi(subs.cell_tags[i].rmi);
 					}
 				);
-				if (combo_syms.count() <= subset_size) [[unlikely]] {
+				if (combo_syms.count() <= naked_subset_size) [[unlikely]] {
 					return found;
 				}
 			}
@@ -171,9 +170,12 @@ namespace okiidoku::mono::detail::solver { namespace {
 	template<Order O> requires(is_order_compiled(O))
 	UnwindInfo find_subsets_for_house_and_check_needs_unwind(
 		EngineImpl<O>& engine,
-		typename EngineImpl<O>::HouseSubsets& subs
+		typename EngineImpl<O>::HouseSubsets& subs,
+		const int_ts::o2x_t<O> max_subset_size // try up-to-and-including this size
 	) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
+		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(max_subset_size >= 2);
+		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(max_subset_size <= static_cast<o2x_t>((T::O2+1)/2));
 		o2i_t sub_a {0};
 		o2i_t sub_z {0};
 		const auto get_next_sub_a {[&]{
@@ -189,7 +191,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 		// while (sub_a+1 < T::O2 && subs.is_begin.test(static_cast<o2x_t>(sub_a+1))) [[likely]] {
 		// 	++sub_a;
 		// }
-		while (sub_a < T::O2) {
+		while (sub_a < T::O2) [[likely]] {
 			sub_z = get_next_sub_a();
 			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(sub_z <= T::O2);
 			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(sub_a < sub_z);
@@ -200,26 +202,30 @@ namespace okiidoku::mono::detail::solver { namespace {
 			if (prepare_try_decompose_subset_and_check_can_skip(engine.cells_cands(), subs, sub_a, sub_z)) {
 				continue;
 			}
-			const auto found {try_decompose_subset(engine.cells_cands(), subs, sub_a, sub_z)};
+			const auto found {try_decompose_subset(
+				engine.cells_cands(), subs, sub_a, sub_z, max_subset_size
+			)};
 			if (!found.has_value()) [[likely]] {
 				sub_a = sub_z;
 				continue;
 			}
 			const auto& [combo_walker, combo_syms] {found.value()};
-			const auto subset_size {combo_walker.get_subset_size()};
-			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(combo_syms.count() <= subset_size);
-			if (combo_syms.count() <  subset_size) [[unlikely]] { return unwind_one_stack_frame_of_(engine); }
-			const bool is_syms_claim_cells {subset_size <= ((sub_z-sub_a+1)/2)};
-			if (is_syms_claim_cells) {
-				for (o2x_t combo_at {0}; combo_at < subset_size; ++combo_at) {
+			const auto naked_subset_size {combo_walker.get_naked_subset_size()};
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(combo_syms.count() <= naked_subset_size);
+			if (combo_syms.count() < naked_subset_size) [[unlikely]] {
+				return unwind_one_stack_frame_of_(engine);
+			}
+			const bool is_naked_subset {naked_subset_size <= ((sub_z-sub_a+1)/2)};
+			if (is_naked_subset) {
+				for (o2x_t combo_at {0}; combo_at < naked_subset_size; ++combo_at) {
 					auto& entry {subs.cell_tags[combo_walker.combo_at(combo_at)]};
 					std::swap(subs.cell_tags[sub_a], entry);
 					++sub_a;
 				}
 				subs.is_begin.set(static_cast<o2x_t>(sub_a));
 			} else {
-				for (o2x_t combo_at {0}; combo_at < subset_size; ++combo_at) {
-					auto& entry {subs.cell_tags[combo_walker.combo_at(subset_size-1-combo_at)]};
+				for (o2x_t combo_at {0}; combo_at < naked_subset_size; ++combo_at) {
+					auto& entry {subs.cell_tags[combo_walker.combo_at(naked_subset_size-1-combo_at)]};
 					std::swap(subs.cell_tags[sub_z-1], entry);
 					--sub_z;
 				}
@@ -229,7 +235,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 				const auto check {engine.do_elim_remove_syms_(subs.cell_tags[i].rmi, combo_syms)};
 				if (check.did_unwind()) [[unlikely]] { return check; }
 			}
-			if (!is_syms_claim_cells) {
+			if (!is_naked_subset) {
 				sub_a = sub_z;
 			}
 			engine.get_found_queues_().push_back(found::CellsClaimSyms<O>{}); // TODO currently pushing a dummy desc just to get proper finder looping in FastSolver
@@ -240,13 +246,18 @@ namespace okiidoku::mono::detail::solver { namespace {
 
 	template<Order O> requires(is_order_compiled(O))
 	UnwindInfo find_subsets_and_check_needs_unwind(
-		EngineImpl<O>& engine
+		EngineImpl<O>& engine,
+		const int_ts::o2x_t<O> max_subset_size
 	) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
+		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(max_subset_size <= static_cast<o2x_t>((T::O2+1)/2));
+		if (max_subset_size < 2) [[unlikely]] {
+			return UnwindInfo::make_no_unwind();
+		}
 		for (const auto house_type : house_types) {
 		for (o2i_t house {0}; house < T::O2; ++house) {
 			const auto check {find_subsets_for_house_and_check_needs_unwind<O>(
-				engine, engine.houses_subsets().at(house_type)[house]
+				engine, engine.houses_subsets().at(house_type)[house], max_subset_size
 			)};
 			if (check.did_unwind()) [[unlikely]] { return check; }
 		}}
@@ -256,12 +267,18 @@ namespace okiidoku::mono::detail::solver { namespace {
 namespace okiidoku::mono::detail::solver {
 
 	OKIIDOKU_CAND_ELIM_FINDER_DEF(sym_claim_cell)
-	OKIIDOKU_CAND_ELIM_FINDER_DEF_ALT(subsets)
 	#undef OKIIDOKU_CAND_ELIM_FINDER
+
+	template<Order O> requires(is_order_compiled(O)) \
+	UnwindInfo CandElimFind<O>::subsets(Engine<O>& engine, const int_ts::o2x_t<O> max_subset_size) noexcept {
+		assert(!engine.no_solutions_remain());
+		if (engine.get_num_puzcells_remaining() == 0) [[unlikely]] { return UnwindInfo::make_no_unwind(); }
+		return find_subsets_and_check_needs_unwind(engine, max_subset_size);
+	}
 
 	#define OKIIDOKU_FOR_COMPILED_O(O_) \
 		template UnwindInfo CandElimFind<O_>::sym_claim_cell(Engine<O_>&) noexcept; \
-		template UnwindInfo CandElimFind<O_>::subsets(Engine<O_>&) noexcept;
+		template UnwindInfo CandElimFind<O_>::subsets(Engine<O_>&, int_ts::o2x_t<O_> max_subset_size) noexcept;
 	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 	#undef OKIIDOKU_FOR_COMPILED_O
 }

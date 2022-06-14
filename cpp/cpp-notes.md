@@ -23,6 +23,9 @@ nm -nCD libs/okiidoku/libokiidoku.so
 # (cd to the cpp folder)
 # view the grid translation unit with macros fully expanded
 g++ -E -Icpp/libs/okiidoku/include/ -Icpp/build/Release/libs/okiidoku/ cpp/libs/okiidoku/src/okiidoku/grid.cpp | less
+
+# https://perf.wiki.kernel.org/index.php/Tutorial
+perf stat -e branch-misses:u ./libs/okiidoku/tests/Release/okiidoku_test
 ```
 
 ## CMake Things

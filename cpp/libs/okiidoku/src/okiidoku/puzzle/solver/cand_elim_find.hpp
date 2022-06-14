@@ -13,13 +13,11 @@ namespace okiidoku::mono::detail::solver {
 		// contract: `no_solutions_remain` returns `false`.
 		// behaviour: immediately returns if `get_num_puzcells_remaining` returns zero.
 
-		// TODO.high for finders that are not (relatively) trivial to perform a full scan of the grid,
-		//   provide a parameter enum `SearchEffort { find_first, find_all, };`
 		static UnwindInfo sym_claim_cell(Engine<O>&) noexcept;
 
 		static UnwindInfo locked_cands(Engine<O>&) noexcept;
 
-		static UnwindInfo subsets(Engine<O>&) noexcept;
+		static UnwindInfo subsets(Engine<O>&, int_ts::o2x_t<O> max_subset_size) noexcept;
 
 		// static UnwindInfo fish(Engine<O>&) noexcept;
 

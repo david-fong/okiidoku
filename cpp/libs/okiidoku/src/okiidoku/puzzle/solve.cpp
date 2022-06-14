@@ -44,7 +44,21 @@ namespace okiidoku::mono {
 			const auto check {e.unwind_one_stack_frame()};
 			if (check.did_unwind_root()) { return std::nullopt; }
 		}
-		// unsigned times_used_more_finders {0};
+		using T = Ints<O>;
+		using Find = detail::solver::CandElimFind<O>;
+		static constexpr auto find_subsets {[](detail::solver::Engine<O>& e_) noexcept {
+			if constexpr (O < 5) {
+				return detail::solver::UnwindInfo::make_no_unwind();
+			} else {
+				return Find::subsets(e_, e_.get_guess_stack_depth() == 0 ? 4 : 2);
+			}
+		}};
+		using finder_t = detail::solver::UnwindInfo (*)(detail::solver::Engine<O>&) noexcept;
+		const auto finders {std::to_array({
+			std::cref(Find::sym_claim_cell),
+			// std::cref(Find::locked_cands), // TODO draft implementation not yet tested. please debug and check it behaves as intended.
+			std::cref(*static_cast<finder_t>(find_subsets)),
+		})};
 		while (e.get_num_puzcells_remaining() > 0) [[likely]] {
 			{
 				using Apply = detail::solver::CandElimApply<O>;
@@ -52,26 +66,16 @@ namespace okiidoku::mono {
 				if (check.did_unwind_root()) [[unlikely]] { return std::nullopt; }
 				if (e.get_num_puzcells_remaining() == 0) [[unlikely]] { break; }
 			}
-			using Find = detail::solver::CandElimFind<O>;
-			static constexpr auto finders {std::to_array({
-				std::cref(Find::sym_claim_cell),
-				// std::cref(Find::locked_cands), // TODO draft implementation not yet tested. please debug and check it behaves as intended.
-				std::cref(Find::subsets),
-			})};
-			// TODO after finding hidden singles, can apply and then go straight to finding subsets
 			{
 				auto check {detail::solver::UnwindInfo::make_no_unwind()};
-				// using finder_t = typename decltype(finders)::value_type;
-				int i = 0;
 				for (const auto& finder : finders) {
-					using T [[maybe_unused]] = Ints<O>;
-					// if (i >= 1 && (O < 5 || e.get_guess_stack_depth() /* % (T::O1) */ != 0)) [[likely]] { break; }
 					check = finder(e);
 					if (check.did_unwind() || e.has_queued_cand_elims()) { break; }
-					++i;
 				}
 				if (check.did_unwind_root()) [[unlikely]] { return std::nullopt; }
-				if (check.did_unwind() || e.has_queued_cand_elims()) { /* times_used_more_finders = 0; */ continue; }
+				if (check.did_unwind() || e.has_queued_cand_elims()) {
+					continue;
+				}
 			}
 			e.push_guess(Find::good_guess_candidate(e));
 		}
