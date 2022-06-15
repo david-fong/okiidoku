@@ -7,26 +7,30 @@
 namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
-	struct DeadlyPatterns final {
+	struct MinimalUnavoidableSets final {
 		Grid<O> ids {}; // TODO dummy field. need to figure out actual representation.
 	};
 
 	// https://www.sudopedia.org/wiki/Deadly_Pattern
 	// contract: grid is filled and follows the one rule.
 	template<Order O> requires(is_order_compiled(O))
-	[[nodiscard, gnu::pure]] OKIIDOKU_EXPORT DeadlyPatterns<O> find_deadly_patterns(const Grid<O>&) noexcept;
+	[[nodiscard, gnu::pure]] OKIIDOKU_EXPORT
+	MinimalUnavoidableSets<O> find_simple_minimal_unavoidable_sets(const Grid<O>&) noexcept;
 
 	// contract: grid is filled or a proper puzzle.
 	// post-condition: the grid is a minimal puzzle. solution unchanged.
 	template<Order O> requires(is_order_compiled(O))
-	OKIIDOKU_EXPORT void make_minimal_puzzle(Grid<O>&, rng_seed_t rng_seed) noexcept;
+	OKIIDOKU_EXPORT
+	void make_minimal_puzzle(Grid<O>&, rng_seed_t rng_seed) noexcept;
 
 	template<Order O> requires(is_order_compiled(O))
-	[[nodiscard, gnu::pure]] OKIIDOKU_EXPORT bool grid_is_proper_puzzle(const Grid<O>&) noexcept;
+	[[nodiscard, gnu::pure]] OKIIDOKU_EXPORT
+	bool grid_is_proper_puzzle(const Grid<O>&) noexcept;
 
 	// contract: grid is a proper puzzle.
 	template<Order O> requires(is_order_compiled(O))
-	[[nodiscard, gnu::pure]] OKIIDOKU_EXPORT bool grid_is_minimal_puzzle(const Grid<O>&) noexcept;
+	[[nodiscard, gnu::pure]] OKIIDOKU_EXPORT
+	bool grid_is_minimal_puzzle(const Grid<O>&) noexcept;
 }
 
 

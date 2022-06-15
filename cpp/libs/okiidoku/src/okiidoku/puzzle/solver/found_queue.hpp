@@ -26,8 +26,7 @@ namespace okiidoku::mono::detail::solver {
 			queue_t<found::CellClaimSym<O>>,
 
 			queue_t<found::SymClaimCell<O>>,
-			queue_t<found::CellsClaimSyms<O>>,
-			queue_t<found::SymsClaimCells<O>>,
+			queue_t<found::Subset<O>>,
 			queue_t<found::LockedCands<O>>
 		>;
 
@@ -49,8 +48,7 @@ namespace okiidoku::mono::detail::solver {
 
 		void push_back(found::CellClaimSym  <O>&& desc) noexcept { std::get<queue_t<found::CellClaimSym  <O>>>(tup_).emplace_back(std::move(desc)); }
 		void push_back(found::SymClaimCell  <O>&& desc) noexcept { std::get<queue_t<found::SymClaimCell  <O>>>(tup_).emplace_back(std::move(desc)); }
-		void push_back(found::CellsClaimSyms<O>&& desc) noexcept { std::get<queue_t<found::CellsClaimSyms<O>>>(tup_).emplace_back(std::move(desc)); }
-		void push_back(found::SymsClaimCells<O>&& desc) noexcept { std::get<queue_t<found::SymsClaimCells<O>>>(tup_).emplace_back(std::move(desc)); }
+		void push_back(found::Subset<O>&& desc) noexcept { std::get<queue_t<found::Subset<O>>>(tup_).emplace_back(std::move(desc)); }
 		void push_back(found::LockedCands   <O>&& desc) noexcept { std::get<queue_t<found::LockedCands   <O>>>(tup_).emplace_back(std::move(desc)); }
 	};
 

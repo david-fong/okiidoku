@@ -238,7 +238,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 			if (!is_naked_subset) {
 				sub_a = sub_z;
 			}
-			engine.get_found_queues_().push_back(found::CellsClaimSyms<O>{}); // TODO currently pushing a dummy desc just to get proper finder looping in FastSolver
+			engine.get_found_queues_().push_back(found::Subset<O>{}); // TODO currently pushing a dummy desc just to get proper finder looping in FastSolver
 		}
 		return UnwindInfo::make_no_unwind();
 	}

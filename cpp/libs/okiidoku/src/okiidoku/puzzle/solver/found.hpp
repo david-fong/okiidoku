@@ -23,19 +23,7 @@ namespace okiidoku::mono::detail::solver::found {
 	};
 
 	template<Order O> requires(is_order_compiled(O))
-	struct CellsClaimSyms final {
-		O2BitArr<O> syms; // what is required
-		O2BitArr<O> house_cells; // who requires it
-		int_ts::o2xs_t<O> house; // where the require-er is
-		HouseType house_type; // where the require-er is
-	};
-
-	template<Order O> requires(is_order_compiled(O))
-	struct SymsClaimCells final {
-		O2BitArr<O> house_cells; // what is required
-		O2BitArr<O> syms; // who requires it
-		int_ts::o2xs_t<O> house; // where the require-er is
-		HouseType house_type; // where the require-er is
+	struct Subset final {
 	};
 
 
@@ -51,8 +39,7 @@ namespace okiidoku::mono::detail::solver::found {
 	#define OKIIDOKU_FOR_COMPILED_O(O_) \
 		static_assert(std::is_aggregate_v<CellClaimSym<O_>>); \
 		static_assert(std::is_aggregate_v<SymClaimCell<O_>>); \
-		static_assert(std::is_aggregate_v<CellsClaimSyms<O_>>); \
-		static_assert(std::is_aggregate_v<SymsClaimCells<O_>>); \
+		static_assert(std::is_aggregate_v<Subset<O_>>); \
 		static_assert(std::is_aggregate_v<LockedCands<O_>>);
 	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 	#undef OKIIDOKU_FOR_COMPILED_O

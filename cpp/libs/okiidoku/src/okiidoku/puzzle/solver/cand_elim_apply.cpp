@@ -143,37 +143,9 @@ namespace okiidoku::mono::detail::solver {
 	template<Order O> requires(is_order_compiled(O))
 	UnwindInfo CandElimApplyImpl<O>::apply(
 		Engine<O>& engine,
-		const found::CellsClaimSyms<O>& desc
+		const found::Subset<O>& desc
 	) noexcept {
 		(void)engine; (void)desc;
-		/* for (o2i_t house_cell {0}; house_cell < T::O2; ++house_cell) {
-			// TODO likelihood attribute. hypothesis: desc.house_cells.count() is small. please empirically test.
-			if (desc.house_cells.test(static_cast<o2x_t>(house_cell))) [[unlikely]] {
-				continue;
-			}
-			const auto rmi {house_cell_to_rmi<O>(desc.house_type, desc.house, house_cell)};
-			const auto check {engine.do_elim_remove_syms_(static_cast<rmi_t>(rmi), desc.syms)};
-			if (check.did_unwind()) [[unlikely]] {
-				return check;
-			}
-		} */
-		return UnwindInfo::make_no_unwind();
-	}
-
-
-	template<Order O> requires(is_order_compiled(O))
-	UnwindInfo CandElimApplyImpl<O>::apply(
-		Engine<O>& engine,
-		const found::SymsClaimCells<O>& desc
-	) noexcept {
-		(void)engine; (void)desc;
-		/* for (auto walker {desc.house_cells.set_bits_walker()}; walker.has_more(); walker.advance()) {
-			const auto rmi {house_cell_to_rmi<O>(desc.house_type, desc.house, walker.value())};
-			const auto check {engine.do_elim_retain_syms_(static_cast<rmi_t>(rmi), desc.syms)};
-			if (check.did_unwind()) [[unlikely]] {
-				return check;
-			}
-		} */
 		return UnwindInfo::make_no_unwind();
 	}
 

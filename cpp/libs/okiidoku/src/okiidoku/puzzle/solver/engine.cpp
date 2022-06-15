@@ -204,6 +204,23 @@ namespace okiidoku::mono::detail::solver {
 	}
 
 
+	// TODO could try using this in a solver which "wipes" guesses and attempts more deduction early on if the guess stack gets large or the number of guesses made gets large.
+	/* template<Order O> requires(is_order_compiled(O))
+	void unwind_all_guesses_and_forget_them_(EngineImpl<O>& e) noexcept {
+		assert(!e.no_solutions_remain());
+		if (e.guess_stack_.empty()) {
+			return;
+		}
+		auto& guess_frame {e.guess_stack_.front()};
+		e.frame_ = std::move(guess_frame.frame);
+		assert(e.debug_check_correct_num_puzcells_remaining_());
+
+		e.found_queues_.clear();
+		e.total_guesses_ = 0;
+		return UnwindInfo::make_did_unwind_guess();
+	} */
+
+
 	template<Order O> requires(is_order_compiled(O))
 	UnwindInfo Engine<O>::unwind_one_stack_frame() noexcept {
 		return unwind_one_stack_frame_of_(static_cast<EngineImpl<O>&>(*this));

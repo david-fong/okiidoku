@@ -27,15 +27,13 @@
 
 - try focusing guesses on the cell ruling out a known solution
 - see the TODO for `get_guess_grouping`.
-- consider changing O2BitArr test to take an o2i_t instead of o2x_t. The caller-side casting is annoying.
 - try to use [unavoidable set](https://www.sudopedia.org/wiki/Unavoidable_Set) / deadly pattern detection to optimize proper-puzzle-making.
-- control of subset size when finding subset things
+  - [interesting](http://forum.enjoysudoku.com/max-number-of-clues-t1448.html#p21531).
 - consider a finder-heuristic that only starts using more powerful finders when the guess stack gets to a certain depth- at which point it unwinds to one-above the last frame that used more powerful finders, and uses more powerful finders.
   - Hm. But the guess stack depth doesn't necessarily correspond to when it may make the most sense to again use more expensive deduction techniques, since I don't know if there's any saying how much further deduction a guess may enable.
   - will have to create some modified version of unwinding which doesn't rule out the guess.
   - or more fine grained: each guess stack frame has a "logic depth/effort" field that describes the finders that were used before the guess was made. Ex. used up to finding subsets of size 2 before the guess was made.
 - play around with giving puzzle maker a threshold to stop trying to solve a candidate puzzle after N guesses, or give up (or mark as try-again-later) seeing if a given is safe to remove after N guesses.
-- try actually working through turning on warnings for sign conversion and see how it affect code readability and performance.
 
 - cppcoreguidelines C.2: use class if there is an invariant, and struct otherwise.
 
@@ -65,8 +63,6 @@
   - [how to write a gdb pretty-printer](https://sourceware.org/gdb/onlinedocs/gdb/Writing-a-Pretty_002dPrinter.html#Writing-a-Pretty_002dPrinter)
   - also look into [visual studio `.natvis` files](https://docs.microsoft.com/en-us/visualstudio/debugger/create-custom-views-of-native-objects)
   - interesting: https://github.com/asarium/gdb-natvis
-
-- [it is allowed in c++ to have template functions and non-template functions with the same name. here are the resulting rules](https://stackoverflow.com/a/16865452/11107541). Could this be used to put the algorithm functions under the same namespace (not in separate "mono" and "visitor" namespace)?
 
 - move the emoji definitions out of the program binary and externalize as a configurable data read in at runtime?
 

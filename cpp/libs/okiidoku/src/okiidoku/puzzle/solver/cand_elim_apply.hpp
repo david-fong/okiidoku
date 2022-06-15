@@ -41,10 +41,7 @@ namespace okiidoku::mono::detail::solver {
 		static UnwindInfo apply(Engine<O>&, const found::SymClaimCell<O>&) noexcept;
 
 		// AKA "naked subsets"
-		static UnwindInfo apply(Engine<O>&, const found::CellsClaimSyms<O>&) noexcept;
-
-		// AKA "hidden subsets"
-		static UnwindInfo apply(Engine<O>&, const found::SymsClaimCells<O>&) noexcept;
+		static UnwindInfo apply(Engine<O>&, const found::Subset<O>&) noexcept;
 
 		static UnwindInfo apply(Engine<O>&, const found::LockedCands<O>&) noexcept;
 

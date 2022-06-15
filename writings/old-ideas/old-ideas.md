@@ -37,6 +37,9 @@
 - ? Refactor names to use terminology suitable for more than just 2 dimensions? Ex. in 2D: row -> `d0i` (as in "dimension-zero index"), col -> `d1i`. But doing so would imply that I'm going to support multiple dimensions... and that's a huge can of worms.
   - I don't really see myself attempting to do a 3d version of sudoku, and doing this seems like it would make the 2d code harder to read.
 
+- [it is allowed in c++ to have template functions and non-template functions with the same name. here are the resulting rules](https://stackoverflow.com/a/16865452/11107541). Could this be used to put the algorithm functions under the same namespace (not in separate "mono" and "visitor" namespace)?
+  - cppcoreguidelines recommends placing functions operating on a class in the same namespace as the class, which allows ADL. Whether or not ADL is a good thing is a separate discussion, but I'm still on board with this recommendation.
+
 ## No Longer Needed
 
 - "smarter"/greedier backtracking: backtracking may be occurring frequently at a coord because of values much earlier in the genpath progress. (wikipedia "backskipping")

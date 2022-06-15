@@ -58,16 +58,16 @@ namespace okiidoku::mono {
 			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(count < T::O2);
 			return count;
 		} else {
-			o2xs_t count {0};
-			// TODO consider rewriting this using std::find_if
-			for (const auto& word : words_) {
-				if (word == 0) {
-					count += word_t_num_bits;
-				} else {
-					count += static_cast<o2xs_t>(std::countr_zero(word));
-					break;
-				}
-			}
+			const auto word {std::find_if(
+				#ifdef __cpp_lib_execution
+				std::execution::unseq,
+				#endif
+				words_.cbegin(), words_.cend(), [](const auto& word){ return word != 0; }
+			)};
+			const o2xs_t count {static_cast<o2x_t>(
+				/* static_cast<o2x_t> */(word_t_num_bits*static_cast<o2x_t>(std::distance(words_.cbegin(), word)))
+				+ static_cast<o2x_t>(std::countr_zero(*word))
+			)};
 			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(count < T::O2);
 			return count;
 		}
