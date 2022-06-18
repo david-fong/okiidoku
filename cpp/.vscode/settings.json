@@ -12,6 +12,7 @@
 
 	"cmake.configureSettings": {
 		"CMAKE_COLOR_DIAGNOSTICS": "ON",
+		// "CMAKE_COMPILE_WARNING_AS_ERROR": false
 	},
 
 	// prefer multi-config generators when available

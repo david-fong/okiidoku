@@ -61,6 +61,8 @@
   - or more fine grained: each guess stack frame has a "logic depth/effort" field that describes the finders that were used before the guess was made. Ex. used up to finding subsets of size 2 before the guess was made.
 - play around with giving puzzle maker a threshold to stop trying to solve a candidate puzzle after N guesses, or give up (or mark as try-again-later) seeing if a given is safe to remove after N guesses.
 
+- Interesting: [](https://cmake.org/cmake/help/latest/variable/CMAKE_VERIFY_INTERFACE_HEADER_SETS.html)
+
 - cppcoreguidelines C.2: use class if there is an invariant, and struct otherwise.
 
 - look into cppitertools for writing my raw loops. see if people say anything about performance overhead.

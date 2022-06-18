@@ -54,11 +54,11 @@ endif()
 # warnings:
 if(MSVC)
 	target_compile_options(okiidoku_compile_options_private INTERFACE
-		/W4 #/WX      # highest warning level #and treat warnings as errors.
+		/W4 # highest warnings level
 	)
 else()
 	target_compile_options(okiidoku_compile_options_private INTERFACE
-		-Wall -Wextra -Wpedantic -pedantic-errors #-Werror
+		-Wall -Wextra -Wpedantic -pedantic-errors
 		-Wfatal-errors # stop compilation on first error. I found it hard to read multiple.
 		-Wold-style-cast
 		-Wvla # maybe put this in the project-root cmake file
