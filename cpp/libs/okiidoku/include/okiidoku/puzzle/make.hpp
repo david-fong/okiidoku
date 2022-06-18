@@ -8,7 +8,7 @@ namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
 	struct MinimalUnavoidableSets final {
-		Grid<O> ids {}; // TODO dummy field. need to figure out actual representation.
+		Grid<O> ids {}; // TODO dummy field. need to figure out actual representation. This doesn't work if a cell can be part of multiple minimal unavoidable sets.
 	};
 
 	// https://www.sudopedia.org/wiki/Deadly_Pattern

@@ -2,6 +2,7 @@ boxcol
 boxrow
 canonicalizer
 Emerentius
+enjoysudoku
 givens
 jczsolve
 minlexing

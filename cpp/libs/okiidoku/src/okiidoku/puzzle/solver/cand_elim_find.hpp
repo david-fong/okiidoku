@@ -23,6 +23,8 @@ namespace okiidoku::mono::detail::solver {
 
 
 		static Guess<O> good_guess_candidate(const Engine<O>&) noexcept;
+
+		// static UnwindInfo common_post_guess_cell_claim_sym(Engine<O>&);
 	};
 }
 #endif

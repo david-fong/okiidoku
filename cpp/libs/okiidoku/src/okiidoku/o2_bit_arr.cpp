@@ -121,7 +121,7 @@ namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
 	std::array<char, Ints<O>::O2>
-	O2BitArr<O>::to_stringbuf() const noexcept {
+	O2BitArr<O>::to_chars() const noexcept {
 		std::array<char, T::O2> _; // NOLINT(cppcoreguidelines-pro-type-member-init) see next line
 		_.fill('.');
 		for (o2i_t i {0}; i < T::O2; ++i) {
@@ -137,7 +137,7 @@ namespace okiidoku::mono {
 		template typename O2BitArr<O_>::o2xs_t O2BitArr<O_>::count_lower_zeros_assuming_non_empty_mask() const noexcept; \
 		template typename O2BitArr<O_>::o2xs_t O2BitArr<O_>::get_index_of_nth_set_bit(O2BitArr<O_>::o2x_t) const noexcept; \
 		template std::strong_ordering O2BitArr<O_>::cmp_differences(const O2BitArr<O_>&, const O2BitArr<O_>&) noexcept; \
-		template std::array<char, Ints<O_>::O2> O2BitArr<O_>::to_stringbuf() const noexcept;
+		template std::array<char, Ints<O_>::O2> O2BitArr<O_>::to_chars() const noexcept;
 	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 	#undef OKIIDOKU_FOR_COMPILED_O
 }

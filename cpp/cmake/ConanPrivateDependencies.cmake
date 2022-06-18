@@ -1,3 +1,5 @@
+include_guard(DIRECTORY)
+
 # following instructions at https://docs.conan.io/en/latest/howtos/cmake_launch.html
 if(NOT EXISTS "${CMAKE_BINARY_DIR}/conan.cmake")
 	message(STATUS "Downloading conan.cmake from https://github.com/conan-io/cmake-conan")

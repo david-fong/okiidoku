@@ -1,3 +1,5 @@
+include_guard(DIRECTORY)
+
 # https://cmake.org/cmake/help/latest/module/FetchContent.html
 include(FetchContent)
 

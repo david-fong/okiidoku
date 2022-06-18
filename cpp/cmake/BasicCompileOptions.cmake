@@ -1,3 +1,5 @@
+include_guard(DIRECTORY)
+
 # settings to enable standard compliance and enable many warnings
 # this should help ensure that this library supports most compilers
 # and isn't less strict on itself than a very strict user's compiler

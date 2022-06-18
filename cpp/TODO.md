@@ -2,7 +2,7 @@
 
 ## Roadmap
 
-- deductive reasoning + backtracking solver
+- improving solver and puzzle-maker for order=5
 - draft archive
 - refactor and improve canonicalization
 - compare backtracking and stochastic search statistics
@@ -25,10 +25,36 @@
 
 ## Misc List
 
+- Challenge to self: find out how to make puzzles with few or many givens.
+  - Hypothesis: prioritizing to remove cells that are in a house with more givens / fewer candidate-symbols will create puzzles with few givens and vice versa.
+
+- Try specializing O2BitArr for when it doesn't need an array. see how it affects code readability, library binary size, and time performance.
+
+- I'd like to collect some statistics about relations between guess stack depth and num puzcells remaining / total num cand-syms remaining.
+  - Perhaps there can be some relation to when to search for larger-sized subsets?
+
+- What would it be like if we took out the specialized single find/apply?
+  - Note: we don't need to get rid of the code: the specializations still have speed and space benefits compared to the generalized subset searching, which could be desirable to an engine user that only wants to search for singles.
+- Hm. Modify the above: what if we made subset-search also find and apply singles?
+  - If specializations for finding singles co-exist with the subset finding, and subsets also find and apply singles, then there should be a documentation note that using the subset finders means the singles finders (presumably?) make no sense to use at the same time.
+
+- what optimizations could be made to quickly check if entire houses have experienced no change? how often would such optimizations come into effect? would there be a net benefit? if so, how much?
+- when a subset has been found, we currently always go back to subset-size index 0, but is there anything smarter we could do?
+  - If you find a naked subset, the resulting eliminations in the new partition can illuminate new naked subsets, but I don't think it can illuminate new hidden subsets.
+  -
+
+- What ways could be explored to speed up the OR-ing together of cand-sym masks when searching for subsets?
+  - A tree-like structure where middle layers cache some pre-computed ORs of partial combinations?
+
+- when searching subsets, is there a way to use knowledge about which cells have changed in cand-syms since last subset search to optimize the combination-search?
+  - Any combination composed only of cells whose number of cand-syms hasn't changed since the last find attempt can be skipped. (I think).
+    - I'd be interested in doing some manual profiling of how often such a skip branch gets taken for order=5.
+
 - try focusing guesses on the cell ruling out a known solution
 - see the TODO for `get_guess_grouping`.
 - try to use [unavoidable set](https://www.sudopedia.org/wiki/Unavoidable_Set) / deadly pattern detection to optimize proper-puzzle-making.
   - [interesting](http://forum.enjoysudoku.com/max-number-of-clues-t1448.html#p21531).
+- possible "deduction technique": given a cell that has multiple candidates, try guessing each candidate (to create "derivatives") and see how much more can be deduced for each derivative without further guessing after that. Any candidates that are ruled out for all the derivatives can be ruled out from the base.
 - consider a finder-heuristic that only starts using more powerful finders when the guess stack gets to a certain depth- at which point it unwinds to one-above the last frame that used more powerful finders, and uses more powerful finders.
   - Hm. But the guess stack depth doesn't necessarily correspond to when it may make the most sense to again use more expensive deduction techniques, since I don't know if there's any saying how much further deduction a guess may enable.
   - will have to create some modified version of unwinding which doesn't rule out the guess.
@@ -54,10 +80,6 @@
 
 - try DLL's again? read the docs actually.
   - [general rules and limitations](https://docs.microsoft.com/en-us/cpp/cpp/general-rules-and-limitations)
-
-- profile guided optimization
-  - [msvc](https://docs.microsoft.com/en-us/cpp/build/profile-guided-optimizations)
-  - [clang](https://clang.llvm.org/docs/UsersManual.html#profile-guided-optimization)
 
 - try writing custom GDB python pretty-printer for `O2BitArr`?
   - [how to write a gdb pretty-printer](https://sourceware.org/gdb/onlinedocs/gdb/Writing-a-Pretty_002dPrinter.html#Writing-a-Pretty_002dPrinter)

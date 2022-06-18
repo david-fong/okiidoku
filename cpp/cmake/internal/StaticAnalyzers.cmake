@@ -1,3 +1,5 @@
+include_guard(DIRECTORY)
+
 if(MSVC)
 	add_compile_options("/analyze") # https://docs.microsoft.com/en-us/cpp/build/reference/analyze-code-analysis
 endif()

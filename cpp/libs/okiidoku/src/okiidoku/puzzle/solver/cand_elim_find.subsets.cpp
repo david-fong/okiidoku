@@ -71,11 +71,12 @@ namespace okiidoku::mono::detail::solver { namespace {
 			bool no_change {true};
 			for (o2i_t i {sub_a}; i < sub_z; ++i) {
 				auto& cell_tag {subs.cell_tags[i]};
-				OKIIDOKU_CONTRACT_TRIVIAL_EVAL(cell_tag.count_cache >= cells_cands.at_rmi(cell_tag.rmi).count());
-				const auto count {static_cast<int_ts::o2is_t<O>>(cells_cands.at_rmi(cell_tag.rmi).count())};
-				if (cell_tag.count_cache > count) {
+				const auto updated_count {static_cast<o2is_t>(cells_cands.at_rmi(cell_tag.rmi).count())};
+				OKIIDOKU_CONTRACT_TRIVIAL_EVAL(cell_tag.count_cache <= T::O2);
+				OKIIDOKU_CONTRACT_TRIVIAL_EVAL(cell_tag.count_cache >= updated_count);
+				if (cell_tag.count_cache > updated_count) {
 					no_change = false;
-					cell_tag.count_cache = count;
+					cell_tag.count_cache = updated_count;
 				}
 			}
 			if (no_change) {

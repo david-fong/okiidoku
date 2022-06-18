@@ -1,3 +1,4 @@
+include_guard(DIRECTORY)
 
 # set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
 # ^tried in last-ditch attempt to support DLLs. It didn't work probably because I don't know what I'm doing.

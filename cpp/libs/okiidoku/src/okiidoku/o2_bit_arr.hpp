@@ -186,7 +186,7 @@ namespace okiidoku::mono {
 		[[nodiscard, gnu::pure]] static std::strong_ordering cmp_differences(const O2BitArr& a, const O2BitArr& b) noexcept;
 
 		// least-significant bit is the least-significant (left-most) character.
-		[[nodiscard, gnu::pure]] std::array<char, T::O2> to_stringbuf() const noexcept;
+		[[nodiscard, gnu::pure]] std::array<char, T::O2> to_chars() const noexcept;
 	};
 	#define OKIIDOKU_FOR_COMPILED_O(O_) \
 		static_assert(!std::is_aggregate_v<O2BitArr<O_>>);

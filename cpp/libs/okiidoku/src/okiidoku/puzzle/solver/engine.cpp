@@ -46,7 +46,6 @@ namespace okiidoku::mono::detail::solver {
 				register_new_given_(static_cast<rmi_t>(rmi), static_cast<val_t>(val));
 			}
 		}
-		// debug_print_cells_cands_();
 	}
 
 
@@ -144,7 +143,7 @@ namespace okiidoku::mono::detail::solver {
 		const EngineImpl<O>::rmi_t rmi
 	) noexcept {
 		assert(!no_solutions_remain());
-		assert(get_num_puzcells_remaining() > 0);
+		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(frame_.num_puzcells_remaining > 0);
 		const auto& cell_cands {cells_cands().at_rmi(rmi)};
 		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(cell_cands.count() == 1);
 		const auto val {cell_cands.count_lower_zeros_assuming_non_empty_mask()};
@@ -169,7 +168,6 @@ namespace okiidoku::mono::detail::solver {
 		++total_guesses_;
 		#ifndef NDEBUG
 		std::clog << "\nguess+(" << get_guess_stack_depth() << ") " << int(guess.rmi) << ":" << int(guess.val);
-		// debug_print_cells_cands_();
 		#endif
 	}
 
@@ -198,7 +196,6 @@ namespace okiidoku::mono::detail::solver {
 		e.guess_stack_.pop_back();
 		// #ifndef NDEBUG
 		// std::clog << "\nguess-(" << e.get_guess_stack_depth() << ") " << int(guess.rmi) << " " << int(guess.val);
-		// e.debug_print_cells_cands_();
 		// #endif
 		return UnwindInfo::make_did_unwind_guess();
 	}
@@ -232,7 +229,7 @@ namespace okiidoku::mono::detail::solver {
 		for (o4i_t rmi {0}; rmi < T::O4; ++rmi) {
 			if (rmi % T::O2 == 0) { std::clog << '\n'; }
 			const auto& mask {cells_cands().at_rmi(rmi)};
-			const auto chars {mask.to_stringbuf()};
+			const auto chars {mask.to_chars()};
 			std::clog.write(chars.data(), chars.size());
 			std::clog << "  " << std::flush;
 		}
