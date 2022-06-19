@@ -40,8 +40,15 @@ namespace okiidoku::mono {
 namespace okiidoku::visitor {
 
 	Transformation scramble(Grid& vis_grid, const rng_seed_t rng_seed) noexcept {
-		return std::visit([&](auto& mono_grid) {
-			return static_cast<Transformation>(mono::scramble(mono_grid, rng_seed));
-		}, vis_grid.get_mono_variant());
+		// return std::visit([&](auto& mono_grid) {
+		// 	return static_cast<Transformation>(mono::scramble(mono_grid, rng_seed));
+		// }, vis_grid.get_mono_variant());
+		switch (vis_grid.get_mono_order()) {
+		#define OKIIDOKU_FOR_COMPILED_O(O_) \
+		case O_: return static_cast<Transformation>(mono::scramble(vis_grid.unchecked_get_mono_exact<O_>(), rng_seed));
+		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
+		#undef OKIIDOKU_FOR_COMPILED_O
+		default: OKIIDOKU_CONTRACT_TRIVIAL_EVAL(false); // std::unreachable
+		}
 	}
 }

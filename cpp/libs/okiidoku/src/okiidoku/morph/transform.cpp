@@ -93,8 +93,15 @@ namespace okiidoku::visitor {
 
 
 	Transformation Transformation::inverted() const noexcept {
-		return std::visit([](const auto& mono_transform) {
-			return static_cast<Transformation>(mono_transform.inverted());
-		}, this->get_mono_variant());
+		// return std::visit([](const auto& mono_transform) {
+		// 	return static_cast<Transformation>(mono_transform.inverted());
+		// }, this->get_mono_variant());
+		switch (this->get_mono_order()) {
+		#define OKIIDOKU_FOR_COMPILED_O(O_) \
+		case O_: return static_cast<Transformation>(this->unchecked_get_mono_exact<O_>().inverted());
+		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
+		#undef OKIIDOKU_FOR_COMPILED_O
+		default: OKIIDOKU_CONTRACT_TRIVIAL_EVAL(false); // std::unreachable
+		}
 	}
 }

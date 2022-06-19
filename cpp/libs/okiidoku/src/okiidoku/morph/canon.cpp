@@ -37,8 +37,15 @@ namespace okiidoku::visitor {
 
 	// contract: `vis_grid` is filled and follows the one rule.
 	Transformation canonicalize(Grid& vis_grid) noexcept {
-		return std::visit([](auto& mono_grid) {
-			return static_cast<Transformation>(mono::canonicalize(mono_grid));
-		}, vis_grid.get_mono_variant());
+		// return std::visit([](auto& mono_grid) {
+		// 	return static_cast<Transformation>(mono::canonicalize(mono_grid));
+		// }, vis_grid.get_mono_variant());
+		switch (vis_grid.get_mono_order()) {
+		#define OKIIDOKU_FOR_COMPILED_O(O_) \
+		case O_: return static_cast<Transformation>(mono::canonicalize(vis_grid.unchecked_get_mono_exact<O_>()));
+		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
+		#undef OKIIDOKU_FOR_COMPILED_O
+		default: OKIIDOKU_CONTRACT_TRIVIAL_EVAL(false); // std::unreachable
+		}
 	}
 }

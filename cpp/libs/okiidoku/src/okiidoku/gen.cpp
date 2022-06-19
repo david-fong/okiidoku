@@ -150,7 +150,7 @@ namespace okiidoku::mono {
 		using T = Ints<O>;
 		using o2i_t = int_ts::o2i_t<O>;
 		{
-			// TODO consider making example_row static constexpr
+			// TODO consider making example_row static constexpr for small grid-orders
 			std::array<grid_val_t<O>, T::O2> example_row; // NOLINT(cppcoreguidelines-pro-type-member-init) see next line
 			std::iota(example_row.begin(), example_row.end(), grid_val_t<O>{0});
 			for (o2i_t row {0}; row < T::O2; ++row) {
@@ -188,8 +188,15 @@ namespace okiidoku::mono {
 namespace okiidoku::visitor {
 
 	void generate(Grid& vis_sink, const rng_seed_t rng_seed) noexcept {
-		return std::visit([&](auto& mono_sink){
-			return mono::generate(mono_sink, rng_seed);
-		}, vis_sink.get_mono_variant());
+		// return std::visit([&](auto& mono_sink){
+		// 	return mono::generate(mono_sink, rng_seed);
+		// }, vis_sink.get_mono_variant());
+		switch (vis_sink.get_mono_order()) {
+		#define OKIIDOKU_FOR_COMPILED_O(O_) \
+		case O_: return mono::generate(vis_sink.unchecked_get_mono_exact<O_>(), rng_seed);
+		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
+		#undef OKIIDOKU_FOR_COMPILED_O
+		default: OKIIDOKU_CONTRACT_TRIVIAL_EVAL(false); // std::unreachable
+		}
 	}
 }
