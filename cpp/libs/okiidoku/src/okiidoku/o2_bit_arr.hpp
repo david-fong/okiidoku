@@ -20,9 +20,19 @@ namespace okiidoku::mono {
 		using o2x_t = int_ts::o2x_t<O>;
 		using o2i_t = int_ts::o2i_t<O>;
 
-		// using word_t = std::uint64_t;
-		// using smaller word size when O<=8 has ~5% time improvement for O=3 solver
-		using word_t = std::conditional_t<(O <= 8), detail::uint_smolN_t<T::O2>, std::uint_least64_t>;
+		// TODO.low investigate ways to store small but expand to a fast(er) int type
+		// when doing bit-twiddling operations and whether the tradeoff is good pareto-wise.
+		using word_t =
+			std::conditional_t<(O <  8), std::uint_fast32_t,
+			std::conditional_t<(O == 8), std::uint_fast64_t,
+			std::uint_fast64_t
+		>>;
+		// since last measured for clang, the above is slightly faster for O=3, with
+		// slightly better codegen and slightly bigger code size.
+		// using word_t =
+		// 	std::conditional_t<(O <= 8), detail::uint_smolN_t<T::O2>,
+		// 	std::uint_least64_t
+		// >;
 
 		// Note: use of unsigned char is safe for grid-orders < 128. That should be fine.
 		using word_i_t = unsigned char;
@@ -45,7 +55,11 @@ namespace okiidoku::mono {
 		[[nodiscard, gnu::const]]
 		static constexpr word_t word_bit_mask_for_bit_i(const o2x_t bit_i) noexcept {
 			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(bit_i < T::O2);
-			return static_cast<word_t>(word_t{1} << static_cast<word_bit_i_t>(bit_i % word_t_num_bits));
+			if constexpr (num_words == 1) {
+				return static_cast<word_t>(word_t{1} << bit_i);
+			} else {
+				return static_cast<word_t>(word_t{1} << (bit_i % word_t_num_bits));
+			}
 		}
 
 		// Internal Note: If user follows contracts, excess top bits are always zero.

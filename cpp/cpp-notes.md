@@ -17,8 +17,11 @@
 
 ```sh
 # (cd to the cmake build folder of interest)
-# view public (-D) de-mangled (-C) symbols of the shared library sorted by address (-n)
-nm -nCD libs/okiidoku/libokiidoku.so
+# view public(-D) de-mangled(-C) symbols of the shared library sorted by address(-n)
+nm -nCD libs/okiidoku/Release/libokiidoku.so
+
+# de-mangled(-C) assembler contents of executable sections(-d), intermixing source code with disassembly(-S)
+objdump -SCd libs/okiidoku/Release/libokiidoku.so | less
 
 # (cd to the cpp folder)
 # view the grid translation unit with macros fully expanded

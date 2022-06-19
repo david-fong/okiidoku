@@ -18,7 +18,7 @@ namespace okiidoku::mono {
 				#ifdef __cpp_lib_execution
 				std::execution::unseq,
 				#endif
-				words_.cbegin(), words_.cend(), static_cast<o2i_t>(0U), std::plus<o2i_t>{},
+				words_.cbegin(), words_.cend(), o2i_t{0}, std::plus<o2i_t>{},
 				[](const auto& word){ return static_cast<o2i_t>(std::popcount(word)); }
 			)};
 			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(count <= T::O2);
@@ -27,23 +27,30 @@ namespace okiidoku::mono {
 	}
 
 
+	// TODO compiler having trouble inferring ability to use bzhi instruction for O=3,4 when they use u16 instead of u32.
 	template<Order O> requires(is_order_compiled(O))
 	typename O2BitArr<O>::o2x_t
 	O2BitArr<O>::count_set_bits_below(const typename O2BitArr<O>::o2x_t end) const noexcept {
-		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(end < T::O2);
-		const auto end_at_int {bit_i_to_word_i(end)};
-		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(end_at_int < num_words);
-		return static_cast<o2x_t>(std::transform_reduce(
-			#ifdef __cpp_lib_execution
-			std::execution::unseq,
-			#endif
-			words_.cbegin(), std::next(words_.cbegin(), end_at_int),
-			/* init value: */static_cast<o2x_t>(std::popcount(static_cast<word_t>(
-				words_[end_at_int] & (word_bit_mask_for_bit_i(end) - static_cast<word_t>(1U))
-			))),
-			std::plus<o2x_t>{},
-			[](const auto& word){ return static_cast<o2x_t>(std::popcount(word)); }
-		));
+		if constexpr (num_words == 1) {
+			return static_cast<o2x_t>(std::popcount(static_cast<word_t>(
+				words_[0] & static_cast<word_t>(word_bit_mask_for_bit_i(end) - word_t{1})
+			)));
+		} else {
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(end < T::O2);
+			const auto end_at_int {bit_i_to_word_i(end)};
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(end_at_int < num_words);
+			return static_cast<o2x_t>(std::transform_reduce(
+				#ifdef __cpp_lib_execution
+				std::execution::unseq,
+				#endif
+				words_.cbegin(), std::next(words_.cbegin(), end_at_int),
+				/* init value: */static_cast<o2x_t>(std::popcount(static_cast<word_t>(
+					words_[end_at_int] & static_cast<word_t>(word_bit_mask_for_bit_i(end) - word_t{1})
+				))),
+				std::plus<o2x_t>{},
+				[](const auto& word){ return static_cast<o2x_t>(std::popcount(word)); }
+			));
+		}
 	}
 
 
@@ -78,7 +85,7 @@ namespace okiidoku::mono {
 	typename O2BitArr<O>::o2x_t
 	O2BitArr<O>::get_index_of_nth_set_bit(O2BitArr::o2x_t set_bit_index) const noexcept {
 		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(set_bit_index < T::O2);
-		assert(count() > o2i_t{set_bit_index});
+		assert(count() > set_bit_index);
 		for (word_i_t word_i {0}; word_i < num_words; ++word_i) {
 			auto& word {words_[word_i]};
 			const auto word_popcount {std::popcount(word)};
@@ -89,7 +96,7 @@ namespace okiidoku::mono {
 				}
 			}
 			for (word_t word_bit_i {0}; word_bit_i < word_t_num_bits; ++word_bit_i) { // TODO.mid possible optimization: skip consecutive set bits by somehow using std::countr_<>
-				const auto bit_mask {word_t{1} << word_bit_i};
+				const auto bit_mask {static_cast<word_t>(word_t{1} << word_bit_i)};
 				if (word & bit_mask) {
 					if (set_bit_index == 0) {
 						// word &= ~bit_mask;
