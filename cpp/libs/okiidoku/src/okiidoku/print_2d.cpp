@@ -59,6 +59,7 @@ namespace okiidoku {
 		using o4xs_t = visitor::int_ts::o4xs_t;
 
 		const auto print_box_row_sep_string_ {[&os, O](const unsigned border_i) -> void {
+			// TODO add contract for border_i
 			#define M_NOOK(NOOK_T, NOOK_C, NOOK_B) \
 			if      (border_i == 0) [[unlikely]] { os << (NOOK_T); } \
 			else if (border_i == O) [[unlikely]] { os << (NOOK_B); } \
@@ -75,6 +76,7 @@ namespace okiidoku {
 		}};
 
 		const auto print_box_row_sep_strings {[&](const unsigned border_i){
+			// TODO add contract for border_i
 			os << '\n';
 			print_box_row_sep_string_(border_i);
 			for (unsigned i {1}; i < grid_views.size(); ++i) {

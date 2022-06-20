@@ -25,7 +25,7 @@ namespace okiidoku::mono {
 		if (!engine_) { return; }
 		engine_->reinit_with_puzzle(puzzle);
 		if (cand_sym_to_ignore) {
-			const auto& ignore {cand_sym_to_ignore.value()};
+			const auto& ignore {*cand_sym_to_ignore};
 			const auto check {engine_->do_elim_remove_sym_(ignore.rmi, ignore.val)};
 			(void)check; // `no_solutions_remain` will be handled by `get_next_solution`.
 		}
@@ -47,7 +47,7 @@ namespace okiidoku::mono {
 		// using T = Ints<O>;
 		using Find = detail::solver::CandElimFind<O>;
 		static constexpr auto find_subsets {[](detail::solver::Engine<O>& e_) noexcept {
-			if constexpr (O < 5) {
+			if constexpr (O < 5) { // NOLINT(readability-magic-numbers)
 				return detail::solver::UnwindInfo::make_no_unwind();
 			} else {
 				return Find::subsets(e_, e_.get_guess_stack_depth() == 0 ? 4 : 2);

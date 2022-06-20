@@ -3,7 +3,7 @@
 #include <okiidoku/o2_bit_arr.hpp>
 #include <okiidoku/detail/contract.hpp>
 
-#include <algorithm>
+#include <algorithm> // all_of
 #include <execution>
 
 namespace okiidoku::mono {
@@ -33,9 +33,8 @@ namespace okiidoku::mono {
 
 			if (has_mask_t::test_any3(static_cast<o2x_t>(val), row_has, col_has, box_has)) [[unlikely]] {
 				return false;
-			} else {
-				has_mask_t::set3(static_cast<o2x_t>(val), row_has, col_has, box_has);
 			}
+			has_mask_t::set3(static_cast<o2x_t>(val), row_has, col_has, box_has);
 		}}
 		return true;
 	}
@@ -44,13 +43,14 @@ namespace okiidoku::mono {
 	template<Order O> requires(is_order_compiled(O))
 	bool grid_is_filled(const Grid<O>& grid) noexcept {
 		using T = Ints<O>;
-		using o4i_t = int_ts::o4i_t<O>;
-		for (o4i_t i {0}; i < T::O4; ++i) {
-			const auto& val {grid.at_rmi(i)};
-			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(val <= T::O2);
-			if (val == T::O2) { return false; }
-		}
-		return true;
+		return std::none_of(
+			#ifdef __cpp_lib_execution
+			std::execution::unseq,
+			#endif
+			grid.get_underlying_array().cbegin(),
+			grid.get_underlying_array().cend(),
+			[](const auto& val){ return val == T::O2; }
+		);
 	}
 
 

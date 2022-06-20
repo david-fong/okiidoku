@@ -133,9 +133,8 @@ namespace okiidoku::mono::detail::solver { namespace {
 			const auto naked_subset_size {[&]() -> o2x_t {
 				if (naked_or_hidden == NakedOrHidden::naked) {
 					return static_cast<o2x_t>(2+(subset_i/2));
-				} else {
-					return static_cast<o2x_t>((sub_z-sub_a)-2-(subset_i/2));
 				}
+				return static_cast<o2x_t>((sub_z-sub_a)-2-(subset_i/2));
 			}()};
 			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(sub_a+naked_subset_size+1 < sub_z);
 			// ^plus one to skip finding hidden singles. // TODO or also try to find them?
@@ -152,7 +151,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 				.combo_syms {},
 				.naked_or_hidden {naked_or_hidden},
 			}};
-			auto& [combo_walker, combo_syms, ignore_] {found.value()};
+			auto& [combo_walker, combo_syms, ignore_] {*found};
 			for (; combo_walker.has_more(); combo_walker.advance()) {
 				combo_syms = std::transform_reduce(
 					#ifdef __cpp_lib_execution
@@ -221,7 +220,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 				sub_a = sub_z;
 				continue;
 			}
-			const auto& [combo_walker, combo_syms, naked_or_hidden] {found.value()};
+			const auto& [combo_walker, combo_syms, naked_or_hidden] {*found};
 			const auto naked_subset_size {combo_walker.get_naked_subset_size()};
 			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(combo_syms.count() <= naked_subset_size);
 			if (combo_syms.count() < naked_subset_size) [[unlikely]] {

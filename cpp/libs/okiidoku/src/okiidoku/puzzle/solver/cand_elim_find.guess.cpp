@@ -35,7 +35,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 					++(houses_solved_counts[rmi_to_house<O>(house_type, rmi)].at(house_type));
 		}	}	}
 		const auto get_house_solved_counts {[&](const o4i_t rmi){
-			if constexpr (O < 5) {
+			if constexpr (O < 5) { // NOLINT(readability-magic-numbers)
 				o3i_t _ {0};
 				for (const auto house_type : house_types) {
 					const auto house {rmi_to_house<O>(house_type, rmi)};

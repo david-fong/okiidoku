@@ -19,6 +19,7 @@ ARGUMENTS
 int main(const int argc, char const *const argv[]) {
 	okiidoku::util::setup_console();
 
+	// NOLINTBEGIN(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays, cppcoreguidelines-pro-bounds-pointer-arithmetic)
 	const unsigned user_order {(argc > 1)
 		? static_cast<unsigned>(std::stoi(argv[1]))
 		: okiidoku::compiled_orders[0]
@@ -34,6 +35,7 @@ int main(const int argc, char const *const argv[]) {
 		}
 		return std::random_device()();
 	}()};
+	// NOLINTEND(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays, cppcoreguidelines-pro-bounds-pointer-arithmetic)
 
 	std::cout << "\nparsed arguments:"
 	<< "\n- arg 1 (grid order) : " << user_order

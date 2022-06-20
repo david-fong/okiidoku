@@ -125,6 +125,7 @@ namespace okiidoku::mono {
 			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(at < T::O2);
 			const auto word_i {bit_i_to_word_i(at)};
 			const word_t word_bit_mask {word_bit_mask_for_bit_i(at)};
+			// TODO consider rewriting to just logical-or testing each one separately
 			return ((a.words_[word_i] | b.words_[word_i] | c.words_[word_i]) & word_bit_mask) != 0;
 		}
 		// contract: `at < O2`
