@@ -1,6 +1,6 @@
 # ōkiidoku
 
-A C++ library to:
+A C++ library for variable-grid-size sudoku to:
 
 - generate random, full grids
 - generate puzzles
@@ -8,7 +8,7 @@ A C++ library to:
 - (WIP) efficiently(?) put full grids in a canonical form
 - (WIP) archive collections of grids in highly-compressed form
 
-It supports parametric grid size of type 9x9, 16x16, 25x25, ..., 256x256, etc.
+It supports parametric grid size of dimensions 9x9, 16x16, 25x25, ..., 256x256, etc.
 
 In the future, it will have language bindings for WASM/JS and Python.
 

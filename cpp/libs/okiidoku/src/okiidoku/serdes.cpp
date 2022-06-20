@@ -215,9 +215,6 @@ namespace okiidoku::mono {
 namespace okiidoku::visitor {
 
 	void write_solution_grid_to_stream(const Grid& vis_src, std::ostream& os) noexcept {
-		// return std::visit([&](auto& mono_src) {
-		// 	return mono::write_solution_grid_to_stream(mono_src, os);
-		// }, vis_src.get_mono_variant());
 		switch (vis_src.get_mono_order()) {
 		#define OKIIDOKU_FOR_COMPILED_O(O_) \
 		case O_: return mono::write_solution_grid_to_stream(vis_src.unchecked_get_mono_exact<O_>(), os);
@@ -228,9 +225,6 @@ namespace okiidoku::visitor {
 	}
 
 	void parse_solution_grid_from_stream(Grid& vis_sink, std::istream& is) noexcept {
-		// return std::visit([&](auto& mono_sink) {
-		// 	return mono::parse_solution_grid_from_stream(mono_sink, is);
-		// }, vis_sink.get_mono_variant());
 		switch (vis_sink.get_mono_order()) {
 		#define OKIIDOKU_FOR_COMPILED_O(O_) \
 		case O_: return mono::parse_solution_grid_from_stream(vis_sink.unchecked_get_mono_exact<O_>(), is);
@@ -241,9 +235,6 @@ namespace okiidoku::visitor {
 	}
 
 	void print_puzzle_grid_to_stream(const Grid& vis_src, std::ostream& os) noexcept {
-		// return std::visit([&](auto& mono_src) {
-		// 	return mono::print_puzzle_grid_to_stream(mono_src, os);
-		// }, vis_src.get_mono_variant());
 		switch (vis_src.get_mono_order()) {
 		#define OKIIDOKU_FOR_COMPILED_O(O_) \
 		case O_: return mono::print_puzzle_grid_to_stream(vis_src.unchecked_get_mono_exact<O_>(), os);
@@ -254,9 +245,6 @@ namespace okiidoku::visitor {
 	}
 
 	void parse_puzzle_grid_from_stream(Grid& vis_sink, std::istream& is) noexcept {
-		// return std::visit([&](auto& mono_sink) {
-		// 	return mono::parse_puzzle_grid_from_stream(mono_sink, is);
-		// }, vis_sink.get_mono_variant());
 		switch (vis_sink.get_mono_order()) {
 		#define OKIIDOKU_FOR_COMPILED_O(O_) \
 		case O_: return mono::parse_puzzle_grid_from_stream(vis_sink.unchecked_get_mono_exact<O_>(), is);

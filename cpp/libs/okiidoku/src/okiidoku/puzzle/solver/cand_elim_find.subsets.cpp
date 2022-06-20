@@ -105,10 +105,13 @@ namespace okiidoku::mono::detail::solver { namespace {
 	}
 
 
+	enum class NakedOrHidden { naked, hidden };
+
 	template<Order O> requires(is_order_compiled(O))
 	struct FoundSubsetInfo final {
 		SubsetComboWalker<O> combo_walker;
 		O2BitArr<O> combo_syms;
+		NakedOrHidden naked_or_hidden;
 	};
 
 
@@ -126,8 +129,9 @@ namespace okiidoku::mono::detail::solver { namespace {
 		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(max_subset_size >= 2);
 		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(max_subset_size <= static_cast<o2x_t>((T::O2+1)/2));
 		for (o2x_t subset_i {0}; subset_i < (sub_z-sub_a-3) && subset_i+2 < 2*max_subset_size; ++subset_i) {
+			const auto naked_or_hidden {(subset_i % 2 == 0) ? NakedOrHidden::naked : NakedOrHidden::hidden};
 			const auto naked_subset_size {[&]() -> o2x_t {
-				if (subset_i % 2 == 0) {
+				if (naked_or_hidden == NakedOrHidden::naked) {
 					return static_cast<o2x_t>(2+(subset_i/2));
 				} else {
 					return static_cast<o2x_t>((sub_z-sub_a)-2-(subset_i/2));
@@ -146,8 +150,9 @@ namespace okiidoku::mono::detail::solver { namespace {
 					naked_subset_size,
 				},
 				.combo_syms {},
+				.naked_or_hidden {naked_or_hidden},
 			}};
-			auto& [combo_walker, combo_syms] {found.value()};
+			auto& [combo_walker, combo_syms, ignore_] {found.value()};
 			for (; combo_walker.has_more(); combo_walker.advance()) {
 				combo_syms = std::transform_reduce(
 					#ifdef __cpp_lib_execution
@@ -187,11 +192,17 @@ namespace okiidoku::mono::detail::solver { namespace {
 			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(next > sub_a);
 			return next;
 		}};
+		// optional speed optimization to skip leading already-found singles:
+		if (subs.is_begin.count() == T::O2) [[unlikely]] {
+			return UnwindInfo::make_no_unwind();
+		} else {
+			auto non_first_members {O2BitArr_ones<O>};
+			non_first_members.remove(subs.is_begin);
+			const auto second_non_single_member {non_first_members.count_lower_zeros_assuming_non_empty_mask()};
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(second_non_single_member > 0);
+			sub_a = static_cast<o2i_t>(second_non_single_member-1);
+		}
 
-		// TODO this optimization seems to not have significant benefit. maybe try benchmarking again later?
-		// while (sub_a+1 < T::O2 && subs.is_begin.test(static_cast<o2x_t>(sub_a+1))) [[likely]] {
-		// 	++sub_a;
-		// }
 		while (sub_a < T::O2) [[likely]] {
 			sub_z = get_next_sub_a();
 			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(sub_z <= T::O2);
@@ -210,14 +221,13 @@ namespace okiidoku::mono::detail::solver { namespace {
 				sub_a = sub_z;
 				continue;
 			}
-			const auto& [combo_walker, combo_syms] {found.value()};
+			const auto& [combo_walker, combo_syms, naked_or_hidden] {found.value()};
 			const auto naked_subset_size {combo_walker.get_naked_subset_size()};
 			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(combo_syms.count() <= naked_subset_size);
 			if (combo_syms.count() < naked_subset_size) [[unlikely]] {
 				return unwind_one_stack_frame_of_(engine);
 			}
-			const bool is_naked_subset {naked_subset_size <= ((sub_z-sub_a+1)/2)};
-			if (is_naked_subset) {
+			if (naked_or_hidden == NakedOrHidden::naked) {
 				for (o2x_t combo_at {0}; combo_at < naked_subset_size; ++combo_at) {
 					auto& entry {subs.cell_tags[combo_walker.combo_at(combo_at)]};
 					std::swap(subs.cell_tags[sub_a], entry);
@@ -236,7 +246,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 				const auto check {engine.do_elim_remove_syms_(subs.cell_tags[i].rmi, combo_syms)};
 				if (check.did_unwind()) [[unlikely]] { return check; }
 			}
-			if (!is_naked_subset) {
+			if (naked_or_hidden != NakedOrHidden::naked) {
 				sub_a = sub_z;
 			}
 			engine.get_found_queues_().push_back(found::Subset<O>{}); // TODO currently pushing a dummy desc just to get proper finder looping in FastSolver

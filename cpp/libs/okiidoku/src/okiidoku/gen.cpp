@@ -50,6 +50,7 @@ namespace okiidoku::mono { namespace {
 
 		// unsigned long long op_count {0};
 		SymCountsForChuteHouses<O> boxes_has {};
+		#pragma clang loop unroll(disable)
 		for (o2i_t row {h_chute}; row < h_chute+T::O1; ++row) {
 		for (o2i_t col {0}; col < T::O2; ++col) {
 			auto& count {boxes_has.ch_count_sym(
@@ -66,6 +67,7 @@ namespace okiidoku::mono { namespace {
 			const auto a_box {static_cast<o1x_t>(a_col/T::O1)};
 			const auto b_box {static_cast<o1x_t>(b_col/T::O1)};
 			if (a_box == b_box) [[unlikely]] { continue; }
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(a_col != b_col);
 			const auto row {static_cast<o2x_t>(h_chute + ((rng() - rng_t::min()) % T::O1))};
 			auto& a_sym {grid.at(row,a_col)};
 			auto& b_sym {grid.at(row,b_col)};
@@ -104,6 +106,7 @@ namespace okiidoku::mono { namespace {
 
 		// unsigned long long op_count {0};
 		SymCountsForChuteHouses<O> cols_has {};
+		#pragma clang loop unroll(disable)
 		for (o2i_t row {0}; row < T::O2; ++row) {
 		for (o1i_t box_col {0}; box_col < T::O1; ++box_col) {
 			auto& count {cols_has.ch_count_sym(
@@ -149,19 +152,14 @@ namespace okiidoku::mono {
 	void generate(Grid<O>& grid, const rng_seed_t rng_seed) noexcept {
 		using T = Ints<O>;
 		using o2i_t = int_ts::o2i_t<O>;
-		{
-			// TODO consider making example_row static constexpr for small grid-orders
-			std::array<grid_val_t<O>, T::O2> example_row; // NOLINT(cppcoreguidelines-pro-type-member-init) see next line
-			std::iota(example_row.begin(), example_row.end(), grid_val_t<O>{0});
-			for (o2i_t row {0}; row < T::O2; ++row) {
-				const auto span {grid.row_span_at(row)};
-				std::copy(example_row.cbegin(), example_row.cend(), span.begin());
-			}
-		}
 		rng_t rng {static_cast<rng_t::result_type>(rng_seed)};
-		for (o2i_t row {0}; row < T::O2; ++row) {
-			const auto row_sp {grid.row_span_at(row)};
-			std::shuffle(row_sp.begin(), row_sp.end(), rng);
+		{
+			// #pragma clang loop unroll(disable)
+			for (o2i_t row {0}; row < T::O2; ++row) {
+				const auto row_sp {grid.row_span_at(row)};
+				std::iota(row_sp.begin(), row_sp.end(), grid_val_t<O>{0});
+				std::shuffle(row_sp.begin(), row_sp.end(), rng);
+			}
 		}
 		/* Note: when making boxes valid, keeping one line untouched works,
 		but is actually slower. same for making columns valid and one box. */
@@ -170,6 +168,8 @@ namespace okiidoku::mono {
 		for (o2i_t h_chute {0}; h_chute < T::O2; h_chute += T::O1) {
 			make_boxes_valid(grid, h_chute, rng);
 		}
+		// Note: iterations _can_ safely run in parallel, but cache-write-back might
+		// get hairy due to vertical chutes "interleaving" in the row-major grid.
 		for (o2i_t v_chute {0}; v_chute < T::O2; v_chute += T::O1) {
 			make_cols_valid(grid, v_chute, rng);
 		}
@@ -188,9 +188,6 @@ namespace okiidoku::mono {
 namespace okiidoku::visitor {
 
 	void generate(Grid& vis_sink, const rng_seed_t rng_seed) noexcept {
-		// return std::visit([&](auto& mono_sink){
-		// 	return mono::generate(mono_sink, rng_seed);
-		// }, vis_sink.get_mono_variant());
 		switch (vis_sink.get_mono_order()) {
 		#define OKIIDOKU_FOR_COMPILED_O(O_) \
 		case O_: return mono::generate(vis_sink.unchecked_get_mono_exact<O_>(), rng_seed);

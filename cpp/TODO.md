@@ -29,6 +29,7 @@
   - Hypothesis: prioritizing to remove cells that are in a house with more givens / fewer candidate-symbols will create puzzles with few givens and vice versa.
 
 - Try specializing O2BitArr for when it doesn't need an array. see how it affects code readability, library binary size, and time performance.
+  - After inspecting disassembly, codegen seems fine. I don't anticipate a big readability improvement.
 
 - I'd like to collect some statistics about relations between guess stack depth and num puzcells remaining / total num cand-syms remaining.
   - Perhaps there can be some relation to when to search for larger-sized subsets?
