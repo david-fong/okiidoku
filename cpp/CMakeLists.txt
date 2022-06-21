@@ -32,6 +32,7 @@ else()
 		-march=native # enable optimizing for the compiling machine's instruction set architecture.
 	)
 endif()
+include(cmake/DetectTargetInstructionSetArchSupport.cmake)
 
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 if(okiidoku_IS_TOP_LEVEL)
