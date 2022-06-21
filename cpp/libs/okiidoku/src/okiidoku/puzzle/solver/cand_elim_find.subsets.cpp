@@ -79,7 +79,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 					cell_tag.count_cache = updated_count;
 				}
 			}
-			if (no_change) {
+			if (no_change) { // TODO I think this is wrong: hidden subsets could still be found if cells outside this subset have changed: in particular, by losing a cand-sym that is a cand-sym of a cell inside this subset.
 				sub_a = sub_z;
 				return true;
 			}
@@ -265,12 +265,20 @@ namespace okiidoku::mono::detail::solver { namespace {
 			return UnwindInfo::make_no_unwind();
 		}
 		for (const auto house_type : house_types) {
-		for (o2i_t house {0}; house < T::O2; ++house) {
-			const auto check {find_subsets_for_house_and_check_needs_unwind<O>(
-				engine, engine.houses_subsets().at(house_type)[house], max_subset_size
-			)};
-			if (check.did_unwind()) [[unlikely]] { return check; }
-		}}
+			auto& houses_subsets {engine.houses_subsets().at(house_type)};
+			// std::array<o2i_t, T::O2> houses;
+			// std::iota(houses.begin(), houses.end(), o2i_t{0});
+			// std::sort(houses.begin(), houses.end(), [&](const auto& a, const auto& b){
+			// 	return houses_subsets[a].is_begin.count() < houses_subsets[b].is_begin.count();
+			// });
+			// for (const auto house : houses) {
+			for (o2i_t house {0}; house < T::O2; ++house) {
+				const auto check {find_subsets_for_house_and_check_needs_unwind<O>(
+					engine, houses_subsets[house], max_subset_size
+				)};
+				if (check.did_unwind()) [[unlikely]] { return check; }
+			}
+		}
 		return UnwindInfo::make_no_unwind();
 	}
 }}

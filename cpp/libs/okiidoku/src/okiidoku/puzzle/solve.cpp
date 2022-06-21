@@ -54,9 +54,9 @@ namespace okiidoku::mono {
 			}
 		}};
 		using finder_t = detail::solver::UnwindInfo (*)(detail::solver::Engine<O>&) noexcept;
-		const auto finders {std::to_array({
+		static constexpr auto finders {std::to_array({
 			std::cref(Find::sym_claim_cell),
-			// std::cref(Find::locked_cands), // TODO draft implementation not yet tested. please debug and check it behaves as intended.
+			std::cref(Find::locked_cands),
 			std::cref(*static_cast<finder_t>(find_subsets)),
 		})};
 		while (e.get_num_puzcells_remaining() > 0) [[likely]] {

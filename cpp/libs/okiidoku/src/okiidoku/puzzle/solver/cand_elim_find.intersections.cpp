@@ -25,6 +25,22 @@ namespace okiidoku::mono::detail::solver { namespace {
 	};
 
 	template<Order O> requires(is_order_compiled(O))
+	using chute_house_syms_t = std::array<O2BitArr<O>, Ints<O>::O1>;
+
+	// TODO.low consider using this to clean up the variable scoping in the finder.
+	//  ex. lines_syms and boxes_syms are only used intermediately to create lines_syms_claiming_an_isec and boxes_syms_claiming_an_isec.
+	// template<Order O> requires(is_order_compiled(O))
+	// struct HouseIsecClaims final {
+	// 	chute_house_syms_t<O> in_line;
+	// 	chute_house_syms_t<O> in_box;
+	// };
+
+	// TODO should be able to implement more generalizations:
+	//  - if in a horizontal chute, N boxes each have N horizontal isecs that are same-ly
+	//    positioned vertically and are all the only horizontal isecs within their boxes
+	//    which can contain a certain sym(s), then the rest of the boxes can remove that
+	//    sym(s) at those vertical isecs of theirs.
+	template<Order O> requires(is_order_compiled(O))
 	[[nodiscard]] bool find_locked_cands_and_check_needs_unwind(
 		const CandsGrid<O>& cells_cands,
 		FoundQueues<O>& found_queues
@@ -35,7 +51,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 		// if S's only candidate cells in B are in I, the same must hold true for L
 		const auto line_type {LineType::row}; // TODO.asap add the outer loop to also try LineType::col
 		for (o1i_t chute {0}; chute < T::O1; ++chute) {
-			// TODO optimize by interleaving entries of syms_non_single and syms
+			// TODO optimize by interleaving entries of syms_non_single and syms?
 			ChuteIsecsSyms<O> chute_isecs_syms_non_single {}; // syms with multiple cand cells in each chute isec
 			ChuteIsecsSyms<O> chute_isecs_syms {}; // all cand syms in each chute isec
 			for (o2i_t chute_isec {0}; chute_isec < T::O2; ++chute_isec) {
@@ -48,10 +64,11 @@ namespace okiidoku::mono::detail::solver { namespace {
 				seen_twice |= (seen_once & cell_cands);
 				seen_once |= cell_cands;
 			}}
-			std::array<O2BitArr<O>, T::O1> lines_syms;
-			std::array<O2BitArr<O>, T::O1> lines_syms_claiming_an_isec; lines_syms_claiming_an_isec.fill(O2BitArr_ones<O>);
-			std::array<O2BitArr<O>, T::O1> boxes_syms;
-			std::array<O2BitArr<O>, T::O1> boxes_syms_claiming_an_isec; boxes_syms_claiming_an_isec.fill(O2BitArr_ones<O>);
+			chute_house_syms_t<O> lines_syms;
+			chute_house_syms_t<O> lines_syms_claiming_an_isec; lines_syms_claiming_an_isec.fill(O2BitArr_ones<O>); // an entry for each line indicating which syms only occur in one isec in the line.
+			chute_house_syms_t<O> boxes_syms;
+			chute_house_syms_t<O> boxes_syms_claiming_an_isec; boxes_syms_claiming_an_isec.fill(O2BitArr_ones<O>); // an entry for each box indicating which syms only occur in one isec in the box.
+			// TODO.low compare speed and lib-size if the initialization is not interleaved.
 			for (o1i_t isec_i {0}; isec_i < T::O1; ++isec_i) {
 				for (o1i_t isec_j {0}; isec_j < T::O1; ++isec_j) {{
 					const auto& line_isec_syms {chute_isecs_syms.at_isec(isec_i, isec_j)};
@@ -65,12 +82,9 @@ namespace okiidoku::mono::detail::solver { namespace {
 			}
 			for (o1i_t box_isec {0}; box_isec < T::O1; ++box_isec) {
 			for (o1i_t line_isec {0}; line_isec < T::O1; ++line_isec) {
-				const auto& isec_syms {chute_isecs_syms.at_isec(box_isec, line_isec)};
-				auto box_minus_isec {boxes_syms[line_isec]}; box_minus_isec.remove(isec_syms);
-				auto line_minus_isec {lines_syms[box_isec]}; line_minus_isec.remove(isec_syms);
 				const auto& isec_syms_non_single {chute_isecs_syms_non_single.at_isec(box_isec, line_isec)};
-				const auto line_match {lines_syms_claiming_an_isec[box_isec] & isec_syms_non_single & box_minus_isec};
-				const auto box_match {boxes_syms_claiming_an_isec[line_isec] & isec_syms_non_single & line_minus_isec};
+				auto line_match {lines_syms_claiming_an_isec[box_isec] & isec_syms_non_single}; line_match.remove(boxes_syms_claiming_an_isec[line_isec]);
+				auto box_match {boxes_syms_claiming_an_isec[line_isec] & isec_syms_non_single};  box_match.remove(lines_syms_claiming_an_isec[box_isec]);
 				const auto isec {static_cast<o3xs_t>(static_cast<o3xs_t>(T::O2*chute)+static_cast<o3xs_t>(T::O1*box_isec)+line_isec)};
 				if (line_match.count() > 0) [[unlikely]] {
 					found_queues.push_back(found::LockedCands<O>{
