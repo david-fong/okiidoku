@@ -67,10 +67,10 @@ namespace okiidoku::mono { namespace {
 	) noexcept {
 		Grid<O> table; {
 			const auto t {Transformation<O>{
-				Transformation<O>::identity_label_map,
-				row_state.to_og,
-				col_state.to_og,
-				is_post_transpose,
+				// .label_map {Transformation<O>::identity_label_map},
+				.row_map {row_state.to_og},
+				.col_map {col_state.to_og},
+				.post_transpose {is_post_transpose},
 			}};
 			t.inverted().apply_from_to(src_grid, table);
 		}
@@ -185,7 +185,7 @@ namespace okiidoku::mono { namespace {
 		}
 
 		Transformation<O> transformation {
-			.label_map {Transformation<O>::identity_label_map}, // TODO.low does this need to be state? or will the default member initializer definition get used?
+			// .label_map {Transformation<O>::identity_label_map},
 			.row_map {row_state.to_og},
 			.col_map {col_state.to_og},
 			.post_transpose {false},

@@ -19,6 +19,38 @@ namespace okiidoku::mono::detail::solver { namespace {
 	*/
 
 	template<Order O> requires(is_order_compiled(O))
+	int_ts::o2xs_t<O> find_good_guess_sym_for_cell(
+		const CandsGrid<O>& cells_cands,
+		const int_ts::o4i_t<O> rmi
+	) noexcept {
+		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
+		const auto best_cell_cands {cells_cands.at_rmi(rmi)};
+		const auto get_sym_num_other_cand_cells {[&](const o2x_t sym){
+			o3i_t num_other_cand_cells {0};
+			for (const auto house_type : house_types) {
+				const auto house {rmi_to_house<O>(house_type, rmi)};
+				for (o2i_t house_cell {0}; house_cell < T::O2; ++house_cell) {
+					const auto& other_cell {cells_cands.at_rmi(house_cell_to_rmi<O>(house_type, house, house_cell))};
+					if (other_cell.test(sym)) { ++num_other_cand_cells; }
+				}
+			}
+			return num_other_cand_cells;
+		}};
+		auto best_sym {best_cell_cands.count_lower_zeros_assuming_non_empty_mask()};
+		o3i_t best_sym_num_other_cand_cells {0};
+		for (auto set_bits_walker {best_cell_cands.set_bits_walker()}; set_bits_walker.has_more(); set_bits_walker.advance()) {
+			const auto sym {set_bits_walker.value()};
+			const auto sym_num_other_cand_cells {get_sym_num_other_cand_cells(sym)};
+			if (sym_num_other_cand_cells > best_sym_num_other_cand_cells) [[unlikely]] {
+				best_sym = sym;
+				best_sym_num_other_cand_cells = sym_num_other_cand_cells;
+			}
+		}
+		return static_cast<o2xs_t>(best_sym);
+	}
+
+
+	template<Order O> requires(is_order_compiled(O))
 	Guess<O> find_good_guess_candidate_for_fast_solver(
 		const CandsGrid<O>& cells_cands,
 		[[maybe_unused]] const typename EngineImpl<O>::guess_stack_t& guess_stack
@@ -103,31 +135,9 @@ namespace okiidoku::mono::detail::solver { namespace {
 				best_guess_grouping = guess_grouping;
 			}
 		}
-		const auto best_cell_cands {cells_cands.at_rmi(best_rmi)};
-		const auto get_sym_num_other_cand_cells {[&](const o2x_t sym){
-			o3i_t num_other_cand_cells {0};
-			for (const auto house_type : house_types) {
-				const auto house {rmi_to_house<O>(house_type, best_rmi)};
-				for (o2i_t house_cell {0}; house_cell < T::O2; ++house_cell) {
-					const auto& other_cell {cells_cands.at_rmi(house_cell_to_rmi<O>(house_type, house, house_cell))};
-					if (other_cell.test(sym)) { ++num_other_cand_cells; }
-				}
-			}
-			return num_other_cand_cells;
-		}};
-		auto best_sym {best_cell_cands.count_lower_zeros_assuming_non_empty_mask()};
-		o3i_t best_sym_num_other_cand_cells {0};
-		for (auto set_bits_walker {best_cell_cands.set_bits_walker()}; set_bits_walker.has_more(); set_bits_walker.advance()) {
-			const auto sym {set_bits_walker.value()};
-			const auto sym_num_other_cand_cells {get_sym_num_other_cand_cells(sym)};
-			if (sym_num_other_cand_cells > best_sym_num_other_cand_cells) [[unlikely]] {
-				best_sym = sym;
-				best_sym_num_other_cand_cells = sym_num_other_cand_cells;
-			}
-		}
 		return Guess<O>{
 			.rmi{static_cast<rmi_t>(best_rmi)},
-			.val{best_sym},
+			.val{find_good_guess_sym_for_cell(cells_cands, best_rmi)},
 		};
 	}
 

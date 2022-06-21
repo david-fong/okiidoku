@@ -46,6 +46,16 @@ unsigned test_morph(okiidoku::SharedRng& shared_rng, const unsigned num_rounds) 
 	assert(O2BitArr_ones<O>.count() == T::O2);
 	for (o2i_t i {0}; i < T::O2; ++i) {
 		assert(O2BitArr_ones<O>.count_set_bits_below(static_cast<o2x_t>(i)) == i);
+		assert(O2BitArr_ones<O>.get_index_of_nth_set_bit(i) == i);
+	}
+	{
+		auto ones {O2BitArr_ones<O>};
+		for (o2i_t i {0}; i < T::O2; ++i) {
+			assert(ones.count_set_bits_below(static_cast<o2x_t>(i)) == 0);
+			assert(ones.get_index_of_nth_set_bit(0) == i);
+			assert(ones.test(ones.count_lower_zeros_assuming_non_empty_mask()));
+			ones.unset(ones.count_lower_zeros_assuming_non_empty_mask());
+		}
 	}
 	{
 		o2i_t count {0};

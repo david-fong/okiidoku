@@ -25,8 +25,6 @@
 
 ## Misc List
 
-- try out implementing the PDEP optimization
-
 - Challenge to self: find out how to make puzzles with few or many givens.
   - Hypothesis: prioritizing to remove cells that are in a house with more givens / fewer candidate-symbols will create puzzles with few givens and vice versa.
 

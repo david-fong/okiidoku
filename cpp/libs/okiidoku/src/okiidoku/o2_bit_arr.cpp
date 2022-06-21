@@ -1,5 +1,9 @@
 #include <okiidoku/o2_bit_arr.hpp>
 
+#if __has_include(<immintrin.h>)
+#include <immintrin.h>
+#endif
+
 #include <numeric> // transform_reduce
 #include <execution>
 #include <cassert>
@@ -85,33 +89,45 @@ namespace okiidoku::mono {
 	typename O2BitArr<O>::o2x_t
 	O2BitArr<O>::get_index_of_nth_set_bit(O2BitArr::o2x_t set_bit_index) const noexcept {
 		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(set_bit_index < T::O2);
-		assert(count() > set_bit_index);
-		for (word_i_t word_i {0}; word_i < num_words; ++word_i) {
-			auto& word {words_[word_i]};
-			const auto word_popcount {std::popcount(word)};
-			if constexpr (num_words > 1) {
-				if (static_cast<o2x_t>(word_popcount) <= set_bit_index) [[likely]] {
-					set_bit_index = static_cast<o2x_t>(set_bit_index - word_popcount);
-					continue;
-				}
-			}
-			for (word_t word_bit_i {0}; word_bit_i < word_t_num_bits; ++word_bit_i) { // TODO.mid possible optimization: skip consecutive set bits by somehow using std::countr_<>
-				const auto bit_mask {static_cast<word_t>(word_t{1} << word_bit_i)};
-				if (word & bit_mask) {
-					if (set_bit_index == 0) {
-						// word &= ~bit_mask;
-						return static_cast<o2x_t>((word_t_num_bits * word_i) + word_bit_i);
+		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(count() > set_bit_index);
+		const word_i_t word_i {[&](){
+			if constexpr (num_words == 1) { return 0; }
+			else {
+				for (word_i_t word_i {0}; word_i < num_words; ++word_i) {
+					const auto& word {words_[word_i]};
+					const auto word_popcount {static_cast<o2x_t>(std::popcount(word))};
+					OKIIDOKU_CONTRACT_TRIVIAL_EVAL(word_popcount <= word_t_num_bits);
+					if (set_bit_index >= word_popcount) [[likely]] {
+						set_bit_index = static_cast<o2x_t>(set_bit_index - word_popcount);
+					} else {
+						return word_i;
 					}
-					--set_bit_index;
 				}
+				OKIIDOKU_CONTRACT_TRIVIAL_EVAL(false); // c++23 std::unreachable
 			}
-			// TODO.high if has pdep instruction:
-			// const auto bit_mask {_pdep_u64(1 << set_bit_index, word)};
-			//// word &= ~bit_mask;
-			// return std::countr_zero(bit_mask);
+		}()};
+		const auto& word {words_[word_i]};
+		#if __has_include(<immintrin.h>)
+			if constexpr (sizeof(word_t) >= 8) {
+				const auto bit_mask {_pdep_u64(1 << set_bit_index, word)};
+				return static_cast<o2x_t>(std::countr_zero(bit_mask));
+			} else {
+				const auto bit_mask {_pdep_u32(1 << set_bit_index, word)};
+				return static_cast<o2x_t>(std::countr_zero(bit_mask));
+			}
+		#else
+		for (word_t word_bit_i {0}; word_bit_i < word_t_num_bits; ++word_bit_i) { // TODO.mid possible optimization: skip consecutive set bits by somehow using std::countr_<>
+			const auto bit_mask {static_cast<word_t>(word_t{1} << word_bit_i)};
+			if (word & bit_mask) {
+				if (set_bit_index == 0) {
+					// word &= ~bit_mask;
+					return static_cast<o2x_t>((word_t_num_bits * word_i) + word_bit_i);
+				}
+				--set_bit_index;
+			}
 		}
-		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(false); // TODO.wait c++23 std::unreachable
-		return 0;
+		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(false); // c++23 std::unreachable
+		#endif
 	}
 
 
