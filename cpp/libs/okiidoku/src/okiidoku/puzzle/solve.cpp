@@ -46,7 +46,7 @@ namespace okiidoku::mono {
 		}
 		// using T = Ints<O>;
 		using Find = detail::solver::CandElimFind<O>;
-		static constexpr auto find_subsets {[](detail::solver::Engine<O>& e_) noexcept {
+		static constexpr auto find_subsets {[]([[maybe_unused]] detail::solver::Engine<O>& e_) noexcept {
 			if constexpr (O < 5) { // NOLINT(readability-magic-numbers)
 				return detail::solver::UnwindInfo::make_no_unwind();
 			} else {

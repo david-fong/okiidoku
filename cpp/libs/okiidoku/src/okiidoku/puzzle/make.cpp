@@ -64,7 +64,7 @@ namespace okiidoku::mono {
 		o4i_t num_keepers {0};
 
 		// Note: will remove the logging once I'm done working on solver (ie. far in the future)
-		const auto call_debug_log_fn {[&](auto&& fn){
+		const auto call_debug_log_fn {[&]([[maybe_unused]] auto&& fn){
 			if constexpr (O < 5) {
 				#ifndef NDEBUG
 				fn();

@@ -109,10 +109,10 @@ namespace okiidoku::mono {
 		const auto& word {words_[word_i]};
 		#if __has_include(<immintrin.h>)
 			if constexpr (sizeof(word_t) >= 8) {
-				const auto bit_mask {_pdep_u64(1 << set_bit_index, word)};
+				const auto bit_mask {_pdep_u64(static_cast<word_t>(1 << set_bit_index), word)};
 				return static_cast<o2x_t>(std::countr_zero(bit_mask));
 			} else {
-				const auto bit_mask {_pdep_u32(1 << set_bit_index, word)};
+				const auto bit_mask {_pdep_u32(static_cast<word_t>(1 << set_bit_index), word)};
 				return static_cast<o2x_t>(std::countr_zero(bit_mask));
 			}
 		#else
