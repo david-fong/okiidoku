@@ -53,6 +53,8 @@ hypothesis: if removing a given breaks properness, the only way to change that i
 
 hypothesis: making guesses all packed in the same / nearby line-box intersections increases the probability of finding "contradictory" guesses earlier, since those guesses will concentrate their eliminations in the same lines and boxes.
 
+hypothesis: given a cell, C, the best guess of a symbol is the symbol, S, who has the most other candidate-cells in the same house as C. Guessing S will eliminate S as a candidate-sym from more cells, and _not_ guessing the other candidate-syms of C means that in the houses of C, the already-few cells which have those candidate-syms of C which are not S are now even fewer.
+
 question: could there be a correlation between good guess candidates and cells that could not be removed as givens ("keepers")? Try making a guess-suggester that favours guessing at a cell which sees many keepers.
 
 If a base puzzle is known to be proper, and then a given G is removed to create a derived puzzle, it is known that there is always exactly one solution to the derived puzzle where the cell at G.rmi takes on G.val, and that solution is the solution of the base puzzle. Therefore, if the goal is to check that the derived puzzle is still proper or not, one can remove G as a candidate from all the guess stack frames. Also- I wonder if it would be more efficient to focus the first guess in the stack at the cell of G.

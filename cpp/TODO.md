@@ -25,18 +25,15 @@
 
 ## Misc List
 
+- try out implementing the PDEP optimization
+
 - Challenge to self: find out how to make puzzles with few or many givens.
   - Hypothesis: prioritizing to remove cells that are in a house with more givens / fewer candidate-symbols will create puzzles with few givens and vice versa.
-
-- Try specializing O2BitArr for when it doesn't need an array. see how it affects code readability, library binary size, and time performance.
-  - After inspecting disassembly, codegen seems fine. I don't anticipate a big readability improvement.
 
 - I'd like to collect some statistics about relations between guess stack depth and num puzcells remaining / total num cand-syms remaining.
   - Perhaps there can be some relation to when to search for larger-sized subsets?
 
-- What would it be like if we took out the specialized single find/apply?
-  - Note: we don't need to get rid of the code: the specializations still have speed and space benefits compared to the generalized subset searching, which could be desirable to an engine user that only wants to search for singles.
-- Hm. Modify the above: what if we made subset-search also find and apply singles?
+- what if we made subset-search also find and apply singles?
   - If specializations for finding singles co-exist with the subset finding, and subsets also find and apply singles, then there should be a documentation note that using the subset finders means the singles finders (presumably?) make no sense to use at the same time.
 
 - what optimizations could be made to quickly check if entire houses have experienced no change? how often would such optimizations come into effect? would there be a net benefit? if so, how much?
@@ -49,7 +46,7 @@
 
 - when searching subsets, is there a way to use knowledge about which cells have changed in cand-syms since last subset search to optimize the combination-search?
   - Any combination composed only of cells whose number of cand-syms hasn't changed since the last find attempt can be skipped. (I think).
-    - I'd be interested in doing some manual profiling of how often such a skip branch gets taken for order=5.
+    - I'd be interested in doing some manual profiling to how often such a skip branch gets taken for order=5.
 
 - try focusing guesses on the cell ruling out a known solution
 - see the TODO for `get_guess_grouping`.
@@ -64,13 +61,16 @@
 
 - Interesting: [](https://cmake.org/cmake/help/latest/variable/CMAKE_VERIFY_INTERFACE_HEADER_SETS.html)
 
+- look into using Catch2 for testing
+  - [tutorial](https://github.com/catchorg/Catch2/blob/devel/docs/tutorial.md)
+  - [cmake integration](https://github.com/catchorg/Catch2/blob/devel/docs/cmake-integration.md)
+- or alternatively using the "smaller version", [doctest](https://github.com/doctest/doctest)
+
 - cppcoreguidelines C.2: use class if there is an invariant, and struct otherwise.
 
 - look into cppitertools for writing my raw loops. see if people say anything about performance overhead.
 
 - Am I breaking any of these? https://en.cppreference.com/w/cpp/language/rule_of_three
-
-- boost has a `variant2` class that is never valueless by exception
 
 - find out how to use the [cppcoreguidelines checker](https://docs.microsoft.com/en-us/cpp/code-quality/using-the-cpp-core-guidelines-checkers?view=msvc-170)
   - I want to use it in a way that is driven by cmake

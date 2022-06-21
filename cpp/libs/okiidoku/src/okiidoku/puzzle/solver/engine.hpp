@@ -218,7 +218,7 @@ namespace okiidoku::mono::detail::solver {
 		using val_t = int_ts::o2xs_t<O>;
 		using rmi_t = int_ts::o4xs_t<O>;
 	public:
-		Engine() noexcept = default;
+		// Engine() noexcept = default; // TODO was this ever needed? why was it written?
 
 		// please read the contracts for the referenced functions.
 		using EngineImpl<O>::reinit_with_puzzle;

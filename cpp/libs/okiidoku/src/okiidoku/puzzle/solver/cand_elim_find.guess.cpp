@@ -5,7 +5,6 @@
 #include <numeric> // transform_reduce <- will not be needed if we do the get_guess_grouping bookkeeping optimization
 #include <algorithm> // sort
 #include <execution>
-#include <ranges>
 #include <array>
 #include <tuple> // tie (for comparisons)
 
@@ -52,7 +51,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 				return _.get_underlying_arr();
 			}
 		}};
-		// TODO.try doing bookkeeping in the engine to avoid re-computation. (keep a guess-count for each house)
+		// TODO.try doing bookkeeping in the engine to avoid re-computation. (keep a guess-count for each house). slightly more relevant now that large fields of guess stack frames aren't heap-allocated (ie. the guess field of each stack entry are farther apart).
 		[[maybe_unused]] const auto get_guess_grouping {[&](const o4i_t rmi) -> o3i_t {
 			return std::transform_reduce(
 				#ifdef __cpp_lib_execution
@@ -79,9 +78,10 @@ namespace okiidoku::mono::detail::solver { namespace {
 		auto best_house_solved_counts {get_house_solved_counts(best_rmi)};
 		[[maybe_unused]] auto best_guess_grouping {get_guess_grouping(best_rmi)};
 
-		// TODO is there a same-or-better-perf way to write this search using std::min?
+		// TODO is there a same-or-better-perf way to write this search using std::transform_reduce or std::min?
 		for (o4i_t rmi {static_cast<o4i_t>(best_rmi+1U)}; rmi < T::O4; ++rmi) {
 			const auto cand_count {cells_cands.at_rmi(rmi).count()};
+			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(cand_count != 0);
 			if (cand_count <= 1) [[unlikely]] { continue; } // no guessing for solved cell.
 			[[maybe_unused]] const auto guess_grouping {get_guess_grouping(rmi)};
 			[[maybe_unused]] const auto house_solved_counts {get_house_solved_counts(rmi)};
@@ -103,10 +103,31 @@ namespace okiidoku::mono::detail::solver { namespace {
 				best_guess_grouping = guess_grouping;
 			}
 		}
+		const auto best_cell_cands {cells_cands.at_rmi(best_rmi)};
+		const auto get_sym_num_other_cand_cells {[&](const o2x_t sym){
+			o3i_t num_other_cand_cells {0};
+			for (const auto house_type : house_types) {
+				const auto house {rmi_to_house<O>(house_type, best_rmi)};
+				for (o2i_t house_cell {0}; house_cell < T::O2; ++house_cell) {
+					const auto& other_cell {cells_cands.at_rmi(house_cell_to_rmi<O>(house_type, house, house_cell))};
+					if (other_cell.test(sym)) { ++num_other_cand_cells; }
+				}
+			}
+			return num_other_cand_cells;
+		}};
+		auto best_sym {best_cell_cands.count_lower_zeros_assuming_non_empty_mask()};
+		o3i_t best_sym_num_other_cand_cells {0};
+		for (auto set_bits_walker {best_cell_cands.set_bits_walker()}; set_bits_walker.has_more(); set_bits_walker.advance()) {
+			const auto sym {set_bits_walker.value()};
+			const auto sym_num_other_cand_cells {get_sym_num_other_cand_cells(sym)};
+			if (sym_num_other_cand_cells > best_sym_num_other_cand_cells) [[unlikely]] {
+				best_sym = sym;
+				best_sym_num_other_cand_cells = sym_num_other_cand_cells;
+			}
+		}
 		return Guess<O>{
 			.rmi{static_cast<rmi_t>(best_rmi)},
-			.val{cells_cands.at_rmi(best_rmi).count_lower_zeros_assuming_non_empty_mask()},
-			// TODO search for better way to choose which sym to guess.
+			.val{best_sym},
 		};
 	}
 

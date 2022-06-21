@@ -15,9 +15,14 @@ namespace okiidoku::mono::archive {
 
 	class OKIIDOKU_EXPORT Reader final {
 	public:
+		Reader() noexcept = default; // TODO
+		~Reader() noexcept = default;
 		// disallow copies.
 		Reader(const Reader&) = delete;
 		Reader& operator=(const Reader&) = delete;
+
+		Reader(Reader&&) = default;
+		Reader& operator=(Reader&&) = default;
 
 	private:
 		class Impl;
