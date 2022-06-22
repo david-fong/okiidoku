@@ -22,5 +22,7 @@ target_sources(okiidoku PRIVATE
 	puzzle/solver/cand_elim_find.intersections.cpp
 	puzzle/solver/cand_elim_apply.cpp
 	puzzle/solve.cpp
+
+	puzzle/maker/find_unavoidable_sets.cpp
 	puzzle/make.cpp
 )

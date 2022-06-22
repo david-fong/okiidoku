@@ -66,12 +66,21 @@ If the guess stack is size N and a guess needs to be popped, currently, the popp
 
 ### Unavoidable Sets
 
-- For simple size-4 set, one can take two houses of the same line-type and see if firstly they have any pair of syms in vice-versa boxes, and then if they are in the same columns
+- For simple size-4 set:
   1. Num line types: `2`
   2. Num chutes for line-types: `O1`
-  3. Num combinations of lines in a chute: `nCr(O1,2)` = `O1!/(2!*(O1-2)!)` = `O1*(O1-1)/2`
-  4. Num combinations of two crossing-lines from different boxes: `nCr(O1,2)*O1*O1` = `O3*(O1-1)/2`
-  5. Total combinations: `2*O1*O1*(O1-1)/2 * O3*(O1-1)/2` = `O5 * (O1-1)^2 / 2`. Growth with respect to O is `O7`
-  6. Possible optimization for step 4: take the two lines of cand-syms, and do a valarray-like sum. (unfortunately, the entries of the valarray need to have tags to point back to the house-cell). then sort/partition entries of the valarray. The crossing-line-pairs will always have the same sum, but entries of the sorted array may not necessarily by crossing-line-pairs. Hm. How about instead of summing, just have a two-entry, sorted array. The work to create the "valarray" is proportional to `O2`. Then to sort the valarray is `O2*log(O2)`. Then to walk it and look for adjacent identical pairs is `O2`. This should have better algorithmic complexity as O grows (roughly slightly over a factor of `O1` better).
+  3. Num combinations of two lines in a chute: `nCr(O1,2)` = `O1!/(2!*(O1-2)!)` = `O1*(O1-1)/2`
+  4. take the two lines of cand-syms, zip them: each entry of the zipped array has a tag pointing to the original house-cell, and a 2-entry array of the zipped values. sort each 2-entry array of zipped values, then sort the outer array by comparing by the 2-entry array. This will cause any matches to be adjacent. The work to create the "valarray" is proportional to `O2`. Then to sort the valarray is `O2*log(O2)`. Then to walk it and look for adjacent identical pairs is `O2`. This should have better algorithmic complexity as O grows (roughly slightly over a factor of `O1` better).
+  - Total: `O4 * (O1-1) * (2*(1+log(O1)))`, which is like `O5*log(O1)`.
+
+- Alternate approach for size-4 UA sets:
+  - For each line type, for each line, make a map from symbols to their house-cell position in the line. `O2` setup cost. This can be done ahead of time (doesn't need to be repeated each time after choosing two lines in the chute)
+  - Take the two lines. For each zip entry `p`, check if `line1_sym_to_cell[p.sym2] == line2_sym_to_cell[p.sym1]`. Cost: `O2`.
+  - Total: `(2*O4) + (2 * O2*(O1-1) * O2)`, which is like `O5`. Better than the above approach!
+    - And my gut feeling is that this would be easier to try to extend to look for larger UA sets.
 
 What bothers me so much about the above is that it's only for the smallest kind of unavoidable set. I have no idea how design something more efficient than the most naive implementation thinkable for finding other kinds of unavoidable sets. I do wonder what the distribution sampled over many solution grids is of how many of each kind of unavoidable set there is in a solution grid. If the size-4 kind is the most common that would put me at some ease.
+
+## Puzzle Ranking
+
+Suggestion: rank a deduction in proportion to the amount of computation / algorithmic complexity required to make it. The difficulty with this is that the complexity depends on the representation / bookkeeping. Proposal: rank according to the complexity when using the most ideal representation? Then the question is what defines the "most ideal representation". I'm not sure, but I wonder if it is always possible to define a representation that makes it constant time to make the deduction. Maybe find some way to factor in the space complexity and the complexity of maintaining the bookkeeping/representation?

@@ -5,6 +5,7 @@ Emerentius
 enjoysudoku
 givens
 jczsolve
+kudoku
 minlexing
 pencilmark
 sudoku

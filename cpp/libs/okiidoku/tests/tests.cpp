@@ -11,6 +11,7 @@
 
 #include <okiidoku_cli_utils/console_setup.hpp>
 
+#include <fstream> // TODO remove when done with the longer-running order=5 experiments
 #include <iostream>  // cout,
 #include <iomanip>   // hex
 #include <charconv>
@@ -93,6 +94,16 @@ unsigned test_morph(okiidoku::SharedRng& shared_rng, const unsigned num_rounds) 
 		std::clog << "\nmaking puzzle #" << int(round);
 		Grid<O> puz_grid {gen_grid};
 		make_minimal_puzzle(puz_grid, shared_rng.get_u64());
+		// {
+		// 	auto fs {std::ofstream("puz5.txt")};
+		// 	for (int_ts::o4i_t<O> i {0}; i < T::O4; ++i) {
+		// 		const auto& val {puz_grid.at_rmi(i)};
+		// 		if (val < T::O2) {
+		// 			fs << std::to_string(val);
+		// 		}
+		// 		fs << '\n';
+		// 	}
+		// }
 		#ifndef OKIIDOKU_NO_LOGGING
 		print_2d<O>(std::clog, shared_rng.get_u64(), gen_grid, puz_grid);
 		#endif

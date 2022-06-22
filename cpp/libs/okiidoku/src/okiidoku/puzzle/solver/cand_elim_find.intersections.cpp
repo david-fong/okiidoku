@@ -61,21 +61,23 @@ namespace okiidoku::mono::detail::solver { namespace {
 			seen_twice |= (seen_once & cell_cands);
 			seen_once |= cell_cands;
 		}}
-		chute_house_syms_t<O> lines_syms;
 		chute_house_syms_t<O> lines_syms_claiming_an_isec; lines_syms_claiming_an_isec.fill(O2BitArr_ones<O>); // an entry for each line indicating which syms only occur in one isec in the line.
-		chute_house_syms_t<O> boxes_syms;
 		chute_house_syms_t<O> boxes_syms_claiming_an_isec; boxes_syms_claiming_an_isec.fill(O2BitArr_ones<O>); // an entry for each box indicating which syms only occur in one isec in the box.
-		// TODO.low compare speed and lib-size if the initialization is not interleaved.
-		for (o1i_t isec_i {0}; isec_i < T::O1; ++isec_i) {
-			for (o1i_t isec_j {0}; isec_j < T::O1; ++isec_j) {{
-				const auto& line_isec_syms {chute_isecs_syms.at_isec(isec_i, isec_j)};
-				lines_syms_claiming_an_isec[isec_i].remove(lines_syms[isec_i] & line_isec_syms);
-				lines_syms[isec_i] |= line_isec_syms;
-				}{
-				const auto& box_isec_syms {chute_isecs_syms.at_isec(isec_j, isec_i)};
-				boxes_syms_claiming_an_isec[isec_i].remove(boxes_syms[isec_i] & box_isec_syms);
-				boxes_syms[isec_i] |= box_isec_syms;
-			}}
+		{
+			chute_house_syms_t<O> lines_syms;
+			chute_house_syms_t<O> boxes_syms;
+			// TODO.low compare speed and lib-size if the initialization is not interleaved.
+			for (o1i_t isec_i {0}; isec_i < T::O1; ++isec_i) {
+				for (o1i_t isec_j {0}; isec_j < T::O1; ++isec_j) {{
+					const auto& line_isec_syms {chute_isecs_syms.at_isec(isec_i, isec_j)};
+					lines_syms_claiming_an_isec[isec_i].remove(lines_syms[isec_i] & line_isec_syms);
+					lines_syms[isec_i] |= line_isec_syms;
+					}{
+					const auto& box_isec_syms {chute_isecs_syms.at_isec(isec_j, isec_i)};
+					boxes_syms_claiming_an_isec[isec_i].remove(boxes_syms[isec_i] & box_isec_syms);
+					boxes_syms[isec_i] |= box_isec_syms;
+				}}
+			}
 		}
 		for (o1i_t box_isec {0}; box_isec < T::O1; ++box_isec) {
 		for (o1i_t line_isec {0}; line_isec < T::O1; ++line_isec) {
@@ -94,7 +96,9 @@ namespace okiidoku::mono::detail::solver { namespace {
 					.line_type{line_type},
 					.remove_from_rest_of{BoxOrLine::box},
 				});
-			} else if (box_match.count() > 0) [[unlikely]] {
+			}
+			// Note: not an else-if. It may be applicable to both.
+			if (box_match.count() > 0) [[unlikely]] {
 				found_queues.push_back(found::LockedCands<O>{
 					.syms{box_match},
 					.isec{isec},

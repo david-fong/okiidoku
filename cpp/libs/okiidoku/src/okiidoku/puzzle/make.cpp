@@ -86,7 +86,7 @@ namespace okiidoku::mono {
 			call_debug_log_fn([&]{
 				std::clog << "\n\n#puzcell cands: " << int(num_puzcell_cands) << ". try rm @ " << int(rmi) << std::flush;
 			});
-			// if (num_puzcell_cands <= 230) [[unlikely]] { std::quick_exit(0); } // TODO delete when done profiling
+			// if (num_puzcell_cands <= 61) [[unlikely]] { return; } // TODO delete when done profiling
 
 			solver.reinit_with_puzzle(grid, {{.rmi{rmi}, .val{static_cast<o2x_t>(val)}}});
 			if (const auto new_soln_opt {solver.get_next_solution()}; new_soln_opt) {

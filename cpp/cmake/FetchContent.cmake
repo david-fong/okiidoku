@@ -4,9 +4,9 @@ include_guard(DIRECTORY)
 include(FetchContent)
 
 FetchContent_Declare(
-	range-v3 # https://github.com/ericniebler/range-v3
+	range-v3
 	GIT_REPOSITORY git@github.com:ericniebler/range-v3.git
-	GIT_TAG "master" # 0.11.0 is currently the latest official release, but it's very old (2020). using master as a crutch to get newer fixes
+	GIT_TAG "0.12.0" # https://github.com/ericniebler/range-v3/releases
 	GIT_SHALLOW TRUE
 	GIT_SUBMODULES "" # none. don't get the docs submodule
 	GIT_PROGRESS ON

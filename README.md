@@ -6,9 +6,9 @@ A C++ library for variable-grid-size sudoku to:
 - generate puzzles
 - find all solutions to a puzzle using logic and brute-force
 - (WIP) efficiently(?) put full grids in a canonical form
-- (WIP) archive collections of grids in highly-compressed form
+- (WIP) archive collections of grids in compressed form
 
-It supports parametric grid size of dimensions 9x9, 16x16, 25x25, ..., 256x256, etc.
+It supports parametric grid size of dimensions 9x9, 16x16, 25x25, ..., 256x256, etc. and uses template meta-programming to allow optimizing for each case.
 
 In the future, it will have language bindings for WASM/JS and Python.
 
@@ -19,6 +19,17 @@ In Japanese, "ookii" (大きい) means "big". I chose the name because one of my
 I work on this project for fun. I like sudoku. I want to learn how to develop high-performance software libraries. I like reasoning about trade-offs. The algorithm design is like the puzzle to me; I always want to try to come up with things on my own before looking at how other people do things. Perhaps in doing so, I will come up with something new, and maybe even something that is better in some ways than existing approaches.
 
 Here is [the roadmap](./cpp/TODO.md) (subject to violent rearrangements at the mercy of my whim and fancy).
+
+## Non-Goals / Non-Priorities
+
+- Being on par with the fastest regular 9x9 sudoku solvers (tdoku, jczsolve, etc.).
+  - With my limited time and knowledge, my higher priority is supporting variable grid size and keeping the code reasonably portable.
+- Being a puzzle rater / implementing many deductive techniques.
+  - Despite the first bullet, I am more interested in throughput than deductive power.
+- Making explicit use of SIMD instructions.
+  - My higher priority is keeping the code portable and somewhat malleable. Compilers and C++ standard library implementations can often infer and generate parallelized code, and for now, that's plenty good enough for me.
+- Supporting sudoku variants other than kudoku.
+  - You are welcome to fork and do such work separately.
 
 ## Usage
 
@@ -32,8 +43,7 @@ If you do something cool with it, that's great! I'd love to hear about it.
 
 ### Some Other Existing Projects and Solvers
 
-- [codegolf competition](https://codegolf.stackexchange.com/questions/190727/the-fastest-sudoku-solver)
-  - [the winner, tdoku](https://t-dillon.github.io/tdoku/)
+- [t-dillon/tdoku](https://t-dillon.github.io/tdoku/)
 - [jczsolve](http://forum.enjoysudoku.com/3-77us-solver-2-8g-cpu-testcase-17sodoku-t30470-210.html#p249309)
 - [Emerentius/sudoku](https://github.com/Emerentius/sudoku)
 - [Peter Norvig](https://norvig.com/sudoku.html)
