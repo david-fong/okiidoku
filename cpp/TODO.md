@@ -26,6 +26,10 @@
 
 ## Misc List
 
+- The generator- due to the way we use the internal rng, the seed size actually limits the number of grids it can generate! The generator currently always starts with wiping the grid contents. Consider creating a `scramble_and_generate` that requires the grid it receives to already be a solution grid.
+
+- Collect some statistics on how much overlap there usually is between the size-4 UA sets found. A very narrow, simple way to do this is just count how many unique cells are covered, and compare to the number of non-unique cells covered.
+
 - Challenge to self: find out how to make puzzles with few or many givens.
   - Hypothesis: prioritizing to remove cells that are in a house with more givens / fewer candidate-symbols will create puzzles with few givens and vice versa.
   - It should be true that keeping givens in overlapping UA sets should help reduce the number of givens for a minimal puzzle.

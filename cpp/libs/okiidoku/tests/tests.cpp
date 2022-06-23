@@ -8,8 +8,8 @@
 #include <okiidoku/gen.hpp>
 #include <okiidoku/grid.hpp>
 #include <okiidoku/o2_bit_arr.hpp>
-#include <okiidoku/shared_rng.hpp>
 
+#include <okiidoku_cli_utils/shared_rng.hpp>
 #include <okiidoku_cli_utils/console_setup.hpp>
 
 #include <fstream> // TODO remove when done with the longer-running order=5 experiments

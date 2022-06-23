@@ -2,7 +2,8 @@
 #define HPP_OKIIDOKU_CLI__REPL
 
 #include <okiidoku_cli/config.hpp>
-#include <okiidoku/shared_rng.hpp>
+
+#include <okiidoku_cli_utils/shared_rng.hpp>
 
 #include <map>
 #include <string_view>

@@ -1,6 +1,6 @@
 #include <okiidoku_cli/repl.hpp>
-#include <okiidoku/shared_rng.hpp>
 
+#include <okiidoku_cli_utils/shared_rng.hpp>
 #include <okiidoku_cli_utils/console_setup.hpp>
 
 #include <iostream>  // cout,

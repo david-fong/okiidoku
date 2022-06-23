@@ -4,8 +4,8 @@
 #include <okiidoku/print_2d.hpp>
 #include <okiidoku/gen.hpp>
 #include <okiidoku/grid.hpp>
-#include <okiidoku/shared_rng.hpp>
 
+#include <okiidoku_cli_utils/shared_rng.hpp>
 #include <okiidoku_cli_utils/console_setup.hpp>
 
 #include <iostream>  // cout,
