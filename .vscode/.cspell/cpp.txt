@@ -18,6 +18,7 @@ NOLINTBEGIN
 NOLINTEND
 NRVO
 nullopt
+objdump
 pimpl
 popcount
 pybind

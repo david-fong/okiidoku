@@ -6,17 +6,6 @@
 
 namespace okiidoku::mono {
 
-	template<Order O> requires(is_order_compiled(O))
-	struct MinimalUnavoidableSets final {
-		Grid<O> ids {}; // TODO dummy field. need to figure out actual representation. This doesn't work if a cell can be part of multiple minimal unavoidable sets.
-	};
-
-	// https://www.sudopedia.org/wiki/Deadly_Pattern
-	// contract: grid is filled and follows the one rule.
-	template<Order O> requires(is_order_compiled(O))
-	[[nodiscard, gnu::pure]] OKIIDOKU_EXPORT
-	MinimalUnavoidableSets<O> find_simple_minimal_unavoidable_sets(const Grid<O>&) noexcept;
-
 	// contract: grid is filled or a proper puzzle.
 	// post-condition: the grid is a minimal puzzle. solution unchanged.
 	template<Order O> requires(is_order_compiled(O))
@@ -41,10 +30,12 @@ namespace okiidoku::visitor {
 	OKIIDOKU_EXPORT void make_minimal_puzzle(Grid&, rng_seed_t rng_seed) noexcept;
 
 	template<Order O> requires(is_order_compiled(O))
-	[[nodiscard, gnu::pure]] OKIIDOKU_EXPORT bool grid_is_proper_puzzle(const Grid&) noexcept;
+	[[nodiscard, gnu::pure]] OKIIDOKU_EXPORT
+	bool grid_is_proper_puzzle(const Grid&) noexcept;
 
 	// contract: grid is a proper puzzle.
 	template<Order O> requires(is_order_compiled(O))
-	[[nodiscard, gnu::pure]] OKIIDOKU_EXPORT bool grid_is_minimal_puzzle(const Grid&) noexcept;
+	[[nodiscard, gnu::pure]] OKIIDOKU_EXPORT
+	bool grid_is_minimal_puzzle(const Grid&) noexcept;
 }
 #endif

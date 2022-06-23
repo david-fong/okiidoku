@@ -16,6 +16,8 @@ target_sources(okiidoku PRIVATE
 	morph/canon_place.cpp
 	morph/canon.cpp
 
+	puzzle/ua_set.cpp
+
 	puzzle/solver/engine.cpp
 	puzzle/solver/cand_elim_find.guess.cpp
 	puzzle/solver/cand_elim_find.subsets.cpp
@@ -23,6 +25,5 @@ target_sources(okiidoku PRIVATE
 	puzzle/solver/cand_elim_apply.cpp
 	puzzle/solve.cpp
 
-	puzzle/maker/find_unavoidable_sets.cpp
 	puzzle/make.cpp
 )

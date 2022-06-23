@@ -22,11 +22,13 @@
 - Ensure dependencies that should be private to the library implementation aren't exposed in any way to the library interface.
 - Run static analyzers
 - Check which `#ifdef __EMSCRIPTEN__` / `__cpp_lib_...` blocks can be removed as emscripten updates its sysroot libc++.
+- https://en.cppreference.com/w/cpp/language/rule_of_three
 
 ## Misc List
 
 - Challenge to self: find out how to make puzzles with few or many givens.
   - Hypothesis: prioritizing to remove cells that are in a house with more givens / fewer candidate-symbols will create puzzles with few givens and vice versa.
+  - It should be true that keeping givens in overlapping UA sets should help reduce the number of givens for a minimal puzzle.
 
 - I'd like to collect some statistics about relations between guess stack depth and num puzcells remaining / total num cand-syms remaining.
   - Perhaps there can be some relation to when to search for larger-sized subsets?
@@ -65,10 +67,9 @@
 - or alternatively using the "smaller version", [doctest](https://github.com/doctest/doctest)
 
 - cppcoreguidelines C.2: use class if there is an invariant, and struct otherwise.
+  - hm. I mean- for a lot of my really simple structs there are invariants on integer bounds. Seems like judgement is required to choose where to draw the line with this guideline.
 
 - look into cppitertools for writing my raw loops. see if people say anything about performance overhead.
-
-- Am I breaking any of these? https://en.cppreference.com/w/cpp/language/rule_of_three
 
 - find out how to use the [cppcoreguidelines checker](https://docs.microsoft.com/en-us/cpp/code-quality/using-the-cpp-core-guidelines-checkers?view=msvc-170)
   - I want to use it in a way that is driven by cmake

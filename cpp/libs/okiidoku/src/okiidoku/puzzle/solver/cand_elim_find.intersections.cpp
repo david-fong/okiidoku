@@ -35,11 +35,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 	// 	chute_house_syms_t<O> in_box;
 	// };
 
-	// TODO should be able to implement more generalizations:
-	//  - if in a horizontal chute, N boxes each have N horizontal isecs that are same-ly
-	//    positioned vertically and are all the only horizontal isecs within their boxes
-	//    which can contain a certain sym(s), then the rest of the boxes can remove that
-	//    sym(s) at those vertical isecs of theirs.
+	// TODO should be able to implement generalizations as fish except for intersections
 	template<Order O> requires(is_order_compiled(O))
 	void find_locked_cands_in_chute(
 		const LineType line_type,
@@ -86,8 +82,8 @@ namespace okiidoku::mono::detail::solver { namespace {
 			auto box_match {boxes_syms_claiming_an_isec[line_isec] & isec_syms_non_single};  box_match.remove(lines_syms_claiming_an_isec[box_isec]);
 			const auto isec {static_cast<o3xs_t>(
 				static_cast<o3xs_t>(T::O2*chute)
-				+static_cast<o3xs_t>(T::O1*box_isec)
-				+line_isec
+				+ static_cast<o3xs_t>(T::O1*box_isec)
+				+ line_isec
 			)};
 			if (line_match.count() > 0) [[unlikely]] {
 				found_queues.push_back(found::LockedCands<O>{
@@ -97,7 +93,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 					.remove_from_rest_of{BoxOrLine::box},
 				});
 			}
-			// Note: not an else-if. It may be applicable to both.
+			// Note: not an else-if: may be for different syms.
 			if (box_match.count() > 0) [[unlikely]] {
 				found_queues.push_back(found::LockedCands<O>{
 					.syms{box_match},

@@ -14,12 +14,6 @@ namespace okiidoku::mono { namespace {
 namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
-	MinimalUnavoidableSets<O> find_simple_minimal_unavoidable_sets(const Grid<O>&) noexcept {
-		return MinimalUnavoidableSets<O>{}; // TODO
-	}
-
-
-	template<Order O> requires(is_order_compiled(O))
 	bool grid_is_proper_puzzle(const Grid<O>& puzzle) noexcept {
 		if (grid_is_filled(puzzle)) {
 			return grid_follows_rule(puzzle);
@@ -105,7 +99,6 @@ namespace okiidoku::mono {
 
 
 	#define OKIIDOKU_FOR_COMPILED_O(O_) \
-		template MinimalUnavoidableSets<O_> find_simple_minimal_unavoidable_sets<O_>(const Grid<O_>&) noexcept; \
 		template void make_minimal_puzzle<O_>(Grid<O_>&, rng_seed_t) noexcept; \
 		template bool grid_is_proper_puzzle<O_>(const Grid<O_>&) noexcept;
 	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
