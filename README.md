@@ -18,7 +18,7 @@ In Japanese, "ookii" (大きい) means "big". I chose the name because one of my
 
 I work on this project for fun. I like sudoku. I want to learn how to develop high-performance software libraries. I like reasoning about trade-offs. The algorithm design is like the puzzle to me; I always want to try to come up with things on my own before looking at how other people do things. Perhaps in doing so, I will come up with something new, and maybe even something that is better in some ways than existing approaches.
 
-Here is [the roadmap](./cpp/TODO.md) (subject to violent rearrangements at the mercy of my whim and fancy).
+Here is [the roadmap](./cpp/TODO.md#roadmap) (subject to violent rearrangements at the mercy of my whim and fancy).
 
 ## Non-Goals / Non-Priorities
 
@@ -37,11 +37,11 @@ Here is [the roadmap](./cpp/TODO.md) (subject to violent rearrangements at the m
 
 This project is MIT licensed.
 
-If you have a question about the project and whether it is suitable for your own goals, please do your own research about [other existing projects](#other-existing-projects-and-solvers) and what they provide, and read through this project's [design docs](./writings/design/) _before_ asking.
+If you have a question about the project and whether it is suitable for your own goals, please first take a look at [other existing projects](#other-existing-projects-and-solvers) and what they provide, and read through this project's [design docs](./writings/design/) before asking.
 
 If you do something cool with it, that's great! I'd love to hear about it.
 
-### Some Other Existing Projects and Solvers
+### Other Existing Sudoku Programs
 
 - [t-dillon/tdoku](https://t-dillon.github.io/tdoku/)
 - [jczsolve](http://forum.enjoysudoku.com/3-77us-solver-2-8g-cpu-testcase-17sodoku-t30470-210.html#p249309)

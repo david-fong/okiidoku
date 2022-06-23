@@ -2,7 +2,7 @@
 
 ## Roadmap
 
-- improving solver and puzzle-maker for order=5
+- improve solver and puzzle-maker for order=5
 - draft archive
 - refactor and improve canonicalization
 - compare backtracking and stochastic search statistics
@@ -12,6 +12,7 @@
 - emscripten build and website
 - puzzle creation experiments (see [research-questions.md](../writings/research-questions.md))
 - optional async and batch-threading wrappers for long-running things
+  - hm. less sure about how necessary this is now knowing about `std::async`.
 - minlexing canonicalization
 - compare canonicalization methods (performance / time-complexity)
 - language bindings for other languages [see dedicated todo-file](./extras/bindings/todo.md)
@@ -25,8 +26,6 @@
 - https://en.cppreference.com/w/cpp/language/rule_of_three
 
 ## Misc List
-
-- The generator- due to the way we use the internal rng, the seed size actually limits the number of grids it can generate! The generator currently always starts with wiping the grid contents. Consider creating a `scramble_and_generate` that requires the grid it receives to already be a solution grid.
 
 - Collect some statistics on how much overlap there usually is between the size-4 UA sets found. A very narrow, simple way to do this is just count how many unique cells are covered, and compare to the number of non-unique cells covered.
 

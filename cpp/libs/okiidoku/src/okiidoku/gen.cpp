@@ -152,14 +152,26 @@ namespace okiidoku::mono {
 	void generate(Grid<O>& grid, const rng_seed_t rng_seed) noexcept {
 		using T = Ints<O>;
 		using o2i_t = int_ts::o2i_t<O>;
+		// #pragma clang loop unroll(disable)
+		for (o2i_t row {0}; row < T::O2; ++row) {
+			const auto row_sp {grid.row_span_at(row)};
+			std::iota(row_sp.begin(), row_sp.end(), grid_val_t<O>{0});
+		}
+		generate_shuffled(grid, rng_seed);
+	}
+
+	template<Order O> requires(is_order_compiled(O))
+	void generate_shuffled(Grid<O>& grid, const rng_seed_t rng_seed) noexcept {
+		using T = Ints<O>;
+		using o2i_t = int_ts::o2i_t<O>;
+		assert(grid_is_filled(grid));
+		// TODO.low assert that rows follow the rule.
+
 		rng_t rng {static_cast<rng_t::result_type>(rng_seed)};
-		{
-			// #pragma clang loop unroll(disable)
-			for (o2i_t row {0}; row < T::O2; ++row) {
-				const auto row_sp {grid.row_span_at(row)};
-				std::iota(row_sp.begin(), row_sp.end(), grid_val_t<O>{0});
-				std::shuffle(row_sp.begin(), row_sp.end(), rng);
-			}
+		// #pragma clang loop unroll(disable)
+		for (o2i_t row {0}; row < T::O2; ++row) {
+			const auto row_sp {grid.row_span_at(row)};
+			std::shuffle(row_sp.begin(), row_sp.end(), rng);
 		}
 		/* Note: when making boxes valid, keeping one line untouched works,
 		but is actually slower. same for making columns valid and one box. */
@@ -173,7 +185,7 @@ namespace okiidoku::mono {
 		for (o2i_t v_chute {0}; v_chute < T::O2; v_chute += T::O1) {
 			make_cols_valid(grid, v_chute, rng);
 		}
-
+		assert(grid_is_filled(grid));
 		assert(grid_follows_rule<O>(grid));
 	}
 

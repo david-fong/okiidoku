@@ -17,8 +17,8 @@ namespace okiidoku::mono {
 	// contract: `grid` is filled and follows the one rule.
 	template<Order O> requires(is_order_compiled(O))
 	Transformation<O> canonicalize(Grid<O>& grid) noexcept {
-		assert(grid_is_filled<O>(grid));
-		assert(grid_follows_rule<O>(grid));
+		assert(grid_is_filled(grid));
+		assert(grid_follows_rule(grid));
 		const auto label_map {detail::canon_label<O>(grid)};
 		auto place_map {detail::canon_place<O>(grid)};
 		// Transformation<O> place_map{}; // TODO.high delete when done canon_place
