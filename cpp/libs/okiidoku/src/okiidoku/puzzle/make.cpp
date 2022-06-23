@@ -1,6 +1,7 @@
 #include <okiidoku/puzzle/make.hpp>
 
 #include <okiidoku/puzzle/solve.hpp>
+#include <okiidoku/puzzle/ua_set.hpp>
 #include <okiidoku/detail/contract.hpp>
 
 #include <algorithm>
@@ -31,6 +32,8 @@ namespace okiidoku::mono {
 	void make_minimal_puzzle(Grid<O>& grid, const rng_seed_t rng_seed) noexcept {
 		assert(grid_is_proper_puzzle(grid));
 
+		const auto ua_sets {find_size_4_minimal_unavoidable_sets(grid)};
+
 		using rng_t = std::minstd_rand;
 		rng_t rng {static_cast<rng_t::result_type>(rng_seed)};
 
@@ -58,7 +61,7 @@ namespace okiidoku::mono {
 		o4i_t num_keepers {0};
 
 		// Note: will remove the logging once I'm done working on solver (ie. far in the future)
-		const auto call_debug_log_fn {[&]([[maybe_unused]] auto&& fn){
+		static constexpr auto call_debug_log_fn {[]([[maybe_unused]] auto&& fn){
 			if constexpr (O < 5) {
 				#ifndef NDEBUG
 				fn();

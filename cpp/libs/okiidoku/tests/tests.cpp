@@ -1,5 +1,6 @@
 #include <okiidoku/puzzle/make.hpp>
 #include <okiidoku/puzzle/solve.hpp>
+#include <okiidoku/puzzle/ua_set.hpp>
 #include <okiidoku/morph/canon.hpp>
 #include <okiidoku/morph/scramble.hpp>
 #include <okiidoku/serdes.hpp>
@@ -28,11 +29,10 @@
 #endif
 #include <cassert>
 
+namespace {
 
-// TODO.high it should probably just return right away if it encounters any failure.
-// returns the number of failures
 template<okiidoku::Order O>
-unsigned test_morph(okiidoku::SharedRng& shared_rng, const unsigned num_rounds) {
+void test_ints() {
 	using namespace okiidoku;
 	using namespace okiidoku::mono;
 	using T = Ints<O>;
@@ -40,14 +40,11 @@ unsigned test_morph(okiidoku::SharedRng& shared_rng, const unsigned num_rounds) 
 	using o2x_t = int_ts::o2x_t<O>;
 	using o2i_t = int_ts::o2i_t<O>;
 	using o3x_t = int_ts::o3x_t<O>;
-	// using o4i_t = int_ts::o4i_t<O>;
-	std::cout << "\n\ntesting for order " << O << std::endl;
-	// Note: if gen_path gets un-deprecated, assert that paths are valid.
 
 	assert(O2BitArr_ones<O>.count() == T::O2);
 	for (o2i_t i {0}; i < T::O2; ++i) {
 		assert(O2BitArr_ones<O>.count_set_bits_below(static_cast<o2x_t>(i)) == i);
-		assert(O2BitArr_ones<O>.get_index_of_nth_set_bit(i) == i);
+		assert(O2BitArr_ones<O>.get_index_of_nth_set_bit(static_cast<o2x_t>(i)) == i);
 	}
 	{
 		auto ones {O2BitArr_ones<O>};
@@ -80,6 +77,17 @@ unsigned test_morph(okiidoku::SharedRng& shared_rng, const unsigned num_rounds) 
 		assert(h_chute_cell_rmi == row_col_to_rmi<O>(i,j));
 		assert(v_chute_cell_rmi == row_col_to_rmi<O>(j,i));
 	}}
+}
+
+
+
+// TODO.high it should probably just return right away if it encounters any failure.
+// returns the number of failures
+template<okiidoku::Order O>
+unsigned test_algorithms(okiidoku::SharedRng& shared_rng, const unsigned num_rounds) {
+	using namespace okiidoku;
+	using namespace okiidoku::mono;
+	std::cout << "\n\ntesting for order " << O << std::endl;
 
 	unsigned int count_bad {0};
 
@@ -93,7 +101,8 @@ unsigned test_morph(okiidoku::SharedRng& shared_rng, const unsigned num_rounds) 
 
 		std::clog << "\nmaking puzzle #" << int(round);
 		Grid<O> puz_grid {gen_grid};
-		make_minimal_puzzle(puz_grid, shared_rng.get_u64());
+		const auto ua_sets {find_size_4_minimal_unavoidable_sets(puz_grid)};
+		// make_minimal_puzzle(puz_grid, shared_rng.get_u64());
 		// {
 		// 	auto fs {std::ofstream("puz5.txt")};
 		// 	for (int_ts::o4i_t<O> i {0}; i < T::O4; ++i) {
@@ -138,6 +147,7 @@ unsigned test_morph(okiidoku::SharedRng& shared_rng, const unsigned num_rounds) 
 	return count_bad;
 }
 
+} // end unnamed namespace
 
 /**
 */
@@ -168,9 +178,14 @@ int main(const int argc, char const *const argv[]) {
 	okiidoku::SharedRng shared_rng;
 	shared_rng.rng.seed(srand_key);
 
-	if (test_morph<5>(shared_rng, num_rounds) != 0) { return 1; }
+	#define OKIIDOKU_FOR_COMPILED_O(O_) \
+	test_ints<O_>();
+	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
+	#undef OKIIDOKU_FOR_COMPILED_O
+
+	if (test_algorithms<5>(shared_rng, num_rounds) != 0) { return 1; }
 	// #define OKIIDOKU_FOR_COMPILED_O(O_) \
-	// if (test_morph<O_>(shared_rng, num_rounds) != 0) { return 1; }
+	// if (test_algorithms<O_>(shared_rng, num_rounds) != 0) { return 1; }
 	// OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 	// #undef OKIIDOKU_FOR_COMPILED_O
 

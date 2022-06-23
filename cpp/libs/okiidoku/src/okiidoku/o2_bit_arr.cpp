@@ -14,19 +14,19 @@ namespace okiidoku::mono {
 	typename O2BitArr<O>::o2i_t
 	O2BitArr<O>::count() const noexcept {
 		if constexpr (num_words == 1) {
-			const auto count {std::popcount(words_[0])};
+			const auto count {static_cast<o2i_t>(std::popcount(words_[0]))};
 			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(count <= T::O2);
-			return static_cast<o2i_t>(count);
+			return count;
 		} else {
-			const auto count {std::transform_reduce(
+			const auto count {static_cast<o2i_t>(std::transform_reduce(
 				#ifdef __cpp_lib_execution
 				std::execution::unseq,
 				#endif
 				words_.cbegin(), words_.cend(), o2i_t{0}, std::plus<o2i_t>{},
 				[](const auto& word){ return static_cast<o2i_t>(std::popcount(word)); }
-			)};
+			))};
 			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(count <= T::O2);
-			return static_cast<o2i_t>(count);
+			return count;
 		}
 	}
 
@@ -35,12 +35,12 @@ namespace okiidoku::mono {
 	template<Order O> requires(is_order_compiled(O))
 	typename O2BitArr<O>::o2x_t
 	O2BitArr<O>::count_set_bits_below(const typename O2BitArr<O>::o2x_t end) const noexcept {
+		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(end < T::O2);
 		if constexpr (num_words == 1) {
 			return static_cast<o2x_t>(std::popcount(static_cast<word_t>(
 				words_[0] & static_cast<word_t>(word_bit_mask_for_bit_i(end) - word_t{1})
 			)));
 		} else {
-			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(end < T::O2);
 			const auto end_at_int {bit_i_to_word_i(end)};
 			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(end_at_int < num_words);
 			return static_cast<o2x_t>(std::transform_reduce(
@@ -95,10 +95,10 @@ namespace okiidoku::mono {
 			else {
 				for (word_i_t word_i {0}; word_i < num_words; ++word_i) {
 					const auto& word {words_[word_i]};
-					const auto word_popcount {static_cast<o2x_t>(std::popcount(word))};
+					const auto word_popcount {static_cast<o2i_t>(std::popcount(word))};
 					OKIIDOKU_CONTRACT_TRIVIAL_EVAL(word_popcount <= word_t_num_bits);
 					if (set_bit_index >= word_popcount) [[likely]] {
-						set_bit_index = static_cast<o2x_t>(set_bit_index - word_popcount);
+						set_bit_index -= word_popcount;
 					} else {
 						return word_i;
 					}
@@ -109,11 +109,11 @@ namespace okiidoku::mono {
 		const auto& word {words_[word_i]};
 		#ifdef OKIIDOKU_TARGET_SUPPORTS_X86_BMI2
 			if constexpr (sizeof(word_t) >= 8) {
-				const auto bit_mask {_pdep_u64(static_cast<word_t>(1 << set_bit_index), word)};
-				return static_cast<o2x_t>(std::countr_zero(bit_mask));
+				const auto bit_mask {_pdep_u64(static_cast<word_t>(word_t{1} << set_bit_index), word)};
+				return static_cast<o2x_t>(static_cast<o2x_t>(word_t_num_bits*word_i) + std::countr_zero(bit_mask));
 			} else {
-				const auto bit_mask {_pdep_u32(static_cast<word_t>(1 << set_bit_index), word)};
-				return static_cast<o2x_t>(std::countr_zero(bit_mask));
+				const auto bit_mask {_pdep_u32(static_cast<word_t>(word_t{1} << set_bit_index), word)};
+				return static_cast<o2x_t>(static_cast<o2x_t>(word_t_num_bits*word_i) + std::countr_zero(bit_mask));
 			}
 		#else
 		for (word_t word_bit_i {0}; word_bit_i < word_t_num_bits; ++word_bit_i) { // TODO.mid possible optimization: skip consecutive set bits by somehow using std::countr_<>

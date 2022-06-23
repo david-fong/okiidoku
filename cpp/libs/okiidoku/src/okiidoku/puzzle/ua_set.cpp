@@ -19,6 +19,7 @@ namespace okiidoku::mono { namespace {
 	template<Order O> requires(is_order_compiled(O))
 	void find_size_4_minimal_unavoidable_sets_in_chute(
 		const Grid<O>& soln_grid,
+		MinimalUnavoidableSets<O>& found,
 		const LineType line_type,
 		const int_ts::o1i_t<O> chute
 	) noexcept {
@@ -42,12 +43,17 @@ namespace okiidoku::mono { namespace {
 			for (o2i_t slice_c {0}; slice_c < T::O2; ++slice_c) {
 				const auto c_a_rmi {chute_cell_to_rmi<O>(line_type, chute, static_cast<o3i_t>((T::O2*chute_line_a)+slice_c))};
 				const auto c_b_rmi {chute_cell_to_rmi<O>(line_type, chute, static_cast<o3i_t>((T::O2*chute_line_b)+slice_c))};
-				const auto& c_a_sym {soln_grid.at_rmi(c_a_rmi)}; OKIIDOKU_CONTRACT_TRIVIAL_EVAL(c_a_rmi < T::O2);
-				const auto& c_b_sym {soln_grid.at_rmi(c_b_rmi)}; OKIIDOKU_CONTRACT_TRIVIAL_EVAL(c_b_rmi < T::O2);
+				const auto& c_a_sym {soln_grid.at_rmi(c_a_rmi)}; OKIIDOKU_CONTRACT_TRIVIAL_EVAL(c_a_sym < T::O2);
+				const auto& c_b_sym {soln_grid.at_rmi(c_b_rmi)}; OKIIDOKU_CONTRACT_TRIVIAL_EVAL(c_b_sym < T::O2);
 				const auto& d_a_cell {chute_lines_sym_to_cell[chute_line_a][c_b_sym]};
 				const auto& d_b_cell {chute_lines_sym_to_cell[chute_line_b][c_a_sym]};
-				if (d_a_cell == d_b_cell) [[unlikely]] {
-					; // TODO
+				if ((d_a_cell == d_b_cell) && (d_a_cell > slice_c)) [[unlikely]] {
+					found.ua_set_4s.emplace_back(UaSet4<O>{
+						static_cast<rmi_t>(c_a_rmi),
+						static_cast<rmi_t>(c_b_rmi),
+						static_cast<rmi_t>(chute_cell_to_rmi<O>(line_type, chute, static_cast<o3i_t>((T::O2*chute_line_a)+d_a_cell))),
+						static_cast<rmi_t>(chute_cell_to_rmi<O>(line_type, chute, static_cast<o3i_t>((T::O2*chute_line_b)+d_b_cell))),
+					});
 				}
 			}
 		}}
@@ -61,7 +67,9 @@ namespace okiidoku::mono {
 		MinimalUnavoidableSets<O> found; // TODO actually populate with found UA sets.
 		for (const auto line_type : line_types) {
 			for (o1i_t chute {0}; chute < T::O1; ++chute) {
-				find_size_4_minimal_unavoidable_sets_in_chute(soln_grid, line_type, chute);
+				find_size_4_minimal_unavoidable_sets_in_chute(
+					soln_grid, found, line_type, chute
+				);
 			}
 		}
 		return found;
