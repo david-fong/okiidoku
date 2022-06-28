@@ -32,9 +32,9 @@ namespace okiidoku {
 		std::mt19937_64 rng;
 		mutable std::mutex mutex;
 
-		[[nodiscard]] std::uint_least64_t get_u64() noexcept {
+		[[nodiscard]] std::uint_fast32_t get_rng_seed() noexcept {
 			std::lock_guard lock_guard {mutex};
-			return rng() - decltype(rng)::min();
+			return static_cast<std::uint_fast32_t>(rng() - decltype(rng)::min());
 		}
 	};
 }

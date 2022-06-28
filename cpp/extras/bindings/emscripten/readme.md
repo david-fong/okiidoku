@@ -21,6 +21,8 @@ cmake --build . --config=Release
 
 # look at the symbol maps for fun
 emnm -nC --defined-only okiidoku/Release/libokiidoku.a | less
+
+node const oki = require(path.join(process.cwd(), "Release/okiidoku.js"))
 ```
 
 ## Code Usage

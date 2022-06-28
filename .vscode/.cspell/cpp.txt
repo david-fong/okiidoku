@@ -4,6 +4,7 @@ cmake
 consteval
 countr
 cout
+cppcon
 cppcoreguidelines
 cppref
 CTAD

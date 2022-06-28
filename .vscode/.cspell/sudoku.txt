@@ -5,9 +5,9 @@ Emerentius
 enjoysudoku
 givens
 jczsolve
-kudoku
 minlexing
 pencilmark
 sudoku
 sudopedia
+sukaku
 tdoku

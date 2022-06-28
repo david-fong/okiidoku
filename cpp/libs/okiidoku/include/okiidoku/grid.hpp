@@ -75,13 +75,13 @@ namespace okiidoku::mono {
 		// TODO.low why does adding an assumption that the value is lteq T::O2 result in increased code size on clang?
 		// contract: `rmi` is in [0, O4).
 		template<class T_rmi> requires(Any_o4x_t<O, T_rmi>)
-		[[nodiscard]] constexpr       val_t& at_rmi(const T_rmi rmi)       noexcept {
+		[[nodiscard, gnu::pure]] constexpr       val_t& at_rmi(const T_rmi rmi)       noexcept {
 			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(rmi < T::O4);
 			// if constexpr (std::same_as<V_, grid_val_t<O>>) { OKIIDOKU_CONTRACT_TRIVIAL_EVAL(arr_[rmi] <= T::O2); }
 			return arr_[rmi];
 		}
 		template<class T_rmi> requires(Any_o4x_t<O, T_rmi>)
-		[[nodiscard]] constexpr const val_t& at_rmi(const T_rmi rmi) const noexcept {
+		[[nodiscard, gnu::pure]] constexpr const val_t& at_rmi(const T_rmi rmi) const noexcept {
 			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(rmi < T::O4);
 			// if constexpr (std::same_as<V_, grid_val_t<O>>) { OKIIDOKU_CONTRACT_TRIVIAL_EVAL(arr_[rmi] <= T::O2); }
 			return arr_[rmi];
@@ -166,11 +166,11 @@ namespace okiidoku::visitor {
 
 		// contract: `rmi` is in [0, O4).
 		// [[nodiscard]] common_val_t& at_rmi(const int_ts::o4i_t rmi)       noexcept;
-		[[nodiscard]] common_val_t at_rmi(const int_ts::o4i_t rmi) const noexcept;
+		[[nodiscard, gnu::pure]] common_val_t at_rmi(const int_ts::o4i_t rmi) const noexcept;
 
 		// contract: `row` and `col` are in [0, O2).
 		// [[nodiscard]] common_val_t& at(const int_ts::o2i_t row, const int_ts::o2i_t col)       noexcept;
-		[[nodiscard]] common_val_t at(const int_ts::o2i_t row, const int_ts::o2i_t col) const noexcept;
+		[[nodiscard, gnu::pure]] common_val_t at(const int_ts::o2i_t row, const int_ts::o2i_t col) const noexcept;
 	};
 }
 #endif

@@ -38,8 +38,8 @@ namespace okiidoku::mono { namespace {
 			}}
 			return map;
 		}()};
-		for (o1i_t chute_line_a {0}; chute_line_a < T::O1; ++chute_line_a) {
-		for (o1i_t chute_line_b {0}; chute_line_b < T::O1; ++chute_line_b) {
+		for (o1i_t chute_line_a {0}; static_cast<o1i_t>(chute_line_a+1) < T::O1; ++chute_line_a) {
+		for (o1i_t chute_line_b {static_cast<o1i_t>(chute_line_a+1)}; chute_line_b < T::O1; ++chute_line_b) {
 			for (o2i_t slice_c {0}; slice_c < T::O2; ++slice_c) {
 				const auto c_a_rmi {chute_cell_to_rmi<O>(line_type, chute, static_cast<o3i_t>((T::O2*chute_line_a)+slice_c))};
 				const auto c_b_rmi {chute_cell_to_rmi<O>(line_type, chute, static_cast<o3i_t>((T::O2*chute_line_b)+slice_c))};
@@ -64,7 +64,8 @@ namespace okiidoku::mono {
 	template<Order O> requires(is_order_compiled(O))
 	MinimalUnavoidableSets<O> find_size_4_minimal_unavoidable_sets(const Grid<O>& soln_grid) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
-		MinimalUnavoidableSets<O> found; // TODO actually populate with found UA sets.
+		MinimalUnavoidableSets<O> found {}; // TODO actually populate with found UA sets.
+		found.ua_set_4s.reserve(1 << (O+2));
 		for (const auto line_type : line_types) {
 			for (o1i_t chute {0}; chute < T::O1; ++chute) {
 				find_size_4_minimal_unavoidable_sets_in_chute(

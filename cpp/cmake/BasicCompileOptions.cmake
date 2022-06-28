@@ -22,6 +22,7 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
 	target_compile_options(okiidoku_compile_options_private INTERFACE
 		# -Wbidi-chars=any # warn on any usage of bidi text
 		-Wnormalized # warn on identifiers that look the same but are not the same
+		-Wno-unknown-pragmas
 	)
 endif()
 

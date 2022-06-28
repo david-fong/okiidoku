@@ -167,7 +167,7 @@ namespace okiidoku::mono {
 		assert(grid_is_filled(grid));
 		// TODO.low assert that rows follow the rule.
 
-		rng_t rng {static_cast<rng_t::result_type>(rng_seed)};
+		rng_t rng {rng_seed};
 		// #pragma clang loop unroll(disable)
 		for (o2i_t row {0}; row < T::O2; ++row) {
 			const auto row_sp {grid.row_span_at(row)};

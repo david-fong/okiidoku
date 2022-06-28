@@ -73,7 +73,7 @@ namespace okiidoku::mono {
 				#ifdef __cpp_lib_execution
 				std::execution::unseq,
 				#endif
-				words_.cbegin(), words_.cend(), [](const auto& word){ return word != 0; }
+				words_.cbegin(), words_.cend(), [](const auto& w){ return w != 0; }
 			)};
 			const o2xs_t count {static_cast<o2x_t>(
 				/* static_cast<o2x_t> */(word_t_num_bits*static_cast<o2x_t>(std::distance(words_.cbegin(), word)))
@@ -91,16 +91,16 @@ namespace okiidoku::mono {
 		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(set_bit_index < T::O2);
 		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(count() > set_bit_index);
 		const word_i_t word_i {[&](){
-			if constexpr (num_words == 1) { return 0; }
+			if constexpr (num_words == 1) { return word_i_t{0}; }
 			else {
-				for (word_i_t word_i {0}; word_i < num_words; ++word_i) {
-					const auto& word {words_[word_i]};
+				for (word_i_t wd_i {0}; wd_i < num_words; ++wd_i) {
+					const auto& word {words_[wd_i]};
 					const auto word_popcount {static_cast<o2i_t>(std::popcount(word))};
 					OKIIDOKU_CONTRACT_TRIVIAL_EVAL(word_popcount <= word_t_num_bits);
 					if (set_bit_index >= word_popcount) [[likely]] {
-						set_bit_index -= word_popcount;
+						set_bit_index = static_cast<o2x_t>(set_bit_index - word_popcount);
 					} else {
-						return word_i;
+						return wd_i;
 					}
 				}
 				OKIIDOKU_CONTRACT_TRIVIAL_EVAL(false); // c++23 std::unreachable

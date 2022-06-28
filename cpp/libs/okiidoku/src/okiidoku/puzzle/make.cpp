@@ -5,7 +5,7 @@
 #include <okiidoku/detail/contract.hpp>
 
 #include <algorithm>
-#include <numeric> // iota
+#include <execution>
 #include <random> // TODO remove once we make a smarter puzzle maker. currently a dumb implementation.
 
 #include <iostream>
@@ -35,7 +35,7 @@ namespace okiidoku::mono {
 		const auto ua_sets {find_size_4_minimal_unavoidable_sets(grid)};
 
 		using rng_t = std::minstd_rand;
-		rng_t rng {static_cast<rng_t::result_type>(rng_seed)};
+		rng_t rng {rng_seed};
 
 		using T = Ints<O>;
 		using o2x_t = int_ts::o2x_t<O>;
@@ -84,6 +84,23 @@ namespace okiidoku::mono {
 				std::clog << "\n\n#puzcell cands: " << int(num_puzcell_cands) << ". try rm @ " << int(rmi) << std::flush;
 			});
 			// if (num_puzcell_cands <= 61) [[unlikely]] { return; } // TODO delete when done profiling
+
+			if (std::any_of(
+				ua_sets.ua_set_4s.cbegin(),
+				ua_sets.ua_set_4s.cend(),
+				[&](const auto& ua_set_4){
+					return std::count_if(
+						#ifdef __cpp_lib_execution
+						std::execution::unseq,
+						#endif
+						ua_set_4.rmis.cbegin(),
+						ua_set_4.rmis.cend(),
+						[&](const auto& ua_set_rmi){ return (ua_set_rmi != rmi) && (grid.at_rmi(ua_set_rmi) != T::O2); }
+					) == 0;
+				}
+			)) {
+				std::clog << "\ncannot remove at " << int(rmi) << " since it is the last given for a ua_set_4.";
+			}
 
 			solver.reinit_with_puzzle(grid, {{.rmi{rmi}, .val{static_cast<o2x_t>(val)}}});
 			if (const auto new_soln_opt {solver.get_next_solution()}; new_soln_opt) {

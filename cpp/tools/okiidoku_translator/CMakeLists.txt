@@ -1,5 +1,5 @@
 add_executable(okiidoku_translator
-   main.cpp
+   translator.main.cpp
 )
 
 target_include_directories(okiidoku_translator PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")

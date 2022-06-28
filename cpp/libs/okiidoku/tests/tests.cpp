@@ -29,6 +29,8 @@
 #endif
 #include <cassert>
 
+static_assert(std::is_same_v<okiidoku::rng_seed_t, std::minstd_rand::result_type>);
+
 namespace {
 
 template<okiidoku::Order O>
@@ -97,12 +99,34 @@ unsigned test_algorithms(okiidoku::SharedRng& shared_rng, const unsigned num_rou
 	// Grid<O> canon_grid;
 
 	for (unsigned round {0}; round < num_rounds; ) {
-		generate(gen_grid, shared_rng.get_u64());
+		generate(gen_grid, shared_rng.get_rng_seed());
 
 		std::clog << "\nmaking puzzle #" << int(round);
 		Grid<O> puz_grid {gen_grid};
-		const auto ua_sets {find_size_4_minimal_unavoidable_sets(puz_grid)};
-		// make_minimal_puzzle(puz_grid, shared_rng.get_u64());
+		auto ua_sets {find_size_4_minimal_unavoidable_sets(puz_grid)};
+		std::clog << '\n' << unsigned(ua_sets.ua_set_4s.size());
+		{
+			std::vector<int_ts::o4xs_t<O>> rmis {};
+			for (auto& ua_set_4 : ua_sets.ua_set_4s) {
+				std::sort(ua_set_4.rmis.begin(), ua_set_4.rmis.end());
+				for (const auto rmi : ua_set_4.rmis) {
+					rmis.push_back(rmi);
+				}
+			}
+			std::sort(ua_sets.ua_set_4s.begin(), ua_sets.ua_set_4s.end(), [](auto& a, auto& b){
+				return a.rmis < b.rmis;
+			});
+			unsigned count_dup {0};
+			std::sort(rmis.begin(), rmis.end());
+			for (size_t i {0}; i+2 < rmis.size(); ++i) {
+				if (rmis[i] == rmis[i+1]) { ++count_dup; }
+				if (rmis[i] == rmis[i+2]) {
+					std::clog << "\noh";
+				}
+			}
+			std::clog << "\ncount_dup: " << count_dup << ". num sets: " << ua_sets.ua_set_4s.size();
+		}
+		// make_minimal_puzzle(puz_grid, shared_rng.get_rng_seed());
 		// {
 		// 	auto fs {std::ofstream("puz5.txt")};
 		// 	for (int_ts::o4i_t<O> i {0}; i < T::O4; ++i) {
@@ -114,7 +138,7 @@ unsigned test_algorithms(okiidoku::SharedRng& shared_rng, const unsigned num_rou
 		// 	}
 		// }
 		#ifndef OKIIDOKU_NO_LOGGING
-		print_2d<O>(std::clog, shared_rng.get_u64(), gen_grid, puz_grid);
+		print_2d<O>(std::clog, shared_rng.get_rng_seed(), gen_grid, puz_grid);
 		#endif
 
 
@@ -125,13 +149,13 @@ unsigned test_algorithms(okiidoku::SharedRng& shared_rng, const unsigned num_rou
 		}
 
 		canon_grid = gen_grid;
-		scramble(canon_grid, shared_rng.get_u64());
+		scramble(canon_grid, shared_rng.get_rng_seed());
 		canonicalize(canon_grid);
 
 		if (gen_grid != canon_grid) {
 			++count_bad;
 			std::clog << "\n!bad\n";
-			print_2d<O>(std::clog, shared_rng.get_u64(), gen_grid, canon_grid);
+			print_2d<O>(std::clog, shared_rng.get_rng_seed(), gen_grid, canon_grid);
 			// std::clog << "\n";
 			std::clog << "\n==========\n";
 		} else {

@@ -13,7 +13,7 @@
 
 namespace okiidoku {
 
-	using rng_seed_t = std::uint_least64_t;
+	using rng_seed_t = std::uint_fast32_t; // see `std::minstd_rand`
 
 	enum class HouseType : unsigned char {
 		box, row, col,

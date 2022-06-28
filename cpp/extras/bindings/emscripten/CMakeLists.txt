@@ -33,7 +33,22 @@ add_subdirectory(${okiidoku_SOURCE_DIR}/libs/okiidoku okiidoku)
 # https://emscripten.org/docs/compiling/Building-Projects.html#using-libraries
 # https://emscripten.org/docs/porting/connecting_cpp_and_javascript/embind.html#binding-libraries
 add_executable(okiidoku_js okiidoku.embind.cpp)
-set_target_properties(okiidoku_js PROPERTIES OUTPUT_NAME "okiidoku")
+set_target_properties(okiidoku_js PROPERTIES
+	OUTPUT_NAME "okiidoku"
+	LINK_DEPENDS ${PROJECT_SOURCE_DIR}/emcc_pre_js.js
+)
+# https://emsettings.surma.technology/
+target_compile_options(okiidoku_js PRIVATE
+	-sSTRICT=1
+)
+target_link_options(okiidoku_js PRIVATE
+	-sSTRICT=1
+	# -sSTANDALONE_WASM=1
+	-sWASM_BIGINT=1
+	# -sMODULARIZE=1
+	# -sENVIRONMENT=web # use to exclude commonJS/Node glue-code
+	--pre-js=${PROJECT_SOURCE_DIR}/emcc_pre_js.js
+)
 target_link_libraries(okiidoku_js
 	PRIVATE okiidoku_compile_options_private
 	PRIVATE okiidoku

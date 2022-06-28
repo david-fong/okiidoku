@@ -1,6 +1,7 @@
 // https://emscripten.org/docs/porting/connecting_cpp_and_javascript/embind.html
 // https://emscripten.org/docs/api_reference/bind.h.html
 // https://github.com/emscripten-core/emscripten/blob/main/ChangeLog.md
+// https://emsettings.surma.technology/
 static_assert(__EMSCRIPTEN__);
 #include <emscripten/bind.h>
 #include <emscripten/emscripten.h>
@@ -10,22 +11,26 @@ static_assert(__EMSCRIPTEN__);
 // with the same name.
 
 #include <okiidoku/grid.hpp>
+#include <okiidoku/gen.hpp>
 
 #include <random> // mt19937_64
 
+// https://github.com/emscripten-core/emscripten/issues/13902
+
 // TODO.low learn what value types are and see if useful. https://emscripten.org/docs/porting/connecting_cpp_and_javascript/embind.html#value-types
 
-namespace okiidoku {
+namespace okiidoku::em {
 	class Rng final {
 	public:
 		std::mt19937_64 rng_;
-		void seed(const unsigned long long seed) noexcept {
+		void seed(const std::uint_fast64_t seed) noexcept {
 			rng_.seed(seed);
 		}
-		[[nodiscard]] std::uint_least64_t get_u64() noexcept {
-			return static_cast<std::uint_least64_t>(rng_() - decltype(rng_)::min());
+		[[nodiscard]] rng_seed_t get_rng_seed() noexcept {
+			return static_cast<rng_seed_t>(rng_() - decltype(rng_)::min());
 		}
 	};
+	Rng rng {};
 }
 namespace okiidoku::mono {
 	;
@@ -42,14 +47,11 @@ EMSCRIPTEN_BINDINGS(okiidoku) {
 	namespace oki_m = okiidoku::mono;
 	namespace oki_v = okiidoku::visitor;
 
-	// em::constant("sharedRng", oki::shared_rng);
-	// TODO.wait currently noexcept functions can't be bound to classes (unintentionally)
-	//  https://github.com/emscripten-core/emscripten/pull/15273
-	//  https://github.com/emscripten-core/emscripten/pull/17140
-	em::class_<oki::Rng>("Rng")
-		.function("seed", &oki::Rng::seed)
-		.function("getUint64", &oki::Rng::get_u64)
+	em::class_<oki::em::Rng>("Rng")
+		.function("seed", &oki::em::Rng::seed)
+		.function("getRngSeed", &oki::em::Rng::get_rng_seed)
 		;
+	em::constant("rng", oki::em::rng);
 
 	em::class_<oki_v::Grid>("Grid")
 		.constructor<oki::Order>()
@@ -58,7 +60,12 @@ EMSCRIPTEN_BINDINGS(okiidoku) {
 		.function("at", &oki::visitor::Grid::at)
 		.function("followsRule", &oki_v::grid_follows_rule)
 		.function("isFilled",    &oki_v::grid_is_filled)
+		.function("isEmpty",     &oki_v::grid_is_empty)
 		;
 	em::function("gridFollowsRule", &oki_v::grid_follows_rule);
 	em::function("gridIsFilled",    &oki_v::grid_is_filled);
+	em::function("gridIsEmpty",     &oki_v::grid_is_empty);
+	em::function("generate",        &oki_v::generate);
 }
+
+int main() {}

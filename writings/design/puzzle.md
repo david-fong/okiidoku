@@ -73,12 +73,21 @@ Note: For kudoku, preventing an unavoidable set from being a deadly pattern requ
   1. Num line types: `2`
   2. Num chutes for line-types: `O1`
   3. Num combinations of two lines in a chute: `nCr(O1,2)` = `O1!/(2!*(O1-2)!)` = `O1*(O1-1)/2`
-  4. Take the two lines. For each zip entry `p`, check if `line1_sym_to_cell[p.sym2] == line2_sym_to_cell[p.sym1]`. Cost: `O2`.
-  - Total: `(2*O4) + (2 * O2*(O1-1) * O2)`, which is like `O5`.
+  4. Take the two lines. For each zip entry `p`, check if `line1_sym_to_cell[p.sym2] == line2_sym_to_cell[p.sym1]`. Cost: `O2`. Actually, knowing that found pairs of zip entries will always be in different blocks, we never need to iterate zip entries of the last box as if they were the first zip entry of a pair to find, since if the second exists, it would already have been found as if it was a first zip entry. So the cost is `O1*(O1-1)`
+  - Total: `1*O1*O1*(O1-1)/2*O1*O1*(O1-1)` = `O3 * (O1-1)^2` ~= `O5`.
 
 It's not obvious to me how to extend this to finding larger kinds of unavoidable sets. I do wonder what the distribution sampled over many solution grids is of how many of each kind of unavoidable set there is in a solution grid. If the size-4 kind is the most common that would put me at some ease.han for regular sudoku.
 
 Is it possible for a proper puzzle to have two empty lines in the same chute? I don't think so because any valid fill of those two lines could be transformed (_without_ moving any givens) into another solution just by swapping those two lines (a VPT). How often a completely random puzzle maker might attempt something like this I have no idea. We could try counting it. In the order=5 minimal puzzle I got close to finishing, there didn't seem to be anything close to becoming like that.
+
+The McGuire group generalized by using an optimized traversal of VPTs to try to match against fixed-position patterns ("blueprints") of UA sets. I wonder how it would fare to do this variation of the idea: blueprints that do not contain symbol info- instead, the match test is done simply by running a solver and counting the number of solutions it finds.
+
+#### Attempts to Generalize
+
+Trying to design a data representation that may be more suitable for the search
+
+have a collection of data per box:
+each box's data is a map from symbols to boxrow,boxcol of that symbol in the box
 
 ## Puzzle Ranking
 

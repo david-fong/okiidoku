@@ -28,7 +28,7 @@ Here is [the roadmap](./cpp/TODO.md#roadmap) (subject to violent rearrangements 
   - Despite the first bullet, I am more interested in throughput than deductive power.
 - Making explicit use of SIMD instructions.
   - My higher priority is keeping the code portable and somewhat malleable. Compilers and C++ standard library implementations can often infer and generate parallelized code, and for now, that's plenty good enough for me.
-- Supporting sudoku variants other than kudoku.
+- Supporting sudoku variants other than sukaku.
   - You are welcome to fork and do such work separately.
 
 ## Usage
