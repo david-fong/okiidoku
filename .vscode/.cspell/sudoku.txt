@@ -1,11 +1,14 @@
 boxcol
 boxrow
 canonicalizer
+dobrichev
 Emerentius
 enjoysudoku
+fsss2
 givens
 jczsolve
 minlexing
+mladen
 pencilmark
 sudoku
 sudopedia

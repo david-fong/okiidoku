@@ -1,8 +1,8 @@
 #include <okiidoku/morph/canon.hpp>
 #include <okiidoku/morph/scramble.hpp>
 #include <okiidoku/serdes.hpp>
-#include <okiidoku/print_2d.hpp>
 #include <okiidoku/gen.hpp>
+#include <okiidoku/print_2d.hpp>
 #include <okiidoku/grid.hpp>
 
 #include <okiidoku_cli_utils/shared_rng.hpp>
@@ -19,7 +19,7 @@
 
 // "copy" names under `okiidoku::mono` to okiidoku:
 // Recommendation: do NOT do this in header files (only in .cpp files)
-namespace okiidoku { using namespace okiidoku::mono; }
+namespace okiidoku { using namespace ::okiidoku::mono; }
 
 int main([[maybe_unused]] const int argc, [[maybe_unused]] char const *const argv[]) {
 	namespace oki = okiidoku;

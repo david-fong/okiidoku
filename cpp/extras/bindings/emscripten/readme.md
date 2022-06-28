@@ -8,14 +8,16 @@
 
 I have no intention to support versions of Emscripten older than the latest.
 
-## Build Commands
+## Command Snippets
+
+Note: The specific cmake configuration commands are just examples. You can do whatever works for you.
 
 ```sh
-# generate build-system configuration files
+# generate build-system configuration files (run after cloning the repo)
 # (cd to :/cpp/extras/bindings/emscripten)
-emcmake cmake -S . -B build/ -G 'Ninja Multi-Config' -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE
+emcmake cmake -S . -B build/ -G 'Ninja Multi-Config' -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -DCMAKE_COLOR_DIAGNOSTICS=TRUE
 
-# build okiidoku
+# build okiidoku (rerun after modifying the library)
 # (cd to ./build)
 cmake --build . --config=Release
 
@@ -27,6 +29,6 @@ node const oki = require(path.join(process.cwd(), "Release/okiidoku.js"))
 
 ## Code Usage
 
-In the future, I will populate the examples folder with an example for the web and for nodejs.
+See the [examples folder](./examples/).
 
-Friendly reminder to [call `.delete()` when you are done with an object](https://emscripten.org/docs/porting/connecting_cpp_and_javascript/embind.html#memory-management) (unless that object was bound using `emscripten::value_object`). Unfortunately there are these things you (and I) will have to deal with in using this library. It just takes some learning of how things work, and being careful.
+Friendly reminder to [call `.delete()` when you are done with an object](https://emscripten.org/docs/porting/connecting_cpp_and_javascript/embind.html#memory-management) living in the WASM memory (unless that object was bound using `emscripten::value_object`). Unfortunately there are these things you (and I) will have to deal with in using this library. It just takes some learning of how things work, and being careful.

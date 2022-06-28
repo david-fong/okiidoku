@@ -17,3 +17,5 @@
 - Since the stochastic generator cannot deterministically traverse all possible outputs, could it be possible that at a certain point, it becomes easier to find more unique (non-equivalent to previously found) puzzles by continuing a backtracking generator from the output of a stochastic generator's output?
 
 - How does the average number of swaps / swaps-attempts required for the stochastic generator to generate a solution scale with size? what is the distribution of the observed complexity in terms of number of swaps / swap-attempts?
+
+- For a given solution grid, is there any correlation between the number of givens in its fewest-givens and most-givens minimal puzzles?

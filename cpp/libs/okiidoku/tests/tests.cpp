@@ -4,8 +4,8 @@
 #include <okiidoku/morph/canon.hpp>
 #include <okiidoku/morph/scramble.hpp>
 #include <okiidoku/serdes.hpp>
-#include <okiidoku/print_2d.hpp>
 #include <okiidoku/gen.hpp>
+#include <okiidoku/print_2d.hpp>
 #include <okiidoku/grid.hpp>
 #include <okiidoku/o2_bit_arr.hpp>
 
@@ -35,8 +35,8 @@ namespace {
 
 template<okiidoku::Order O>
 void test_ints() {
-	using namespace okiidoku;
-	using namespace okiidoku::mono;
+	using namespace ::okiidoku;
+	using namespace ::okiidoku::mono;
 	using T = Ints<O>;
 	using o1x_t = int_ts::o1x_t<O>;
 	using o2x_t = int_ts::o2x_t<O>;
@@ -87,8 +87,8 @@ void test_ints() {
 // returns the number of failures
 template<okiidoku::Order O>
 unsigned test_algorithms(okiidoku::SharedRng& shared_rng, const unsigned num_rounds) {
-	using namespace okiidoku;
-	using namespace okiidoku::mono;
+	using namespace ::okiidoku;
+	using namespace ::okiidoku::mono;
 	std::cout << "\n\ntesting for order " << O << std::endl;
 
 	unsigned int count_bad {0};

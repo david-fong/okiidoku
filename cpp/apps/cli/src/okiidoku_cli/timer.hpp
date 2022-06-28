@@ -14,7 +14,7 @@ namespace okiidoku {
 		};
 
 		[[nodiscard]] Elapsed read_elapsed() const noexcept {
-			using namespace std::chrono;
+			using namespace ::std::chrono;
 			return Elapsed {
 				.proc_seconds = (static_cast<double>(std::clock() - proc_clock_start_) / CLOCKS_PER_SEC),
 				.wall_seconds = (static_cast<double>(

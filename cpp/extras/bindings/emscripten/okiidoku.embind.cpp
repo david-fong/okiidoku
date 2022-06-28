@@ -1,7 +1,6 @@
 // https://emscripten.org/docs/porting/connecting_cpp_and_javascript/embind.html
 // https://emscripten.org/docs/api_reference/bind.h.html
 // https://github.com/emscripten-core/emscripten/blob/main/ChangeLog.md
-// https://emsettings.surma.technology/
 static_assert(__EMSCRIPTEN__);
 #include <emscripten/bind.h>
 #include <emscripten/emscripten.h>
@@ -10,16 +9,21 @@ static_assert(__EMSCRIPTEN__);
 // uses static constructor functions and I'm assuming I can't define multiple
 // with the same name.
 
-#include <okiidoku/grid.hpp>
 #include <okiidoku/gen.hpp>
+#include <okiidoku/print_2d.hpp>
+#include <okiidoku/grid.hpp>
 
+#include <sstream>
 #include <random> // mt19937_64
 
 // https://github.com/emscripten-core/emscripten/issues/13902
 
 // TODO.low learn what value types are and see if useful. https://emscripten.org/docs/porting/connecting_cpp_and_javascript/embind.html#value-types
 
-namespace okiidoku::em {
+namespace okiidoku::em { namespace {
+
+	using namespace ::okiidoku::visitor;
+
 	class Rng final {
 	public:
 		std::mt19937_64 rng_;
@@ -31,14 +35,27 @@ namespace okiidoku::em {
 		}
 	};
 	Rng rng {};
-}
+
+	std::string grid_to_emoji_string(Grid& grid) noexcept {
+		std::stringstream ss {};
+		print_2d(ss, rng.get_rng_seed(), grid);
+		return ss.str();
+	}
+
+	void generate(Grid& grid) noexcept {
+		generate(grid, rng.get_rng_seed());
+	}
+	void generate_shuffled(Grid& grid) noexcept {
+		generate_shuffled(grid, rng.get_rng_seed());
+	}
+}}
 namespace okiidoku::mono {
 	;
 }
-namespace okiidoku::visitor {
+namespace okiidoku::visitor { namespace {
 	;
 	// TODO.low define wrappers that return undefined or throw on contract violations / out of bounds. https://emscripten.org/docs/porting/connecting_cpp_and_javascript/embind.html#non-member-functions-on-the-javascript-prototype
-}
+}}
 
 // static constructor function:
 EMSCRIPTEN_BINDINGS(okiidoku) {
@@ -46,6 +63,8 @@ EMSCRIPTEN_BINDINGS(okiidoku) {
 	namespace oki = okiidoku;
 	namespace oki_m = okiidoku::mono;
 	namespace oki_v = okiidoku::visitor;
+
+	em::function("isOrderCompiled", &oki::is_order_compiled);
 
 	em::class_<oki::em::Rng>("Rng")
 		.function("seed", &oki::em::Rng::seed)
@@ -61,11 +80,15 @@ EMSCRIPTEN_BINDINGS(okiidoku) {
 		.function("followsRule", &oki_v::grid_follows_rule)
 		.function("isFilled",    &oki_v::grid_is_filled)
 		.function("isEmpty",     &oki_v::grid_is_empty)
+		.function("toString",    &oki::em::grid_to_emoji_string)
 		;
 	em::function("gridFollowsRule", &oki_v::grid_follows_rule);
 	em::function("gridIsFilled",    &oki_v::grid_is_filled);
 	em::function("gridIsEmpty",     &oki_v::grid_is_empty);
-	em::function("generate",        &oki_v::generate);
+	em::function("generate",         em::select_overload<void(oki_v::Grid&)>(&oki::em::generate));
+	em::function("generate",         em::select_overload<void(oki_v::Grid&, const oki::rng_seed_t)>(&oki_v::generate));
+	em::function("generateShuffled", em::select_overload<void(oki_v::Grid&)>(&oki::em::generate_shuffled));
+	em::function("generateShuffled", em::select_overload<void(oki_v::Grid&, const oki::rng_seed_t)>(&oki_v::generate_shuffled));
 }
 
 int main() {}

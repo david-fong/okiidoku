@@ -208,4 +208,14 @@ namespace okiidoku::visitor {
 		default: OKIIDOKU_CONTRACT_TRIVIAL_EVAL(false); // std::unreachable
 		}
 	}
+
+	void generate_shuffled(Grid& vis_sink, const rng_seed_t rng_seed) noexcept {
+		switch (vis_sink.get_mono_order()) {
+		#define OKIIDOKU_FOR_COMPILED_O(O_) \
+		case O_: return mono::generate_shuffled(vis_sink.unchecked_get_mono_exact<O_>(), rng_seed);
+		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
+		#undef OKIIDOKU_FOR_COMPILED_O
+		default: OKIIDOKU_CONTRACT_TRIVIAL_EVAL(false); // std::unreachable
+		}
+	}
 }

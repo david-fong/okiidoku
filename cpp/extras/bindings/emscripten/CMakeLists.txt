@@ -21,7 +21,7 @@ include(${okiidoku_SOURCE_DIR}/cmake/BasicCompileOptions.cmake)
 if(okiidoku_IS_TOP_LEVEL)
 	include(${okiidoku_SOURCE_DIR}/cmake/internal/StaticAnalyzers.cmake)
 	include(${okiidoku_SOURCE_DIR}/cmake/internal/Sanitizers.cmake)
-	include(CTest) # https://cliutils.gitlab.io/modern-cmake/chapters/testing.html
+	include(CTest)
 endif()
 
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
@@ -38,6 +38,7 @@ set_target_properties(okiidoku_js PROPERTIES
 	LINK_DEPENDS ${PROJECT_SOURCE_DIR}/emcc_pre_js.js
 )
 # https://emsettings.surma.technology/
+# https://github.com/emscripten-core/emscripten/blob/main/src/settings.js
 target_compile_options(okiidoku_js PRIVATE
 	-sSTRICT=1
 )

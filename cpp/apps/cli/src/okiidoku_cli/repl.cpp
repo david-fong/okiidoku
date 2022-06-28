@@ -2,9 +2,9 @@
 
 #include <okiidoku_cli/timer.hpp>
 #include <okiidoku_cli_utils/str.hpp>
-#include <okiidoku/print_2d.hpp>
 #include <okiidoku/morph/canon.hpp>
 #include <okiidoku/gen.hpp>
+#include <okiidoku/print_2d.hpp>
 #include <okiidoku/serdes.hpp>
 
 #include <iostream>   // cout, endl,
@@ -87,7 +87,7 @@ namespace okiidoku::cli {
 
 
 	void Repl::gen_single() {
-		using namespace okiidoku::visitor;
+		using namespace ::okiidoku::visitor;
 		const clock_t clock_start {std::clock()};
 		Grid grid(config_.order());
 		generate(grid, shared_rng_.get_rng_seed());
@@ -106,7 +106,7 @@ namespace okiidoku::cli {
 
 
 	void Repl::gen_multiple(unsigned long long how_many) {
-		using namespace okiidoku::visitor;
+		using namespace ::okiidoku::visitor;
 		const Timer timer{};
 		{
 			std::filesystem::create_directories("gen");

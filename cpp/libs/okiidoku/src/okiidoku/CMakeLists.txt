@@ -1,10 +1,9 @@
 target_sources(okiidoku PRIVATE
 	o2_bit_arr.cpp
 	grid.cpp
+	print_2d.cpp
 
 	gen.cpp
-
-	print_2d.cpp
 
 	serdes.cpp
 	archive.cpp
