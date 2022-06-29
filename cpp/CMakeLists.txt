@@ -17,14 +17,13 @@ if(okiidoku_IS_TOP_LEVEL)
 	include(cmake/if_top_level/static_analyzers.cmake)
 	include(cmake/if_top_level/sanitizers.cmake)
 	include(CTest) # https://cliutils.gitlab.io/modern-cmake/chapters/testing.html
+
+	include(CheckIPOSupported)
+	check_ipo_supported(RESULT CMAKE_INTERPROCEDURAL_OPTIMIZATION)
+	set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_DEBUG FALSE)
 endif()
 
 include(cmake/detect_target_isa_support.cmake)
-
-set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
-if(okiidoku_IS_TOP_LEVEL)
-	set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_DEBUG FALSE)
-endif()
 
 
 # General use cases should use BUILD_SHARED_LIBS to choose whether to build

@@ -1,7 +1,1 @@
-cppcon
-cppcoreguidelines
-cppref
-NRVO
-objdump
-pybind
 sysroot

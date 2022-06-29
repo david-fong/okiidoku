@@ -16,6 +16,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 		FoundQueues<O>& found_queues
 	) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
+		(void)cells_cands; (void)found_queues;
 		; // TODO either start from scratch, or try to use the subset finding cache info...
 		return false;
 	}
