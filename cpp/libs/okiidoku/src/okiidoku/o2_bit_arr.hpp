@@ -183,6 +183,7 @@ namespace okiidoku::mono {
 				OKIIDOKU_CONTRACT_TRIVIAL_EVAL(has_more());
 				while (word_i < num_words && arr_.words_[word_i] == 0) { ++word_i; }
 				if (has_more()) {
+					OKIIDOKU_CONTRACT_TRIVIAL_EVAL(word_i < num_words); // MSVC analyzer has trouble deducing this.
 					auto& word {arr_.words_[word_i]};
 					word_bit_i = static_cast<word_bit_i_t>(std::countr_zero(word));
 					word &= static_cast<word_t>(word-1U); // unset lowest bit

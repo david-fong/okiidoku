@@ -4,19 +4,34 @@
 	"language": "en-GB",
 	"enabledLanguageIds": [
 		"c",
+		"css",
 		"cpp",
+		"html",
 		"markdown",
 		"plaintext",
 		"python",
 		"text",
+		"typescript",
+		"javascript",
 		"json",
 		"jsonc"
 	],
+	"enableFiletypes": [
+		// "cpp"
+	],
+	"languageSettings": [
+		{
+			"languageId": "cpp",
+			"dictionaries": ["!cpp", "cpp-refined"]
+		}
+	],
+	// "useGitignore": true,
 	"dictionaries": [
 		"okiidoku-sudoku",
 		"okiidoku-cpp",
 		"okiidoku-misc"
 	],
+	"readonly": true,
 	"dictionaryDefinitions": [
 		{
 			"name": "okiidoku-sudoku",
