@@ -27,9 +27,18 @@
 
 ## Misc List
 
-- think about [this](https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle#Pseudorandom_generators)
+- Come up with a contract-checking strategy for bindings. Options:
+  - Leave it as a user responsibility to know and follow contracts.
+  - Throw exception on the other language side.
+
+- look into using Catch2 for testing
+  - [tutorial](https://github.com/catchorg/Catch2/blob/devel/docs/tutorial.md)
+  - [cmake integration](https://github.com/catchorg/Catch2/blob/devel/docs/cmake-integration.md)
+- or alternatively using the "smaller version", [doctest](https://github.com/doctest/doctest)
 
 - Consider removing `generate` and instead having a grid constructor that initializes with something that is a valid input for `generate_shuffled`. `iota` is nice and simple, but could also be misused. most-canonical-grid is safer but either is slightly slower (non-constexpr) or consumes constexpr space (constexpr).
+
+- think about [this](https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle#Pseudorandom_generators)
 
 - Collect some statistics on how much overlap there usually is between the size-4 UA sets found. A very narrow, simple way to do this is just count how many unique cells are covered, and compare to the number of non-unique cells covered.
 
@@ -67,11 +76,6 @@
 - play around with giving puzzle maker a threshold to stop trying to solve a candidate puzzle after N guesses, or give up (or mark as try-again-later) seeing if a given is safe to remove after N guesses.
 
 - Interesting: [](https://cmake.org/cmake/help/latest/variable/CMAKE_VERIFY_INTERFACE_HEADER_SETS.html)
-
-- look into using Catch2 for testing
-  - [tutorial](https://github.com/catchorg/Catch2/blob/devel/docs/tutorial.md)
-  - [cmake integration](https://github.com/catchorg/Catch2/blob/devel/docs/cmake-integration.md)
-- or alternatively using the "smaller version", [doctest](https://github.com/doctest/doctest)
 
 - cppcoreguidelines C.2: use class if there is an invariant, and struct otherwise.
   - hm. I mean- for a lot of my really simple structs there are invariants on integer bounds. Seems like judgement is required to choose where to draw the line with this guideline.

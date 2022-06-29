@@ -8,7 +8,8 @@ globalThis.okiidokuMain = () => {
 	oki.rng.seed(BigInt(Date.now()));
 	{
 		const grid = new oki.Grid(3);
-		oki.generate(grid, oki.rng.getRngSeed());
+		oki.initMostCanonicalGrid(grid);
+		oki.generateShuffled(grid, oki.rng.getRngSeed());
 		// console.log(grid); // node's default console logging doesn't call toString
 		console.log(grid.toString());
 		grid.delete();

@@ -45,6 +45,11 @@ namespace okiidoku::mono {
 	[[nodiscard, gnu::pure]] OKIIDOKU_EXPORT
 	bool grid_is_empty(const Grid<O>&) noexcept;
 
+	// Populates a grid with the contents of the Most Canonical Grid.
+	template<Order O> requires(is_order_compiled(O))
+	OKIIDOKU_EXPORT
+	void init_most_canonical_grid(Grid<O>&) noexcept;
+
 
 	template<Order O, class V_>
 	requires(is_order_compiled(O) && !std::is_reference_v<V_>)
@@ -139,6 +144,10 @@ namespace okiidoku::visitor {
 	// Returns true if all of the cells are empty (equal to O2).
 	[[nodiscard, gnu::pure]] OKIIDOKU_EXPORT
 	bool grid_is_empty(const Grid&) noexcept;
+
+	// Populates a grid with the contents of the Most Canonical Grid.
+	OKIIDOKU_EXPORT
+	void init_most_canonical_grid(Grid&) noexcept;
 
 
 	namespace detail {

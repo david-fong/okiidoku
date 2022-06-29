@@ -30,7 +30,7 @@ int main([[maybe_unused]] const int argc, [[maybe_unused]] char const *const arg
 	constexpr oki::Order O {3};
 
 	oki::Grid<O> gen_grid;
-	oki::generate(gen_grid, shared_rng.get_rng_seed());
+	oki::init_most_canonical_grid(gen_grid);
 	oki::generate_shuffled(gen_grid, shared_rng.get_rng_seed());
 	oki::Grid<O> puz_grid;
 	// TODO.wait oki::make_minimal_puzzle(gen_grid, puz_of_gen_grid);

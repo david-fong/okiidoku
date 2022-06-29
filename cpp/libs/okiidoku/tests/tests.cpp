@@ -45,11 +45,14 @@ unsigned test_algorithms(okiidoku::SharedRng& shared_rng, const unsigned num_rou
 
 	Grid<O> gen_grid;
 	assert(grid_is_empty(gen_grid)); // grid by default-construction must be initialized to an empty grid
+	init_most_canonical_grid(gen_grid);
+	assert(grid_is_filled(gen_grid));
+	assert(grid_follows_rule(gen_grid));
 
 	// Grid<O> canon_grid;
 
 	for (unsigned round {0}; round < num_rounds; ) {
-		generate(gen_grid, shared_rng.get_rng_seed());
+		generate_shuffled(gen_grid, shared_rng.get_rng_seed());
 
 		std::clog << "\nmaking puzzle #" << int(round);
 		Grid<O> puz_grid {gen_grid};

@@ -149,18 +149,6 @@ namespace okiidoku::mono { namespace {
 namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
-	void generate(Grid<O>& grid, const rng_seed_t rng_seed) noexcept {
-		using T = Ints<O>;
-		using o2i_t = int_ts::o2i_t<O>;
-		// #pragma clang loop unroll(disable)
-		for (o2i_t row {0}; row < T::O2; ++row) {
-			const auto row_sp {grid.row_span_at(row)};
-			std::iota(row_sp.begin(), row_sp.end(), grid_val_t<O>{0});
-		}
-		generate_shuffled(grid, rng_seed);
-	}
-
-	template<Order O> requires(is_order_compiled(O))
 	void generate_shuffled(Grid<O>& grid, const rng_seed_t rng_seed) noexcept {
 		using T = Ints<O>;
 		using o2i_t = int_ts::o2i_t<O>;
@@ -191,23 +179,13 @@ namespace okiidoku::mono {
 
 
 	#define OKIIDOKU_FOR_COMPILED_O(O_) \
-		template void generate<O_>(Grid<O_>&, rng_seed_t) noexcept;
+		template void generate_shuffled<O_>(Grid<O_>&, rng_seed_t) noexcept;
 	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 	#undef OKIIDOKU_FOR_COMPILED_O
 }
 
 
 namespace okiidoku::visitor {
-
-	void generate(Grid& vis_sink, const rng_seed_t rng_seed) noexcept {
-		switch (vis_sink.get_mono_order()) {
-		#define OKIIDOKU_FOR_COMPILED_O(O_) \
-		case O_: return mono::generate(vis_sink.unchecked_get_mono_exact<O_>(), rng_seed);
-		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-		#undef OKIIDOKU_FOR_COMPILED_O
-		default: OKIIDOKU_CONTRACT_TRIVIAL_EVAL(false); // std::unreachable
-		}
-	}
 
 	void generate_shuffled(Grid& vis_sink, const rng_seed_t rng_seed) noexcept {
 		switch (vis_sink.get_mono_order()) {

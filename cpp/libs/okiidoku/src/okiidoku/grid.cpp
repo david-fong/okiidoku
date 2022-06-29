@@ -68,10 +68,38 @@ namespace okiidoku::mono {
 	}
 
 
+	template<Order O> requires(is_order_compiled(O))
+	void init_most_canonical_grid(Grid<O>& grid) noexcept {
+		using T = Ints<O>;
+		using o1i_t = int_ts::o1i_t<O>;
+		using o2i_t = int_ts::o2i_t<O>;
+		for (o2i_t box {0}; box < T::O2; ++box) {
+			const auto h_chute {static_cast<o1i_t>(box/T::O1)};
+			const auto v_chute {static_cast<o1i_t>(box%T::O1)};
+			for (o2i_t box_cell {0}; box_cell < T::O2; ++box_cell) {
+				const auto boxrow {static_cast<o1i_t>(box_cell/T::O1)};
+				const auto boxcol {static_cast<o1i_t>(box_cell%T::O1)};
+				const auto rmi {box_cell_to_rmi<O>(box, box_cell)};
+				const auto val_row {static_cast<o1i_t>((boxrow+v_chute) % T::O1)};
+				const auto val_col {static_cast<o1i_t>((boxcol+h_chute) % T::O1)};
+				const auto val {static_cast<grid_val_t<O>>(
+					(T::O1*val_row)+val_col
+				)};
+				OKIIDOKU_CONTRACT_TRIVIAL_EVAL(val < T::O2);
+				grid.at_rmi(rmi) = val;
+			}
+		}
+		assert(grid_is_filled(grid));
+		assert(grid_follows_rule(grid));
+	}
+
+
+
 	#define OKIIDOKU_FOR_COMPILED_O(O_) \
 		template bool grid_follows_rule<O_>(const Grid<O_>&) noexcept; \
 		template bool grid_is_filled<O_>(const Grid<O_>&) noexcept; \
-		template bool grid_is_empty<O_>(const Grid<O_>&) noexcept;
+		template bool grid_is_empty<O_>(const Grid<O_>&) noexcept; \
+		template void init_most_canonical_grid<O_>(Grid<O_>&) noexcept;
 	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 	#undef OKIIDOKU_FOR_COMPILED_O
 }
@@ -103,6 +131,16 @@ namespace okiidoku::visitor {
 		switch (vis_grid.get_mono_order()) {
 		#define OKIIDOKU_FOR_COMPILED_O(O_) \
 		case O_: return mono::grid_is_empty(vis_grid.unchecked_get_mono_exact<O_>());
+		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
+		#undef OKIIDOKU_FOR_COMPILED_O
+		default: OKIIDOKU_CONTRACT_TRIVIAL_EVAL(false); // std::unreachable
+		}
+	}
+
+	void init_most_canonical_grid(Grid& vis_grid) noexcept {
+		switch (vis_grid.get_mono_order()) {
+		#define OKIIDOKU_FOR_COMPILED_O(O_) \
+		case O_: return mono::init_most_canonical_grid(vis_grid.unchecked_get_mono_exact<O_>());
 		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 		#undef OKIIDOKU_FOR_COMPILED_O
 		default: OKIIDOKU_CONTRACT_TRIVIAL_EVAL(false); // std::unreachable

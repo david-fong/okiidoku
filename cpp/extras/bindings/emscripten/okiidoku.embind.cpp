@@ -5,9 +5,6 @@ static_assert(__EMSCRIPTEN__);
 #include <emscripten/bind.h>
 #include <emscripten/emscripten.h>
 #include <emscripten/val.h>
-// I think I need to put all these in a same file since EMSCRIPTEN_BINDINGS
-// uses static constructor functions and I'm assuming I can't define multiple
-// with the same name.
 
 #include <okiidoku/gen.hpp>
 #include <okiidoku/print_2d.hpp>
@@ -42,9 +39,6 @@ namespace okiidoku::em { namespace {
 		return ss.str();
 	}
 
-	void generate(Grid& grid) noexcept {
-		generate(grid, rng.get_rng_seed());
-	}
 	void generate_shuffled(Grid& grid) noexcept {
 		generate_shuffled(grid, rng.get_rng_seed());
 	}
@@ -74,20 +68,19 @@ EMSCRIPTEN_BINDINGS(okiidoku) {
 
 	em::class_<oki_v::Grid>("Grid")
 		.constructor<oki::Order>()
-		.function("getMonoOrder", &oki::visitor::Grid::get_mono_order) // TODO do I need to define the base class to do this? https://emscripten.org/docs/porting/connecting_cpp_and_javascript/embind.html#base-classes
+		// .function("getMonoOrder", &oki::visitor::Grid::get_mono_order) // TODO need to define the base class to do this https://emscripten.org/docs/porting/connecting_cpp_and_javascript/embind.html#base-classes
 		.function("atRmi", &oki::visitor::Grid::at_rmi)
-		.function("at", &oki::visitor::Grid::at)
+		.function("at",    &oki::visitor::Grid::at)
 		.function("followsRule", &oki_v::grid_follows_rule)
 		.function("isFilled",    &oki_v::grid_is_filled)
 		.function("isEmpty",     &oki_v::grid_is_empty)
 		.function("toString",    &oki::em::grid_to_emoji_string)
 		;
-	em::function("gridFollowsRule", &oki_v::grid_follows_rule);
-	em::function("gridIsFilled",    &oki_v::grid_is_filled);
-	em::function("gridIsEmpty",     &oki_v::grid_is_empty);
+	// em::function("gridFollowsRule", &oki_v::grid_follows_rule);
+	// em::function("gridIsFilled",    &oki_v::grid_is_filled);
+	// em::function("gridIsEmpty",     &oki_v::grid_is_empty);
 
-	em::function("generate",         em::select_overload<void(oki_v::Grid&                 )>(&oki::em::generate));
-	em::function("generate",         em::select_overload<void(oki_v::Grid&, oki::rng_seed_t)>(&oki_v::generate));
+	em::function("initMostCanonicalGrid", &oki_v::init_most_canonical_grid);
 	em::function("generateShuffled", em::select_overload<void(oki_v::Grid&                 )>(&oki::em::generate_shuffled));
 	em::function("generateShuffled", em::select_overload<void(oki_v::Grid&, oki::rng_seed_t)>(&oki_v::generate_shuffled));
 }
