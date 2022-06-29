@@ -26,7 +26,6 @@ namespace okiidoku::mono::detail::solver::found {
 	struct Subset final {
 	};
 
-
 	template<Order O> requires(is_order_compiled(O))
 	struct LockedCands final {
 		O2BitArr<O> syms;
@@ -35,12 +34,20 @@ namespace okiidoku::mono::detail::solver::found {
 		BoxOrLine remove_from_rest_of;
 	};
 
+	template<Order O> requires(is_order_compiled(O))
+	struct Fish final {
+		O2BitArr<O> syms;
+		O2BitArr<O> lines;
+		LineType elim_from_line_type;
+	};
+
 
 	#define OKIIDOKU_FOR_COMPILED_O(O_) \
 		static_assert(std::is_aggregate_v<CellClaimSym<O_>>); \
 		static_assert(std::is_aggregate_v<SymClaimCell<O_>>); \
 		static_assert(std::is_aggregate_v<Subset<O_>>); \
-		static_assert(std::is_aggregate_v<LockedCands<O_>>);
+		static_assert(std::is_aggregate_v<LockedCands<O_>>); \
+		static_assert(std::is_aggregate_v<Fish<O_>>);
 	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 	#undef OKIIDOKU_FOR_COMPILED_O
 }

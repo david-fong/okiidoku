@@ -31,6 +31,7 @@ int main([[maybe_unused]] const int argc, [[maybe_unused]] char const *const arg
 
 	oki::Grid<O> gen_grid;
 	oki::generate(gen_grid, shared_rng.get_rng_seed());
+	oki::generate_shuffled(gen_grid, shared_rng.get_rng_seed());
 	oki::Grid<O> puz_grid;
 	// TODO.wait oki::make_minimal_puzzle(gen_grid, puz_of_gen_grid);
 	auto canon_transform_for_gen_grid {oki::canonicalize(gen_grid)};

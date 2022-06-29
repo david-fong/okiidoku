@@ -15,11 +15,11 @@ namespace okiidoku::mono::detail::solver {
 
 		static UnwindInfo sym_claim_cell(Engine<O>&) noexcept;
 
-		static UnwindInfo locked_cands(Engine<O>&) noexcept;
-
 		static UnwindInfo subsets(Engine<O>&, int_ts::o2x_t<O> max_subset_size) noexcept;
 
-		// static UnwindInfo fish(Engine<O>&) noexcept;
+		static UnwindInfo locked_cands(Engine<O>&) noexcept;
+
+		static UnwindInfo fish(Engine<O>&) noexcept;
 
 
 		static Guess<O> good_guess_candidate(const Engine<O>&) noexcept;

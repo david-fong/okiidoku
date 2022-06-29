@@ -10,29 +10,16 @@ set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_CXX_EXTENSIONS FALSE)
 
 
-include(cmake/BasicCompileOptions.cmake)
+include(cmake/compile_opts.basic.cmake)
 
 if(okiidoku_IS_TOP_LEVEL)
-	include(cmake/internal/StaticAnalyzers.cmake)
-	include(cmake/internal/Sanitizers.cmake)
+	include(cmake/internal/compile_opts.non_portable.cmake)
+	include(cmake/internal/static_analyzers.cmake)
+	include(cmake/internal/sanitizers.cmake)
 	include(CTest) # https://cliutils.gitlab.io/modern-cmake/chapters/testing.html
 endif()
 
-if(MSVC)
-	if(okiidoku_IS_TOP_LEVEL)
-		add_compile_options(/EHsc)
-		# https://docs.microsoft.com/en-us/cpp/build/reference/eh-exception-handling-model#standard-c-exception-handling
-		# must be consistent for whole program(s). do not hijack user's choice.
-		# This project doesn't throw exceptions, so any model should be okay.
-		# TODO wat https://gitlab.kitware.com/cmake/cmake/-/issues/20610
-	endif()
-else()
-	add_compile_options(
-		-fno-semantic-interposition # disable ELF external overrides for more optimization (on by default for LLVM)
-		-march=native # enable optimizing for the compiling machine's instruction set architecture.
-	)
-endif()
-include(cmake/DetectTargetInstructionSetArchSupport.cmake)
+include(cmake/detect_target_isa_support.cmake)
 
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 if(okiidoku_IS_TOP_LEVEL)
@@ -55,10 +42,10 @@ if(DEFINED okiidoku_SHARED_LIBS)
 	set(BUILD_SHARED_LIBS "${okiidoku_SHARED_LIBS}")
 endif()
 include(GNUInstallDirs)
-include(cmake/SharedLibThings.cmake)
+include(cmake/shared_lib_things.cmake)
 
 
-include(cmake/FetchContent.cmake)
+include(cmake/fetch_content.cmake)
 
 add_subdirectory(libs/cli_utils)
 add_subdirectory(libs/okiidoku)

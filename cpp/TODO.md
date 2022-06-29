@@ -27,6 +27,8 @@
 
 ## Misc List
 
+- Consider removing `generate` and instead having a grid constructor that initializes with something that is a valid input for `generate_shuffled`. `iota` is nice and simple, but could also be misused. most-canonical-grid is safer but either is slightly slower (non-constexpr) or consumes constexpr space (constexpr).
+
 - Collect some statistics on how much overlap there usually is between the size-4 UA sets found. A very narrow, simple way to do this is just count how many unique cells are covered, and compare to the number of non-unique cells covered.
 
 - Challenge to self: find out how to make puzzles with few or many givens.

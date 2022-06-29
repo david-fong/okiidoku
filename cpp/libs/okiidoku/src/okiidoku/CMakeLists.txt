@@ -21,6 +21,7 @@ target_sources(okiidoku PRIVATE
 	puzzle/solver/cand_elim_find.guess.cpp
 	puzzle/solver/cand_elim_find.subsets.cpp
 	puzzle/solver/cand_elim_find.intersections.cpp
+	puzzle/solver/cand_elim_find.fish.cpp
 	puzzle/solver/cand_elim_apply.cpp
 	puzzle/solve.cpp
 

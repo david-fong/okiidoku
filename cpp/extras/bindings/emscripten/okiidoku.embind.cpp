@@ -85,10 +85,11 @@ EMSCRIPTEN_BINDINGS(okiidoku) {
 	em::function("gridFollowsRule", &oki_v::grid_follows_rule);
 	em::function("gridIsFilled",    &oki_v::grid_is_filled);
 	em::function("gridIsEmpty",     &oki_v::grid_is_empty);
-	em::function("generate",         em::select_overload<void(oki_v::Grid&)>(&oki::em::generate));
-	em::function("generate",         em::select_overload<void(oki_v::Grid&, const oki::rng_seed_t)>(&oki_v::generate));
-	em::function("generateShuffled", em::select_overload<void(oki_v::Grid&)>(&oki::em::generate_shuffled));
-	em::function("generateShuffled", em::select_overload<void(oki_v::Grid&, const oki::rng_seed_t)>(&oki_v::generate_shuffled));
+
+	em::function("generate",         em::select_overload<void(oki_v::Grid&                 )>(&oki::em::generate));
+	em::function("generate",         em::select_overload<void(oki_v::Grid&, oki::rng_seed_t)>(&oki_v::generate));
+	em::function("generateShuffled", em::select_overload<void(oki_v::Grid&                 )>(&oki::em::generate_shuffled));
+	em::function("generateShuffled", em::select_overload<void(oki_v::Grid&, oki::rng_seed_t)>(&oki_v::generate_shuffled));
 }
 
 int main() {}

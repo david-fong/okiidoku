@@ -176,11 +176,11 @@ namespace okiidoku::mono {
 		/* Note: when making boxes valid, keeping one line untouched works,
 		but is actually slower. same for making columns valid and one box. */
 
-		// Note: iterations _can_ safely run in parallel.
+		// Note: iterations _can_ safely run concurrently.
 		for (o2i_t h_chute {0}; h_chute < T::O2; h_chute += T::O1) {
 			make_boxes_valid(grid, h_chute, rng);
 		}
-		// Note: iterations _can_ safely run in parallel, but cache-write-back might
+		// Note: iterations _can_ safely run concurrently, but cache-write-back might
 		// get hairy due to vertical chutes "interleaving" in the row-major grid.
 		for (o2i_t v_chute {0}; v_chute < T::O2; v_chute += T::O1) {
 			make_cols_valid(grid, v_chute, rng);

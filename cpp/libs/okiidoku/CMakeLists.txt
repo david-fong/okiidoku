@@ -11,7 +11,6 @@ set_target_properties(okiidoku PROPERTIES
 target_compile_features(okiidoku PUBLIC cxx_std_20)
 add_subdirectory(src/okiidoku)
 
-# https://cmake.org/cmake/help/latest/module/GenerateExportHeader.html
 include(GenerateExportHeader)
 generate_export_header(okiidoku EXPORT_FILE_NAME include/okiidoku/detail/export.h)
 target_compile_definitions(okiidoku PUBLIC "$<$<NOT:$<BOOL:${BUILD_SHARED_LIBS}>>:OKIIDOKU_STATIC_DEFINE>")
@@ -30,11 +29,9 @@ install(DIRECTORY
 	COMPONENT okiidoku_development
 )
 
-# find_package(Threads REQUIRED)
 target_link_libraries(okiidoku
 	PRIVATE okiidoku_compile_options_private
 	PRIVATE range-v3::range-v3
-	# PRIVATE Threads::Threads
 )
 
 if(okiidoku_IS_TOP_LEVEL)

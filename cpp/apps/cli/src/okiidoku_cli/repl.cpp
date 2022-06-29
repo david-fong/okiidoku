@@ -120,8 +120,9 @@ namespace okiidoku::cli {
 			// 	std::cout << str::red.on << fail.what() << str::red.off << std::endl;
 			// }
 			Grid grid(config_.order());
+			generate(grid, shared_rng_.get_rng_seed()); // TODO consider making a prepare_grid_for_generate() instead of doing this.
 			for (unsigned long long prog {0}; prog < how_many; ++prog) {
-				generate(grid, shared_rng_.get_rng_seed());
+				generate_shuffled(grid, shared_rng_.get_rng_seed());
 				if (config_.canonicalize()) {
 					canonicalize(grid);
 				}
