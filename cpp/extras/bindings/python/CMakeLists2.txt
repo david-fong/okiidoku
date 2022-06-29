@@ -15,8 +15,8 @@ include(${okiidoku_SOURCE_DIR}/cmake/fetch_content.cmake)
 include(${okiidoku_SOURCE_DIR}/cmake/compile_opts.basic.cmake)
 
 if(okiidoku_IS_TOP_LEVEL)
-	include(${okiidoku_SOURCE_DIR}/cmake/internal/static_analyzers.cmake)
-	include(${okiidoku_SOURCE_DIR}/cmake/internal/sanitizers.cmake)
+	include(${okiidoku_SOURCE_DIR}/cmake/if_top_level/static_analyzers.cmake)
+	include(${okiidoku_SOURCE_DIR}/cmake/if_top_level/sanitizers.cmake)
 	include(CTest) # https://cliutils.gitlab.io/modern-cmake/chapters/testing.html
 endif()
 

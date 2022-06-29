@@ -13,9 +13,9 @@ set(CMAKE_CXX_EXTENSIONS FALSE)
 include(cmake/compile_opts.basic.cmake)
 
 if(okiidoku_IS_TOP_LEVEL)
-	include(cmake/internal/compile_opts.non_portable.cmake)
-	include(cmake/internal/static_analyzers.cmake)
-	include(cmake/internal/sanitizers.cmake)
+	include(cmake/if_top_level/compile_opts.non_portable.cmake)
+	include(cmake/if_top_level/static_analyzers.cmake)
+	include(cmake/if_top_level/sanitizers.cmake)
 	include(CTest) # https://cliutils.gitlab.io/modern-cmake/chapters/testing.html
 endif()
 
@@ -45,7 +45,7 @@ include(GNUInstallDirs)
 include(cmake/shared_lib_things.cmake)
 
 
-include(cmake/fetch_content.cmake)
+include(cmake/dependencies.cmake)
 
 add_subdirectory(libs/cli_utils)
 add_subdirectory(libs/okiidoku)

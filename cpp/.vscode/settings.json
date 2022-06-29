@@ -40,9 +40,9 @@
 	},
 
 	"files.exclude": {
-		"external/": true,
+		// "external/": true,
 		"build/": true,
-		"extras/bindings/emscripten/external/": true,
+		// "extras/bindings/emscripten/external/": true,
 		"extras/bindings/emscripten/build/": true,
 	},
 

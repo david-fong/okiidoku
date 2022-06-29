@@ -15,16 +15,16 @@ set(CMAKE_CXX_EXTENSIONS FALSE)
 
 set(okiidoku_SOURCE_DIR "${PROJECT_SOURCE_DIR}/../../../")
 
-include(${okiidoku_SOURCE_DIR}/cmake/fetch_content.cmake)
+include(${okiidoku_SOURCE_DIR}/cmake/dependencies.cmake)
 include(${okiidoku_SOURCE_DIR}/cmake/compile_opts.basic.cmake)
 
 if(okiidoku_IS_TOP_LEVEL)
-	include(${okiidoku_SOURCE_DIR}/cmake/internal/static_analyzers.cmake)
-	include(${okiidoku_SOURCE_DIR}/cmake/internal/sanitizers.cmake)
+	include(${okiidoku_SOURCE_DIR}/cmake/if_top_level/static_analyzers.cmake)
+	include(${okiidoku_SOURCE_DIR}/cmake/if_top_level/sanitizers.cmake)
 	include(CTest)
 endif()
 
-include(cmake/detect_target_isa_support.cmake)
+include(${okiidoku_SOURCE_DIR}/cmake/detect_target_isa_support.cmake)
 
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 set(BUILD_SHARED_LIBS FALSE) # https://emscripten.org/docs/compiling/Dynamic-Linking.html
