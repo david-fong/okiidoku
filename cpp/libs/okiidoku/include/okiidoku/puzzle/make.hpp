@@ -1,5 +1,5 @@
-#ifndef HPP_OKIIDOKU__PUZZLE__MAKE_HARD
-#define HPP_OKIIDOKU__PUZZLE__MAKE_HARD
+#ifndef HPP_OKIIDOKU__PUZZLE__MAKE
+#define HPP_OKIIDOKU__PUZZLE__MAKE
 
 #include <okiidoku/grid.hpp>
 #include <okiidoku/detail/order_templates.hpp>

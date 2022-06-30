@@ -7,7 +7,7 @@ install(TARGETS
 	LIBRARY  COMPONENT okiidoku_runtime
 	NAMELINK_COMPONENT okiidoku_development
 	ARCHIVE  COMPONENT okiidoku_development
-	INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+	INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
 )
 
 if(BUILD_SHARED_LIBS)
@@ -19,13 +19,13 @@ endif()
 # regular installation import support:
 install(EXPORT okiidoku_installation_targets
 	NAMESPACE okiidoku::
-	DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/okiidoku
-	FILE okiidoku-${OKIIDOKU_LIB_TYPE_NAME}-targets.cmake
+	DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/okiidoku"
+	FILE "okiidoku-${OKIIDOKU_LIB_TYPE_NAME}-targets.cmake"
 	COMPONENT okiidoku_development
 )
 # also support importing from this repo's build-tree (no installation):
 # https://cmake.org/cmake/help/latest/guide/importing-exporting/index.html#exporting-targets-from-the-build-tree
 export(EXPORT okiidoku_installation_targets
 	NAMESPACE okiidoku::
-	FILE ${CMAKE_CURRENT_BINARY_DIR}/cmake/okiidoku-targets.cmake
+	FILE "${CMAKE_CURRENT_BINARY_DIR}/cmake/okiidoku-targets.cmake"
 )

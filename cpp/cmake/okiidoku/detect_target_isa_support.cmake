@@ -1,6 +1,8 @@
 include_guard(DIRECTORY)
 
 include(CheckCXXSourceCompiles)
+# Note: wrapping with functions to scope `CMAKE_REQUIRED_FLAGS`
+
 function(detect_target_isa_support)
 	if(NOT MSVC)
 		set(CMAKE_REQUIRED_FLAGS -march=native)
