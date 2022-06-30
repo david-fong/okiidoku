@@ -26,4 +26,5 @@ if(okiidoku_IS_TOP_LEVEL)
 		VERSION 3.0.1
 		GITHUB_REPOSITORY "catchorg/Catch2"
 	)
+	include(${catch2_SOURCE_DIR}/extras/Catch.cmake)
 endif()

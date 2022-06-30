@@ -18,14 +18,9 @@
 		// "CMAKE_COMPILE_WARNING_AS_ERROR": false
 	},
 
-	// prefer multi-config generators when available
-	// TODO.wait the fallback seems to have broken in extension version 0.11.0. I've resorted to setting this per user-local-kit.
-	// "cmake.preferredGenerators": ["Visual Studio 17 2022", "Ninja Multi-Config"],
-
-	// If you don't have a build system with multi-config, you may want to append "/${buildType}" to the below.
 	// TODO.wait https://github.com/microsoft/vscode-cmake-tools/issues/2426
 	// TODO.try will the ${buildKitVendor} part have conflicts with MSVC for mingw-64 or cygwin?
-	"cmake.buildDirectory": "${workspaceFolder}/build/${buildKitVendor}",
+	"cmake.buildDirectory": "${workspaceFolder}/build/${buildKitVendor}_${buildKitVersionMajor}",
 
 	"cmake.debugConfig": {
 		"environment": [],

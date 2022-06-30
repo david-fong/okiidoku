@@ -10,9 +10,7 @@ namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
 	bool grid_follows_rule(const Grid<O>& grid) noexcept {
-		using T = Ints<O>;
-		using o2x_t = int_ts::o2x_t<O>;
-		using o2i_t = int_ts::o2i_t<O>;
+		OKIIDOKU_MONO_INT_TS_TYPEDEFS
 		using has_mask_t = O2BitArr<O>;
 
 		has_mask_t row_has;
@@ -68,11 +66,10 @@ namespace okiidoku::mono {
 	}
 
 
+	// TODO.low compare binary size and speed if this is changed to initialize from a constexpr variable
 	template<Order O> requires(is_order_compiled(O))
 	void init_most_canonical_grid(Grid<O>& grid) noexcept {
-		using T = Ints<O>;
-		using o1i_t = int_ts::o1i_t<O>;
-		using o2i_t = int_ts::o2i_t<O>;
+		OKIIDOKU_MONO_INT_TS_TYPEDEFS
 		for (o2i_t box {0}; box < T::O2; ++box) {
 			const auto h_chute {static_cast<o1i_t>(box/T::O1)};
 			const auto v_chute {static_cast<o1i_t>(box%T::O1)};

@@ -121,6 +121,24 @@ namespace okiidoku::mono {
 		static constexpr int_ts::o4i_t<O> O4 {O*O*O*O};
 	};
 
+	#define OKIIDOKU_MONO_INT_TS_TYPEDEFS \
+		using T [[maybe_unused]] = Ints<O>; \
+		using o1x_t [[maybe_unused]] = int_ts::o1x_t<O>; \
+		using o1i_t [[maybe_unused]] = int_ts::o1i_t<O>; \
+		using o2x_t [[maybe_unused]] = int_ts::o2x_t<O>; \
+		using o2i_t [[maybe_unused]] = int_ts::o2i_t<O>; \
+		using o3x_t [[maybe_unused]] = int_ts::o3x_t<O>; \
+		using o3i_t [[maybe_unused]] = int_ts::o3i_t<O>; \
+		using o4x_t [[maybe_unused]] = int_ts::o4x_t<O>; \
+		using o4i_t [[maybe_unused]] = int_ts::o4i_t<O>; \
+		using o2xs_t [[maybe_unused]] = int_ts::o2xs_t<O>; \
+		using o2is_t [[maybe_unused]] = int_ts::o2is_t<O>; \
+		using o3xs_t [[maybe_unused]] = int_ts::o3xs_t<O>; \
+		using o3is_t [[maybe_unused]] = int_ts::o3is_t<O>; \
+		using o4xs_t [[maybe_unused]] = int_ts::o4xs_t<O>; \
+		using o4is_t [[maybe_unused]] = int_ts::o4is_t<O>;
+		// using rmi_t [[maybe_unused]] = int_ts::o4xs_t<O>;
+
 	template<Order O, typename T>
 	concept Any_o1x_t = std::unsigned_integral<T> && std::numeric_limits<T>::max() >= (Ints<O>::O1-1);
 

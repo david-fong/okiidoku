@@ -9,11 +9,12 @@ namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
 	struct OKIIDOKU_EXPORT Transformation final {
+	private:
 		using T = Ints<O>;
-		using mapping_t = int_ts::o2xs_t<O>;
 		using o1i_t = int_ts::o1i_t<O>;
 		using o2i_t = int_ts::o2i_t<O>;
-
+	public:
+		using mapping_t = int_ts::o2xs_t<O>;
 		using label_map_t = std::array<mapping_t, T::O2>;
 		using  line_map_t = std::array<std::array<mapping_t, T::O1>, T::O1>;
 

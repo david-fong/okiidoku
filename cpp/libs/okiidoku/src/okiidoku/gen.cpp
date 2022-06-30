@@ -41,11 +41,7 @@ namespace okiidoku::mono { namespace {
 
 	template<Order O> requires(is_order_compiled(O))
 	void make_boxes_valid(Grid<O>& grid, const int_ts::o2i_t<O> h_chute, rng_t& rng) noexcept {
-		using T = Ints<O>;
-		using o1x_t = int_ts::o1x_t<O>;
-		using o2x_t = int_ts::o2x_t<O>;
-		using o2i_t = int_ts::o2i_t<O>;
-		using o3i_t = int_ts::o3i_t<O>;
+		OKIIDOKU_MONO_INT_TS_TYPEDEFS
 		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(h_chute <= T::O2-T::O1);
 
 		// unsigned long long op_count {0};
@@ -96,12 +92,7 @@ namespace okiidoku::mono { namespace {
 
 	template<Order O> requires(is_order_compiled(O))
 	void make_cols_valid(Grid<O>& grid, const int_ts::o2i_t<O> v_chute, rng_t& rng) noexcept {
-		using T = Ints<O>;
-		using o1x_t = int_ts::o1x_t<O>;
-		using o1i_t = int_ts::o1i_t<O>;
-		using o2x_t = int_ts::o2x_t<O>;
-		using o2i_t = int_ts::o2i_t<O>;
-		using o3i_t = int_ts::o3i_t<O>;
+		OKIIDOKU_MONO_INT_TS_TYPEDEFS
 		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(v_chute <= T::O2-T::O1);
 
 		// unsigned long long op_count {0};

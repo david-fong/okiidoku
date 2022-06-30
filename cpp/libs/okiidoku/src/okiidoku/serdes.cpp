@@ -13,6 +13,7 @@ namespace okiidoku::mono { namespace {
 
 	template<Order O> requires(is_order_compiled(O))
 	class SerdesHelper final {
+	private:
 		using T = Ints<O>;
 		using cands_t = O2BitArr<O>;
 		using val_t = int_ts::o2x_t<O>;

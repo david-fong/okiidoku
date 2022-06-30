@@ -27,6 +27,9 @@
 
 ## Misc List
 
+- Currently avoiding using `OKIIDOKU_MONO_INT_TS_TYPEDEFS` in headers in classes.
+  - Was worried about the "header size" cost. I think I'm probably prematurely optimizing.
+
 - Come up with a contract-checking strategy for bindings. Options:
   - Leave it as a user responsibility to know and follow contracts.
   - Throw exception on the other language side.
@@ -36,8 +39,6 @@
   - [cmake integration](https://github.com/catchorg/Catch2/blob/devel/docs/cmake-integration.md)
 - or alternatively using the "smaller version", [doctest](https://github.com/doctest/doctest)
 - current usage of `okiidoku_IS_TOP_LEVEL` (instead of `PROJECT_IS_TOP_LEVEL`) is to not build testing for emscripten bindings since I don't know how to run wasm. Kind of a dumb reason and dumb hack. Not sure what to do here.
-
-- Consider removing `generate` and instead having a grid constructor that initializes with something that is a valid input for `generate_shuffled`. `iota` is nice and simple, but could also be misused. most-canonical-grid is safer but either is slightly slower (non-constexpr) or consumes constexpr space (constexpr).
 
 - think about [this](https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle#Pseudorandom_generators)
 

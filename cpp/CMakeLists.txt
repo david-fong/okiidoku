@@ -17,7 +17,7 @@ if(PROJECT_IS_TOP_LEVEL)
 	include(okiidoku/if_top_level/compile_opts.non_portable)
 	include(okiidoku/if_top_level/static_analyzers)
 	include(okiidoku/if_top_level/sanitizers)
-	include(CTest) # https://cliutils.gitlab.io/modern-cmake/chapters/testing.html
+	enable_testing() # not `include(CTest)` because I don't use CDash.
 
 	include(CheckIPOSupported)
 	check_ipo_supported(RESULT CMAKE_INTERPROCEDURAL_OPTIMIZATION)

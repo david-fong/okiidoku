@@ -22,7 +22,7 @@ include(okiidoku/compile_opts.basic)
 if(PROJECT_IS_TOP_LEVEL)
 	include(okiidoku/if_top_level/static_analyzers)
 	include(okiidoku/if_top_level/sanitizers)
-	include(CTest)
+	enable_testing()
 endif()
 
 include(okiidoku/detect_target_isa_support)

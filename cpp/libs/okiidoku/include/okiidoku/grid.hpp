@@ -54,13 +54,10 @@ namespace okiidoku::mono {
 	template<Order O, class V_>
 	requires(is_order_compiled(O) && !std::is_reference_v<V_>)
 	struct detail::Gridlike {
+	private:
+		using T = Ints<O>;
 	public:
 		using val_t = V_;
-		using T = Ints<O>;
-		using o2x_t = int_ts::o2x_t<O>;
-		using o2i_t = int_ts::o2i_t<O>;
-		using o4x_t = int_ts::o4x_t<O>;
-		using o4i_t = int_ts::o4i_t<O>;
 		using array_t = std::array<val_t, T::O4>;
 
 		// lexicographical comparison over row-major-order traversal of cells.
@@ -95,9 +92,9 @@ namespace okiidoku::mono {
 		// TODO.low why is using row_col_to_rmi slower than "inlining" the expression here? Is it because of the return-type cast? even adding bounds assumptions seems to increase code size...
 		// contract: `row` and `col` are in [0, O2).
 		template<class T_row, class T_col> requires(Any_o2x_t<O, T_row> && Any_o2x_t<O, T_col>)
-		[[nodiscard]] constexpr       val_t& at(const T_row row, const T_col col)       noexcept { return arr_[static_cast<o4x_t>(static_cast<o4x_t>(T::O2*row)+col)]; }
+		[[nodiscard]] constexpr       val_t& at(const T_row row, const T_col col)       noexcept { return arr_[static_cast<int_ts::o4x_t<O>>(static_cast<int_ts::o4x_t<O>>(T::O2*row)+col)]; }
 		template<class T_row, class T_col> requires(Any_o2x_t<O, T_row> && Any_o2x_t<O, T_col>)
-		[[nodiscard]] constexpr const val_t& at(const T_row row, const T_col col) const noexcept { return arr_[static_cast<o4x_t>(static_cast<o4x_t>(T::O2*row)+col)]; }
+		[[nodiscard]] constexpr const val_t& at(const T_row row, const T_col col) const noexcept { return arr_[static_cast<int_ts::o4x_t<O>>(static_cast<int_ts::o4x_t<O>>(T::O2*row)+col)]; }
 
 		// contract: `box` and `box_cell` are in [0, O2).
 		template<class T_house, class T_house_cell> requires(Any_o2x_t<O, T_house> && Any_o2x_t<O, T_house_cell>)

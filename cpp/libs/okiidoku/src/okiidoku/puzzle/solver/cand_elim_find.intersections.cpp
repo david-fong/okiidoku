@@ -12,16 +12,15 @@ namespace okiidoku::mono::detail::solver { namespace {
 
 	template<Order O> requires(is_order_compiled(O))
 	struct ChuteIsecsSyms final {
-		using T = Ints<O>;
-		using o1i_t = int_ts::o1i_t<O>;
-		using o2i_t = int_ts::o2i_t<O>;
+	private:
+		OKIIDOKU_MONO_INT_TS_TYPEDEFS
+		std::array<O2BitArr<O>, T::O2> arr_ {};
+	public:
 		// inner dimension is for intersections in a line, outer dimension for intersections in a box.
 		[[nodiscard, gnu::pure]] const O2BitArr<O>& at_isec(const o2i_t isec_i) const noexcept { return arr_[isec_i]; }
 		[[nodiscard, gnu::pure]]       O2BitArr<O>& at_isec(const o2i_t isec_i)       noexcept { return arr_[isec_i]; }
 		[[nodiscard, gnu::pure]] const O2BitArr<O>& at_isec(const o1i_t box_isec_i, const o1i_t line_isec_i) const noexcept { return arr_[static_cast<o2i_t>(static_cast<o2i_t>(T::O1*box_isec_i)+line_isec_i)]; }
 		[[nodiscard, gnu::pure]]       O2BitArr<O>& at_isec(const o1i_t box_isec_i, const o1i_t line_isec_i)       noexcept { return arr_[static_cast<o2i_t>(static_cast<o2i_t>(T::O1*box_isec_i)+line_isec_i)]; }
-	private:
-		std::array<O2BitArr<O>, T::O2> arr_ {};
 	};
 
 	template<Order O> requires(is_order_compiled(O))

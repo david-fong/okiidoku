@@ -34,7 +34,7 @@ namespace okiidoku {
 
 		[[nodiscard]] std::uint_fast32_t get_rng_seed() noexcept {
 			std::lock_guard lock_guard {mutex};
-			return static_cast<std::uint_fast32_t>(rng() - decltype(rng)::min());
+			return rng() - decltype(rng)::min();
 		}
 	};
 }

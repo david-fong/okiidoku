@@ -31,11 +31,8 @@ namespace okiidoku::mono { namespace {
 
 	template<Order O> requires(is_order_compiled(O))
 	detail::Gridlike<O, RelMasks<O>> make_rel_masks_(const Grid<O>& grid) noexcept {
-		using T = Ints<O>;
+		OKIIDOKU_MONO_INT_TS_TYPEDEFS
 		using val_t = int_ts::o2is_t<O>;
-		using o1i_t = int_ts::o1i_t<O>;
-		using o2x_t = int_ts::o2x_t<O>;
-		using o2i_t = int_ts::o2i_t<O>;
 
 		// TODO.high for large grid sizes, this uses hundreds of KB of stack.
 		// stacks have limits defaulted by the OS. This is not good. Find a
@@ -81,10 +78,8 @@ namespace okiidoku::mono::detail {
 
 	template<Order O> requires(is_order_compiled(O))
 	detail::Gridlike<O, Rel<O>> make_rel_table(const Grid<O>& grid_in) noexcept {
-		using T = Ints<O>;
+		OKIIDOKU_MONO_INT_TS_TYPEDEFS
 		using rel_at_mask_t = O2BitArr<O>;
-		using o1i_t = int_ts::o1i_t<O>;
-		using o2i_t = int_ts::o2i_t<O>;
 		using chute_imbalance_t = typename Rel<O>::chute_imbalance_t;
 
 		const detail::Gridlike<O, RelMasks<O>> masks {make_rel_masks_<O>(grid_in)};

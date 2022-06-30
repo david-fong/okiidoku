@@ -37,10 +37,8 @@ namespace okiidoku::mono {
 		using rng_t = std::minstd_rand;
 		rng_t rng {rng_seed};
 
-		using T = Ints<O>;
-		using o2x_t = int_ts::o2x_t<O>;
+		OKIIDOKU_MONO_INT_TS_TYPEDEFS
 		using rmi_t = int_ts::o4xs_t<O>;
-		using o4i_t = int_ts::o4i_t<O>;
 		// Note: this implementation never "backtracks". once it removes a given,
 		// it never puts it back.
 

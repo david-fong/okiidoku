@@ -14,12 +14,12 @@ namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
 	struct O2BitArr final {
-	public:
+	private:
 		using T = Ints<O>;
 		using o2xs_t = int_ts::o2xs_t<O>;
 		using o2x_t = int_ts::o2x_t<O>;
 		using o2i_t = int_ts::o2i_t<O>;
-
+	public:
 		// TODO.low investigate ways to store small but expand to a fast(er) int type
 		// when doing bit-twiddling operations and whether the tradeoff is good pareto-wise.
 		using word_t =

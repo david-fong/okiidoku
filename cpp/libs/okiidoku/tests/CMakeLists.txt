@@ -13,3 +13,12 @@ target_link_libraries(okiidoku_test
 target_include_directories(okiidoku_test PRIVATE ../src/)
 
 # add_test(NAME test COMMAND okiidoku_test)
+
+add_executable(okiidoku_test_catch2 tests.catch2.cpp)
+target_link_libraries(okiidoku_test_catch2
+	# PRIVATE okiidoku_compile_options_private
+	PRIVATE Catch2::Catch2WithMain
+	PRIVATE okiidoku_cli_utils
+   PRIVATE okiidoku
+)
+catch_discover_tests(okiidoku_test_catch2) # https://github.com/catchorg/Catch2/blob/devel/docs/cmake-integration.md#customization

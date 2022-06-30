@@ -77,12 +77,13 @@ namespace okiidoku::mono::detail::solver {
 	template<Order O> requires(is_order_compiled(O))
 	struct EngineImpl {
 		friend UnwindInfo unwind_one_stack_frame_of_<O>(EngineImpl<O>&) noexcept;
+	private:
 		using T = Ints<O>;
 		using o2i_t = int_ts::o2i_t<O>;
+		using o4i_t = int_ts::o4i_t<O>;
 		using val_t = int_ts::o2xs_t<O>;
 		using rmi_t = int_ts::o4xs_t<O>;
-		using o4i_t = int_ts::o4i_t<O>;
-
+	public:
 		struct HouseSubsets final {
 			struct CellTag {
 				rmi_t rmi;
@@ -214,6 +215,7 @@ namespace okiidoku::mono::detail::solver {
 		friend class CandElimFind<O>;  // the class wraps implementations that can only see what they need.
 		friend class CandElimApply<O>;
 		friend class CandElimApplyImpl<O>;
+	private:
 		using T = Ints<O>;
 		using val_t = int_ts::o2xs_t<O>;
 		using rmi_t = int_ts::o4xs_t<O>;

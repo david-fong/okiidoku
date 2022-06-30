@@ -5,11 +5,7 @@ template<okiidoku::Order O>
 void test_ints() {
 	using namespace ::okiidoku;
 	using namespace ::okiidoku::mono;
-	using T = Ints<O>;
-	using o1x_t = int_ts::o1x_t<O>;
-	using o2x_t = int_ts::o2x_t<O>;
-	using o2i_t = int_ts::o2i_t<O>;
-	using o3x_t = int_ts::o3x_t<O>;
+	OKIIDOKU_MONO_INT_TS_TYPEDEFS
 
 	assert(O2BitArr_ones<O>.count() == T::O2);
 	for (o2i_t i {0}; i < T::O2; ++i) {

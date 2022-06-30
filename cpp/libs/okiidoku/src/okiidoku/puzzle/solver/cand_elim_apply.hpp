@@ -18,6 +18,7 @@ namespace okiidoku::mono::detail::solver {
 
 	template<Order O> requires(is_order_compiled(O))
 	class CandElimApplyImpl final {
+	private:
 		using T = Ints<O>;
 		using o1i_t = int_ts::o1i_t<O>;
 		using o2x_t = int_ts::o2x_t<O>;

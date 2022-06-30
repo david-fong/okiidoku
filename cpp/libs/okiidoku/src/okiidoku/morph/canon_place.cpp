@@ -24,12 +24,10 @@ namespace okiidoku::mono { namespace {
 
 	template<Order O> requires(is_order_compiled(O))
 	class CanonPlace final {
-		using T = Ints<O>;
+	private:
+		OKIIDOKU_MONO_INT_TS_TYPEDEFS
 		using val_t = int_ts::o2is_t<O>;
 		using mapping_t = typename Transformation<O>::mapping_t;
-		using o1i_t = int_ts::o1i_t<O>;
-		using o2i_t = int_ts::o2i_t<O>;
-		using o4i_t = int_ts::o4i_t<O>;
 
 	public:
 		// explicit CanonPlace(const Grid<O>& grid) noexcept: src_grid{grid} {}
