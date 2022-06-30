@@ -39,6 +39,7 @@ perf stat -e branch-misses:u ./libs/okiidoku/tests/Release/okiidoku_test
 - [cmake for dynamic library developers](https://www.youtube.com/watch?v=m0DwB4OvDXk)
 - [alex reinking tutorial part 2](https://alexreinking.com/blog/how-to-use-cmake-without-the-agonizing-pain-part-2.html)
 - [](https://crascit.com/2016/01/31/enhanced-source-file-handling-with-target_sources/)
+- [preparing a project for CPM](https://github.com/cpm-cmake/CPM.cmake/wiki/Preparing-projects-for-CPM.cmake)
 
 ## Conan Things
 

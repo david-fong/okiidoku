@@ -13,18 +13,19 @@ set(CMAKE_CXX_STANDARD 20 CACHE STRING "The C++ standard to use")
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_CXX_EXTENSIONS FALSE)
 
-set(okiidoku_SOURCE_DIR "${PROJECT_SOURCE_DIR}/../../../")
+set(okiidoku_SOURCE_DIR ${PROJECT_SOURCE_DIR}/../../../)
+list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/../../../cmake)
 
-include(${okiidoku_SOURCE_DIR}/cmake/dependencies.cmake)
-include(${okiidoku_SOURCE_DIR}/cmake/compile_opts.basic.cmake)
+include(okiidoku/dependencies)
+include(okiidoku/compile_opts.basic)
 
-if(okiidoku_IS_TOP_LEVEL)
-	include(${okiidoku_SOURCE_DIR}/cmake/if_top_level/static_analyzers.cmake)
-	include(${okiidoku_SOURCE_DIR}/cmake/if_top_level/sanitizers.cmake)
+if(PROJECT_IS_TOP_LEVEL)
+	include(okiidoku/if_top_level/static_analyzers)
+	include(okiidoku/if_top_level/sanitizers)
 	include(CTest)
 endif()
 
-include(${okiidoku_SOURCE_DIR}/cmake/detect_target_isa_support.cmake)
+include(okiidoku/detect_target_isa_support)
 
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 set(BUILD_SHARED_LIBS FALSE) # https://emscripten.org/docs/compiling/Dynamic-Linking.html

@@ -36,7 +36,5 @@ target_link_libraries(okiidoku
 
 if(okiidoku_IS_TOP_LEVEL)
 	add_subdirectory(examples EXCLUDE_FROM_ALL)
-	if(BUILD_TESTING)
-		add_subdirectory(tests)
-	endif()
+	add_subdirectory(tests)
 endif()

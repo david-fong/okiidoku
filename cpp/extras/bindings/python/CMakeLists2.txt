@@ -10,14 +10,15 @@ set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_CXX_EXTENSIONS FALSE)
 
 set(okiidoku_SOURCE_DIR "${PROJECT_SOURCE_DIR}/../../../")
+list(APPEND CMAKE_MODULE_PATH ${okiidoku_SOURCE_DIR})
 
-include(${okiidoku_SOURCE_DIR}/cmake/fetch_content.cmake)
-include(${okiidoku_SOURCE_DIR}/cmake/compile_opts.basic.cmake)
+include(okiidoku/fetch_content)
+include(okiidoku/compile_opts.basic)
 
-if(okiidoku_IS_TOP_LEVEL)
-	include(${okiidoku_SOURCE_DIR}/cmake/if_top_level/static_analyzers.cmake)
-	include(${okiidoku_SOURCE_DIR}/cmake/if_top_level/sanitizers.cmake)
-	include(CTest) # https://cliutils.gitlab.io/modern-cmake/chapters/testing.html
+if(PROJECT_IS_TOP_LEVEL)
+	include(okiidoku/if_top_level/static_analyzers)
+	include(okiidoku/if_top_level/sanitizers)
+	include(CTest)
 endif()
 
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)

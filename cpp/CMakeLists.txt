@@ -9,13 +9,14 @@ set(CMAKE_CXX_STANDARD 20 CACHE STRING "The C++ standard to use")
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_CXX_EXTENSIONS FALSE)
 
+list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
-include(cmake/compile_opts.basic.cmake)
+include(okiidoku/compile_opts.basic)
 
-if(okiidoku_IS_TOP_LEVEL)
-	include(cmake/if_top_level/compile_opts.non_portable.cmake)
-	include(cmake/if_top_level/static_analyzers.cmake)
-	include(cmake/if_top_level/sanitizers.cmake)
+if(PROJECT_IS_TOP_LEVEL)
+	include(okiidoku/if_top_level/compile_opts.non_portable)
+	include(okiidoku/if_top_level/static_analyzers)
+	include(okiidoku/if_top_level/sanitizers)
 	include(CTest) # https://cliutils.gitlab.io/modern-cmake/chapters/testing.html
 
 	include(CheckIPOSupported)
@@ -23,7 +24,9 @@ if(okiidoku_IS_TOP_LEVEL)
 	set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_DEBUG FALSE)
 endif()
 
-include(cmake/detect_target_isa_support.cmake)
+include(okiidoku/dependencies)
+
+include(okiidoku/detect_target_isa_support)
 
 
 # General use cases should use BUILD_SHARED_LIBS to choose whether to build
@@ -34,57 +37,25 @@ include(cmake/detect_target_isa_support.cmake)
 # https://alexreinking.com/blog/building-a-dual-shared-and-static-library-with-cmake.html
 if(MSVC)
 	set(okiidoku_SHARED_LIBS FALSE)
-elseif(okiidoku_IS_TOP_LEVEL)
+elseif(PROJECT_IS_TOP_LEVEL)
 	set(okiidoku_SHARED_LIBS TRUE)
 endif()
 if(DEFINED okiidoku_SHARED_LIBS)
 	set(BUILD_SHARED_LIBS "${okiidoku_SHARED_LIBS}")
 endif()
 include(GNUInstallDirs)
-include(cmake/shared_lib_things.cmake)
+include(okiidoku/shared_lib_things)
 
-
-include(cmake/dependencies.cmake)
 
 add_subdirectory(libs/cli_utils)
 add_subdirectory(libs/okiidoku)
-
 add_subdirectory(apps/cli)
-
-if(okiidoku_IS_TOP_LEVEL)
+if(PROJECT_IS_TOP_LEVEL)
 	add_subdirectory(tools/okiidoku_translator EXCLUDE_FROM_ALL)
 endif()
 
 
-install(TARGETS
-	okiidoku okiidoku_cli
-	EXPORT okiidoku_installation_targets
-	RUNTIME  COMPONENT okiidoku_runtime
-	LIBRARY  COMPONENT okiidoku_runtime
-	NAMELINK_COMPONENT okiidoku_development
-	ARCHIVE  COMPONENT okiidoku_development
-	INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-)
-
-if(BUILD_SHARED_LIBS)
-	set(OKIIDOKU_LIB_TYPE_NAME shared)
-else()
-	set(OKIIDOKU_LIB_TYPE_NAME static)
-endif()
-
-# regular installation import support:
-install(EXPORT okiidoku_installation_targets
-	NAMESPACE okiidoku::
-	DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/okiidoku
-	FILE okiidoku-${OKIIDOKU_LIB_TYPE_NAME}-targets.cmake
-	COMPONENT okiidoku_development
-)
-# also support importing from this repo's build-tree (no installation):
-# https://cmake.org/cmake/help/latest/guide/importing-exporting/index.html#exporting-targets-from-the-build-tree
-export(EXPORT okiidoku_installation_targets
-	NAMESPACE okiidoku::
-	FILE ${CMAKE_CURRENT_BINARY_DIR}/cmake/okiidoku-targets.cmake
-)
+include(okiidoku/installation)
 
 
 # Packaging support

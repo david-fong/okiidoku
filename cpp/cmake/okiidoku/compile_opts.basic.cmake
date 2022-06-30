@@ -28,7 +28,7 @@ endif()
 
 
 # diagnostics formatting:
-if(okiidoku_IS_TOP_LEVEL)
+if(PROJECT_IS_TOP_LEVEL)
 	if(MSVC)
 		target_compile_options(okiidoku_compile_options_private INTERFACE
 			/diagnostics:caret
