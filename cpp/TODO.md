@@ -36,13 +36,16 @@
 
 - look into using Catch2 for testing
   - [tutorial](https://github.com/catchorg/Catch2/blob/devel/docs/tutorial.md)
-  - [cmake integration](https://github.com/catchorg/Catch2/blob/devel/docs/cmake-integration.md)
 - or alternatively using the "smaller version", [doctest](https://github.com/doctest/doctest)
 - current usage of `okiidoku_IS_TOP_LEVEL` (instead of `PROJECT_IS_TOP_LEVEL`) is to not build testing for emscripten bindings since I don't know how to run wasm. Kind of a dumb reason and dumb hack. Not sure what to do here.
 
 - think about [this](https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle#Pseudorandom_generators)
 
 - Collect some statistics on how much overlap there usually is between the size-4 UA sets found. A very narrow, simple way to do this is just count how many unique cells are covered, and compare to the number of non-unique cells covered.
+  - links to UA set discussions:
+    - http://forum.enjoysudoku.com/post318692.html?hilit=unavoidable#p318692
+    - http://forum.enjoysudoku.com/unbiased-grid-generation-t5128-15.html#p39512
+    - http://forum.enjoysudoku.com/structures-of-the-solution-grid-t4235-75.html
 
 - Challenge to self: find out how to make puzzles with few or many givens.
   - Hypothesis: prioritizing to remove cells that are in a house with more givens / fewer candidate-symbols will create puzzles with few givens and vice versa.
@@ -84,6 +87,10 @@
 
 - look into cppitertools for writing my raw loops. see if people say anything about performance overhead.
 
+- CI/CD
+  - [CPM notes](https://github.com/cpm-cmake/CPM.cmake/wiki/Caching-with-CPM.cmake-and-ccache-on-GitHub-Actions#caching-with-github-actions)
+  - [catch2 notes](https://github.com/catchorg/Catch2/blob/devel/docs/ci-and-misc.md)
+
 - find out how to use the [cppcoreguidelines checker](https://docs.microsoft.com/en-us/cpp/code-quality/using-the-cpp-core-guidelines-checkers?view=msvc-170)
   - I want to use it in a way that is driven by cmake
 
@@ -121,6 +128,7 @@
         - https://github.com/daniele77/cli
       - command
         - https://github.com/CLIUtils/CLI11
+      - FTXUI
   - Can look into ncurses in the future? Or look into options for TUI libraries?
   - A web interface would be really nice.
 - C++20

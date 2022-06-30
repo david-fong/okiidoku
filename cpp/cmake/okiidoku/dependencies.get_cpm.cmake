@@ -1,6 +1,5 @@
 include_guard(DIRECTORY)
 # https://github.com/cpm-cmake/CPM.cmake/blob/master/cmake/get_cpm.cmake
-# https://github.com/cpm-cmake/CPM.cmake/wiki/Caching-with-CPM.cmake-and-ccache-on-GitHub-Actions#caching-with-github-actions
 
 if(CPM_SOURCE_CACHE)
 	# Expand relative path. This is important if the provided path contains a tilde (~)

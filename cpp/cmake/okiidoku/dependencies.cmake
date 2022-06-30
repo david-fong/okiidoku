@@ -21,6 +21,7 @@ endif()
 
 
 if(okiidoku_IS_TOP_LEVEL)
+	# https://github.com/catchorg/Catch2/blob/devel/docs/cmake-integration.md
 	CPMAddPackage(
 		NAME catch2
 		VERSION 3.0.1
