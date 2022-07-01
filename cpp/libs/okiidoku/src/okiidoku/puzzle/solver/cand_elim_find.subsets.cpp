@@ -63,8 +63,8 @@ namespace okiidoku::mono::detail::solver { namespace {
 		const int_ts::o2i_t<O> sub_z
 	) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
-		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(sub_z <= T::O2);
-		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(sub_a < sub_z);
+		OKIIDOKU_CONTRACT_USE(sub_z <= T::O2);
+		OKIIDOKU_CONTRACT_USE(sub_a < sub_z);
 		// update candidate-symbol count cache fields for the subset:
 		{
 			// TODO profile and add likelihood attributes
@@ -72,8 +72,8 @@ namespace okiidoku::mono::detail::solver { namespace {
 			for (o2i_t i {sub_a}; i < sub_z; ++i) {
 				auto& cell_tag {subs.cell_tags[i]};
 				const auto updated_count {static_cast<o2is_t>(cells_cands.at_rmi(cell_tag.rmi).count())};
-				OKIIDOKU_CONTRACT_TRIVIAL_EVAL(cell_tag.count_cache <= T::O2);
-				OKIIDOKU_CONTRACT_TRIVIAL_EVAL(cell_tag.count_cache >= updated_count);
+				OKIIDOKU_CONTRACT_USE(cell_tag.count_cache <= T::O2);
+				OKIIDOKU_CONTRACT_USE(cell_tag.count_cache >= updated_count);
 				if (cell_tag.count_cache > updated_count) {
 					no_change = false;
 					cell_tag.count_cache = updated_count;
@@ -124,10 +124,10 @@ namespace okiidoku::mono::detail::solver { namespace {
 		const int_ts::o2x_t<O> max_subset_size // try up-to-and-including this size
 	) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
-		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(sub_z <= T::O2);
-		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(sub_a < sub_z);
-		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(max_subset_size >= 2);
-		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(max_subset_size <= static_cast<o2x_t>((T::O2+1)/2));
+		OKIIDOKU_CONTRACT_USE(sub_z <= T::O2);
+		OKIIDOKU_CONTRACT_USE(sub_a < sub_z);
+		OKIIDOKU_CONTRACT_USE(max_subset_size >= 2);
+		OKIIDOKU_CONTRACT_USE(max_subset_size <= static_cast<o2x_t>((T::O2+1)/2));
 		for (o2x_t subset_i {0}; subset_i < (sub_z-sub_a-3) && subset_i+2 < 2*max_subset_size; ++subset_i) {
 			const auto naked_or_hidden {(subset_i % 2 == 0) ? NakedOrHidden::naked : NakedOrHidden::hidden};
 			const auto naked_subset_size {[&]() -> o2x_t {
@@ -136,7 +136,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 				}
 				return static_cast<o2x_t>((sub_z-sub_a)-2-(subset_i/2));
 			}()};
-			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(sub_a+naked_subset_size+1 < sub_z);
+			OKIIDOKU_CONTRACT_USE(sub_a+naked_subset_size+1 < sub_z);
 			// ^plus one to skip finding hidden singles. // TODO or also try to find them?
 			std::optional<FoundSubsetInfo<O>> found {{ // Note: wrap with optional to allow NRVO
 				.combo_walker {
@@ -179,16 +179,16 @@ namespace okiidoku::mono::detail::solver { namespace {
 		const int_ts::o2x_t<O> max_subset_size // try up-to-and-including this size
 	) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
-		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(max_subset_size >= 2);
-		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(max_subset_size <= static_cast<o2x_t>((T::O2+1)/2));
+		OKIIDOKU_CONTRACT_USE(max_subset_size >= 2);
+		OKIIDOKU_CONTRACT_USE(max_subset_size <= static_cast<o2x_t>((T::O2+1)/2));
 		o2i_t sub_a {0};
 		o2i_t sub_z {0};
 		const auto get_next_sub_a {[&]{
-			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(sub_a < T::O2);
+			OKIIDOKU_CONTRACT_USE(sub_a < T::O2);
 			auto next {static_cast<o2i_t>(sub_a+1)};
 			while (next < T::O2 && !subs.is_begin.test(static_cast<o2x_t>(next))) { ++next; }
-			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(next <= T::O2);
-			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(next > sub_a);
+			OKIIDOKU_CONTRACT_USE(next <= T::O2);
+			OKIIDOKU_CONTRACT_USE(next > sub_a);
 			return next;
 		}};
 		// optional speed optimization to skip leading already-found singles:
@@ -198,17 +198,17 @@ namespace okiidoku::mono::detail::solver { namespace {
 			auto non_first_members {O2BitArr_ones<O>};
 			non_first_members.remove(subs.is_begin);
 			const auto second_non_single_member {non_first_members.count_lower_zeros_assuming_non_empty_mask()};
-			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(second_non_single_member > 0);
+			OKIIDOKU_CONTRACT_USE(second_non_single_member > 0);
 			sub_a = static_cast<o2i_t>(second_non_single_member-1);
 		}
 
 		while (sub_a < T::O2) [[likely]] {
 			sub_z = get_next_sub_a();
-			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(sub_z <= T::O2);
-			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(sub_a < sub_z);
-			assert(subs.is_begin.test(static_cast<o2x_t>(sub_a)));
+			OKIIDOKU_CONTRACT_USE(sub_z <= T::O2);
+			OKIIDOKU_CONTRACT_USE(sub_a < sub_z);
+			OKIIDOKU_CONTRACT_ASSERT(subs.is_begin.test(static_cast<o2x_t>(sub_a)));
 			for (auto i {static_cast<o2i_t>(sub_a+1)}; i < sub_z; ++i) {
-				assert(!subs.is_begin.test(static_cast<o2x_t>(i)));
+				OKIIDOKU_CONTRACT_ASSERT(!subs.is_begin.test(static_cast<o2x_t>(i)));
 			}
 			if (prepare_try_decompose_subset_and_check_can_skip(engine.cells_cands(), subs, sub_a, sub_z)) {
 				continue;
@@ -222,7 +222,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 			}
 			const auto& [combo_walker, combo_syms, naked_or_hidden] {*found};
 			const auto naked_subset_size {combo_walker.get_naked_subset_size()};
-			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(combo_syms.count() <= naked_subset_size);
+			OKIIDOKU_CONTRACT_USE(combo_syms.count() <= naked_subset_size);
 			if (combo_syms.count() < naked_subset_size) [[unlikely]] {
 				return unwind_one_stack_frame_of_(engine);
 			}
@@ -260,7 +260,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 		const int_ts::o2x_t<O> max_subset_size
 	) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
-		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(max_subset_size <= static_cast<o2x_t>((T::O2+1)/2));
+		OKIIDOKU_CONTRACT_USE(max_subset_size <= static_cast<o2x_t>((T::O2+1)/2));
 		if (max_subset_size < 2) [[unlikely]] {
 			return UnwindInfo::make_no_unwind();
 		}
@@ -289,7 +289,7 @@ namespace okiidoku::mono::detail::solver {
 
 	template<Order O> requires(is_order_compiled(O)) \
 	UnwindInfo CandElimFind<O>::subsets(Engine<O>& engine, const int_ts::o2x_t<O> max_subset_size) noexcept {
-		assert(!engine.no_solutions_remain());
+		OKIIDOKU_CONTRACT_ASSERT(!engine.no_solutions_remain());
 		if (engine.get_num_puzcells_remaining() == 0) [[unlikely]] { return UnwindInfo::make_no_unwind(); }
 		return find_subsets_and_check_needs_unwind(engine, max_subset_size);
 	}

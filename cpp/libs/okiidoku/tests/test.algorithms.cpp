@@ -18,7 +18,7 @@
 
 template<okiidoku::Order O>
 void test_algorithms(okiidoku::SharedRng& shared_rng, const unsigned num_rounds) {
-	if (O >= 5) { return; } // TODO.high
+	if (O >= 4) { return; } // TODO.high enable when solver for order=5 is faster?
 	using namespace ::okiidoku;
 	using namespace ::okiidoku::mono;
 	// OKIIDOKU_MONO_INT_TS_TYPEDEFS
@@ -60,9 +60,9 @@ void test_algorithms(okiidoku::SharedRng& shared_rng, const unsigned num_rounds)
 
 
 TEST_CASE("algorithms") {
-	const auto default_num_rounds {1'0U};
+	const auto default_num_rounds {100U};
 	okiidoku::SharedRng shared_rng {};
-	shared_rng.rng.seed(std::random_device()());
+	shared_rng.rng.seed(std::random_device()()); // look into using Catch2 GENERATE and random() features
 
 	#define OKIIDOKU_FOR_COMPILED_O(O_) \
 	test_algorithms<O_>(shared_rng, default_num_rounds);

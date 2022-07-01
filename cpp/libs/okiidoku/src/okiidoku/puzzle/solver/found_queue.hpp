@@ -2,11 +2,11 @@
 #define HPP_OKIIDOKU__PUZZLE__SOLVER__FOUND_QUEUE
 
 #include <okiidoku/puzzle/solver/found.hpp>
+#include <okiidoku/detail/contract.hpp>
 
 #include <deque>
 #include <tuple>
 #include <type_traits>
-#include <cassert>
 
 namespace okiidoku::mono::detail::solver {
 
@@ -42,7 +42,7 @@ namespace okiidoku::mono::detail::solver {
 		// Note: only used when unwinding the engine's guess stack.
 		void clear() noexcept {
 			std::apply([](auto& ...dq){ (... , dq.clear()); }, tup_);
-			assert(is_empty());
+			OKIIDOKU_CONTRACT_ASSERT(is_empty());
 			// TODO.low consider whether resizing down is a good idea here?
 		}
 

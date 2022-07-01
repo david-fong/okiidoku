@@ -46,15 +46,15 @@ namespace okiidoku::mono {
 		// contract: `bit_i < T::O2`
 		[[nodiscard, gnu::const]]
 		static constexpr word_i_t bit_i_to_word_i(const o2x_t bit_i) noexcept {
-			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(bit_i < T::O2);
+			OKIIDOKU_CONTRACT_USE(bit_i < T::O2);
 			const auto word_i {static_cast<word_i_t>(bit_i / word_t_num_bits)};
-			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(word_i < num_words);
+			OKIIDOKU_CONTRACT_USE(word_i < num_words);
 			return word_i;
 		}
 		// contract: `bit_i < T::O2`
 		[[nodiscard, gnu::const]]
 		static constexpr word_t word_bit_mask_for_bit_i(const o2x_t bit_i) noexcept {
-			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(bit_i < T::O2);
+			OKIIDOKU_CONTRACT_USE(bit_i < T::O2);
 			if constexpr (num_words == 1) {
 				return static_cast<word_t>(word_t{1} << bit_i);
 			} else {
@@ -88,19 +88,19 @@ namespace okiidoku::mono {
 
 		// contract: `at < O2`
 		[[nodiscard, gnu::pure]] bool test(const o2x_t at) const noexcept {
-			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(at < T::O2);
+			OKIIDOKU_CONTRACT_USE(at < T::O2);
 			const word_t word_bit_mask {word_bit_mask_for_bit_i(at)};
 			return (words_[bit_i_to_word_i(at)] & word_bit_mask) != 0;
 		}
 		// contract: `at < O2`
 		constexpr void set(const o2x_t at) noexcept {
-			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(at < T::O2);
+			OKIIDOKU_CONTRACT_USE(at < T::O2);
 			const word_t word_bit_mask {word_bit_mask_for_bit_i(at)};
 			words_[bit_i_to_word_i(at)] |= word_bit_mask;
 		}
 		// contract: `at < O2`
 		constexpr void unset(const o2x_t at) noexcept {
-			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(at < T::O2);
+			OKIIDOKU_CONTRACT_USE(at < T::O2);
 			const word_t word_bit_mask {word_bit_mask_for_bit_i(at)};
 			words_[bit_i_to_word_i(at)] &= static_cast<word_t>(~word_bit_mask);
 		}
@@ -122,7 +122,7 @@ namespace okiidoku::mono {
 
 		// contract: `at < O2`
 		[[nodiscard, gnu::pure]] static bool test_any3(const o2x_t at, const O2BitArr& a, const O2BitArr& b, const O2BitArr& c) noexcept {
-			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(at < T::O2);
+			OKIIDOKU_CONTRACT_USE(at < T::O2);
 			const auto word_i {bit_i_to_word_i(at)};
 			const word_t word_bit_mask {word_bit_mask_for_bit_i(at)};
 			// TODO consider rewriting to just logical-or testing each one separately
@@ -130,7 +130,7 @@ namespace okiidoku::mono {
 		}
 		// contract: `at < O2`
 		static void set3(const o2x_t at, O2BitArr& a, O2BitArr& b, O2BitArr& c) noexcept {
-			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(at < T::O2);
+			OKIIDOKU_CONTRACT_USE(at < T::O2);
 			const auto word_i {bit_i_to_word_i(at)};
 			const word_t word_bit_mask {word_bit_mask_for_bit_i(at)};
 			a.words_[word_i] |= word_bit_mask;
@@ -139,7 +139,7 @@ namespace okiidoku::mono {
 		}
 		// contract: `at < O2`
 		static void unset3(const o2x_t at, O2BitArr& a, O2BitArr& b, O2BitArr& c) noexcept {
-			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(at < T::O2);
+			OKIIDOKU_CONTRACT_USE(at < T::O2);
 			const auto word_i {bit_i_to_word_i(at)};
 			const word_t word_bit_mask {word_bit_mask_for_bit_i(at)};
 			a.words_[word_i] &= static_cast<word_t>(~word_bit_mask);
@@ -171,19 +171,19 @@ namespace okiidoku::mono {
 
 		class SetBitsWalker final {
 		public:
-			explicit SetBitsWalker(O2BitArr arr) noexcept: arr_{arr} {
+			explicit SetBitsWalker(const O2BitArr arr) noexcept: arr_{arr} {
 				advance();
 			}
 			[[nodiscard, gnu::pure]] bool has_more() const noexcept { return word_i < num_words; }
 			[[nodiscard, gnu::pure]] o2x_t value() const noexcept {
-				OKIIDOKU_CONTRACT_TRIVIAL_EVAL(has_more());
+				OKIIDOKU_CONTRACT_USE(has_more());
 				return static_cast<o2x_t>((word_i * word_t_num_bits) + word_bit_i);
 			}
 			void advance() noexcept {
-				OKIIDOKU_CONTRACT_TRIVIAL_EVAL(has_more());
+				OKIIDOKU_CONTRACT_USE(has_more());
 				while (word_i < num_words && arr_.words_[word_i] == 0) { ++word_i; }
 				if (has_more()) {
-					OKIIDOKU_CONTRACT_TRIVIAL_EVAL(word_i < num_words); // MSVC analyzer has trouble deducing this.
+					OKIIDOKU_CONTRACT_USE(word_i < num_words); // MSVC analyzer has trouble deducing this.
 					auto& word {arr_.words_[word_i]};
 					word_bit_i = static_cast<word_bit_i_t>(std::countr_zero(word));
 					word &= static_cast<word_t>(word-1U); // unset lowest bit

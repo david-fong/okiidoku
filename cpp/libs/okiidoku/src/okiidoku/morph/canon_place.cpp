@@ -14,7 +14,6 @@
 #include <algorithm> // sort
 #include <iterator>  // next
 #include <numeric>   // iota
-#include <cassert>
 
 namespace okiidoku::mono { namespace {
 
@@ -191,7 +190,7 @@ namespace okiidoku::mono { namespace {
 		transformation = transformation.inverted();
 		// TODO.high use two iota views mapped one to src_grid and one to post_transposed view and lexicographical compare. if post_transposed less, edit transformation and apply a post_transpose_only transformation to src_grid in place.
 		transformation.apply_in_place(src_grid);
-		assert(grid_follows_rule<O>(src_grid));
+		OKIIDOKU_CONTRACT_ASSERT(grid_follows_rule<O>(src_grid));
 		return transformation;
 	}
 }}

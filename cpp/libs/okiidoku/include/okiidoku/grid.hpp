@@ -8,7 +8,6 @@
 #include <array>
 #include <span>
 #include <compare>
-#include <cassert>
 
 namespace okiidoku::mono {
 
@@ -78,14 +77,14 @@ namespace okiidoku::mono {
 		// contract: `rmi` is in [0, O4).
 		template<class T_rmi> requires(Any_o4x_t<O, T_rmi>)
 		[[nodiscard, gnu::pure]] constexpr       val_t& at_rmi(const T_rmi rmi)       noexcept {
-			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(rmi < T::O4);
-			// if constexpr (std::same_as<V_, grid_val_t<O>>) { OKIIDOKU_CONTRACT_TRIVIAL_EVAL(arr_[rmi] <= T::O2); }
+			OKIIDOKU_CONTRACT_USE(rmi < T::O4);
+			// if constexpr (std::same_as<V_, grid_val_t<O>>) { OKIIDOKU_CONTRACT_USE(arr_[rmi] <= T::O2); }
 			return arr_[rmi];
 		}
 		template<class T_rmi> requires(Any_o4x_t<O, T_rmi>)
 		[[nodiscard, gnu::pure]] constexpr const val_t& at_rmi(const T_rmi rmi) const noexcept {
-			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(rmi < T::O4);
-			// if constexpr (std::same_as<V_, grid_val_t<O>>) { OKIIDOKU_CONTRACT_TRIVIAL_EVAL(arr_[rmi] <= T::O2); }
+			OKIIDOKU_CONTRACT_USE(rmi < T::O4);
+			// if constexpr (std::same_as<V_, grid_val_t<O>>) { OKIIDOKU_CONTRACT_USE(arr_[rmi] <= T::O2); }
 			return arr_[rmi];
 		}
 

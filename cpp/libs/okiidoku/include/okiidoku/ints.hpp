@@ -159,52 +159,52 @@ namespace okiidoku::mono {
 	template<Order O> [[nodiscard, gnu::const]]
 	constexpr int_ts::o2i_t<O> rmi_to_row(const int_ts::o4i_t<O> rmi) noexcept {
 		using T = Ints<O>;
-		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(rmi < T::O4);
+		OKIIDOKU_CONTRACT_USE(rmi < T::O4);
 		return static_cast<int_ts::o2i_t<O>>(rmi / (Ints<O>::O2));
 	}
 	template<Order O> [[nodiscard, gnu::const]]
 	constexpr int_ts::o2i_t<O> rmi_to_col(const int_ts::o4i_t<O> rmi) noexcept {
 		using T = Ints<O>;
-		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(rmi < T::O4);
+		OKIIDOKU_CONTRACT_USE(rmi < T::O4);
 		return static_cast<int_ts::o2i_t<O>>(rmi % (Ints<O>::O2));
 	}
 	template<Order O> [[nodiscard, gnu::const]]
 	constexpr int_ts::o2i_t<O> rmi_to_box(const int_ts::o2i_t<O> row, const int_ts::o2i_t<O> col) noexcept {
 		using T = Ints<O>;
-		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(row < T::O2);
-		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(col < T::O2);
+		OKIIDOKU_CONTRACT_USE(row < T::O2);
+		OKIIDOKU_CONTRACT_USE(col < T::O2);
 		using o2i_t = int_ts::o2i_t<O>;
 		const auto box {static_cast<o2i_t>(static_cast<o2i_t>((row / O) * O) + (col / O))};
-		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(box < T::O2);
+		OKIIDOKU_CONTRACT_USE(box < T::O2);
 		return box;
 	}
 	template<Order O> [[nodiscard, gnu::const]]
 	constexpr int_ts::o2i_t<O> rmi_to_box(const int_ts::o4i_t<O> rmi) noexcept {
 		using T = Ints<O>;
-		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(rmi < T::O4);
+		OKIIDOKU_CONTRACT_USE(rmi < T::O4);
 		return rmi_to_box<O>(rmi_to_row<O>(rmi), rmi_to_col<O>(rmi));
 	}
 	template<Order O> [[nodiscard, gnu::const]]
 	constexpr int_ts::o2x_t<O> rmi_to_box_cell(const int_ts::o4x_t<O> rmi) noexcept {
 		using T = Ints<O>;
-		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(rmi < T::O4);
+		OKIIDOKU_CONTRACT_USE(rmi < T::O4);
 		const auto boxrow {(rmi/T::O2)%T::O1};
 		const auto boxcol {rmi%T::O1};
 		const auto box_cell {static_cast<int_ts::o2x_t<O>>((T::O1*boxrow)+boxcol)};
-		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(box_cell < T::O2);
+		OKIIDOKU_CONTRACT_USE(box_cell < T::O2);
 		return box_cell;
 	}
 	template<Order O, class T_rmi>
 	requires(Any_o4x_t<O, T_rmi>) [[nodiscard, gnu::const]]
 	constexpr int_ts::o2x_t<O> rmi_to_house(const HouseType house_type, const T_rmi rmi) noexcept {
 		using T = Ints<O>;
-		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(rmi < T::O4);
+		OKIIDOKU_CONTRACT_USE(rmi < T::O4);
 		using o2x_t = int_ts::o2x_t<O>;
 		switch (house_type) {
 		case HouseType::row: return static_cast<o2x_t>(rmi_to_row<O>(rmi));
 		case HouseType::col: return static_cast<o2x_t>(rmi_to_col<O>(rmi));
 		case HouseType::box: return static_cast<o2x_t>(rmi_to_box<O>(rmi));
-		default: OKIIDOKU_CONTRACT_TRIVIAL_EVAL(false); // std::unreachable
+		default: OKIIDOKU_CONTRACT_USE(false); // std::unreachable
 		}
 	}
 
@@ -213,11 +213,11 @@ namespace okiidoku::mono {
 	requires(Any_o2x_t<O, T_row>, Any_o2x_t<O, T_col>) [[nodiscard, gnu::const]]
 	constexpr int_ts::o4x_t<O> row_col_to_rmi(const T_row row, const T_col col) noexcept {
 		using T = Ints<O>;
-		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(row < T::O2);
-		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(col < T::O2);
+		OKIIDOKU_CONTRACT_USE(row < T::O2);
+		OKIIDOKU_CONTRACT_USE(col < T::O2);
 		using o4x_t = int_ts::o4x_t<O>;
 		const auto rmi {static_cast<o4x_t>((T::O2 * row) + col)};
-		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(rmi < T::O4);
+		OKIIDOKU_CONTRACT_USE(rmi < T::O4);
 		return rmi;
 	}
 
@@ -226,8 +226,8 @@ namespace okiidoku::mono {
 	requires(Any_o2x_t<O, T_house> && Any_o2x_t<O, T_house_cell>) [[nodiscard, gnu::const]]
 	constexpr int_ts::o4x_t<O> box_cell_to_rmi(const T_house box, const T_house_cell box_cell) noexcept {
 		using T = Ints<O>;
-		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(box < T::O2);
-		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(box_cell < T::O2);
+		OKIIDOKU_CONTRACT_USE(box < T::O2);
+		OKIIDOKU_CONTRACT_USE(box_cell < T::O2);
 		using o4x_t = int_ts::o4x_t<O>;
 		const auto row {static_cast<o4x_t>(((box/T::O1)*T::O1) + (box_cell/T::O1))};
 		const auto col {static_cast<o4x_t>(((box%T::O1)*T::O1) + (box_cell%T::O1))};
@@ -241,7 +241,7 @@ namespace okiidoku::mono {
 		case HouseType::row: return row_col_to_rmi<O>(house, house_cell);
 		case HouseType::col: return row_col_to_rmi<O>(house_cell, house);
 		case HouseType::box: return box_cell_to_rmi<O>(house, house_cell);
-		default: OKIIDOKU_CONTRACT_TRIVIAL_EVAL(false); // std::unreachable
+		default: OKIIDOKU_CONTRACT_USE(false); // std::unreachable
 		}
 	}
 
@@ -249,13 +249,13 @@ namespace okiidoku::mono {
 	requires(Any_o1x_t<O, T_chute> && Any_o3x_t<O, T_chute_cell>) [[nodiscard, gnu::const]]
 	constexpr int_ts::o4x_t<O> chute_cell_to_rmi(const LineType line_type, const T_chute chute, const T_chute_cell chute_cell) noexcept {
 		using T = Ints<O>;
-		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(chute < T::O1);
-		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(chute_cell < T::O3);
+		OKIIDOKU_CONTRACT_USE(chute < T::O1);
+		OKIIDOKU_CONTRACT_USE(chute_cell < T::O3);
 		using o4x_t = int_ts::o4x_t<O>;
 		switch (line_type) {
 		case LineType::row: return static_cast<o4x_t>((T::O3*chute)+chute_cell);
 		case LineType::col: return static_cast<o4x_t>((T::O1*chute)+((chute_cell%T::O2)*T::O2)+(chute_cell/T::O2));
-		default: OKIIDOKU_CONTRACT_TRIVIAL_EVAL(false); // std::unreachable
+		default: OKIIDOKU_CONTRACT_USE(false); // std::unreachable
 		}
 	}
 }

@@ -71,7 +71,7 @@ namespace okiidoku::visitor {
 		);
 		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 		#undef OKIIDOKU_FOR_COMPILED_O
-		default: OKIIDOKU_CONTRACT_TRIVIAL_EVAL(false); // std::unreachable
+		default: OKIIDOKU_CONTRACT_USE(false); // std::unreachable
 		}
 	}
 
@@ -87,7 +87,7 @@ namespace okiidoku::visitor {
 		);
 		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 		#undef OKIIDOKU_FOR_COMPILED_O
-		default: OKIIDOKU_CONTRACT_TRIVIAL_EVAL(false); // std::unreachable
+		default: OKIIDOKU_CONTRACT_USE(false); // std::unreachable
 		}
 	}
 
@@ -98,7 +98,7 @@ namespace okiidoku::visitor {
 		case O_: return static_cast<Transformation>(this->unchecked_get_mono_exact<O_>().inverted());
 		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 		#undef OKIIDOKU_FOR_COMPILED_O
-		default: OKIIDOKU_CONTRACT_TRIVIAL_EVAL(false); // std::unreachable
+		default: OKIIDOKU_CONTRACT_USE(false); // std::unreachable
 		}
 	}
 }

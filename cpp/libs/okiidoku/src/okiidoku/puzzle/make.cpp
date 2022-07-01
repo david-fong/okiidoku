@@ -30,7 +30,7 @@ namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
 	void make_minimal_puzzle(Grid<O>& grid, const rng_seed_t rng_seed) noexcept {
-		assert(grid_is_proper_puzzle(grid));
+		OKIIDOKU_CONTRACT_ASSERT(grid_is_proper_puzzle(grid));
 
 		const auto ua_sets {find_size_4_minimal_unavoidable_sets(grid)};
 
@@ -45,14 +45,14 @@ namespace okiidoku::mono {
 		o4i_t num_puzcell_cands {0};
 		std::array<rmi_t, T::O4> puzcell_cand_rmis; // non-candidates: either removed, or can't be removed.
 		for (o4i_t rmi {0}; rmi < T::O4; ++rmi) {
-			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(grid.at_rmi(rmi) <= T::O2);
+			OKIIDOKU_CONTRACT_USE(grid.at_rmi(rmi) <= T::O2);
 			if (grid.at_rmi(rmi) < T::O2) [[likely]] {
 				puzcell_cand_rmis[num_puzcell_cands] = static_cast<rmi_t>(rmi);
 				++num_puzcell_cands;
 		}	}
 
 		const auto remove_puzcell_cand_at {[&](const o4i_t cand_i){
-			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(cand_i < num_puzcell_cands);
+			OKIIDOKU_CONTRACT_USE(cand_i < num_puzcell_cands);
 			--num_puzcell_cands;
 			puzcell_cand_rmis[cand_i] = std::move(puzcell_cand_rmis[num_puzcell_cands]);
 		}};
@@ -72,11 +72,11 @@ namespace okiidoku::mono {
 		FastSolver<O> solver {};
 		while (num_puzcell_cands > 0) {
 			const auto puzcell_cand_i {static_cast<o4i_t>((rng() - rng_t::min()) % num_puzcell_cands)};
-			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(puzcell_cand_i < num_puzcell_cands);
+			OKIIDOKU_CONTRACT_USE(puzcell_cand_i < num_puzcell_cands);
 
 			const auto rmi {puzcell_cand_rmis[puzcell_cand_i]};
 			const auto val {std::exchange(grid.at_rmi(rmi), static_cast<grid_val_t<O>>(T::O2))};
-			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(val < T::O2);
+			OKIIDOKU_CONTRACT_USE(val < T::O2);
 
 			call_debug_log_fn([&]{
 				std::clog << "\n\n#puzcell cands: " << int(num_puzcell_cands) << ". try rm @ " << int(rmi) << std::flush;
@@ -110,9 +110,9 @@ namespace okiidoku::mono {
 				++num_keepers;
 			}
 			remove_puzcell_cand_at(puzcell_cand_i);
-			// assert(grid_follows_rule(grid)); // a bit gratuitous
+			// OKIIDOKU_CONTRACT_ASSERT(grid_follows_rule(grid)); // a bit gratuitous
 		}
-		assert(grid_is_proper_puzzle(grid));
+		OKIIDOKU_CONTRACT_ASSERT(grid_is_proper_puzzle(grid));
 	}
 
 

@@ -27,6 +27,12 @@
 
 ## Misc List
 
+- Finding Fish:
+  - for each house type
+    - for each house
+      - get an O2BitArr indicating which symbols are not solved in the house.
+  - Taking N houses of the same type, considering symbol S, only choose houses that have not already solved S.
+
 - Currently avoiding using `OKIIDOKU_MONO_INT_TS_TYPEDEFS` in headers in classes.
   - Was worried about the "header size" cost. I think I'm probably prematurely optimizing.
 

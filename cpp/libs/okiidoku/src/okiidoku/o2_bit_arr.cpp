@@ -6,7 +6,6 @@
 
 #include <numeric> // transform_reduce
 #include <execution>
-#include <cassert>
 
 namespace okiidoku::mono {
 
@@ -15,7 +14,7 @@ namespace okiidoku::mono {
 	O2BitArr<O>::count() const noexcept {
 		if constexpr (num_words == 1) {
 			const auto count {static_cast<o2i_t>(std::popcount(words_[0]))};
-			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(count <= T::O2);
+			OKIIDOKU_CONTRACT_USE(count <= T::O2);
 			return count;
 		} else {
 			const auto count {static_cast<o2i_t>(std::transform_reduce(
@@ -25,7 +24,7 @@ namespace okiidoku::mono {
 				words_.cbegin(), words_.cend(), o2i_t{0}, std::plus<o2i_t>{},
 				[](const auto& word){ return static_cast<o2i_t>(std::popcount(word)); }
 			))};
-			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(count <= T::O2);
+			OKIIDOKU_CONTRACT_USE(count <= T::O2);
 			return count;
 		}
 	}
@@ -35,14 +34,14 @@ namespace okiidoku::mono {
 	template<Order O> requires(is_order_compiled(O))
 	typename O2BitArr<O>::o2x_t
 	O2BitArr<O>::count_set_bits_below(const typename O2BitArr<O>::o2x_t end) const noexcept {
-		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(end < T::O2);
+		OKIIDOKU_CONTRACT_USE(end < T::O2);
 		if constexpr (num_words == 1) {
 			return static_cast<o2x_t>(std::popcount(static_cast<word_t>(
 				words_[0] & static_cast<word_t>(word_bit_mask_for_bit_i(end) - word_t{1})
 			)));
 		} else {
 			const auto end_at_int {bit_i_to_word_i(end)};
-			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(end_at_int < num_words);
+			OKIIDOKU_CONTRACT_USE(end_at_int < num_words);
 			return static_cast<o2x_t>(std::transform_reduce(
 				#ifdef __cpp_lib_execution
 				std::execution::unseq,
@@ -63,10 +62,10 @@ namespace okiidoku::mono {
 	O2BitArr<O>::count_lower_zeros_assuming_non_empty_mask() const noexcept {
 		// Note: without the non-empty-mask assumption, we'd have to
 		//  handle discounting excess top zeros in the empty-mask case.
-		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(count() > 0);
+		OKIIDOKU_CONTRACT_USE(count() > 0);
 		if constexpr (num_words == 1) {
 			const auto count {static_cast<o2xs_t>(std::countr_zero(words_[0]))};
-			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(count < T::O2);
+			OKIIDOKU_CONTRACT_USE(count < T::O2);
 			return count;
 		} else {
 			const auto word {std::find_if(
@@ -79,7 +78,7 @@ namespace okiidoku::mono {
 				/* static_cast<o2x_t> */(word_t_num_bits*static_cast<o2x_t>(std::distance(words_.cbegin(), word)))
 				+ static_cast<o2x_t>(std::countr_zero(*word))
 			)};
-			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(count < T::O2);
+			OKIIDOKU_CONTRACT_USE(count < T::O2);
 			return count;
 		}
 	}
@@ -88,22 +87,22 @@ namespace okiidoku::mono {
 	template<Order O> requires(is_order_compiled(O))
 	typename O2BitArr<O>::o2x_t
 	O2BitArr<O>::get_index_of_nth_set_bit(O2BitArr::o2x_t set_bit_index) const noexcept {
-		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(set_bit_index < T::O2);
-		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(count() > set_bit_index);
+		OKIIDOKU_CONTRACT_USE(set_bit_index < T::O2);
+		OKIIDOKU_CONTRACT_USE(count() > set_bit_index);
 		const word_i_t word_i {[&](){
 			if constexpr (num_words == 1) { return word_i_t{0}; }
 			else {
 				for (word_i_t wd_i {0}; wd_i < num_words; ++wd_i) {
 					const auto& word {words_[wd_i]};
 					const auto word_popcount {static_cast<o2i_t>(std::popcount(word))};
-					OKIIDOKU_CONTRACT_TRIVIAL_EVAL(word_popcount <= word_t_num_bits);
+					OKIIDOKU_CONTRACT_USE(word_popcount <= word_t_num_bits);
 					if (set_bit_index >= word_popcount) [[likely]] {
 						set_bit_index = static_cast<o2x_t>(set_bit_index - word_popcount);
 					} else {
 						return wd_i;
 					}
 				}
-				OKIIDOKU_CONTRACT_TRIVIAL_EVAL(false); // c++23 std::unreachable
+				OKIIDOKU_CONTRACT_USE(false); // c++23 std::unreachable
 			}
 		}()};
 		const auto& word {words_[word_i]};
@@ -126,7 +125,7 @@ namespace okiidoku::mono {
 				--set_bit_index;
 			}
 		}
-		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(false); // c++23 std::unreachable
+		OKIIDOKU_CONTRACT_USE(false); // c++23 std::unreachable
 		#endif
 	}
 

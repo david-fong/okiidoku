@@ -6,7 +6,6 @@
 #include <algorithm> // sort
 #include <numeric>   // iota
 #include <compare>   // is_eq
-#include <cassert>
 
 namespace okiidoku::mono { namespace {
 
@@ -99,7 +98,7 @@ namespace okiidoku::mono { namespace {
 				do_a_pass_(s);
 				if (s.ties.is_completely_unresolved()) {
 					// TODO.high encountered the most canonical grid. :O not sure what to do here.
-					assert(false);
+					std::abort();
 					break;
 				}
 				if (old_ties == s.ties) {
@@ -118,7 +117,7 @@ namespace okiidoku::mono { namespace {
 		for (o4i_t i {0}; i < Ints<O>::O4; ++i) {
 			grid.at_rmi(i) = static_cast<val_t>(label_og_to_canon[grid.at_rmi(i)]);
 		}
-		assert(grid_follows_rule<O>(grid));
+		OKIIDOKU_CONTRACT_ASSERT(grid_follows_rule<O>(grid));
 		return label_og_to_canon;
 	}
 }}

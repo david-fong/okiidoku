@@ -23,7 +23,7 @@ namespace okiidoku::mono {
 			if (row % T::O1 == 0) [[unlikely]] { h_chute_boxes_has.fill(has_mask_t{}); }
 
 			const auto& val {grid.at(row,col)};
-			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(val <= T::O2);
+			OKIIDOKU_CONTRACT_USE(val <= T::O2);
 			if (val == T::O2) { continue; }
 
 			auto& col_has {cols_has[col]};
@@ -82,12 +82,12 @@ namespace okiidoku::mono {
 				const auto val {static_cast<grid_val_t<O>>(
 					(T::O1*val_row)+val_col
 				)};
-				OKIIDOKU_CONTRACT_TRIVIAL_EVAL(val < T::O2);
+				OKIIDOKU_CONTRACT_USE(val < T::O2);
 				grid.at_rmi(rmi) = val;
 			}
 		}
-		assert(grid_is_filled(grid));
-		assert(grid_follows_rule(grid));
+		OKIIDOKU_CONTRACT_ASSERT(grid_is_filled(grid));
+		OKIIDOKU_CONTRACT_ASSERT(grid_follows_rule(grid));
 	}
 
 
@@ -110,7 +110,7 @@ namespace okiidoku::visitor {
 		case O_: return mono::grid_follows_rule(vis_grid.unchecked_get_mono_exact<O_>());
 		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 		#undef OKIIDOKU_FOR_COMPILED_O
-		default: OKIIDOKU_CONTRACT_TRIVIAL_EVAL(false); // std::unreachable
+		default: OKIIDOKU_CONTRACT_USE(false); // std::unreachable
 		}
 	}
 
@@ -120,7 +120,7 @@ namespace okiidoku::visitor {
 		case O_: return mono::grid_is_filled(vis_grid.unchecked_get_mono_exact<O_>());
 		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 		#undef OKIIDOKU_FOR_COMPILED_O
-		default: OKIIDOKU_CONTRACT_TRIVIAL_EVAL(false); // std::unreachable
+		default: OKIIDOKU_CONTRACT_USE(false); // std::unreachable
 		}
 	}
 
@@ -130,7 +130,7 @@ namespace okiidoku::visitor {
 		case O_: return mono::grid_is_empty(vis_grid.unchecked_get_mono_exact<O_>());
 		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 		#undef OKIIDOKU_FOR_COMPILED_O
-		default: OKIIDOKU_CONTRACT_TRIVIAL_EVAL(false); // std::unreachable
+		default: OKIIDOKU_CONTRACT_USE(false); // std::unreachable
 		}
 	}
 
@@ -140,7 +140,7 @@ namespace okiidoku::visitor {
 		case O_: return mono::init_most_canonical_grid(vis_grid.unchecked_get_mono_exact<O_>());
 		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 		#undef OKIIDOKU_FOR_COMPILED_O
-		default: OKIIDOKU_CONTRACT_TRIVIAL_EVAL(false); // std::unreachable
+		default: OKIIDOKU_CONTRACT_USE(false); // std::unreachable
 		}
 	}
 
@@ -151,7 +151,7 @@ namespace okiidoku::visitor {
 		case O_: return this->unchecked_get_mono_exact<O_>().at_rmi(rmi);
 		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 		#undef OKIIDOKU_FOR_COMPILED_O
-		default: OKIIDOKU_CONTRACT_TRIVIAL_EVAL(false); // std::unreachable
+		default: OKIIDOKU_CONTRACT_USE(false); // std::unreachable
 		}
 	}
 
@@ -161,7 +161,7 @@ namespace okiidoku::visitor {
 		case O_: return this->unchecked_get_mono_exact<O_>().at(row, col);
 		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 		#undef OKIIDOKU_FOR_COMPILED_O
-		default: OKIIDOKU_CONTRACT_TRIVIAL_EVAL(false); // std::unreachable
+		default: OKIIDOKU_CONTRACT_USE(false); // std::unreachable
 		}
 	}
 }

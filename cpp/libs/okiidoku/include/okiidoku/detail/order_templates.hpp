@@ -23,19 +23,16 @@ namespace okiidoku {
 
 	namespace detail {
 		template<Order Ignored, Order... Orders>
-		class CompiledOrdersHelper final {
-		public:
-			static consteval auto make_arr() noexcept { return std::to_array({Orders...}); }
-		};
+		consteval auto CompiledOrdersHelper_make_array() noexcept { return std::to_array({Orders...}); }
 	}
 	// exists because my template instantiation macro has no delimiter
 	// argument, so I hack this to ignore a leading comma at a usage site.
-	constexpr auto compiled_orders {detail::CompiledOrdersHelper<
+	constexpr auto compiled_orders {detail::CompiledOrdersHelper_make_array<
 		/* ignored: */Order{0}
 		#define OKIIDOKU_FOR_COMPILED_O(O_) , O_
 		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 		#undef OKIIDOKU_FOR_COMPILED_O
-	>::make_arr()};
+	>()};
 
 	constexpr Order largest_compiled_order {[]{
 		Order largest {0};
@@ -126,15 +123,15 @@ namespace okiidoku {
 			template<Order O> [[nodiscard, gnu::pure]]
 			typename Adaptor::template type<O>& unchecked_get_mono_exact() noexcept {
 				using T_var = typename Adaptor::template type<O>;
-				OKIIDOKU_CONTRACT_TRIVIAL_EVAL(std::holds_alternative<T_var>(variant_));
-				OKIIDOKU_CONTRACT_TRIVIAL_EVAL(std::get_if<T_var>(&variant_) != nullptr);
+				OKIIDOKU_CONTRACT_USE(std::holds_alternative<T_var>(variant_));
+				OKIIDOKU_CONTRACT_USE(std::get_if<T_var>(&variant_) != nullptr);
 				return *std::get_if<T_var>(&variant_);
 			}
 			template<Order O> [[nodiscard, gnu::pure]]
 			const typename Adaptor::template type<O>& unchecked_get_mono_exact() const noexcept {
 				using T_var = typename Adaptor::template type<O>;
-				OKIIDOKU_CONTRACT_TRIVIAL_EVAL(std::holds_alternative<T_var>(variant_));
-				OKIIDOKU_CONTRACT_TRIVIAL_EVAL(std::get_if<T_var>(&variant_) != nullptr);
+				OKIIDOKU_CONTRACT_USE(std::holds_alternative<T_var>(variant_));
+				OKIIDOKU_CONTRACT_USE(std::get_if<T_var>(&variant_) != nullptr);
 				return *std::get_if<T_var>(&variant_);
 			}
 		private:
@@ -154,7 +151,7 @@ namespace okiidoku {
 			case O_: return vis_a.template unchecked_get_mono_exact<O_>() <=> vis_b.template unchecked_get_mono_exact<O_>();
 			OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 			#undef OKIIDOKU_FOR_COMPILED_O
-			default: OKIIDOKU_CONTRACT_TRIVIAL_EVAL(false); // std::unreachable
+			default: OKIIDOKU_CONTRACT_USE(false); // std::unreachable
 			}
 		}
 	}

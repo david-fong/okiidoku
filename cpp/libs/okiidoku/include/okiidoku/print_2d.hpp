@@ -72,7 +72,7 @@ namespace okiidoku {
 			case O_: return mono::print_2d<O_>(os, rng_seed, (grids.template unchecked_get_mono_exact<O_>())...);
 			OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 			#undef OKIIDOKU_FOR_COMPILED_O
-			default: OKIIDOKU_CONTRACT_TRIVIAL_EVAL(false); // std::unreachable
+			default: OKIIDOKU_CONTRACT_USE(false); // std::unreachable
 			}
 		}
 	}

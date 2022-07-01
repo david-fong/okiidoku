@@ -12,7 +12,7 @@ namespace okiidoku::mono::detail::solver {
 
 		template<Order O, class QueueT> requires(is_order_compiled(O))
 		void queue_apply_one(Engine<O>& engine, QueueT& queue, UnwindInfo& check) noexcept {
-			assert(!queue.empty());
+			OKIIDOKU_CONTRACT_USE(!queue.empty());
 			if constexpr (std::is_same_v<std::decay_t<decltype(queue)>, typename FoundQueues<O>::template queue_t<found::CellClaimSym<O>>>) {
 				auto desc {std::move(queue.front())}; // handle passive find during apply
 				queue.pop_front();
@@ -23,11 +23,11 @@ namespace okiidoku::mono::detail::solver {
 				#endif
 				check = CandElimApplyImpl<O>::apply(engine, queue.front());
 				if (!check.did_unwind()) [[likely]] {
-					assert(old_front_addr == &queue.front()); // no passive find during apply
-					assert(!queue.empty());
+					OKIIDOKU_CONTRACT_ASSERT(old_front_addr == &queue.front()); // no passive find during apply
+					OKIIDOKU_CONTRACT_USE(!queue.empty());
 					queue.pop_front();
 				} else {
-					assert(queue.empty());
+					OKIIDOKU_CONTRACT_ASSERT(queue.empty());
 				}
 			}
 		}
@@ -36,7 +36,7 @@ namespace okiidoku::mono::detail::solver {
 
 	template<Order O> requires(is_order_compiled(O))
 	UnwindInfo CandElimApply<O>::apply_first_queued(Engine<O>& engine) noexcept {
-		assert(engine.has_queued_cand_elims());
+		OKIIDOKU_CONTRACT_ASSERT(engine.has_queued_cand_elims());
 		auto check {UnwindInfo::make_no_unwind()};
 		// Note: I had to choose between easier-to-understand code, or making it
 		// impossible to forget to update this "boilerplate" if I implement more
@@ -77,7 +77,7 @@ namespace okiidoku::mono::detail::solver {
 		if constexpr (!std::is_same_v<last_queue_t, passive_queue_t>) {
 			logical_and_loop_body(std::get<passive_queue_t>(engine.get_found_queues_().tup_));
 		}
-		assert(!engine.has_queued_cand_elims());
+		OKIIDOKU_CONTRACT_ASSERT(!engine.has_queued_cand_elims());
 		return check;
 	}
 
@@ -158,19 +158,19 @@ namespace okiidoku::mono::detail::solver {
 		const auto isec_base {[&]{ switch (desc.remove_from_rest_of) {
 			case BoxOrLine::box:  return static_cast<o3i_t>(((desc.isec/T::O2)*T::O2)+(desc.isec%T::O1));
 			case BoxOrLine::line: return static_cast<o3i_t>(desc.isec - (desc.isec%T::O1));
-			default: OKIIDOKU_CONTRACT_TRIVIAL_EVAL(false); // std::unreachable
+			default: OKIIDOKU_CONTRACT_USE(false); // std::unreachable
 		} }()};
 		const auto nb_scale {[&]{ switch (desc.remove_from_rest_of) {
 			case BoxOrLine::box:  return static_cast<o3i_t>(T::O1);
 			case BoxOrLine::line: return static_cast<o3i_t>(1);
-			default: OKIIDOKU_CONTRACT_TRIVIAL_EVAL(false); // std::unreachable
+			default: OKIIDOKU_CONTRACT_USE(false); // std::unreachable
 		} }()};
 		for (o1i_t nb_i {0}; nb_i < T::O1; ++nb_i) {
 			const auto isec {isec_base + (nb_i * nb_scale)};
 			if (isec == desc.isec) [[unlikely]] { continue; }
 			for (o1i_t isec_cell_i {0}; isec_cell_i < T::O1; ++isec_cell_i) {
 				const auto chute {static_cast<o1i_t>(isec/T::O2)};
-				assert(chute == static_cast<o1i_t>(desc.isec/T::O2));
+				OKIIDOKU_CONTRACT_ASSERT(chute == static_cast<o1i_t>(desc.isec/T::O2));
 				const auto chute_cell {static_cast<o3i_t>(((isec*T::O1)%T::O3) + isec_cell_i)};
 				const auto rmi {chute_cell_to_rmi<O>(desc.line_type, chute, chute_cell)};
 				const auto check {engine.do_elim_remove_syms_(static_cast<rmi_t>(rmi), desc.syms)};

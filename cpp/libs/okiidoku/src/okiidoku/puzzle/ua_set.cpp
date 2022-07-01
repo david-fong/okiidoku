@@ -24,16 +24,16 @@ namespace okiidoku::mono { namespace {
 		const int_ts::o1i_t<O> chute
 	) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
-		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(chute < T::O1);
+		OKIIDOKU_CONTRACT_USE(chute < T::O1);
 		const auto chute_lines_sym_to_cell {[&](){
 			chute_lines_sym_to_cell_t<O> map;
 			for (o1i_t chute_line {0}; chute_line < T::O1; ++chute_line) {
 			for (o2i_t house_cell {0}; house_cell < T::O2; ++house_cell) {
 				const auto chute_cell_i {static_cast<o3i_t>((T::O2*chute_line)+house_cell)};
-				OKIIDOKU_CONTRACT_TRIVIAL_EVAL(chute_cell_i < T::O3);
+				OKIIDOKU_CONTRACT_USE(chute_cell_i < T::O3);
 				const auto rmi {chute_cell_to_rmi<O>(line_type, chute, chute_cell_i)};
 				const auto& sym {soln_grid.at_rmi(rmi)};
-				OKIIDOKU_CONTRACT_TRIVIAL_EVAL(sym < T::O2);
+				OKIIDOKU_CONTRACT_USE(sym < T::O2);
 				map[chute_line][sym] = static_cast<o2xs_t>(house_cell);
 			}}
 			return map;
@@ -43,8 +43,8 @@ namespace okiidoku::mono { namespace {
 			for (o2i_t slice_c {0}; slice_c < T::O2; ++slice_c) {
 				const auto c_a_rmi {chute_cell_to_rmi<O>(line_type, chute, static_cast<o3i_t>((T::O2*chute_line_a)+slice_c))};
 				const auto c_b_rmi {chute_cell_to_rmi<O>(line_type, chute, static_cast<o3i_t>((T::O2*chute_line_b)+slice_c))};
-				const auto& c_a_sym {soln_grid.at_rmi(c_a_rmi)}; OKIIDOKU_CONTRACT_TRIVIAL_EVAL(c_a_sym < T::O2);
-				const auto& c_b_sym {soln_grid.at_rmi(c_b_rmi)}; OKIIDOKU_CONTRACT_TRIVIAL_EVAL(c_b_sym < T::O2);
+				const auto& c_a_sym {soln_grid.at_rmi(c_a_rmi)}; OKIIDOKU_CONTRACT_USE(c_a_sym < T::O2);
+				const auto& c_b_sym {soln_grid.at_rmi(c_b_rmi)}; OKIIDOKU_CONTRACT_USE(c_b_sym < T::O2);
 				const auto& d_a_cell {chute_lines_sym_to_cell[chute_line_a][c_b_sym]};
 				const auto& d_b_cell {chute_lines_sym_to_cell[chute_line_b][c_a_sym]};
 				if ((d_a_cell == d_b_cell) && (d_a_cell > slice_c)) [[unlikely]] {

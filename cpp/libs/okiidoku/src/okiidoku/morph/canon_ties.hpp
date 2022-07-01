@@ -25,10 +25,10 @@ namespace okiidoku::mono::detail {
 		public:
 			link_t begin_;
 			link_t end_;
-			Range(const link_t begin, const link_t end) noexcept: begin_{begin}, end_{end} { assert(begin_ < end_); }
-			[[nodiscard]] link_t size() const noexcept { OKIIDOKU_CONTRACT_TRIVIAL_EVAL(begin_ < end_); return static_cast<link_t>(end_ - begin_); }
-			auto begin() const noexcept { assert(begin_ < end_); return ranges::views::iota(begin_, end_).begin(); }
-			auto end()   const noexcept { assert(begin_ < end_); return ranges::views::iota(begin_, end_).end(); }
+			Range(const link_t begin, const link_t end) noexcept: begin_{begin}, end_{end} { OKIIDOKU_CONTRACT_USE(begin_ < end_); }
+			[[nodiscard]] link_t size() const noexcept { OKIIDOKU_CONTRACT_USE(begin_ < end_); return static_cast<link_t>(end_ - begin_); }
+			auto begin() const noexcept { OKIIDOKU_CONTRACT_USE(begin_ < end_); return ranges::views::iota(begin_, end_).begin(); }
+			auto end()   const noexcept { OKIIDOKU_CONTRACT_USE(begin_ < end_); return ranges::views::iota(begin_, end_).end(); }
 		};
 
 		class Iterator final {
@@ -46,7 +46,7 @@ namespace okiidoku::mono::detail {
 
 			Range operator*()  const noexcept { return Range{i_, links_[i_]}; }
 			Range operator->() const noexcept { return Range{i_, links_[i_]}; }
-			Iterator& operator++() noexcept { assert(links_[i_] > i_); i_ = links_[i_]; return *this; }
+			Iterator& operator++() noexcept { OKIIDOKU_CONTRACT_ASSERT(links_[i_] > i_); i_ = links_[i_]; return *this; }
 			Iterator operator++(int) noexcept { Iterator tmp = *this; ++(*this); return tmp; }
 			[[nodiscard, gnu::pure]] friend bool operator==(const Iterator& a, const Iterator& b) noexcept { return (&a.links_ == &b.links_) && (a.i_ == b.i_); }
 			[[nodiscard, gnu::pure]] friend bool operator!=(const Iterator& a, const Iterator& b) noexcept { return (&a.links_ != &b.links_) || (a.i_ != b.i_); }
@@ -66,10 +66,10 @@ namespace okiidoku::mono::detail {
 		// requires (std::regular_invocable<IsEq, link_t, link_t>)
 		void update(const IsEq is_eq) noexcept {
 			for (const auto tie : *this) {
-				OKIIDOKU_CONTRACT_TRIVIAL_EVAL(tie.begin_ < tie.end_);
+				OKIIDOKU_CONTRACT_USE(tie.begin_ < tie.end_);
 				auto cursor {tie.begin_};
 				for (auto i {static_cast<link_t>(cursor+1)}; i < tie.end_; ++i) {
-					OKIIDOKU_CONTRACT_TRIVIAL_EVAL(cursor < i);
+					OKIIDOKU_CONTRACT_USE(cursor < i);
 					if (!std::invoke(is_eq, static_cast<link_t>(i-1), i)) [[likely]] {
 						links_[cursor] = i;
 						cursor = i;

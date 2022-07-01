@@ -6,7 +6,6 @@
 #include <okiidoku/detail/export.h>
 
 #include <array>
-#include <cassert>
 
 namespace okiidoku::mono::detail::solver {
 
@@ -30,10 +29,10 @@ namespace okiidoku::mono::detail::solver {
 			begin_{begin}, end_{end}, naked_subset_size_{naked_subset_size},
 			has_more_{static_cast<o2i_t>(begin + naked_subset_size) <= end}
 		{
-			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(end_ <= T::O2);
-			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(naked_subset_size_ > 0);
-			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(naked_subset_size_ < T::O2);
-			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(begin_ + naked_subset_size_ <= T::O2);
+			OKIIDOKU_CONTRACT_USE(end_ <= T::O2);
+			OKIIDOKU_CONTRACT_USE(naked_subset_size_ > 0);
+			OKIIDOKU_CONTRACT_USE(naked_subset_size_ < T::O2);
+			OKIIDOKU_CONTRACT_USE(begin_ + naked_subset_size_ <= T::O2);
 			if (has_more()) [[likely]] {
 				for (o2x_t i {0}; i < naked_subset_size_; ++i) {
 					combo_[i] = static_cast<o2xs_t>(begin_ + i);
@@ -43,8 +42,8 @@ namespace okiidoku::mono::detail::solver {
 		}
 
 		[[nodiscard, gnu::pure]] o2x_t get_naked_subset_size() const noexcept {
-			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(naked_subset_size_ > 0);
-			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(naked_subset_size_ < T::O2);
+			OKIIDOKU_CONTRACT_USE(naked_subset_size_ > 0);
+			OKIIDOKU_CONTRACT_USE(naked_subset_size_ < T::O2);
 			return naked_subset_size_;
 		}
 
@@ -54,21 +53,21 @@ namespace okiidoku::mono::detail::solver {
 
 		// contract: `i < naked_subset_size`
 		[[nodiscard, gnu::pure]] o2xs_t combo_at(const o2x_t i) const noexcept {
-			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(i < naked_subset_size_);
+			OKIIDOKU_CONTRACT_USE(i < naked_subset_size_);
 			return combo_[i];
 		}
 		// contract: `has_more` returns `true`.
 		[[nodiscard, gnu::pure]] auto at_it() const noexcept {
-			assert(has_more());
+			OKIIDOKU_CONTRACT_ASSERT(has_more());
 			return combo_.cbegin();
 		}
 
 		// contract: `has_more` returns `true`.
 		void advance() noexcept {
-			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(has_more());
-			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(end_ <= T::O2);
-			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(naked_subset_size_ > 0);
-			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(naked_subset_size_ < T::O2);
+			OKIIDOKU_CONTRACT_USE(has_more());
+			OKIIDOKU_CONTRACT_USE(end_ <= T::O2);
+			OKIIDOKU_CONTRACT_USE(naked_subset_size_ > 0);
+			OKIIDOKU_CONTRACT_USE(naked_subset_size_ < T::O2);
 			auto i {static_cast<o2x_t>(naked_subset_size_-1U)};
 			++combo_[i];
 			while (combo_[i] > end_ - naked_subset_size_ + i) [[likely]] {
@@ -99,13 +98,13 @@ namespace okiidoku::mono::detail::solver {
 		void assert_is_state_valid_() const noexcept {
 			#ifndef NDEBUG
 			if (static_cast<o2i_t>(begin_ + naked_subset_size_) > end_) {
-				assert(!has_more_);
+				OKIIDOKU_CONTRACT_ASSERT(!has_more_);
 				return;
 			}
-			assert(combo_[0] >= begin_);
-			assert(combo_[static_cast<o2x_t>(naked_subset_size_-1)] < end_);
+			OKIIDOKU_CONTRACT_ASSERT(combo_[0] >= begin_);
+			OKIIDOKU_CONTRACT_ASSERT(combo_[static_cast<o2x_t>(naked_subset_size_-1)] < end_);
 			for (o2x_t i {1}; i < naked_subset_size_; ++i) {
-				assert(combo_[static_cast<o2x_t>(i-1)] < combo_[i]);
+				OKIIDOKU_CONTRACT_ASSERT(combo_[static_cast<o2x_t>(i-1)] < combo_[i]);
 			}
 			#endif
 		}

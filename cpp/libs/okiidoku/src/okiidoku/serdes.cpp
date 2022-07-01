@@ -7,7 +7,6 @@
 #include <algorithm>
 #include <array>
 #include <limits> // numeric_limits
-#include <cassert>
 
 namespace okiidoku::mono { namespace {
 
@@ -76,23 +75,23 @@ namespace okiidoku::mono { namespace {
 
 	template<Order O> requires(is_order_compiled(O))
 	void SerdesHelper<O>::print_val(std::ostream& os, const typename SerdesHelper<O>::val_t val) noexcept {
-		assert(cell_cands.test(val));
+		OKIIDOKU_CONTRACT_ASSERT(cell_cands.test(val));
 		// The number of possible different values that this cell could be
 		// based on the values that have already been encountered.
 		auto smol_val_buf_remaining {cell_cands.count()};
-		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(smol_val_buf_remaining > 0); // implied by contract (grid_follows_rule)
+		OKIIDOKU_CONTRACT_USE(smol_val_buf_remaining > 0); // implied by contract (grid_follows_rule)
 
 		// Some slightly-weird-looking logic stems from the fact that it is
 		// a "null" action to try to print something that can only take on one
 		// value (as in- the buffer will be unchanged). Just keep that in mind.
 		auto smol_val_buf {static_cast<val_t>(cell_cands.count_set_bits_below(val))};
-		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(smol_val_buf < smol_val_buf_remaining);
+		OKIIDOKU_CONTRACT_USE(smol_val_buf < smol_val_buf_remaining);
 		while (smol_val_buf_remaining > 1) {
 			buf += static_cast<buf_t>(buf_pos * smol_val_buf); // should never overflow
 			// const auto buf_remaining {(buf_pos == 1) ? buf_end : static_cast<buf_t>(buf_end - buf_pos)};
 			{
 				const auto use_factor {static_cast<buf_t>(smol_val_buf_remaining)};
-				OKIIDOKU_CONTRACT_TRIVIAL_EVAL(buf_pos != 0 && buf_pos < buf_end);
+				OKIIDOKU_CONTRACT_USE(buf_pos != 0 && buf_pos < buf_end);
 				buf_pos *= use_factor;
 				smol_val_buf /= static_cast<val_t>(use_factor);
 				smol_val_buf_remaining /= static_cast<int_ts::o2i_t<O>>(use_factor);
@@ -122,13 +121,13 @@ namespace okiidoku::mono { namespace {
 		// The number of possible different values that this cell could be
 		// based on the values that have already been encountered.
 		auto smol_val_buf_remaining {cell_cands.count()};
-		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(smol_val_buf_remaining > 0); // implied by contract (grid_follows_rule)
+		OKIIDOKU_CONTRACT_USE(smol_val_buf_remaining > 0); // implied by contract (grid_follows_rule)
 		(void)smol_val_buf_remaining; (void)is;
 
 		val_t smol_val_buf {0};
 		// TODO
 
-		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(smol_val_buf < smol_val_buf_remaining);
+		OKIIDOKU_CONTRACT_USE(smol_val_buf < smol_val_buf_remaining);
 		const auto val {cell_cands.get_index_of_nth_set_bit(smol_val_buf)};
 		remove_cand_at_current_rmi_(val);
 		return val;
@@ -146,8 +145,8 @@ namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
 	void write_solution_grid_to_stream(const Grid<O>& grid, std::ostream& os) noexcept {
-		assert(grid_is_filled<O>(grid));
-		assert(grid_follows_rule(grid));
+		OKIIDOKU_CONTRACT_ASSERT(grid_is_filled<O>(grid));
+		OKIIDOKU_CONTRACT_ASSERT(grid_follows_rule(grid));
 		using T = Ints<O>;
 
 		SerdesHelper<O> helper {};
@@ -181,14 +180,14 @@ namespace okiidoku::mono {
 		}
 		// TODO infer cells in anti-diagonal boxes.
 
-		assert(grid_is_filled(grid));
-		assert(grid_follows_rule(grid));
+		OKIIDOKU_CONTRACT_ASSERT(grid_is_filled(grid));
+		OKIIDOKU_CONTRACT_ASSERT(grid_follows_rule(grid));
 	}
 
 
 	template<Order O> requires(is_order_compiled(O))
 	void print_puzzle_grid_to_stream(const Grid<O>& grid, std::ostream& os) noexcept {
-		assert(grid_follows_rule(grid));
+		OKIIDOKU_CONTRACT_ASSERT(grid_follows_rule(grid));
 		// using T = Ints<O>;
 		(void)os; (void)grid;
 	}
@@ -199,7 +198,7 @@ namespace okiidoku::mono {
 		// using T = Ints<O>;
 		(void)is; (void)grid;
 
-		assert(grid_follows_rule(grid));
+		OKIIDOKU_CONTRACT_ASSERT(grid_follows_rule(grid));
 	}
 
 
@@ -221,7 +220,7 @@ namespace okiidoku::visitor {
 		case O_: return mono::write_solution_grid_to_stream(vis_src.unchecked_get_mono_exact<O_>(), os);
 		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 		#undef OKIIDOKU_FOR_COMPILED_O
-		default: OKIIDOKU_CONTRACT_TRIVIAL_EVAL(false); // std::unreachable
+		default: OKIIDOKU_CONTRACT_USE(false); // std::unreachable
 		}
 	}
 
@@ -231,7 +230,7 @@ namespace okiidoku::visitor {
 		case O_: return mono::parse_solution_grid_from_stream(vis_sink.unchecked_get_mono_exact<O_>(), is);
 		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 		#undef OKIIDOKU_FOR_COMPILED_O
-		default: OKIIDOKU_CONTRACT_TRIVIAL_EVAL(false); // std::unreachable
+		default: OKIIDOKU_CONTRACT_USE(false); // std::unreachable
 		}
 	}
 
@@ -241,7 +240,7 @@ namespace okiidoku::visitor {
 		case O_: return mono::print_puzzle_grid_to_stream(vis_src.unchecked_get_mono_exact<O_>(), os);
 		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 		#undef OKIIDOKU_FOR_COMPILED_O
-		default: OKIIDOKU_CONTRACT_TRIVIAL_EVAL(false); // std::unreachable
+		default: OKIIDOKU_CONTRACT_USE(false); // std::unreachable
 		}
 	}
 
@@ -251,7 +250,7 @@ namespace okiidoku::visitor {
 		case O_: return mono::parse_puzzle_grid_from_stream(vis_sink.unchecked_get_mono_exact<O_>(), is);
 		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 		#undef OKIIDOKU_FOR_COMPILED_O
-		default: OKIIDOKU_CONTRACT_TRIVIAL_EVAL(false); // std::unreachable
+		default: OKIIDOKU_CONTRACT_USE(false); // std::unreachable
 		}
 	}
 }

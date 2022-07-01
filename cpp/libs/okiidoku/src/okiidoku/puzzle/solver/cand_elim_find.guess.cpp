@@ -105,7 +105,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 				best_rmi = rmi;
 				break;
 		}	}
-		OKIIDOKU_CONTRACT_TRIVIAL_EVAL(best_rmi < T::O4);
+		OKIIDOKU_CONTRACT_USE(best_rmi < T::O4);
 		auto best_cand_count {cells_cands.at_rmi(best_rmi).count()};
 		auto best_house_solved_counts {get_house_solved_counts(best_rmi)};
 		[[maybe_unused]] auto best_guess_grouping {get_guess_grouping(best_rmi)};
@@ -113,7 +113,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 		// TODO is there a same-or-better-perf way to write this search using std::transform_reduce or std::min?
 		for (o4i_t rmi {static_cast<o4i_t>(best_rmi+1U)}; rmi < T::O4; ++rmi) {
 			const auto cand_count {cells_cands.at_rmi(rmi).count()};
-			OKIIDOKU_CONTRACT_TRIVIAL_EVAL(cand_count != 0);
+			OKIIDOKU_CONTRACT_USE(cand_count != 0);
 			if (cand_count <= 1) [[unlikely]] { continue; } // no guessing for solved cell.
 			[[maybe_unused]] const auto guess_grouping {get_guess_grouping(rmi)};
 			[[maybe_unused]] const auto house_solved_counts {get_house_solved_counts(rmi)};
@@ -150,8 +150,8 @@ namespace okiidoku::mono::detail::solver {
 
 	template<Order O> requires(is_order_compiled(O))
 	Guess<O> CandElimFind<O>::good_guess_candidate(const Engine<O>& engine) noexcept {
-		assert(!engine.no_solutions_remain());
-		assert(engine.get_num_puzcells_remaining() > 0); // cannot guess when already solved
+		OKIIDOKU_CONTRACT_ASSERT(!engine.no_solutions_remain());
+		OKIIDOKU_CONTRACT_ASSERT(engine.get_num_puzcells_remaining() > 0); // cannot guess when already solved
 		return find_good_guess_candidate_for_fast_solver<O>(engine.cells_cands(), engine.get_guess_stack_());
 	}
 

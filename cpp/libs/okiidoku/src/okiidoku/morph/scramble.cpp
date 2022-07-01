@@ -4,7 +4,6 @@
 
 #include <random> // minstd_rand
 #include <array>
-#include <cassert>
 
 namespace okiidoku::mono {
 
@@ -25,7 +24,7 @@ namespace okiidoku::mono {
 			// t.post_transpose = static_cast<bool>(rng() % 2); // TODO add this back when canonicalize can handle it
 		}
 		t.apply_in_place(grid);
-		assert(grid_follows_rule<O>(grid));
+		OKIIDOKU_CONTRACT_ASSERT(grid_follows_rule<O>(grid));
 		return t;
 	}
 
@@ -45,7 +44,7 @@ namespace okiidoku::visitor {
 		case O_: return static_cast<Transformation>(mono::scramble(vis_grid.unchecked_get_mono_exact<O_>(), rng_seed));
 		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 		#undef OKIIDOKU_FOR_COMPILED_O
-		default: OKIIDOKU_CONTRACT_TRIVIAL_EVAL(false); // std::unreachable
+		default: OKIIDOKU_CONTRACT_USE(false); // std::unreachable
 		}
 	}
 }
