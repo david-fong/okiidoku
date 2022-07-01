@@ -32,6 +32,10 @@ target_sources(okiidoku_test.o2_bit_arr PRIVATE
 okiidoku_add_test(grid)
 okiidoku_test_a_depends_on_b(grid o2_bit_arr)
 
-okiidoku_add_test(algorithms)
-okiidoku_test_a_depends_on_b(algorithms o2_bit_arr)
-okiidoku_test_a_depends_on_b(algorithms grid)
+okiidoku_add_test(morph)
+okiidoku_test_a_depends_on_b(morph o2_bit_arr)
+okiidoku_test_a_depends_on_b(morph grid)
+
+okiidoku_add_test(puzzle)
+okiidoku_test_a_depends_on_b(puzzle o2_bit_arr)
+okiidoku_test_a_depends_on_b(puzzle grid)
