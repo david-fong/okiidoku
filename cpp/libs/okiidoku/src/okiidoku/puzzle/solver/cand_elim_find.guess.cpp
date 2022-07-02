@@ -36,7 +36,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 			}
 			return num_other_cand_cells;
 		}};
-		auto best_sym {best_cell_cands.count_lower_zeros_assuming_non_empty_mask()};
+		auto best_sym {best_cell_cands.first_set_bit_require_exists()};
 		o3i_t best_sym_num_other_cand_cells {0};
 		for (auto set_bits_walker {best_cell_cands.set_bits_walker()}; set_bits_walker.has_more(); set_bits_walker.advance()) {
 			const auto sym {set_bits_walker.value()};
@@ -150,8 +150,8 @@ namespace okiidoku::mono::detail::solver {
 
 	template<Order O> requires(is_order_compiled(O))
 	Guess<O> CandElimFind<O>::good_guess_candidate(const Engine<O>& engine) noexcept {
-		OKIIDOKU_CONTRACT_ASSERT(!engine.no_solutions_remain());
-		OKIIDOKU_CONTRACT_ASSERT(engine.get_num_puzcells_remaining() > 0); // cannot guess when already solved
+		OKIIDOKU_CONTRACT_ASSERT(!engine.no_more_solns());
+		OKIIDOKU_CONTRACT_ASSERT(engine.get_num_num_unsolved() > 0); // cannot guess when already solved
 		return find_good_guess_candidate_for_fast_solver<O>(engine.cells_cands(), engine.get_guess_stack_());
 	}
 

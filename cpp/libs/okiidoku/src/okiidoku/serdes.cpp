@@ -84,7 +84,7 @@ namespace okiidoku::mono { namespace {
 		// Some slightly-weird-looking logic stems from the fact that it is
 		// a "null" action to try to print something that can only take on one
 		// value (as in- the buffer will be unchanged). Just keep that in mind.
-		auto smol_val_buf {static_cast<val_t>(cell_cands.count_set_bits_below(val))};
+		auto smol_val_buf {static_cast<val_t>(cell_cands.count_below(val))};
 		OKIIDOKU_CONTRACT_USE(smol_val_buf < smol_val_buf_remaining);
 		while (smol_val_buf_remaining > 1) {
 			buf += static_cast<buf_t>(buf_pos * smol_val_buf); // should never overflow

@@ -41,7 +41,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 				const auto match_cands {cell_cands & syms_claiming_a_cell};
 				if (match_cands.count() > 0) [[unlikely]] {
 					if (match_cands.count() > 1) [[unlikely]] { return true; } // multiple syms want same cell.
-					const auto sym {match_cands.count_lower_zeros_assuming_non_empty_mask()};
+					const auto sym {match_cands.first_set_bit_require_exists()};
 					if (cell_cands.count() > 1) [[likely]] {
 						found_queues.push_back(found::SymClaimCell<O>{
 							.rmi{static_cast<rmi_t>(rmi)},
@@ -197,7 +197,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 		} else {
 			auto non_first_members {O2BitArr_ones<O>};
 			non_first_members.remove(subs.is_begin);
-			const auto second_non_single_member {non_first_members.count_lower_zeros_assuming_non_empty_mask()};
+			const auto second_non_single_member {non_first_members.first_set_bit_require_exists()};
 			OKIIDOKU_CONTRACT_USE(second_non_single_member > 0);
 			sub_a = static_cast<o2i_t>(second_non_single_member-1);
 		}
@@ -289,8 +289,8 @@ namespace okiidoku::mono::detail::solver {
 
 	template<Order O> requires(is_order_compiled(O)) \
 	UnwindInfo CandElimFind<O>::subsets(Engine<O>& engine, const int_ts::o2x_t<O> max_subset_size) noexcept {
-		OKIIDOKU_CONTRACT_ASSERT(!engine.no_solutions_remain());
-		if (engine.get_num_puzcells_remaining() == 0) [[unlikely]] { return UnwindInfo::make_no_unwind(); }
+		OKIIDOKU_CONTRACT_ASSERT(!engine.no_more_solns());
+		if (engine.get_num_num_unsolved() == 0) [[unlikely]] { return UnwindInfo::make_no_unwind(); }
 		return find_subsets_and_check_needs_unwind(engine, max_subset_size);
 	}
 

@@ -55,7 +55,7 @@
 #endif
 
 #ifndef OKIIDOKU_COMPILE_O16
-#define OKIIDOKU_COMPILE_O16 true
+#define OKIIDOKU_COMPILE_O16 false
 #endif
 
 #endif

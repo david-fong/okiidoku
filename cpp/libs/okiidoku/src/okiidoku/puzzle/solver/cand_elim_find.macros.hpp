@@ -14,8 +14,8 @@ namespace okiidoku::mono::detail::solver {
 	#define OKIIDOKU_CAND_ELIM_FINDER_DEF(TECHNIQUE_NAME) \
 	template<Order O> requires(is_order_compiled(O)) \
 	UnwindInfo CandElimFind<O>::TECHNIQUE_NAME(Engine<O>& engine) noexcept { \
-		OKIIDOKU_CONTRACT_ASSERT(!engine.no_solutions_remain()); \
-		if (engine.get_num_puzcells_remaining() == 0) [[unlikely]] { return UnwindInfo::make_no_unwind(); } \
+		OKIIDOKU_CONTRACT_ASSERT(!engine.no_more_solns()); \
+		if (engine.get_num_num_unsolved() == 0) [[unlikely]] { return UnwindInfo::make_no_unwind(); } \
 		const auto needs_unwind {find_ ## TECHNIQUE_NAME ## _and_check_needs_unwind(engine.cells_cands(), engine.get_found_queues_())}; \
 		if (needs_unwind) { return engine.unwind_one_stack_frame(); } \
 		return UnwindInfo::make_no_unwind(); \

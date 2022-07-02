@@ -33,7 +33,7 @@ namespace okiidoku::mono {
 	// TODO compiler having trouble inferring ability to use bzhi instruction for O=3,4 when they use u16 instead of u32.
 	template<Order O> requires(is_order_compiled(O))
 	typename O2BitArr<O>::o2x_t
-	O2BitArr<O>::count_set_bits_below(const typename O2BitArr<O>::o2x_t end) const noexcept {
+	O2BitArr<O>::count_below(const typename O2BitArr<O>::o2x_t end) const noexcept {
 		OKIIDOKU_CONTRACT_USE(end < T::O2);
 		if constexpr (num_words == 1) {
 			return static_cast<o2x_t>(std::popcount(static_cast<word_t>(
@@ -59,7 +59,7 @@ namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
 	typename O2BitArr<O>::o2xs_t
-	O2BitArr<O>::count_lower_zeros_assuming_non_empty_mask() const noexcept {
+	O2BitArr<O>::first_set_bit_require_exists() const noexcept {
 		// Note: without the non-empty-mask assumption, we'd have to
 		//  handle discounting excess top zeros in the empty-mask case.
 		OKIIDOKU_CONTRACT_USE(count() > 0);
@@ -155,8 +155,8 @@ namespace okiidoku::mono {
 
 	#define OKIIDOKU_FOR_COMPILED_O(O_) \
 		template typename O2BitArr<O_>::o2i_t O2BitArr<O_>::count() const noexcept; \
-		template typename O2BitArr<O_>::o2x_t O2BitArr<O_>::count_set_bits_below(typename O2BitArr<O_>::o2x_t) const noexcept; \
-		template typename O2BitArr<O_>::o2xs_t O2BitArr<O_>::count_lower_zeros_assuming_non_empty_mask() const noexcept; \
+		template typename O2BitArr<O_>::o2x_t O2BitArr<O_>::count_below(typename O2BitArr<O_>::o2x_t) const noexcept; \
+		template typename O2BitArr<O_>::o2xs_t O2BitArr<O_>::first_set_bit_require_exists() const noexcept; \
 		template typename O2BitArr<O_>::o2xs_t O2BitArr<O_>::get_index_of_nth_set_bit(O2BitArr<O_>::o2x_t) const noexcept; \
 		template std::strong_ordering O2BitArr<O_>::cmp_differences(const O2BitArr<O_>&, const O2BitArr<O_>&) noexcept; \
 		template std::array<char, Ints<O_>::O2> O2BitArr<O_>::to_chars() const noexcept;

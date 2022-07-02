@@ -9,6 +9,13 @@
       -
   - The maximum number of remaining clues is interesting since it will likely be the worst case for compressed storage.
 
+- Challenge to self: find out how to make puzzles with few or many givens.
+  - Hypothesis: prioritizing to remove cells that are in a house with more givens / fewer candidate-symbols will create puzzles with few givens and vice versa.
+  - It should be true that keeping givens in overlapping UA sets should help reduce the number of givens for a minimal puzzle.
+
+- I'd like to collect some statistics about relations between guess stack depth and num puzcells remaining / total num cand-syms remaining.
+  - Perhaps there can be some relation to when to search for larger-sized subsets?
+
 - Can the scramble-invariant property analysis of a grid be used to efficiently estimate the difficulty of a puzzle (or the possible range of difficulties of puzzles generated from a solution)? I believe (and hope) there is potential that the answer is yes. If it is the case, how? And what would the accuracy of the estimation be (error distribution)?
   - If so, could it be used to _create_ probably difficult puzzles?
   - What is the relationship between number of hints and puzzle difficulty?

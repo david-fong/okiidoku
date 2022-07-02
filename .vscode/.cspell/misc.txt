@@ -16,6 +16,7 @@ libokiidoku
 ōkiidoku
 opcount
 pdep
+Povs
 prefetch
 puzcell
 puzcells

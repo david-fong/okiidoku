@@ -27,16 +27,19 @@
 
 ## Misc List
 
-- Finding Fish:
-  - for each house type
-    - for each house
-      - get an O2BitArr indicating which symbols are not solved in the house.
-  - Taking N houses of the same type, considering symbol S, only choose houses that have not already solved S.
+<!-- - no more separate apply. find will do apply automatically -->
+- how to prevent program stack growth due to recursion for singles? consider giving CandPovs an internal data-only stack.
+<!-- - should unwinding be non-automatic? no. still no. I see no additional benefit from non-automatic, and still see the downside (opportunity for mistakes in engine usage). -->
+<!-- - should UnwindInfo say whether anyhing was found? yes. please add a bit. -->
+<!-- -   why? as a replacement for the FoundQueues functionality of checking if anything was found. -->
+<!-- - what should UnwindInfo now be called? LogicStat? FindStat? FindDigest? FindSummary? FindErrc? I like FindStat the most. -->
+- consider making subset finders take parameter of _single_ subset size to try finding for instead of a ceiling-like parameter.
 
 - Currently avoiding using `OKIIDOKU_MONO_INT_TS_TYPEDEFS` in headers in classes.
   - Was worried about the "header size" cost. I think I'm probably prematurely optimizing.
+  - give this a try [](https://crascit.com/2022/06/24/build-performance-insights/)
 
-- Come up with a contract-checking strategy for bindings. Options:
+- Come up with a precondition-checking strategy for language bindings. Options:
   - Leave it as a user responsibility to know and follow contracts.
   - Throw exception on the other language side.
 
@@ -52,28 +55,6 @@
     - http://forum.enjoysudoku.com/post318692.html?hilit=unavoidable#p318692
     - http://forum.enjoysudoku.com/unbiased-grid-generation-t5128-15.html#p39512
     - http://forum.enjoysudoku.com/structures-of-the-solution-grid-t4235-75.html
-
-- Challenge to self: find out how to make puzzles with few or many givens.
-  - Hypothesis: prioritizing to remove cells that are in a house with more givens / fewer candidate-symbols will create puzzles with few givens and vice versa.
-  - It should be true that keeping givens in overlapping UA sets should help reduce the number of givens for a minimal puzzle.
-
-- I'd like to collect some statistics about relations between guess stack depth and num puzcells remaining / total num cand-syms remaining.
-  - Perhaps there can be some relation to when to search for larger-sized subsets?
-
-- what if we made subset-search also find and apply singles?
-  - If specializations for finding singles co-exist with the subset finding, and subsets also find and apply singles, then there should be a documentation note that using the subset finders means the singles finders (presumably?) make no sense to use at the same time.
-
-- what optimizations could be made to quickly check if entire houses have experienced no change? how often would such optimizations come into effect? would there be a net benefit? if so, how much?
-- when a subset has been found, we currently always go back to subset-size index 0, but is there anything smarter we could do?
-  - If you find a naked subset, the resulting eliminations in the new partition can illuminate new naked subsets, but I don't think it can illuminate new hidden subsets.
-  -
-
-- What ways could be explored to speed up the OR-ing together of cand-sym masks when searching for subsets?
-  - A tree-like structure where middle layers cache some pre-computed ORs of partial combinations?
-
-- when searching subsets, is there a way to use knowledge about which cells have changed in cand-syms since last subset search to optimize the combination-search?
-  - Any combination composed only of cells whose number of cand-syms hasn't changed since the last find attempt can be skipped. (I think).
-    - I'd be interested in doing some manual profiling to how often such a skip branch gets taken for order=5.
 
 - try focusing guesses on the cell ruling out a known solution
 - see the TODO for `get_guess_grouping`.

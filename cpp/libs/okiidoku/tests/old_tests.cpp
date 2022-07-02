@@ -31,8 +31,6 @@
 
 static_assert(std::is_same_v<okiidoku::rng_seed_t, std::minstd_rand::result_type>);
 
-#include <test.ints.tpp>
-
 
 
 /**
@@ -64,16 +62,7 @@ int main(const int argc, char const *const argv[]) {
 	okiidoku::SharedRng shared_rng;
 	shared_rng.rng.seed(srand_key);
 
-	#define OKIIDOKU_FOR_COMPILED_O(O_) \
-	test_ints<O_>();
-	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-	#undef OKIIDOKU_FOR_COMPILED_O
-
 	if (test_algorithms<5>(shared_rng, num_rounds) != 0) { return 1; }
-	// #define OKIIDOKU_FOR_COMPILED_O(O_) \
-	// if (test_algorithms<O_>(shared_rng, num_rounds) != 0) { return 1; }
-	// OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-	// #undef OKIIDOKU_FOR_COMPILED_O
 
 	return 0;
 }

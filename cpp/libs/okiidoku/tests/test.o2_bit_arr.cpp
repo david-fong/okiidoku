@@ -11,16 +11,16 @@ void test_o2_bit_arr() {
 
 	REQUIRE(O2BitArr_ones<O>.count() == T::O2);
 	for (o2i_t i {0}; i < T::O2; ++i) {
-		REQUIRE(O2BitArr_ones<O>.count_set_bits_below(static_cast<o2x_t>(i)) == i);
+		REQUIRE(O2BitArr_ones<O>.count_below(static_cast<o2x_t>(i)) == i);
 		REQUIRE(O2BitArr_ones<O>.get_index_of_nth_set_bit(static_cast<o2x_t>(i)) == i);
 	}
 	{
 		auto ones {O2BitArr_ones<O>};
 		for (o2i_t i {0}; i < T::O2; ++i) {
-			REQUIRE(ones.count_set_bits_below(static_cast<o2x_t>(i)) == 0);
+			REQUIRE(ones.count_below(static_cast<o2x_t>(i)) == 0);
 			REQUIRE(ones.get_index_of_nth_set_bit(0) == i);
-			REQUIRE(ones.test(ones.count_lower_zeros_assuming_non_empty_mask()));
-			ones.unset(ones.count_lower_zeros_assuming_non_empty_mask());
+			REQUIRE(ones.test(ones.first_set_bit_require_exists()));
+			ones.unset(ones.first_set_bit_require_exists());
 		}
 	}
 	{

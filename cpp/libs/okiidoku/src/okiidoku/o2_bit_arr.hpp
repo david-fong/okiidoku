@@ -84,7 +84,7 @@ namespace okiidoku::mono {
 
 		// count the number of set bits below the specified bit index.
 		// contract: `end < O2`.
-		[[nodiscard, gnu::pure]] o2x_t count_set_bits_below(const o2x_t end) const noexcept;
+		[[nodiscard, gnu::pure]] o2x_t count_below(const o2x_t end) const noexcept;
 
 		// contract: `at < O2`
 		[[nodiscard, gnu::pure]] bool test(const o2x_t at) const noexcept {
@@ -163,8 +163,8 @@ namespace okiidoku::mono {
 		}
 
 		// contract: this mask has at least one set bit.
-		// Note: a suitably long and ugly function name for a sharp, niche, optimized knife.
-		[[nodiscard, gnu::pure]] o2xs_t count_lower_zeros_assuming_non_empty_mask() const noexcept;
+		// Note: an ugly name for a "sharp knife".
+		[[nodiscard, gnu::pure]] o2xs_t first_set_bit_require_exists() const noexcept;
 
 		// contract: `set_bit_i` < O2 and there are at least `set_bit_i+1` set bits.
 		[[nodiscard, gnu::pure]] o2x_t get_index_of_nth_set_bit(o2x_t set_bit_i) const noexcept;

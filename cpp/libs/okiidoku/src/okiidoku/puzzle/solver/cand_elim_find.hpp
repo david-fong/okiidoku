@@ -10,8 +10,8 @@ namespace okiidoku::mono::detail::solver {
 		// Note: use of class wrapper instead of individual template functions eases friending.
 	public:
 		// common contracts and invariants for all finders:
-		// contract: `no_solutions_remain` returns `false`.
-		// behaviour: immediately returns if `get_num_puzcells_remaining` returns zero.
+		// contract: `no_more_solns` returns `false`.
+		// behaviour: immediately returns if `get_num_num_unsolved` returns zero.
 
 		static UnwindInfo sym_claim_cell(Engine<O>&) noexcept;
 
