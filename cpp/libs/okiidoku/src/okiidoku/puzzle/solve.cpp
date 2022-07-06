@@ -40,7 +40,7 @@ namespace okiidoku::mono {
 		}
 		engine_t& e {*engine_};
 		if (num_solns_found() > 0) {
-			OKIIDOKU_CONTRACT_ASSERT(e.get_num_num_unsolved() == 0);
+			OKIIDOKU_CONTRACT_ASSERT(e.get_num_unsolved() == 0);
 			const auto check {e.unwind_one_stack_frame()};
 			if (check.did_unwind_root()) { return std::nullopt; }
 		}
@@ -66,12 +66,12 @@ namespace okiidoku::mono {
 			std::cref(*static_cast<finder_t>(find_intersections)),
 			std::cref(*static_cast<finder_t>(find_subsets)),
 		})};
-		while (e.get_num_num_unsolved() > 0) [[likely]] {
+		while (e.get_num_unsolved() > 0) [[likely]] {
 			{
 				using Apply = detail::solver::CandElimApply<O>;
 				const auto check {Apply::apply_all_queued(e)};
 				if (check.did_unwind_root()) [[unlikely]] { return std::nullopt; }
-				if (e.get_num_num_unsolved() == 0) [[unlikely]] { break; }
+				if (e.get_num_unsolved() == 0) [[unlikely]] { break; }
 			}
 			{
 				auto check {detail::solver::UnwindInfo::make_no_unwind()};

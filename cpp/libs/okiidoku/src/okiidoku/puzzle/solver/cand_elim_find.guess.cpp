@@ -151,7 +151,7 @@ namespace okiidoku::mono::detail::solver {
 	template<Order O> requires(is_order_compiled(O))
 	Guess<O> CandElimFind<O>::good_guess_candidate(const Engine<O>& engine) noexcept {
 		OKIIDOKU_CONTRACT_ASSERT(!engine.no_more_solns());
-		OKIIDOKU_CONTRACT_ASSERT(engine.get_num_num_unsolved() > 0); // cannot guess when already solved
+		OKIIDOKU_CONTRACT_ASSERT(engine.get_num_unsolved() > 0); // cannot guess when already solved
 		return find_good_guess_candidate_for_fast_solver<O>(engine.cells_cands(), engine.get_guess_stack_());
 	}
 

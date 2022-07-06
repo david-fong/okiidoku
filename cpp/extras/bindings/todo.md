@@ -26,3 +26,11 @@ There is [SWIG](https://www.swig.org/exec.html), but from extremely shallow onli
 
 - [Boost.Python](https://www.boost.org/doc/libs/1_79_0/libs/python/doc/html/index.html)
   - [reducing compiling time](https://www.boost.org/doc/libs/1_50_0/libs/python/doc/tutorial/doc/html/python/techniques.html#python.reducing_compiling_time)
+
+## Java
+
+not yet confirmed to be on roadmap.
+
+- There's JNI.
+- Java 19 has something new [](https://openjdk.org/jeps/424)
+

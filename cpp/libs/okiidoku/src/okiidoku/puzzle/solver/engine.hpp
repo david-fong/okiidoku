@@ -94,12 +94,12 @@ namespace okiidoku::mono::detail::solver {
 		>;
 
 		struct Frame final {
-			o4i_t num_num_unsolved;
+			o4i_t num_unsolved;
 			CandsGrid<O> cells_cands;
 			houses_subsets_t houses_subsets;
 		};
 
-		// TODO consider a different design: cells_cands_ and num_num_unsolved_ are just the top
+		// TODO consider a different design: cells_cands_ and num_unsolved_ are just the top
 		// entry of the guess_stack_. no_more_solns_ is implied when the guess stack size is zero.
 		//  This would make the EngineImpl struct size small enough to probably justify no longer wrapping
 		//   Engine with unique_ptr in the Solver classes.
@@ -133,12 +133,11 @@ namespace okiidoku::mono::detail::solver {
 
 
 		[[nodiscard, gnu::pure]]
-		auto get_num_num_unsolved() const noexcept { return frame_.num_num_unsolved; }
+		auto get_num_unsolved() const noexcept { return frame_.num_unsolved; }
 
 		// contract: `val` is currently one of _multiple_ candidate-symbols at `rmi`.
 		// contract: only call when `has_queued_cand_elims` returns `false`. There
 		//  is _never_ a good reason to make a guess when you have a deduction ready.
-		//  See design docs for more discussion.
 		void push_guess(Guess<O>) noexcept;
 
 		[[nodiscard, gnu::pure]]
@@ -148,7 +147,7 @@ namespace okiidoku::mono::detail::solver {
 		std::uint_fast64_t get_total_guesses() const noexcept { return total_guesses_; };
 
 		// contract: `no_more_solns` returns `false`.
-		// contract: `get_num_num_unsolved` returns zero.
+		// contract: `get_num_unsolved` returns zero.
 		// returns a filled grid that follows the one rule and contains all the puzzle's givens.
 		[[nodiscard, gnu::pure]]
 		Grid<O> build_solution_obj() const noexcept;
@@ -185,15 +184,15 @@ namespace okiidoku::mono::detail::solver {
 		// contract: (it follows that) no previous call in the context of the current
 		//  guess stack has been made with the same value of `rmi`.
 		// contract: (it follows that) the cell at `rmi` has exactly one candidate-symbol.
-		// post-condition: decrements `num_num_unsolved`.
+		// post-condition: decrements `num_unsolved`.
 		void enqueue_cand_elims_for_new_cell_claim_sym_(rmi_t rmi) noexcept;
 
 		void debug_print_cells_cands_() const noexcept;
-		[[nodiscard, gnu::pure]] bool debug_check_correct_num_num_unsolved_() const noexcept;
+		[[nodiscard, gnu::pure]] bool debug_check_correct_num_unsolved_() const noexcept;
 
 
 		Frame frame_ {
-			.num_num_unsolved {T::O4},
+			.num_unsolved {T::O4},
 			.cells_cands {},
 			.houses_subsets {},
 		};
@@ -224,7 +223,7 @@ namespace okiidoku::mono::detail::solver {
 		using EngineImpl<O>::do_elim_remove_sym_;
 		using EngineImpl<O>::no_more_solns;
 		using EngineImpl<O>::has_queued_cand_elims;
-		using EngineImpl<O>::get_num_num_unsolved;
+		using EngineImpl<O>::get_num_unsolved;
 		using EngineImpl<O>::push_guess;
 		using EngineImpl<O>::get_guess_stack_depth;
 		using EngineImpl<O>::get_total_guesses;

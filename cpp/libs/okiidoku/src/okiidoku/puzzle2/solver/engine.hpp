@@ -23,7 +23,6 @@ I don't expect the average person checking out this library to be interested
 namespace okiidoku::mono::detail::solver2 {
 
 	template<Order O> requires(is_order_compiled(O)) struct EngineImpl;
-	template<Order O> requires(is_order_compiled(O)) class Engine;
 
 	// usage: must be called immediately when a cell's candidate-symbol count
 	//  changes to zero. call to prepare to find another solution.
@@ -88,7 +87,7 @@ namespace okiidoku::mono::detail::solver2 {
 		auto no_more_solns() const noexcept { return no_more_solns_; }
 
 		[[nodiscard, gnu::pure]]
-		auto get_num_unsolved() const noexcept { return frame_.num_unsolved; }
+		auto get_num_unsolved() const noexcept { return frame_.cands_povs.num_unsolved(); }
 
 		// contract: `val` is currently one of _multiple_ candidate-symbols at `rmi`.
 		void push_guess(Guess<O>) noexcept;

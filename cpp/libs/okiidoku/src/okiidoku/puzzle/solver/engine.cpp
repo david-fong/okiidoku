@@ -19,7 +19,7 @@ namespace okiidoku::mono::detail::solver {
 
 	template<Order O> requires(is_order_compiled(O))
 	void EngineImpl<O>::reinit_with_puzzle(const Grid<O>& puzzle) noexcept {
-		frame_.num_num_unsolved = T::O4;
+		frame_.num_unsolved = T::O4;
 		mut_cells_cands().get_underlying_array().fill(O2BitArr_ones<O>);
 		for (const auto house_type : house_types) {
 		for (o2i_t house {0}; house < T::O2; ++house) {
@@ -52,7 +52,7 @@ namespace okiidoku::mono::detail::solver {
 	template<Order O> requires(is_order_compiled(O))
 	Grid<O> EngineImpl<O>::build_solution_obj() const noexcept {
 		OKIIDOKU_CONTRACT_ASSERT(!no_more_solns());
-		OKIIDOKU_CONTRACT_ASSERT(get_num_num_unsolved() == 0);
+		OKIIDOKU_CONTRACT_ASSERT(get_num_unsolved() == 0);
 		Grid<O> soln;
 		for (o4i_t rmi {0}; rmi < T::O4; ++rmi) {
 			const auto& cell_cands {cells_cands().at_rmi(rmi)};
@@ -143,14 +143,14 @@ namespace okiidoku::mono::detail::solver {
 		const EngineImpl<O>::rmi_t rmi
 	) noexcept {
 		OKIIDOKU_CONTRACT_ASSERT(!no_more_solns());
-		OKIIDOKU_CONTRACT_USE(frame_.num_num_unsolved > 0);
+		OKIIDOKU_CONTRACT_USE(frame_.num_unsolved > 0);
 		const auto& cell_cands {cells_cands().at_rmi(rmi)};
 		OKIIDOKU_CONTRACT_USE(cell_cands.count() == 1);
 		const auto val {cell_cands.first_set_bit_require_exists()};
 		OKIIDOKU_CONTRACT_ASSERT(cell_cands.test(val));
 		found_queues_.push_back(found::CellClaimSym<O>{.rmi{rmi},.val{val}});
-		--frame_.num_num_unsolved;
-		OKIIDOKU_CONTRACT_ASSERT(debug_check_correct_num_num_unsolved_());
+		--frame_.num_unsolved;
+		OKIIDOKU_CONTRACT_ASSERT(debug_check_correct_num_unsolved_());
 	}
 
 
@@ -182,7 +182,7 @@ namespace okiidoku::mono::detail::solver {
 		}
 		auto& guess_frame {e.guess_stack_.back()};
 		e.frame_ = std::move(guess_frame.frame);
-		OKIIDOKU_CONTRACT_ASSERT(e.debug_check_correct_num_num_unsolved_());
+		OKIIDOKU_CONTRACT_ASSERT(e.debug_check_correct_num_unsolved_());
 
 		const auto guess {std::move(guess_frame.guess)};
 		auto& cell_cands {e.mut_cells_cands().at_rmi(guess.rmi)};
@@ -210,7 +210,7 @@ namespace okiidoku::mono::detail::solver {
 		}
 		auto& guess_frame {e.guess_stack_.front()};
 		e.frame_ = std::move(guess_frame.frame);
-		OKIIDOKU_CONTRACT_ASSERT(e.debug_check_correct_num_num_unsolved_());
+		OKIIDOKU_CONTRACT_ASSERT(e.debug_check_correct_num_unsolved_());
 
 		e.found_queues_.clear();
 		e.total_guesses_ = 0;
@@ -236,8 +236,8 @@ namespace okiidoku::mono::detail::solver {
 	}
 
 	template<Order O> requires(is_order_compiled(O))
-	bool EngineImpl<O>::debug_check_correct_num_num_unsolved_() const noexcept {
-		return get_num_num_unsolved() == Ints<O>::O4 - static_cast<int_ts::o4i_t<O>>(std::count_if(
+	bool EngineImpl<O>::debug_check_correct_num_unsolved_() const noexcept {
+		return get_num_unsolved() == Ints<O>::O4 - static_cast<int_ts::o4i_t<O>>(std::count_if(
 			#ifdef __cpp_lib_execution
 			std::execution::unseq,
 			#endif

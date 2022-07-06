@@ -7,9 +7,14 @@
 
 ## Not Possible (?)
 
+- I noticed that the exported symbols of the dynamic library weren't getting grouped by order; I though this could be a bad thing for code locality.
+  - Tried out [this](https://stackoverflow.com/questions/6886567/how-does-gcc-decide-what-order-to-output-assembly-functions-in). Made a BIST function that calls all the things and see if it will cause monomorphic functions to get grouped together. See if exporting the BIST is required for the ordering to be done.
+  - It didn't work. Tried making the dynamic library static and it still didn't work. I think I should stop worrying about it (don't micro-optimize things that won't have noticeable effect).
 - what: try using the GCC "section" function attribute to put same-order code in the same section. Ex. "text-okiidoku-o3". Test this on an older commit and see how it goes. May want to get rid of usages of `[[gnu::hot/cold]]`.
   - motivation: code locality.
   - why it doesn't work: can't use template arguments in attribute string-argument values. :(
+  - An alternative might be to do the template instantiations all together, since the positioning of machine code functions seems to be based around the positioning of the function definitions. I don't like this options as much as what I have right now: it would mean any change to an implementation would recompile everything (since all instantiations would need to be in a same TU).
+  - another alternative would be to use PGO. That's probably what I'll go with once I figure out how to do it.
 
 ## Things Tried that I Reverted
 
@@ -57,10 +62,6 @@ These didn't end up doing the thing I wanted / thought might happen.
 
 - refactor template expansions and tweak config header to co-locate same-order expansions while also giving a somewhat convenient way to control what library features to include? Or look into a way to get linker to automatically do this.
   - started the refactor and then decided to see if there was perf improvement when compiling for only one order. No improvement was observed. Refactoring effort abandoned for added complexity. If there is other merit found in the future, the work is stashed in the `collate-so-symbols` branch.
-
-- I noticed that the exported symbols of the dynamic library weren't getting grouped by order; I though this could be a bad thing for code locality.
-  - Tried out [this](https://stackoverflow.com/questions/6886567/how-does-gcc-decide-what-order-to-output-assembly-functions-in). Made a BIST function that calls all the things and see if it will cause monomorphic functions to get grouped together. See if exporting the BIST is required for the ordering to be done.
-  - It didn't work. Tried making the dynamic library static and it still didn't work. I think I should stop worrying about it (don't micro-optimize things that won't have noticeable effect).
 
 ### Generator
 

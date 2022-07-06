@@ -3,7 +3,7 @@
 A C++ library for variable-grid-size sudoku to:
 
 - generate random, full grids
-- generate puzzles
+- (WIP) generate puzzles
 - find all solutions to a puzzle using logic and brute-force
 - (WIP) efficiently(?) put full grids in a canonical form
 - (WIP) archive collections of grids in compressed form
@@ -42,7 +42,7 @@ In order:
 
 This project is MIT licensed.
 
-If you have a question about the project and whether it is suitable for your own goals, please first take a look at other existing projects and what they provide, and read through this project's [design docs](./writings/design/) before asking.
+If you have a question about the project and whether it is suitable for your own goals, please first take a look at other existing projects and what they provide, and read through this project's [design docs](./writings/design/) before asking. Use the [discussion page](https://github.com/david-fong/okiidoku/discussions) for questions rather than raising a GitHub issue.
 
 If you do something cool with it, that's great! I'd love to hear about it.
 

@@ -290,7 +290,7 @@ namespace okiidoku::mono::detail::solver {
 	template<Order O> requires(is_order_compiled(O)) \
 	UnwindInfo CandElimFind<O>::subsets(Engine<O>& engine, const int_ts::o2x_t<O> max_subset_size) noexcept {
 		OKIIDOKU_CONTRACT_ASSERT(!engine.no_more_solns());
-		if (engine.get_num_num_unsolved() == 0) [[unlikely]] { return UnwindInfo::make_no_unwind(); }
+		if (engine.get_num_unsolved() == 0) [[unlikely]] { return UnwindInfo::make_no_unwind(); }
 		return find_subsets_and_check_needs_unwind(engine, max_subset_size);
 	}
 

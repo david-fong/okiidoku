@@ -5,7 +5,7 @@
 - can deterministically cover all completions of a grid without revisiting already-visited outcomes.
   - can be used to find out how many solutions a puzzle has.
 
-- very slow for larger order grids
+- when not combined with deductive methods, is very slow for larger order grids
 
 ## Stochastic Search
 

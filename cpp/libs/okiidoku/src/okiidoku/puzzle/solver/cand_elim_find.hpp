@@ -11,7 +11,7 @@ namespace okiidoku::mono::detail::solver {
 	public:
 		// common contracts and invariants for all finders:
 		// contract: `no_more_solns` returns `false`.
-		// behaviour: immediately returns if `get_num_num_unsolved` returns zero.
+		// behaviour: immediately returns if `get_num_unsolved` returns zero.
 
 		static UnwindInfo sym_claim_cell(Engine<O>&) noexcept;
 
