@@ -5,23 +5,6 @@
 #include <mutex>
 #include <cstdint>
 
-/* #define OKIIDOKU_DEFINE_MT19937_64 \
-template class std::mersenne_twister_engine<std::uint_fast64_t, 64, 312, 156, 31, \
-	0xb5026f5aa96619e9, 29, \
-	0x5555555555555555, 17, \
-	0x71d67fffeda60000, 37, \
-	0xfff7eee000000000, 43, 6364136223846793005 \
->; */
-
-// explicit template declaration of std::mt19937_64.
-// done to prevent inclusion of the implementation in each per-order dynamic library.
-// requires users of the code to provide the
-// extern OKIIDOKU_DEFINE_MT19937_64
-
-// #ifndef OKIIDOKU_IS_BUILD_LIBRARY
-// OKIIDOKU_DEFINE_MT19937_64
-// #endif
-
 namespace okiidoku {
 
 	class SharedRng final {
@@ -34,7 +17,10 @@ namespace okiidoku {
 
 		[[nodiscard]] std::uint_fast32_t get_rng_seed() noexcept {
 			std::lock_guard lock_guard {mutex};
-			return rng() - decltype(rng)::min();
+			#pragma GCC diagnostic push
+			#pragma GCC diagnostic ignored "-Wuseless-cast" // not useless on MSVC
+			return static_cast<std::uint_fast32_t>(rng() - decltype(rng)::min());
+			#pragma GCC diagnostic pop
 		}
 	};
 }

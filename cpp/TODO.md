@@ -30,7 +30,7 @@
 <!-- - no more separate apply. find will do apply automatically -->
 - how to prevent program stack growth due to recursion for singles? consider giving CandPovs an internal data-only stack.
 <!-- - should unwinding be non-automatic? no. still no. I see no additional benefit from non-automatic, and still see the downside (opportunity for mistakes in engine usage). -->
-<!-- - should UnwindInfo say whether anyhing was found? yes. please add a bit. -->
+<!-- - should UnwindInfo say whether anything was found? yes. please add a bit. -->
 <!-- -   why? as a replacement for the FoundQueues functionality of checking if anything was found. -->
 <!-- - what should UnwindInfo now be called? LogicStat? FindStat? FindDigest? FindSummary? FindErrc? I like FindStat the most. -->
 - consider making subset finders take parameter of _single_ subset size to try finding for instead of a ceiling-like parameter.
@@ -45,9 +45,6 @@ consider making cand masks have two lanes: one storing full O2BitArr, one storin
   - Leave it as a user responsibility to know and follow contracts.
   - Throw exception on the other language side.
 
-- look into using Catch2 for testing
-  - [tutorial](https://github.com/catchorg/Catch2/blob/devel/docs/tutorial.md)
-- or alternatively using the "smaller version", [doctest](https://github.com/doctest/doctest)
 - current usage of `okiidoku_IS_TOP_LEVEL` (instead of `PROJECT_IS_TOP_LEVEL`) is to not build testing for emscripten bindings since I don't know how to run wasm. Kind of a dumb reason and dumb hack. Not sure what to do here.
 
 - think about [this](https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle#Pseudorandom_generators)
@@ -79,11 +76,6 @@ consider making cand masks have two lanes: one storing full O2BitArr, one storin
 - CI/CD
   - [CPM notes](https://github.com/cpm-cmake/CPM.cmake/wiki/Caching-with-CPM.cmake-and-ccache-on-GitHub-Actions#caching-with-github-actions)
   - [catch2 notes](https://github.com/catchorg/Catch2/blob/devel/docs/ci-and-misc.md)
-
-- experiment with enabling sanitizers only on certain cmake targets, where legal according to sanitizer specs
-  - <https://github.com/google/sanitizers/wiki/AddressSanitizer#faq>
-  - <https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html#issue-suppression>
-  - this only crossed my mind because the debug binaries seem really big and I wonder if it's due to sanitizer stuff. the debug test bunaries are quite big- I think due to catch2. I'm considering alternatively switching back to doctest.
 
 - find out how to use the [cppcoreguidelines checker](https://docs.microsoft.com/en-us/cpp/code-quality/using-the-cpp-core-guidelines-checkers?view=msvc-170)
   - I want to use it in a way that is driven by cmake

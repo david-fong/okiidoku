@@ -3,7 +3,6 @@ include_guard(DIRECTORY)
 set(CPM_DOWNLOAD_VERSION 0.35.1) # https://github.com/cpm-cmake/CPM.cmake/tags
 include(okiidoku/dependencies.get_cpm)
 
-
 CPMAddPackage(
 	NAME range-v3
 	GIT_TAG 0.12.0 # https://github.com/ericniebler/range-v3/releases
@@ -25,6 +24,7 @@ if(okiidoku_IS_TOP_LEVEL)
 		NAME catch2
 		VERSION 3.1.0
 		GITHUB_REPOSITORY "catchorg/Catch2"
+		EXCLUDE_FROM_ALL TRUE
 	)
 	include("${catch2_SOURCE_DIR}/extras/Catch.cmake")
 endif()

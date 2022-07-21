@@ -3,13 +3,11 @@
 #include <okiidoku_cli_utils/shared_rng.hpp>
 #include <okiidoku_cli_utils/console_setup.hpp>
 
-#include <iostream>  // cout,
+#include <iostream>  // cout
 #include <iomanip>   // hex
 #include <charconv>
 #include <string_view>
-#include <random>    // random_device,
-
-// OKIIDOKU_DEFINE_MT19937_64
+#include <random>    // random_device
 
 /**
 ARGUMENTS

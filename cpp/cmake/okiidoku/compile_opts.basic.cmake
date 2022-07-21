@@ -5,8 +5,8 @@ include_guard(DIRECTORY)
 # and isn't less strict on itself than a very strict user's compiler
 # options might be on it.
 
-add_library(okiidoku_compile_options_public  INTERFACE IMPORTED)
-add_library(okiidoku_compile_options_private INTERFACE IMPORTED)
+add_library(okiidoku_compile_options_public  INTERFACE IMPORTED) # "IMPORTED" to prevent auto installation
+add_library(okiidoku_compile_options_private INTERFACE)
 
 # source file and compiler option parsing rules:
 # Note: the pragma flags can currently be private since I currently
