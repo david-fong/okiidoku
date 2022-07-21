@@ -4,6 +4,7 @@
 add_executable(okiidoku_example_mono using_mono.main.cpp)
 target_link_libraries(okiidoku_example_mono
 	# you won't have these. I only use them to help build the example.
+	PUBLIC  okiidoku_compile_options_public
 	PRIVATE okiidoku_compile_options_private
 	PRIVATE okiidoku_cli_utils
 
@@ -14,8 +15,9 @@ target_link_libraries(okiidoku_example_mono
 # TODO.low consider making an example using std::async.
 # find_package(Threads REQUIRED)
 # target_link_libraries(okiidoku_example_threads
-# 	PRIVATE okiidoku_compile_options_private
-# 	PRIVATE okiidoku_cli_utils
-# 	PRIVATE okiidoku::okiidoku
-# 	PRIVATE Threads::Threads
+	# PUBLIC  okiidoku_compile_options_public
+	# PRIVATE okiidoku_compile_options_private
+	# PRIVATE okiidoku_cli_utils
+	# PRIVATE okiidoku::okiidoku
+	# PRIVATE Threads::Threads
 # )

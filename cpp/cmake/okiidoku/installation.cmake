@@ -3,6 +3,7 @@ include_guard(DIRECTORY)
 install(TARGETS
 	okiidoku okiidoku_cli
 	EXPORT okiidoku_installation_targets
+	# RUNTIME_DEPENDENCIES # currently there are none.
 	RUNTIME  COMPONENT okiidoku_runtime
 	LIBRARY  COMPONENT okiidoku_runtime
 	NAMELINK_COMPONENT okiidoku_development

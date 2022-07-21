@@ -5,20 +5,24 @@ include_guard(DIRECTORY)
 # and isn't less strict on itself than a very strict user's compiler
 # options might be on it.
 
-# add_library(okiidoku_compile_options_public  INTERFACE IMPORTED)
+add_library(okiidoku_compile_options_public  INTERFACE IMPORTED)
 add_library(okiidoku_compile_options_private INTERFACE IMPORTED)
 
 # source file and compiler option parsing rules:
+# Note: the pragma flags can currently be private since I currently
+#  don't use any compiler-specific pragmas in any public header files.
 if(MSVC)
+	target_compile_options(okiidoku_compile_options_public INTERFACE
+		/wd5030 # warning disable: "unrecognized attribute"
+	)
 	target_compile_options(okiidoku_compile_options_private INTERFACE
 		/options:strict # unrecognized compiler options are errors
 		/utf-8  # /source-charset:utf-8 (for preprocessor), and /execution-charset:utf8 (for compiler)
-		/wd5030 # warning disable: "unrecognized attribute"
 		/wd4068 # warning disable: "unrecognized pragma"
-		# TODO 5030 and utf-8 may not work as a private-only compiler option... we can either make it a public
-		# otpion, or use https://docs.microsoft.com/en-us/cpp/preprocessor/warning?view=msvc-170
 	)
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+	target_compile_options(okiidoku_compile_options_public INTERFACE
+	)
 	target_compile_options(okiidoku_compile_options_private INTERFACE
 		# -Wbidi-chars=any # warn on any usage of bidi text
 		-Wnormalized # warn on identifiers that look the same but are not the same

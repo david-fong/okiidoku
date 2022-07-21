@@ -35,6 +35,9 @@
 		"[json]": {
 			"editor.insertSpaces": false,
 		},
+		"[xml]": {
+			"editor.insertSpaces": false,
+		},
 		"[cpp]": {
 			"editor.insertSpaces": false,
 		},

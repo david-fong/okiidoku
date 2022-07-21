@@ -34,12 +34,15 @@ perf stat -e branch-misses:u ./libs/okiidoku/tests/Release/okiidoku_test
 ## CMake Things
 
 - [official tutorial](https://cmake.org/cmake/help/latest/guide/tutorial/index.html)
-- https://cliutils.gitlab.io/modern-cmake/
-- [Jason Turner example/template](https://github.com/lefticus/cpp_weekly_game_project)
 - [cmake for dynamic library developers](https://www.youtube.com/watch?v=m0DwB4OvDXk)
 - [alex reinking tutorial part 2](https://alexreinking.com/blog/how-to-use-cmake-without-the-agonizing-pain-part-2.html)
 - [](https://crascit.com/2016/01/31/enhanced-source-file-handling-with-target_sources/)
 - [preparing a project for CPM](https://github.com/cpm-cmake/CPM.cmake/wiki/Preparing-projects-for-CPM.cmake)
+- https://cliutils.gitlab.io/modern-cmake/
+- [Jason Turner example/template](https://github.com/lefticus/cpp_weekly_game_project)
+- [](https://cmake.org/cmake/help/latest/command/install.html#install-runtime-dependency-set)
+
+- <https://cmake.org/cmake/help/latest/variable/PROJECT-NAME_SOURCE_DIR.html>
 
 ## Conan Things
 

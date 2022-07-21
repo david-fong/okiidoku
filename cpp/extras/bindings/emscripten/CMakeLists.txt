@@ -55,6 +55,7 @@ target_link_options(okiidoku_js PRIVATE
 	--pre-js=${PROJECT_SOURCE_DIR}/emcc_pre_js.js
 )
 target_link_libraries(okiidoku_js
+	PUBLIC  okiidoku_compile_options_public
 	PRIVATE okiidoku_compile_options_private
 	PRIVATE okiidoku
 	PRIVATE embind

@@ -2,16 +2,16 @@
 
 ## Backtracking
 
-- can deterministically cover all completions of a grid without revisiting already-visited outcomes.
+- can deterministically cover all solutions of a puzzle without revisiting already-visited solutions.
   - can be used to find out how many solutions a puzzle has.
 
-- when not combined with deductive methods, is very slow for larger order grids
+- when not combined with deductive methods, is very slow for larger grids
 
 ## Stochastic Search
 
 I learned about this from [this forum thread](http://forum.enjoysudoku.com/giant-sudoku-s-16x16-25x25-36x36-100x100-t6578-120.html#p259504) where I later [made a post describing my optimizations](http://forum.enjoysudoku.com/giant-sudoku-s-16x16-25x25-36x36-100x100-t6578-150.html#p318577).
 
-### The Basic Gist
+### The Basic Idea
 
 Start with valid rows. Continually pick a random row and two random cells in the row; if swapping them would not cause their columns and boxes to be missing more symbols, swap their symbols. Do this until the grid is valid. A greedy algorithm that performs advances that are pareto-equivalent or a pareto improvement.
 
@@ -19,7 +19,7 @@ Start with valid rows. Continually pick a random row and two random cells in the
 
 First make all boxes valid while allowing invalid columns. Once all boxes are valid, make all the columns valid. This constrains the swaps to be more "intentional" and aligned with the rule of sudoku.
 
-Improve cache locality by doing one house at a time: when working on boxes, completely satisfy the boxes of the first horizontal chute before moving to the next one; when working on columns, completely satisfy all columns of the first vertical chute before moving to the next one. This results in less data being worked on at any time.
+Improve cache locality by doing one chute at a time: when working on boxes, completely satisfy the boxes of the first horizontal chute before moving to the next one; when working on columns, completely satisfy all columns of the first vertical chute before moving to the next one. This results in less data being worked on at any time.
 
 When storing counts of how many copies of a symbol a house has, for the 2D array where one dimension is for the `O2` different symbols, and the other is for the `O1` houses currently being made valid, make the outer dimension be the one for symbols. Rationale: cache locality. As grid-order increases, `O2` grows much faster than `O1`. Every swap operation involves four entries in the 2D array, being four "corners" in a sub-rectangle of the array. Putting the smaller dimension as the inner one increases the likelihood of getting pairs of those four "corners" in the same cache line (the best case becomes two cache misses instead of four).
 

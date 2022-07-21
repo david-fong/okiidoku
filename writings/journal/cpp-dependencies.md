@@ -49,3 +49,9 @@ Some people advocate for "cmake-non-intrusive" package-manager usage. Ie. keepin
 - There's also the fact that FetchContent isn't super easy to share between multiple projects. You can set SOURCE_DIR to be a common directory, such as an `external` directory, but somewhat disappointingly, if you remove the build directory and reconfigure, CMake will try to clone again even though the clone is still there in the `external` directory untouched/unchanged.
   - [link to CMake discourse thread](https://discourse.cmake.org/t/share-fetchcontent-between-projects/4537/2)
   - As a workaround, I've just set `FETCHCONTENT_UPDATES_DISCONNECTED` specifically for range-v3 so that it doesn't check for updates. it only does any networking (to clone) if the clone isn't there yet.
+
+Other undesirable things one might run into:
+- https://github.com/ericniebler/range-v3/issues/1689
+  - if using FetchContent
+- https://github.com/ericniebler/range-v3/issues/1213
+  - tons of cmake things only required if user wants to run range-v3 tests.

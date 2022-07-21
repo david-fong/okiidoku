@@ -5,15 +5,16 @@ project(okiidoku
 	HOMEPAGE_URL "https://github.com/david-fong/okiidoku"
 	LANGUAGES CXX
 )
-set(CMAKE_CXX_STANDARD 20 CACHE STRING "The C++ standard to use")
-set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
-set(CMAKE_CXX_EXTENSIONS FALSE)
 
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 include(okiidoku/compile_opts.basic)
 
 if(PROJECT_IS_TOP_LEVEL)
+	set(CMAKE_CXX_STANDARD 20 CACHE STRING "The C++ standard to use")
+	set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
+	set(CMAKE_CXX_EXTENSIONS FALSE)
+
 	include(okiidoku/if_top_level/compile_opts.non_portable)
 	include(okiidoku/if_top_level/static_analyzers)
 	include(okiidoku/if_top_level/sanitizers)
@@ -21,12 +22,12 @@ if(PROJECT_IS_TOP_LEVEL)
 
 	include(CheckIPOSupported)
 	check_ipo_supported(RESULT CMAKE_INTERPROCEDURAL_OPTIMIZATION)
-	set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_DEBUG FALSE)
+	set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_DEBUG FALSE) # want fast debug build
 endif()
 
-include(okiidoku/dependencies)
-
 include(okiidoku/detect_target_isa_support)
+
+include(okiidoku/dependencies)
 
 
 # General use cases should use BUILD_SHARED_LIBS to choose whether to build
@@ -42,17 +43,18 @@ elseif(PROJECT_IS_TOP_LEVEL)
 endif()
 if(DEFINED okiidoku_SHARED_LIBS)
 	set(BUILD_SHARED_LIBS "${okiidoku_SHARED_LIBS}")
+	unset(okiidoku_SHARED_LIBS)
 endif()
 include(GNUInstallDirs)
 include(okiidoku/shared_lib_things)
 
 
-add_subdirectory(libs/cli_utils)
 add_subdirectory(libs/okiidoku)
+add_subdirectory(libs/cli_utils)
 add_subdirectory(apps/cli)
-if(PROJECT_IS_TOP_LEVEL)
-	add_subdirectory(tools/okiidoku_translator EXCLUDE_FROM_ALL)
-endif()
+add_subdirectory(tools/okiidoku_translator EXCLUDE_FROM_ALL)
+add_subdirectory(extras/bindings/python EXCLUDE_FROM_ALL)
+# Note: emscripten bindings require emscripten's toolchain. see its subdir.
 
 
 include(okiidoku/installation)

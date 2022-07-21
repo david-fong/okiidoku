@@ -3,5 +3,6 @@ add_library(okiidoku_cli_utils STATIC
 )
 target_include_directories(okiidoku_cli_utils PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>")
 target_link_libraries(okiidoku_cli_utils
+   PUBLIC  okiidoku_compile_options_public
    PRIVATE okiidoku_compile_options_private
 )

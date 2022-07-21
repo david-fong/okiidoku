@@ -3,12 +3,17 @@
 # TODO.low try Alex's tutorial things for installation utilities.
 add_library(okiidoku #[[ uses BUILD_SHARED_LIBS ]] "")
 add_library(okiidoku::okiidoku ALIAS okiidoku)
+target_compile_features(okiidoku PUBLIC cxx_std_20)
 set_target_properties(okiidoku PROPERTIES
 	# https://www.youtube.com/watch?v=m0DwB4OvDXk&ab_channel=CppCon&t=17m13s
 	VERSION   ${okiidoku_VERSION}
 	SOVERSION ${okiidoku_VERSION_MAJOR}
+	CXX_STANDARD_REQUIRED TRUE
+	CXX_EXTENSIONS OFF
+	INTERPROCEDURAL_OPTIMIZATION TRUE
+	CXX_VISIBILITY_PRESET hidden
+	VISIBILITY_INLINES_HIDDEN TRUE
 )
-target_compile_features(okiidoku PUBLIC cxx_std_20)
 add_subdirectory(src/okiidoku)
 
 include(GenerateExportHeader)
@@ -30,6 +35,7 @@ install(DIRECTORY
 )
 
 target_link_libraries(okiidoku
+	PUBLIC  okiidoku_compile_options_public
 	PRIVATE okiidoku_compile_options_private
 	PRIVATE range-v3::range-v3
 )

@@ -1,3 +1,4 @@
+alts
 analyzer
 analyzers
 cand
@@ -20,6 +21,7 @@ Povs
 prefetch
 puzcell
 puzcells
+reinit
 serdes
 smol
 soln

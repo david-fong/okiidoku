@@ -1,5 +1,5 @@
-#ifndef HPP_OKIIDOKU__PUZZLE__SOLVER__ENGINE
-#define HPP_OKIIDOKU__PUZZLE__SOLVER__ENGINE
+#ifndef HPP_OKIIDOKU__PUZZLE__SOLVER2__ENGINE
+#define HPP_OKIIDOKU__PUZZLE__SOLVER2__ENGINE
 
 #include <okiidoku/puzzle/solver/cands.hpp>
 #include <okiidoku/puzzle/solver/find_cache.hpp>
@@ -12,9 +12,9 @@
 
 /**
 The "engine" is a primitive for building a solver capable of finding all
- solutions to a puzzle. It uses a symbol-major representation, and implements
- simple solving techniques: subsets, fish, and intersections. To enable
- finding all solutions, the guess mechanism is a backtrack-able stack..
+ solutions to a puzzle. It supports simple solving techniques: subsets,
+ fish, and intersections. To enable finding all solutions, the guess
+ mechanism is a backtrack-able stack.
 
 I don't expect the average person checking out this library to be interested
  in such tinkering, and there are more usage contracts to follow than there

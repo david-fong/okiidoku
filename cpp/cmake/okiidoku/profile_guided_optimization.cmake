@@ -8,9 +8,6 @@ endif()
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR EMSCRIPTEN)
 	# https://clang.llvm.org/docs/UsersManual.html#profile-guided-optimization
-target_compile_options(okiidoku_compile_options_private INTERFACE
-	-Wimplicit-fallthrough
-)
 
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
 	# https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html

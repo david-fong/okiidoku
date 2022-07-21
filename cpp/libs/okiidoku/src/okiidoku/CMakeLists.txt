@@ -1,3 +1,4 @@
+# https://cmake.org/cmake/help/latest/command/target_sources.html
 target_sources(okiidoku PRIVATE
 	o2_bit_arr.cpp
 	grid.cpp
@@ -26,4 +27,9 @@ target_sources(okiidoku PRIVATE
 	puzzle/solve.cpp
 
 	puzzle/make.cpp
+)
+
+
+target_sources(okiidoku PRIVATE
+	${okiidoku_SOURCE_DIR}/tools/okiidoku.natvis
 )

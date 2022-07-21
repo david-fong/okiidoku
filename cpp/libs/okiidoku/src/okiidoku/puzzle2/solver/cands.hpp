@@ -1,5 +1,5 @@
-#ifndef HPP_OKIIDOKU__PUZZLE__SOLVER__CANDS
-#define HPP_OKIIDOKU__PUZZLE__SOLVER__CANDS
+#ifndef HPP_OKIIDOKU__PUZZLE__SOLVER2__CANDS
+#define HPP_OKIIDOKU__PUZZLE__SOLVER2__CANDS
 
 #include <okiidoku/grid.hpp>
 #include <okiidoku/o2_bit_arr.hpp>
@@ -9,7 +9,7 @@
 
 namespace okiidoku::mono::detail::solver2 {
 
-	constexpr Order order_threshold_to_use_compact_cands;
+	constexpr Order order_threshold_to_use_compact_cands {6}; // TODO experiment
 
 	// non-memory-concerned implementation.
 	template<Order O> requires(is_order_compiled(O) && (O < order_threshold_to_use_compact_cands))
@@ -95,21 +95,23 @@ namespace okiidoku::mono::detail::solver2 {
 		using o2i_t = int_ts::o2i_t<O>;
 		using o4i_t = int_ts::o4i_t<O>;
 		using rmi_t = int_ts::o4xs_t<O>;
-		HouseTypeMap<CandsPov<O>> cell_sym_;
-		HouseTypeMap<CandsPov<O>> sym_cell_;
+
+		// Invariant: all POVs must be consistent with one another at all times.
+		HouseTypeMap<CandsPov<O>> pov_cell_major_;
+		HouseTypeMap<CandsPov<O>> pov_sym_major_;
 		o4i_t num_unsolved_;
 
 	public:
 		[[nodiscard, gnu::pure]]
 		auto num_unsolved() const noexcept { return num_unsolved_; }
 
-		FindStat remove(o4x_t rmi, o2x_t cand) noexcept;
+		[[nodiscard, gnu::pure]]
+		const CandsPov<O>& pov(const CellOrSym, const HouseType, const o2i_t house) const noexcept;
+
+		FindStat rule_out_rmi_sym(o4x_t rmi, o2x_t sym) noexcept;
 		// cell has only one cand sym:
 		//  for all neighbouring cell, remove that sym.
 		//  for that sym in that house(s), solve that cell.
-
-		[[nodiscard, gnu::pure]]
-		const CandsPov<O>& pov(const CellOrSym, const HouseType, const o2i_t house) const noexcept;
 	};
 }
 #endif

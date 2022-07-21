@@ -10,10 +10,8 @@
 
 	// https://vector-of-bool.github.io/docs/vscode-cmake-tools/settings.html
 
+	"cmake.configureArgs": ["-Wdev"],
 	"cmake.configureSettings": {
-		// "CMAKE_CONFIGURATION_TYPES": ["Debug","Release","RelWithDebInfo","MinSizeRel"],
-		// "CMAKE_CROSS_CONFIGS": [],
-		// "CMAKE_DEFAULT_CONFIGS": [],
 		"CMAKE_COLOR_DIAGNOSTICS": "ON",
 		// "CMAKE_COMPILE_WARNING_AS_ERROR": false
 	},
@@ -28,7 +26,7 @@
 		"args": [],
 		"setupCommands": [],
 		"stopAtEntry": true,
-		// "visualizerFile": "${workspaceFolder}/tools/debug.natvis",
+		// "visualizerFile": "${workspaceFolder}/tools/okiidoku.natvis", // TODO.try is this needed if already specified in CMake?
 	},
 
 	"[cmake]": {

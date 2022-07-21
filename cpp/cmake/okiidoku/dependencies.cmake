@@ -14,7 +14,6 @@ if(range-v3_ADDED)
 	add_library(range-v3 INTERFACE IMPORTED)
 	add_library(range-v3::range-v3 ALIAS range-v3)
 	target_include_directories(range-v3 SYSTEM INTERFACE "${range-v3_SOURCE_DIR}/include")
-	# https://github.com/ericniebler/range-v3/issues/1689
 	# original CMake options I might care about:
 	#  RANGES_MODULES, RANGES_POLLY, RANGES_DEEP_STL_INTEGRATION
 endif()
@@ -24,7 +23,7 @@ if(okiidoku_IS_TOP_LEVEL)
 	# https://github.com/catchorg/Catch2/blob/devel/docs/cmake-integration.md
 	CPMAddPackage(
 		NAME catch2
-		VERSION 3.0.1
+		VERSION 3.1.0
 		GITHUB_REPOSITORY "catchorg/Catch2"
 	)
 	include("${catch2_SOURCE_DIR}/extras/Catch.cmake")

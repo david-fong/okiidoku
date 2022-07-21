@@ -40,6 +40,8 @@ In order:
 
 [See the readme in the cpp directory](./cpp/readme.md).
 
+For Python and WASM/JS bindings, see the [bindings directory](./cpp/extras/bindings/)
+
 This project is MIT licensed.
 
 If you have a question about the project and whether it is suitable for your own goals, please first take a look at other existing projects and what they provide, and read through this project's [design docs](./writings/design/) before asking. Use the [discussion page](https://github.com/david-fong/okiidoku/discussions) for questions rather than raising a GitHub issue.

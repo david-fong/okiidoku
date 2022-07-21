@@ -16,7 +16,7 @@
 These properties are not direct requirements, but they may end up being needed in order to satisfy / better satisfy another requirement.
 
 - Efficient random access
-- Sorted entries (this ends up being included for binary search)
+- Sorted entries (useful if binary search is desirable)
 - Efficient entry insertion
 
 My personal end goal of storing all these grids is to have a large set of grids to use for when I later start working on puzzle generation and trying to make very hard puzzles. Perhaps other people can find other uses, but I can't think of any right now.

@@ -35,6 +35,8 @@
 <!-- - what should UnwindInfo now be called? LogicStat? FindStat? FindDigest? FindSummary? FindErrc? I like FindStat the most. -->
 - consider making subset finders take parameter of _single_ subset size to try finding for instead of a ceiling-like parameter.
 
+consider making cand masks have two lanes: one storing full O2BitArr, one storing just a byte. the byte lane is intended for use with subset finding and needs an additional array of o2x\_t where indices (relative to the index of the beginning of the subset) correspond to bits of the byte mask, and the value is the value of the candidate (candidate tags). Then to remove a given candidate, can use simd to scan the candidate tags and get a byte where bits are set if the corresponding tag value matched the cand to remove, and then remove set bits of that byte from the byte storing subset candidates. <https://stackoverflow.com/questions/54897297/check-all-bytes-of-a-m128i-for-a-match-of-a-single-byte-using-sse-avx-avx2>
+
 - Currently avoiding using `OKIIDOKU_MONO_INT_TS_TYPEDEFS` in headers in classes.
   - Was worried about the "header size" cost. I think I'm probably prematurely optimizing.
   - give this a try [](https://crascit.com/2022/06/24/build-performance-insights/)
@@ -77,6 +79,11 @@
 - CI/CD
   - [CPM notes](https://github.com/cpm-cmake/CPM.cmake/wiki/Caching-with-CPM.cmake-and-ccache-on-GitHub-Actions#caching-with-github-actions)
   - [catch2 notes](https://github.com/catchorg/Catch2/blob/devel/docs/ci-and-misc.md)
+
+- experiment with enabling sanitizers only on certain cmake targets, where legal according to sanitizer specs
+  - <https://github.com/google/sanitizers/wiki/AddressSanitizer#faq>
+  - <https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html#issue-suppression>
+  - this only crossed my mind because the debug binaries seem really big and I wonder if it's due to sanitizer stuff. the debug test bunaries are quite big- I think due to catch2. I'm considering alternatively switching back to doctest.
 
 - find out how to use the [cppcoreguidelines checker](https://docs.microsoft.com/en-us/cpp/code-quality/using-the-cpp-core-guidelines-checkers?view=msvc-170)
   - I want to use it in a way that is driven by cmake
