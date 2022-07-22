@@ -28,7 +28,7 @@ namespace okiidoku::cli {
 			{ "",             E::gen_single },
 			{ "gen",          E::gen_multiple },
 		};
-		constexpr std::string_view helpMessage {"\nCOMMAND MENU:"
+		inline constexpr std::string_view helpMessage {"\nCOMMAND MENU:"
 		"\n- help                  print this help menu"
 		"\n- quit                  cleanly exit this program"
 		"\n"

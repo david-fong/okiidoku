@@ -18,7 +18,7 @@ namespace okiidoku {
 	enum class HouseType : unsigned char {
 		box, row, col,
 	};
-	constexpr auto house_types {std::to_array<HouseType>({
+	inline constexpr auto house_types {std::to_array<HouseType>({
 		HouseType::row,
 		HouseType::col,
 		HouseType::box,
@@ -37,7 +37,7 @@ namespace okiidoku {
 	enum class LineType : unsigned char {
 		row, col,
 	};
-	constexpr auto line_types {std::to_array<LineType>({
+	inline constexpr auto line_types {std::to_array<LineType>({
 		LineType::row,
 		LineType::col,
 	})};

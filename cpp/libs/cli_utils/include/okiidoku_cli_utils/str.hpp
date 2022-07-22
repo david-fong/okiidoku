@@ -17,9 +17,9 @@ namespace okiidoku::util::str {
 		std::string_view off;
 	};
 	#if USE_ANSI_ESC
-	#define SGR(NAME, ON_STR, OFF_STR) constexpr SgrPair NAME { .on {(ON_STR)}, .off {(OFF_STR)} };
+	#define SGR(NAME, ON_STR, OFF_STR) inline constexpr SgrPair NAME { .on {(ON_STR)}, .off {(OFF_STR)} };
 	#else
-	#define SGR(NAME, ON_STR, OFF_STR) constexpr SgrPair NAME { .on {""}, .off {""} };
+	#define SGR(NAME, ON_STR, OFF_STR) inline constexpr SgrPair NAME { .on {""}, .off {""} };
 	#endif
 
 	SGR(dim, "\033[2m",  "\033[22m")
@@ -38,7 +38,7 @@ namespace okiidoku::util::str {
 	 * See https://cppreference.com/w/cpp/language/sizeof...#Example
 	 * for an example utility function I can make to avoid this problem.
 	 */
-	constexpr std::array<std::string_view, 4> box_chars {
+	inline constexpr std::array<std::string_view, 4> box_chars {
 		#if USE_ANSI_ESC
 		"\u2591", "\u2592", "\u2593", "\u2588",
 		#else

@@ -27,14 +27,14 @@ namespace okiidoku {
 	}
 	// exists because my template instantiation macro has no delimiter
 	// argument, so I hack this to ignore a leading comma at a usage site.
-	constexpr auto compiled_orders {detail::CompiledOrdersHelper_make_array<
+	inline constexpr auto compiled_orders {detail::CompiledOrdersHelper_make_array<
 		/* ignored: */Order{0}
 		#define OKIIDOKU_FOR_COMPILED_O(O_) , O_
 		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 		#undef OKIIDOKU_FOR_COMPILED_O
 	>()};
 
-	constexpr Order largest_compiled_order {[]{
+	inline constexpr Order largest_compiled_order {[]{
 		Order largest {0};
 		#define OKIIDOKU_FOR_COMPILED_O(O_) largest = O_;
 		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES

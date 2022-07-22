@@ -9,7 +9,7 @@
 
 namespace okiidoku::mono::detail::solver2 {
 
-	constexpr Order order_threshold_to_use_compact_cands {6}; // TODO experiment
+	inline constexpr Order order_threshold_to_use_compact_cands {6}; // TODO experiment
 
 	// non-memory-concerned implementation.
 	template<Order O> requires(is_order_compiled(O) && (O < order_threshold_to_use_compact_cands))
