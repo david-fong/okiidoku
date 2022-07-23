@@ -155,16 +155,20 @@ namespace okiidoku::mono::detail::solver {
 		Engine<O>& engine,
 		const found::LockedCands<O>& desc
 	) noexcept {
-		const auto isec_base {[&]{ switch (desc.remove_from_rest_of) {
+		const auto isec_base {[&]{
+			switch (desc.remove_from_rest_of) {
 			case BoxOrLine::box:  return static_cast<o3i_t>(((desc.isec/T::O2)*T::O2)+(desc.isec%T::O1));
 			case BoxOrLine::line: return static_cast<o3i_t>(desc.isec - (desc.isec%T::O1));
-			default: OKIIDOKU_CONTRACT_USE(false); // std::unreachable
-		} }()};
-		const auto nb_scale {[&]{ switch (desc.remove_from_rest_of) {
+			}
+			OKIIDOKU_CONTRACT_USE(false); // std::unreachable
+		}()};
+		const auto nb_scale {[&]{
+			switch (desc.remove_from_rest_of) {
 			case BoxOrLine::box:  return static_cast<o3i_t>(T::O1);
 			case BoxOrLine::line: return static_cast<o3i_t>(1);
-			default: OKIIDOKU_CONTRACT_USE(false); // std::unreachable
-		} }()};
+			}
+			OKIIDOKU_CONTRACT_USE(false); // std::unreachable
+		}()};
 		for (o1i_t nb_i {0}; nb_i < T::O1; ++nb_i) {
 			const auto isec {isec_base + (nb_i * nb_scale)};
 			if (isec == desc.isec) [[unlikely]] { continue; }

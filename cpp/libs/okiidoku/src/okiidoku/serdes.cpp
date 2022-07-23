@@ -220,8 +220,8 @@ namespace okiidoku::visitor {
 		case O_: return mono::write_solution_grid_to_stream(vis_src.unchecked_get_mono_exact<O_>(), os);
 		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 		#undef OKIIDOKU_FOR_COMPILED_O
-		default: OKIIDOKU_CONTRACT_USE(false); // std::unreachable
 		}
+		OKIIDOKU_CONTRACT_USE(false); // std::unreachable
 	}
 
 	void parse_solution_grid_from_stream(Grid& vis_sink, std::istream& is) noexcept {
@@ -230,8 +230,8 @@ namespace okiidoku::visitor {
 		case O_: return mono::parse_solution_grid_from_stream(vis_sink.unchecked_get_mono_exact<O_>(), is);
 		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 		#undef OKIIDOKU_FOR_COMPILED_O
-		default: OKIIDOKU_CONTRACT_USE(false); // std::unreachable
 		}
+		OKIIDOKU_CONTRACT_USE(false); // std::unreachable
 	}
 
 	void print_puzzle_grid_to_stream(const Grid& vis_src, std::ostream& os) noexcept {
@@ -240,8 +240,8 @@ namespace okiidoku::visitor {
 		case O_: return mono::print_puzzle_grid_to_stream(vis_src.unchecked_get_mono_exact<O_>(), os);
 		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 		#undef OKIIDOKU_FOR_COMPILED_O
-		default: OKIIDOKU_CONTRACT_USE(false); // std::unreachable
 		}
+		OKIIDOKU_CONTRACT_USE(false); // std::unreachable
 	}
 
 	void parse_puzzle_grid_from_stream(Grid& vis_sink, std::istream& is) noexcept {
@@ -250,7 +250,7 @@ namespace okiidoku::visitor {
 		case O_: return mono::parse_puzzle_grid_from_stream(vis_sink.unchecked_get_mono_exact<O_>(), is);
 		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
 		#undef OKIIDOKU_FOR_COMPILED_O
-		default: OKIIDOKU_CONTRACT_USE(false); // std::unreachable
 		}
+		OKIIDOKU_CONTRACT_USE(false); // std::unreachable
 	}
 }
