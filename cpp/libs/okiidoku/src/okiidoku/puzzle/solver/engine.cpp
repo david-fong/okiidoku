@@ -248,10 +248,10 @@ namespace okiidoku::mono::detail::solver {
 	}
 
 
-	#define OKIIDOKU_FOR_COMPILED_O(O_) \
+	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 		template struct FoundQueues<O_>; \
 		template struct EngineImpl<O_>; \
 		template class Engine<O_>;
-	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-	#undef OKIIDOKU_FOR_COMPILED_O
+	OKIIDOKU_FOREACH_O_DO_EMIT
+	#undef OKIIDOKU_FOREACH_O_EMIT
 }

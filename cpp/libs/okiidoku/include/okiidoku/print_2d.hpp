@@ -68,10 +68,10 @@ namespace okiidoku {
 			if (!(... && (std::get<0>(tup).get_mono_order() == grids.get_mono_order()))) [[unlikely]] { return; }
 
 			switch (std::get<0>(tup).get_mono_order()) {
-			#define OKIIDOKU_FOR_COMPILED_O(O_) \
+			#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 			case O_: return mono::print_2d<O_>(os, rng_seed, (grids.template unchecked_get_mono_exact<O_>())...);
-			OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-			#undef OKIIDOKU_FOR_COMPILED_O
+			OKIIDOKU_FOREACH_O_DO_EMIT
+			#undef OKIIDOKU_FOREACH_O_EMIT
 			}
 			OKIIDOKU_CONTRACT_USE(false); // std::unreachable
 		}

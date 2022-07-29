@@ -153,13 +153,13 @@ namespace okiidoku::mono {
 	}
 
 
-	#define OKIIDOKU_FOR_COMPILED_O(O_) \
+	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 		template typename O2BitArr<O_>::o2i_t O2BitArr<O_>::count() const noexcept; \
 		template typename O2BitArr<O_>::o2x_t O2BitArr<O_>::count_below(typename O2BitArr<O_>::o2x_t) const noexcept; \
 		template typename O2BitArr<O_>::o2xs_t O2BitArr<O_>::first_set_bit_require_exists() const noexcept; \
 		template typename O2BitArr<O_>::o2xs_t O2BitArr<O_>::get_index_of_nth_set_bit(O2BitArr<O_>::o2x_t) const noexcept; \
 		template std::strong_ordering O2BitArr<O_>::cmp_differences(const O2BitArr<O_>&, const O2BitArr<O_>&) noexcept; \
 		template std::array<char, Ints<O_>::O2> O2BitArr<O_>::to_chars() const noexcept;
-	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-	#undef OKIIDOKU_FOR_COMPILED_O
+	OKIIDOKU_FOREACH_O_DO_EMIT
+	#undef OKIIDOKU_FOREACH_O_EMIT
 }

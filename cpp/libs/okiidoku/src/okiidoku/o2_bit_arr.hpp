@@ -204,10 +204,10 @@ namespace okiidoku::mono {
 		// least-significant bit is the least-significant (left-most) character.
 		[[nodiscard, gnu::pure]] std::array<char, T::O2> to_chars() const noexcept;
 	};
-	#define OKIIDOKU_FOR_COMPILED_O(O_) \
+	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 		static_assert(!std::is_aggregate_v<O2BitArr<O_>>);
-	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-	#undef OKIIDOKU_FOR_COMPILED_O
+	OKIIDOKU_FOREACH_O_DO_EMIT
+	#undef OKIIDOKU_FOREACH_O_EMIT
 
 
 	template<Order O> requires(is_order_compiled(O))

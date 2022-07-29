@@ -34,10 +34,10 @@ namespace okiidoku::mono::detail::solver {
 
 
 	struct [[nodiscard]] UnwindInfo final {
-		#define OKIIDOKU_FOR_COMPILED_O(O_) \
+		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 		friend UnwindInfo unwind_one_stack_frame_of_<O_>(EngineImpl<O_>&) noexcept;
-		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-		#undef OKIIDOKU_FOR_COMPILED_O
+		OKIIDOKU_FOREACH_O_DO_EMIT
+		#undef OKIIDOKU_FOREACH_O_EMIT
 	private:
 		explicit consteval UnwindInfo(bool did_unwind, bool did_unwind_root) noexcept:
 			did_unwind_{did_unwind}, did_unwind_root_{did_unwind_root} {}
@@ -234,10 +234,10 @@ namespace okiidoku::mono::detail::solver {
 	};
 
 
-	#define OKIIDOKU_FOR_COMPILED_O(O_) \
+	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 		extern template struct EngineImpl<O_>; \
 		extern template class Engine<O_>;
-	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-	#undef OKIIDOKU_FOR_COMPILED_O
+	OKIIDOKU_FOREACH_O_DO_EMIT
+	#undef OKIIDOKU_FOREACH_O_EMIT
 }
 #endif

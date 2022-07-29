@@ -11,8 +11,8 @@
 
 /**
 ARGUMENTS
-1: grid order (default defined in compiled_orders).
-2: scramble random key (default: device random number).
+1: grid order
+2: RNG seed (default: get from device)
 */
 int main(const int argc, char const *const argv[]) {
 	okiidoku::util::setup_console();

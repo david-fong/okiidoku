@@ -1,3 +1,4 @@
+<!-- cspell:dictionaries cpp-refined -->
 # Things To Do
 
 ## Roadmap

@@ -92,13 +92,13 @@ namespace okiidoku::mono {
 
 
 
-	#define OKIIDOKU_FOR_COMPILED_O(O_) \
+	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 		template bool grid_follows_rule<O_>(const Grid<O_>&) noexcept; \
 		template bool grid_is_filled<O_>(const Grid<O_>&) noexcept; \
 		template bool grid_is_empty<O_>(const Grid<O_>&) noexcept; \
 		template void init_most_canonical_grid<O_>(Grid<O_>&) noexcept;
-	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-	#undef OKIIDOKU_FOR_COMPILED_O
+	OKIIDOKU_FOREACH_O_DO_EMIT
+	#undef OKIIDOKU_FOREACH_O_EMIT
 }
 
 
@@ -106,40 +106,40 @@ namespace okiidoku::visitor {
 
 	bool grid_follows_rule(const Grid& vis_grid) noexcept {
 		switch (vis_grid.get_mono_order()) {
-		#define OKIIDOKU_FOR_COMPILED_O(O_) \
+		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 		case O_: return mono::grid_follows_rule(vis_grid.unchecked_get_mono_exact<O_>());
-		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-		#undef OKIIDOKU_FOR_COMPILED_O
+		OKIIDOKU_FOREACH_O_DO_EMIT
+		#undef OKIIDOKU_FOREACH_O_EMIT
 		}
 		OKIIDOKU_CONTRACT_USE(false); // std::unreachable
 	}
 
 	bool grid_is_filled(const Grid& vis_grid) noexcept {
 		switch (vis_grid.get_mono_order()) {
-		#define OKIIDOKU_FOR_COMPILED_O(O_) \
+		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 		case O_: return mono::grid_is_filled(vis_grid.unchecked_get_mono_exact<O_>());
-		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-		#undef OKIIDOKU_FOR_COMPILED_O
+		OKIIDOKU_FOREACH_O_DO_EMIT
+		#undef OKIIDOKU_FOREACH_O_EMIT
 		}
 		OKIIDOKU_CONTRACT_USE(false); // std::unreachable
 	}
 
 	bool grid_is_empty(const Grid& vis_grid) noexcept {
 		switch (vis_grid.get_mono_order()) {
-		#define OKIIDOKU_FOR_COMPILED_O(O_) \
+		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 		case O_: return mono::grid_is_empty(vis_grid.unchecked_get_mono_exact<O_>());
-		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-		#undef OKIIDOKU_FOR_COMPILED_O
+		OKIIDOKU_FOREACH_O_DO_EMIT
+		#undef OKIIDOKU_FOREACH_O_EMIT
 		}
 		OKIIDOKU_CONTRACT_USE(false); // std::unreachable
 	}
 
 	void init_most_canonical_grid(Grid& vis_grid) noexcept {
 		switch (vis_grid.get_mono_order()) {
-		#define OKIIDOKU_FOR_COMPILED_O(O_) \
+		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 		case O_: return mono::init_most_canonical_grid(vis_grid.unchecked_get_mono_exact<O_>());
-		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-		#undef OKIIDOKU_FOR_COMPILED_O
+		OKIIDOKU_FOREACH_O_DO_EMIT
+		#undef OKIIDOKU_FOREACH_O_EMIT
 		}
 		OKIIDOKU_CONTRACT_USE(false); // std::unreachable
 	}
@@ -147,20 +147,20 @@ namespace okiidoku::visitor {
 
 	Grid::common_val_t Grid::at_rmi(const int_ts::o4i_t rmi) const noexcept {
 		switch (this->get_mono_order()) {
-		#define OKIIDOKU_FOR_COMPILED_O(O_) \
+		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 		case O_: return this->unchecked_get_mono_exact<O_>().at_rmi(rmi);
-		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-		#undef OKIIDOKU_FOR_COMPILED_O
+		OKIIDOKU_FOREACH_O_DO_EMIT
+		#undef OKIIDOKU_FOREACH_O_EMIT
 		}
 		OKIIDOKU_CONTRACT_USE(false); // std::unreachable
 	}
 
 	Grid::common_val_t Grid::at(const int_ts::o2i_t row, const int_ts::o2i_t col) const noexcept {
 		switch (this->get_mono_order()) {
-		#define OKIIDOKU_FOR_COMPILED_O(O_) \
+		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 		case O_: return this->unchecked_get_mono_exact<O_>().at(row, col);
-		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-		#undef OKIIDOKU_FOR_COMPILED_O
+		OKIIDOKU_FOREACH_O_DO_EMIT
+		#undef OKIIDOKU_FOREACH_O_EMIT
 		}
 		OKIIDOKU_CONTRACT_USE(false); // std::unreachable
 	}

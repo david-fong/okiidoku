@@ -5,8 +5,10 @@ project(okiidoku
 	HOMEPAGE_URL "https://github.com/david-fong/okiidoku"
 	LANGUAGES CXX
 )
+set(OKIIDOKU_VERSION_COMPATIBILITY ExactVersion) # see `cmake/installation.cmake`.
+# ^ I will consider switching to support `SameMajorVersion` starting at v1.0.0.
 
-list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+list(APPEND CMAKE_MODULE_PATH ${okiidoku_SOURCE_DIR}/cmake)
 
 include(okiidoku/compile_opts.basic)
 
@@ -45,7 +47,6 @@ if(DEFINED okiidoku_SHARED_LIBS)
 	set(BUILD_SHARED_LIBS "${okiidoku_SHARED_LIBS}")
 	unset(okiidoku_SHARED_LIBS)
 endif()
-include(GNUInstallDirs)
 include(okiidoku/shared_lib_things)
 
 
@@ -58,13 +59,4 @@ add_subdirectory(extras/bindings/python EXCLUDE_FROM_ALL)
 
 
 include(okiidoku/installation)
-
-
-# Packaging support
-# https://cmake.org/cmake/help/latest/module/CPack.html
-# https://cmake.org/cmake/help/latest/guide/importing-exporting/index.html#creating-packages
-set(CPACK_PACKAGE_VENDOR "david-fong")
-set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENCE")
-set(CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/readme.md")
-set(CPACK_SOURCE_GENERATOR "TGZ")
-# include(CPack) # disabled since currently using GCC's "-march=native".
+include(okiidoku/packaging)

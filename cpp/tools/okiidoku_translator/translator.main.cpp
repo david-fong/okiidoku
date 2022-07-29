@@ -7,14 +7,14 @@
 
 /**
 ARGUMENTS
-1: grid order (default defined in compiled_orders).
-2: scramble random key (default: device random number).
+1: grid order
+2: RNG seed (default: get from device)
 */
 int main(const int argc, char const *const argv[]) {
 	okiidoku::util::setup_console();
 
 	// unsigned int user_order; // 1
-	// user_order = (argc > 1) ? std::stoi(argv[1]) : OKIIDOKU_DEFAULT_ORDER;
+	// user_order = std::stoi(argv[1]);
 
 	// std::cout << "\nPARSED ARGUMENTS:"
 	// << "\n- ARG 1 [[ grid order ]] : " << user_order

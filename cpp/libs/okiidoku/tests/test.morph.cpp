@@ -49,8 +49,8 @@ TEST_CASE("morph") {
 	okiidoku::SharedRng shared_rng {};
 	shared_rng.rng.seed(std::random_device()()); // look into using Catch2 GENERATE and random() features
 
-	#define OKIIDOKU_FOR_COMPILED_O(O_) \
+	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 	test_morph<O_>(shared_rng, default_num_rounds);
-	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-	#undef OKIIDOKU_FOR_COMPILED_O
+	OKIIDOKU_FOREACH_O_DO_EMIT
+	#undef OKIIDOKU_FOREACH_O_EMIT
 }

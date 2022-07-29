@@ -128,8 +128,8 @@ namespace okiidoku::mono::detail {
 		return CanonLabel<O>::do_it(grid);
 	}
 
-	#define OKIIDOKU_FOR_COMPILED_O(O_) \
+	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 		template label_map_t<O_> canon_label<O_>(Grid<O_>&) noexcept;
-	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-	#undef OKIIDOKU_FOR_COMPILED_O
+	OKIIDOKU_FOREACH_O_DO_EMIT
+	#undef OKIIDOKU_FOREACH_O_EMIT
 }

@@ -1,17 +1,14 @@
 include_guard(DIRECTORY)
+include(GNUInstallDirs)
 
 # set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
 # ^tried in last-ditch attempt to support DLLs. It didn't work probably because I don't know what I'm doing.
 
-# Alex Reinking's tutorial suggests respecting user-specified values, but
-# that doesn't make intuitive sense to me as to why, so I'm not doing it.
-# Note: I have added these directly as target props to the main library,
-#  so this doesn't add much value anymore.
-# if (NOT DEFINED CMAKE_CXX_VISIBILITY_PRESET AND NOT DEFINED CMAKE_VISIBILITY_INLINES_HIDDEN)
-#	# use strict settings unless values are overridden by the user.
+if (NOT DEFINED CMAKE_CXX_VISIBILITY_PRESET AND NOT DEFINED CMAKE_VISIBILITY_INLINES_HIDDEN)
+	# use strict settings unless already specified by the user.
 	set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 	set(CMAKE_VISIBILITY_INLINES_HIDDEN TRUE)
-# endif()
+endif()
 
 # https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/RPATH-handling
 # https://docs.conan.io/en/latest/howtos/manage_shared_libraries/rpaths.html

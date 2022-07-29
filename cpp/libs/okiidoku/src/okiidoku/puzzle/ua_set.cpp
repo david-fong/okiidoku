@@ -77,8 +77,8 @@ namespace okiidoku::mono {
 	}
 
 
-	#define OKIIDOKU_FOR_COMPILED_O(O_) \
+	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 		template MinimalUnavoidableSets<O_> find_size_4_minimal_unavoidable_sets<O_>(const Grid<O_>&) noexcept;
-	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-	#undef OKIIDOKU_FOR_COMPILED_O
+	OKIIDOKU_FOREACH_O_DO_EMIT
+	#undef OKIIDOKU_FOREACH_O_EMIT
 }

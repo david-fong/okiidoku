@@ -42,14 +42,14 @@ namespace okiidoku::mono::detail::solver::found {
 	};
 
 
-	#define OKIIDOKU_FOR_COMPILED_O(O_) \
+	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 		static_assert(std::is_aggregate_v<CellClaimSym<O_>>); \
 		static_assert(std::is_aggregate_v<SymClaimCell<O_>>); \
 		static_assert(std::is_aggregate_v<Subset<O_>>); \
 		static_assert(std::is_aggregate_v<LockedCands<O_>>); \
 		static_assert(std::is_aggregate_v<Fish<O_>>);
-	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-	#undef OKIIDOKU_FOR_COMPILED_O
+	OKIIDOKU_FOREACH_O_DO_EMIT
+	#undef OKIIDOKU_FOREACH_O_EMIT
 }
 namespace okiidoku::mono::detail::solver {
 

@@ -13,8 +13,8 @@ set(CMAKE_CXX_STANDARD 20 CACHE STRING "The C++ standard to use")
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_CXX_EXTENSIONS FALSE)
 
-set(okiidoku_SOURCE_DIR ${PROJECT_SOURCE_DIR}/../../../)
-list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/../../../cmake)
+set(okiidoku_SOURCE_DIR "${PROJECT_SOURCE_DIR}/../../..")
+list(APPEND CMAKE_MODULE_PATH "${okiidoku_SOURCE_DIR}/cmake")
 
 include(okiidoku/dependencies)
 include(okiidoku/compile_opts.basic)

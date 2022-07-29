@@ -168,10 +168,10 @@ namespace okiidoku::mono {
 	}
 
 
-	#define OKIIDOKU_FOR_COMPILED_O(O_) \
+	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 		template void generate_shuffled<O_>(Grid<O_>&, rng_seed_t) noexcept;
-	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-	#undef OKIIDOKU_FOR_COMPILED_O
+	OKIIDOKU_FOREACH_O_DO_EMIT
+	#undef OKIIDOKU_FOREACH_O_EMIT
 }
 
 
@@ -179,10 +179,10 @@ namespace okiidoku::visitor {
 
 	void generate_shuffled(Grid& vis_sink, const rng_seed_t rng_seed) noexcept {
 		switch (vis_sink.get_mono_order()) {
-		#define OKIIDOKU_FOR_COMPILED_O(O_) \
+		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 		case O_: return mono::generate_shuffled(vis_sink.unchecked_get_mono_exact<O_>(), rng_seed);
-		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-		#undef OKIIDOKU_FOR_COMPILED_O
+		OKIIDOKU_FOREACH_O_DO_EMIT
+		#undef OKIIDOKU_FOREACH_O_EMIT
 		}
 		OKIIDOKU_CONTRACT_USE(false); // std::unreachable
 	}

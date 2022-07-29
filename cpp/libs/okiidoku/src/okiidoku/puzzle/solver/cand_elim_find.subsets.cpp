@@ -294,9 +294,9 @@ namespace okiidoku::mono::detail::solver {
 		return find_subsets_and_check_needs_unwind(engine, max_subset_size);
 	}
 
-	#define OKIIDOKU_FOR_COMPILED_O(O_) \
+	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 		template UnwindInfo CandElimFind<O_>::sym_claim_cell(Engine<O_>&) noexcept; \
 		template UnwindInfo CandElimFind<O_>::subsets(Engine<O_>&, int_ts::o2x_t<O_> max_subset_size) noexcept;
-	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-	#undef OKIIDOKU_FOR_COMPILED_O
+	OKIIDOKU_FOREACH_O_DO_EMIT
+	#undef OKIIDOKU_FOREACH_O_EMIT
 }

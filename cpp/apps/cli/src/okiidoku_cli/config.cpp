@@ -34,10 +34,10 @@ namespace okiidoku::cli {
 		std::cout
 			<< str::red.on << '"' << arg << "\" is not a valid order.\n" << str::red.off
 			<< "ORDER OPTIONS: ";
-			#define OKIIDOKU_FOR_COMPILED_O(O_) \
+			#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 				std::cout << #O_ << ", ";
-			OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-			#undef OKIIDOKU_FOR_COMPILED_O
+			OKIIDOKU_FOREACH_O_DO_EMIT
+			#undef OKIIDOKU_FOREACH_O_EMIT
 			std::cout << std::endl;
 	}
 

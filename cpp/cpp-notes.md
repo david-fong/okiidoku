@@ -1,3 +1,4 @@
+<!-- cspell:dictionaries cpp-refined -->
 # C++ Notes
 
 ## Coding Guides
@@ -16,6 +17,11 @@
 ## Snippets
 
 ```sh
+# list all words in source code starting with "OKIIDOKU_"
+# -o: only-matching; -S smart-case; -I: no-filename ; -N: no-line-number
+rg -oSIN --no-filename '(\w+)?okiidoku_\w+' | sort | uniq -c
+
+
 # (cd to the cmake build folder of interest)
 # view public(-D) de-mangled(-C) symbols of the shared library sorted by address(-n)
 nm -nCD libs/okiidoku/Release/libokiidoku.so

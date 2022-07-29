@@ -24,10 +24,10 @@ namespace okiidoku::mono {
 		return place_map;
 	}
 
-	#define OKIIDOKU_FOR_COMPILED_O(O_) \
+	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 		template Transformation<O_> canonicalize<O_>(Grid<O_>&) noexcept;
-	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-	#undef OKIIDOKU_FOR_COMPILED_O
+	OKIIDOKU_FOREACH_O_DO_EMIT
+	#undef OKIIDOKU_FOREACH_O_EMIT
 }
 
 
@@ -36,10 +36,10 @@ namespace okiidoku::visitor {
 	// contract: `vis_grid` is filled and follows the one rule.
 	Transformation canonicalize(Grid& vis_grid) noexcept {
 		switch (vis_grid.get_mono_order()) {
-		#define OKIIDOKU_FOR_COMPILED_O(O_) \
+		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 		case O_: return static_cast<Transformation>(mono::canonicalize(vis_grid.unchecked_get_mono_exact<O_>()));
-		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-		#undef OKIIDOKU_FOR_COMPILED_O
+		OKIIDOKU_FOREACH_O_DO_EMIT
+		#undef OKIIDOKU_FOREACH_O_EMIT
 		}
 		OKIIDOKU_CONTRACT_USE(false); // std::unreachable
 	}

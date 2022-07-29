@@ -202,13 +202,13 @@ namespace okiidoku::mono {
 	}
 
 
-	#define OKIIDOKU_FOR_COMPILED_O(O_) \
+	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 		template void write_solution_grid_to_stream  <O_>(const Grid<O_>&, std::ostream&) noexcept; \
 		template void parse_solution_grid_from_stream<O_>(      Grid<O_>&, std::istream&) noexcept; \
 		template void print_puzzle_grid_to_stream    <O_>(const Grid<O_>&, std::ostream&) noexcept; \
 		template void parse_puzzle_grid_from_stream  <O_>(      Grid<O_>&, std::istream&) noexcept;
-	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-	#undef OKIIDOKU_FOR_COMPILED_O
+	OKIIDOKU_FOREACH_O_DO_EMIT
+	#undef OKIIDOKU_FOREACH_O_EMIT
 }
 
 
@@ -216,40 +216,40 @@ namespace okiidoku::visitor {
 
 	void write_solution_grid_to_stream(const Grid& vis_src, std::ostream& os) noexcept {
 		switch (vis_src.get_mono_order()) {
-		#define OKIIDOKU_FOR_COMPILED_O(O_) \
+		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 		case O_: return mono::write_solution_grid_to_stream(vis_src.unchecked_get_mono_exact<O_>(), os);
-		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-		#undef OKIIDOKU_FOR_COMPILED_O
+		OKIIDOKU_FOREACH_O_DO_EMIT
+		#undef OKIIDOKU_FOREACH_O_EMIT
 		}
 		OKIIDOKU_CONTRACT_USE(false); // std::unreachable
 	}
 
 	void parse_solution_grid_from_stream(Grid& vis_sink, std::istream& is) noexcept {
 		switch (vis_sink.get_mono_order()) {
-		#define OKIIDOKU_FOR_COMPILED_O(O_) \
+		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 		case O_: return mono::parse_solution_grid_from_stream(vis_sink.unchecked_get_mono_exact<O_>(), is);
-		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-		#undef OKIIDOKU_FOR_COMPILED_O
+		OKIIDOKU_FOREACH_O_DO_EMIT
+		#undef OKIIDOKU_FOREACH_O_EMIT
 		}
 		OKIIDOKU_CONTRACT_USE(false); // std::unreachable
 	}
 
 	void print_puzzle_grid_to_stream(const Grid& vis_src, std::ostream& os) noexcept {
 		switch (vis_src.get_mono_order()) {
-		#define OKIIDOKU_FOR_COMPILED_O(O_) \
+		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 		case O_: return mono::print_puzzle_grid_to_stream(vis_src.unchecked_get_mono_exact<O_>(), os);
-		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-		#undef OKIIDOKU_FOR_COMPILED_O
+		OKIIDOKU_FOREACH_O_DO_EMIT
+		#undef OKIIDOKU_FOREACH_O_EMIT
 		}
 		OKIIDOKU_CONTRACT_USE(false); // std::unreachable
 	}
 
 	void parse_puzzle_grid_from_stream(Grid& vis_sink, std::istream& is) noexcept {
 		switch (vis_sink.get_mono_order()) {
-		#define OKIIDOKU_FOR_COMPILED_O(O_) \
+		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 		case O_: return mono::parse_puzzle_grid_from_stream(vis_sink.unchecked_get_mono_exact<O_>(), is);
-		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-		#undef OKIIDOKU_FOR_COMPILED_O
+		OKIIDOKU_FOREACH_O_DO_EMIT
+		#undef OKIIDOKU_FOREACH_O_EMIT
 		}
 		OKIIDOKU_CONTRACT_USE(false); // std::unreachable
 	}

@@ -122,9 +122,9 @@ namespace okiidoku::mono::detail {
 	}
 
 
-	#define OKIIDOKU_FOR_COMPILED_O(O_) \
+	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 		template struct Rel<O_>; \
 		template detail::Gridlike<O_, Rel<(O_)>> make_rel_table<O_>(const Grid<O_>&) noexcept ;
-	OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-	#undef OKIIDOKU_FOR_COMPILED_O
+	OKIIDOKU_FOREACH_O_DO_EMIT
+	#undef OKIIDOKU_FOREACH_O_EMIT
 }

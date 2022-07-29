@@ -15,9 +15,9 @@ namespace okiidoku {
 	using Order = unsigned;
 
 	constexpr bool is_order_compiled(const Order O) noexcept {
-		#define OKIIDOKU_FOR_COMPILED_O(O_) if (O == O_) { return true; }
-		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-		#undef OKIIDOKU_FOR_COMPILED_O
+		#define OKIIDOKU_FOREACH_O_EMIT(O_) if (O == O_) { return true; }
+		OKIIDOKU_FOREACH_O_DO_EMIT
+		#undef OKIIDOKU_FOREACH_O_EMIT
 		return false;
 	}
 
@@ -29,16 +29,16 @@ namespace okiidoku {
 	// argument, so I hack this to ignore a leading comma at a usage site.
 	inline constexpr auto compiled_orders {detail::CompiledOrdersHelper_make_array<
 		/* ignored: */Order{0}
-		#define OKIIDOKU_FOR_COMPILED_O(O_) , O_
-		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-		#undef OKIIDOKU_FOR_COMPILED_O
+		#define OKIIDOKU_FOREACH_O_EMIT(O_) , O_
+		OKIIDOKU_FOREACH_O_DO_EMIT
+		#undef OKIIDOKU_FOREACH_O_EMIT
 	>()};
 
 	inline constexpr Order largest_compiled_order {[]{
 		Order largest {0};
-		#define OKIIDOKU_FOR_COMPILED_O(O_) largest = O_;
-		OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-		#undef OKIIDOKU_FOR_COMPILED_O
+		#define OKIIDOKU_FOREACH_O_EMIT(O_) largest = O_;
+		OKIIDOKU_FOREACH_O_DO_EMIT
+		#undef OKIIDOKU_FOREACH_O_EMIT
 		return largest;
 	}()};
 
@@ -53,9 +53,9 @@ namespace okiidoku {
 			//  `use_dynamic_allocation` template function, or a use_dynamic_allocation constant.
 			//  the bool constant is the simplest.
 
-			#define OKIIDOKU_FOR_COMPILED_O(O_) typename T::template type<O_>;
-			OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-			#undef OKIIDOKU_FOR_COMPILED_O
+			#define OKIIDOKU_FOREACH_O_EMIT(O_) typename T::template type<O_>;
+			OKIIDOKU_FOREACH_O_DO_EMIT
+			#undef OKIIDOKU_FOREACH_O_EMIT
 		};
 
 		/* This helper is here because there's no great way to correctly put commas
@@ -67,9 +67,9 @@ namespace okiidoku {
 		template<MonoToVisitorAdaptor Adaptor>
 		using OrderVariantFor = VariantSkipFirstHelper<
 			/* ignored: */void
-			#define OKIIDOKU_FOR_COMPILED_O(O_) , typename Adaptor::template type<O_>
-			OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-			#undef OKIIDOKU_FOR_COMPILED_O
+			#define OKIIDOKU_FOREACH_O_EMIT(O_) , typename Adaptor::template type<O_>
+			OKIIDOKU_FOREACH_O_DO_EMIT
+			#undef OKIIDOKU_FOREACH_O_EMIT
 		>;
 
 
@@ -91,16 +91,16 @@ namespace okiidoku {
 			// If the provided order is not compiled, defaults to the lowest compiled order.
 			explicit ContainerBase(const Order O) noexcept requires(
 				!Adaptor::is_borrow_type
-				#define OKIIDOKU_FOR_COMPILED_O(O_) \
+				#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 				&& std::is_nothrow_default_constructible_v<typename Adaptor::template type<O_>>
-				OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-				#undef OKIIDOKU_FOR_COMPILED_O
+				OKIIDOKU_FOREACH_O_DO_EMIT
+				#undef OKIIDOKU_FOREACH_O_EMIT
 			): variant_([O]{
 				switch (O) {
-				#define OKIIDOKU_FOR_COMPILED_O(O_) \
+				#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 				case O_: return variant_t(std::in_place_type<typename Adaptor::template type<O_>>);
-				OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-				#undef OKIIDOKU_FOR_COMPILED_O
+				OKIIDOKU_FOREACH_O_DO_EMIT
+				#undef OKIIDOKU_FOREACH_O_EMIT
 				default: return variant_t(); // default to the lowest compiled order.
 				}
 			}()) {}
@@ -147,10 +147,10 @@ namespace okiidoku {
 				return cmp;
 			}
 			switch (vis_a.get_mono_order()) {
-			#define OKIIDOKU_FOR_COMPILED_O(O_) \
+			#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 			case O_: return vis_a.template unchecked_get_mono_exact<O_>() <=> vis_b.template unchecked_get_mono_exact<O_>();
-			OKIIDOKU_INSTANTIATE_ORDER_TEMPLATES
-			#undef OKIIDOKU_FOR_COMPILED_O
+			OKIIDOKU_FOREACH_O_DO_EMIT
+			#undef OKIIDOKU_FOREACH_O_EMIT
 			}
 			OKIIDOKU_CONTRACT_USE(false); // std::unreachable
 		}
