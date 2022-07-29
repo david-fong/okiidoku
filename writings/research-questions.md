@@ -1,3 +1,5 @@
+<!-- SPDX-FileCopyrightText: 2020 David Fong -->
+<!-- SPDX-License-Identifier: CC0-1.0 -->
 # Interesting Questions for Further Research
 
 - For a given solution grid, is there any correlation between the number of givens in its fewest-givens and most-givens minimal puzzles?

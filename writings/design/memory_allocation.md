@@ -1,3 +1,5 @@
+<!-- SPDX-FileCopyrightText: 2020 David Fong -->
+<!-- SPDX-License-Identifier: CC0-1.0 -->
 
 - Grids must not needlessly waste space in memory.
   - Use the smallest integer size for each entry.

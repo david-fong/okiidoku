@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2020 David Fong
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 // https://pybind11.readthedocs.io/en/stable/changelog.html
 // https://pybind11.readthedocs.io/en/stable/upgrade.html
 // https://pybind11.readthedocs.io/en/stable/limitations.html

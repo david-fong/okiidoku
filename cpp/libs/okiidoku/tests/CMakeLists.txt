@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2020 David Fong
+# SPDX-License-Identifier: GPL-3.0-or-later
 # https://github.com/catchorg/Catch2/blob/devel/docs/usage-tips.md
 function(okiidoku_test_add name)
 	set(target okiidoku_test.${name})

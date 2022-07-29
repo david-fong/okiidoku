@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2020 David Fong
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 // https://emscripten.org/docs/porting/connecting_cpp_and_javascript/embind.html
 // https://emscripten.org/docs/api_reference/bind.h.html
 // https://github.com/emscripten-core/emscripten/blob/main/ChangeLog.md

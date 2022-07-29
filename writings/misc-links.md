@@ -1,3 +1,5 @@
+<!-- SPDX-FileCopyrightText: 2020 David Fong -->
+<!-- SPDX-License-Identifier: CC0-1.0 -->
 
 http://forum.enjoysudoku.com/the-hardest-sudokus-new-thread-t6539.html?hilit=discord
 

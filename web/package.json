@@ -6,7 +6,7 @@
   "keywords": [
     "sudoku"
   ],
-  "license": "MIT",
+  "license": "AGPL-3.0-or-later",
   "author": "David Fong (https://github.com/david-fong)",
   "repository": "github:david-fong/okiidoku",
   "type": "module",

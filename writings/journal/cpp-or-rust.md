@@ -1,3 +1,5 @@
+<!-- SPDX-FileCopyrightText: 2020 David Fong -->
+<!-- SPDX-License-Identifier: CC0-1.0 -->
 
 - I have zero experience or background in rust.
 - But I have constant haunting fear that everything would have been / be better for me if I had just started by using it instead of c++.

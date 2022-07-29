@@ -1,3 +1,5 @@
+<!-- SPDX-FileCopyrightText: 2020 David Fong -->
+<!-- SPDX-License-Identifier: CC0-1.0 -->
 # Rethinking the Solver Engine
 
 ## Important Questions

@@ -1,3 +1,5 @@
+<!-- SPDX-FileCopyrightText: 2020 David Fong -->
+<!-- SPDX-License-Identifier: CC0-1.0 -->
 
 Some people advocate for "cmake-non-intrusive" package-manager usage. Ie. keeping the cmake configuration agnostic with respect to the package manager.
 

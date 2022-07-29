@@ -1,3 +1,5 @@
+<!-- SPDX-FileCopyrightText: 2020 David Fong -->
+<!-- SPDX-License-Identifier: CC0-1.0 -->
 
 I expect this library and its application wrappers not to have many users. Not many people are interested in programming sudoku solvers, and can't really think of any "practical uses" of having one. The most I expect is for a subset of the small community of hobbyist/research domain-experts in the field to give it a glance and maybe try running it. If within that small community it gains significant attention, I'd be pleasantly surprised.
 

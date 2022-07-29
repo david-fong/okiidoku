@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2020 David Fong
+// SPDX-License-Identifier: AGPL-3.0-or-later
 #include <okiidoku/puzzle/make.hpp>
 #include <okiidoku/puzzle/solve.hpp>
 #include <okiidoku/puzzle/ua_set.hpp>

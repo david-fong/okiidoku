@@ -1,3 +1,6 @@
+<!-- SPDX-FileCopyrightText: 2020 David Fong -->
+<!-- SPDX-License-Identifier: CC0-1.0 -->
+<!-- cspell:dictionaries cpp-refined -->
 # Language Bindings
 
 ## Notes on SWIG

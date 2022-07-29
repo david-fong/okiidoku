@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2020 David Fong
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 # TODO.low it would be better to actually demonstrate a CMakeLists.txt file
 # importing the library as a separate project.
 

@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2020 David Fong
+# SPDX-License-Identifier: GPL-3.0-or-later
 include_guard(DIRECTORY)
 # https://github.com/cpm-cmake/CPM.cmake/blob/master/cmake/get_cpm.cmake
 

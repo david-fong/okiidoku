@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2020 David Fong
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 # https://github.com/pybind/cmake_example
 # https://pybind11.readthedocs.io/en/stable/cmake/index.html
 

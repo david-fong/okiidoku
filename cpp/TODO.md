@@ -1,3 +1,5 @@
+<!-- SPDX-FileCopyrightText: 2020 David Fong -->
+<!-- SPDX-License-Identifier: CC0-1.0 -->
 <!-- cspell:dictionaries cpp-refined -->
 # Things To Do
 
@@ -20,6 +22,7 @@
 
 ## Periodic Checkups
 
+- `reuse lint` (check licensing)
 - Examine contents of exported symbols (`nm -nCD libs/okiidoku/.../libokiidoku.so | less`) and make sure nothing is exported that isn't intended to be.
 - Ensure dependencies that should be private to the library implementation aren't exposed in any way to the library interface.
 - Run static analyzers

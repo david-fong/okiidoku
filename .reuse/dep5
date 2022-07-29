@@ -1,0 +1,10 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: okiidoku
+Upstream-Contact: David Fong <davidfong19@gmail.com>
+Source: https://github.com/david-fong/okiidoku
+
+Files:
+ sample-output/*.txt
+ sample-output/*.png
+Copyright: 2020 David Fong
+License: CC0-1.0

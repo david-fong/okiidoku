@@ -1,4 +1,7 @@
 #!/usr/bin/env node
+// SPDX-FileCopyrightText: 2020 David Fong
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 // TODO.wait typescript .d.ts generation https://github.com/emscripten-core/emscripten/issues/7083
 
 // console.log(process.cwd());

@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2020 David Fong
+# SPDX-License-Identifier: GPL-3.0-or-later
 # https://alexreinking.com/blog/building-a-dual-shared-and-static-library-with-cmake.html
 # https://www.reddit.com/r/cpp/comments/m0rt7v/building_a_dual_shared_and_static_library_with/
 # TODO.low try Alex's tutorial things for installation utilities.

@@ -1,3 +1,5 @@
+<!-- SPDX-FileCopyrightText: 2020 David Fong -->
+<!-- SPDX-License-Identifier: GFDL-1.3-or-later -->
 <!-- cspell:dictionaries cpp-refined -->
 # C++ Notes
 
@@ -53,6 +55,18 @@ perf stat -e branch-misses:u ./libs/okiidoku/tests/Release/okiidoku_test
 ## Conan Things
 
 - [Using conan with CMake without making the CMake config depend on conan](https://jfreeman.dev/blog/2019/06/27/trying-conan-with-modern-cmake:-packaging/)
+
+## Reuse SPDX notes
+
+- place the comment tags in the earliest possible line that a comment can go.
+- which licence to use?
+  - source code: AGPL-3.0-or-later
+  - tests and example code: AGPL-3.0-or-later
+  - build system config: GPL-3.0-or-later
+  - debugger helper config: GPL-3.0-or-later
+  - documentation: GFDL-1.3-or-later
+  - other writings: CC0-1.0
+  - small "helper tool" configs (gitignore, linting, formatting): CC0-1.0
 
 ## things I got wrong before
 

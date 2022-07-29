@@ -1,3 +1,5 @@
+<!-- SPDX-FileCopyrightText: 2020 David Fong -->
+<!-- SPDX-License-Identifier: CC0-1.0 -->
 # String Encodings of Grids
 
 For the purposes of persistence and messaging (emscripten bridge to JS) within this library, binary format (and maybe JSON) are suitable.
