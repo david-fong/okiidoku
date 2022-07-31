@@ -4,6 +4,7 @@
 
 #include <okiidoku_cli_utils/shared_rng.hpp>
 #include <okiidoku_cli_utils/console_setup.hpp>
+#include <okiidoku/about.hpp>
 
 #include <iostream>  // cout
 #include <iomanip>   // hex
@@ -42,7 +43,7 @@ int main(const int argc, char const *const argv[]) {
 	<< "\n- arg 2 (srand key)  : " << std::hex << srand_key << std::dec // TODO.mid ugh. it's using my numpunct grouping.
 	<< std::endl;
 
-	okiidoku::SharedRng shared_rng;
+	okiidoku::util::SharedRng shared_rng;
 	shared_rng.rng.seed(srand_key);
 
 	okiidoku::cli::Repl repl {user_order, shared_rng};

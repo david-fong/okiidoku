@@ -30,6 +30,7 @@
 
 		"files.associations": {
 			".clang-tidy": "yaml",
+			"*.natvis": "xml",
 		},
 		// "explorer.sortOrder": "default",
 		"C_Cpp.autoAddFileAssociations": false,

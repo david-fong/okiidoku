@@ -1,0 +1,28 @@
+# SPDX-FileCopyrightText: 2020 David Fong
+# SPDX-License-Identifier: CC0-1.0
+
+cmake
+endfunction
+endmacro
+STREQUAL
+
+cpack
+
+CXX
+NOTFOUND
+
+INTERPROCEDURAL
+SOVERSION
+NAMELINK_COMPONENT
+
+INCLUDEDIR
+LIBDIR
+
+MSVC
+RPATH
+CPPCHECK
+
+
+# ecosystem
+CPM
+emscripten

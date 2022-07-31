@@ -1,8 +1,10 @@
 # SPDX-FileCopyrightText: 2020 David Fong
 # SPDX-License-Identifier: GPL-3.0-or-later
+
 # https://alexreinking.com/blog/building-a-dual-shared-and-static-library-with-cmake.html
 # https://www.reddit.com/r/cpp/comments/m0rt7v/building_a_dual_shared_and_static_library_with/
 # TODO.low try Alex's tutorial things for installation utilities.
+
 add_library(okiidoku #[[ uses BUILD_SHARED_LIBS ]] "")
 add_library(okiidoku::okiidoku ALIAS okiidoku)
 target_compile_features(okiidoku PUBLIC cxx_std_20)
@@ -22,7 +24,7 @@ include(GenerateExportHeader)
 generate_export_header(okiidoku EXPORT_FILE_NAME include/okiidoku/detail/export.h)
 target_compile_definitions(okiidoku PUBLIC "$<$<NOT:$<BOOL:${BUILD_SHARED_LIBS}>>:OKIIDOKU_STATIC_DEFINE>")
 
-configure_file(include/okiidoku/config/version.hpp.in include/okiidoku/config/version.hpp @ONLY)
+include(okiidoku/generate.git_info)
 
 target_include_directories(okiidoku
 	PUBLIC  "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>"

@@ -49,7 +49,7 @@ namespace okiidoku::util::str {
 	};
 	template<class T>
 	requires std::is_arithmetic_v<T>
-	constexpr std::string_view get_box_char(T out_of, T count) {
+	constexpr std::string_view get_box_char(const T out_of, const T count) {
 		assert(count <= out_of);
 		return (count == 0) ? " " : util::str::box_chars[static_cast<std::size_t>(
 			(count) * util::str::box_chars.size() / (out_of + 1)

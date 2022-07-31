@@ -23,7 +23,7 @@ namespace okiidoku::cli {
 	constexpr std::string_view welcome_message {};
 
 
-	Repl::Repl(const Order order_input, SharedRng& rng):
+	Repl::Repl(const Order order_input, util::SharedRng& rng):
 		shared_rng_(rng)
 	{
 		config_.order(order_input);

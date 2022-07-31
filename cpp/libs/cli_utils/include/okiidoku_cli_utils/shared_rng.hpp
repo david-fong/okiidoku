@@ -7,7 +7,7 @@
 #include <mutex>
 #include <cstdint>
 
-namespace okiidoku {
+namespace okiidoku::util {
 
 	class SharedRng final {
 	public:

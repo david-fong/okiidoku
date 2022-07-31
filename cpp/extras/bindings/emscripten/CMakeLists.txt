@@ -33,7 +33,7 @@ set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 set(BUILD_SHARED_LIBS FALSE) # https://emscripten.org/docs/compiling/Dynamic-Linking.html
 
 
-# Note: can't use CMake imports since emcsripten needs to build it from scratch.
+# Note: can't use CMake imports since emscripten needs to build it from scratch.
 add_subdirectory(${okiidoku_SOURCE_DIR}/libs/okiidoku okiidoku)
 
 # https://emscripten.org/docs/compiling/Building-Projects.html#using-libraries

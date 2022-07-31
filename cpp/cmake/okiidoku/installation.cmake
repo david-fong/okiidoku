@@ -19,7 +19,8 @@ install(TARGETS
 	INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
 )
 install(FILES ../README.md TYPE DOC COMPONENT okiidoku_about)
-install(FILES LICENCE TYPE DOC COMPONENT okiidoku_about) # TODO later switch to the .reuse/dep5 file and use RENAME to rename to "copyright"
+install(FILES ../.reuse/dep5 TYPE DOC COMPONENT okiidoku_about RENAME copying) # hm probably not right. need to make a custom one for the installation
+install(DIRECTORY ../LICENSES TYPE DOC COMPONENT okiidoku_about)
 # TODO copy the LICENSES folder to doc?
 
 if(BUILD_SHARED_LIBS)

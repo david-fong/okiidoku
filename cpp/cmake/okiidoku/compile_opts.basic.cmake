@@ -1,5 +1,6 @@
 # SPDX-FileCopyrightText: 2020 David Fong
 # SPDX-License-Identifier: GPL-3.0-or-later
+# cspell:ignoreRegExp -[W][a-z-]+\b
 include_guard(DIRECTORY)
 
 # settings to enable standard compliance and enable many warnings

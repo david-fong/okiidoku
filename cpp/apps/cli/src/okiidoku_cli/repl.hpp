@@ -51,7 +51,7 @@ namespace okiidoku::cli {
 
 	class Repl final {
 	public:
-		explicit Repl(Order O, SharedRng& rng);
+		explicit Repl(Order O, util::SharedRng& rng);
 
 		// disallow copies and moves:
 		Repl(const Repl&) = delete;
@@ -62,7 +62,7 @@ namespace okiidoku::cli {
 		bool run_command(std::string_view cmd_line);
 
 	private:
-		SharedRng& shared_rng_;
+		util::SharedRng& shared_rng_;
 		Config config_;
 
 		void gen_single();

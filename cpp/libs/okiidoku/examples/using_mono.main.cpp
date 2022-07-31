@@ -26,7 +26,7 @@ namespace okiidoku { using namespace ::okiidoku::mono; }
 int main([[maybe_unused]] const int argc, [[maybe_unused]] char const *const argv[]) {
 	namespace oki = okiidoku;
 	oki::util::setup_console();
-	oki::SharedRng shared_rng;
+	oki::util::SharedRng shared_rng;
 	shared_rng.rng.seed(std::random_device()());
 
 	constexpr oki::Order O {3};

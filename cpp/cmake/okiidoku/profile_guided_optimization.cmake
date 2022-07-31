@@ -1,5 +1,6 @@
 # SPDX-FileCopyrightText: 2020 David Fong
 # SPDX-License-Identifier: GPL-3.0-or-later
+# cspell:words "-fprofile"
 include_guard(DIRECTORY)
 
 # TODO wrap this whole thing as a function taking a TARGET_NAME

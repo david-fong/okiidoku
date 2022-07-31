@@ -23,6 +23,9 @@
 # -o: only-matching; -S smart-case; -I: no-filename ; -N: no-line-number
 rg -oSIN --no-filename '(\w+)?okiidoku_\w+' | sort | uniq -c
 
+# (cd to the build folder)
+# install to a test directory
+cmake --install . --config=Release --prefix=install_test
 
 # (cd to the cmake build folder of interest)
 # view public(-D) de-mangled(-C) symbols of the shared library sorted by address(-n)
@@ -66,7 +69,12 @@ perf stat -e branch-misses:u ./libs/okiidoku/tests/Release/okiidoku_test
   - debugger helper config: GPL-3.0-or-later
   - documentation: GFDL-1.3-or-later
   - other writings: CC0-1.0
-  - small "helper tool" configs (gitignore, linting, formatting): CC0-1.0
+  - small "helper tool" configs (gitignore, linting, formatting, IDE): CC0-1.0
+
+<https://reuse.software/dev/>
+<https://www.gnu.org/licenses/gpl-faq.html>
+<https://www.gnu.org/licenses/gpl-howto.html>
+<https://www.gnu.org/licenses/license-list.en.html>
 
 ## things I got wrong before
 

@@ -6,7 +6,7 @@
 #include <okiidoku/config/defaults.hpp>
 #include <okiidoku/detail/order_templates.macros.hpp>
 #include <okiidoku/detail/contract.hpp>
-#include <okiidoku/detail/export.h>
+#include <okiidoku/detail/export.h> // only included to "re-export" to includers
 
 #include <array>
 #include <variant>

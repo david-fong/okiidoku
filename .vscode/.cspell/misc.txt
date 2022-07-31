@@ -1,33 +1,35 @@
 # SPDX-FileCopyrightText: 2020 David Fong
 # SPDX-License-Identifier: CC0-1.0
-alts
+alts # alternates
 analyzer
 analyzers
-cand
+cand # candidate
 cands
+delim # delimiter
 deserialization
 desmos
-distrib
-elim
+distrib # distribution
+elim # elimination
 elims
 Fong
 genpath
 gridlike
-isec
+isec # intersection
 isecs
 libokiidoku
 ōkiidoku
 opcount
-pdep
+pdep # an x86 BMI instruction
 Povs
 prefetch
-puzcell
+proc # process
+puzcell # puzzle cell
 puzcells
 reinit
 serdes
-smol
-soln
+smol # small
+soln # solution
 solns
 speedup
-syms
+syms # symbols
 unsat

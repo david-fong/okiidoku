@@ -7,6 +7,7 @@
 	"language": "en-GB",
 	"enabledLanguageIds": [
 		"c",
+		"cmake",
 		"css",
 		"cpp",
 		"html",
@@ -26,6 +27,10 @@
 		{
 			"languageId": "cpp",
 			"dictionaries": ["!cpp", "cpp-refined"]
+		},
+		{
+			"languageId": "cmake",
+			"dictionaries": ["okiidoku-cmake"]
 		}
 	],
 	// "useGitignore": true,
@@ -44,6 +49,11 @@
 		{
 			"name": "okiidoku-cpp",
 			"path": "./.cspell/cpp.txt",
+			"addWords": true
+		},
+		{
+			"name": "okiidoku-cmake",
+			"path": "./.cspell/cmake.txt",
 			"addWords": true
 		},
 		{

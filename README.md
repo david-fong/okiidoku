@@ -44,7 +44,7 @@ In order:
 
 For Python and WASM/JS bindings, see the [bindings directory](./cpp/extras/bindings/)
 
-This project is MIT licensed.
+This project is licensed under the [GNU Affero General Public License or (at your option) any later version](./LICENSES/AGPL-3.0-or-later-3.0-or-later.txt).
 
 If you have a question about the project and whether it is suitable for your own goals, please first take a look at other existing projects and what they provide, and read through this project's [design docs](./writings/design/) before asking. Use the [discussion page](https://github.com/david-fong/okiidoku/discussions) for questions rather than raising a GitHub issue.
 
