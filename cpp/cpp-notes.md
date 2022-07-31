@@ -1,5 +1,5 @@
 <!-- SPDX-FileCopyrightText: 2020 David Fong -->
-<!-- SPDX-License-Identifier: GFDL-1.3-or-later -->
+<!-- SPDX-License-Identifier: CC0-1.0 -->
 <!-- cspell:dictionaries cpp-refined -->
 # C++ Notes
 
@@ -67,7 +67,7 @@ perf stat -e branch-misses:u ./libs/okiidoku/tests/Release/okiidoku_test
   - tests and example code: AGPL-3.0-or-later
   - build system config: GPL-3.0-or-later
   - debugger helper config: GPL-3.0-or-later
-  - documentation: GFDL-1.3-or-later
+  - documentation: CC0-1.0
   - other writings: CC0-1.0
   - small "helper tool" configs (gitignore, linting, formatting, IDE): CC0-1.0
 
