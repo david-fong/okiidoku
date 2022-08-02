@@ -10,28 +10,33 @@ project(okiidoku
 set(OKIIDOKU_VERSION_COMPATIBILITY ExactVersion) # see `cmake/installation.cmake`.
 # ^ I will consider switching to support `SameMajorVersion` starting at v1.0.0.
 
+option(OKIIDOKU_BUILD_BINDINGS_FOR_PYTHON "build bindings for python" NO)
+
 list(APPEND CMAKE_MODULE_PATH ${okiidoku_SOURCE_DIR}/cmake)
 
 include(okiidoku/compile_opts.basic)
 
 if(PROJECT_IS_TOP_LEVEL)
-	set(CMAKE_CXX_STANDARD 20 CACHE STRING "The C++ standard to use")
-	set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
-	set(CMAKE_CXX_EXTENSIONS FALSE)
+	set(CMAKE_CXX_STANDARD 20 CACHE STRING "the C++ standard to use")
+	set(CMAKE_CXX_STANDARD_REQUIRED NO)
+	set(CMAKE_CXX_EXTENSIONS OFF)
 
 	include(okiidoku/if_top_level/compile_opts.non_portable)
-	include(okiidoku/if_top_level/static_analyzers)
 	include(okiidoku/if_top_level/sanitizers)
-	enable_testing() # not `include(CTest)` because I don't use CDash.
 
 	include(CheckIPOSupported)
 	check_ipo_supported(RESULT CMAKE_INTERPROCEDURAL_OPTIMIZATION)
-	set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_DEBUG FALSE) # want fast debug build
+	set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF) # want fast debug build
 endif()
 
-include(okiidoku/detect_target_isa_support)
-
 include(okiidoku/dependencies)
+
+if(PROJECT_IS_TOP_LEVEL)
+	# Note: these are done _after_ adding dependencies to avoid doing this work on them.
+	include(okiidoku/if_top_level/static_analyzers)
+	enable_testing() # not `include(CTest)` because I don't use CDash.
+endif()
+include(okiidoku/detect_target_isa_support)
 
 
 # General use cases should use BUILD_SHARED_LIBS to choose whether to build
@@ -41,9 +46,9 @@ include(okiidoku/dependencies)
 # DLLs are currently not supported (I had trouble attempting to get it working).
 # https://alexreinking.com/blog/building-a-dual-shared-and-static-library-with-cmake.html
 if(MSVC)
-	set(okiidoku_SHARED_LIBS FALSE)
+	set(okiidoku_SHARED_LIBS NO)
 elseif(PROJECT_IS_TOP_LEVEL)
-	set(okiidoku_SHARED_LIBS TRUE)
+	set(okiidoku_SHARED_LIBS YES)
 endif()
 if(DEFINED okiidoku_SHARED_LIBS)
 	set(BUILD_SHARED_LIBS "${okiidoku_SHARED_LIBS}")
@@ -55,9 +60,12 @@ include(okiidoku/shared_lib_things)
 add_subdirectory(libs/okiidoku)
 add_subdirectory(libs/cli_utils)
 add_subdirectory(apps/cli)
+
 add_subdirectory(tools/okiidoku_translator EXCLUDE_FROM_ALL)
-add_subdirectory(extras/bindings/python EXCLUDE_FROM_ALL)
-# Note: emscripten bindings require emscripten's toolchain. see its subdir.
+if(OKIIDOKU_BUILD_BINDINGS_FOR_PYTHON)
+	add_subdirectory(extras/bindings/python EXCLUDE_FROM_ALL)
+endif()
+# Note: emscripten bindings require emscripten's toolchain. see its subdirectory.
 
 
 include(okiidoku/installation)

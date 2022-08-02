@@ -15,7 +15,7 @@ namespace okiidoku::util {
 		// - consider not using this for any hot-loop operations.
 		// - this is not thread-safe. guard with mutex where necessary.
 		std::mt19937_64 rng;
-		mutable std::mutex mutex;
+		mutable std::mutex mutex {};
 
 		[[nodiscard]] std::uint_fast32_t get_rng_seed() noexcept {
 			std::lock_guard lock_guard {mutex};

@@ -31,8 +31,6 @@
 
 ## Misc List
 
-- check if clang-tidy is running for targets added by CPM. If so, find a way to stop that from happening.
-
 <!-- - no more separate apply. find will do apply automatically -->
 - how to prevent program stack growth due to recursion for singles? consider giving CandPovs an internal data-only stack.
 <!-- - should unwinding be non-automatic? no. still no. I see no additional benefit from non-automatic, and still see the downside (opportunity for mistakes in engine usage). -->

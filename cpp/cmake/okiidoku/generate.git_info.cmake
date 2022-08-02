@@ -24,12 +24,20 @@ okiidoku_generate_version_semver()
 
 
 function(okiidoku_generate_version_git)
+	find_package(Git QUIET)
 	set(output "${CMAKE_CURRENT_BINARY_DIR}/src/okiidoku/about.git.cpp")
 	set(script "${okiidoku_SOURCE_DIR}/cmake/okiidoku/generate.git_info.configure_file.cmake")
+	if(Git_FOUND)
+		execute_process(
+			COMMAND "${GIT_EXECUTABLE}" rev-parse --show-toplevel
+			OUTPUT_VARIABLE GIT_TOP_LEVEL
+			OUTPUT_STRIP_TRAILING_WHITESPACE
+		)
+	endif()
 	# Note: need to use add_custom_command instead of configure_file to execute at build-time.
 	add_custom_command(
 		COMMAND "${CMAKE_COMMAND}" "-DOUTPUT=${output}" -P "${script}"
-		DEPENDS "${script}"
+		DEPENDS "${script}" "$<IF:$<BOOL:Git_FOUND>,${GIT_TOP_LEVEL}/.git/index,>"
 		OUTPUT  "${output}"
 		VERBATIM
 	)

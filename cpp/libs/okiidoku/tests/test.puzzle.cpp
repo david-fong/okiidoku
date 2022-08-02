@@ -45,8 +45,7 @@ void test_puzzle(okiidoku::util::SharedRng& shared_rng, const unsigned num_round
 
 TEST_CASE("puzzle") {
 	const auto default_num_rounds {100U};
-	okiidoku::util::SharedRng shared_rng {};
-	shared_rng.rng.seed(std::random_device()()); // look into using Catch2 GENERATE and random() features
+	okiidoku::util::SharedRng shared_rng {.rng{std::random_device()()}}; // look into using Catch2 GENERATE and random() features
 
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 	test_puzzle<O_>(shared_rng, default_num_rounds);

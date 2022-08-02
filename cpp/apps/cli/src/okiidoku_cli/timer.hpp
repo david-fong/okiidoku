@@ -18,10 +18,10 @@ namespace okiidoku::cli {
 		[[nodiscard]] Elapsed read_elapsed() const noexcept {
 			using namespace ::std::chrono;
 			return Elapsed {
-				.proc_seconds {static_cast<double>(std::clock() - proc_clock_start_) / CLOCKS_PER_SEC},
-				.wall_seconds {static_cast<double>(
+				.proc_seconds = static_cast<double>(std::clock() - proc_clock_start_) / CLOCKS_PER_SEC,
+				.wall_seconds = static_cast<double>(
 					duration_cast<microseconds>(steady_clock::now() - wall_clock_start_).count()
-				) / 1'000'000.0},
+				) / 1'000'000.0,
 			};
 		}
 	private:

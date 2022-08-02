@@ -30,3 +30,11 @@ if(okiidoku_IS_TOP_LEVEL)
 	)
 	include("${catch2_SOURCE_DIR}/extras/Catch.cmake")
 endif()
+
+
+if(OKIIDOKU_BUILD_BINDINGS_FOR_PYTHON)
+	CPMAddPackage("gh:pybind/pybind11@2.9.2")
+	# https://pybind11.readthedocs.io/en/stable/index.html
+	# https://pybind11.readthedocs.io/en/stable/changelog.html
+	# Note: CPM does auto EXCLUDE_FROM_ALL when using shorthand add
+endif()
