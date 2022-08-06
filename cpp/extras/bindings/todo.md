@@ -27,6 +27,8 @@ There is [SWIG](https://www.swig.org/exec.html), but from extremely shallow onli
   - based on Boost.Python. Seems people think well of it and like it a bit more than Boost.Python.
   - Has the advantage that I don't need to pull in all of boost just to get this.
 
+- [creating a setup.py](https://stackoverflow.com/a/73153215/11107541)
+
 - [Boost.Python](https://www.boost.org/doc/libs/1_79_0/libs/python/doc/html/index.html)
   - [reducing compiling time](https://www.boost.org/doc/libs/1_50_0/libs/python/doc/tutorial/doc/html/python/techniques.html#python.reducing_compiling_time)
 

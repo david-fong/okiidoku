@@ -17,10 +17,6 @@ list(APPEND CMAKE_MODULE_PATH ${okiidoku_SOURCE_DIR}/cmake)
 include(okiidoku/compile_opts.basic)
 
 if(PROJECT_IS_TOP_LEVEL)
-	set(CMAKE_CXX_STANDARD 20 CACHE STRING "the C++ standard to use")
-	set(CMAKE_CXX_STANDARD_REQUIRED NO)
-	set(CMAKE_CXX_EXTENSIONS OFF)
-
 	include(okiidoku/if_top_level/compile_opts.non_portable)
 	include(okiidoku/if_top_level/sanitizers)
 

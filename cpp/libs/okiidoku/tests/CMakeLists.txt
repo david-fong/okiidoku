@@ -9,13 +9,13 @@ function(okiidoku_test_add name)
 		PRIVATE okiidoku_compile_options_private
 		PRIVATE okiidoku
 		PRIVATE okiidoku_cli_utils
-		PRIVATE Catch2::Catch2WithMain
+		PRIVATE doctest::doctest
 	)
 	target_include_directories(${target} PRIVATE
 		"${CMAKE_CURRENT_LIST_DIR}/../src"
 	)
 	# https://github.com/catchorg/Catch2/blob/devel/docs/cmake-integration.md#customization
-	catch_discover_tests(${target}
+	doctest_discover_tests(${target}
 		PROPERTIES # https://cmake.org/cmake/help/latest/manual/cmake-properties.7.html#properties-on-tests
 			FIXTURES_SETUP ${target}
 	)

@@ -8,18 +8,18 @@ project(okiidoku_emscripten
 	LANGUAGES CXX
 )
 if(NOT DEFINED EMSCRIPTEN)
-	message(FATAL_ERROR "call cmake wrapped with emcmake like `emcmake cmake <...>`")
-	# The emcmake wrapper adds command-line arguments to set toolchain file path and such.
+	message(FATAL_ERROR "missing emscripten toolchain file. see `emcmake`")
 endif()
-set(CMAKE_CXX_STANDARD 20 CACHE STRING "The C++ standard to use")
-set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
-set(CMAKE_CXX_EXTENSIONS FALSE)
 
 set(okiidoku_SOURCE_DIR "${PROJECT_SOURCE_DIR}/../../..")
 list(APPEND CMAKE_MODULE_PATH "${okiidoku_SOURCE_DIR}/cmake")
 
-include(okiidoku/dependencies)
 include(okiidoku/compile_opts.basic)
+
+set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+set(BUILD_SHARED_LIBS FALSE) # https://emscripten.org/docs/compiling/Dynamic-Linking.html
+
+include(okiidoku/dependencies)
 
 if(PROJECT_IS_TOP_LEVEL)
 	include(okiidoku/if_top_level/static_analyzers)
@@ -29,12 +29,10 @@ endif()
 
 include(okiidoku/detect_target_isa_support)
 
-set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
-set(BUILD_SHARED_LIBS FALSE) # https://emscripten.org/docs/compiling/Dynamic-Linking.html
-
 
 # Note: can't use CMake imports since emscripten needs to build it from scratch.
-add_subdirectory(${okiidoku_SOURCE_DIR}/libs/okiidoku okiidoku)
+# add_subdirectory(${okiidoku_SOURCE_DIR}/libs/okiidoku okiidoku)
+add_subdirectory(${okiidoku_SOURCE_DIR} okiidoku EXCLUDE_FROM_ALL)
 
 # https://emscripten.org/docs/compiling/Building-Projects.html#using-libraries
 # https://emscripten.org/docs/porting/connecting_cpp_and_javascript/embind.html#binding-libraries
@@ -49,12 +47,15 @@ target_compile_options(okiidoku_js PRIVATE
 	-sSTRICT=1
 )
 target_link_options(okiidoku_js PRIVATE
+	--no-entry
+	--pre-js=${PROJECT_SOURCE_DIR}/emcc_pre_js.js
+
 	-sSTRICT=1
+	-sALLOW_UNIMPLEMENTED_SYSCALLS=1 # TODO.wait workaround. why needed?
 	# -sSTANDALONE_WASM=1
 	-sWASM_BIGINT=1
 	# -sMODULARIZE=1
 	# -sENVIRONMENT=web # use to exclude commonJS/Node glue-code
-	--pre-js=${PROJECT_SOURCE_DIR}/emcc_pre_js.js
 )
 target_link_libraries(okiidoku_js
 	PUBLIC  okiidoku_compile_options_public

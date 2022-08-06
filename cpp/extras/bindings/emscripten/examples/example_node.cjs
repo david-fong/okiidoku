@@ -7,4 +7,4 @@ const process = require("process");
 globalThis.okiidokuMain = () => {
 	// see file ./example_node.mjs
 }
-const oki = require(path.join(process.cwd(), "Release/okiidoku.js"));
+const oki = require(path.join(process.cwd(), "../out/build/dev/Release/okiidoku.js"));

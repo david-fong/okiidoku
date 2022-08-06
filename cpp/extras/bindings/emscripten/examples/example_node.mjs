@@ -5,7 +5,7 @@
 // TODO.wait typescript .d.ts generation https://github.com/emscripten-core/emscripten/issues/7083
 
 // console.log(process.cwd());
-// import { default as oki }  from "../build/Release/okiidoku.js";
+// import { default as oki }  from "../out/build/dev/Release/okiidoku.js";
 globalThis.okiidokuMain = () => {
 	// console.log(oki);
 	oki.rng.seed(BigInt(Date.now()));
@@ -18,4 +18,4 @@ globalThis.okiidokuMain = () => {
 		grid.delete();
 	}
 }
-const { default: oki } = await import("../build/Release/okiidoku.js");
+const { default: oki } = await import("../out/build/dev/Release/okiidoku.js");

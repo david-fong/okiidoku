@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2020 David Fong
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#include <catch2/catch_test_macros.hpp>
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#include <doctest/doctest.h>
 
 #include <okiidoku/morph/canon.hpp>
 #include <okiidoku/morph/scramble.hpp>
@@ -28,7 +29,7 @@ void test_morph(okiidoku::util::SharedRng& shared_rng, const unsigned num_rounds
 
 	for (unsigned round {0}; round < num_rounds; ++round) {
 		generate_shuffled(gen_grid, shared_rng.get_rng_seed());
-		REQUIRE(grid_follows_rule(gen_grid));
+		CHECK(grid_follows_rule(gen_grid));
 
 		/* const auto gen_canon_transform {canonicalize(gen_grid)};
 		if (gen_canon_transform.inverted().inverted() != gen_canon_transform) {
@@ -40,7 +41,7 @@ void test_morph(okiidoku::util::SharedRng& shared_rng, const unsigned num_rounds
 		scramble(canon_grid, shared_rng.get_rng_seed());
 		canonicalize(canon_grid);
 
-		REQUIRE(gen_grid == canon_grid);
+		CHECK(gen_grid == canon_grid);
 		*/
 	}
 }
@@ -48,7 +49,7 @@ void test_morph(okiidoku::util::SharedRng& shared_rng, const unsigned num_rounds
 
 TEST_CASE("morph") {
 	const auto default_num_rounds {100U};
-	okiidoku::util::SharedRng shared_rng {.rng{std::random_device()()}}; // look into using Catch2 GENERATE and random() features
+	okiidoku::util::SharedRng shared_rng {std::random_device()()}; // look into using Catch2 GENERATE and random() features
 
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 	test_morph<O_>(shared_rng, default_num_rounds);

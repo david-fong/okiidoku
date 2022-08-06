@@ -3,6 +3,9 @@
 # cspell:words fsanitize, addresssanitizer, asan
 include_guard(DIRECTORY)
 
+# setup tips for linking mixed-instrumentation binaries:
+#  https://stackoverflow.com/a/47022141/11107541
+
 function(okiidoku_enable_private_sanitizers)
 	set(target "okiidoku_compile_options_private")
 	set(configs "$<CONFIG:Debug,RelWithDebInfo>")
@@ -27,7 +30,7 @@ function(okiidoku_enable_private_sanitizers)
 
 		target_compile_options("${target}" INTERFACE "$<${configs}:-fsanitize=address,undefined>")
 		target_link_options(   "${target}" INTERFACE "$<${configs}:-fsanitize=address,undefined>")
-		# TODO.wait note for emscripten https://emscripten.org/docs/debugging/Sanitizers.html#address-sanitizer (may need to configure increased startup memory)
+		# TODO note for emscripten https://emscripten.org/docs/debugging/Sanitizers.html#address-sanitizer (may need to configure increased startup memory)
 
 	endif()
 endfunction()

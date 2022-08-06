@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2020 David Fong
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#include <catch2/catch_test_macros.hpp>
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#include <doctest/doctest.h>
 
 #include <okiidoku/puzzle/make.hpp>
 #include <okiidoku/puzzle/solve.hpp>
@@ -29,7 +30,7 @@ void test_puzzle(okiidoku::util::SharedRng& shared_rng, const unsigned num_round
 
 	for (unsigned round {0}; round < num_rounds; ++round) {
 		generate_shuffled(gen_grid, shared_rng.get_rng_seed());
-		REQUIRE(grid_follows_rule(gen_grid));
+		CHECK(grid_follows_rule(gen_grid));
 
 		INFO("making puzzle #" << int(round));
 		Grid<O> puz_grid {gen_grid};
@@ -45,7 +46,7 @@ void test_puzzle(okiidoku::util::SharedRng& shared_rng, const unsigned num_round
 
 TEST_CASE("puzzle") {
 	const auto default_num_rounds {100U};
-	okiidoku::util::SharedRng shared_rng {.rng{std::random_device()()}}; // look into using Catch2 GENERATE and random() features
+	okiidoku::util::SharedRng shared_rng {std::random_device()()}; // look into using Catch2 GENERATE and random() features
 
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 	test_puzzle<O_>(shared_rng, default_num_rounds);

@@ -2,9 +2,16 @@
 # SPDX-License-Identifier: CC0-1.0
 
 cmake
+
+endforeach
 endfunction
+endif
 endmacro
+endwhile
+elseif
+
 STREQUAL
+ARGN
 
 cpack
 

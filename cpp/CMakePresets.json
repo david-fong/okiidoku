@@ -1,0 +1,83 @@
+{
+	"vendor": {
+		"okiidoku_notes": [
+			"https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html",
+			"put personal/local preset configs in a CMakeUserPresets.json file."
+		]
+	},
+	"version": 3,
+	"cmakeMinimumRequired": {
+		"major": 3,
+		"minor": 21
+	},
+	"configurePresets": [
+		{
+			"name": "base:dev",
+			"hidden": true,
+			"description": "recommended for developing okiidoku",
+			"generator": "Ninja Multi-Config",
+			"binaryDir": "${sourceDir}/out/build/${presetName}",
+			"installDir": "${sourceDir}/out/install/${presetName}",
+			"cacheVariables": {
+				"CMAKE_CXX_STANDARD": "20",
+				"CMAKE_CXX_STANDARD_REQUIRED": true,
+				"CMAKE_CXX_EXTENSIONS": false,
+				"CMAKE_EXPORT_COMPILE_COMMANDS": true,
+				"CMAKE_COLOR_DIAGNOSTICS": true
+			},
+			"warnings": {
+				"dev": true
+			}
+		},
+		{
+			"name": "compiler:clang",
+			"hidden": true,
+			"cacheVariables": {
+				"CMAKE_C_COMPILER": "/usr/bin/clang",
+				"CMAKE_CXX_COMPILER": "/usr/bin/clang++"
+			}
+		},
+		{
+			"name": "compiler:gcc",
+			"hidden": true,
+			"cacheVariables": {
+				"CMAKE_C_COMPILER": "/usr/bin/gcc",
+				"CMAKE_CXX_COMPILER": "/usr/bin/g++"
+			}
+		},
+		{
+			"name": "dev.clang",
+			"inherits": ["base:dev", "compiler:clang"]
+		},
+		{
+			"name": "dev.gcc",
+			"inherits": ["base:dev", "compiler:gcc"]
+		}
+	],
+	"buildPresets": [
+		{
+			"name": "dev.clang.debug",
+			"configurePreset": "dev.clang",
+			"displayName": "debug",
+			"configuration": "Debug"
+		},
+		{
+			"name": "dev.clang.release",
+			"configurePreset": "dev.clang",
+			"displayName": "release",
+			"configuration": "Release"
+		},
+		{
+			"name": "dev.gcc.debug",
+			"configurePreset": "dev.gcc",
+			"displayName": "debug",
+			"configuration": "Debug"
+		},
+		{
+			"name": "dev.gcc.release",
+			"configurePreset": "dev.gcc",
+			"displayName": "release",
+			"configuration": "Release"
+		}
+	]
+}

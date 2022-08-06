@@ -87,5 +87,3 @@ EMSCRIPTEN_BINDINGS(okiidoku) {
 	em::function("generateShuffled", em::select_overload<void(oki_v::Grid&                 )>(&oki::em::generate_shuffled));
 	em::function("generateShuffled", em::select_overload<void(oki_v::Grid&, oki::rng_seed_t)>(&oki_v::generate_shuffled));
 }
-
-int main() {}

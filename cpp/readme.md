@@ -23,8 +23,6 @@
 
 - Code examples can be found in [the examples folder](./libs/okiidoku/examples/).
 
-- It does not make any use of `printf` and friends, so if nothing in your project uses them either, it is safe to do [`sync_with_stdio(false);`](https://en.cppreference.com/w/cpp/io/ios_base/sync_with_stdio).
-
 ## CMake Setup Options
 
 Refer to the [CMake guide](https://cmake.org/cmake/help/latest/guide/importing-exporting/index.html).
