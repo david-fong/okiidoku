@@ -46,12 +46,27 @@
 			}
 		},
 		{
+			"name": "builder:vs:x64",
+			"hidden": true,
+			"generator": "Visual Studio 17 2022",
+			"toolset": "host=x64",
+			"architecture": "x64",
+			"cacheVariables": {
+				"CMAKE_C_COMPILER": "cl.exe",
+				"CMAKE_CXX_COMPILER": "cl.exe"
+			}
+		},
+		{
 			"name": "dev.clang",
-			"inherits": ["base:dev", "compiler:clang"]
+			"inherits": ["compiler:clang", "base:dev"]
 		},
 		{
 			"name": "dev.gcc",
-			"inherits": ["base:dev", "compiler:gcc"]
+			"inherits": ["compiler:gcc", "base:dev"]
+		},
+		{
+			"name": "dev.msvc",
+			"inherits": ["builder:vs:x64", "base:dev"]
 		}
 	],
 	"buildPresets": [
@@ -76,6 +91,18 @@
 		{
 			"name": "dev.gcc.release",
 			"configurePreset": "dev.gcc",
+			"displayName": "release",
+			"configuration": "Release"
+		},
+		{
+			"name": "dev.msvc.debug",
+			"configurePreset": "dev.msvc",
+			"displayName": "debug",
+			"configuration": "Debug"
+		},
+		{
+			"name": "dev.msvc.release",
+			"configurePreset": "dev.msvc",
 			"displayName": "release",
 			"configuration": "Release"
 		}

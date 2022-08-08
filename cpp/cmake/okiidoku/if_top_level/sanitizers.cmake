@@ -5,6 +5,7 @@ include_guard(DIRECTORY)
 
 # setup tips for linking mixed-instrumentation binaries:
 #  https://stackoverflow.com/a/47022141/11107541
+#  https://github.com/google/sanitizers/wiki/AddressSanitizer#faq
 
 function(okiidoku_enable_private_sanitizers)
 	set(target "okiidoku_compile_options_private")

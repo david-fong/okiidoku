@@ -85,22 +85,22 @@ namespace okiidoku::mono {
 			});
 			// if (num_puzcell_cands <= 61) [[unlikely]] { return; } // TODO delete when done profiling
 
-			if (std::any_of(
-				ua_sets.ua_set_4s.cbegin(),
-				ua_sets.ua_set_4s.cend(),
-				[&](const auto& ua_set_4){
-					return std::count_if(
-						#ifdef __cpp_lib_execution
-						std::execution::unseq,
-						#endif
-						ua_set_4.rmis.cbegin(),
-						ua_set_4.rmis.cend(),
-						[&](const auto& ua_set_rmi){ return (ua_set_rmi != rmi) && (grid.at_rmi(ua_set_rmi) != T::O2); }
-					) == 0;
-				}
-			)) {
-				std::clog << "\ncannot remove at " << int(rmi) << " since it is the last given for a ua_set_4.";
-			}
+			// if (std::any_of(
+			// 	ua_sets.ua_set_4s.cbegin(),
+			// 	ua_sets.ua_set_4s.cend(),
+			// 	[&](const auto& ua_set_4){
+			// 		return std::count_if(
+			// 			#ifdef __cpp_lib_execution
+			// 			std::execution::unseq,
+			// 			#endif
+			// 			ua_set_4.rmis.cbegin(),
+			// 			ua_set_4.rmis.cend(),
+			// 			[&](const auto& ua_set_rmi){ return (ua_set_rmi != rmi) && (grid.at_rmi(ua_set_rmi) != T::O2); }
+			// 		) == 0;
+			// 	}
+			// )) {
+			// 	std::clog << "\ncannot remove at " << int(rmi) << " since it is the last given for a ua_set_4.";
+			// }
 
 			solver.reinit_with_puzzle(grid, {{.rmi{rmi}, .val{static_cast<o2x_t>(val)}}});
 			if (const auto new_soln_opt {solver.get_next_solution()}; new_soln_opt) {
