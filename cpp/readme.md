@@ -12,7 +12,7 @@
 ## Using the Library
 
 - Requirements to build from source:
-  - CMake 3.21
+  - CMake 3.22 or later
   - a C++ compiler [supporting C++20](https://en.cppreference.com/w/cpp/compiler_support). I have tested on GCC 11, Visual Studio 17 2022, and Clang 14. I have no interest in committing to support other compilers (ex. apple-clang) or lower versions of the above compilers.
   - a build system (ex. Ninja, Visual Studio)
 

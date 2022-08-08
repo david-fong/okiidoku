@@ -5,12 +5,14 @@ analyzer
 analyzers
 cand # candidate
 cands
+cmake
 delim # delimiter
 deserialization
 desmos
 distrib # distribution
 elim # elimination
 elims
+emscripten
 Fong
 genpath
 gridlike

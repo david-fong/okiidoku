@@ -1,6 +1,6 @@
 {
 	"vendor": {
-		"okiidoku_notes": [
+		"david-fong.github.io/okiidoku/notes": [
 			"https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html",
 			"put personal/local preset configs in a CMakeUserPresets.json file."
 		]

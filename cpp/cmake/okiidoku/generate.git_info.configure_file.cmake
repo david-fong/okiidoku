@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2020 David Fong
 # SPDX-License-Identifier: GPL-3.0-or-later
 # cspell:dictionaries cpp-refined
-cmake_minimum_required(VERSION 3.21)
+cmake_minimum_required(VERSION 3.22)
 include_guard(DIRECTORY)
 
 find_package(Git QUIET)

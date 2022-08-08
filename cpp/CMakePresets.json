@@ -1,6 +1,6 @@
 {
 	"vendor": {
-		"okiidoku_notes": [
+		"david-fong.github.io/okiidoku/notes": [
 			"https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html",
 			"put personal/local preset configs in a CMakeUserPresets.json file."
 		]
@@ -8,7 +8,7 @@
 	"version": 3,
 	"cmakeMinimumRequired": {
 		"major": 3,
-		"minor": 21
+		"minor": 22
 	},
 	"configurePresets": [
 		{
@@ -48,6 +48,11 @@
 		{
 			"name": "builder:vs:x64",
 			"hidden": true,
+			"condition": {
+				"type": "equals",
+				"lhs": "${hostSystemName}",
+				"rhs": "Windows"
+			},
 			"generator": "Visual Studio 17 2022",
 			"toolset": "host=x64",
 			"architecture": "x64",
