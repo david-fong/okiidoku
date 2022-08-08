@@ -1,6 +1,8 @@
 # SPDX-FileCopyrightText: 2020 David Fong
 # SPDX-License-Identifier: CC0-1.0
 
+# https://cmake.org/cmake/help/latest/manual/cmake-variables.7.html
+
 cmake
 
 endforeach

@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2020 David Fong
 # SPDX-License-Identifier: GPL-3.0-or-later
 # https://github.com/catchorg/Catch2/blob/devel/docs/usage-tips.md
-function(okiidoku_test_add name)
+function(okiidoku_test_add name #[[ ARGN are dependencies ]])
 	set(target okiidoku_test.${name})
 	add_executable(${target} test.${name}.cpp)
 	target_link_libraries(${target}
@@ -19,29 +19,26 @@ function(okiidoku_test_add name)
 		PROPERTIES # https://cmake.org/cmake/help/latest/manual/cmake-properties.7.html#properties-on-tests
 			FIXTURES_SETUP ${target}
 	)
-endfunction()
-
-# https://crascit.com/2016/10/18/test-fixtures-with-cmake-ctest/
-function(okiidoku_test_dep depender dependee)
-	set_tests_properties(${okiidoku_test.${depender}_TESTS} PROPERTIES
-		FIXTURES_REQUIRED okiidoku_test.${dependee}
+	# https://crascit.com/2016/10/18/test-fixtures-with-cmake-ctest/
+	# TODO.wait https://github.com/catchorg/Catch2/issues/2496
+	set(dependency "")
+	foreach(dependency ${ARGN})
+		list(APPEND dependencies okiidoku_test.${dependency})
+	endforeach()
+	set_tests_properties(${${target}_TESTS} PROPERTIES
+		FIXTURES_REQUIRED "${dependencies}"
 	)
 endfunction()
 
 
-okiidoku_test_add(o2_bit_arr)
+okiidoku_test_add(o2_bit_arr #[[ DEPS ]])
 target_sources(okiidoku_test.o2_bit_arr PRIVATE
 	# a bit of a hack to be able to test it (library internals: hidden symbols).
 	"${CMAKE_CURRENT_LIST_DIR}/../src/okiidoku/o2_bit_arr.cpp"
 )
 
-okiidoku_test_add(grid)
-okiidoku_test_dep(grid o2_bit_arr)
+okiidoku_test_add(grid #[[ DEPS ]] o2_bit_arr)
 
-okiidoku_test_add(morph)
-okiidoku_test_dep(morph o2_bit_arr)
-okiidoku_test_dep(morph grid)
+okiidoku_test_add(morph #[[ DEPS ]] o2_bit_arr grid)
 
-okiidoku_test_add(puzzle)
-okiidoku_test_dep(puzzle o2_bit_arr)
-okiidoku_test_dep(puzzle grid)
+okiidoku_test_add(puzzle #[[ DEPS ]] o2_bit_arr grid)

@@ -5,11 +5,11 @@ include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
 if(NOT DEFINED OKIIDOKU_INSTALL_CMAKEDIR)
-	set(OKIIDOKU_INSTALL_CMAKEDIR "${CMAKE_INSTALL_LIBDIR}/cmake/okiidoku" CACHE STRING "the path to cmake-install-related files")
+	set(OKIIDOKU_INSTALL_CMAKEDIR "${CMAKE_INSTALL_LIBDIR}/cmake/okiidoku")
 endif()
 
-install(TARGETS
-	okiidoku okiidoku_cli
+install(
+	TARGETS okiidoku okiidoku_cli
 	EXPORT okiidoku_installation_targets
 	# RUNTIME_DEPENDENCIES # currently there are none to bundle.
 	RUNTIME  COMPONENT okiidoku_runtime
@@ -30,7 +30,8 @@ else()
 endif()
 
 # regular installation import support:
-install(EXPORT okiidoku_installation_targets
+install(
+	EXPORT okiidoku_installation_targets
 	NAMESPACE okiidoku::
 	DESTINATION "${OKIIDOKU_INSTALL_CMAKEDIR}"
 	FILE "okiidoku-${OKIIDOKU_LIB_TYPE_NAME}-targets.cmake"
@@ -38,7 +39,8 @@ install(EXPORT okiidoku_installation_targets
 )
 # also support importing from this repo's build-tree (no installation):
 # https://cmake.org/cmake/help/latest/guide/importing-exporting/index.html#exporting-targets-from-the-build-tree
-export(EXPORT okiidoku_installation_targets
+export(
+	EXPORT okiidoku_installation_targets
 	NAMESPACE okiidoku::
 	FILE "${CMAKE_CURRENT_BINARY_DIR}/cmake/okiidoku-targets.cmake"
 )

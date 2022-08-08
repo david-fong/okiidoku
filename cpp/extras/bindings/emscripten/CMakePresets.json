@@ -14,7 +14,6 @@
 		{
 			"name": "base:dev",
 			"hidden": true,
-			"description": "recommended for developing okiidoku",
 			"generator": "Ninja Multi-Config",
 			"binaryDir": "${sourceDir}/out/build/${presetName}",
 			"installDir": "${sourceDir}/out/install/${presetName}",

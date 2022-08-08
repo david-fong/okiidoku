@@ -31,6 +31,10 @@
 
 ## Misc List
 
+use module mode for emscripten binding output
+
+make dedicated macro for `std::unreachable`
+
 rename the cmake helper for non-portable compile options to be something like compile\_options.global.non\_portable to emphasize that they are intended to and must be applied globally, including to dependencies
 
 <!-- - no more separate apply. find will do apply automatically -->

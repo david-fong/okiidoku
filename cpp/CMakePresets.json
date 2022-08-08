@@ -14,7 +14,6 @@
 		{
 			"name": "base:dev",
 			"hidden": true,
-			"description": "recommended for developing okiidoku",
 			"generator": "Ninja Multi-Config",
 			"binaryDir": "${sourceDir}/out/build/${presetName}",
 			"installDir": "${sourceDir}/out/install/${presetName}",
@@ -76,40 +75,60 @@
 	],
 	"buildPresets": [
 		{
+			"name": "base:dev",
+			"hidden": true,
+			"targets": ["okiidoku", "okiidoku_cli"]
+		},
+		{
 			"name": "dev.clang.debug",
 			"configurePreset": "dev.clang",
 			"displayName": "debug",
+			"inherits": ["base:dev"],
 			"configuration": "Debug"
 		},
 		{
 			"name": "dev.clang.release",
 			"configurePreset": "dev.clang",
 			"displayName": "release",
+			"inherits": ["base:dev"],
 			"configuration": "Release"
 		},
 		{
 			"name": "dev.gcc.debug",
 			"configurePreset": "dev.gcc",
 			"displayName": "debug",
+			"inherits": ["base:dev"],
 			"configuration": "Debug"
 		},
 		{
 			"name": "dev.gcc.release",
 			"configurePreset": "dev.gcc",
 			"displayName": "release",
+			"inherits": ["base:dev"],
 			"configuration": "Release"
 		},
 		{
 			"name": "dev.msvc.debug",
 			"configurePreset": "dev.msvc",
 			"displayName": "debug",
+			"inherits": ["base:dev"],
 			"configuration": "Debug"
 		},
 		{
 			"name": "dev.msvc.release",
 			"configurePreset": "dev.msvc",
 			"displayName": "release",
+			"inherits": ["base:dev"],
 			"configuration": "Release"
+		}
+	],
+	"testPresets": [
+		{
+			"name": "base:dev",
+			"hidden": true,
+			"description": "recommended for developing okiidoku",
+			"execution": {},
+			"output": {}
 		}
 	]
 }

@@ -45,7 +45,7 @@ perf stat -e branch-misses:u ./libs/okiidoku/tests/Release/okiidoku_test
 ## CMake Things
 
 - [official tutorial](https://cmake.org/cmake/help/latest/guide/tutorial/index.html)
-- [cmake for dynamic library developers](https://www.youtube.com/watch?v=m0DwB4OvDXk)
+- [cmake for dynamic library developers - craig scott](https://www.youtube.com/watch?v=m0DwB4OvDXk)
 - [alex reinking tutorial part 2](https://alexreinking.com/blog/how-to-use-cmake-without-the-agonizing-pain-part-2.html)
 - [](https://crascit.com/2016/01/31/enhanced-source-file-handling-with-target_sources/)
 - [preparing a project for CPM](https://github.com/cpm-cmake/CPM.cmake/wiki/Preparing-projects-for-CPM.cmake)
@@ -55,9 +55,9 @@ perf stat -e branch-misses:u ./libs/okiidoku/tests/Release/okiidoku_test
 
 - <https://cmake.org/cmake/help/latest/variable/PROJECT-NAME_SOURCE_DIR.html>
 
-## Conan Things
-
-- [Using conan with CMake without making the CMake config depend on conan](https://jfreeman.dev/blog/2019/06/27/trying-conan-with-modern-cmake:-packaging/)
+- presets:
+  - [cmake docs](https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html)
+  - [vscode extension docs](https://github.com/microsoft/vscode-cmake-tools/blob/main/docs/cmake-presets.md)
 
 ## Reuse SPDX notes
 
@@ -145,7 +145,7 @@ things I got wrong before which I couldn't understand based on gcc's error messa
   - [standardization proposal](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p1774r4.pdf)
   - [interesting clang thing](https://github.com/microsoft/GSL/pull/608)
 
-- [floats in `(0.0,1.0]` can be slower to process](https://en.wikipedia.org/wiki/Subnormal_number#Performance_issues)
+- [floats in `(0.0,1.0]` can be slower to process](https://en.wikipedia.org/wiki/Subnormal_number#Performance_issues) (apparently?)
 
 ## misc VS Code regexes
 
