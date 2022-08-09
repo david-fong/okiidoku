@@ -124,7 +124,7 @@ namespace okiidoku::mono { namespace {
 			);
 		}
 		const auto chute_tie_data {[&](o2i_t chute) {
-			namespace v = ranges::views;
+			namespace v = ::ranges::views;
 			return to_tied | v::drop(chute*T::O1) | v::take(T::O1) | v::transform([&](auto i){ return v::common(table.row_span_at(i)); }) | v::join;
 		}};
 		// try to resolve tied chute ranges:

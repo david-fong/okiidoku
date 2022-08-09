@@ -223,7 +223,7 @@ namespace okiidoku::visitor {
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
 		}
-		OKIIDOKU_CONTRACT_USE(false); // std::unreachable
+		OKIIDOKU_UNREACHABLE;
 	}
 
 	void parse_solution_grid_from_stream(Grid& vis_sink, std::istream& is) noexcept {
@@ -233,7 +233,7 @@ namespace okiidoku::visitor {
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
 		}
-		OKIIDOKU_CONTRACT_USE(false); // std::unreachable
+		OKIIDOKU_UNREACHABLE;
 	}
 
 	void print_puzzle_grid_to_stream(const Grid& vis_src, std::ostream& os) noexcept {
@@ -243,7 +243,7 @@ namespace okiidoku::visitor {
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
 		}
-		OKIIDOKU_CONTRACT_USE(false); // std::unreachable
+		OKIIDOKU_UNREACHABLE;
 	}
 
 	void parse_puzzle_grid_from_stream(Grid& vis_sink, std::istream& is) noexcept {
@@ -253,6 +253,6 @@ namespace okiidoku::visitor {
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
 		}
-		OKIIDOKU_CONTRACT_USE(false); // std::unreachable
+		OKIIDOKU_UNREACHABLE;
 	}
 }

@@ -16,7 +16,7 @@
 
 template<okiidoku::Order O>
 void test_morph(okiidoku::util::SharedRng& shared_rng, const unsigned num_rounds) {
-	if (O >= 4) { return; } // TODO.high enable when solver for order=5 is faster?
+	if constexpr (O >= 4) { return; } // TODO.high enable when solver for order=5 is faster?
 	using namespace ::okiidoku;
 	using namespace ::okiidoku::mono;
 	// OKIIDOKU_MONO_INT_TS_TYPEDEFS

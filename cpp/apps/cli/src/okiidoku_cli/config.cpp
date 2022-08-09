@@ -11,7 +11,7 @@
 
 namespace okiidoku::cli {
 
-	namespace str = okiidoku::util::str;
+	namespace str = ::okiidoku::util::str;
 
 
 	void Config::order(const Order new_order) noexcept {

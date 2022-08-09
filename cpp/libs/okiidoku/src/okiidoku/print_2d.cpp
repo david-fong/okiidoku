@@ -21,28 +21,25 @@ namespace okiidoku { namespace {
 		{
 			using rng_t = std::minstd_rand; // other good LCG parameters: https://arxiv.org/pdf/2001.05304v3.pdf
 			rng_t rng {rng_seed};
-			for (
-				size_t b {0}, e_i_ {0}, e {prefs[e_i_]};
-				b != prefs.back();
-				b = e, ++e_i_, e = (e_i_ == prefs.size() ? emoji::sets.size() : prefs[e_i_])
-			) {
+			for (size_t b {0}, e_i_ {0}; b != prefs.back(); ++e_i_) {
+				const size_t e {prefs[e_i_]};
 				std::shuffle(
 					std::next(shuffled_sets.begin(), static_cast<long>(b)),
 					std::next(shuffled_sets.begin(), static_cast<long>(e)),
 					rng
 				);
+				b = e;
 			}
 		}
 		// first try to find a single set large enough:
-		for (
-			size_t b {0}, e_i_ {0}, e {prefs[e_i_]};
-			e != prefs.back(); // unlike before, don't use anything not in top prefs list here.
-			b = e, ++e_i_, e = prefs[e_i_]
-		) {
+			// unlike before, don't use anything not in top prefs list here.
+		for (size_t b {0}, e_i_ {0}; e_i_ < prefs.size(); ++e_i_) {
+			const size_t e {prefs[e_i_]};
 			for (size_t i {b}; i < e; ++i) {
 				if (emoji::sets.at(shuffled_sets.at(i)).entries.size() >= O2) {
 					return {shuffled_sets.at(i)};
 			}	}
+			b = e;
 		}
 		// otherwise just return everything:
 		return shuffled_sets;

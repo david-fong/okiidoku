@@ -221,7 +221,7 @@ namespace okiidoku::mono {
 		case HouseType::col: return static_cast<o2x_t>(rmi_to_col<O>(rmi));
 		case HouseType::box: return static_cast<o2x_t>(rmi_to_box<O>(rmi));
 		}
-		OKIIDOKU_CONTRACT_USE(false); // std::unreachable
+		OKIIDOKU_UNREACHABLE;
 	}
 
 
@@ -258,7 +258,7 @@ namespace okiidoku::mono {
 		case HouseType::col: return row_col_to_rmi<O>(house_cell, house);
 		case HouseType::box: return box_cell_to_rmi<O>(house, house_cell);
 		}
-		OKIIDOKU_CONTRACT_USE(false); // std::unreachable
+		OKIIDOKU_UNREACHABLE;
 	}
 
 	template<Order O, class T_chute, class T_chute_cell>
@@ -272,7 +272,7 @@ namespace okiidoku::mono {
 		case LineType::row: return static_cast<o4x_t>((T::O3*chute)+chute_cell);
 		case LineType::col: return static_cast<o4x_t>((T::O1*chute)+((chute_cell%T::O2)*T::O2)+(chute_cell/T::O2));
 		}
-		OKIIDOKU_CONTRACT_USE(false); // std::unreachable
+		OKIIDOKU_UNREACHABLE;
 	}
 }
 

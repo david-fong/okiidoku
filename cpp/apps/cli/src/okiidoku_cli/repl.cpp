@@ -18,7 +18,7 @@
 
 namespace okiidoku::cli {
 
-	namespace str = okiidoku::util::str;
+	namespace str = ::okiidoku::util::str;
 
 	constexpr std::string_view welcome_message {};
 

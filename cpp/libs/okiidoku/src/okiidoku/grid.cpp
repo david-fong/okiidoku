@@ -113,7 +113,7 @@ namespace okiidoku::visitor {
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
 		}
-		OKIIDOKU_CONTRACT_USE(false); // std::unreachable
+		OKIIDOKU_UNREACHABLE;
 	}
 
 	bool grid_is_filled(const Grid& vis_grid) noexcept {
@@ -123,7 +123,7 @@ namespace okiidoku::visitor {
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
 		}
-		OKIIDOKU_CONTRACT_USE(false); // std::unreachable
+		OKIIDOKU_UNREACHABLE;
 	}
 
 	bool grid_is_empty(const Grid& vis_grid) noexcept {
@@ -133,7 +133,7 @@ namespace okiidoku::visitor {
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
 		}
-		OKIIDOKU_CONTRACT_USE(false); // std::unreachable
+		OKIIDOKU_UNREACHABLE;
 	}
 
 	void init_most_canonical_grid(Grid& vis_grid) noexcept {
@@ -143,7 +143,7 @@ namespace okiidoku::visitor {
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
 		}
-		OKIIDOKU_CONTRACT_USE(false); // std::unreachable
+		OKIIDOKU_UNREACHABLE;
 	}
 
 
@@ -154,7 +154,7 @@ namespace okiidoku::visitor {
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
 		}
-		OKIIDOKU_CONTRACT_USE(false); // std::unreachable
+		OKIIDOKU_UNREACHABLE;
 	}
 
 	Grid::common_val_t Grid::at(const int_ts::o2i_t row, const int_ts::o2i_t col) const noexcept {
@@ -164,6 +164,6 @@ namespace okiidoku::visitor {
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
 		}
-		OKIIDOKU_CONTRACT_USE(false); // std::unreachable
+		OKIIDOKU_UNREACHABLE;
 	}
 }

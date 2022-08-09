@@ -89,7 +89,7 @@
 		{
 			"name": "base:dev",
 			"hidden": true,
-			"targets": ["okiidoku", "okiidoku_cli"]
+			"targets": ["all", "okiidoku_cli"]
 		},
 		{
 			"name": "dev.clang.debug",

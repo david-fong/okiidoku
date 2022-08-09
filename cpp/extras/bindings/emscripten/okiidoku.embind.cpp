@@ -56,10 +56,10 @@ namespace okiidoku::visitor { namespace {
 
 // static constructor function:
 EMSCRIPTEN_BINDINGS(okiidoku) {
-	namespace em = emscripten;
-	namespace oki = okiidoku;
-	namespace oki_m = okiidoku::mono;
-	namespace oki_v = okiidoku::visitor;
+	namespace em = ::emscripten;
+	namespace oki = ::okiidoku;
+	namespace oki_m = ::okiidoku::mono;
+	namespace oki_v = ::okiidoku::visitor;
 
 	em::function("isOrderCompiled", &oki::is_order_compiled);
 

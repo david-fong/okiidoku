@@ -47,6 +47,6 @@ namespace okiidoku::visitor {
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
 		}
-		OKIIDOKU_CONTRACT_USE(false); // std::unreachable
+		OKIIDOKU_UNREACHABLE;
 	}
 }
