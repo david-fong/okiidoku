@@ -1,9 +1,10 @@
 # SPDX-FileCopyrightText: 2020 David Fong
 # SPDX-License-Identifier: GPL-3.0-or-later
+# cspell:words emcmake embind emcc
 cmake_minimum_required(VERSION 3.22)
 project(okiidoku_emscripten
 	VERSION 0.0.1
-	DESCRIPTION "emscripten build of libokiidoku"
+	DESCRIPTION "emscripten build of okiidoku"
 	HOMEPAGE_URL "https://github.com/david-fong/okiidoku"
 	LANGUAGES CXX
 )
@@ -23,11 +24,10 @@ include(okiidoku/dependencies)
 
 if(PROJECT_IS_TOP_LEVEL)
 	include(okiidoku/if_top_level/static_analyzers)
+	include(okiidoku/if_top_level/compile_opts.non_portable)
 	include(okiidoku/if_top_level/sanitizers)
 	enable_testing()
 endif()
-
-include(okiidoku/detect_target_isa_support)
 
 
 # Note: can't use CMake imports since emscripten needs to build it from scratch.

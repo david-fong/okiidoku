@@ -10,7 +10,6 @@ project(okiidoku
 set(OKIIDOKU_VERSION_COMPATIBILITY ExactVersion) # see `cmake/installation.cmake`.
 # ^ I will consider switching to support `SameMajorVersion` starting at v1.0.0.
 
-option(OKIIDOKU_BUILD_APP_CLI "build the cli wrapper application" YES)
 option(OKIIDOKU_BUILD_BINDINGS_FOR_PYTHON "build bindings for python" NO)
 
 list(APPEND CMAKE_MODULE_PATH ${okiidoku_SOURCE_DIR}/cmake)
@@ -33,7 +32,6 @@ if(PROJECT_IS_TOP_LEVEL)
 	include(okiidoku/if_top_level/static_analyzers)
 	enable_testing() # not `include(CTest)` because I don't use CDash.
 endif()
-include(okiidoku/detect_target_isa_support)
 
 
 # General use cases should use BUILD_SHARED_LIBS to choose whether to build
@@ -42,7 +40,7 @@ include(okiidoku/detect_target_isa_support)
 #
 # DLLs are currently not supported (I had trouble attempting to get it working).
 # https://alexreinking.com/blog/building-a-dual-shared-and-static-library-with-cmake.html
-if(TARGET_SUPPORTS_SHARED_LIBS)
+if(NOT DEFINED TARGET_SUPPORTS_SHARED_LIBS OR TARGET_SUPPORTS_SHARED_LIBS)
 	if(MSVC)
 		set(okiidoku_SHARED_LIBS NO)
 	elseif(PROJECT_IS_TOP_LEVEL)
@@ -59,11 +57,11 @@ endif()
 # Note: If an optional target requires fetching large dependencies,
 #  guard with a cmake option; otherwise, mark as EXCLUDE_FROM_ALL.
 add_subdirectory(libs/okiidoku)
-add_subdirectory(libs/cli_utils EXCLUDE_FROM_ALL)
-add_subdirectory(apps/cli EXCLUDE_FROM_ALL)
+add_subdirectory(libs/cli_utils EXCLUDE_FROM_ALL) # internal
+add_subdirectory(apps/cli EXCLUDE_FROM_ALL) # target: okiidoku_cli
 add_subdirectory(tools/okiidoku_translator EXCLUDE_FROM_ALL)
 if(OKIIDOKU_BUILD_BINDINGS_FOR_PYTHON)
-	add_subdirectory(extras/bindings/python)
+	add_subdirectory(extras/bindings/python) # target: okiidoku_py
 endif()
 # Note: emscripten bindings require emscripten's toolchain. see its subdirectory.
 

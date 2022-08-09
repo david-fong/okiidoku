@@ -36,10 +36,10 @@
 	},
 
 	"files.exclude": {
-		// "external/": true,
+		"external/": true,
 		"out/": true,
 		"build/": true,
-		// "extras/bindings/emscripten/external/": true,
+		"extras/bindings/emscripten/external/": true,
 		"extras/bindings/emscripten/out/": true,
 		"extras/bindings/emscripten/build/": true,
 	},

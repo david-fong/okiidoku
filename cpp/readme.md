@@ -12,8 +12,8 @@
 ## Using the Library
 
 - Requirements to build from source:
-  - CMake 3.22 or later
-  - a C++ compiler [supporting C++20](https://en.cppreference.com/w/cpp/compiler_support). I have tested on GCC 11, Visual Studio 17 2022, and Clang 14. I have no interest in committing to support other compilers (ex. apple-clang) or lower versions of the above compilers.
+  - [CMake](https://cmake.org/install/) 3.22 or later
+  - a C++ compiler [supporting C++20](https://en.cppreference.com/w/cpp/compiler_support). I have tested on Clang 14, GCC 11, and Visual Studio 17 2022. I have no interest in committing to support other compilers (ex. apple-clang) or lower versions of the above compilers.
   - a build system (ex. Ninja, Visual Studio)
 
 - The library uses templates for each compiled grid size for optimization purposes. The templates are accessible under the `okiidoku::mono` namespace, and a visitor-pattern interface is exposed under the `okiidoku::visitor` namespace. The visitor pattern is intended to make it more convenient to write code that uses an order selected at runtime.
@@ -24,6 +24,8 @@
 - Code examples can be found in [the examples folder](./libs/okiidoku/examples/).
 
 ## CMake Setup Options
+
+- https://cmake.org/cmake/help/latest/guide/user-interaction/index.html
 
 Refer to the [CMake guide](https://cmake.org/cmake/help/latest/guide/importing-exporting/index.html).
 

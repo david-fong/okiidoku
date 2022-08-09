@@ -26,7 +26,8 @@
 			"TODO.wait",
 			"TODO",
 		],
-		"cmake.configureOnOpen": false,
+		"cmake.ignoreCMakeListsMissing": true,
+		"cmake.useCMakePresets": "always",
 
 		"files.associations": {
 			".clang-tidy": "yaml",

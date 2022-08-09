@@ -37,6 +37,10 @@ make dedicated macro for `std::unreachable`
 
 rename the cmake helper for non-portable compile options to be something like compile\_options.global.non\_portable to emphasize that they are intended to and must be applied globally, including to dependencies
 
+usage docs for CMake:
+- building an app target (cmake --build . --config=Release --target okiidoku_cli)
+- installing an app target (cmake --install . --config=Release --component okiidoku_runtime \[--prefix\])
+
 <!-- - no more separate apply. find will do apply automatically -->
 - how to prevent program stack growth due to recursion for singles? consider giving CandPovs an internal data-only stack.
 <!-- - should unwinding be non-automatic? no. still no. I see no additional benefit from non-automatic, and still see the downside (opportunity for mistakes in engine usage). -->
