@@ -29,12 +29,17 @@
 - Check which `#ifdef __EMSCRIPTEN__` / `__cpp_lib_...` blocks can be removed as emscripten updates its sysroot libc++.
 - https://en.cppreference.com/w/cpp/language/rule_of_three
 
+Issues I'm watching:
+
+- [emscripten toolchain file does not set cross-compiling emulator like `emcmake`](https://github.com/emscripten-core/emscripten/issues/16382)
+- [vscode cmake tools problem with cmake installed via snap](https://github.com/microsoft/vscode-cmake-tools/issues/838#issuecomment-1035123514)
+
 ## Misc List
 
 use module mode for emscripten binding output. make sure to update readme and examples
 
 - ctest for emscripten configuration
-- add a CMake option to build testing
+- add a CMake option to build with sanitizers / static analyzers
 
 usage docs for CMake:
 - building an app target (cmake --build . --config=Release --target okiidoku_cli)

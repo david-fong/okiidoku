@@ -48,7 +48,7 @@ You can use `tput rmam` to disable the terminal's line wrapping, and `tput smam`
 
 ## Source Code
 
-The project is set up for use with VS Code. After installing and enabling the recommended extensions, you will need to perform [some initial steps](https://code.visualstudio.com/docs/cpp/cmake-linux#_select-a-kit) to tell VS Code what specific build tools ("kit") and build configuration ("variant") you want to use.
+The project is set up for use with VS Code. After installing and enabling the recommended extensions, select a configure preset and build preset.
 
 Don't open the cpp folder or the repo's root folder in VS Code directly. Open [the repo's workspace file](../okiidoku.code-workspace).
 

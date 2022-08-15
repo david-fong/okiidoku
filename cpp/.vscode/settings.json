@@ -12,17 +12,6 @@
 
 	// https://vector-of-bool.github.io/docs/vscode-cmake-tools/settings.html
 
-	// fallback settings if dev opts out of using CMake presets.
-	"cmake.configureArgs": ["-Wdev"],
-	"cmake.configureSettings": {
-		"CMAKE_COLOR_DIAGNOSTICS": "ON",
-		// "CMAKE_COMPILE_WARNING_AS_ERROR": false
-	},
-	// TODO.wait https://github.com/microsoft/vscode-cmake-tools/issues/2426
-	// TODO.try will the ${buildKitVendor} part have conflicts with MSVC for mingw-64 or cygwin?
-	"cmake.buildDirectory": "${workspaceFolder}/out/build/${buildKitVendor}_${buildKitVersionMajor}",
-	"cmake.installPrefix": "${workspaceFolder}/out/build/${buildKitVendor}_${buildKitVersionMajor}",
-
 	"cmake.debugConfig": {
 		"environment": [],
 		// "cwd": "",
@@ -39,8 +28,5 @@
 		"external/": true,
 		"out/": true,
 		"build/": true,
-		"extras/bindings/emscripten/external/": true,
-		"extras/bindings/emscripten/out/": true,
-		"extras/bindings/emscripten/build/": true,
 	},
 }

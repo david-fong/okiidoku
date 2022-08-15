@@ -21,7 +21,7 @@ if(range-v3_ADDED)
 endif()
 
 
-if(okiidoku_IS_TOP_LEVEL)
+if(OKIIDOKU_BUILD_TESTING)
 	# https://github.com/catchorg/Catch2/blob/devel/docs/cmake-integration.md
 	CPMAddPackage(
 		NAME doctest

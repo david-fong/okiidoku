@@ -2,10 +2,12 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 include_guard(DIRECTORY)
 
+option(OKIIDOKU_BUILD_TESTING "build tests for okiidoku" "${PROJECT_IS_TOP_LEVEL}")
+
 option(
 	OKIIDOKU_BUILD_OPTIMIZE_LOCAL_NON_PORTABLE
 	"optimize for the compiling machine (less portable result). disables CPack."
-	"${PROJECT_IS_TOP_LEVEL}" # default
+	#[[ default: ]] "${PROJECT_IS_TOP_LEVEL}"
 )
 
 

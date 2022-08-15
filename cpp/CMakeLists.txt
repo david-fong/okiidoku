@@ -12,6 +12,7 @@ set(OKIIDOKU_VERSION_COMPATIBILITY ExactVersion) # see `cmake/installation.cmake
 # ^ I will consider switching to support `SameMajorVersion` starting at v1.0.0.
 
 include(okiidoku/options) # see this file for build options. summary:
+# OKIIDOKU_BUILD_TESTING
 # OKIIDOKU_BUILD_OPTIMIZE_LOCAL_NON_PORTABLE
 # OKIIDOKU_BUILD_BINDINGS_FOR_PYTHON
 # OKIIDOKU_BUILD_SHARED_LIBS
@@ -35,6 +36,8 @@ include(okiidoku/dependencies)
 if(PROJECT_IS_TOP_LEVEL)
 	# Note: these are done _after_ adding dependencies to avoid doing this work on them.
 	include(okiidoku/if_top_level/static_analyzers)
+endif()
+if(OKIIDOKU_BUILD_TESTING)
 	enable_testing() # not `include(CTest)` because I don't use CDash.
 endif()
 

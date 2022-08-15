@@ -46,7 +46,7 @@ target_link_libraries(okiidoku
 	PRIVATE range-v3::range-v3
 )
 
-if(PROJECT_IS_TOP_LEVEL AND NOT EMSCRIPTEN)
+if(OKIIDOKU_BUILD_TESTING AND NOT EMSCRIPTEN)
 	add_subdirectory(examples EXCLUDE_FROM_ALL)
 	add_subdirectory(tests)
 endif()
