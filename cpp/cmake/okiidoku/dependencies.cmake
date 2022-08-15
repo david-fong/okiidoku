@@ -4,6 +4,7 @@ include_guard(DIRECTORY)
 
 set(CPM_DOWNLOAD_VERSION 0.35.4) # https://github.com/cpm-cmake/CPM.cmake/tags
 include(okiidoku/dependencies.get_cpm)
+# Note: CPM does auto EXCLUDE_FROM_ALL when using shorthand add
 
 CPMAddPackage(
 	NAME range-v3
@@ -19,8 +20,6 @@ if(range-v3_ADDED)
 	#  RANGES_MODULES, RANGES_POLLY, RANGES_DEEP_STL_INTEGRATION
 endif()
 
-
-# Note: CPM does auto EXCLUDE_FROM_ALL when using shorthand add
 
 if(okiidoku_IS_TOP_LEVEL)
 	# https://github.com/catchorg/Catch2/blob/devel/docs/cmake-integration.md

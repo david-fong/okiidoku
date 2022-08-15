@@ -24,7 +24,7 @@ include(GenerateExportHeader)
 generate_export_header(okiidoku EXPORT_FILE_NAME include/okiidoku/detail/export.h)
 target_compile_definitions(okiidoku PUBLIC "$<$<NOT:$<BOOL:${BUILD_SHARED_LIBS}>>:OKIIDOKU_STATIC_DEFINE>")
 
-include(okiidoku/generate.git_info)
+include(./cmake/generate_meta_info.cmake)
 
 target_include_directories(okiidoku
 	PUBLIC  "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>"
@@ -46,7 +46,7 @@ target_link_libraries(okiidoku
 	PRIVATE range-v3::range-v3
 )
 
-if(okiidoku_IS_TOP_LEVEL)
+if(PROJECT_IS_TOP_LEVEL AND NOT EMSCRIPTEN)
 	add_subdirectory(examples EXCLUDE_FROM_ALL)
 	add_subdirectory(tests)
 endif()

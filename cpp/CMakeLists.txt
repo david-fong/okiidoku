@@ -7,17 +7,22 @@ project(okiidoku
 	HOMEPAGE_URL "https://github.com/david-fong/okiidoku"
 	LANGUAGES CXX
 )
+list(APPEND CMAKE_MODULE_PATH "${okiidoku_SOURCE_DIR}/cmake")
 set(OKIIDOKU_VERSION_COMPATIBILITY ExactVersion) # see `cmake/installation.cmake`.
 # ^ I will consider switching to support `SameMajorVersion` starting at v1.0.0.
 
-option(OKIIDOKU_BUILD_BINDINGS_FOR_PYTHON "build bindings for python" NO)
+include(okiidoku/options) # see this file for build options. summary:
+# OKIIDOKU_BUILD_OPTIMIZE_LOCAL_NON_PORTABLE
+# OKIIDOKU_BUILD_BINDINGS_FOR_PYTHON
+# OKIIDOKU_BUILD_SHARED_LIBS
 
-list(APPEND CMAKE_MODULE_PATH ${okiidoku_SOURCE_DIR}/cmake)
 
 include(okiidoku/compile_opts.basic)
 
+if(OKIIDOKU_BUILD_OPTIMIZE_LOCAL_NON_PORTABLE)
+	include(okiidoku/if_top_level/compile_opts.global.non_portable)
+endif()
 if(PROJECT_IS_TOP_LEVEL)
-	include(okiidoku/if_top_level/compile_opts.non_portable)
 	include(okiidoku/if_top_level/sanitizers)
 
 	include(CheckIPOSupported)
@@ -34,37 +39,22 @@ if(PROJECT_IS_TOP_LEVEL)
 endif()
 
 
-# General use cases should use BUILD_SHARED_LIBS to choose whether to build
-# the library as shared or static. okiidoku_SHARED_LIBS should only be used
-# for convenience when it is desired to make an exception just for okiidoku.
-#
-# DLLs are currently not supported (I had trouble attempting to get it working).
-# https://alexreinking.com/blog/building-a-dual-shared-and-static-library-with-cmake.html
-if(NOT DEFINED TARGET_SUPPORTS_SHARED_LIBS OR TARGET_SUPPORTS_SHARED_LIBS)
-	if(MSVC)
-		set(okiidoku_SHARED_LIBS NO)
-	elseif(PROJECT_IS_TOP_LEVEL)
-		set(okiidoku_SHARED_LIBS YES)
-	endif()
-	if(DEFINED okiidoku_SHARED_LIBS)
-		set(BUILD_SHARED_LIBS "${okiidoku_SHARED_LIBS}")
-		unset(okiidoku_SHARED_LIBS)
-	endif()
-	include(okiidoku/shared_lib_things)
-endif()
-
-
-# Note: If an optional target requires fetching large dependencies,
-#  guard with a cmake option; otherwise, mark as EXCLUDE_FROM_ALL.
 add_subdirectory(libs/okiidoku)
 add_subdirectory(libs/cli_utils EXCLUDE_FROM_ALL) # internal
+
 add_subdirectory(apps/cli EXCLUDE_FROM_ALL) # target: okiidoku_cli
+
 add_subdirectory(tools/okiidoku_translator EXCLUDE_FROM_ALL)
+
+if(EMSCRIPTEN)
+	add_subdirectory(extras/bindings/emscripten) # target: okiidoku_js
+endif()
 if(OKIIDOKU_BUILD_BINDINGS_FOR_PYTHON)
 	add_subdirectory(extras/bindings/python) # target: okiidoku_py
 endif()
-# Note: emscripten bindings require emscripten's toolchain. see its subdirectory.
 
 
 include(okiidoku/installation)
-include(okiidoku/packaging)
+if(OKIIDOKU_BUILD_OPTIMIZE_LOCAL_NON_PORTABLE)
+	include(okiidoku/packaging)
+endif()

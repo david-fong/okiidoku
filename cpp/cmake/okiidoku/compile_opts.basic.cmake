@@ -35,6 +35,7 @@ endif()
 
 
 # diagnostics formatting:
+# TODO hm. these make more sense to be user-controlled globally-applied flags. maybe should be moved to CMakePresets.json
 if(PROJECT_IS_TOP_LEVEL)
 	if(MSVC)
 		target_compile_options(okiidoku_compile_options_private INTERFACE
@@ -59,16 +60,21 @@ else()
 	)
 endif()
 
+# TODO is there any point to wrapping with `$<BUILD_INTERFACE:>`? I juts tried it for fun.
 
 # warnings:
 if(MSVC)
 	target_compile_options(okiidoku_compile_options_private INTERFACE
-		/W4 # highest warnings level
+		$<BUILD_INTERFACE:/W4> # highest warnings level
 	)
 else()
+	# set(flags_file "${okiidoku_SOURCE_DIR}/cmake/okiidoku/compile_opts/warnings.gcc.txt")
+	# set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${flags_file}")
 	target_compile_options(okiidoku_compile_options_private INTERFACE
-		-Wall -Wextra -Wpedantic -pedantic-errors
+		$<BUILD_INTERFACE:
 		-Wfatal-errors # stop compilation on first error. I found it hard to read multiple.
+		# "@${flags_file}"
+		-Wall -Wextra -Wpedantic -pedantic-errors
 		-Wold-style-cast
 		-Wvla # maybe put this in the project-root cmake file
 		-Wconversion -Wsign-conversion #-Warith-conversion
@@ -86,13 +92,17 @@ else()
 		-Wmissing-declarations
 		-Wunused-macros
 		-Wundef # warn on undefined identifier used in `#if`
+		>
 	)
 	if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR EMSCRIPTEN)
 		target_compile_options(okiidoku_compile_options_private INTERFACE
+			$<BUILD_INTERFACE:
 			-Wimplicit-fallthrough
+			>
 		)
 	elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
 		target_compile_options(okiidoku_compile_options_private INTERFACE
+			$<BUILD_INTERFACE:
 			-Wuseless-cast
 			-Wimplicit-fallthrough=5
 			-Walloc-zero
@@ -115,6 +125,7 @@ else()
 			# interesting but probably too overboard:
 			# -Wpadded
 			# -Wsign-promo # actually warns on overload selection behaviour mandated by the standard :O
+			>
 		)
 	endif()
 endif()

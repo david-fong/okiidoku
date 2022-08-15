@@ -3,14 +3,6 @@
 include_guard(DIRECTORY)
 include(CheckCXXSourceCompiles)
 
-if(MSVC)
-	add_compile_options(/EHsc)
-	# https://docs.microsoft.com/en-us/cpp/build/reference/eh-exception-handling-model#standard-c-exception-handling
-	# must be consistent for whole program(s). do not hijack user's choice.
-	# This project doesn't throw exceptions, so any model should be okay.
-	# TODO wat https://gitlab.kitware.com/cmake/cmake/-/issues/20610
-endif()
-
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
 	add_compile_options(
 		-fno-semantic-interposition # disable ELF external overrides for more optimization (on by default for LLVM)
@@ -24,12 +16,14 @@ if(NOT MSVC)
 endif()
 
 
-# Note: wrapping with functions to scope `CMAKE_REQUIRED_FLAGS`
+# Note: wrapping with functions to scope changes to `CMAKE_CXX_FLAGS`
 # cspell:dictionaries cpp-refined
-function(detect_target_isa_support)
-	if(NOT MSVC)
-		set(CMAKE_REQUIRED_FLAGS -march=native)
-	endif()
+function(okiidoku_detect_target_isa_support)
+	get_directory_property(directory_compile_options COMPILE_OPTIONS)
+	foreach(opt ${directory_compile_options})
+		string(APPEND CMAKE_CXX_FLAGS " \"${opt}\"")
+	endforeach()
+
 	check_cxx_source_compiles("
 		#include <immintrin.h>
 		int main() {
@@ -42,4 +36,4 @@ function(detect_target_isa_support)
 		add_compile_definitions(OKIIDOKU_TARGET_SUPPORTS_X86_BMI2)
 	endif()
 endfunction()
-detect_target_isa_support()
+okiidoku_detect_target_isa_support()

@@ -6,6 +6,9 @@ include_guard(DIRECTORY)
 if(MSVC)
 	target_compile_options(okiidoku_compile_options_private INTERFACE "/analyze")
 	# https://docs.microsoft.com/en-us/cpp/build/reference/analyze-code-analysis
+else()
+	# target_compile_options(okiidoku_compile_options_private INTERFACE "-fanalyzer")
+	# https://gcc.gnu.org/onlinedocs/gcc/Static-Analyzer-Options.html
 endif()
 
 

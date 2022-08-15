@@ -17,11 +17,9 @@ Note: The specific cmake configuration commands are just examples. You can do wh
 
 ```sh
 # generate build-system configuration files (run after cloning the repo)
-# (cd to :/cpp/extras/bindings/emscripten)
-emcmake cmake -S . -B build/ -G 'Ninja Multi-Config' -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -DCMAKE_COLOR_DIAGNOSTICS=TRUE
-# or alternatively:
+# (cd to :/cpp)
 export EMSDK=#<path to emsdk>
-cmake -S . --preset=dev
+cmake -S . --preset=dev.emscripten
 
 # build okiidoku (rerun after modifying the library)
 # (cd to ./build)

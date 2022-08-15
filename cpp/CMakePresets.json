@@ -27,7 +27,10 @@
 			"hidden": true,
 			"inherits": ["base:any"],
 			"generator": "Ninja",
-			"binaryDir": "${sourceDir}/build"
+			"binaryDir": "${sourceDir}/build",
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "Release"
+			}
 		},
 		{
 			"name": "base:dev",
@@ -45,23 +48,23 @@
 			}
 		},
 		{
-			"name": "compiler:clang",
+			"name": "tool:clang-14",
 			"hidden": true,
 			"cacheVariables": {
-				"CMAKE_C_COMPILER": "/usr/bin/clang",
-				"CMAKE_CXX_COMPILER": "/usr/bin/clang++"
+				"CMAKE_C_COMPILER": "clang-14",
+				"CMAKE_CXX_COMPILER": "clang++-14"
 			}
 		},
 		{
-			"name": "compiler:gcc",
+			"name": "tool:gcc-11",
 			"hidden": true,
 			"cacheVariables": {
-				"CMAKE_C_COMPILER": "/usr/bin/gcc",
-				"CMAKE_CXX_COMPILER": "/usr/bin/g++"
+				"CMAKE_C_COMPILER": "gcc-11",
+				"CMAKE_CXX_COMPILER": "g++-11"
 			}
 		},
 		{
-			"name": "builder:vs:x64",
+			"name": "tool:vs:x64",
 			"hidden": true,
 			"condition": {"type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows"},
 			"generator": "Visual Studio 17 2022",
@@ -73,16 +76,31 @@
 			}
 		},
 		{
+			"name": "tool:emscripten",
+			"hidden": true,
+			"description": "available if you set/export EMSDK environment variable. good for IDEs which are hard to configure to use `emcmake cmake`.",
+			"condition": {"type": "notEquals", "lhs": "$env{EMSDK}", "rhs": ""},
+			"toolchainFile": "$env{EMSDK}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake",
+			"cacheVariables": {
+				"CMAKE_CROSSCOMPILING_EMULATOR": "node;--experimental-wasm-threads",
+				"OKIIDOKU_BUILD_BINDINGS_FOR_PYTHON": null
+			}
+		},
+		{
 			"name": "dev.clang",
-			"inherits": ["compiler:clang", "base:dev"]
+			"inherits": ["tool:clang-14", "base:dev"]
 		},
 		{
 			"name": "dev.gcc",
-			"inherits": ["compiler:gcc", "base:dev"]
+			"inherits": ["tool:gcc-11", "base:dev"]
 		},
 		{
 			"name": "dev.msvc",
-			"inherits": ["builder:vs:x64", "base:dev"]
+			"inherits": ["tool:vs:x64", "base:dev"]
+		},
+		{
+			"name": "dev.emscripten",
+			"inherits": ["tool:emscripten", "base:dev"]
 		}
 	],
 	"buildPresets": [
@@ -129,6 +147,20 @@
 		{
 			"name": "dev.msvc.release",
 			"configurePreset": "dev.msvc",
+			"displayName": "release",
+			"inherits": ["base:dev"],
+			"configuration": "Release"
+		},
+		{
+			"name": "dev.emscripten.debug",
+			"configurePreset": "dev.emscripten",
+			"displayName": "debug",
+			"inherits": ["base:dev"],
+			"configuration": "Debug"
+		},
+		{
+			"name": "dev.emscripten.release",
+			"configurePreset": "dev.emscripten",
 			"displayName": "release",
 			"inherits": ["base:dev"],
 			"configuration": "Release"

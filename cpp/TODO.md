@@ -31,9 +31,10 @@
 
 ## Misc List
 
-use module mode for emscripten binding output
+use module mode for emscripten binding output. make sure to update readme and examples
 
-rename the cmake helper for non-portable compile options to be something like compile\_options.global.non\_portable to emphasize that they are intended to and must be applied globally, including to dependencies
+- ctest for emscripten configuration
+- add a CMake option to build testing
 
 usage docs for CMake:
 - building an app target (cmake --build . --config=Release --target okiidoku_cli)
@@ -56,8 +57,6 @@ consider making cand masks have two lanes: one storing full O2BitArr, one storin
 - Come up with a precondition-checking strategy for language bindings. Options:
   - Leave it as a user responsibility to know and follow contracts.
   - Throw exception on the other language side.
-
-- current usage of `okiidoku_IS_TOP_LEVEL` (instead of `PROJECT_IS_TOP_LEVEL`) is to not build testing for emscripten bindings since I don't know how to run wasm. Kind of a dumb reason and dumb hack. Not sure what to do here.
 
 - think about [this](https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle#Pseudorandom_generators)
 
@@ -107,8 +106,6 @@ consider making cand masks have two lanes: one storing full O2BitArr, one storin
   - interesting: https://github.com/asarium/gdb-natvis
 
 - move the emoji definitions out of the program binary and externalize as a configurable data read in at runtime?
-
-- [what's this? CMakePresets.json](https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html)
 
 - Go back and try the old canonicalization by rel row prob, but break ties by doing some brute force: try each tied permutation and valuate it according to some reduction of how it pushes rarer rel counts to the top left. Just be careful to shift to get rid of the main diagonal seam.
   - If there are multiple puddles of ties, the resolution of a puddle shouldn't depend on the resolution of any other puddle- only on the non-tied rows/columns. A consequence of this is that this resolution algorithm will not work if there are no non-tied rows/columns.

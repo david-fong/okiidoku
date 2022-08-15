@@ -11,6 +11,8 @@ There is [SWIG](https://www.swig.org/exec.html), but from extremely shallow onli
 
 ## WASM and JS
 
+- the cmake preset "dev" inherits the toolchain preset's condition. If [this](https://gitlab.kitware.com/cmake/cmake/-/issues/23283) gets implemented, we can make use of it to have a clean solution.
+
 - emscripten links and things for future reference
   - `emcmake cmake -S . -B build -G 'Ninja Multi-Config'`
   - [conan and emscripten](https://docs.conan.io/en/latest/integrations/cross_platform/emscripten.html)
