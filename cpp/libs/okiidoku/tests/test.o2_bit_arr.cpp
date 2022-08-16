@@ -13,8 +13,6 @@ void test_o2_bit_arr() {
 	using namespace ::okiidoku::mono;
 	OKIIDOKU_MONO_INT_TS_TYPEDEFS
 
-	CHECK(false);
-
 	CHECK(O2BitArr_ones<O>.count() == T::O2);
 	for (o2i_t i {0}; i < T::O2; ++i) {
 		CHECK(O2BitArr_ones<O>.count_below(static_cast<o2x_t>(i)) == i);

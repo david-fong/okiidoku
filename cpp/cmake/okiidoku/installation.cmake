@@ -19,7 +19,7 @@ install(
 	INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
 )
 install(FILES ../README.md TYPE DOC COMPONENT okiidoku_about)
-install(FILES ../.reuse/dep5 TYPE DOC COMPONENT okiidoku_about RENAME copying) # hm probably not right. need to make a custom one for the installation
+# install(FILES ../.reuse/dep5 TYPE DOC COMPONENT okiidoku_about RENAME copying) # hm probably not right. need to make a custom one for the installation
 install(DIRECTORY ../LICENSES TYPE DOC COMPONENT okiidoku_about)
 # TODO copy the LICENSES folder to doc?
 
@@ -45,12 +45,14 @@ export(
 	FILE "${CMAKE_CURRENT_BINARY_DIR}/cmake/okiidoku-targets.cmake"
 )
 
+
 write_basic_package_version_file(
 	okiidoku-config-version.cmake
 	COMPATIBILITY "${OKIIDOKU_VERSION_COMPATIBILITY}"
 )
 
 # support for `find_package`. seems complicated to set up and I'm not sure anyone will want this. I don't.
+# https://cmake.org/cmake/help/latest/guide/importing-exporting/index.html#creating-relocatable-packages
 # install(FILES
 # 	# "${CMAKE_CURRENT_BINARY_DIR}/okiidoku-config.cmake" # TODO
 # 	"${CMAKE_CURRENT_BINARY_DIR}/okiidoku-config-version.cmake"

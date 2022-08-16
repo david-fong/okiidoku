@@ -11,7 +11,7 @@ list(APPEND CMAKE_MODULE_PATH "${okiidoku_SOURCE_DIR}/cmake")
 set(OKIIDOKU_VERSION_COMPATIBILITY ExactVersion) # see `cmake/installation.cmake`.
 # ^ I will consider switching to support `SameMajorVersion` starting at v1.0.0.
 
-include(okiidoku/options) # see this file for build options. summary:
+include(okiidoku/options) # see this file for more info & defaults. summary:
 # OKIIDOKU_BUILD_TESTING
 # OKIIDOKU_BUILD_OPTIMIZE_LOCAL_NON_PORTABLE
 # OKIIDOKU_BUILD_BINDINGS_FOR_PYTHON

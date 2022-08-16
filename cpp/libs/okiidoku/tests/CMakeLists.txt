@@ -14,19 +14,16 @@ function(okiidoku_test_add name #[[ ARGN are dependencies ]])
 	target_include_directories(${target} PRIVATE
 		"${CMAKE_CURRENT_LIST_DIR}/../src"
 	)
+	# https://crascit.com/2016/10/18/test-fixtures-with-cmake-ctest/
+	foreach(dependency ${ARGN})
+		list(APPEND dependencies okiidoku_test.${dependency})
+	endforeach()
+
 	# https://github.com/catchorg/Catch2/blob/devel/docs/cmake-integration.md#customization
 	doctest_discover_tests(${target}
 		PROPERTIES # https://cmake.org/cmake/help/latest/manual/cmake-properties.7.html#properties-on-tests
 			FIXTURES_SETUP ${target}
-	)
-	# https://crascit.com/2016/10/18/test-fixtures-with-cmake-ctest/
-	# TODO.wait https://github.com/catchorg/Catch2/issues/2496
-	set(dependency "")
-	foreach(dependency ${ARGN})
-		list(APPEND dependencies okiidoku_test.${dependency})
-	endforeach()
-	set_tests_properties(${${target}_TESTS} PROPERTIES
-		FIXTURES_REQUIRED "${dependencies}"
+			FIXTURES_REQUIRED "${dependencies}"
 	)
 endfunction()
 

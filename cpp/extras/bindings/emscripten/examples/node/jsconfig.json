@@ -1,0 +1,7 @@
+// SPDX-FileCopyrightText: 2020 David Fong
+// SPDX-License-Identifier: CC0-1.0
+{
+	"compilerOptions": {
+		"lib": ["ES2021"]
+	}
+}

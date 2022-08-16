@@ -26,9 +26,8 @@
 
 ## CMake Setup Options
 
+- Refer to the top-level [CMakeLists.txt](./CMakeLists.txt) file for the list of build options.
 - https://cmake.org/cmake/help/latest/guide/user-interaction/index.html
-
-Refer to the [CMake guide](https://cmake.org/cmake/help/latest/guide/importing-exporting/index.html).
 
 - You can build okiidoku and then import from its build tree.
 
