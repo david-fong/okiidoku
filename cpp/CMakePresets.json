@@ -56,9 +56,23 @@
 		{
 			"name": "tool:clang-14",
 			"hidden": true,
+			"condition": {"type": "notEquals", "lhs": "${hostSystemName}", "rhs": "Darwin"},
 			"cacheVariables": {
 				"CMAKE_C_COMPILER": "clang-14",
 				"CMAKE_CXX_COMPILER": "clang++-14"
+			}
+		},
+		{
+			"name": "tool:clang-homebrew",
+			"hidden": true,
+			"condition": {"type": "equals", "lhs": "${hostSystemName}", "rhs": "Darwin"},
+			"cacheVariables": {
+				"CMAKE_C_COMPILER": "clang-14",
+				"CMAKE_CXX_COMPILER": "clang++-14"
+			},
+			"environment": {
+				"LDFLAGS": "-L/usr/local/opt/llvm/lib;-Wl,-rpath,/usr/local/opt/llvm/lib",
+				"CXX_FLAGS": "-I/usr/local/opt/llvm/include"
 			}
 		},
 		{
@@ -98,6 +112,10 @@
 			"inherits": ["tool:clang-14", "base:dev"]
 		},
 		{
+			"name": "dev.clang-homebrew",
+			"inherits": ["tool:clang-homebrew", "base:dev"]
+		},
+		{
 			"name": "dev.gcc",
 			"inherits": ["tool:gcc-11", "base:dev"]
 		},
@@ -126,6 +144,20 @@
 		{
 			"name": "dev.clang.release",
 			"configurePreset": "dev.clang",
+			"displayName": "release",
+			"inherits": ["base:dev"],
+			"configuration": "Release"
+		},
+		{
+			"name": "dev.clang-homebrew.debug",
+			"configurePreset": "dev.clang-homebrew",
+			"displayName": "debug",
+			"inherits": ["base:dev"],
+			"configuration": "Debug"
+		},
+		{
+			"name": "dev.clang-homebrew.release",
+			"configurePreset": "dev.clang-homebrew",
 			"displayName": "release",
 			"inherits": ["base:dev"],
 			"configuration": "Release"

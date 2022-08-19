@@ -2,6 +2,15 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 include_guard(DIRECTORY)
 
+if(NOT DEFINED CMAKE_BUILD_TYPE)
+	set(CMAKE_BUILD_TYPE "${CMAKE_BUILD_TYPE}" CACHE STRING "cmake build configuration")
+elseif(PROJECT_IS_TOP_LEVEL)
+	set_property(CACHE CMAKE_BUILD_TYPE #[[ APPEND ]]
+		PROPERTY STRINGS "Debug;RelWithDebInfo;Release;MinSizeRel;PgoUse"
+	)
+endif()
+
+
 # General use cases should use `BUILD_SHARED_LIBS`.
 # Use `OKIIDOKU_BUILD_SHARED_LIBS` to make an exception just for okiidoku.
 #
