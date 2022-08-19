@@ -8,7 +8,7 @@ add_executable(okiidoku_example_mono using_mono.main.cpp)
 target_link_libraries(okiidoku_example_mono
 	# you won't have these. I only use them to help build the example.
 	PUBLIC  okiidoku_compile_options_public
-	PRIVATE okiidoku_compile_options_private
+	PRIVATE okiidoku_compiler_warnings
 	PRIVATE okiidoku_cli_utils
 
 	# you need this!
@@ -19,7 +19,7 @@ target_link_libraries(okiidoku_example_mono
 # find_package(Threads REQUIRED)
 # target_link_libraries(okiidoku_example_threads
 	# PUBLIC  okiidoku_compile_options_public
-	# PRIVATE okiidoku_compile_options_private
+	# PRIVATE okiidoku_compiler_warnings
 	# PRIVATE okiidoku_cli_utils
 	# PRIVATE okiidoku::okiidoku
 	# PRIVATE Threads::Threads

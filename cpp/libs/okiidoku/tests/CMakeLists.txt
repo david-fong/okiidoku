@@ -6,7 +6,7 @@ function(okiidoku_test_add name #[[ ARGN are dependencies ]])
 	add_executable(${target} test.${name}.cpp)
 	target_link_libraries(${target}
 		PUBLIC  okiidoku_compile_options_public
-		PRIVATE okiidoku_compile_options_private
+		PRIVATE okiidoku_compiler_warnings
 		PRIVATE okiidoku
 		PRIVATE okiidoku_cli_utils
 		PRIVATE doctest::doctest

@@ -15,10 +15,12 @@ elseif
 STREQUAL
 ARGN
 
+cmakedefine # see configure_file
 cpack
 
 CXX
 NOTFOUND
+BYPRODUCTS
 
 INTERPROCEDURAL
 SOVERSION

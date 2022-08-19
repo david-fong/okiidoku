@@ -36,6 +36,8 @@ Issues I'm watching:
 
 ## Misc List
 
+make sure not to fail the IPO support check (CMP0069)
+
 use module mode for emscripten binding output. make sure to update readme and examples
 
 - ctest for emscripten configuration

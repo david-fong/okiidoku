@@ -3,7 +3,7 @@
 include_guard(DIRECTORY)
 include(CheckCXXSourceCompiles)
 
-if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 	add_compile_options(
 		-fno-semantic-interposition # disable ELF external overrides for more optimization (on by default for LLVM)
 	)

@@ -8,7 +8,7 @@ include_guard(DIRECTORY)
 #  https://github.com/google/sanitizers/wiki/AddressSanitizer#faq
 
 function(okiidoku_enable_private_sanitizers)
-	set(target "okiidoku_compile_options_private")
+	set(target "okiidoku_compiler_warnings")
 	set(configs "$<CONFIG:Debug,RelWithDebInfo>")
 	if(MSVC)
 		# add_compile_options("$<$<CONFIG:Debug>:/RTC>")

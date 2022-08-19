@@ -1,5 +1,6 @@
 # SPDX-FileCopyrightText: 2020 David Fong
 # SPDX-License-Identifier: GPL-3.0-or-later
+# cspell:words CMAKEDIR
 include_guard(DIRECTORY)
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
@@ -9,7 +10,7 @@ if(NOT DEFINED OKIIDOKU_INSTALL_CMAKEDIR)
 endif()
 
 install(
-	TARGETS okiidoku okiidoku_cli
+	TARGETS okiidoku_compile_options_public okiidoku okiidoku_cli
 	EXPORT okiidoku_installation_targets
 	# RUNTIME_DEPENDENCIES # currently there are none to bundle.
 	RUNTIME  COMPONENT okiidoku_runtime
@@ -24,9 +25,9 @@ install(DIRECTORY ../LICENSES TYPE DOC COMPONENT okiidoku_about)
 # TODO copy the LICENSES folder to doc?
 
 if(BUILD_SHARED_LIBS)
-	set(OKIIDOKU_LIB_TYPE_NAME shared)
+	set(_okiidoku_lib_type_name shared)
 else()
-	set(OKIIDOKU_LIB_TYPE_NAME static)
+	set(_okiidoku_lib_type_name static)
 endif()
 
 # regular installation import support:
@@ -34,7 +35,7 @@ install(
 	EXPORT okiidoku_installation_targets
 	NAMESPACE okiidoku::
 	DESTINATION "${OKIIDOKU_INSTALL_CMAKEDIR}"
-	FILE "okiidoku-${OKIIDOKU_LIB_TYPE_NAME}-targets.cmake"
+	FILE "okiidoku-${_okiidoku_lib_type_name}-targets.cmake"
 	COMPONENT okiidoku_development
 )
 # also support importing from this repo's build-tree (no installation):

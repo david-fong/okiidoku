@@ -6,6 +6,7 @@ analyzers
 cand # candidate
 cands
 cmake
+codepage # a windows console thing
 delim # delimiter
 deserialization
 desmos

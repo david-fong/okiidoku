@@ -16,12 +16,6 @@
 
 namespace okiidoku::util {
 
-	#ifdef _WIN32
-	std::optional<DWORD> old_con_mode {std::nullopt};
-	std::optional<UINT> old_con_input_codepage {std::nullopt};
-	std::optional<UINT> old_con_output_codepage {std::nullopt};
-	#endif
-
 	class MyNumPunct final : public std::numpunct<char> {
 	protected:
 		std::string do_grouping() const override {
@@ -30,6 +24,12 @@ namespace okiidoku::util {
 	};
 
 	namespace {
+		#ifdef _WIN32
+		std::optional<DWORD> old_con_mode {std::nullopt};
+		std::optional<UINT> old_con_input_codepage {std::nullopt};
+		std::optional<UINT> old_con_output_codepage {std::nullopt};
+		#endif
+
 		void restore_console_config_() {
 			#ifdef _WIN32
 			if (old_con_mode) { SetConsoleMode(GetStdHandle(STD_OUTPUT_HANDLE), old_con_mode.value()); }

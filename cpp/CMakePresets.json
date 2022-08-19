@@ -20,6 +20,7 @@
 				"CMAKE_CXX_STANDARD": "20",
 				"CMAKE_CXX_STANDARD_REQUIRED": true,
 				"CMAKE_CXX_EXTENSIONS": false,
+				"CMAKE_CONFIGURATION_TYPES": "Debug;RelWithDebInfo;Release;MinSizeRel;PgoUse",
 				"CMAKE_EXPORT_COMPILE_COMMANDS": true,
 				"CMAKE_COLOR_DIAGNOSTICS": true
 			}
@@ -43,6 +44,7 @@
 			"binaryDir": "${sourceDir}/out/build/${presetName}",
 			"installDir": "${sourceDir}/out/install/${presetName}",
 			"cacheVariables": {
+				"CMAKE_INTERPROCEDURAL_OPTIMIZATION_DEBUG": false,
 				"CPM_SOURCE_CACHE": "${sourceDir}/external/.cpm",
 				"OKIIDOKU_BUILD_TESTING": true,
 				"OKIIDOKU_BUILD_BINDINGS_FOR_PYTHON": true

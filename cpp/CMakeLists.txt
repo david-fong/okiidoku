@@ -12,22 +12,22 @@ set(OKIIDOKU_VERSION_COMPATIBILITY ExactVersion) # see `cmake/installation.cmake
 # ^ I will consider switching to support `SameMajorVersion` starting at v1.0.0.
 
 include(okiidoku/options) # see this file for more info & defaults. summary:
+# OKIIDOKU_BUILD_SHARED_LIBS
 # OKIIDOKU_BUILD_TESTING
 # OKIIDOKU_BUILD_OPTIMIZE_LOCAL_NON_PORTABLE
 # OKIIDOKU_BUILD_BINDINGS_FOR_PYTHON
-# OKIIDOKU_BUILD_SHARED_LIBS
 
 
 include(okiidoku/compile_opts.basic)
+include(CheckIPOSupported)
+check_ipo_supported(RESULT CMAKE_INTERPROCEDURAL_OPTIMIZATION)
 
 if(OKIIDOKU_BUILD_OPTIMIZE_LOCAL_NON_PORTABLE)
-	include(okiidoku/if_top_level/compile_opts.global.non_portable)
+	include(okiidoku/optional/compile_opts.global.non_portable)
 endif()
 if(PROJECT_IS_TOP_LEVEL)
-	include(okiidoku/if_top_level/sanitizers)
+	include(okiidoku/optional/sanitizers)
 
-	include(CheckIPOSupported)
-	check_ipo_supported(RESULT CMAKE_INTERPROCEDURAL_OPTIMIZATION)
 	set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF) # want fast debug build
 endif()
 
@@ -35,7 +35,7 @@ include(okiidoku/dependencies)
 
 if(PROJECT_IS_TOP_LEVEL)
 	# Note: these are done _after_ adding dependencies to avoid doing this work on them.
-	include(okiidoku/if_top_level/static_analyzers)
+	include(okiidoku/optional/static_analyzers)
 endif()
 if(OKIIDOKU_BUILD_TESTING)
 	enable_testing() # not `include(CTest)` because I don't use CDash.

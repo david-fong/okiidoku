@@ -20,24 +20,26 @@
 		"json",
 		"jsonc"
 	],
-	"enableFiletypes": [
-		// "cpp"
+	// "useGitignore": true,
+	"dictionaries": [
+		"okiidoku-sudoku",
+		"okiidoku-misc"
 	],
 	"languageSettings": [
 		{
 			"languageId": "cpp",
-			"dictionaries": ["!cpp", "cpp-refined"]
+			"dictionaries": ["!cpp", "cpp-refined", "okiidoku-cpp"]
 		},
 		{
 			"languageId": "cmake",
 			"dictionaries": ["okiidoku-cmake"]
 		}
 	],
-	// "useGitignore": true,
-	"dictionaries": [
-		"okiidoku-sudoku",
-		"okiidoku-cpp",
-		"okiidoku-misc"
+	"overrides": [
+		{
+			"filename": "**/CMakePresets.json",
+			"languageId": "cmake"
+		}
 	],
 	"readonly": true,
 	"dictionaryDefinitions": [

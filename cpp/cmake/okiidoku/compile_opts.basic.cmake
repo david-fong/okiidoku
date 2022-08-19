@@ -3,13 +3,11 @@
 # cspell:ignoreRegExp -[W][a-z-]+\b
 include_guard(DIRECTORY)
 
-# settings to enable standard compliance and enable many warnings
-# this should help ensure that this library supports most compilers
-# and isn't less strict on itself than a very strict user's compiler
-# options might be on it.
+add_library(okiidoku_compile_options_public INTERFACE)
+add_library(okiidoku_compiler_warnings INTERFACE IMPORTED)
+# Note: "IMPORTED" used to prevent auto installation
 
-add_library(okiidoku_compile_options_public  INTERFACE IMPORTED) # "IMPORTED" to prevent auto installation
-add_library(okiidoku_compile_options_private INTERFACE IMPORTED)
+set_target_properties(okiidoku_compile_options_public PROPERTIES EXPORT_NAME _compile_options)
 
 # source file and compiler option parsing rules:
 # Note: the pragma flags can currently be private since I currently
@@ -18,15 +16,15 @@ if(MSVC)
 	target_compile_options(okiidoku_compile_options_public INTERFACE
 		/wd5030 # warning disable: "unrecognized attribute"
 	)
-	target_compile_options(okiidoku_compile_options_private INTERFACE
+	target_compile_options(okiidoku_compiler_warnings INTERFACE
 		/options:strict # unrecognized compiler options are errors
 		/utf-8  # /source-charset:utf-8 (for preprocessor), and /execution-charset:utf8 (for compiler)
 		/wd4068 # warning disable: "unrecognized pragma"
 	)
-elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 	target_compile_options(okiidoku_compile_options_public INTERFACE
 	)
-	target_compile_options(okiidoku_compile_options_private INTERFACE
+	target_compile_options(okiidoku_compiler_warnings INTERFACE
 		# -Wbidi-chars=any # warn on any usage of bidi text
 		-Wnormalized # warn on identifiers that look the same but are not the same
 		-Wno-unknown-pragmas
@@ -38,11 +36,11 @@ endif()
 # TODO hm. these make more sense to be user-controlled globally-applied flags. maybe should be moved to CMakePresets.json
 if(PROJECT_IS_TOP_LEVEL)
 	if(MSVC)
-		target_compile_options(okiidoku_compile_options_private INTERFACE
+		target_compile_options(okiidoku_compiler_warnings INTERFACE
 			/diagnostics:caret
 		)
 	else()
-		target_compile_options(okiidoku_compile_options_private INTERFACE
+		target_compile_options(okiidoku_compiler_warnings INTERFACE
 		)
 	endif()
 endif()
@@ -50,28 +48,26 @@ endif()
 
 # standards compliance and abi:
 if(MSVC)
-	target_compile_options(okiidoku_compile_options_private INTERFACE
+	target_compile_options(okiidoku_compiler_warnings INTERFACE
 		/permissive-  # https://discourse.cmake.org/t/cxx-extensions-and-permissive/1994
 		/volatile:iso # https://docs.microsoft.com/en-us/cpp/build/reference/volatile-volatile-keyword-interpretation#remarks
 	)
 else()
-	target_compile_options(okiidoku_compile_options_private INTERFACE
+	target_compile_options(okiidoku_compiler_warnings INTERFACE
 		# -Wabi
 	)
 endif()
 
-# TODO is there any point to wrapping with `$<BUILD_INTERFACE:>`? I juts tried it for fun.
 
 # warnings:
 if(MSVC)
-	target_compile_options(okiidoku_compile_options_private INTERFACE
-		$<BUILD_INTERFACE:/W4> # highest warnings level
+	target_compile_options(okiidoku_compiler_warnings INTERFACE
+		/W4 # highest warnings level
 	)
 else()
 	# set(flags_file "${okiidoku_SOURCE_DIR}/cmake/okiidoku/compile_opts/warnings.gcc.txt")
 	# set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${flags_file}")
-	target_compile_options(okiidoku_compile_options_private INTERFACE
-		$<BUILD_INTERFACE:
+	target_compile_options(okiidoku_compiler_warnings INTERFACE
 		-Wfatal-errors # stop compilation on first error. I found it hard to read multiple.
 		# "@${flags_file}"
 		-Wall -Wextra -Wpedantic -pedantic-errors
@@ -92,17 +88,13 @@ else()
 		-Wmissing-declarations
 		-Wunused-macros
 		-Wundef # warn on undefined identifier used in `#if`
-		>
 	)
 	if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR EMSCRIPTEN)
-		target_compile_options(okiidoku_compile_options_private INTERFACE
-			$<BUILD_INTERFACE:
+		target_compile_options(okiidoku_compiler_warnings INTERFACE
 			-Wimplicit-fallthrough
-			>
 		)
-	elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-		target_compile_options(okiidoku_compile_options_private INTERFACE
-			$<BUILD_INTERFACE:
+	elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+		target_compile_options(okiidoku_compiler_warnings INTERFACE
 			-Wuseless-cast
 			-Wimplicit-fallthrough=5
 			-Walloc-zero
@@ -125,7 +117,6 @@ else()
 			# interesting but probably too overboard:
 			# -Wpadded
 			# -Wsign-promo # actually warns on overload selection behaviour mandated by the standard :O
-			>
 		)
 	endif()
 endif()
