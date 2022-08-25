@@ -36,6 +36,10 @@ Issues I'm watching:
 
 ## Misc List
 
+update gitignores and vscode settings to allow for build and install folders that use suffixes instead of nesting for multiple generated build-systems?
+
+check if wsl apt has gcc-12. If so, bump minimum gcc version to gcc-12. hmm. or maybe give it some time to fix regressions?
+
 make sure not to fail the IPO support check (CMP0069)
 
 use module mode for emscripten binding output. make sure to update readme and examples

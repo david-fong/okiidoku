@@ -6,7 +6,7 @@
 # TODO.low try Alex's tutorial things for installation utilities.
 
 add_library(okiidoku #[[ uses BUILD_SHARED_LIBS ]] "")
-add_library(okiidoku::okiidoku ALIAS okiidoku)
+add_library("${PROJECT_NAME}::okiidoku" ALIAS okiidoku)
 target_compile_features(okiidoku PUBLIC cxx_std_20)
 set_target_properties(okiidoku PROPERTIES
 	# https://www.youtube.com/watch?v=m0DwB4OvDXk&ab_channel=CppCon&t=17m13s
@@ -14,9 +14,9 @@ set_target_properties(okiidoku PROPERTIES
 	SOVERSION ${okiidoku_VERSION_MAJOR}
 	CXX_STANDARD_REQUIRED TRUE
 	CXX_EXTENSIONS OFF
-	INTERPROCEDURAL_OPTIMIZATION TRUE
 	CXX_VISIBILITY_PRESET hidden
 	VISIBILITY_INLINES_HIDDEN TRUE
+	INTERPROCEDURAL_OPTIMIZATION "${okiidoku_is_ipo_supported}"
 )
 add_subdirectory(src/okiidoku)
 
@@ -50,3 +50,4 @@ if(OKIIDOKU_BUILD_TESTING AND NOT EMSCRIPTEN)
 	add_subdirectory(examples EXCLUDE_FROM_ALL)
 	add_subdirectory(tests)
 endif()
+add_subdirectory(pgo)

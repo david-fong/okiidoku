@@ -4,6 +4,8 @@
 # https://cmake.org/cmake/help/latest/manual/cmake-variables.7.html
 
 cmake
+ctest
+cpack
 
 endforeach
 endfunction
@@ -16,18 +18,35 @@ STREQUAL
 ARGN
 
 cmakedefine # see configure_file
-cpack
 
 CXX
 NOTFOUND
 BYPRODUCTS
 
+DEPENDEES # ExternalProject_Add_Step
+DEPENDERS
+
 INTERPROCEDURAL
 SOVERSION
 NAMELINK_COMPONENT
 
-INCLUDEDIR
+# https://cmake.org/cmake/help/latest/module/GNUInstallDirs.html#module:GNUInstallDirs
+BINDIR
+SBINDIR
+LIBEXECDIR
+SYSCONFDIR
+SHAREDSTATEDIR
+LOCALSTATEDIR
+RUNSTATEDIR
 LIBDIR
+INCLUDEDIR
+OLDINCLUDEDIR
+DATAROOTDIR
+DATADIR
+INFODIR
+LOCALEDIR
+MANDIR
+DOCDIR
 
 MSVC
 RPATH

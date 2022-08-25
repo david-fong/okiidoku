@@ -12,9 +12,15 @@
 ## Using the Library
 
 - Requirements to build from source:
+  - If you are new to C++, you will need an attitude to learn proactively about C++ and CMake.
   - [CMake](https://cmake.org/install/) 3.22 or later
-  - a C++ compiler [supporting C++20](https://en.cppreference.com/w/cpp/compiler_support). I have tested on Clang 14, GCC 11, and Visual Studio 17 2022. I have no interest in committing to support other compilers (ex. apple-clang) or lower versions of the above compilers.
+  - a C++ compiler [supporting C++20](https://en.cppreference.com/w/cpp/compiler_support).
+    - I test on Clang 14, GCC 11, and Visual Studio 17 2022.
+    - I currently have no interest in committing to support other compilers (ex. apple-clang) or lower versions of the above compilers.
+    - Older versions _may_ work, but don't expect them to.
   - a build system (ex. Ninja, Visual Studio)
+  - Note: My general policy on tooling version support is to try to support the lowest common denominator of versions that are easily installable on homebrew, apt, and chocolatey, and wait a bit for regressions in new major releases to get fixed.
+    - For apt, I try to support the repository for the latest Ubuntu version supported with WSL2.
 
 - The library uses templates for each compiled grid size for optimization purposes. The templates are accessible under the `okiidoku::mono` namespace, and a visitor-pattern interface is exposed under the `okiidoku::visitor` namespace. The visitor pattern is intended to make it more convenient to write code that uses an order selected at runtime.
   - To change the supported grid sizes that get compiled, create a [tweak header](https://vector-of-bool.github.io/2020/10/04/lib-configuration.html#providing-a-tweak-header) for [`./libs/okiidoku/include/okiidoku/config/defaults.hpp`](./libs/okiidoku/include/okiidoku/config/defaults.hpp).

@@ -25,9 +25,10 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 	target_compile_options(okiidoku_compile_options_public INTERFACE
 	)
 	target_compile_options(okiidoku_compiler_warnings INTERFACE
-		# -Wbidi-chars=any # warn on any usage of bidi text
+		# -Wbidi-chars=any # warn on any usage of bidi text. TODO use generator expression to enable if gcc v12+
 		-Wnormalized # warn on identifiers that look the same but are not the same
 		-Wno-unknown-pragmas
+		-Wno-attributes=clang::
 	)
 endif()
 

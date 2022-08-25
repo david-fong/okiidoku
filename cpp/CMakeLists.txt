@@ -17,18 +17,21 @@ include(okiidoku/options) # see this file for more info & defaults. summary:
 # OKIIDOKU_BUILD_OPTIMIZE_LOCAL_NON_PORTABLE
 # OKIIDOKU_BUILD_BINDINGS_FOR_PYTHON
 
+include(okiidoku/pgo_helpers)
+okiidoku_pgo_gen_check_needs_short_circuit()
 
 include(okiidoku/compile_opts.basic)
 include(CheckIPOSupported)
-check_ipo_supported(RESULT CMAKE_INTERPROCEDURAL_OPTIMIZATION)
+check_ipo_supported(RESULT okiidoku_is_ipo_supported)
+if(NOT DEFINED CMAKE_INTERPROCEDURAL_OPTIMIZATION)
+	set(CMAKE_INTERPROCEDURAL_OPTIMIZATION "${okiidoku_is_ipo_supported}")
+endif()
 
 if(OKIIDOKU_BUILD_OPTIMIZE_LOCAL_NON_PORTABLE)
 	include(okiidoku/optional/compile_opts.global.non_portable)
 endif()
 if(PROJECT_IS_TOP_LEVEL)
 	include(okiidoku/optional/sanitizers)
-
-	set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF) # want fast debug build
 endif()
 
 include(okiidoku/dependencies)
@@ -58,6 +61,6 @@ endif()
 
 
 include(okiidoku/installation)
-if(OKIIDOKU_BUILD_OPTIMIZE_LOCAL_NON_PORTABLE)
+if(NOT OKIIDOKU_BUILD_OPTIMIZE_LOCAL_NON_PORTABLE)
 	include(okiidoku/packaging)
 endif()

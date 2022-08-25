@@ -33,7 +33,7 @@ endif()
 # regular installation import support:
 install(
 	EXPORT okiidoku_installation_targets
-	NAMESPACE okiidoku::
+	NAMESPACE "${PROJECT_NAME}::"
 	DESTINATION "${OKIIDOKU_INSTALL_CMAKEDIR}"
 	FILE "okiidoku-${_okiidoku_lib_type_name}-targets.cmake"
 	COMPONENT okiidoku_development

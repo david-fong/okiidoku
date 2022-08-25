@@ -2,13 +2,20 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 include_guard(DIRECTORY)
 
-if(NOT DEFINED CMAKE_BUILD_TYPE)
-	set(CMAKE_BUILD_TYPE "${CMAKE_BUILD_TYPE}" CACHE STRING "cmake build configuration")
-elseif(PROJECT_IS_TOP_LEVEL)
-	set_property(CACHE CMAKE_BUILD_TYPE #[[ APPEND ]]
-		PROPERTY STRINGS "Debug;RelWithDebInfo;Release;MinSizeRel;PgoUse"
-	)
+
+# Suggest build types for single-config generators in cmake-gui
+get_property(is_multi_config GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+if(NOT is_multi_config)
+	if(NOT DEFINED CMAKE_BUILD_TYPE)
+		set(CMAKE_BUILD_TYPE "${CMAKE_BUILD_TYPE}" CACHE STRING "cmake build configuration")
+	endif()
+	if(PROJECT_IS_TOP_LEVEL)
+		set_property(CACHE CMAKE_BUILD_TYPE #[[ APPEND ]]
+			PROPERTY STRINGS "Debug;RelWithDebInfo;Release;MinSizeRel;PgoUse"
+		)
+	endif()
 endif()
+unset(is_multi_config)
 
 
 # General use cases should use `BUILD_SHARED_LIBS`.

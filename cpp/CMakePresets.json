@@ -150,6 +150,13 @@
 			"configuration": "Release"
 		},
 		{
+			"name": "dev.clang.pgo",
+			"configurePreset": "dev.clang",
+			"displayName": "pgo",
+			"inherits": ["base:dev"],
+			"configuration": "PgoUse"
+		},
+		{
 			"name": "dev.clang-homebrew.debug",
 			"configurePreset": "dev.clang-homebrew",
 			"displayName": "debug",
@@ -162,6 +169,13 @@
 			"displayName": "release",
 			"inherits": ["base:dev"],
 			"configuration": "Release"
+		},
+		{
+			"name": "dev.clang-homebrew.pgo",
+			"configurePreset": "dev.clang-homebrew",
+			"displayName": "pgo",
+			"inherits": ["base:dev"],
+			"configuration": "PgoUse"
 		},
 		{
 			"name": "dev.gcc.debug",
@@ -178,6 +192,13 @@
 			"configuration": "Release"
 		},
 		{
+			"name": "dev.gcc.pgo",
+			"configurePreset": "dev.gcc",
+			"displayName": "pgo",
+			"inherits": ["base:dev"],
+			"configuration": "PgoUse"
+		},
+		{
 			"name": "dev.msvc.debug",
 			"configurePreset": "dev.msvc",
 			"displayName": "debug",
@@ -190,6 +211,13 @@
 			"displayName": "release",
 			"inherits": ["base:dev"],
 			"configuration": "Release"
+		},
+		{
+			"name": "dev.msvc.pgo",
+			"configurePreset": "dev.msvc",
+			"displayName": "pgo",
+			"inherits": ["base:dev"],
+			"configuration": "PgoUse"
 		},
 		{
 			"name": "dev.emscripten.debug",
