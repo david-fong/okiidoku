@@ -9,9 +9,8 @@ set_target_properties(okiidoku_cli PROPERTIES EXPORT_NAME cli)
 
 target_include_directories(okiidoku_cli PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
 
+okiidoku_add_compiler_options(okiidoku_cli)
 target_link_libraries(okiidoku_cli
-	PUBLIC  okiidoku_compile_options_public
-	PRIVATE okiidoku_compiler_warnings
 	PRIVATE okiidoku_cli_utils
 	PRIVATE okiidoku
 )

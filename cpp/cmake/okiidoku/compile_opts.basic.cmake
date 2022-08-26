@@ -7,6 +7,25 @@ add_library(okiidoku_compile_options_public INTERFACE)
 add_library(okiidoku_compiler_warnings INTERFACE IMPORTED)
 # Note: "IMPORTED" used to prevent auto installation
 
+function(okiidoku_add_compiler_options target)
+	target_link_libraries(${target}
+		PUBLIC  okiidoku_compile_options_public
+		PRIVATE okiidoku_compiler_warnings
+	)
+	# get_target_property(sources ${target} SOURCES)
+	# set_property(SOURCE ${sources}
+	# 	# DIRECTORY "${PROJECT_SOURCE_DIR}" "${PROJECT_BINARY_DIR}"
+	# 	TARGET_DIRECTORY ${target}
+	# 	APPEND PROPERTY OBJECT_DEPENDS "${PROJECT_SOURCE_DIR}/cmake/okiidoku/flags"
+	# )
+	# # TODO.asap delete commented out code
+	# message("${sources}")
+	# foreach(source ${sources})
+	# 	get_source_file_property(deps "${source}" DIRECTORY "${PROJECT_SOURCE_DIR}" OBJECT_DEPENDS)
+	# 	message("dep: ${source}: ${deps}")
+	# endforeach()
+endfunction()
+
 set_target_properties(okiidoku_compile_options_public PROPERTIES EXPORT_NAME _compile_options)
 
 # source file and compiler option parsing rules:

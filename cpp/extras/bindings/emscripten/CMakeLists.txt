@@ -28,9 +28,8 @@ target_link_options(okiidoku_js PRIVATE
 	# -sMODULARIZE=1
 	# -sENVIRONMENT=web # use to exclude commonJS/Node glue-code
 )
+okiidoku_add_compiler_options(okiidoku_js)
 target_link_libraries(okiidoku_js
-	PUBLIC  okiidoku_compile_options_public
-	PRIVATE okiidoku_compiler_warnings
 	PRIVATE okiidoku
 	PRIVATE embind
 )

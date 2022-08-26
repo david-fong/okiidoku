@@ -5,9 +5,8 @@ add_executable(okiidoku_translator
 )
 
 target_include_directories(okiidoku_translator PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
+okiidoku_add_compiler_options(okiidoku_translator)
 target_link_libraries(okiidoku_translator
-	PUBLIC  okiidoku_compile_options_public
-	PRIVATE okiidoku_compiler_warnings
 	PRIVATE okiidoku_cli_utils
 	PRIVATE okiidoku
 )
