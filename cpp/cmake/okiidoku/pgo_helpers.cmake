@@ -6,7 +6,7 @@ include_guard(DIRECTORY)
 # release build with PGO for selected targets. This is _not_ the same as
 # providing an option to "add" PGO support to all generated build-system
 # configs. Rationale for design: I don't see myself ever wanting PGO for
-# anything but a speed-optimized release build.
+# _anything but_ a speed-optimized release build.
 
 # https://gitlab.kitware.com/cmake/cmake/-/issues/19273
 
@@ -187,8 +187,10 @@ function(okiidoku_enable_profile_guided_optimization
 		CMAKE_CACHE_ARGS
 			"-D CMAKE_C_COMPILER:STRING=${CMAKE_C_COMPILER}"
 			"-D CMAKE_CXX_COMPILER:STRING=${CMAKE_CXX_COMPILER}"
+			"-D CMAKE_CXX_EXTENSIONS:BOOL=${CMAKE_CXX_EXTENSIONS}"
 			"-D CMAKE_CONFIGURATION_TYPES:STRING=PgoGen"
 			"-D CMAKE_BUILD_TYPE:STRING=PgoGen"
+			"-D CMAKE_EXPORT_COMPILE_COMMANDS:BOOL=YES"
 			"-D CPM_SOURCE_CACHE:PATH=${CPM_SOURCE_CACHE}" # TODO.low omit if not defined.
 			"-D _OKIIDOKU_PGO_CALLING_CONFIG:INTERNAL=$<CONFIG>"
 			"-D _OKIIDOKU_PGO_DATA_ROOT_DIR:INTERNAL=${_OKIIDOKU_PGO_DATA_ROOT_DIR}"
@@ -209,7 +211,7 @@ function(okiidoku_enable_profile_guided_optimization
 		STEP_TARGETS build install
 	)
 	ExternalProject_Add_Step("${training_proj}" train
-		COMMAND "$<${if_use}:<INSTALL_DIR>/${CMAKE_INSTALL_BINDIR}/${trainer}>>"
+		COMMAND "$<${if_use}:<INSTALL_DIR>/${CMAKE_INSTALL_BINDIR}/${trainer}>"
 		# COMMENT "running the PGO training program (\"${trainer}\") for \"${trainee}\"..."
 		DEPENDEES install
 		# DEPENDERS

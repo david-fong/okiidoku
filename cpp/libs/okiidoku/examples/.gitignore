@@ -3,4 +3,5 @@
 /CMakeUserPresets.json
 /external/
 /out/
-/build/
+/build*/
+/install*/

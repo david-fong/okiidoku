@@ -13,6 +13,8 @@ set(OKIIDOKU_VERSION_COMPATIBILITY ExactVersion) # see `cmake/installation.cmake
 
 include(okiidoku/options) # see this file for more info & defaults. summary:
 # OKIIDOKU_BUILD_SHARED_LIBS
+# OKIIDOKU_BUILD_WITH_STATIC_ANALYZERS
+# OKIIDOKU_BUILD_DEBUG_WITH_SANITIZERS
 # OKIIDOKU_BUILD_TESTING
 # OKIIDOKU_BUILD_OPTIMIZE_LOCAL_NON_PORTABLE
 # OKIIDOKU_BUILD_BINDINGS_FOR_PYTHON
@@ -30,13 +32,13 @@ endif()
 if(OKIIDOKU_BUILD_OPTIMIZE_LOCAL_NON_PORTABLE)
 	include(okiidoku/optional/compile_opts.global.non_portable)
 endif()
-if(PROJECT_IS_TOP_LEVEL)
+if(OKIIDOKU_BUILD_DEBUG_WITH_SANITIZERS)
 	include(okiidoku/optional/sanitizers)
 endif()
 
 include(okiidoku/dependencies)
 
-if(PROJECT_IS_TOP_LEVEL)
+if(OKIIDOKU_BUILD_WITH_STATIC_ANALYSIS)
 	# Note: these are done _after_ adding dependencies to avoid doing this work on them.
 	include(okiidoku/optional/static_analyzers)
 endif()
@@ -63,4 +65,6 @@ endif()
 include(okiidoku/installation)
 if(NOT OKIIDOKU_BUILD_OPTIMIZE_LOCAL_NON_PORTABLE)
 	include(okiidoku/packaging)
+else()
+	message(NOTICE "note that okiidoku packaging rules are not enabled due to using `OKIIDOKU_BUILD_OPTIMIZE_LOCAL_NON_PORTABLE`.")
 endif()
