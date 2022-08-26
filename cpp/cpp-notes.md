@@ -41,6 +41,9 @@ g++ -E -I../libs/okiidoku/include/ -Ilibs/okiidoku/Release/include/ ../libs/okii
 
 # https://perf.wiki.kernel.org/index.php/Tutorial
 perf stat -e branch-misses:u ./libs/okiidoku/tests/Release/okiidoku_test
+
+# compare sizes of pgo vs release builds
+size ./libs/okiidoku/PgoUse/libokiidoku.so ./libs/okiidoku/Release/libokiidoku.so
 ```
 
 ## CMake Things

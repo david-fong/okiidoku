@@ -32,8 +32,8 @@ endif()
 if(_OKIIDOKU_BUILD_IS_PGO_GEN AND NOT DEFINED _OKIIDOKU_PGO_CALLING_CONFIG)
 	message(FATAL_ERROR "The \"PgoGen\" ExternalProject needs to be passed a `_OKIIDOKU_PGO_CALLING_CONFIG`.")
 endif()
-if(_OKIIDOKU_BUILD_IS_PGO_GEN AND NOT DEFINED _OKIIDOKU_PGO_DATA_ROOT_DIR)
-	message(FATAL_ERROR "The \"PgoGen\" ExternalProject needs to be passed a `_OKIIDOKU_PGO_DATA_ROOT_DIR`.")
+if(_OKIIDOKU_BUILD_IS_PGO_GEN AND NOT DEFINED _OKIIDOKU_PGO_DIR)
+	message(FATAL_ERROR "The \"PgoGen\" ExternalProject needs to be passed a `_OKIIDOKU_PGO_DIR`.")
 endif()
 
 # Note: wrap with `macro` so `return()` returns from caller instead of this `include()`ed file.
@@ -54,7 +54,7 @@ unset(_config_types)
 list(PREPEND CMAKE_CXX_FLAGS_PGOGEN ${CMAKE_CXX_FLAGS_RELEASE})
 list(PREPEND CMAKE_CXX_FLAGS_PGOUSE ${CMAKE_CXX_FLAGS_RELEASE})
 if(NOT _OKIIDOKU_BUILD_IS_PGO_GEN)
-	set(_OKIIDOKU_PGO_DATA_ROOT_DIR "${PROJECT_BINARY_DIR}/_pgo")
+	set(_OKIIDOKU_PGO_DIR "${PROJECT_BINARY_DIR}/_pgo")
 endif()
 
 
@@ -92,7 +92,7 @@ function(okiidoku_enable_profile_guided_optimization
 	endif()
 
 
-	set(data_dir "${_OKIIDOKU_PGO_DATA_ROOT_DIR}/${trainee}/trained_by/${trainer}")
+	set(data_dir "${_OKIIDOKU_PGO_DIR}/data/pgo/${trainee}/trained_by/${trainer}")
 
 	if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR EMSCRIPTEN)
 		# cspell:words "-fprofile" instr profdata profraw
@@ -147,7 +147,7 @@ function(okiidoku_enable_profile_guided_optimization
 			"$<${if_gen}:-fprofile-generate=${data_dir}>"
 			"$<${if_use}:-fprofile-use=${data_dir}>"
 			# "$<${if_use}:-fprofile-correction>
-			# "$<${if_use}:-fprofile-partial-training> # for code not run during training, optimize as normal instead of for size.
+			# "$<${if_use}:-fprofile-partial-training> # for code not run during training, optimize as normal instead of for size. # TODO.asap should we use partial training?
 		)
 		target_link_options(${trainee} PRIVATE
 			"$<${if_gen}:-fprofile-generate=${data_dir}>"
@@ -176,7 +176,7 @@ function(okiidoku_enable_profile_guided_optimization
 	include(ExternalProject)
 	ExternalProject_Add("${training_proj}"
 		# directory options:
-		PREFIX "${CMAKE_BINARY_DIR}/_pgo"
+		PREFIX "${_OKIIDOKU_PGO_DIR}"
 		SOURCE_DIR "${PROJECT_SOURCE_DIR}"
 		# configure step options:
 		CMAKE_GENERATOR "${training_generator}"
@@ -187,22 +187,22 @@ function(okiidoku_enable_profile_guided_optimization
 		CMAKE_CACHE_ARGS
 			"-D CMAKE_C_COMPILER:STRING=${CMAKE_C_COMPILER}"
 			"-D CMAKE_CXX_COMPILER:STRING=${CMAKE_CXX_COMPILER}"
+			"-D CMAKE_CXX_STANDARD:STRING=${CMAKE_CXX_STANDARD}"
+			"-D CMAKE_CXX_STANDARD_REQUIRED:BOOL=${CMAKE_CXX_STANDARD_REQUIRED}"
 			"-D CMAKE_CXX_EXTENSIONS:BOOL=${CMAKE_CXX_EXTENSIONS}"
 			"-D CMAKE_CONFIGURATION_TYPES:STRING=PgoGen"
 			"-D CMAKE_BUILD_TYPE:STRING=PgoGen"
 			"-D CMAKE_EXPORT_COMPILE_COMMANDS:BOOL=YES"
 			"-D CPM_SOURCE_CACHE:PATH=${CPM_SOURCE_CACHE}" # TODO.low omit if not defined.
 			"-D _OKIIDOKU_PGO_CALLING_CONFIG:INTERNAL=$<CONFIG>"
-			"-D _OKIIDOKU_PGO_DATA_ROOT_DIR:INTERNAL=${_OKIIDOKU_PGO_DATA_ROOT_DIR}"
+			"-D _OKIIDOKU_PGO_DIR:INTERNAL=${_OKIIDOKU_PGO_DIR}"
 			"-D OKIIDOKU_BUILD_TESTING:BOOL=NO"
 			"-D OKIIDOKU_BUILD_SHARED:BOOL=${OKIIDOKU_BUILD_SHARED_LIBS}"
 		CONFIGURE_HANDLED_BY_BUILD YES
 		# build step options:
-		# BUILD_ALWAYS YES
 		# install step options:
-		INSTALL_COMMAND "" # no-op
+		INSTALL_COMMAND "${CMAKE_COMMAND}" --install . --config PgoGen --prefix <INSTALL_DIR>
 		# test step options:
-		#  none
 		# output logging options:
 		LOG_CONFIGURE YES LOG_BUILD YES LOG_INSTALL YES LOG_TEST YES
 		LOG_OUTPUT_ON_FAILURE YES
@@ -213,7 +213,7 @@ function(okiidoku_enable_profile_guided_optimization
 	ExternalProject_Add_Step("${training_proj}" train
 		COMMAND "$<${if_use}:<INSTALL_DIR>/${CMAKE_INSTALL_BINDIR}/${trainer}>"
 		# COMMENT "running the PGO training program (\"${trainer}\") for \"${trainee}\"..."
-		DEPENDEES install
+		DEPENDEES build install
 		# DEPENDERS
 		# BYPRODUCTS
 	)

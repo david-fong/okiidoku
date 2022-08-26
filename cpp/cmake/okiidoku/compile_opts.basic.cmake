@@ -47,7 +47,7 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 		# -Wbidi-chars=any # warn on any usage of bidi text. TODO use generator expression to enable if gcc v12+
 		-Wnormalized # warn on identifiers that look the same but are not the same
 		-Wno-unknown-pragmas
-		-Wno-attributes=clang::
+		"$<$<VERSION_GREATER_EQUAL:$<CXX_COMPILER_VERSION>,12>:-Wno-attributes=clang::>"
 	)
 endif()
 
@@ -105,8 +105,9 @@ else()
 		-Wnon-virtual-dtor
 		# -Wnoexcept
 		-Wenum-compare -Wenum-conversion
-		-Wmissing-declarations
-		-Wunused-macros
+		-Wmissing-declarations -Wunused-macros
+		-Wsuggest-override
+		-Wmismatched-tags -Wextra-semi
 		-Wundef # warn on undefined identifier used in `#if`
 	)
 	if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR EMSCRIPTEN)
@@ -115,24 +116,26 @@ else()
 		)
 	elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 		target_compile_options(okiidoku_compiler_warnings INTERFACE
-			-Wuseless-cast
+			-fno-nonansi-builtins # Disable built-in declarations of functions that are not mandated by ANSI/ISO C. These include ffs, alloca, _exit, index, bzero, conjf, and other related functions.
+			-Wtrampolines
 			-Wimplicit-fallthrough=5
-			-Walloc-zero
+
 			-Wlogical-op
 			-Wduplicated-cond
+			-Walloc-zero
+			-Wuseless-cast
 
+			-Wredundant-tags
+
+			-Wsuggest-final-types
+			-Wsuggest-final-methods
 			-Wsuggest-attribute=pure
 			-Wsuggest-attribute=const
 			-Wsuggest-attribute=noreturn
 			# TODO.try
 			# -fno-implicit-templates or -frepo # https://gcc.gnu.org/onlinedocs/gcc-4.7.2/gcc/Template-Instantiation.html#Template-Instantiation
 
-			-Wno-builtin-declaration-mismatch
-			-fno-nonansi-builtins # Disable built-in declarations of functions that are not mandated by ANSI/ISO C. These include ffs, alloca, _exit, index, bzero, conjf, and other related functions.
-			-Wtrampolines
-
 			# -Wunsafe-loop-optimizations # only meaningful with -funsafe-loop-optimizations
-
 
 			# interesting but probably too overboard:
 			# -Wpadded

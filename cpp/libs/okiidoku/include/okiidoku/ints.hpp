@@ -28,10 +28,10 @@ namespace okiidoku {
 	template<typename V> requires(!std::is_reference_v<V>)
 	struct HouseTypeMap final {
 		// HouseTypeMap();
-		[[nodiscard, gnu::pure]] const V& at(const HouseType key) const noexcept { return arr_[static_cast<unsigned char>(key)]; }; // TODO.wait std::to_underlying
-		[[nodiscard, gnu::pure]]       V& at(const HouseType key)       noexcept { return arr_[static_cast<unsigned char>(key)]; };
-		[[nodiscard, gnu::pure]] const auto& get_underlying_arr() const noexcept { return arr_; };
-		[[nodiscard, gnu::pure]]       auto& get_underlying_arr()       noexcept { return arr_; };
+		[[nodiscard, gnu::pure]] const V& at(const HouseType key) const noexcept { return arr_[static_cast<unsigned char>(key)]; } // TODO.wait std::to_underlying
+		[[nodiscard, gnu::pure]]       V& at(const HouseType key)       noexcept { return arr_[static_cast<unsigned char>(key)]; }
+		[[nodiscard, gnu::pure]] const auto& get_underlying_arr() const noexcept { return arr_; }
+		[[nodiscard, gnu::pure]]       auto& get_underlying_arr()       noexcept { return arr_; }
 	private:
 		std::array<V, house_types.size()> arr_;
 	};
@@ -46,10 +46,10 @@ namespace okiidoku {
 	template<typename V> requires(!std::is_reference_v<V>)
 	struct LineTypeMap final {
 		// HouseTypeMap();
-		[[nodiscard, gnu::pure]] const V& at(const LineType key) const noexcept { return arr_[static_cast<unsigned char>(key)]; }; // TODO.wait std::to_underlying
-		[[nodiscard, gnu::pure]]       V& at(const LineType key)       noexcept { return arr_[static_cast<unsigned char>(key)]; };
-		[[nodiscard, gnu::pure]] const auto& get_underlying_arr() const noexcept { return arr_; };
-		[[nodiscard, gnu::pure]]       auto& get_underlying_arr()       noexcept { return arr_; };
+		[[nodiscard, gnu::pure]] const V& at(const LineType key) const noexcept { return arr_[static_cast<unsigned char>(key)]; } // TODO.wait std::to_underlying
+		[[nodiscard, gnu::pure]]       V& at(const LineType key)       noexcept { return arr_[static_cast<unsigned char>(key)]; }
+		[[nodiscard, gnu::pure]] const auto& get_underlying_arr() const noexcept { return arr_; }
+		[[nodiscard, gnu::pure]]       auto& get_underlying_arr()       noexcept { return arr_; }
 	private:
 		std::array<V, line_types.size()> arr_;
 	};

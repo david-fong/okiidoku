@@ -36,11 +36,6 @@ Issues I'm watching:
 
 ## Misc List
 
-- try compiler flag files again
-  - https://github.com/ninja-build/ninja/issues/2178#issuecomment-1227834660
-  - https://cmake.org/cmake/help/latest/command/set_source_files_properties.html
-  - https://cmake.org/cmake/help/latest/prop_sf/OBJECT_DEPENDS.html
-
 bump minimum gcc version to gcc-12. hmm. or maybe give it some time to fix regressions?
 
 use module mode for emscripten binding output. make sure to update readme and examples

@@ -101,5 +101,4 @@ namespace okiidoku::mono {
 
 
 namespace okiidoku::visitor {
-	;
 }

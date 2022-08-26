@@ -17,7 +17,7 @@ namespace okiidoku::cli {
 		void order(Order) noexcept;
 		void order(std::string_view);
 
-		[[nodiscard, gnu::pure]] bool canonicalize() const noexcept { return canonicalize_; };
+		[[nodiscard, gnu::pure]] bool canonicalize() const noexcept { return canonicalize_; }
 		void canonicalize(bool);
 		void canonicalize(std::string_view);
 

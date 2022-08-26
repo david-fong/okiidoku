@@ -10,8 +10,8 @@ include(okiidoku/installation)
 # https://cmake.org/cmake/help/latest/guide/importing-exporting/index.html#creating-packages
 set(CPACK_VERBATIM_VARIABLES YES)
 set(CPACK_PACKAGE_VENDOR "david-fong")
-set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/../LICENSES/AGPL-3.0-or-later")
-set(CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/readme.md")
+set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/../LICENSE.txt")
+set(CPACK_RESOURCE_FILE_README "${PROJECT_SOURCE_DIR}/readme.md")
 #set(CPACK_PACKAGE_ICON )
 set(CPACK_SOURCE_IGNORE_FILES
 	# see https://github.com/CLIUtils/CLI11/blob/main/CMakeLists.txt for reference

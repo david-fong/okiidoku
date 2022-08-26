@@ -26,7 +26,7 @@ namespace okiidoku::mono {
 	//  Using inheritance gains nice mangled symbol names. Speed seems to suffer a
 	//  negligible drop (~1%?) or maybe it doesn't. I am happy with this outcome.
 	struct Grid final : public detail::Gridlike<O, grid_val_t<O>> {
-		Grid() noexcept: detail::Gridlike<O, grid_val_t<O>>{} {};
+		Grid() noexcept: detail::Gridlike<O, grid_val_t<O>>{} {}
 	};
 
 
@@ -72,8 +72,8 @@ namespace okiidoku::mono {
 		}
 		Gridlike() noexcept requires(!std::same_as<V_, grid_val_t<O>>) = default;
 
-		[[nodiscard, gnu::pure]]       array_t& get_underlying_array()       noexcept { return arr_; };
-		[[nodiscard, gnu::pure]] const array_t& get_underlying_array() const noexcept { return arr_; };
+		[[nodiscard, gnu::pure]]       array_t& get_underlying_array()       noexcept { return arr_; }
+		[[nodiscard, gnu::pure]] const array_t& get_underlying_array() const noexcept { return arr_; }
 
 		// TODO.low why does adding an assumption that the value is lteq T::O2 result in increased code size on clang?
 		// contract: `rmi` is in [0, O4).

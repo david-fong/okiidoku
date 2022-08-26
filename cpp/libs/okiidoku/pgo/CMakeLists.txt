@@ -12,3 +12,12 @@ if(_OKIIDOKU_BUILD_IS_PGO_GEN)
 	)
 endif()
 okiidoku_enable_profile_guided_optimization(okiidoku #[[trainer:]] okiidoku_pgo_trainer_default)
+
+if(_OKIIDOKU_BUILD_IS_PGO_GEN)
+	install(
+		TARGETS okiidoku_pgo_trainer_default
+		EXPORT okiidoku_installation_targets
+		COMPONENT okiidoku_pgo_trainers
+		INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+	)
+endif()

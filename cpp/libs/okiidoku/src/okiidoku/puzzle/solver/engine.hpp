@@ -143,10 +143,10 @@ namespace okiidoku::mono::detail::solver {
 		void push_guess(Guess<O>) noexcept;
 
 		[[nodiscard, gnu::pure]]
-		std::size_t get_guess_stack_depth() const noexcept { return guess_stack_.size(); };
+		std::size_t get_guess_stack_depth() const noexcept { return guess_stack_.size(); }
 
 		[[nodiscard, gnu::pure]]
-		std::uint_fast64_t get_total_guesses() const noexcept { return total_guesses_; };
+		std::uint_fast64_t get_total_guesses() const noexcept { return total_guesses_; }
 
 		// contract: `no_more_solns` returns `false`.
 		// contract: `get_num_unsolved` returns zero.
