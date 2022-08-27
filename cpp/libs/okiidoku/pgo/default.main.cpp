@@ -10,6 +10,30 @@
 #include <string_view>
 #include <random>    // random_device
 
+template<okiidoku::Order O>
+void do_training(okiidoku::util::SharedRng& shared_rng, const unsigned num_rounds) {
+	// 3: 30k, 4: 40k, 5: 700,
+	using namespace ::okiidoku;
+	using namespace ::okiidoku::mono;
+	// OKIIDOKU_MONO_INT_TS_TYPEDEFS
+
+	Grid<O> gen_grid;
+	init_most_canonical_grid(gen_grid);
+
+	// Grid<O> canon_grid;
+
+	for (unsigned round {0}; round < num_rounds; ++round) {
+		generate_shuffled(gen_grid, shared_rng.get_rng_seed());
+
+		/* const auto gen_canon_transform {canonicalize(gen_grid)};
+		canon_grid = gen_grid;
+		scramble(canon_grid, shared_rng.get_rng_seed());
+		canonicalize(canon_grid);
+		*/
+	}
+}
+
+
 /**
 ARGUMENTS
 1: RNG seed (default: get from device)
@@ -36,5 +60,9 @@ int main(const int argc, char const *const argv[]) {
 	<< std::endl;
 
 	okiidoku::util::SharedRng shared_rng(srand_key);
+	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
+	do_training<O_>(shared_rng, 700);
+	OKIIDOKU_FOREACH_O_DO_EMIT
+	#undef OKIIDOKU_FOREACH_O_EMIT
 	return 0;
 }

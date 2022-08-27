@@ -42,7 +42,7 @@ In order:
 
 [See the readme in the cpp directory](./cpp/readme.md).
 
-For Python and WASM/JS bindings, see the [bindings directory](./cpp/extras/bindings/)
+For Python and WASM/JS bindings, see the [extras folder](./cpp/extras/)
 
 This project is licensed under the [GNU Affero General Public License or (at your option) any later version](./LICENSES/AGPL-3.0-or-later-3.0-or-later.txt).
 

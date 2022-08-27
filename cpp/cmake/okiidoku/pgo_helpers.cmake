@@ -142,7 +142,7 @@ function(okiidoku_enable_profile_guided_optimization
 		unset(trainee_binary_dir)
 		unset(int_dir)
 		target_compile_options(${trainee} PRIVATE
-			"$<${if_pgo}:-fprofile-dir=${data_dir}>"
+			# "$<${if_pgo}:-fprofile-dir=${data_dir}>"
 			"$<${if_pgo}:-fprofile-prefix-path=${objects_dir}>"
 			"$<${if_gen}:-fprofile-generate=${data_dir}>"
 			"$<${if_use}:-fprofile-use=${data_dir}>"
@@ -200,6 +200,7 @@ function(okiidoku_enable_profile_guided_optimization
 			"-D OKIIDOKU_BUILD_SHARED:BOOL=${OKIIDOKU_BUILD_SHARED_LIBS}"
 		CONFIGURE_HANDLED_BY_BUILD YES
 		# build step options:
+		BUILD_ALWAYS YES
 		# install step options:
 		INSTALL_COMMAND "${CMAKE_COMMAND}" --install . --config PgoGen --prefix <INSTALL_DIR>
 		# test step options:
@@ -208,7 +209,6 @@ function(okiidoku_enable_profile_guided_optimization
 		LOG_OUTPUT_ON_FAILURE YES
 		# target options:
 		EXCLUDE_FROM_ALL YES
-		STEP_TARGETS build install
 	)
 	ExternalProject_Add_Step("${training_proj}" train
 		COMMAND "$<${if_use}:<INSTALL_DIR>/${CMAKE_INSTALL_BINDIR}/${trainer}>"
@@ -221,8 +221,4 @@ function(okiidoku_enable_profile_guided_optimization
 	# TODO.wait use generator expression once `add_dependencies` supports them. https://gitlab.kitware.com/cmake/cmake/-/issues/19467
 	add_dependencies(${trainee} "${training_proj}-train")
 
-	# how do I want to run the training program?
-	# - configure it to be a test and use the test step functions of ExternalProject
-	# - use find_package to import the external project and run it that way?
-	# - use STEP_TARGETS or ExternalProject_Add_StepTargets() to create a custom target and then add_dependencies()
 endfunction()

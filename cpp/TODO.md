@@ -18,7 +18,7 @@
   - hm. less sure about how necessary this is now knowing about `std::async`.
 - minlexing canonicalization
 - compare canonicalization methods (performance / time-complexity)
-- language bindings for other languages [see dedicated todo-file](./extras/bindings/todo.md)
+- language bindings for other languages [see dedicated todo-file](./extras/todo.md)
 
 ## Periodic Checkups
 
@@ -35,6 +35,9 @@ Issues I'm watching:
 - [vscode cmake tools problem with cmake installed via snap](https://github.com/microsoft/vscode-cmake-tools/issues/838#issuecomment-1035123514)
 
 ## Misc List
+
+- how come running the training program doesn't seem to generate the training data?
+- how do I make all the sources in the PgoUse config targets rebuild when the pgo data changes? `OBJECT_DEPENDS`? depend on what? it would be a pain to do custom for each compiler's data format. How about depending on the CMake timestamp file for the training step?
 
 bump minimum gcc version to gcc-12. hmm. or maybe give it some time to fix regressions?
 

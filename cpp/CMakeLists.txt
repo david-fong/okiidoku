@@ -55,10 +55,10 @@ add_subdirectory(apps/cli EXCLUDE_FROM_ALL) # target: okiidoku_cli
 add_subdirectory(tools/okiidoku_translator EXCLUDE_FROM_ALL)
 
 if(EMSCRIPTEN)
-	add_subdirectory(extras/bindings/emscripten) # target: okiidoku_js
+	add_subdirectory(extras/emscripten) # target: okiidoku_js
 endif()
 if(OKIIDOKU_BUILD_BINDINGS_FOR_PYTHON)
-	add_subdirectory(extras/bindings/python) # target: okiidoku_py
+	add_subdirectory(extras/python) # target: okiidoku_py
 endif()
 
 

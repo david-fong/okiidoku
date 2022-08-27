@@ -6,9 +6,12 @@ include_guard(DIRECTORY)
 
 find_package(Git QUIET)
 if(NOT Git_FOUND)
-	set(OKIIDOKU_GIT_BUILT_FROM_REPO "false")
+	# set(OKIIDOKU_GIT_BUILT_FROM_REPO "false")
+	set(OKIIDOKU_GIT_REMOTES "")
+	set(OKIIDOKU_GIT_BRANCH "")
+	set(OKIIDOKU_GIT_COMMIT "")
 else()
-	set(OKIIDOKU_GIT_BUILT_FROM_REPO "true")
+	# set(OKIIDOKU_GIT_BUILT_FROM_REPO "true")
 	execute_process(
 		COMMAND "${GIT_EXECUTABLE}" remote -v
 		OUTPUT_VARIABLE OKIIDOKU_GIT_REMOTES

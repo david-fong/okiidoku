@@ -47,15 +47,13 @@
 
 ## Building and Running okiidoku\_cli
 
-You can use CMake from the command list, or just use the VS Code CMake-Tools extension to build the project.
+You can use CMake from the command line, or just use the VS Code CMake-Tools extension to build the project.
 
 You can use `tput rmam` to disable the terminal's line wrapping, and `tput smam` to enable it again afterward.
 
 ## Source Code
 
-The project is set up for use with VS Code. After installing and enabling the recommended extensions, select a configure preset and build preset.
-
-Don't open the cpp folder or the repo's root folder in VS Code directly. Open [the repo's workspace file](../okiidoku.code-workspace).
+The project is set up for use with VS Code. Don't open the cpp folder or the repo's root folder in VS Code directly. Open [the repo's workspace file](../okiidoku.code-workspace). After installing and enabling the recommended extensions, select a configure preset and build preset.
 
 Note: if you installed cmake via snap (like I did on my Ubuntu machine): https://github.com/microsoft/vscode-cmake-tools/issues/838#issuecomment-1035123514
 
