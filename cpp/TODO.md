@@ -47,6 +47,7 @@ Issues I'm watching:
     - according to some 5-second google, yes it can. see `-frandom-seed=string`
       - [conan: reproducible builds](https://blog.conan.io/2019/09/02/Deterministic-builds-with-C-C++.html#randomness-created-by-the-compiler). see their example of how to mitigate with CMake.
     - try `nm` on individual object files to see if mangled names exist (haven't been differently inlined) and are different.
+  - it's being inlined for both the training and optimized builds... do I need to make it not get inlined for the training build?
 
 bump minimum gcc version to gcc-12. hmm. or maybe give it some time to fix regressions?
 

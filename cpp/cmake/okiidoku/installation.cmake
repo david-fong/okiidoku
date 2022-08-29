@@ -51,20 +51,20 @@ install(
 export(
 	EXPORT okiidoku_installation_targets
 	NAMESPACE okiidoku::
-	FILE "${CMAKE_CURRENT_BINARY_DIR}/cmake/okiidoku-targets.cmake"
+	FILE "${PROJECT_BINARY_DIR}/cmake/okiidoku-targets.cmake"
 )
 
 
 write_basic_package_version_file(
-	okiidoku-config-version.cmake
+	"${PROJECT_BINARY_DIR}/cmake/okiidoku-config-version.cmake"
 	COMPATIBILITY "${OKIIDOKU_VERSION_COMPATIBILITY}"
 )
 
 # support for `find_package`. seems complicated to set up and I'm not sure anyone will want this. I don't.
 # https://cmake.org/cmake/help/latest/guide/importing-exporting/index.html#creating-relocatable-packages
 # install(FILES
-# 	# "${CMAKE_CURRENT_BINARY_DIR}/okiidoku-config.cmake" # TODO
-# 	"${CMAKE_CURRENT_BINARY_DIR}/okiidoku-config-version.cmake"
+# 	# "${PROJECT_BINARY_DIR}/cmake/okiidoku-config.cmake" # TODO
+# 	"${PROJECT_BINARY_DIR}/cmake/okiidoku-config-version.cmake"
 # 	DESTINATION "${OKIIDOKU_INSTALL_CMAKEDIR}"
 # 	COMPONENT okiidoku_development
 # )
