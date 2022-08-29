@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: 2020 David Fong
 # SPDX-License-Identifier: GPL-3.0-or-later
-
+# TODO.wait https://github.com/vector-of-bool/pitchfork/issues/45
 if(_OKIIDOKU_BUILD_IS_PGO_GEN)
 	add_executable(okiidoku_pgo_trainer_default
 		default.main.cpp
@@ -10,10 +10,6 @@ if(_OKIIDOKU_BUILD_IS_PGO_GEN)
 		PRIVATE okiidoku_cli_utils
 		PRIVATE okiidoku
 	)
-endif()
-okiidoku_enable_profile_guided_optimization(okiidoku #[[trainer:]] okiidoku_pgo_trainer_default)
-
-if(_OKIIDOKU_BUILD_IS_PGO_GEN)
 	install(
 		TARGETS okiidoku_pgo_trainer_default
 		EXPORT okiidoku_installation_targets

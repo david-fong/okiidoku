@@ -58,6 +58,60 @@ if(NOT _OKIIDOKU_BUILD_IS_PGO_GEN)
 endif()
 
 
+if(NOT _OKIIDOKU_BUILD_IS_PGO_GEN)
+	set(okiidoku_pgo_training_cmake_generator "${CMAKE_GENERATOR}")
+	if(okiidoku_pgo_training_cmake_generator STREQUAL "Ninja Multi-Config")
+		set(okiidoku_pgo_training_cmake_generator "Ninja")
+	endif()
+
+	# TODO find a way to only do this if the config is PgoUse?
+	# TODO.low I think things can go out of sync if the cache is manually edited...
+	include(ExternalProject)
+	ExternalProject_Add(okiidoku_pgo_training
+		# directory options:
+		PREFIX "${_OKIIDOKU_PGO_DIR}"
+		SOURCE_DIR "${PROJECT_SOURCE_DIR}"
+		# configure step options:
+		CMAKE_GENERATOR "${okiidoku_pgo_training_cmake_generator}"
+		CMAKE_GENERATOR_PLATFORM "${CMAKE_GENERATOR_PLATFORM}"
+		CMAKE_GENERATOR_TOOLSET  "${CMAKE_GENERATOR_TOOLSET}"
+		CMAKE_GENERATOR_INSTANCE "${CMAKE_GENERATOR_INSTANCE}"
+		CMAKE_ARGS
+		# CMAKE_CACHE_ARGS
+			"-D CMAKE_C_COMPILER:STRING=${CMAKE_C_COMPILER}"
+			"-D CMAKE_CXX_COMPILER:STRING=${CMAKE_CXX_COMPILER}"
+			"-D CMAKE_CXX_STANDARD:STRING=${CMAKE_CXX_STANDARD}"
+			"-D CMAKE_CXX_STANDARD_REQUIRED:BOOL=${CMAKE_CXX_STANDARD_REQUIRED}"
+			"-D CMAKE_CXX_EXTENSIONS:BOOL=${CMAKE_CXX_EXTENSIONS}"
+			"-D CMAKE_CONFIGURATION_TYPES:STRING=PgoGen"
+			"-D CMAKE_BUILD_TYPE:STRING=PgoGen"
+			"-D CMAKE_BUILD_RPATH_USE_ORIGIN:BOOL=${CMAKE_BUILD_RPATH_USE_ORIGIN}"
+			"-D CMAKE_EXPORT_COMPILE_COMMANDS:BOOL=YES"
+			"-D CPM_SOURCE_CACHE:PATH=${CPM_SOURCE_CACHE}" # TODO.low omit if not defined.
+			"-D _OKIIDOKU_PGO_CALLING_CONFIG:INTERNAL=$<CONFIG>"
+			"-D _OKIIDOKU_PGO_DIR:INTERNAL=${_OKIIDOKU_PGO_DIR}"
+			"-D OKIIDOKU_BUILD_SHARED_LIBS:BOOL=${OKIIDOKU_BUILD_SHARED_LIBS}"
+			"-D OKIIDOKU_BUILD_WITH_STATIC_ANALYZERS:BOOL=NO"
+			"-D OKIIDOKU_BUILD_DEBUG_WITH_SANITIZERS:BOOL=NO"
+			"-D OKIIDOKU_BUILD_TESTING:BOOL=NO"
+			"-D OKIIDOKU_BUILD_OPTIMIZE_LOCAL_NON_PORTABLE:BOOL=${OKIIDOKU_BUILD_OPTIMIZE_LOCAL_NON_PORTABLE}"
+		CONFIGURE_HANDLED_BY_BUILD YES
+		# build step options:
+		BUILD_ALWAYS YES
+		# install step options:
+		INSTALL_COMMAND "${CMAKE_COMMAND}" --install . --config PgoGen --prefix <INSTALL_DIR>
+		# test step options:
+		# output logging options:
+		LOG_CONFIGURE YES LOG_BUILD YES LOG_INSTALL YES LOG_TEST YES
+		LOG_OUTPUT_ON_FAILURE YES
+		# target options:
+		EXCLUDE_FROM_ALL YES
+		# misc options:
+		# LIST_SEPARATOR " "
+	)
+endif()
+
+
 # this must be called in the same directory scope as the one defining the trainee
 # trainee a target shared library
 # trainer a target executable- ideally lightweight
@@ -66,6 +120,9 @@ function(okiidoku_enable_profile_guided_optimization
 	trainee # name of target to train for PGO
 	trainer # name of a executable target to use for training PGO
 )
+	if(NOT CMAKE_CURRENT_BINARY_DIR STREQUAL PROJECT_BINARY_DIR)
+		message(FATAL_ERROR "for some reason custom steps for ExternalProject need to be registered in the same directory as the ExternalProject was registered.")
+	endif()
 	if(_OKIIDOKU_BUILD_IS_PGO_GEN)
 		get_target_property(trainer_target_type ${trainer} TYPE)
 		if(NOT trainer_target_type STREQUAL "EXECUTABLE")
@@ -95,6 +152,7 @@ function(okiidoku_enable_profile_guided_optimization
 	set(data_dir "${_OKIIDOKU_PGO_DIR}/data/pgo/${trainee}/trained_by/${trainer}")
 
 	if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR EMSCRIPTEN)
+		# TODO test this and fix problems
 		# cspell:words "-fprofile" instr profdata profraw
 		# https://clang.llvm.org/docs/UsersManual.html#profile-guided-optimization
 		# https://clang.llvm.org/docs/UsersManual.html#profiling-with-instrumentation
@@ -114,9 +172,9 @@ function(okiidoku_enable_profile_guided_optimization
 			string(REPLACE llvm_version "." ";" llvm_version_list "${CMAKE_CXX_COMPILER_VERSION}")
 			list(GET llvm_version_list 0 llvm_major_version)
 			find_program(LLVM_PROFDATA "llvm-profdata-${llvm_major_version}")
-			add_custom_command(TARGET ${trainee} PRE_BUILD VERBATIM COMMAND_EXPAND_LISTS
+			add_custom_command(TARGET ${trainee} PRE_BUILD VERBATIM COMMAND_EXPAND_LISTS # TODO.asap I don't think this will work. PRE_BUILD is pretty much PRE_LINK except on visual studio. needs to be part of the train step.
 				DEPENDS ""
-				COMMAND "$<$<CONFIG:PgoGen>:${LLVM_PROFDATA};merge;-output=\"${profdata_file}\";${data_dir}/*.profraw>"
+				COMMAND "$<${if_gen}:${LLVM_PROFDATA};merge;-output=\"${profdata_file}\";${data_dir}/*.profraw>"
 				BYPRODUCTS "${profdata_file}"
 			)
 			unset(LLVM_PROFDATA)
@@ -130,28 +188,49 @@ function(okiidoku_enable_profile_guided_optimization
 		# https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html
 		# https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html
 		# TODO issue warning about -fprofile-prefix-path if generator has not been tested by me.
+
+		# get per-config root dir for objects for `-fprofile-prefix-path`. relies on CMake internals.
 		get_property(is_multi_config GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
 		if(is_multi_config)
 			set(int_dir "$<CONFIG>")
 		else()
-			set(int_dir ".")
+			set(int_dir "")
 		endif()
 		unset(is_multi_config)
 		get_target_property(trainee_binary_dir ${trainee} BINARY_DIR)
 		set(objects_dir "${trainee_binary_dir}/CMakeFiles/${trainee}.dir/${int_dir}")
 		unset(trainee_binary_dir)
 		unset(int_dir)
+
+		# reproducible generated name for things with internal linkage
+		get_target_property(trainee_sources ${trainee} SOURCES)
+		foreach(_file ${trainee_sources})
+			file(SHA256 "${_file}" hash)
+			# string(SUBSTRING "${hash}" 0 8 hash)
+			set_property(
+				SOURCE "${_file}" TARGET_DIRECTORY ${trainee}
+				APPEND_STRING PROPERTY COMPILE_FLAGS "$<${if_pgo}:-frandom-seed=0x${hash}>"
+			)
+		endforeach()
+
 		target_compile_options(${trainee} PRIVATE
 			# "$<${if_pgo}:-fprofile-dir=${data_dir}>"
 			"$<${if_pgo}:-fprofile-prefix-path=${objects_dir}>"
+			# "-ffile-prefix-map=${CMAKE_SOURCE_DIR}=." # TODO.wait this is only available in GCC 12 and I don't even know if it will change the mangled filenames like I want it to.
 			"$<${if_gen}:-fprofile-generate=${data_dir}>"
 			"$<${if_use}:-fprofile-use=${data_dir}>"
 			# "$<${if_use}:-fprofile-correction>
 			# "$<${if_use}:-fprofile-partial-training> # for code not run during training, optimize as normal instead of for size. # TODO.asap should we use partial training?
 		)
 		target_link_options(${trainee} PRIVATE
+			"$<${if_pgo}:-fprofile-prefix-path=${objects_dir}>"
 			"$<${if_gen}:-fprofile-generate=${data_dir}>"
+			"$<${if_use}:-fprofile-use=${data_dir}>"
 		)
+		if(_OKIIDOKU_BUILD_IS_PGO_GEN)
+			target_compile_options(${trainer} PRIVATE "-fprofile-generate=${data_dir}")
+			target_link_options(   ${trainer} PRIVATE "-fprofile-generate=${data_dir}")
+		endif()
 		# https://gcc.gnu.org/wiki/AutoFDO/Tutorial
 
 
@@ -165,60 +244,24 @@ function(okiidoku_enable_profile_guided_optimization
 		return()
 	endif()
 
-	set(training_generator "${CMAKE_GENERATOR}")
-	if(training_generator STREQUAL "Ninja Multi-Config")
-		set(training_generator "Ninja")
+	# Note: annoyingly, commands cannot be the empty string. use `cmake -E true` as a no-op instead.
+	if(NOT "${data_dir}" STREQUAL "")
+		set(command_clean_data "${CMAKE_COMMAND};-E;\$<IF:${if_use},rm;-rf;--;${data_dir},true>")
 	endif()
+	set(command_train "\$<IF:${if_use},<INSTALL_DIR>/${CMAKE_INSTALL_BINDIR}/${trainer},${CMAKE_COMMAND};-E;true>")
 
-	# cspell:words "-DCMAKE" "-DOKIIDOKU"
-	# TODO find a way to only do this if the config is PgoUse?
-	set(training_proj "${trainee}_pgo_training")
-	include(ExternalProject)
-	ExternalProject_Add("${training_proj}"
-		# directory options:
-		PREFIX "${_OKIIDOKU_PGO_DIR}"
-		SOURCE_DIR "${PROJECT_SOURCE_DIR}"
-		# configure step options:
-		CMAKE_GENERATOR "${training_generator}"
-		CMAKE_GENERATOR_PLATFORM "${CMAKE_GENERATOR_PLATFORM}"
-		CMAKE_GENERATOR_TOOLSET  "${CMAKE_GENERATOR_TOOLSET}"
-		CMAKE_GENERATOR_INSTANCE "${CMAKE_GENERATOR_INSTANCE}"
-		CMAKE_ARGS
-		CMAKE_CACHE_ARGS
-			"-D CMAKE_C_COMPILER:STRING=${CMAKE_C_COMPILER}"
-			"-D CMAKE_CXX_COMPILER:STRING=${CMAKE_CXX_COMPILER}"
-			"-D CMAKE_CXX_STANDARD:STRING=${CMAKE_CXX_STANDARD}"
-			"-D CMAKE_CXX_STANDARD_REQUIRED:BOOL=${CMAKE_CXX_STANDARD_REQUIRED}"
-			"-D CMAKE_CXX_EXTENSIONS:BOOL=${CMAKE_CXX_EXTENSIONS}"
-			"-D CMAKE_CONFIGURATION_TYPES:STRING=PgoGen"
-			"-D CMAKE_BUILD_TYPE:STRING=PgoGen"
-			"-D CMAKE_EXPORT_COMPILE_COMMANDS:BOOL=YES"
-			"-D CPM_SOURCE_CACHE:PATH=${CPM_SOURCE_CACHE}" # TODO.low omit if not defined.
-			"-D _OKIIDOKU_PGO_CALLING_CONFIG:INTERNAL=$<CONFIG>"
-			"-D _OKIIDOKU_PGO_DIR:INTERNAL=${_OKIIDOKU_PGO_DIR}"
-			"-D OKIIDOKU_BUILD_TESTING:BOOL=NO"
-			"-D OKIIDOKU_BUILD_SHARED:BOOL=${OKIIDOKU_BUILD_SHARED_LIBS}"
-		CONFIGURE_HANDLED_BY_BUILD YES
-		# build step options:
-		BUILD_ALWAYS YES
-		# install step options:
-		INSTALL_COMMAND "${CMAKE_COMMAND}" --install . --config PgoGen --prefix <INSTALL_DIR>
-		# test step options:
-		# output logging options:
-		LOG_CONFIGURE YES LOG_BUILD YES LOG_INSTALL YES LOG_TEST YES
-		LOG_OUTPUT_ON_FAILURE YES
-		# target options:
-		EXCLUDE_FROM_ALL YES
-	)
-	ExternalProject_Add_Step("${training_proj}" train
-		COMMAND "$<${if_use}:<INSTALL_DIR>/${CMAKE_INSTALL_BINDIR}/${trainer}>"
+	ExternalProject_Add_Step(okiidoku_pgo_training train
+		COMMAND "${command_clean_data}"
+		COMMAND "${command_train}"
 		# COMMENT "running the PGO training program (\"${trainer}\") for \"${trainee}\"..."
-		DEPENDEES build install
+		DEPENDEES build install # TODO.asap look for a better way? for some reason this seems to always re-run now, even if nothing changed about the build. maybe we can create a target which depends on the executable, and then depend on that target.
 		# DEPENDERS
 		# BYPRODUCTS
+		# TODO.low consider setting working directory? what would be the point though? And would it fail on windows MSVC doesn't need the data_dir?
+		LOG YES
 	)
-	ExternalProject_Add_StepTargets("${training_proj}" train)
-	# TODO.wait use generator expression once `add_dependencies` supports them. https://gitlab.kitware.com/cmake/cmake/-/issues/19467
-	add_dependencies(${trainee} "${training_proj}-train")
+	ExternalProject_Add_StepTargets(okiidoku_pgo_training train)
+	# TODO.wait use generator expression once `add_dependencies` supports them. https://gitlab.kitware.com/cmake/cmake/-/issues/19467. currently doing workaround in the custom step COMMANDs.
+	add_dependencies(${trainee} "okiidoku_pgo_training-train")
 
 endfunction()

@@ -61,6 +61,8 @@ if(OKIIDOKU_BUILD_BINDINGS_FOR_PYTHON)
 	add_subdirectory(extras/python) # target: okiidoku_py
 endif()
 
+okiidoku_enable_profile_guided_optimization(okiidoku #[[trainer:]] okiidoku_pgo_trainer_default)
+
 
 include(okiidoku/installation)
 if(NOT OKIIDOKU_BUILD_OPTIMIZE_LOCAL_NON_PORTABLE)

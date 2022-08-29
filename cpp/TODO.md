@@ -36,8 +36,17 @@ Issues I'm watching:
 
 ## Misc List
 
-- how come running the training program doesn't seem to generate the training data?
-- how do I make all the sources in the PgoUse config targets rebuild when the pgo data changes? `OBJECT_DEPENDS`? depend on what? it would be a pain to do custom for each compiler's data format. How about depending on the CMake timestamp file for the training step?
+- gcc prefix maps: do it unconditionally for PGO builds using `-fprofile-prefix-map`. For other builds... Not sure. Could be QoL for debugging in GDB and maybe reading compiler diagnostics? Maybe? Could be useful if later we want "reproducible builds".
+
+- how do I make all the sources in the PgoUse config targets rebuild when the pgo data changes? `OBJECT_DEPENDS`? depend on what? it would be a pain to do custom for each compiler's data format. How about depending on the CMake timestamp file for the training step? But that probably means that I won't get dependency detection if the profile data gets manually deleted.eeeeee
+- profile for `make_cols_valid` not found in profile data.
+  - could this be due to anonymous/unnamed namespaces?
+    - try testing by moving them out of the anonymous namespace and see if the warning persists.
+    - If so, how could I fix this?
+    - also, if solution found, still test the wrong approach to see if it could lead to masking bad config if partial-training is turned on.
+    - according to some 5-second google, yes it can. see `-frandom-seed=string`
+      - [conan: reproducible builds](https://blog.conan.io/2019/09/02/Deterministic-builds-with-C-C++.html#randomness-created-by-the-compiler). see their example of how to mitigate with CMake.
+    - try `nm` on individual object files to see if mangled names exist (haven't been differently inlined) and are different.
 
 bump minimum gcc version to gcc-12. hmm. or maybe give it some time to fix regressions?
 

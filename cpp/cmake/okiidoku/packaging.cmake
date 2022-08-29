@@ -8,6 +8,7 @@ include(okiidoku/installation)
 # https://cmake.org/cmake/help/book/mastering-cmake/chapter/Packaging%20With%20CPack.html
 # https://cmake.org/cmake/help/latest/module/CPack.html
 # https://cmake.org/cmake/help/latest/guide/importing-exporting/index.html#creating-packages
+# https://cmake.org/cmake/help/latest/manual/cpack-generators.7.html
 set(CPACK_VERBATIM_VARIABLES YES)
 set(CPACK_PACKAGE_VENDOR "david-fong")
 set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/../LICENSE.txt")
@@ -20,6 +21,7 @@ set(CPACK_SOURCE_IGNORE_FILES
 	[[/cpp-notes.md]] [[/TODO.md]]
 )
 set(CPACK_SOURCE_GENERATOR "TGZ")
+# TODO.low https://reproducible-builds.org/docs/archives/
 
 
 # https://decovar.dev/blog/2021/09/23/cmake-cpack-package-deb-apt/

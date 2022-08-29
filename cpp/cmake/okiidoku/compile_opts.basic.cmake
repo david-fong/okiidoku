@@ -79,6 +79,18 @@ else()
 endif()
 
 
+# related to reproducible builds / deterministic compilation:
+if(MSVC)
+	target_compile_options(okiidoku_compiler_warnings INTERFACE
+	)
+else()
+	target_compile_options(okiidoku_compiler_warnings INTERFACE
+		-Werror=date-time
+		# "-ffile-prefix-map=${CMAKE_SOURCE_DIR}=." # TODO.low try this out and see what benefits there are
+	)
+endif()
+
+
 # warnings:
 if(MSVC)
 	target_compile_options(okiidoku_compiler_warnings INTERFACE

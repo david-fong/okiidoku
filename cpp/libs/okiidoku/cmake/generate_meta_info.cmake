@@ -41,6 +41,9 @@ function(okiidoku_generate_version_git)
 		OUTPUT  "${output}"
 		VERBATIM
 	)
+	# execute at configure time in case we also need to get/set properties of the file or read it then:
+	execute_process(COMMAND "${CMAKE_COMMAND}" "-D OUTPUT=${output}" -P "${script}")
+
 	target_sources(okiidoku PRIVATE "${output}")
 endfunction()
 okiidoku_generate_version_git()

@@ -21,6 +21,7 @@
 				"CMAKE_CXX_STANDARD_REQUIRED": true,
 				"CMAKE_CXX_EXTENSIONS": false,
 				"CMAKE_CONFIGURATION_TYPES": "Debug;RelWithDebInfo;Release;MinSizeRel;PgoUse",
+				"CMAKE_BUILD_RPATH_USE_ORIGIN": true,
 				"CMAKE_EXPORT_COMPILE_COMMANDS": true,
 				"CMAKE_COLOR_DIAGNOSTICS": true
 			}
