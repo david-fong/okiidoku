@@ -27,13 +27,13 @@ endif()
 
 if(_OKIIDOKU_BUILD_IS_PGO_GEN AND (NOT _config_types STREQUAL "PgoGen"))
 	# PgoGen should always be the only generated config for a generated build-system
-	message(FATAL_ERROR "The \"PgoGen\" configuration is an internal meta-build-system detail and something is wrong. Did you try to use it directly?")
+	message(FATAL_ERROR "The 'PgoGen' configuration is an internal meta-build-system detail and something is wrong. Did you try to use it directly?")
 endif()
 if(_OKIIDOKU_BUILD_IS_PGO_GEN AND NOT DEFINED _OKIIDOKU_PGO_CALLING_CONFIG)
-	message(FATAL_ERROR "The \"PgoGen\" ExternalProject needs to be passed a `_OKIIDOKU_PGO_CALLING_CONFIG`.")
+	message(FATAL_ERROR "The 'PgoGen' ExternalProject needs to be passed a `_OKIIDOKU_PGO_CALLING_CONFIG`.")
 endif()
 if(_OKIIDOKU_BUILD_IS_PGO_GEN AND NOT DEFINED _OKIIDOKU_PGO_DIR)
-	message(FATAL_ERROR "The \"PgoGen\" ExternalProject needs to be passed a `_OKIIDOKU_PGO_DIR`.")
+	message(FATAL_ERROR "The 'PgoGen' ExternalProject needs to be passed a `_OKIIDOKU_PGO_DIR`.")
 endif()
 
 # Note: wrap with `macro` so `return()` returns from caller instead of this `include()`ed file.
@@ -77,7 +77,8 @@ if(NOT _OKIIDOKU_BUILD_IS_PGO_GEN)
 		CMAKE_GENERATOR_TOOLSET  "${CMAKE_GENERATOR_TOOLSET}"
 		CMAKE_GENERATOR_INSTANCE "${CMAKE_GENERATOR_INSTANCE}"
 		CMAKE_ARGS
-		# CMAKE_CACHE_ARGS
+		CMAKE_CACHE_ARGS
+			"-D CMAKE_TOOLCHAIN_FILE:FILEPATH=${CMAKE_TOOLCHAIN_FILE}"
 			"-D CMAKE_C_COMPILER:STRING=${CMAKE_C_COMPILER}"
 			"-D CMAKE_CXX_COMPILER:STRING=${CMAKE_CXX_COMPILER}"
 			"-D CMAKE_CXX_STANDARD:STRING=${CMAKE_CXX_STANDARD}"
@@ -86,9 +87,9 @@ if(NOT _OKIIDOKU_BUILD_IS_PGO_GEN)
 			"-D CMAKE_CONFIGURATION_TYPES:STRING=PgoGen"
 			"-D CMAKE_BUILD_TYPE:STRING=PgoGen"
 			"-D CMAKE_BUILD_RPATH_USE_ORIGIN:BOOL=${CMAKE_BUILD_RPATH_USE_ORIGIN}"
-			"-D CMAKE_RUNTIME_OUTPUT_DIRECTORY:PATH=${_OKIIDOKU_PGO_DIR}"
-			"-D CMAKE_LIBRARY_OUTPUT_DIRECTORY:PATH=${_OKIIDOKU_PGO_DIR}"
-			"-D CMAKE_ARCHIVE_OUTPUT_DIRECTORY:PATH=${_OKIIDOKU_PGO_DIR}"
+			"-D CMAKE_RUNTIME_OUTPUT_DIRECTORY:PATH=${_OKIIDOKU_PGO_DIR}/out"
+			"-D CMAKE_LIBRARY_OUTPUT_DIRECTORY:PATH=${_OKIIDOKU_PGO_DIR}/out"
+			"-D CMAKE_ARCHIVE_OUTPUT_DIRECTORY:PATH=${_OKIIDOKU_PGO_DIR}/out"
 			"-D CMAKE_EXPORT_COMPILE_COMMANDS:BOOL=YES"
 			"-D CPM_SOURCE_CACHE:PATH=${CPM_SOURCE_CACHE}" # TODO.low omit if not defined.
 			"-D _OKIIDOKU_PGO_CALLING_CONFIG:INTERNAL=$<CONFIG>"
@@ -102,8 +103,6 @@ if(NOT _OKIIDOKU_BUILD_IS_PGO_GEN)
 		# build step options:
 		BUILD_ALWAYS YES
 		BUILD_BYPRODUCTS
-			"${_OKIIDOKU_PGO_DIR}/okiidoku${CMAKE_SHARED_LIBRARY_SUFFIX}"
-			"${_OKIIDOKU_PGO_DIR}/okiidoku_pgo_trainer_default${CMAKE_EXECUTABLE_SUFFIX}" # TODO.asap make these less "hardcoded"
 		# install step options:
 		INSTALL_COMMAND "${CMAKE_COMMAND}" --install . --config PgoGen --prefix <INSTALL_DIR>
 		# test step options:
@@ -112,9 +111,8 @@ if(NOT _OKIIDOKU_BUILD_IS_PGO_GEN)
 		LOG_OUTPUT_ON_FAILURE YES
 		# target options:
 		EXCLUDE_FROM_ALL YES
-		STEP_TARGETS build # needed to register timestamp byproducts
+		STEP_TARGETS build
 		# misc options:
-		# LIST_SEPARATOR " "
 	)
 endif()
 
@@ -133,7 +131,7 @@ function(okiidoku_enable_profile_guided_optimization
 	if(_OKIIDOKU_BUILD_IS_PGO_GEN)
 		get_target_property(trainer_target_type ${trainer} TYPE)
 		if(NOT trainer_target_type STREQUAL "EXECUTABLE")
-			message(FATAL_ERROR "pgo trainer must be an EXECUTABLE target, but \"${trainer}\" is a ${trainer_target_type}")
+			message(FATAL_ERROR "pgo trainer must be an EXECUTABLE target, but '${trainer}' is a ${trainer_target_type}")
 		endif()
 		unset(trainer_target_type)
 	endif()
@@ -181,7 +179,7 @@ function(okiidoku_enable_profile_guided_optimization
 			find_program(LLVM_PROFDATA "llvm-profdata-${llvm_major_version}")
 			add_custom_command(TARGET ${trainee} PRE_BUILD VERBATIM COMMAND_EXPAND_LISTS # TODO.asap I don't think this will work. PRE_BUILD is pretty much PRE_LINK except on visual studio. needs to be part of the train step.
 				DEPENDS ""
-				COMMAND "$<${if_gen}:${LLVM_PROFDATA};merge;-output=\"${profdata_file}\";${data_dir}/*.profraw>"
+				COMMAND "$<${if_gen}:${LLVM_PROFDATA};merge;-output='${profdata_file}';${data_dir}/*.profraw>"
 				BYPRODUCTS "${profdata_file}"
 			)
 			unset(LLVM_PROFDATA)
@@ -216,9 +214,10 @@ function(okiidoku_enable_profile_guided_optimization
 			# string(SUBSTRING "${hash}" 0 8 hash)
 			set_property(
 				SOURCE "${_file}" TARGET_DIRECTORY ${trainee}
-				APPEND_STRING PROPERTY COMPILE_FLAGS "$<${if_pgo}:-frandom-seed=0x${hash}>"
+				APPEND PROPERTY COMPILE_OPTIONS "$<${if_pgo}:-frandom-seed=0x${hash}>"
 			)
 		endforeach()
+		unset(trainee_sources)
 
 		target_compile_options(${trainee} PRIVATE
 			# "$<${if_pgo}:-fprofile-dir=${data_dir}>"
@@ -251,65 +250,44 @@ function(okiidoku_enable_profile_guided_optimization
 
 
 	set(custom_stamp_dir "${_OKIIDOKU_PGO_DIR}/src/okiidoku_pgo_gen-stamp/PgoUse")
-	# set(better_trainee_stamp "${custom_stamp_dir}/${trainee}.build-stamp")
-	# set(better_trainer_stamp "${custom_stamp_dir}/${trainer}.build-stamp")
 
 	if(_OKIIDOKU_BUILD_IS_PGO_GEN)
-		# add_custom_command(TARGET ${trainee} POST_BUILD
-		# 	COMMAND "${CMAKE_COMMAND};-E;touch;${better_trainee_stamp}" # TODO need to only do this if build artifact has changed
-		# 	BYPRODUCTS "${better_trainee_stamp}"
-		# 	VERBATIM COMMAND_EXPAND_LISTS
-		# )
-		# add_custom_command(TARGET ${trainer} POST_BUILD
-		# 	COMMAND "${CMAKE_COMMAND};-E;touch;${better_trainer_stamp}"
-		# 	BYPRODUCTS "${better_trainer_stamp}"
-		# 	VERBATIM COMMAND_EXPAND_LISTS
-		# )
 		return()
 	endif()
 
-	# add_custom_command(TARGET okiidoku_pgo_gen-build POST_BUILD
-	# 	COMMAND "${CMAKE_COMMAND};-E;true"
-	# 	BYPRODUCTS "${better_trainee_stamp}" "${better_trainer_stamp}" # TODO.asap I don't think this works. only COMMAND and DEPENDENCIES get appended.
-	# 	VERBATIM COMMAND_EXPAND_LISTS
-	# )
+	set(training_stamp_file "${data_dir}/include/${trainee}/detail/pgo_gen_last_training_timestamp.hpp")
 
 	# Note: annoyingly, commands cannot be the empty string. use `cmake -E true` as a no-op instead.
-	if(NOT "${data_dir}" STREQUAL "")
-		set(command_clean_data "${CMAKE_COMMAND};-E;\$<IF:${if_use},rm;-rf;--;${data_dir},true>")
-	endif()
-	# set(command_train "\$<IF:${if_use},<INSTALL_DIR>/${CMAKE_INSTALL_BINDIR}/${trainer}${CMAKE_EXECUTABLE_SUFFIX},${CMAKE_COMMAND};-E;true>")
-	set(command_train "\$<IF:${if_use},<INSTALL_DIR>/${trainer}${CMAKE_EXECUTABLE_SUFFIX},${CMAKE_COMMAND};-E;true>")
+	string(JOIN ";" command_train
+		"${CMAKE_COMMAND}"
+		"-D _OKIIDOKU_PGO_DIR=${_OKIIDOKU_PGO_DIR}"
+		"-D trainee=${trainee}"
+		"-D trainer=${trainer}"
+		"-D trainee_binary=${_OKIIDOKU_PGO_DIR}/out/${trainee}${CMAKE_SHARED_LIBRARY_SUFFIX}"
+		"-D trainer_binary=${_OKIIDOKU_PGO_DIR}/out/${trainer}${CMAKE_EXECUTABLE_SUFFIX}"
+		"-D data_dir=${data_dir}"
+		"-D training_stamp_file=${training_stamp_file}"
+		"-P" "${PROJECT_SOURCE_DIR}/cmake/okiidoku/pgo.run_training.cmake"
+	)
+	set(command_train "\$<IF:${if_use},${command_train},${CMAKE_COMMAND};-E;true>")
 
 	set(train_step_name "train_${trainee}_using_${trainer}")
-	ExternalProject_Add_Step(okiidoku_pgo_gen "${train_step_name}"
-		COMMAND "${command_clean_data}"
+	add_custom_target("okiidoku_pgo_gen-${train_step_name}"
 		COMMAND "${command_train}"
-		# COMMENT "running the PGO training program (\"${trainer}\") for \"${trainee}\"..."
-		# DEPENDERS
-		BYPRODUCTS ${training_byproducts}
-		# TODO.low consider setting working directory? what would be the point though? And would it fail on windows MSVC doesn't need the data_dir?
-		LOG YES
-	)
-	ExternalProject_Add_StepTargets(okiidoku_pgo_gen "${train_step_name}")
-	add_custom_command(TARGET "okiidoku_pgo_gen-${train_step_name}" PRE_BUILD
-	# add_custom_target("okiidoku_pgo_gen-${train_step_name}-check_dirty"
-		COMMAND "${CMAKE_COMMAND};-E;touch;${custom_stamp_dir}/okiidoku_pgo_gen-${train_step_name}-check_dirty"
-		BYPRODUCTS "${custom_stamp_dir}/okiidoku_pgo_gen-${train_step_name}-check_dirty"
 		DEPENDS
-		# TODO what I'm trying below probably isn't going to work / is probably overly complicated
-		#  see the BUILD_BYPRODUCTS argumetn to ExternalProject_Add. just make the build project
-		#  generate a file containing the hashes of the build artifacts, and have it only touch
-		#  the file if the hashes have changed. Then just use the byproducts in a custom target.
-			"${_OKIIDOKU_PGO_DIR}/${trainer}${CMAKE_EXECUTABLE_SUFFIX}"
-			"${_OKIIDOKU_PGO_DIR}/${trainee}${CMAKE_SHARED_LIBRARY_SUFFIX}"
-			# "${custom_stamp_dir}/${trainee}.build-stamp"
-			# "${custom_stamp_dir}/${trainer}.build-stamp"
+			"${PROJECT_SOURCE_DIR}/cmake/okiidoku/pgo.run_training.cmake"
+			"${CMAKE_FILE}"
+		BYPRODUCTS ${training_byproducts} "${training_stamp_file}"
+		COMMENT "Checking if '${trainee}' needs to be re-trained by '${trainer}'"
 		VERBATIM COMMAND_EXPAND_LISTS
 	)
-	# add_dependencies("okiidoku_pgo_gen-${train_step_name}" "okiidoku_pgo_gen-${train_step_name}-check_dirty")
-	# ExternalProject_Add_StepDependencies(okiidoku_pgo_gen "${train_step_name}" "okiidoku_pgo_gen-${train_step_name}-check_dirty")
+	add_dependencies("okiidoku_pgo_gen-${train_step_name}" "okiidoku_pgo_gen-build")
 	# TODO.wait use generator expression once `add_dependencies` supports them. https://gitlab.kitware.com/cmake/cmake/-/issues/19467. currently doing workaround in the custom step COMMANDs.
 	add_dependencies(${trainee} "okiidoku_pgo_gen-${train_step_name}")
+
+	# little hack: a changed definition should cause everything to rebuild.
+	#  currently, OBJECT_DEPENDS doesn't support generator expressions. I would
+	#  just use a compile definition, but that can't be changed at build time.
+	target_include_directories(${trainee} PRIVATE "$<BUILD_INTERFACE:$<${if_use}:${data_dir}/include>>")
 
 endfunction()

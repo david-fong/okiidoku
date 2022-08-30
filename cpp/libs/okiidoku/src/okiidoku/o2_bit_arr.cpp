@@ -1,5 +1,6 @@
 // SPDX-FileCopyrightText: 2020 David Fong
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#include <okiidoku/detail/pgo_use_check_needs_rebuild.hpp>
 #include <okiidoku/o2_bit_arr.hpp>
 
 #if __has_include(<immintrin.h>)
@@ -104,7 +105,7 @@ namespace okiidoku::mono {
 						return wd_i;
 					}
 				}
-				OKIIDOKU_CONTRACT_USE(false); // c++23 std::unreachable
+				OKIIDOKU_UNREACHABLE;
 			}
 		}()};
 		const auto& word {words_[word_i]};
@@ -127,7 +128,7 @@ namespace okiidoku::mono {
 				--set_bit_index;
 			}
 		}
-		OKIIDOKU_CONTRACT_USE(false); // c++23 std::unreachable
+		OKIIDOKU_UNREACHABLE;
 		#endif
 	}
 

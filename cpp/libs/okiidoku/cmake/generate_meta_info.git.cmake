@@ -2,7 +2,9 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # cspell:dictionaries cpp-refined
 cmake_minimum_required(VERSION 3.22)
-include_guard(DIRECTORY)
+if(CMAKE_SCRIPT_MODE_FILE STREQUAL "")
+	message(FATAL_ERROR "this should be called as a script")
+endif()
 
 find_package(Git QUIET)
 if(NOT Git_FOUND)
@@ -34,6 +36,7 @@ set(delim "\"'\"'")
 file(CONFIGURE OUTPUT ${OUTPUT} CONTENT
 "// SPDX-FileCopyrightText: 2020 David Fong
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#include <okiidoku/detail/pgo_use_check_needs_rebuild.hpp>
 #include <okiidoku/about.hpp>
 namespace okiidoku::about {
 	const GitInfo git_info {

@@ -36,6 +36,8 @@ Issues I'm watching:
 
 ## Misc List
 
+- do I really need to put `#include <okiidoku/detail/pgo_use_check_needs_rebuild.hpp>` for generated global constant files (project version and git status info files)?
+
 - gcc prefix maps: do it unconditionally for PGO builds using `-fprofile-prefix-map`. For other builds... Not sure. Could be QoL for debugging in GDB and maybe reading compiler diagnostics? Maybe? Could be useful if later we want "reproducible builds".
 
 - how do I make all the sources in the PgoUse config targets rebuild when the pgo data changes? `OBJECT_DEPENDS`? depend on what? it would be a pain to do custom for each compiler's data format. How about depending on the CMake timestamp file for the training step? But that probably means that I won't get dependency detection if the profile data gets manually deleted.eeeeee
