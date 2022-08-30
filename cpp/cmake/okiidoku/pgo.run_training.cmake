@@ -12,6 +12,9 @@ endif()
 # trainer_binary
 # data_dir
 # training_stamp_file
+if(NOT EXISTS "${trainee_binary}" OR NOT EXISTS "${trainer_binary}")
+	message(FATAL_ERROR "trainee and trainer binaries were not found.")
+endif()
 if(
 	EXISTS "${training_stamp_file}"
 	AND "${training_stamp_file}" IS_NEWER_THAN "${trainee_binary}"

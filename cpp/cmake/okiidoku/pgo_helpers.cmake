@@ -128,6 +128,11 @@ function(okiidoku_enable_profile_guided_optimization
 	if(NOT CMAKE_CURRENT_BINARY_DIR STREQUAL PROJECT_BINARY_DIR)
 		message(FATAL_ERROR "for some reason custom steps for ExternalProject need to be registered in the same directory as the ExternalProject was registered.")
 	endif()
+	get_target_property(trainee_target_type ${trainee} TYPE)
+	if(NOT trainee_target_type STREQUAL "SHARED_LIBRARY")
+		message(FATAL_ERROR "pgo trainee must be a SHARED_LIBRARY target, but '${trainee}' is a ${trainee_target_type}")
+	endif()
+	unset(trainee_target_type)
 	if(_OKIIDOKU_BUILD_IS_PGO_GEN)
 		get_target_property(trainer_target_type ${trainer} TYPE)
 		if(NOT trainer_target_type STREQUAL "EXECUTABLE")
@@ -237,9 +242,6 @@ function(okiidoku_enable_profile_guided_optimization
 			target_compile_options(${trainer} PRIVATE "-fprofile-generate=${data_dir}")
 			target_link_options(   ${trainer} PRIVATE "-fprofile-generate=${data_dir}")
 		endif()
-
-		# TODO.asap set training_byproducts
-		set(training_byproducts)
 		# https://gcc.gnu.org/wiki/AutoFDO/Tutorial
 
 
@@ -248,8 +250,6 @@ function(okiidoku_enable_profile_guided_optimization
 		# https://www.intel.com/content/www/us/en/develop/documentation/cpp-compiler-developer-guide-and-reference/top/optimization-and-programming/profile-guided-optimization-pgo/profile-an-application-with-instrumentation.html
 	endif()
 
-
-	set(custom_stamp_dir "${_OKIIDOKU_PGO_DIR}/src/okiidoku_pgo_gen-stamp/PgoUse")
 
 	if(_OKIIDOKU_BUILD_IS_PGO_GEN)
 		return()
@@ -263,7 +263,7 @@ function(okiidoku_enable_profile_guided_optimization
 		"-D _OKIIDOKU_PGO_DIR=${_OKIIDOKU_PGO_DIR}"
 		"-D trainee=${trainee}"
 		"-D trainer=${trainer}"
-		"-D trainee_binary=${_OKIIDOKU_PGO_DIR}/out/${trainee}${CMAKE_SHARED_LIBRARY_SUFFIX}"
+		"-D trainee_binary=${_OKIIDOKU_PGO_DIR}/out/${CMAKE_SHARED_LIBRARY_PREFIX}${trainee}${CMAKE_SHARED_LIBRARY_SUFFIX}"
 		"-D trainer_binary=${_OKIIDOKU_PGO_DIR}/out/${trainer}${CMAKE_EXECUTABLE_SUFFIX}"
 		"-D data_dir=${data_dir}"
 		"-D training_stamp_file=${training_stamp_file}"
@@ -274,10 +274,7 @@ function(okiidoku_enable_profile_guided_optimization
 	set(train_step_name "train_${trainee}_using_${trainer}")
 	add_custom_target("okiidoku_pgo_gen-${train_step_name}"
 		COMMAND "${command_train}"
-		DEPENDS
-			"${PROJECT_SOURCE_DIR}/cmake/okiidoku/pgo.run_training.cmake"
-			"${CMAKE_FILE}"
-		BYPRODUCTS ${training_byproducts} "${training_stamp_file}"
+		BYPRODUCTS "${training_stamp_file}"
 		COMMENT "Checking if '${trainee}' needs to be re-trained by '${trainer}'"
 		VERBATIM COMMAND_EXPAND_LISTS
 	)
@@ -285,9 +282,10 @@ function(okiidoku_enable_profile_guided_optimization
 	# TODO.wait use generator expression once `add_dependencies` supports them. https://gitlab.kitware.com/cmake/cmake/-/issues/19467. currently doing workaround in the custom step COMMANDs.
 	add_dependencies(${trainee} "okiidoku_pgo_gen-${train_step_name}")
 
-	# little hack: a changed definition should cause everything to rebuild.
+	# make all sources include the timestamp header to detect need for recompilation
 	#  currently, OBJECT_DEPENDS doesn't support generator expressions. I would
 	#  just use a compile definition, but that can't be changed at build time.
 	target_include_directories(${trainee} PRIVATE "$<BUILD_INTERFACE:$<${if_use}:${data_dir}/include>>")
+	target_sources(${trainee} PRIVATE "$<${if_use}:${training_stamp_file}>")
 
 endfunction()
