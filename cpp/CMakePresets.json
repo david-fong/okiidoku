@@ -254,17 +254,22 @@
 			"configuration": "PgoUse"
 		},
 		{
+			"name": "base:dev.emscripten",
+			"hidden": true,
+			"targets": ["all"]
+		},
+		{
 			"name": "dev.emscripten.debug",
 			"configurePreset": "dev.emscripten",
 			"displayName": "debug",
-			"inherits": ["base:dev"],
+			"inherits": ["base:dev.emscripten"],
 			"configuration": "Debug"
 		},
 		{
 			"name": "dev.emscripten.release",
 			"configurePreset": "dev.emscripten",
 			"displayName": "release",
-			"inherits": ["base:dev"],
+			"inherits": ["base:dev.emscripten"],
 			"configuration": "Release"
 		}
 	],

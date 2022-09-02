@@ -22,7 +22,7 @@ export EMSDK=#<path to emsdk>
 cmake -S . --preset=dev.emscripten
 
 # build okiidoku (rerun after modifying the library)
-# (cd to ./build)
+# (cd to ./out/build/dev.emscripten)
 cmake --build . --config=Release
 
 # look at the symbol maps for fun

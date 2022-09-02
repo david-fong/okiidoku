@@ -14,6 +14,7 @@
 	"settings": {
 		"cSpell.language": "en-GB",
 		"files.trimTrailingWhitespace": true,
+		"search.followSymlinks": false,
 
 		"todo-tree.filtering.useBuiltInExcludes": "file excludes",
 		"todo-tree.general.statusBar": "total",

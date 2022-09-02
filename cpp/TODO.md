@@ -48,10 +48,7 @@ Issues I'm watching:
 
 bump minimum gcc version to gcc-12. hmm. or maybe give it some time to fix regressions?
 
-use module mode for emscripten binding output. make sure to update readme and examples
-
 - ctest for emscripten configuration
-- add a CMake option to build with sanitizers / static analyzers
 
 usage docs for CMake:
 - building an app target (cmake --build . --config=Release --target okiidoku_cli)

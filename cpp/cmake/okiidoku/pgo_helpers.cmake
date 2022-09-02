@@ -46,6 +46,9 @@ endmacro()
 
 if((NOT "PgoUse" IN_LIST _config_types) AND (NOT _OKIIDOKU_BUILD_IS_PGO_GEN))
 	unset(_config_types)
+	function(okiidoku_enable_profile_guided_optimization)
+		# no-op
+	endfunction()
 	return() # short circuit if user doesn't care about PGO.
 endif()
 unset(_config_types)

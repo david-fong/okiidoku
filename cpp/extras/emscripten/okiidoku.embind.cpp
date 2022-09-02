@@ -47,10 +47,8 @@ namespace okiidoku::em { namespace {
 	}
 }}
 namespace okiidoku::mono {
-	;
 }
 namespace okiidoku::visitor { namespace {
-	;
 	// TODO.low define wrappers that return undefined or throw on contract violations / out of bounds. https://emscripten.org/docs/porting/connecting_cpp_and_javascript/embind.html#non-member-functions-on-the-javascript-prototype
 }}
 

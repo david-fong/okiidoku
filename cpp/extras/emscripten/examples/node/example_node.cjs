@@ -3,8 +3,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 const path = require("path");
 const process = require("process");
+// const { default: okiidoku_create } = require("./build/Debug/okiidoku");
 
-globalThis.okiidokuMain = () => {
-	// see file ./example_node.mjs
-}
-const oki = require(path.join(process.cwd(), "../out/build/dev/Release/okiidoku.js"));
+require("./build/Debug/okiidoku")({
+	// https://emscripten.org/docs/api_reference/module.html#module
+}).then((oki) => {
+	// console.log(oki);
+});

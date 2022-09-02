@@ -26,11 +26,16 @@ endfunction()
 okiidoku_install_target(okiidoku_compile_options_public)
 okiidoku_install_target(okiidoku)
 okiidoku_install_target(okiidoku_cli OPTIONAL)
+if(EMSCRIPTEN)
+	okiidoku_install_target(okiidoku_js)
+endif()
+# if(OKIIDOKU_BUILD_BINDINGS_FOR_PYTHON) # TODO
+# 	okiidoku_install_target(okiidoku_py)
+# endif()
 
 install(FILES ../README.md TYPE DOC COMPONENT okiidoku_about)
 # install(FILES ../.reuse/dep5 TYPE DOC COMPONENT okiidoku_about RENAME copying) # hm probably not right. need to make a custom one for the installation
 install(DIRECTORY ../LICENSES TYPE DOC COMPONENT okiidoku_about)
-# TODO copy the LICENSES folder to doc?
 
 if(BUILD_SHARED_LIBS)
 	set(_okiidoku_lib_type_name shared)
@@ -50,7 +55,7 @@ install(
 # https://cmake.org/cmake/help/latest/guide/importing-exporting/index.html#exporting-targets-from-the-build-tree
 export(
 	EXPORT okiidoku_installation_targets
-	NAMESPACE okiidoku::
+	NAMESPACE "${PROJECT_NAME}::"
 	FILE "${PROJECT_BINARY_DIR}/cmake/okiidoku-targets.cmake"
 )
 
