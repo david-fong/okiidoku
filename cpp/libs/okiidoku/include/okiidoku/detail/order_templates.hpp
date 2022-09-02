@@ -49,8 +49,8 @@ namespace okiidoku {
 		// exists so that OrderVariantFor can use container templates that have other
 		// template parameters other than just the order.
 		template<typename T>
-		concept MonoToVisitorAdaptor = requires() {
-			std::same_as<decltype(T::is_borrow_type), bool>;
+		concept MonoToVisitorAdaptor = requires(T x) {
+			// std::same_as<decltype(T::is_borrow_type), bool>; // TODO.low why is this not working on gcc 12?
 			// TODO consider creating a `dynamic_allocation_floor` constant, or a bool-returning
 			//  `use_dynamic_allocation` template function, or a use_dynamic_allocation constant.
 			//  the bool constant is the simplest.

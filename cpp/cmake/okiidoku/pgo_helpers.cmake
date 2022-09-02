@@ -141,6 +141,8 @@ function(okiidoku_enable_profile_guided_optimization
 		unset(trainer_target_type)
 	endif()
 
+	# TODO.asap append to a cache variable's STRINGS property to help users know what trainers exist to choose from for this trainee.
+
 	set(if_pgo "$<CONFIG:PgoGen,PgoUse>")
 	set(if_gen "$<CONFIG:PgoGen>")
 	set(if_use "$<CONFIG:PgoUse>")
@@ -148,7 +150,7 @@ function(okiidoku_enable_profile_guided_optimization
 	if(MSVC)
 		# cspell:words LTCG GENPROFILE USEPROFILE
 		# https://docs.microsoft.com/en-us/cpp/build/profile-guided-optimizations
-		set(data_filename "${trainee}__trained_by__${trainer}.pgd")
+		set(data_filename "${trainer}.pgd")
 		target_compile_options(${trainee} PRIVATE "$<${if_gen}:/GL>")
 		target_link_options(${trainee} PRIVATE
 			"$<${if_gen}:/LTCG:INCREMENTAL>"
@@ -159,39 +161,21 @@ function(okiidoku_enable_profile_guided_optimization
 	endif()
 
 
-	set(data_dir "${_OKIIDOKU_PGO_DIR}/data/pgo/${trainee}/trained_by/${trainer}")
+	set(data_dir "${_OKIIDOKU_PGO_DIR}/data/${trainer}")
 
 	if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR EMSCRIPTEN)
 		# TODO test this and fix problems
 		# cspell:words "-fprofile" instr profdata profraw
 		# https://clang.llvm.org/docs/UsersManual.html#profile-guided-optimization
 		# https://clang.llvm.org/docs/UsersManual.html#profiling-with-instrumentation
-		set(profdata_file "${data_dir}/${trainer}.profdata")
+		set(data_file_for_clang "${data_dir}/${trainer}.profdata")
 		target_compile_options(${trainee} PRIVATE
 			"$<${if_gen}:-fprofile-instr-generate=${data_dir}>"
-			"$<${if_use}:-fprofile-instr-use=${profdata_file}>"
+			"$<${if_use}:-fprofile-instr-use=${data_file_for_clang}>"
 		)
 		target_link_options(${trainee} PRIVATE
 			"$<${if_gen}:-fprofile-generate=${data_dir}>"
 		)
-		if(_OKIIDOKU_BUILD_IS_PGO_GEN)
-			if(NOT DEFINED CMAKE_CXX_COMPILER_VERSION)
-				message(WARNING "could not get llvm version from `CMAKE_CXX_COMPILER_VERSION`")
-				return()
-			endif()
-			string(REPLACE llvm_version "." ";" llvm_version_list "${CMAKE_CXX_COMPILER_VERSION}")
-			list(GET llvm_version_list 0 llvm_major_version)
-			find_program(LLVM_PROFDATA "llvm-profdata-${llvm_major_version}")
-			add_custom_command(TARGET ${trainee} PRE_BUILD VERBATIM COMMAND_EXPAND_LISTS # TODO.asap I don't think this will work. PRE_BUILD is pretty much PRE_LINK except on visual studio. needs to be part of the train step.
-				DEPENDS ""
-				COMMAND "$<${if_gen}:${LLVM_PROFDATA};merge;-output='${profdata_file}';${data_dir}/*.profraw>"
-				BYPRODUCTS "${profdata_file}"
-			)
-			unset(LLVM_PROFDATA)
-			unset(llvm_version_major)
-			unset(llvm_version_list)
-		endif()
-		unset(profdata_file)
 
 
 	elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
@@ -201,10 +185,9 @@ function(okiidoku_enable_profile_guided_optimization
 
 		# get per-config root dir for objects for `-fprofile-prefix-path`. relies on CMake internals.
 		get_property(is_multi_config GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+		set(int_dir "")
 		if(is_multi_config)
 			set(int_dir "$<CONFIG>")
-		else()
-			set(int_dir "")
 		endif()
 		unset(is_multi_config)
 		get_target_property(trainee_binary_dir ${trainee} BINARY_DIR)
@@ -271,21 +254,39 @@ function(okiidoku_enable_profile_guided_optimization
 	)
 	set(command_train "\$<IF:${if_use},${command_train},${CMAKE_COMMAND};-E;true>")
 
-	set(train_step_name "train_${trainee}_using_${trainer}")
-	add_custom_target("okiidoku_pgo_gen-${train_step_name}"
+	add_custom_target("run_${trainer}"
 		COMMAND "${command_train}"
 		BYPRODUCTS "${training_stamp_file}"
-		COMMENT "Checking if '${trainee}' needs to be re-trained by '${trainer}'"
+		COMMENT "Checking if '${trainer}' needs to be re-run"
 		VERBATIM COMMAND_EXPAND_LISTS
 	)
-	add_dependencies("okiidoku_pgo_gen-${train_step_name}" "okiidoku_pgo_gen-build")
+	add_dependencies("run_${trainer}" "okiidoku_pgo_gen-build")
 	# TODO.wait use generator expression once `add_dependencies` supports them. https://gitlab.kitware.com/cmake/cmake/-/issues/19467. currently doing workaround in the custom step COMMANDs.
-	add_dependencies(${trainee} "okiidoku_pgo_gen-${train_step_name}")
+	add_dependencies(${trainee} "run_${trainer}")
 
 	# make all sources include the timestamp header to detect need for recompilation
 	#  currently, OBJECT_DEPENDS doesn't support generator expressions. I would
 	#  just use a compile definition, but that can't be changed at build time.
 	target_include_directories(${trainee} PRIVATE "$<BUILD_INTERFACE:$<${if_use}:${data_dir}/include>>")
 	target_sources(${trainee} PRIVATE "$<${if_use}:${training_stamp_file}>")
+
+
+	if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR EMSCRIPTEN)
+		if(NOT DEFINED CMAKE_CXX_COMPILER_VERSION)
+			message(WARNING "could not get llvm version from `CMAKE_CXX_COMPILER_VERSION`")
+			return()
+		endif()
+		string(REPLACE llvm_version "." ";" llvm_version_list "${CMAKE_CXX_COMPILER_VERSION}")
+		list(GET llvm_version_list 0 llvm_major_version)
+		find_program(LLVM_PROFDATA "llvm-profdata-${llvm_major_version}")
+		add_custom_command(TARGET "run_${trainer}" POST_BUILD VERBATIM COMMAND_EXPAND_LISTS
+			DEPENDS
+			COMMAND "$<${if_gen}:${LLVM_PROFDATA};merge;-output='${data_file_for_clang}';${data_dir}/*.profraw>"
+			BYPRODUCTS "${data_file_for_clang}"
+		)
+		unset(LLVM_PROFDATA)
+		unset(llvm_version_major)
+		unset(llvm_version_list)
+	endif()
 
 endfunction()

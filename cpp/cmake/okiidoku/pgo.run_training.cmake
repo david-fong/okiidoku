@@ -13,7 +13,7 @@ endif()
 # data_dir
 # training_stamp_file
 if(NOT EXISTS "${trainee_binary}" OR NOT EXISTS "${trainer_binary}")
-	message(FATAL_ERROR "trainee and trainer binaries were not found.")
+	message(FATAL_ERROR "trainee or trainer binaries were not found.")
 endif()
 if(
 	EXISTS "${training_stamp_file}"
@@ -27,10 +27,11 @@ if(NOT data_dir STREQUAL "")
 	message(STATUS "removing any old PGO data")
 	file(REMOVE_RECURSE "${data_dir}")
 endif()
+file(MAKE_DIRECTORY "${data_dir}")
 
-message(STATUS "executing '${trainer}' to train '${trainee}' for PGO")
+message(STATUS "executing '${trainer}'")
 execute_process(COMMAND "${trainer_binary}"
-	# WORKING_DIRECTORY "${data_dir}"
+	WORKING_DIRECTORY "${data_dir}"
 	RESULT_VARIABLE exit_code
 )
 if(NOT exit_code EQUAL 0)

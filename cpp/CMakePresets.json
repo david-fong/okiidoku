@@ -86,6 +86,14 @@
 			}
 		},
 		{
+			"name": "tool:gcc-12",
+			"hidden": true,
+			"cacheVariables": {
+				"CMAKE_C_COMPILER": "gcc-12",
+				"CMAKE_CXX_COMPILER": "g++-12"
+			}
+		},
+		{
 			"name": "tool:vs:x64",
 			"hidden": true,
 			"condition": {"type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows"},
@@ -120,6 +128,10 @@
 		{
 			"name": "dev.gcc",
 			"inherits": ["tool:gcc-11", "base:dev"]
+		},
+		{
+			"name": "dev.gcc-12",
+			"inherits": ["tool:gcc-12", "base:dev"]
 		},
 		{
 			"name": "dev.msvc",
@@ -195,6 +207,27 @@
 		{
 			"name": "dev.gcc.pgo",
 			"configurePreset": "dev.gcc",
+			"displayName": "pgo",
+			"inherits": ["base:dev"],
+			"configuration": "PgoUse"
+		},
+		{
+			"name": "dev.gcc-12.debug",
+			"configurePreset": "dev.gcc-12",
+			"displayName": "debug",
+			"inherits": ["base:dev"],
+			"configuration": "Debug"
+		},
+		{
+			"name": "dev.gcc-12.release",
+			"configurePreset": "dev.gcc-12",
+			"displayName": "release",
+			"inherits": ["base:dev"],
+			"configuration": "Release"
+		},
+		{
+			"name": "dev.gcc-12.pgo",
+			"configurePreset": "dev.gcc-12",
 			"displayName": "pgo",
 			"inherits": ["base:dev"],
 			"configuration": "PgoUse"
