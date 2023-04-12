@@ -22,13 +22,13 @@ namespace okiidoku::mono::detail::solver2 {
 		using o2i_t = int_ts::o2i_t<O>;
 		using rmi_t = int_ts::o4xs_t<O>;
 
-		detail::Gridlike<O2BitArr<O>> cands_;
+		detail::Gridlike<O, O2BitArr<O>> cands_;
 		HouseType house_type_;
 	public:
 		[[nodiscard, gnu::pure]] auto is_unsolved (const o2i_t house, const o2i_t at) const noexcept -> bool { return cands_.at(house, at).count() == 1; }
 		[[nodiscard, gnu::pure]] auto at_unsolved (const o2i_t house, const o2i_t at) const noexcept -> const O2BitArr<O>& { OKIIDOKU_CONTRACT_USE( is_unsolved(house, at)); return cands_.at(house, at); }
-		[[nodiscard, gnu::pure]] auto at_solved   (const o2i_t house, const o2i_t at) const noexcept -> o2xs_t             { OKIIDOKU_CONTRACT_USE(!is_unsolved(house, at)); return cands_.at(house, at).first_set_bit_require_exists(); };
-		void gc() const noexcept {/* noop */};
+		[[nodiscard, gnu::pure]] auto at_solved   (const o2i_t house, const o2i_t at) const noexcept -> o2xs_t             { OKIIDOKU_CONTRACT_USE(!is_unsolved(house, at)); return cands_.at(house, at).first_set_bit_require_exists(); }
+		void gc() const noexcept {/* noop */}
 	};
 
 
@@ -49,7 +49,7 @@ namespace okiidoku::mono::detail::solver2 {
 			std::array<o2xs_t, T::O2> sym_or_offset;
 		};
 		std::array<HouseData, T::O2> houses_;
-		std::vector<O2BitArr<O>> cands_pool_;
+		std::vector<O2BitArr<O>> cands_pool_; // initial size: O4
 		HouseType house_type_;
 	public:
 		[[nodiscard, gnu::pure]] auto is_unsolved (const o2i_t house, const o2i_t at) const noexcept -> bool;

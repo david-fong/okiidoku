@@ -28,8 +28,13 @@ target_sources(okiidoku PRIVATE
 	puzzle/solver/cand_elim_apply.cpp
 	puzzle/solve.cpp
 
+	# puzzle2/solver/cands.cpp
+
 	puzzle/make.cpp
 )
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+	target_sources(okiidoku PRIVATE debug/gdb_support.cpp)
+endif()
 
 
 target_sources(okiidoku PRIVATE

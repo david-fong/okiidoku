@@ -73,8 +73,8 @@
 				"CMAKE_CXX_COMPILER": "$env{LLVM_HOME}/bin/clang++"
 			},
 			"environment": {
-				"LDFLAGS": "-L${LLVM_HOME}/lib;-Wl,-rpath,${LLVM_HOME}/lib",
-				"CXX_FLAGS": "-I${LLVM_HOME}/include"
+				"LDFLAGS": "-L$env{LLVM_HOME}/lib;-Wl,-rpath,$env{LLVM_HOME}/lib",
+				"CXX_FLAGS": "-I$env{LLVM_HOME}/include"
 			}
 		},
 		{

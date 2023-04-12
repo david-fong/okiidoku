@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 include_guard(DIRECTORY)
 
-set(CPM_DOWNLOAD_VERSION 0.35.4) # https://github.com/cpm-cmake/CPM.cmake/tags
+set(CPM_DOWNLOAD_VERSION 0.38.1) # https://github.com/cpm-cmake/CPM.cmake/tags
 include(okiidoku/dependencies.get_cpm)
 # Note: CPM does auto EXCLUDE_FROM_ALL when using shorthand add
 
@@ -30,7 +30,7 @@ if(OKIIDOKU_BUILD_TESTING)
 		DOWNLOAD_ONLY YES
 	)
 	if(doctest_ADDED)
-		# TODO.wait https://gitlab.kitware.com/cmake/cmake/-/merge_requests/7399 (cmake v3.25)
+		# TODO.wait once CMake 3.25 more widely default supported, https://github.com/cpm-cmake/CPM.cmake/releases/tag/v0.38.0
 		add_library(doctest INTERFACE IMPORTED)
 		add_library(doctest::doctest ALIAS doctest)
 		target_include_directories(doctest SYSTEM INTERFACE "${doctest_SOURCE_DIR}")

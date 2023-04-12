@@ -3,8 +3,8 @@
 #ifndef HPP_OKIIDOKU__PUZZLE__SOLVER2__ENGINE
 #define HPP_OKIIDOKU__PUZZLE__SOLVER2__ENGINE
 
-#include <okiidoku/puzzle/solver/cands.hpp>
-#include <okiidoku/puzzle/solver/find_cache.hpp>
+#include <okiidoku/puzzle2/solver/cands.hpp>
+#include <okiidoku/puzzle2/solver/find_cache.hpp>
 #include <okiidoku/grid.hpp>
 #include <okiidoku/o2_bit_arr.hpp>
 

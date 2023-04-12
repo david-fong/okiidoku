@@ -28,7 +28,7 @@ namespace okiidoku::mono { namespace {
 		[[nodiscard, gnu::pure]] const V& ch_count_sym(const ch_t ch, const sym_t sym) const noexcept {
 			OKIIDOKU_CONTRACT_USE(ch < T::O1);
 			OKIIDOKU_CONTRACT_USE(sym < T::O2);
-			return store_[(T::O1*sym)+ch];
+			return store_[static_cast<o3i_t>(static_cast<o3i_t>(T::O1*sym)+ch)];
 		}
 		[[nodiscard, gnu::pure]] V& ch_count_sym(const ch_t ch, const sym_t sym) noexcept {
 			OKIIDOKU_CONTRACT_USE(ch < T::O1);
@@ -77,6 +77,8 @@ namespace okiidoku::mono { namespace {
 				(boxes_has.ch_count_sym(b_box,b_sym) == 1 ? -1 : 0) + // regression
 				(boxes_has.ch_count_sym(b_box,a_sym) == 0 ?  1 : 0)   // improvement
 			)};
+			OKIIDOKU_CONTRACT_USE(num_resolved <=  2);
+			OKIIDOKU_CONTRACT_USE(num_resolved >= -2);
 			if (num_resolved >= 0) [[unlikely]] { // TODO.low for fun: find out on average at what op_count it starts being unlikely
 				OKIIDOKU_CONTRACT_USE(num_missing_syms >= static_cast<o3i_t>(num_resolved));
 				num_missing_syms = static_cast<o3i_t>(num_missing_syms - static_cast<o3i_t>(num_resolved));
@@ -125,6 +127,8 @@ namespace okiidoku::mono { namespace {
 				(cols_has.ch_count_sym(b_col,b_sym) == 1 ? -1 : 0) + // regression
 				(cols_has.ch_count_sym(b_col,a_sym) == 0 ?  1 : 0)   // improvement
 			)};
+			OKIIDOKU_CONTRACT_USE(num_resolved <=  2);
+			OKIIDOKU_CONTRACT_USE(num_resolved >= -2);
 			if (num_resolved >= 0) [[unlikely]] {
 				OKIIDOKU_CONTRACT_USE(num_missing_syms >= static_cast<o3i_t>(num_resolved));
 				num_missing_syms = static_cast<o3i_t>(num_missing_syms - static_cast<o3i_t>(num_resolved));

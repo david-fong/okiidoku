@@ -16,8 +16,7 @@ function(okiidoku_install_target target)
 		# RUNTIME_DEPENDENCIES # currently there are none to bundle.
 		${ARGN}
 		RUNTIME  COMPONENT okiidoku_runtime
-		LIBRARY  COMPONENT okiidoku_runtime
-		NAMELINK_COMPONENT okiidoku_development
+		LIBRARY  COMPONENT okiidoku_runtime NAMELINK_COMPONENT okiidoku_development
 		ARCHIVE  COMPONENT okiidoku_development
 		INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
 	)

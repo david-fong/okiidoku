@@ -36,6 +36,10 @@ Issues I'm watching:
 
 ## Misc List
 
+- launch.json https://code.visualstudio.com/docs/editor/variables-reference#_input-variables
+
+check `CMAKE_LANG_COMPILER_FRONTEND_VARIANT` to use msvc flags when compiler is clang-cl?
+
 - write a minimal contributing.md file. examples:
   - https://github.com/libgit2/libgit2/blob/main/docs/contributing.md
 
@@ -118,6 +122,7 @@ consider making cand masks have two lanes: one storing full O2BitArr, one storin
   - [how to write a gdb pretty-printer](https://sourceware.org/gdb/onlinedocs/gdb/Writing-a-Pretty_002dPrinter.html#Writing-a-Pretty_002dPrinter)
   - also look into [visual studio `.natvis` files](https://docs.microsoft.com/en-us/visualstudio/debugger/create-custom-views-of-native-objects)
   - interesting: https://github.com/asarium/gdb-natvis
+  - <https://sourceware.org/gdb/onlinedocs/gdb/dotdebug_005fgdb_005fscripts-section.html>
 
 - move the emoji definitions out of the program binary and externalize as a configurable data read in at runtime?
 

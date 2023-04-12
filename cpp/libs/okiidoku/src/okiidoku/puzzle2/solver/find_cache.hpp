@@ -7,6 +7,7 @@
 
 namespace okiidoku::mono::detail::solver2 {
 
+	// TODO.design hmmm why couldn't this just be part of the cands interfaces? I suppose because fish needs one of these, but fish can share cands pov with sym-major subset pov?
 	// for "subsets", each house has a `Set`.
 	// for "fish", each symbol has a `Set`.
 	template<Order O> requires(is_order_compiled(O))
@@ -17,10 +18,12 @@ namespace okiidoku::mono::detail::solver2 {
 	public:
 		struct Set final {
 			struct Tag final {
-				// for house-type house cell, how many cand syms - 1?
-				// for house-type house sym, how many cand cells - 1?
-				// for house-type sym house, how many cand cells - 1?
+				// for house cell, how many cand syms - 1?
+				// for house sym, how many cand cells - 1?
+				// for sym line,  how many cand cells - 1?
 				int_ts::o2xs_t<O> num_alts;
+				// for subsets, points to house set's cell or sym
+				// for fish, points to sym set's line
 				int_ts::o2xs_t<O> at;
 			};
 			O2BitArr<O> is_begin;

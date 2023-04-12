@@ -19,6 +19,14 @@ void test_o2_bit_arr() {
 		CHECK(O2BitArr_ones<O>.get_index_of_nth_set_bit(static_cast<o2x_t>(i)) == i);
 	}
 	{
+		O2BitArr<O> arr {};
+		for (o2i_t i {0}; i < T::O2; ++i) {
+			CHECK(!arr.test(static_cast<o2x_t>(i)));
+			arr.set(i);
+			CHECK(arr.test(i));
+		}
+	}
+	{
 		auto ones {O2BitArr_ones<O>};
 		for (o2i_t i {0}; i < T::O2; ++i) {
 			CHECK(ones.count_below(static_cast<o2x_t>(i)) == 0);

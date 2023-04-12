@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: CC0-1.0
 {
 	"folders": [
-		{ "path": "writings" },
 		{ "path": "cpp" },
+		{ "path": "writings" },
 		{ "path": "web" },
 	],
 	"extensions": {
@@ -36,6 +36,7 @@
 		},
 		// "explorer.sortOrder": "default",
 		"C_Cpp.autoAddFileAssociations": false,
+		"C_Cpp.intelliSenseCacheSize": 0,
 
 		"[json]": {
 			"editor.insertSpaces": false,

@@ -10,6 +10,7 @@ endif()
 add_executable(okiidoku_js okiidoku.embind.cpp)
 set_target_properties(okiidoku_js PROPERTIES
 	OUTPUT_NAME "okiidoku"
+	# SUFFIX ".js" # not explicitly needed.
 )
 # https://emsettings.surma.technology/
 # https://github.com/emscripten-core/emscripten/blob/main/src/settings.js

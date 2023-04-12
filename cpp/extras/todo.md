@@ -25,6 +25,8 @@ There is [SWIG](https://www.swig.org/exec.html), but from extremely shallow onli
 
 ## Python
 
+- Oh boy. There's a pybind11 successor: https://github.com/wjakob/nanobind
+
 - [PyBind11](https://pybind11.readthedocs.io/en/stable/)
   - based on Boost.Python. Seems people think well of it and like it a bit more than Boost.Python.
   - Has the advantage that I don't need to pull in all of boost just to get this.
