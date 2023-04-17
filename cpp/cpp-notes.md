@@ -30,20 +30,22 @@ cmake --install . --config=Release --prefix=install_test
 
 # (cd to the cmake build folder of interest)
 # view public(-D) de-mangled(-C) symbols of the shared library sorted by address(-n)
-nm -nCD libs/okiidoku/Release/libokiidoku.so
+nm -nCD build/Release/lib/libokiidoku.so
 
 # de-mangled(-C) assembler contents of executable sections(-d), intermixing source code with disassembly(-S). --visualize-jumps=extended-color
-objdump -SCd libs/okiidoku/Release/libokiidoku.so | less
+objdump -SCd build/Release/lib/libokiidoku.so | less
 
 # (cd to the cpp folder)
 # view the grid translation unit with macros fully expanded
 g++ -E -I../libs/okiidoku/include/ -Ilibs/okiidoku/Release/include/ ../libs/okiidoku/src/okiidoku/grid.cpp | less
 
 # https://perf.wiki.kernel.org/index.php/Tutorial
-perf stat -e branch-misses:u ./libs/okiidoku/tests/Release/okiidoku_test
+perf stat -e branch-misses:u ./build/Release/bin/okiidoku_test
 
 # compare sizes of pgo vs release builds
-size ./libs/okiidoku/PgoUse/libokiidoku.so ./libs/okiidoku/Release/libokiidoku.so
+size ./build/PgoUse/lib/libokiidoku.so ./build/Release/lib/libokiidoku.so
+
+gdb --cd=build/Debug bin/okiidoku_test.o2_bit_arr
 ```
 
 ## CMake Things

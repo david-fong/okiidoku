@@ -7,4 +7,4 @@
 .asciz \"" script_name "\"\n\
 .popsection \n\
 ");
-DEFINE_GDB_PY_SCRIPT("okiidoku.gdb.py")
+DEFINE_GDB_PY_SCRIPT("share/okiidoku.gdb.py")

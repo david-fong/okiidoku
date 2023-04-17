@@ -260,7 +260,7 @@ function(okiidoku_enable_profile_guided_optimization
 	add_custom_target("run_${trainer}"
 		COMMAND "${command_train}"
 		BYPRODUCTS "${training_stamp_file}"
-		COMMENT "Checking if '${trainer}' needs to be re-run"
+		COMMENT "\$<IF:${if_use},Checking if '${trainer}' needs to be re-run,>"
 		VERBATIM COMMAND_EXPAND_LISTS
 	)
 	add_dependencies("run_${trainer}" "okiidoku_pgo_gen-build")

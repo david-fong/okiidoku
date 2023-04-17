@@ -7,9 +7,11 @@ project(okiidoku
 	HOMEPAGE_URL "https://github.com/david-fong/okiidoku"
 	LANGUAGES CXX
 )
-list(APPEND CMAKE_MODULE_PATH "${okiidoku_SOURCE_DIR}/cmake")
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 set(OKIIDOKU_VERSION_COMPATIBILITY ExactVersion) # see `cmake/installation.cmake`.
 # ^ I will consider switching to support `SameMajorVersion` starting at v1.0.0.
+
+include(okiidoku/default_output_dirs)
 
 include(okiidoku/options) # see this file for more info & defaults. summary:
 # OKIIDOKU_BUILD_SHARED_LIBS

@@ -97,7 +97,7 @@ if(MSVC)
 		/W4 # highest warnings level
 	)
 else()
-	# set(flags_file "${okiidoku_SOURCE_DIR}/cmake/okiidoku/compile_opts/warnings.gcc.txt")
+	# set(flags_file "${PROJECT_SOURCE_DIR}/cmake/okiidoku/compile_opts/warnings.gcc.txt")
 	# set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${flags_file}")
 	target_compile_options(okiidoku_compiler_warnings INTERFACE
 		-Wfatal-errors # stop compilation on first error. I found it hard to read multiple.

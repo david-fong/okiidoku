@@ -16,30 +16,28 @@ import gdb.printing
 
 class O2BitArrPrinter:
 	def __init__(self, order, val):
-		self.word_t_num_bits = gdb.parse_and_eval('okiidoku::mono::O2BitArr<'+order+'>::word_t_num_bits')
+		# self.word_t_num_bits = gdb.parse_and_eval('okiidoku::mono::O2BitArr<'+str(order)+'>::word_t_num_bits')
+		# self.num_words = gdb.parse_and_eval('okiidoku::mono::O2BitArr<'+str(order)+'>::num_words')
 		self.order = order
 		self.val = val
 	def to_string(self):
-		# py print('{:09b}'.format(int(gdb.parse_and_eval('arr')['words_']['_M_elems'][0])))
-		# oh... this is actually tricky. especially because I used uint_fast32_t and uint_fast64_t instead of exact sizes
-		words = reversed(self.val['words_']['_M_elems'])
-		msw_num_bits = self.word_t_num_bits if order == self.word_t_num_bits else (order % self.word_t_num_bits)
-		return '{:0'+msw_num_bits+'b}'.format(words[0])
-		+ ''.join(map(lambda x: '{:0'+word+'b}'.format(int(x)), words[1:]))
+		# https://stackoverflow.com/a/22798055/11107541
+		eval_string = "(*("+str(self.val.type)+"*)("+str(self.val.address)+")).to_chars()"
+		return gdb.parse_and_eval(eval_string)['_M_elems']
 
 
 def pp_lookup_function(order, val):
 	lookup_tag = val.type.tag
 	if lookup_tag is None:
 		return None
-	if lookup_tag == 'okiidoku::mono::O2BitArr<'+order+'>':
+	if lookup_tag == 'okiidoku::mono::O2BitArr<'+str(order)+'>':
 		return O2BitArrPrinter(order, val)
 	return None
 
 
 def register_printers(objfile):
 	for order in range(2, 11):
-		objfile.pretty_printers.append(order, pp_lookup_function)
+		objfile.pretty_printers.append(lambda x, o=order: pp_lookup_function(o, x))
 
 
 register_printers(gdb.current_objfile())

@@ -23,7 +23,7 @@
 ## Periodic Checkups
 
 - `reuse lint` (check licensing)
-- Examine contents of exported symbols (`nm -nCD libs/okiidoku/.../libokiidoku.so | less`) and make sure nothing is exported that isn't intended to be.
+- Examine contents of exported symbols (`nm -nCD build/<config>/lib/libokiidoku.so | less`) and make sure nothing is exported that isn't intended to be.
 - Ensure dependencies that should be private to the library implementation aren't exposed in any way to the library interface.
 - Run static analyzers
 - Check which `#ifdef __EMSCRIPTEN__` / `__cpp_lib_...` blocks can be removed as emscripten updates its sysroot libc++.

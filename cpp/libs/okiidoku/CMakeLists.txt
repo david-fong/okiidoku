@@ -40,6 +40,21 @@ install(DIRECTORY
 	COMPONENT okiidoku_development
 )
 
+# too bad can't use execute_process or file(CREATE_LINK) because there's a generator expression.
+include(GNUInstallDirs)
+add_custom_target(okiidoku_copy_debugger_support_files ALL
+	"${CMAKE_COMMAND}" -E make_directory "${OKIIDOKU_DATA_OUTPUT_DIRECTORY}"
+	COMMAND "${CMAKE_COMMAND}" -E create_symlink "${PROJECT_SOURCE_DIR}/tools/okiidoku.gdb.py" "${OKIIDOKU_DATA_OUTPUT_DIRECTORY}/okiidoku.gdb.py"
+	COMMAND "${CMAKE_COMMAND}" -E create_symlink "${PROJECT_SOURCE_DIR}/tools/okiidoku.natvis" "${OKIIDOKU_DATA_OUTPUT_DIRECTORY}/okiidoku.natvis"
+	VERBATIM COMMAND_EXPAND_LISTS
+)
+install(FILES
+	"${PROJECT_SOURCE_DIR}/tools/okiidoku.gdb.py"
+	"${PROJECT_SOURCE_DIR}/tools/okiidoku.natvis"
+	TYPE DATA
+	COMPONENT okiidoku_development
+)
+
 okiidoku_add_compiler_options(okiidoku)
 target_link_libraries(okiidoku
 	PRIVATE range-v3::range-v3
