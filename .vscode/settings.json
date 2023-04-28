@@ -1,62 +1,91 @@
-// SPDX-FileCopyrightText: 2020 David Fong
-// SPDX-License-Identifier: CC0-1.0
 {
-   "files.associations": {
-      "iostream": "cpp",
-      "*.tcc": "cpp",
-      "functional": "cpp",
-      "random": "cpp",
-      "mutex": "cpp",
-      "type_traits": "cpp",
-      "compare": "cpp",
-      "array": "cpp",
-      "atomic": "cpp",
-      "bit": "cpp",
-      "cctype": "cpp",
-      "chrono": "cpp",
-      "clocale": "cpp",
-      "cmath": "cpp",
-      "concepts": "cpp",
-      "condition_variable": "cpp",
-      "cstdarg": "cpp",
-      "cstddef": "cpp",
-      "cstdint": "cpp",
-      "cstdio": "cpp",
-      "cstdlib": "cpp",
-      "ctime": "cpp",
-      "cwchar": "cpp",
-      "cwctype": "cpp",
-      "deque": "cpp",
-      "map": "cpp",
-      "string": "cpp",
-      "unordered_map": "cpp",
-      "vector": "cpp",
-      "exception": "cpp",
-      "algorithm": "cpp",
-      "iterator": "cpp",
-      "memory": "cpp",
-      "memory_resource": "cpp",
-      "numeric": "cpp",
-      "optional": "cpp",
-      "ratio": "cpp",
-      "string_view": "cpp",
-      "system_error": "cpp",
-      "tuple": "cpp",
-      "utility": "cpp",
-      "initializer_list": "cpp",
-      "iomanip": "cpp",
-      "iosfwd": "cpp",
-      "istream": "cpp",
-      "limits": "cpp",
-      "new": "cpp",
-      "numbers": "cpp",
-      "ostream": "cpp",
-      "semaphore": "cpp",
-      "sstream": "cpp",
-      "stdexcept": "cpp",
-      "stop_token": "cpp",
-      "streambuf": "cpp",
-      "thread": "cpp",
-      "typeinfo": "cpp"
-   }
+	"cSpell.language": "en-GB",
+	"files.trimTrailingWhitespace": true,
+	"search.followSymlinks": false,
+
+	"files.exclude": {
+		// note: paths are relative to ${workspaceFolder} by defualt.
+		"cpp/external/": true,
+		"cpp/out/": true,
+		"cpp/build*/": true,
+		"cpp/install*/": true,
+		"cpp/extras/emscripten/examples/node/build/": true,
+
+      "web/node_modules": true,
+      "web/dist": true,
+      "web/pnpm-lock.yaml": true,
+	},
+
+	"todo-tree.filtering.useBuiltInExcludes": "file excludes",
+	"todo-tree.general.statusBar": "total",
+	"todo-tree.general.tags": [
+		"TODO.asap",
+		"TODO.high",
+		"TODO.mid",
+		"TODO.low",
+		"TODO.try",
+		"TODO.wait",
+		"TODO",
+	],
+	"cmake.ignoreCMakeListsMissing": true,
+	"cmake.useCMakePresets": "always",
+
+	"files.associations": {
+		".clang-tidy": "yaml",
+		"*.natvis": "xml",
+	},
+	// "explorer.sortOrder": "default",
+	"C_Cpp.autoAddFileAssociations": false,
+	"C_Cpp.intelliSenseCacheSize": 0,
+
+	// https://code.visualstudio.com/docs/cpp/faq-cpp
+	"C_Cpp.default.cStandard": "c17",
+	"C_Cpp.default.cppStandard": "c++20",
+	"C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+	"C_Cpp.default.browse.limitSymbolsToIncludedHeaders": true,
+	"C_Cpp.default.browse.path": ["${workspaceFolder}"],
+
+	// https://vector-of-bool.github.io/docs/vscode-cmake-tools/settings.html
+
+	"cmake.sourceDirectory": ["${workspaceFolder}/cpp"],
+	"cmake.buildDirectory": "${sourceDirectory}/out/build/${cmake.activeConfigurePresetName}",
+	"cmake.debugConfig": {
+		"environment": [],
+		// "cwd": "",
+		"args": [],
+		"setupCommands": [],
+		"stopAtEntry": true,
+		// "visualizerFile": "${workspaceFolder}/tools/okiidoku.natvis", // TODO.try is this needed if already specified in CMake?
+	},
+
+	"[json]": {
+		"editor.insertSpaces": false,
+	},
+	"[xml]": {
+		"editor.insertSpaces": false,
+	},
+	"[cpp]": {
+		"editor.insertSpaces": false,
+	},
+	"[cmake]": {
+		"editor.insertSpaces": false,
+	},
+	"[rust]": {
+		"editor.insertSpaces": false,
+	},
+	"[python]": {
+		"editor.insertSpaces": false,
+	},
+	"[typescript]": {
+		"editor.insertSpaces": false,
+	},
+	"[javascript]": {
+		"editor.insertSpaces": false,
+	},
+	"[html]": {
+		"editor.insertSpaces": false,
+	},
+	"[css]": {
+		"editor.insertSpaces": false,
+	},
 }

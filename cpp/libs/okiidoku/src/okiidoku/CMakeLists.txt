@@ -32,9 +32,9 @@ target_sources(okiidoku PRIVATE
 
 	puzzle/make.cpp
 )
-# if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-# 	target_sources(okiidoku PRIVATE debug/gdb_support.cpp)
-# endif()
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+	target_sources(okiidoku PRIVATE debug/gdb_support.cpp)
+endif()
 
 
 target_sources(okiidoku PRIVATE

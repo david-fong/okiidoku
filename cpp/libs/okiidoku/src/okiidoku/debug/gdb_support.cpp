@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2020 David Fong
+// SPDX-License-Identifier: AGPL-3.0-or-later
 // https://sourceware.org/gdb/onlinedocs/gdb/dotdebug_005fgdb_005fscripts-section.html
 /* Note: The "MS" section flags are to remove duplicates.  */
 #define DEFINE_GDB_PY_SCRIPT(script_name) \
