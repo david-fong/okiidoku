@@ -68,7 +68,7 @@ namespace okiidoku::mono {
 
 	namespace detail {
 
-		template<unsigned int N>
+		template<int N>
 		using uint_fastN_t =
 			std::conditional_t<(N <=   8U), std::uint_fast8_t,
 			std::conditional_t<(N <=  16U), std::uint_fast16_t,
@@ -78,7 +78,7 @@ namespace okiidoku::mono {
 			void
 		>>>>;
 
-		template<unsigned int N>
+		template<int N>
 		using uint_smolN_t =
 			std::conditional_t<(N <=   8U), std::uint_least8_t,
 			std::conditional_t<(N <=  16U), std::uint_least16_t,
@@ -89,7 +89,7 @@ namespace okiidoku::mono {
 		>>>>;
 
 		// Note: this is optional based on whether the target architecture supports these fixed-width types.
-		template<unsigned int N>
+		template<int N>
 		using uint_fixedN_t =
 			std::conditional_t<(N <=   8U), std::uint8_t,
 			std::conditional_t<(N <=  16U), std::uint16_t,

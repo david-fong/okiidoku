@@ -37,6 +37,7 @@ Issues I'm watching:
 ## Misc List
 
 - launch.json https://code.visualstudio.com/docs/editor/variables-reference#_input-variables
+- `"$schema": "https://raw.githubusercontent.com/Kitware/CMake/master/Help/manual/presets/schema.json"` in CMakePresets when CMake 3.28
 
 check `CMAKE_LANG_COMPILER_FRONTEND_VARIANT` to use msvc flags when compiler is clang-cl?
 

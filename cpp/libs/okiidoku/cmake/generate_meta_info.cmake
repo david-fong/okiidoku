@@ -3,7 +3,7 @@
 # cspell:dictionaries cpp-refined
 include_guard(DIRECTORY)
 
-function(okiidoku_generate_version_semver)
+block()
 	set(output "${CMAKE_CURRENT_BINARY_DIR}/src/okiidoku/about.semver.cpp")
 	file(CONFIGURE OUTPUT ${output} CONTENT
 "// SPDX-FileCopyrightText: 2020 David Fong
@@ -20,11 +20,10 @@ namespace okiidoku::about {
 	};
 }")
 	target_sources(okiidoku PRIVATE "${output}")
-endfunction()
-okiidoku_generate_version_semver()
+endblock()
 
 
-function(okiidoku_generate_version_git)
+block()
 	find_package(Git QUIET)
 	set(output "${CMAKE_CURRENT_BINARY_DIR}/src/okiidoku/about.git.cpp")
 	set(script "${CMAKE_CURRENT_SOURCE_DIR}/cmake/generate_meta_info.git.cmake")
@@ -46,5 +45,4 @@ function(okiidoku_generate_version_git)
 	execute_process(COMMAND "${CMAKE_COMMAND}" "-D OUTPUT=${output}" -P "${script}")
 
 	target_sources(okiidoku PRIVATE "${output}")
-endfunction()
-okiidoku_generate_version_git()
+endblock()

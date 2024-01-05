@@ -288,7 +288,7 @@ function(okiidoku_enable_profile_guided_optimization
 			BYPRODUCTS "${data_file_for_clang}"
 		)
 		unset(LLVM_PROFDATA)
-		unset(llvm_version_major)
+		unset(llvm_major_version)
 		unset(llvm_version_list)
 	endif()
 

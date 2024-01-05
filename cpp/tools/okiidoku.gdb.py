@@ -1,5 +1,6 @@
 # SPDX-FileCopyrightText: 2020 David Fong
 # SPDX-License-Identifier: GPL-3.0-or-later
+# cspell:dictionaries cpp-refined
 # cspell:words objfile _M_elems
 import gdb.printing
 # https://sourceware.org/gdb/onlinedocs/gdb/Writing-a-Pretty_002dPrinter.html
@@ -23,19 +24,30 @@ class O2BitArrPrinter:
 	def to_string(self):
 		# https://stackoverflow.com/a/22798055/11107541
 		eval_string = "(*("+str(self.val.type)+"*)("+str(self.val.address)+")).to_chars()"
-		return gdb.parse_and_eval(eval_string)['_M_elems']
+		return gdb.parse_and_eval(eval_string)["_M_elems"]
+
+
+class MonoGridPrinter:
+	def __init__(self, order, val):
+		self.order = order
+		self.val = val
+	def to_string(self):
+		return gdb.parse_and_eval("okiidoku::mono::print_2d(std::cout, 0, "+self.val+")")
 
 
 def pp_lookup_function(order, val):
 	lookup_tag = val.type.tag
 	if lookup_tag is None:
 		return None
-	if lookup_tag == 'okiidoku::mono::O2BitArr<'+str(order)+'>':
+	if lookup_tag == "okiidoku::mono::O2BitArr<"+str(order)+">":
 		return O2BitArrPrinter(order, val)
+	if lookup_tag == "okiidoku::mono::Grid<"+str(order)+">":
+		return MonoGridPrinter(order, val)
 	return None
 
 
 def register_printers(objfile):
+	# print(gdb.parse_and_eval("okiidoku::mono::compiled_orders")) # not possible currently (not exported)
 	for order in range(2, 11):
 		objfile.pretty_printers.append(lambda x, o=order: pp_lookup_function(o, x))
 

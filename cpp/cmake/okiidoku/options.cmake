@@ -6,9 +6,7 @@ include_guard(DIRECTORY)
 # Suggest build types for single-config generators in cmake-gui
 get_property(is_multi_config GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
 if(NOT is_multi_config)
-	if(NOT DEFINED CMAKE_BUILD_TYPE)
-		set(CMAKE_BUILD_TYPE "${CMAKE_BUILD_TYPE}" CACHE STRING "cmake build configuration")
-	endif()
+	set(CMAKE_BUILD_TYPE "${CMAKE_BUILD_TYPE}" CACHE STRING "cmake build configuration")
 	if(PROJECT_IS_TOP_LEVEL)
 		set_property(CACHE CMAKE_BUILD_TYPE #[[ APPEND ]]
 			PROPERTY STRINGS "Debug;RelWithDebInfo;Release;MinSizeRel;PgoUse"

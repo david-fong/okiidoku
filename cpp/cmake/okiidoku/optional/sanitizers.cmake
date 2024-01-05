@@ -7,7 +7,7 @@ include_guard(DIRECTORY)
 #  https://stackoverflow.com/a/47022141/11107541
 #  https://github.com/google/sanitizers/wiki/AddressSanitizer#faq
 
-function(okiidoku_enable_private_sanitizers)
+block()
 	set(target "okiidoku_compiler_warnings")
 	set(configs "$<CONFIG:Debug,RelWithDebInfo>")
 	if(MSVC)
@@ -34,5 +34,4 @@ function(okiidoku_enable_private_sanitizers)
 		# TODO note for emscripten https://emscripten.org/docs/debugging/Sanitizers.html#address-sanitizer (may need to configure increased startup memory)
 
 	endif()
-endfunction()
-okiidoku_enable_private_sanitizers()
+endblock()

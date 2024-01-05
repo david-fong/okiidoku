@@ -46,5 +46,5 @@ if(NOT DEFINED OKIIDOKU_DATA_OUTPUT_DIRECTORY)
 endif()
 
 unset(CMAKE_INSTALL_LIBDIR2)
-unset(cfg)
+unset(base)
 unset(is_multi_config)

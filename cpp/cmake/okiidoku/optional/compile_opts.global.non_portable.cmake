@@ -19,7 +19,7 @@ endif()
 
 # Note: wrapping with functions to scope changes to `CMAKE_CXX_FLAGS`
 # cspell:dictionaries cpp-refined
-function(okiidoku_detect_target_isa_support)
+block()
 	get_directory_property(directory_compile_options COMPILE_OPTIONS)
 	foreach(opt ${directory_compile_options})
 		string(APPEND CMAKE_CXX_FLAGS " \"${opt}\"")
@@ -36,5 +36,4 @@ function(okiidoku_detect_target_isa_support)
 	if(OKIIDOKU_TARGET_SUPPORTS_X86_BMI2)
 		add_compile_definitions(OKIIDOKU_TARGET_SUPPORTS_X86_BMI2)
 	endif()
-endfunction()
-okiidoku_detect_target_isa_support()
+endblock()

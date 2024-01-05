@@ -4,7 +4,7 @@
 	"search.followSymlinks": false,
 
 	"files.exclude": {
-		// note: paths are relative to ${workspaceFolder} by defualt.
+		// note: paths are relative to ${workspaceFolder} by default.
 		"cpp/external/": true,
 		"cpp/out/": true,
 		"cpp/build*/": true,
@@ -14,6 +14,10 @@
       "web/node_modules": true,
       "web/dist": true,
       "web/pnpm-lock.yaml": true,
+	},
+	"files.readonlyInclude": {
+		"cpp/external/**": true,
+		"/usr/include/**": true
 	},
 
 	"todo-tree.filtering.useBuiltInExcludes": "file excludes",
@@ -58,34 +62,7 @@
 		// "visualizerFile": "${workspaceFolder}/tools/okiidoku.natvis", // TODO.try is this needed if already specified in CMake?
 	},
 
-	"[json]": {
-		"editor.insertSpaces": false,
-	},
-	"[xml]": {
-		"editor.insertSpaces": false,
-	},
-	"[cpp]": {
-		"editor.insertSpaces": false,
-	},
-	"[cmake]": {
-		"editor.insertSpaces": false,
-	},
-	"[rust]": {
-		"editor.insertSpaces": false,
-	},
-	"[python]": {
-		"editor.insertSpaces": false,
-	},
-	"[typescript]": {
-		"editor.insertSpaces": false,
-	},
-	"[javascript]": {
-		"editor.insertSpaces": false,
-	},
-	"[html]": {
-		"editor.insertSpaces": false,
-	},
-	"[css]": {
+	"[json][xml][cpp][cmake][rust][python][typescript][javascript][html][css]": {
 		"editor.insertSpaces": false,
 	},
 }

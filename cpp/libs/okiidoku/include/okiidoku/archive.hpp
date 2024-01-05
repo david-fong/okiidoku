@@ -12,6 +12,7 @@
 #if __has_include(<experimental/propagate_const>)
 #include <experimental/propagate_const>
 #endif
+#include <cstdint> // uint_...
 
 namespace okiidoku::mono::archive {
 
