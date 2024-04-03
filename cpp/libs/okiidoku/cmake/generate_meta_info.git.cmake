@@ -36,7 +36,7 @@ set(delim "\"'\"'")
 file(CONFIGURE OUTPUT ${OUTPUT} CONTENT
 "// SPDX-FileCopyrightText: 2020 David Fong
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#include <okiidoku/detail/pgo_use_check_needs_rebuild.hpp>
+// #include <okiidoku/detail/pgo_use_check_needs_rebuild.hpp> // not needed
 #include <okiidoku/about.hpp>
 namespace okiidoku::about {
 	const GitInfo git_info {

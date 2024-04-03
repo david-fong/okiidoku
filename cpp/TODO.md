@@ -36,15 +36,15 @@ Issues I'm watching:
 
 ## Misc List
 
-- launch.json https://code.visualstudio.com/docs/editor/variables-reference#_input-variables
+- launch.json https://code.visualstudio.com/docs/editor/variables-reference#_input-variables <!-- is this still useful? CMake tools has target debug stuff, right?-->
 - `"$schema": "https://raw.githubusercontent.com/Kitware/CMake/master/Help/manual/presets/schema.json"` in CMakePresets when CMake 3.28
+- `set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY NO)` in dev preset?
+- make CMake compiler warning flags only enabled if project is top-level.
 
 check `CMAKE_LANG_COMPILER_FRONTEND_VARIANT` to use msvc flags when compiler is clang-cl?
 
 - write a minimal contributing.md file. examples:
   - https://github.com/libgit2/libgit2/blob/main/docs/contributing.md
-
-- do I really need to put `#include <okiidoku/detail/pgo_use_check_needs_rebuild.hpp>` for generated global constant files (project version and git status info files)?
 
 - profile for `make_cols_valid` not found in profile data.
   - could this be due to anonymous/unnamed namespaces?

@@ -14,6 +14,7 @@ set_target_properties(okiidoku_js PROPERTIES
 )
 # https://emsettings.surma.technology/
 # https://github.com/emscripten-core/emscripten/blob/main/src/settings.js
+# TODO.wait typescript .d.ts generation https://github.com/emscripten-core/emscripten/issues/7083
 target_compile_options(okiidoku_js PRIVATE
 	-sSTRICT=1
 )

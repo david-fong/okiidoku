@@ -120,9 +120,9 @@ if(NOT _OKIIDOKU_BUILD_IS_PGO_GEN)
 endif()
 
 
-# this must be called in the same directory scope as the one defining the trainee
 # trainee a target shared library
 # trainer a target executable- ideally lightweight
+# remarks: due to CMake quirks, this must be called in the same directory scope as the one defining the pgo_gen ExternalProject
 # TODO.low consider making this work for training executables as well?
 function(okiidoku_enable_profile_guided_optimization
 	trainee # name of target to train for PGO
@@ -151,6 +151,7 @@ function(okiidoku_enable_profile_guided_optimization
 	set(if_use "$<CONFIG:PgoUse>")
 
 	if(MSVC)
+	block()
 		# cspell:words LTCG GENPROFILE USEPROFILE
 		# https://docs.microsoft.com/en-us/cpp/build/profile-guided-optimizations
 		set(data_filename "${trainer}.pgd")
@@ -160,7 +161,7 @@ function(okiidoku_enable_profile_guided_optimization
 			"$<${if_gen}:/GENPROFILE:PGD=${data_filename}>"
 			"$<${if_use}:/USEPROFILE:PGD=${data_filename}>"
 		)
-		unset(data_filename)
+	endblock()
 	endif()
 
 
@@ -187,16 +188,15 @@ function(okiidoku_enable_profile_guided_optimization
 		# TODO issue warning about -fprofile-prefix-path if generator has not been tested by me.
 
 		# get per-config root dir for objects for `-fprofile-prefix-path`. relies on CMake internals.
-		get_property(is_multi_config GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
-		set(int_dir "")
-		if(is_multi_config)
-			set(int_dir "$<CONFIG>")
-		endif()
-		unset(is_multi_config)
-		get_target_property(trainee_binary_dir ${trainee} BINARY_DIR)
-		set(objects_dir "${trainee_binary_dir}/CMakeFiles/${trainee}.dir/${int_dir}")
-		unset(trainee_binary_dir)
-		unset(int_dir)
+		block(PROPAGATE objects_dir)
+			get_property(is_multi_config GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+			set(int_dir "")
+			if(is_multi_config)
+				set(int_dir "$<CONFIG>")
+			endif()
+			get_target_property(trainee_binary_dir ${trainee} BINARY_DIR)
+			set(objects_dir "${trainee_binary_dir}/CMakeFiles/${trainee}.dir/${int_dir}")
+		endblock()
 
 		# reproducible generated name for things with internal linkage
 		get_target_property(trainee_sources ${trainee} SOURCES)
@@ -263,23 +263,25 @@ function(okiidoku_enable_profile_guided_optimization
 		COMMENT "\$<IF:${if_use},Checking if '${trainer}' needs to be re-run,>"
 		VERBATIM COMMAND_EXPAND_LISTS
 	)
-	add_dependencies("run_${trainer}" "okiidoku_pgo_gen-build")
+	add_dependencies("run_${trainer}" "okiidoku_pgo_gen-build") # build will stop if run_trainer fails
 	# TODO.wait use generator expression once `add_dependencies` supports them. https://gitlab.kitware.com/cmake/cmake/-/issues/19467. currently doing workaround in the custom step COMMANDs.
 	add_dependencies(${trainee} "run_${trainer}")
 
-	# make all sources include the timestamp header to detect need for recompilation
-	#  currently, OBJECT_DEPENDS doesn't support generator expressions. I would
-	#  just use a compile definition, but that can't be changed at build time.
+	# make all sources include the timestamp header to detect need for recompilation.
+	#  currently, OBJECT_DEPENDS doesn't support generator expressions (https://gitlab.kitware.com/cmake/cmake/-/issues/22034).
+	#  I would just use a compile definition, but that can't be changed at build time.
+	# TODO consider using a inclusion compiler flag instead of the manual #includes. I hesitated due to relying on compiler flags (less portable?) but this whole PGO implementation is already very reliant on compiler flags. and then we can clear out this buildsystem config implementation detail from the source files.
 	target_include_directories(${trainee} PRIVATE "$<BUILD_INTERFACE:$<${if_use}:${data_dir}/include>>")
-	target_sources(${trainee} PRIVATE "$<${if_use}:${training_stamp_file}>")
+	# target_sources(${trainee} PRIVATE "$<${if_use}:${training_stamp_file}>") # TODO why is this done?
 
 
 	if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR EMSCRIPTEN)
+	block()
 		if(NOT DEFINED CMAKE_CXX_COMPILER_VERSION)
 			message(WARNING "could not get llvm version from `CMAKE_CXX_COMPILER_VERSION`")
 			return()
 		endif()
-		string(REPLACE llvm_version "." ";" llvm_version_list "${CMAKE_CXX_COMPILER_VERSION}")
+		string(REPLACE "llvm_version" "." ";" llvm_version_list "${CMAKE_CXX_COMPILER_VERSION}")
 		list(GET llvm_version_list 0 llvm_major_version)
 		find_program(LLVM_PROFDATA "llvm-profdata-${llvm_major_version}")
 		add_custom_command(TARGET "run_${trainer}" POST_BUILD VERBATIM COMMAND_EXPAND_LISTS
@@ -287,9 +289,7 @@ function(okiidoku_enable_profile_guided_optimization
 			COMMAND "$<${if_gen}:${LLVM_PROFDATA};merge;-output='${data_file_for_clang}';${data_dir}/*.profraw>"
 			BYPRODUCTS "${data_file_for_clang}"
 		)
-		unset(LLVM_PROFDATA)
-		unset(llvm_major_version)
-		unset(llvm_version_list)
+	endblock()
 	endif()
 
 endfunction()

@@ -6,6 +6,8 @@ set(CPM_DOWNLOAD_VERSION 0.38.7) # https://github.com/cpm-cmake/CPM.cmake/releas
 include(okiidoku/dependencies.get_cpm)
 # Note: CPM does auto EXCLUDE_FROM_ALL when using shorthand add
 
+# TODO.wait once CMake 3.25 more widely default supported, https://github.com/cpm-cmake/CPM.cmake/releases/tag/v0.38.0 (or is this relevant? we're doing download-only and that's fine for us so far...)
+
 CPMAddPackage(
 	NAME range-v3
 	GIT_TAG 0.12.0 # https://github.com/ericniebler/range-v3/releases
@@ -30,7 +32,6 @@ if(OKIIDOKU_BUILD_TESTING)
 		DOWNLOAD_ONLY YES
 	)
 	if(doctest_ADDED)
-		# TODO.wait once CMake 3.25 more widely default supported, https://github.com/cpm-cmake/CPM.cmake/releases/tag/v0.38.0
 		add_library(doctest INTERFACE IMPORTED)
 		add_library(doctest::doctest ALIAS doctest)
 		target_include_directories(doctest SYSTEM INTERFACE "${doctest_SOURCE_DIR}")

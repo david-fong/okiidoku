@@ -11,9 +11,9 @@
 		"cpp/install*/": true,
 		"cpp/extras/emscripten/examples/node/build/": true,
 
-      "web/node_modules": true,
-      "web/dist": true,
-      "web/pnpm-lock.yaml": true,
+		"web/node_modules": true,
+		"web/dist": true,
+		"web/pnpm-lock.yaml": true,
 	},
 	"files.readonlyInclude": {
 		"cpp/external/**": true,

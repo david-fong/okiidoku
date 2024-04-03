@@ -13,7 +13,7 @@
 
 - Requirements to build from source:
   - If you are new to C++, you will need an attitude to learn proactively about C++ and CMake.
-  - [CMake](https://cmake.org/install/) 3.22 or later
+  - [CMake](https://cmake.org/install/) 3.28 or later
   - a C++ compiler [supporting C++20](https://en.cppreference.com/w/cpp/compiler_support).
     - I test on Clang 14, GCC 11, and Visual Studio 17 2022.
     - I currently have no interest in committing to support other compilers (ex. apple-clang) or lower versions of the above compilers.
