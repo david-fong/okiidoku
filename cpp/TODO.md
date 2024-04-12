@@ -28,6 +28,7 @@
 - Run static analyzers
 - Check which `#ifdef __EMSCRIPTEN__` / `__cpp_lib_...` blocks can be removed as emscripten updates its sysroot libc++.
 - https://en.cppreference.com/w/cpp/language/rule_of_three
+- Write comments for custom CMake commands and targets
 
 Issues I'm watching:
 
@@ -36,8 +37,10 @@ Issues I'm watching:
 
 ## Misc List
 
+- figure out running in node REPL again.
+- pgo_use_check_needs_rebuild via compiler flag? make sure it doesn't mess up installations
+
 - launch.json https://code.visualstudio.com/docs/editor/variables-reference#_input-variables <!-- is this still useful? CMake tools has target debug stuff, right?-->
-- read https://gcc.gnu.org/gcc-13/changes.html
 
 check `CMAKE_LANG_COMPILER_FRONTEND_VARIANT` to use msvc flags when compiler is clang-cl?
 

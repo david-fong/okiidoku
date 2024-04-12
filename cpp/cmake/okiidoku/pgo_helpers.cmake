@@ -14,54 +14,53 @@ include_guard(DIRECTORY)
 #  does each component need to have a different profile-data path? I'm guessing yes?
 # I don't really care about PGO for anything but the core library
 
+# MARK: input validation and context query
 set(_config_types "${CMAKE_CONFIGURATION_TYPES}")
 if(DEFINED CMAKE_BUILD_TYPE AND _config_types STREQUAL "")
 	# handle if user strangely sets both CMAKE_CONFIGURATION_TYPES and
 	# CMAKE_BUILD_TYPE (which I lazily do in the ExternalProject_Add :P)
 	list(APPEND _config_types "${CMAKE_BUILD_TYPE}")
 endif()
-
 if("PgoGen" IN_LIST _config_types)
 	set(_OKIIDOKU_BUILD_IS_PGO_GEN YES)
+	if(NOT _config_types STREQUAL "PgoGen") # PgoGen should always be the _only_ generated config for a generated build-system
+		message(FATAL_ERROR "The 'PgoGen' configuration is an internal meta-build-system detail and something is wrong. Did you try to use it directly?")
+	endif()
+	if(NOT DEFINED _OKIIDOKU_PGO_CALLING_CONFIG)
+		message(FATAL_ERROR "The 'PgoGen' ExternalProject needs to be passed a `_OKIIDOKU_PGO_CALLING_CONFIG`.")
+	endif()
+	if(NOT DEFINED _OKIIDOKU_PGO_DIR)
+		message(FATAL_ERROR "The 'PgoGen' ExternalProject needs to be passed a `_OKIIDOKU_PGO_DIR`.")
+	endif()
 endif()
 
-if(_OKIIDOKU_BUILD_IS_PGO_GEN AND (NOT _config_types STREQUAL "PgoGen"))
-	# PgoGen should always be the only generated config for a generated build-system
-	message(FATAL_ERROR "The 'PgoGen' configuration is an internal meta-build-system detail and something is wrong. Did you try to use it directly?")
-endif()
-if(_OKIIDOKU_BUILD_IS_PGO_GEN AND NOT DEFINED _OKIIDOKU_PGO_CALLING_CONFIG)
-	message(FATAL_ERROR "The 'PgoGen' ExternalProject needs to be passed a `_OKIIDOKU_PGO_CALLING_CONFIG`.")
-endif()
-if(_OKIIDOKU_BUILD_IS_PGO_GEN AND NOT DEFINED _OKIIDOKU_PGO_DIR)
-	message(FATAL_ERROR "The 'PgoGen' ExternalProject needs to be passed a `_OKIIDOKU_PGO_DIR`.")
-endif()
-
-# Note: wrap with `macro` so `return()` returns from caller instead of this `include()`ed file.
+# short circuit this (external) project if not added by/for the PgoUse config
 # This should be called right after `include()`ing this file.
-macro(okiidoku_pgo_gen_check_needs_short_circuit)
+# Note: wrap with `macro` so `return()` returns from caller instead of this `include()`ed file.
+# this would be a lot easier if ExternalProject_Add could condition upon $<CONFIG>
+macro(okiidoku_check_needs_short_circuit_pgo_gen_externalproject)
 	if(DEFINED _OKIIDOKU_PGO_CALLING_CONFIG AND NOT _OKIIDOKU_PGO_CALLING_CONFIG STREQUAL "PgoUse")
 		return() # I couldn't think of a better way to "short-circuit" the `ExternalProject_Add`
 	endif()
 endmacro()
 
+# short circuit if user doesn't care about PGO.
 if((NOT "PgoUse" IN_LIST _config_types) AND (NOT _OKIIDOKU_BUILD_IS_PGO_GEN))
 	unset(_config_types)
-	function(okiidoku_enable_profile_guided_optimization)
-		# no-op
+	function(okiidoku_target_pgo) # no-op
 	endfunction()
-	return() # short circuit if user doesn't care about PGO.
+	return()
 endif()
 unset(_config_types)
 
+
+# MARK: add training project
 # cspell:words PGOGEN PGOUSE
+# TODO don't I need to do more? https://stackoverflow.com/a/75828118/11107541
 list(PREPEND CMAKE_CXX_FLAGS_PGOGEN ${CMAKE_CXX_FLAGS_RELEASE})
 list(PREPEND CMAKE_CXX_FLAGS_PGOUSE ${CMAKE_CXX_FLAGS_RELEASE})
-if(NOT _OKIIDOKU_BUILD_IS_PGO_GEN)
+if(NOT _OKIIDOKU_BUILD_IS_PGO_GEN) # is PgoUse
 	set(_OKIIDOKU_PGO_DIR "${PROJECT_BINARY_DIR}/_pgo")
-endif()
-
-
-if(NOT _OKIIDOKU_BUILD_IS_PGO_GEN)
 	set(okiidoku_pgo_gen_cmake_generator "${CMAKE_GENERATOR}")
 	if(okiidoku_pgo_gen_cmake_generator STREQUAL "Ninja Multi-Config")
 		set(okiidoku_pgo_gen_cmake_generator "Ninja")
@@ -121,14 +120,17 @@ if(NOT _OKIIDOKU_BUILD_IS_PGO_GEN)
 endif()
 
 
+# MARK: okiidoku_target_pgo
+# add a PGO trainee+trainer pair
 # trainee a target shared library
 # trainer a target executable- ideally lightweight
 # remarks: due to CMake quirks, this must be called in the same directory scope as the one defining the pgo_gen ExternalProject
 # TODO.low consider making this work for training executables as well?
-function(okiidoku_enable_profile_guided_optimization
+function(okiidoku_target_pgo
 	trainee # name of target to train for PGO
 	trainer # name of a executable target to use for training PGO
 )
+	# basic input validation
 	if(NOT CMAKE_CURRENT_BINARY_DIR STREQUAL PROJECT_BINARY_DIR)
 		message(FATAL_ERROR "for some reason custom steps for ExternalProject need to be registered in the same directory as the ExternalProject was registered.")
 	endif()
@@ -264,7 +266,8 @@ function(okiidoku_enable_profile_guided_optimization
 		COMMENT "\$<IF:${if_use},Checking if '${trainer}' needs to be re-run,>"
 		VERBATIM COMMAND_EXPAND_LISTS
 	)
-	add_dependencies("run_${trainer}" "okiidoku_pgo_gen-build") # build will stop if run_trainer fails
+	add_dependencies("run_${trainer}" "okiidoku_pgo_gen-build") # must build trainee before training
+	# build will stop if run_trainer fails
 	# TODO.wait use generator expression once `add_dependencies` supports them. https://gitlab.kitware.com/cmake/cmake/-/issues/19467. currently doing workaround in the custom step COMMANDs.
 	add_dependencies(${trainee} "run_${trainer}")
 
@@ -287,8 +290,10 @@ function(okiidoku_enable_profile_guided_optimization
 		find_program(LLVM_PROFDATA "llvm-profdata-${llvm_major_version}")
 		add_custom_command(TARGET "run_${trainer}" POST_BUILD VERBATIM COMMAND_EXPAND_LISTS
 			DEPENDS
-			COMMAND "$<${if_gen}:${LLVM_PROFDATA};merge;-output='${data_file_for_clang}';${data_dir}/*.profraw>"
+			# https://llvm.org/docs/CommandGuide/llvm-profdata.html#profdata-merge
+			COMMAND "$<${if_gen}:${LLVM_PROFDATA};merge;--output='${data_file_for_clang}';${data_dir}/*.profraw>"
 			BYPRODUCTS "${data_file_for_clang}"
+			COMMENT "Merging LLVM profile data files"
 		)
 	endblock()
 	endif()

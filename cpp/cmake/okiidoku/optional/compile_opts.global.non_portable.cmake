@@ -10,7 +10,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 	)
 endif()
 
-if(NOT MSVC)
+if(NOT MSVC AND NOT DEFINED EMSCRIPTEN)
 	add_compile_options(
 		-march=native # enable optimizing for the compiling machine's instruction set architecture.
 	)

@@ -13,12 +13,12 @@
 
 - Requirements to build from source:
   - If you are new to C++, you will need an attitude to learn proactively about C++ and CMake.
-  - [CMake](https://cmake.org/install/) 3.28 or later
+  - [CMake](https://cmake.org/install/) 3.28 or higher
   - a C++ compiler [supporting C++20](https://en.cppreference.com/w/cpp/compiler_support).
     - I test on Clang 14, GCC 11, and Visual Studio 17 2022.
     - I currently have no interest in committing to support other compilers (ex. apple-clang) or lower versions of the above compilers.
     - Older versions _may_ work, but don't expect them to.
-  - a build system (ex. Ninja, Visual Studio)
+  - [a C++ build system](https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html) (ex. Ninja, Visual Studio)
   - Note: My general policy on tooling version support is to try to support the lowest common denominator of versions that are easily installable on homebrew, apt, and chocolatey, and wait a bit for regressions in new major releases to get fixed.
     - For apt, I try to support the repository for the latest Ubuntu version supported with WSL2.
 

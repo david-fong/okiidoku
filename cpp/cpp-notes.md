@@ -92,6 +92,8 @@ things I got wrong before which I couldn't understand based on gcc's error messa
 
 - Do not use `static` inside a member function to hold a lambda that captures `this`, since `this` is not always at the same address. Seems obvious in retrospect.
 
+- Emscripten does not support the `-march=` flag. https://github.com/emscripten-core/emscripten/issues/20244#issuecomment-1722510550
+
 ## more
 
 - [equality and ordering operators](https://brevzin.github.io/c++/2019/07/28/comparisons-cpp20/)

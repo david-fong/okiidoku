@@ -5,7 +5,9 @@
 // TODO.wait typescript .d.ts generation https://github.com/emscripten-core/emscripten/issues/7083
 
 // console.log(process.cwd());
-const oki = await (await import("./build/Debug/okiidoku.js")).default({
+// TODO why do I need to add JSDoc? I thought/assumed TS would pick up the .d.ts at the same location
+/**@type {import("./build/Release/okiidoku").MainModule}*/
+const oki = await (await import("./build/Release/okiidoku.js")).default({
 	// https://emscripten.org/docs/api_reference/module.html#module
 });
 // console.log(oki);

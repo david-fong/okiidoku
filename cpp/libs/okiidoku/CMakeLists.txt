@@ -18,7 +18,7 @@ set_target_properties(okiidoku PROPERTIES
 	VISIBILITY_INLINES_HIDDEN TRUE
 	INTERPROCEDURAL_OPTIMIZATION "${okiidoku_is_ipo_supported}"
 )
-add_subdirectory(src/okiidoku)
+add_subdirectory(src/okiidoku) # target_source_files
 
 include(GenerateExportHeader)
 generate_export_header(okiidoku EXPORT_FILE_NAME include/okiidoku/detail/export.h)
@@ -26,12 +26,12 @@ target_compile_definitions(okiidoku PUBLIC "$<$<NOT:$<BOOL:${BUILD_SHARED_LIBS}>
 
 include(./cmake/generate_meta_info.cmake)
 
+# MARK: headers
 target_include_directories(okiidoku
 	PUBLIC  "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>"
 	PUBLIC  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
 	PRIVATE "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>"
 )
-
 # Future Note: if switching back to FILE_SET, make sure headers get installed. not sure why they weren't when previously using FILE_SET. maybe each header file needs to be listed out explicitly?
 install(DIRECTORY
 	"${CMAKE_CURRENT_BINARY_DIR}/include/okiidoku"
@@ -40,26 +40,32 @@ install(DIRECTORY
 	COMPONENT okiidoku_development
 )
 
-# too bad can't use execute_process or file(CREATE_LINK) because there's a generator expression.
+# MARK: debug support
+# too bad can't use execute_process or file(CREATE_LINK) because there's a generator expression in OKIIDOKU_DATA_OUTPUT_DIRECTORY.
 include(GNUInstallDirs)
+# TODO can this be a build event custom command?
 add_custom_target(okiidoku_copy_debugger_support_files ALL
 	"${CMAKE_COMMAND}" -E make_directory "${OKIIDOKU_DATA_OUTPUT_DIRECTORY}"
 	COMMAND "${CMAKE_COMMAND}" -E create_symlink "${PROJECT_SOURCE_DIR}/tools/okiidoku.gdb.py" "${OKIIDOKU_DATA_OUTPUT_DIRECTORY}/okiidoku.gdb.py"
 	COMMAND "${CMAKE_COMMAND}" -E create_symlink "${PROJECT_SOURCE_DIR}/tools/okiidoku.natvis" "${OKIIDOKU_DATA_OUTPUT_DIRECTORY}/okiidoku.natvis"
+	COMMENT "Symlinking debug-support files to data directory"
 	VERBATIM COMMAND_EXPAND_LISTS
 )
 install(FILES
 	"${PROJECT_SOURCE_DIR}/tools/okiidoku.gdb.py"
 	"${PROJECT_SOURCE_DIR}/tools/okiidoku.natvis"
-	TYPE DATA
+	TYPE DATA # see DEFINE_GDB_PY_SCRIPT in gdb_support.cpp
+	# also https://learn.microsoft.com/en-us/visualstudio/debugger/create-custom-views-of-native-objects#BKMK_natvis_location and https://learn.microsoft.com/en-us/cpp/build/reference/natvis-add-natvis-to-pdb so if a PDB is installed with embedded natvis, no need to install natvis separately?
 	COMPONENT okiidoku_development
 )
 
+# MARK: dependencies
 okiidoku_add_compiler_options(okiidoku)
 target_link_libraries(okiidoku
 	PRIVATE range-v3::range-v3
 )
 
+# MARK: examples, tests, pgo
 if(OKIIDOKU_BUILD_TESTING AND NOT EMSCRIPTEN)
 	add_subdirectory(examples EXCLUDE_FROM_ALL)
 	add_subdirectory(tests)

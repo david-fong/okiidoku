@@ -5,9 +5,9 @@
 
 ## Required Tools
 
-- [Emscripten](https://emscripten.org/docs/getting_started/downloads.html)
-- CMake 3.28 or later
-- A C/C++ build system. Recommended: Ninja
+- [Emscripten](https://emscripten.org/docs/getting_started/downloads.html) 3.1.57 or higher
+- CMake 3.28 or higher
+- [A C++ build system](https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html). Recommended: Ninja
 
 I have no intention to support versions of Emscripten older than the latest.
 
@@ -28,7 +28,8 @@ cmake --build . --config=Release
 # look at the symbol maps for fun
 emnm -nC --defined-only okiidoku/Release/libokiidoku.a | less
 
-node const oki = require(path.join(process.cwd(), "Release/okiidoku.js"))
+# cd into the build directory
+node -i -e 'const oki = require(path.join(process.cwd(), "bin/okiidoku.js"))'
 ```
 
 ## Code Usage

@@ -39,6 +39,7 @@ block()
 		COMMAND "${CMAKE_COMMAND}" "-D OUTPUT=${output}" -P "${script}"
 		DEPENDS "${script}" "$<IF:$<BOOL:Git_FOUND>,${GIT_TOP_LEVEL}/.git/index,>"
 		OUTPUT  "${output}"
+		COMMENT "Generating Git info source file"
 		VERBATIM
 	)
 	# execute at configure time in case we also need to get/set properties of the file or read it then:

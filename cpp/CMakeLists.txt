@@ -10,6 +10,7 @@ project(okiidoku
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 set(OKIIDOKU_VERSION_COMPATIBILITY ExactVersion) # see `cmake/installation.cmake`.
 # ^ I will consider switching to support `SameMajorVersion` starting at v1.0.0.
+set(CMAKE_CXX_SCAN_FOR_MODULES NO) # I'm not using C++ modules... yet.
 
 include(okiidoku/default_output_dirs)
 
@@ -22,7 +23,7 @@ include(okiidoku/options) # see this file for more info & defaults. summary:
 # OKIIDOKU_BUILD_BINDINGS_FOR_PYTHON
 
 include(okiidoku/pgo_helpers)
-okiidoku_pgo_gen_check_needs_short_circuit()
+okiidoku_check_needs_short_circuit_pgo_gen_externalproject()
 
 include(okiidoku/compile_opts.basic)
 include(CheckIPOSupported)
@@ -63,7 +64,7 @@ if(OKIIDOKU_BUILD_BINDINGS_FOR_PYTHON)
 	add_subdirectory(extras/python) # target: okiidoku_py
 endif()
 
-okiidoku_enable_profile_guided_optimization(okiidoku #[[trainer:]] okiidoku_pgo_trainer_default)
+okiidoku_target_pgo(okiidoku #[[trainer:]] okiidoku_pgo_trainer_default)
 
 
 include(okiidoku/installation)
