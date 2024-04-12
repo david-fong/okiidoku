@@ -6,6 +6,7 @@
 #include <okiidoku/puzzle/solver/found_queue.hpp>
 #include <okiidoku/grid.hpp>
 #include <okiidoku/o2_bit_arr.hpp>
+#include <okiidoku/detail/order_templates.hpp>
 
 // #include <stack>
 #include <vector>

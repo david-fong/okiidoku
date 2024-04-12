@@ -37,9 +37,7 @@ Issues I'm watching:
 ## Misc List
 
 - launch.json https://code.visualstudio.com/docs/editor/variables-reference#_input-variables <!-- is this still useful? CMake tools has target debug stuff, right?-->
-- `"$schema": "https://raw.githubusercontent.com/Kitware/CMake/master/Help/manual/presets/schema.json"` in CMakePresets when CMake 3.28
-- `set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY NO)` in dev preset?
-- make CMake compiler warning flags only enabled if project is top-level.
+- read https://gcc.gnu.org/gcc-13/changes.html
 
 check `CMAKE_LANG_COMPILER_FRONTEND_VARIANT` to use msvc flags when compiler is clang-cl?
 
@@ -51,7 +49,7 @@ check `CMAKE_LANG_COMPILER_FRONTEND_VARIANT` to use msvc flags when compiler is 
     - If so, how could I fix this?
   - it's being inlined for both the training and optimized builds... do I need to make it not get inlined for the training build?
 
-bump minimum gcc version to gcc-12. hmm. or maybe give it some time to fix regressions?
+bump minimum gcc version to gcc-12. hmm. or maybe give it some time to fix regressions? Ubuntu 22.04 is still on 11...
 
 - ctest for emscripten configuration
 

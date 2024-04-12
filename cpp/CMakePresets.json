@@ -10,7 +10,7 @@
 	"version": 3,
 	"cmakeMinimumRequired": {
 		"major": 3,
-		"minor": 22
+		"minor": 28
 	},
 	"configurePresets": [
 		{
@@ -34,7 +34,8 @@
 			"binaryDir": "${sourceDir}/build",
 			"cacheVariables": {
 				"CMAKE_BUILD_TYPE": "Release",
-				"CMAKE_DEFAULT_BUILD_TYPE": "Release"
+				"CMAKE_DEFAULT_BUILD_TYPE": "Release",
+				"CPACK_INCLUDE_TOPLEVEL_DIRECTORY": false
 			}
 		},
 		{
@@ -47,8 +48,10 @@
 			"cacheVariables": {
 				"CMAKE_INTERPROCEDURAL_OPTIMIZATION_DEBUG": false,
 				"CPM_SOURCE_CACHE": "${sourceDir}/external/.cpm",
+				"OKIIDOKU_BUILD_WITH_SUGGESTED_WARNINGS": true,
 				"OKIIDOKU_BUILD_TESTING": true,
-				"OKIIDOKU_BUILD_BINDINGS_FOR_PYTHON": true
+				"OKIIDOKU_BUILD_BINDINGS_FOR_PYTHON": true,
+				"CPACK_INCLUDE_TOPLEVEL_DIRECTORY": false
 			},
 			"warnings": {
 				"dev": true

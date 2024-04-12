@@ -110,7 +110,7 @@ namespace okiidoku::mono {
 		}()};
 		const auto& word {words_[word_i]};
 		#ifdef OKIIDOKU_TARGET_SUPPORTS_X86_BMI2
-			if constexpr (sizeof(word_t) >= 8) {
+			if constexpr (sizeof(word_t) >= sizeof(std::uint64_t)) {
 				const auto bit_mask {_pdep_u64(static_cast<word_t>(word_t{1} << set_bit_index), word)};
 				return static_cast<o2x_t>(static_cast<o2x_t>(word_t_num_bits*word_i) + std::countr_zero(bit_mask));
 			} else {

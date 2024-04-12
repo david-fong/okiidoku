@@ -30,6 +30,8 @@ Checks: "
   misc-*,
     -misc-non-private-member-variables-in-classes,
 "
+CheckOptions:
+  readability-function-cognitive-complexity.IgnoreMacros: yes
 # hicpp is mostly aliases to other rules. I just added specifically all
 # that are not aliases to rules I already include. On a similar note,
 # some of the excluded rules are just alias exclusions so I don't have

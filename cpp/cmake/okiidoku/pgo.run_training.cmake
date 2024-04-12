@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: 2020 David Fong
 # SPDX-License-Identifier: GPL-3.0-or-later
-cmake_minimum_required(VERSION 3.22)
+cmake_minimum_required(VERSION 3.28)
 if(CMAKE_SCRIPT_MODE_FILE STREQUAL "")
 	message(FATAL_ERROR "this should be called as a script")
 endif()

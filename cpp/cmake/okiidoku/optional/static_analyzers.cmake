@@ -5,10 +5,11 @@ include_guard(DIRECTORY)
 
 if(MSVC)
 	target_compile_options(okiidoku_compiler_warnings INTERFACE "/analyze")
-	# https://docs.microsoft.com/en-us/cpp/build/reference/analyze-code-analysis
+	#^ https://docs.microsoft.com/en-us/cpp/build/reference/analyze-code-analysis
 else()
-	# target_compile_options(okiidoku_compiler_warnings INTERFACE "-fanalyzer")
-	# https://gcc.gnu.org/onlinedocs/gcc/Static-Analyzer-Options.html
+	target_compile_options(okiidoku_compiler_warnings INTERFACE "$<$<COMPILE_LANGUAGE:C>:-fanalyzer>")
+	#^ https://gcc.gnu.org/onlinedocs/gcc/Static-Analyzer-Options.html
+	#  it's intended for C code and unlikely to be useful for C++ (see https://gcc.gnu.org/gcc-13/changes.html)
 endif()
 
 
@@ -19,6 +20,9 @@ find_program(
 )
 if(NOT "${CLANG_TIDY_EXE}" STREQUAL "CLANG_TIDY_EXE-NOTFOUND")
 	set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_EXE}")
+	# if(CMAKE_COLOR_DIAGNOSTICS) # it already detects if terminal supports colours
+	# 	list(APPEND CMAKE_CXX_CLANG_TIDY "--use-color")
+	# endif()
 	# TODO.mid sort out the warnings
 endif()
 

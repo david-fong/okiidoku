@@ -9,9 +9,13 @@ add_library(okiidoku_compiler_warnings INTERFACE IMPORTED)
 
 function(okiidoku_add_compiler_options target)
 	target_link_libraries(${target}
-		PUBLIC  okiidoku_compile_options_public
-		PRIVATE okiidoku_compiler_warnings
+		PUBLIC okiidoku_compile_options_public
 	)
+	if(OKIIDOKU_BUILD_WITH_SUGGESTED_WARNINGS)
+		target_link_libraries(${target}
+			PRIVATE okiidoku_compiler_warnings
+		)
+	endif()
 	# get_target_property(sources ${target} SOURCES)
 	# set_property(SOURCE ${sources}
 	# 	# DIRECTORY "${PROJECT_SOURCE_DIR}" "${PROJECT_BINARY_DIR}"
@@ -41,14 +45,17 @@ if(MSVC)
 		/wd4068 # warning disable: "unrecognized pragma"
 	)
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+block()
+	set(v12 "$<VERSION_GREATER_EQUAL:$<CXX_COMPILER_VERSION>,12>")
 	target_compile_options(okiidoku_compile_options_public INTERFACE
 	)
 	target_compile_options(okiidoku_compiler_warnings INTERFACE
-		# -Wbidi-chars=any # warn on any usage of bidi text. TODO use generator expression to enable if gcc v12+
+		"$<${v12}:-Wbidi-chars=any>" # warn on any usage of bidi text
 		-Wnormalized # warn on identifiers that look the same but are not the same
 		-Wno-unknown-pragmas
-		"$<$<VERSION_GREATER_EQUAL:$<CXX_COMPILER_VERSION>,12>:-Wno-attributes=clang::>"
+		"$<${v12}:-Wno-attributes=clang::>"
 	)
+endblock()
 endif()
 
 

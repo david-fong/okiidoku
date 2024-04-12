@@ -3,6 +3,7 @@
 #include <okiidoku/detail/pgo_use_check_needs_rebuild.hpp>
 #include <okiidoku/print_2d.hpp>
 #include <okiidoku/print_2d.emoji.hpp>
+#include <okiidoku/detail/contract.hpp>
 
 #include <iostream>
 #include <random> // minstd_rand
@@ -54,12 +55,14 @@ namespace okiidoku {
 		const rng_seed_t rng_seed,
 		const std::span<const print_2d_grid_view> grid_views
 	) noexcept {
+		OKIIDOKU_CONTRACT_USE(O <= largest_compiled_order);
+		OKIIDOKU_CONTRACT_USE(is_order_compiled(O));
 		const unsigned O2 {O*O};
 		using o2is_t = visitor::int_ts::o2is_t;
 		using o4xs_t = visitor::int_ts::o4xs_t;
 
-		const auto print_box_row_sep_string_ {[&os, O](const unsigned border_i) -> void {
-			// TODO add contract for border_i
+		const auto print_box_row_sep_string_ {[&os, O](const Order border_i) -> void {
+			OKIIDOKU_CONTRACT_USE(border_i <= O);
 			#define M_NOOK(NOOK_T, NOOK_C, NOOK_B) \
 			if      (border_i == 0) [[unlikely]] { os << (NOOK_T); } \
 			else if (border_i == O) [[unlikely]] { os << (NOOK_B); } \
@@ -75,11 +78,11 @@ namespace okiidoku {
 			#undef M_NOOK
 		}};
 
-		const auto print_box_row_sep_strings {[&](const unsigned border_i){
-			// TODO add contract for border_i
+		const auto print_box_row_sep_strings {[&](const Order border_i){
+			OKIIDOKU_CONTRACT_USE(border_i <= O);
 			os << '\n';
 			print_box_row_sep_string_(border_i);
-			for (unsigned i {1}; i < grid_views.size(); ++i) {
+			for (std::size_t i {1}; i < grid_views.size(); ++i) {
 				os << "   ";
 				print_box_row_sep_string_(border_i);
 			}
@@ -91,7 +94,7 @@ namespace okiidoku {
 				print_box_row_sep_strings(row / O);
 			}
 			os << '\n';
-			for (unsigned grid_i {0}; grid_i < grid_views.size(); ++grid_i) {
+			for (std::size_t grid_i {0}; grid_i < grid_views.size(); ++grid_i) {
 				for (o2is_t col {0}; col < O2; ++col) {
 					if ((col % O) == 0) [[unlikely]] { os << " │"; }
 

@@ -16,7 +16,7 @@ namespace okiidoku::mono {
 		Transformation<O> t {};
 		{
 			using rng_t = std::minstd_rand;
-			rng_t rng {rng_seed};
+			rng_t rng {rng_seed}; // TODO try std::ranges::shuffle on my compilers
 			ranges::shuffle(t.label_map, rng);
 			ranges::shuffle(t.row_map, rng);
 			ranges::shuffle(t.col_map, rng);

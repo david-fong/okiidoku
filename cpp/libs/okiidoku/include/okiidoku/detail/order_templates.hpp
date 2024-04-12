@@ -50,10 +50,10 @@ namespace okiidoku {
 		// template parameters other than just the order.
 		template<typename T>
 		concept MonoToVisitorAdaptor = requires(T x) {
-			// std::same_as<decltype(T::is_borrow_type), bool>; // TODO.low why is this not working on gcc 12?
+			// requires std::same_as<decltype(T::is_borrow_type), bool>; // TODO.low why is this not working on gcc 12?
 			// TODO consider creating a `dynamic_allocation_floor` constant, or a bool-returning
 			//  `use_dynamic_allocation` template function, or a use_dynamic_allocation constant.
-			//  the bool constant is the simplest.
+			//  the bool constant is the simplest. (I assume I wrote this b/c stack size warnings)
 
 			#define OKIIDOKU_FOREACH_O_EMIT(O_) typename T::template type<O_>;
 			OKIIDOKU_FOREACH_O_DO_EMIT

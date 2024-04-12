@@ -31,12 +31,6 @@ namespace okiidoku::mono { namespace {
 		using val_t = int_ts::o2is_t<O>;
 		using mapping_t = typename Transformation<O>::mapping_t;
 
-	public:
-		// explicit CanonPlace(const Grid<O>& grid) noexcept: src_grid{grid} {}
-
-	private:
-		// Grid<O>& src_grid;
-
 		struct PolarState final {
 			line_map_t<O> to_og {Transformation<O>::identity_line_map};
 			detail::TieLinks<O, 2> line_ties {};

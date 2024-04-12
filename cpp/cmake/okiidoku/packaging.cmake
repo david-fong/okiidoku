@@ -29,4 +29,4 @@ set(CPACK_SOURCE_GENERATOR "TGZ")
 set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
 
 
-# include(CPack) # disabled since currently using GCC's "-march=native".
+include(CPack)

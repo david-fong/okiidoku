@@ -27,13 +27,13 @@ namespace okiidoku::mono { namespace {
 
 	public:
 		SerdesHelper() noexcept:
-			row_cands {O2BitArr_ones<O>},
-			cell_cands {O2BitArr_ones<O>}
+			row_cands_ {O2BitArr_ones<O>},
+			cell_cands_ {O2BitArr_ones<O>}
 		{
-			h_chute_boxes_cands.fill(O2BitArr_ones<O>);
-			cols_cands.fill(O2BitArr_ones<O>);
+			h_chute_boxes_cands_.fill(O2BitArr_ones<O>);
+			cols_cands_.fill(O2BitArr_ones<O>);
 		}
-		[[nodiscard]] o4i_t get_cell_rmi() const noexcept { return cell_rmi; }
+		[[nodiscard]] o4i_t get_cell_rmi() const noexcept { return cell_rmi_; }
 		void advance() noexcept;
 
 		// automatically removes val as a candidate of future cells.
@@ -48,62 +48,62 @@ namespace okiidoku::mono { namespace {
 
 		// hypothetical candidates remaining for future cells
 		// based on already encountered (printed/parsed) cells.
-		cands_t row_cands;
-		std::array<cands_t, T::O1> h_chute_boxes_cands;
-		std::array<cands_t, T::O2> cols_cands;
+		cands_t row_cands_;
+		std::array<cands_t, T::O1> h_chute_boxes_cands_;
+		std::array<cands_t, T::O2> cols_cands_;
 
 		// hypothetical candidates of cell to print/parse.
-		cands_t cell_cands;
+		cands_t cell_cands_;
 
-		o4i_t cell_rmi {0};
+		o4i_t cell_rmi_ {0};
 
 		// current small buffer of data to print/parse.
 		static constexpr buf_t buf_end {buf_t{8*num_buf_bytes}};
-		buf_t buf {0};
-		buf_t buf_pos {1};
+		buf_t buf_ {0};
+		buf_t buf_pos_ {1};
 	};
 
 
 	template<Order O> requires(is_order_compiled(O))
 	void SerdesHelper<O>::advance() noexcept {
-		++cell_rmi;
-		if (cell_rmi % T::O2 == 0) [[unlikely]] { row_cands = O2BitArr_ones<O>; }
-		if (cell_rmi % T::O3 == 0) [[unlikely]] { h_chute_boxes_cands.fill(O2BitArr_ones<O>); }
+		++cell_rmi_;
+		if (cell_rmi_ % T::O2 == 0) [[unlikely]] { row_cands_ = O2BitArr_ones<O>; }
+		if (cell_rmi_ % T::O3 == 0) [[unlikely]] { h_chute_boxes_cands_.fill(O2BitArr_ones<O>); }
 
-		auto& box_cands {h_chute_boxes_cands[cell_rmi / T::O3]};
-		auto& col_cands {cols_cands[cell_rmi / T::O2]};
-		cell_cands = row_cands & col_cands & box_cands;
+		auto& box_cands {h_chute_boxes_cands_[cell_rmi_ / T::O3]};
+		auto& col_cands {cols_cands_[cell_rmi_ / T::O2]};
+		cell_cands_ = row_cands_ & col_cands & box_cands;
 	}
 
 
 	template<Order O> requires(is_order_compiled(O))
 	void SerdesHelper<O>::print_val(std::ostream& os, const typename SerdesHelper<O>::val_t val) noexcept {
-		OKIIDOKU_CONTRACT_ASSERT(cell_cands.test(val));
+		OKIIDOKU_CONTRACT_ASSERT(cell_cands_.test(val));
 		// The number of possible different values that this cell could be
 		// based on the values that have already been encountered.
-		auto smol_val_buf_remaining {cell_cands.count()};
+		auto smol_val_buf_remaining {cell_cands_.count()};
 		OKIIDOKU_CONTRACT_USE(smol_val_buf_remaining > 0); // implied by contract (grid_follows_rule)
 
 		// Some slightly-weird-looking logic stems from the fact that it is
 		// a "null" action to try to print something that can only take on one
 		// value (as in- the buffer will be unchanged). Just keep that in mind.
-		auto smol_val_buf {static_cast<val_t>(cell_cands.count_below(val))};
+		auto smol_val_buf {static_cast<val_t>(cell_cands_.count_below(val))};
 		OKIIDOKU_CONTRACT_USE(smol_val_buf < smol_val_buf_remaining);
 		while (smol_val_buf_remaining > 1) {
-			buf += static_cast<buf_t>(buf_pos * smol_val_buf); // should never overflow
-			// const auto buf_remaining {(buf_pos == 1) ? buf_end : static_cast<buf_t>(buf_end - buf_pos)};
+			buf_ += static_cast<buf_t>(buf_pos_ * smol_val_buf); // should never overflow
+			// const auto buf_remaining {(buf_pos_ == 1) ? buf_end : static_cast<buf_t>(buf_end - buf_pos_)};
 			{
 				const auto use_factor {static_cast<buf_t>(smol_val_buf_remaining)};
-				OKIIDOKU_CONTRACT_USE(buf_pos != 0 && buf_pos < buf_end);
-				buf_pos *= use_factor;
+				OKIIDOKU_CONTRACT_USE(buf_pos_ != 0 && buf_pos_ < buf_end);
+				buf_pos_ *= use_factor;
 				smol_val_buf /= static_cast<val_t>(use_factor);
 				smol_val_buf_remaining /= static_cast<int_ts::o2i_t<O>>(use_factor);
 			}
-			if (buf_pos >= buf_end) { // TODO.asap should this be a while loop?
+			if (buf_pos_ >= buf_end) { // TODO.asap should this be a while loop?
 				static_assert(num_buf_bytes == 1); // otherwise the below needs to change.
-				os.put(static_cast<char>(buf));
-				buf >>= 8 * num_buf_bytes;
-				buf_pos = static_cast<buf_t>((buf_pos % buf_end) + 1);
+				os.put(static_cast<char>(buf_));
+				buf_ >>= 8 * num_buf_bytes;
+				buf_pos_ = static_cast<buf_t>((buf_pos_ % buf_end) + 1);
 			}
 		}
 		remove_cand_at_current_rmi_(val);
@@ -112,8 +112,8 @@ namespace okiidoku::mono { namespace {
 
 	template<Order O> requires(is_order_compiled(O))
 	void SerdesHelper<O>::print_remaining_buf(std::ostream& os) noexcept {
-		if (buf_pos > 1) {
-			os.put(static_cast<char>(buf));
+		if (buf_pos_ > 1) {
+			os.put(static_cast<char>(buf_));
 		}
 		// TODO should there be some mechanism to disable further printing? or just write a contract?
 	}
@@ -123,7 +123,7 @@ namespace okiidoku::mono { namespace {
 	typename SerdesHelper<O>::val_t SerdesHelper<O>::parse_val(std::istream& is) noexcept {
 		// The number of possible different values that this cell could be
 		// based on the values that have already been encountered.
-		auto smol_val_buf_remaining {cell_cands.count()};
+		auto smol_val_buf_remaining {cell_cands_.count()};
 		OKIIDOKU_CONTRACT_USE(smol_val_buf_remaining > 0); // implied by contract (grid_follows_rule)
 		(void)smol_val_buf_remaining; (void)is;
 
@@ -131,7 +131,7 @@ namespace okiidoku::mono { namespace {
 		// TODO
 
 		OKIIDOKU_CONTRACT_USE(smol_val_buf < smol_val_buf_remaining);
-		const auto val {cell_cands.get_index_of_nth_set_bit(smol_val_buf)};
+		const auto val {cell_cands_.get_index_of_nth_set_bit(smol_val_buf)};
 		remove_cand_at_current_rmi_(val);
 		return val;
 	}
@@ -139,9 +139,9 @@ namespace okiidoku::mono { namespace {
 
 	template<Order O> requires(is_order_compiled(O))
 	void SerdesHelper<O>::remove_cand_at_current_rmi_(const typename SerdesHelper<O>::val_t cand) noexcept {
-		auto& box_cands {h_chute_boxes_cands[cell_rmi / T::O3]};
-		auto& col_cands {cols_cands[cell_rmi / T::O2]};
-		cands_t::unset3(cand, row_cands, box_cands, col_cands);
+		auto& box_cands {h_chute_boxes_cands_[cell_rmi_ / T::O3]};
+		auto& col_cands {cols_cands_[cell_rmi_ / T::O2]};
+		cands_t::unset3(cand, row_cands_, box_cands, col_cands);
 	}
 }}
 namespace okiidoku::mono {

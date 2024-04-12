@@ -40,7 +40,7 @@ endif()
 
 include(okiidoku/dependencies)
 
-if(OKIIDOKU_BUILD_WITH_STATIC_ANALYSIS)
+if(OKIIDOKU_BUILD_WITH_STATIC_ANALYZERS)
 	# Note: these are done _after_ adding dependencies to avoid doing this work on them.
 	include(okiidoku/optional/static_analyzers)
 endif()

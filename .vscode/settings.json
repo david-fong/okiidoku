@@ -53,6 +53,7 @@
 
 	"cmake.sourceDirectory": ["${workspaceFolder}/cpp"],
 	"cmake.buildDirectory": "${sourceDirectory}/out/build/${cmake.activeConfigurePresetName}",
+	"cmake.installPrefix": "${sourceDirectory}/out/install/${cmake.activeConfigurePresetName}",
 	"cmake.debugConfig": {
 		"environment": [],
 		// "cwd": "",

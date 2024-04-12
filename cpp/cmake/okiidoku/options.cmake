@@ -16,8 +16,9 @@ endif()
 unset(is_multi_config)
 
 
+# OKIIDOKU_BUILD_SHARED_LIBS
 # General use cases should use `BUILD_SHARED_LIBS`.
-# Use `OKIIDOKU_BUILD_SHARED_LIBS` to make an exception just for okiidoku.
+# Use this to make an exception just for okiidoku.
 #
 # DLLs are currently not supported (I had trouble attempting to get it working).
 # https://alexreinking.com/blog/building-a-dual-shared-and-static-library-with-cmake.html
@@ -42,6 +43,7 @@ endif()
 unset(okiidoku_target_supports_shared_libs)
 
 
+option(OKIIDOKU_BUILD_WITH_SUGGESTED_WARNINGS "build okiidoku with suggested warnings" "${PROJECT_IS_TOP_LEVEL}")
 option(OKIIDOKU_BUILD_WITH_STATIC_ANALYZERS "build okiidoku with static analyzers" NO) # off by default because it's slow
 option(OKIIDOKU_BUILD_DEBUG_WITH_SANITIZERS "build okiidoku debug builds with sanitizers" "${PROJECT_IS_TOP_LEVEL}")
 option(OKIIDOKU_BUILD_TESTING "build tests for okiidoku" "${PROJECT_IS_TOP_LEVEL}")

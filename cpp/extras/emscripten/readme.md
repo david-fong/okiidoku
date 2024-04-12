@@ -6,7 +6,7 @@
 ## Required Tools
 
 - [Emscripten](https://emscripten.org/docs/getting_started/downloads.html)
-- CMake 3.22 or later
+- CMake 3.28 or later
 - A C/C++ build system. Recommended: Ninja
 
 I have no intention to support versions of Emscripten older than the latest.

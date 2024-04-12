@@ -6,8 +6,9 @@
 #include <okiidoku/grid.hpp>
 #include <okiidoku/ints.hpp>
 
+namespace okiidoku {
 template<okiidoku::Order O>
-void test_grid() {
+[[gnu::noinline]] void test_grid() {
 	using namespace ::okiidoku;
 	using namespace ::okiidoku::mono;
 	OKIIDOKU_MONO_INT_TS_TYPEDEFS
@@ -32,11 +33,11 @@ void test_grid() {
 	init_most_canonical_grid(gen_grid);
 	CHECK(grid_is_filled(gen_grid));
 	CHECK(grid_follows_rule(gen_grid));
-}
+}}
 
 TEST_CASE("grid") {
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-	test_grid<O_>();
+	okiidoku::test_grid<O_>();
 	OKIIDOKU_FOREACH_O_DO_EMIT
 	#undef OKIIDOKU_FOREACH_O_EMIT
 }

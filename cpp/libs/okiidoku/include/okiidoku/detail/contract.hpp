@@ -17,8 +17,9 @@
 	#ifdef _MSC_VER
 	#define OKIIDOKU_CONTRACT_USE(cond) __assume(cond)
 	#define OKIIDOKU_UNREACHABLE __assume(false)
-	#elif defined(__GNUC__)
+	#elif defined(__GNUC__) // includes clang (unless -fgnuc=0)
 	#define OKIIDOKU_CONTRACT_USE(cond) ((cond) ? static_cast<void>(0) : __builtin_unreachable())
+	// TODO when bump minimum to GCC 13, https://gcc.gnu.org/gcc-13/changes.html#:~:text=A%20new%20statement%20attribute%20for%20C%2B%2B23%20P1774R8%20Portable%20assumptions
 	#define OKIIDOKU_UNREACHABLE __builtin_unreachable()
 	#else
 	#define OKIIDOKU_CONTRACT_USE(cond) static_cast<void>((cond) ? 0 : 0)
