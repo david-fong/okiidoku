@@ -16,7 +16,7 @@ static_assert(__EMSCRIPTEN__);
 #include <sstream>
 #include <random> // mt19937_64
 
-// https://github.com/emscripten-core/emscripten/issues/13902
+// https://github.com/emscripten-core/emscripten/issues/13902 unint64_t is passed through to JS as a signed value instead #13902
 
 // TODO.low learn what value types are and see if useful. https://emscripten.org/docs/porting/connecting_cpp_and_javascript/embind.html#value-types
 
@@ -33,6 +33,7 @@ namespace okiidoku::em { namespace {
 		[[nodiscard]] rng_seed_t get_rng_seed() noexcept {
 			return static_cast<rng_seed_t>(rng_() - decltype(rng_)::min());
 		}
+		// auto get_next() noexcept { return rng_(); } // haven't found a need for this
 	};
 	Rng rng {};
 
@@ -70,8 +71,8 @@ EMSCRIPTEN_BINDINGS(okiidoku) {
 	em::class_<oki_v::Grid>("Grid")
 		.constructor<oki::Order>()
 		// .function("getMonoOrder", &oki::visitor::Grid::get_mono_order) // TODO need to define the base class to do this https://emscripten.org/docs/porting/connecting_cpp_and_javascript/embind.html#base-classes
-		.function("atRmi", &oki::visitor::Grid::at_rmi)
-		.function("at",    &oki::visitor::Grid::at)
+		.function("atRmi",       &oki_v::Grid::at_rmi)
+		.function("at",          &oki_v::Grid::at)
 		.function("followsRule", &oki_v::grid_follows_rule)
 		.function("isFilled",    &oki_v::grid_is_filled)
 		.function("isEmpty",     &oki_v::grid_is_empty)

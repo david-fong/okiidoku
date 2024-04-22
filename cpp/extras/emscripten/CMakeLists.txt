@@ -18,24 +18,30 @@ set_target_properties(okiidoku_js PROPERTIES
 )
 # https://emsettings.surma.technology/
 # https://github.com/emscripten-core/emscripten/blob/main/src/settings.js
-# TODO.wait typescript .d.ts generation https://github.com/emscripten-core/emscripten/issues/7083
 target_compile_options(okiidoku_js PRIVATE
 	-sSTRICT=1
-	# --emit-tsd "$<TARGET_FILE_DIR:okiidoku_js>/okiidoku.d.ts"
 )
 target_link_options(okiidoku_js PRIVATE
 	--no-entry # it's a "reactor" (ie. a library)
 	# --pre-js=
 	-sSTRICT=1
-	-sMODULARIZE=1 # https://emscripten.org/docs/api_reference/module.html#module
-	-sEXPORT_NAME=okiidoku_create
+
+	# https://emscripten.org/docs/api_reference/module.html#module
+	-sMODULARIZE=1
+	-sEXPORT_NAME=OKIIDOKU_CREATE_MODULE
+	# -sWASM_ASYNC_COMPILATION=1 this is the default
 	# -sINCOMING_MODULE_JS_API=[onRuntimeInitialized]
+
+	# https://emscripten.org/docs/porting/connecting_cpp_and_javascript/embind.html#typescript-definitions
 	--emit-tsd "$<TARGET_FILE_DIR:okiidoku_js>/okiidoku.d.ts"
+
+	"$<$<CONFIG:Release,MinSizeRel>:--closure=1>" # https://emscripten.org/docs/site/glossary.html#term-closure-compiler
 
 	-sALLOW_UNIMPLEMENTED_SYSCALLS=1 # TODO.wait workaround. why needed?
 	# -sSTANDALONE_WASM=1
 	-sWASM_BIGINT=1
 	# -sENVIRONMENT=web # use to exclude commonJS/Node glue-code
+	# -sMIN_NODE_VERSION
 )
 okiidoku_add_compiler_options(okiidoku_js)
 target_link_libraries(okiidoku_js

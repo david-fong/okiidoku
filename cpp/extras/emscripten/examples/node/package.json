@@ -1,0 +1,11 @@
+{
+  "name": "okiidoku-node-examples",
+  "version": "0.1.0",
+  "private": true,
+  "directories": {
+    "example": "."
+  },
+  "devDependencies": {
+    "@types/node": "^20"
+  }
+}

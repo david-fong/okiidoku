@@ -2,6 +2,12 @@
 // SPDX-License-Identifier: CC0-1.0
 {
 	"compilerOptions": {
-		"lib": ["ES2021"]
-	}
+		"module": "Node16", // https://www.typescriptlang.org/docs/handbook/modules/reference.html#the-module-compiler-option
+		"target": "ES2022",
+		"lib": ["ES2022"],
+		"allowSyntheticDefaultImports": false,
+		"checkJs": true,
+		"strict": true,
+		"skipDefaultLibCheck": true,
+	},
 }

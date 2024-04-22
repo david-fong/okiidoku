@@ -45,4 +45,9 @@ if(OKIIDOKU_BUILD_BINDINGS_FOR_PYTHON)
 	CPMAddPackage("gh:pybind/pybind11@2.9.2")
 	# https://pybind11.readthedocs.io/en/stable/index.html
 	# https://pybind11.readthedocs.io/en/stable/changelog.html
+
+	CPMAddPackage("gh:wjakob/nanobind@1.9.2")
+	# https://github.com/wjakob/nanobind
+	# https://github.com/wjakob/nanobind/blob/master/docs/changelog.rst
+	# https://nanobind.readthedocs.io/en/latest/building.html#finding-nanobind
 endif()
