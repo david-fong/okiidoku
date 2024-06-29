@@ -7,7 +7,7 @@
 			"inherit `tool:<some_tool>` and `base:user` to build your own presets."
 		]
 	},
-	"version": 3,
+	"version": 8,
 	"cmakeMinimumRequired": {
 		"major": 3,
 		"minor": 28
@@ -45,6 +45,9 @@
 			"generator": "Ninja Multi-Config",
 			"binaryDir": "${sourceDir}/out/build/${presetName}",
 			"installDir": "${sourceDir}/out/install/${presetName}",
+			"environment": {
+				"CMAKE_INSTALL_MODE": "REL_SYMLINK_OR_COPY"
+			},
 			"cacheVariables": {
 				"CMAKE_INTERPROCEDURAL_OPTIMIZATION_DEBUG": false,
 				"CPM_SOURCE_CACHE": "${sourceDir}/external/.cpm",

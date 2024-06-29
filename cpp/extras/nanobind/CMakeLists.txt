@@ -19,7 +19,8 @@ if(okiidoku_is_ipo_supported)
 endif()
 
 # https://nanobind.readthedocs.io/en/latest/api_cmake.html#high-level-interface
-nanobind_add_module(okiidoku_py
+nanobind_add_module(
+	okiidoku_py # https://nanobind.readthedocs.io/en/latest/faq.html#importing-my-module-fails-with-an-importerror
 	${nb_stable_abi} "${nb_shared_libs}" ${nb_lto}
 	okiidoku.nanobind.cpp
 )
@@ -27,14 +28,15 @@ nanobind_add_module(okiidoku_py
 # https://nanobind.readthedocs.io/en/latest/typing.html#stubs
 nanobind_add_stub(okiidoku_py_stub
 	MODULE okiidoku_py
-	OUTPUT "$<TARGET_FILE_DIR:okiidoku_py>/okiidoku.pyi"
-	PYTHON_PATH "$<TARGET_FILE_DIR:okiidoku_py>"
+	OUTPUT "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/okiidoku_py.pyi"
+	# OUTPUT "$<PATH:GET_PARENT_PATH,$<TARGET_FILE:okiidoku_py>>/okiidoku.pyi" # TODO having issues with this
+	PYTHON_PATH "$<TARGET_FILE_DIR:okiidoku_py>" # supposed to be relative path?
 	DEPENDS okiidoku_py
 )
 endblock()
 # set_target_properties(okiidoku_py PROPERTIES OUTPUT_NAME "okiidoku") # TODO.try
 
-okiidoku_add_compiler_options(okiidoku_py)
+# okiidoku_add_compiler_options(okiidoku_py) # TODO.wait once nanobind adds its headers as system include directories
 target_link_libraries(okiidoku_py
 	PRIVATE okiidoku
 )

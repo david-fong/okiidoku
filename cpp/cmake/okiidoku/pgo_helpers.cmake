@@ -214,23 +214,16 @@ function(okiidoku_target_pgo
 		unset(trainee_sources)
 
 		target_compile_options(${trainee} PRIVATE
-			# "$<${if_pgo}:-fprofile-dir=${data_dir}>"
 			"$<${if_pgo}:-fprofile-prefix-path=${objects_dir}>"
-			# "-ffile-prefix-map=${CMAKE_SOURCE_DIR}=." # TODO.wait this is only available in GCC 12 and I don't even know if it will change the mangled filenames like I want it to.
+			# "-ffile-prefix-map=${okiidoku_SOURCE_DIR}=." # TODO.wait this is only available in GCC 12 and I don't even know if it will change the mangled filenames like I want it to.
 			"$<${if_gen}:-fprofile-generate=${data_dir}>"
 			"$<${if_use}:-fprofile-use=${data_dir}>"
 			# "$<${if_use}:-fprofile-correction>
 			# "$<${if_use}:-fprofile-partial-training> # for code not run during training, optimize as normal instead of for size. # TODO.asap should we use partial training?
 		)
 		target_link_options(${trainee} PRIVATE
-			"$<${if_pgo}:-fprofile-prefix-path=${objects_dir}>"
 			"$<${if_gen}:-fprofile-generate=${data_dir}>"
-			"$<${if_use}:-fprofile-use=${data_dir}>"
 		)
-		if(_OKIIDOKU_BUILD_IS_PGO_GEN)
-			target_compile_options(${trainer} PRIVATE "-fprofile-generate=${data_dir}")
-			target_link_options(   ${trainer} PRIVATE "-fprofile-generate=${data_dir}")
-		endif()
 		# https://gcc.gnu.org/wiki/AutoFDO/Tutorial
 
 

@@ -61,7 +61,7 @@ endif()
 
 # diagnostics formatting:
 # TODO hm. these make more sense to be user-controlled globally-applied flags. maybe should be moved to CMakePresets.json
-if(PROJECT_IS_TOP_LEVEL)
+if(okiidoku_IS_TOP_LEVEL)
 	if(MSVC)
 		target_compile_options(okiidoku_compiler_warnings INTERFACE
 			/diagnostics:caret
@@ -91,10 +91,13 @@ if(MSVC)
 	target_compile_options(okiidoku_compiler_warnings INTERFACE
 	)
 else()
+block()
+	set(v12 "$<VERSION_GREATER_EQUAL:$<CXX_COMPILER_VERSION>,12>")
 	target_compile_options(okiidoku_compiler_warnings INTERFACE
 		-Werror=date-time
-		# "-ffile-prefix-map=${CMAKE_SOURCE_DIR}=." # TODO.low try this out and see what benefits there are
+		# "$<${v12}:-ffile-prefix-map=${okiidoku_SOURCE_DIR}=.>" # TODO.low try this out and see what benefits there are. see also gdb: set substitue-path, vscode: "sourceFileMap"
 	)
+endblock()
 endif()
 
 

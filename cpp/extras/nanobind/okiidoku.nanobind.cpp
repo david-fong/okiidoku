@@ -15,12 +15,14 @@
 namespace nb = ::nanobind;
 
 // function called upon python import
-NB_MODULE(okiidoku, m) { //
+// https://nanobind.readthedocs.io/en/latest/api_core.html#c.NB_MODULE
+// https://nanobind.readthedocs.io/en/latest/basics.html
+NB_MODULE(okiidoku_py, m) { //
 	namespace oki = ::okiidoku;
 	namespace oki_m = ::okiidoku::mono;
 	namespace oki_v = ::okiidoku::visitor;
 
 	m.doc() = "pybind11 build of okiidoku";
 
-	m.def("generate", &add, "generate a random filled sudoku grid");
+	m.def("generate_shuffled", &oki_v::generate_shuffled, "generate a random filled sudoku grid");
 }

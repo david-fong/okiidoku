@@ -37,8 +37,13 @@ Issues I'm watching:
 
 ## Misc List
 
-- figure out running in node REPL again.
-- pgo_use_check_needs_rebuild via compiler flag? make sure it doesn't mess up installations
+- fix location of generated pyi file.
+- install parent directory using build preset name. can't see how to do this right now with there being no macro for buildPresetName in CMake Preset spec.
+- install nanobind stuff
+
+- pgo_use_check_needs_rebuild via compiler flag? make sure it doesn't mess up installations (check if can use a build interface generator expression for that)
+
+- create dedicated hidden CMake configure preset starting point for packaging workflow?
 
 - launch.json https://code.visualstudio.com/docs/editor/variables-reference#_input-variables <!-- is this still useful? CMake tools has target debug stuff, right?-->
 
@@ -52,9 +57,9 @@ check `CMAKE_LANG_COMPILER_FRONTEND_VARIANT` to use msvc flags when compiler is 
     - If so, how could I fix this?
   - it's being inlined for both the training and optimized builds... do I need to make it not get inlined for the training build?
 
-bump minimum gcc version to gcc-12. hmm. or maybe give it some time to fix regressions? Ubuntu 22.04 is still on 11...
-
 - ctest for emscripten configuration
+
+- GCC -Wnrvo? or is it in -Wall?
 
 usage docs for CMake:
 - building an app target (cmake --build . --config=Release --target okiidoku_cli)

@@ -7,7 +7,7 @@ include_guard(DIRECTORY)
 get_property(is_multi_config GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
 if(NOT is_multi_config)
 	set(CMAKE_BUILD_TYPE "${CMAKE_BUILD_TYPE}" CACHE STRING "cmake build configuration")
-	if(PROJECT_IS_TOP_LEVEL)
+	if(okiidoku_IS_TOP_LEVEL)
 		set_property(CACHE CMAKE_BUILD_TYPE #[[ APPEND ]]
 			PROPERTY STRINGS "Debug;RelWithDebInfo;Release;MinSizeRel;PgoUse"
 		)
@@ -26,7 +26,7 @@ get_property(okiidoku_target_supports_shared_libs GLOBAL PROPERTY TARGET_SUPPORT
 if(okiidoku_target_supports_shared_libs)
 	if(MSVC)
 		set(OKIIDOKU_BUILD_SHARED_LIBS NO CACHE INTERNAL "DLLs are not yet supported")
-	elseif(PROJECT_IS_TOP_LEVEL)
+	elseif(okiidoku_IS_TOP_LEVEL)
 		set(OKIIDOKU_BUILD_SHARED_LIBS YES CACHE BOOL "okiidoku build shared libs")
 	elseif(DEFINED OKIIDOKU_BUILD_SHARED_LIBS)
 		set(OKIIDOKU_BUILD_SHARED_LIBS "${OKIIDOKU_BUILD_SHARED_LIBS}" CACHE BOOL "okiidoku build shared libs")
@@ -43,16 +43,16 @@ endif()
 unset(okiidoku_target_supports_shared_libs)
 
 
-option(OKIIDOKU_BUILD_WITH_SUGGESTED_WARNINGS "build okiidoku with suggested warnings" "${PROJECT_IS_TOP_LEVEL}")
+option(OKIIDOKU_BUILD_WITH_SUGGESTED_WARNINGS "build okiidoku with suggested warnings" "${okiidoku_IS_TOP_LEVEL}")
 option(OKIIDOKU_BUILD_WITH_STATIC_ANALYZERS "build okiidoku with static analyzers" NO) # off by default because it's slow
-option(OKIIDOKU_BUILD_DEBUG_WITH_SANITIZERS "build okiidoku debug builds with sanitizers" "${PROJECT_IS_TOP_LEVEL}")
-option(OKIIDOKU_BUILD_TESTING "build tests for okiidoku" "${PROJECT_IS_TOP_LEVEL}")
+option(OKIIDOKU_BUILD_DEBUG_WITH_SANITIZERS "build okiidoku debug builds with sanitizers" "${okiidoku_IS_TOP_LEVEL}")
+option(OKIIDOKU_BUILD_TESTING "build tests for okiidoku" "${okiidoku_IS_TOP_LEVEL}")
 
 
 option(
 	OKIIDOKU_BUILD_OPTIMIZE_LOCAL_NON_PORTABLE
 	"optimize for the compiling machine (less portable result). disables CPack."
-	#[[ default: ]] "${PROJECT_IS_TOP_LEVEL}"
+	#[[ default: ]] "${okiidoku_IS_TOP_LEVEL}"
 )
 
 

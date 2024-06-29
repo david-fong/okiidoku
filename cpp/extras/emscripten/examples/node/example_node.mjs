@@ -2,10 +2,14 @@
 // SPDX-FileCopyrightText: 2020 David Fong
 // SPDX-License-Identifier: AGPL-3.0-or-later
 /**
+ * Pass --repl to this script to start a REPL.
+ *
  * For CommonJS module scripts, you can basically do the same thing as below.
  * You just need to wrap the import await in an async function so it's not top-level.
  * Ex. wrap in an async IIFE: (async() => {...})();
  * Or you can require("./build/Release/okiidoku.js").then(oki => {...});
+ *
+ * Actual import path for you will be under your install and/or build directory.
  */
 // console.log(process.cwd());
 const oki = await (await import("./build/Release/okiidoku.js")).default({

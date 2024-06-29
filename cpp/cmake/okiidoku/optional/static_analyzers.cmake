@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # cspell:dictionaries cpp-refined
 include_guard(DIRECTORY)
+block()
 
 if(MSVC)
 	target_compile_options(okiidoku_compiler_warnings INTERFACE "/analyze")
@@ -38,3 +39,5 @@ if(NOT "${CPPCHECK_EXE}" STREQUAL "CPPCHECK_EXE-NOTFOUND")
 	# It's choking on the tweak header's `#if __has_include(...)`.
 	# Other people also mention this issue on sourceforge.
 endif()
+
+endblock()

@@ -2,11 +2,9 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 include_guard(DIRECTORY)
 
-set(CPM_DOWNLOAD_VERSION 0.38.7) # https://github.com/cpm-cmake/CPM.cmake/releases
+set(CPM_DOWNLOAD_VERSION 0.40.0) # https://github.com/cpm-cmake/CPM.cmake/releases
 include(okiidoku/dependencies.get_cpm)
-# Note: CPM does auto EXCLUDE_FROM_ALL when using shorthand add
-
-# TODO.wait once CMake 3.25 more widely default supported, https://github.com/cpm-cmake/CPM.cmake/releases/tag/v0.38.0 (or is this relevant? we're doing download-only and that's fine for us so far...)
+# Note: CPM does auto EXCLUDE_FROM_ALL and SYSTEM when using shorthand add
 
 CPMAddPackage(
 	NAME range-v3
@@ -42,11 +40,12 @@ endif()
 
 
 if(OKIIDOKU_BUILD_BINDINGS_FOR_PYTHON)
-	CPMAddPackage("gh:pybind/pybind11@2.9.2")
+	# CPMAddPackage("gh:pybind/pybind11@2.9.2")
 	# https://pybind11.readthedocs.io/en/stable/index.html
 	# https://pybind11.readthedocs.io/en/stable/changelog.html
 
-	CPMAddPackage("gh:wjakob/nanobind@1.9.2")
+	find_package(Python COMPONENTS Interpreter Development REQUIRED)
+	CPMAddPackage("gh:wjakob/nanobind@2.0.0")
 	# https://github.com/wjakob/nanobind
 	# https://github.com/wjakob/nanobind/blob/master/docs/changelog.rst
 	# https://nanobind.readthedocs.io/en/latest/building.html#finding-nanobind

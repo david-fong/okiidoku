@@ -8,7 +8,7 @@ project(okiidoku
 	LANGUAGES CXX
 )
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
-set(OKIIDOKU_VERSION_COMPATIBILITY ExactVersion) # see `cmake/installation.cmake`.
+set(OKIIDOKU_VERSION_COMPATIBILITY ExactVersion) # see `cmake/installation.cmake`. TODO is this variable case sensitive?
 # ^ I will consider switching to support `SameMajorVersion` starting at v1.0.0.
 set(CMAKE_CXX_SCAN_FOR_MODULES NO) # I'm not using C++ modules... yet.
 
@@ -25,6 +25,7 @@ include(okiidoku/options) # see this file for more info & defaults. summary:
 include(okiidoku/pgo_helpers)
 okiidoku_check_needs_short_circuit_pgo_gen_externalproject()
 
+include(okiidoku/ccache)
 include(okiidoku/compile_opts.basic)
 include(CheckIPOSupported)
 check_ipo_supported(RESULT okiidoku_is_ipo_supported)
@@ -50,7 +51,7 @@ if(OKIIDOKU_BUILD_TESTING)
 endif()
 
 
-add_subdirectory(libs/okiidoku)
+add_subdirectory(libs/okiidoku) # target: okiidoku
 add_subdirectory(libs/cli_utils EXCLUDE_FROM_ALL) # internal
 
 add_subdirectory(apps/cli EXCLUDE_FROM_ALL) # target: okiidoku_cli

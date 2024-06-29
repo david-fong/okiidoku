@@ -52,8 +52,9 @@
 	// https://vector-of-bool.github.io/docs/vscode-cmake-tools/settings.html
 
 	"cmake.sourceDirectory": ["${workspaceFolder}/cpp"],
-	"cmake.buildDirectory": "${sourceDirectory}/out/build/${cmake.activeConfigurePresetName}",
-	"cmake.installPrefix": "${sourceDirectory}/out/install/${cmake.activeConfigurePresetName}",
+	// the following two lines are technically not needed. only when using kits. but this project uses presets.
+	"cmake.buildDirectory": "${sourceDirectory}/out/build/${command:cmake.activeConfigurePresetName}",
+	"cmake.installPrefix": "${sourceDirectory}/out/install/${command:cmake.activeBuildPresetName}",
 	"cmake.debugConfig": {
 		"environment": [],
 		// "cwd": "",
