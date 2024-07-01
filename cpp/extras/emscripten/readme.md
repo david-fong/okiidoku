@@ -5,11 +5,11 @@
 
 ## Required Tools
 
-- [Emscripten](https://emscripten.org/docs/getting_started/downloads.html) 3.1.57 or higher
+- [Emscripten](https://emscripten.org/docs/getting_started/downloads.html) 3.1.61 or higher
 - CMake 3.28 or higher
 - [A C++ build system](https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html). Recommended: Ninja
 
-I have no intention to support versions of Emscripten older than the latest.
+I have no intention to support versions of Emscripten older than the latest at the time of my last pull.
 
 ## Command Snippets
 

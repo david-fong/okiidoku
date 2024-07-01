@@ -33,14 +33,13 @@
 Issues I'm watching:
 
 - [emscripten toolchain file does not set cross-compiling emulator like `emcmake`](https://github.com/emscripten-core/emscripten/issues/16382)
-- [vscode cmake tools problem with cmake installed via snap](https://github.com/microsoft/vscode-cmake-tools/issues/838#issuecomment-1035123514)
 
 ## Misc List
 
-- fix location of generated pyi file.
-- install parent directory using build preset name. can't see how to do this right now with there being no macro for buildPresetName in CMake Preset spec.
+- ./out/install/\<namespace directory\> := build preset name. can't see how to do this right now with there being no macro for buildPresetName in CMake Preset spec.
 - install nanobind stuff
 
+- check if ccache interferes with pgo_use_check_needs_rebuild
 - pgo_use_check_needs_rebuild via compiler flag? make sure it doesn't mess up installations (check if can use a build interface generator expression for that)
 
 - create dedicated hidden CMake configure preset starting point for packaging workflow?

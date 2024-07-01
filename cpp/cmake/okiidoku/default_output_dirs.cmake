@@ -7,8 +7,7 @@ include_guard(DIRECTORY)
 # things, but also want to adjust the output directories, you'll have to
 # make the paths work out yourself.
 
-
-
+# if user has set anything, don't set defaults for anything
 if(
 	(DEFINED CMAKE_RUNTIME_OUTPUT_DIRECTORY) OR
 	(DEFINED CMAKE_LIBRARY_OUTPUT_DIRECTORY) OR

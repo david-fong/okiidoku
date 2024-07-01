@@ -4,14 +4,11 @@
 /**
  * Pass --repl to this script to start a REPL.
  *
- * For CommonJS module scripts, you can basically do the same thing as below.
- * You just need to wrap the import await in an async function so it's not top-level.
- * Ex. wrap in an async IIFE: (async() => {...})();
- * Or you can require("./build/Release/okiidoku.js").then(oki => {...});
+ * For CommonJS, wrap with `(async() => {...})();`, or `require(".../okiidoku.js").then(oki => {...});`
  *
- * Actual import path for you will be under your install and/or build directory.
+ * Actual import path for you will be under your install and/or build directory. TODO maybe only support install dir?
  */
-// console.log(process.cwd());
+// TODO also try installation directory layout relative path (../../../../bin/okiidoku.js)
 const oki = await (await import("./build/Release/okiidoku.js")).default({
 	// https://emscripten.org/docs/api_reference/module.html#module
 });
@@ -22,7 +19,7 @@ oki.rng.seed(BigInt(Date.now()));
 	oki.initMostCanonicalGrid(grid);
 	oki.generateShuffled(grid, oki.rng.getRngSeed());
 	// console.log(grid); // node's default console logging doesn't call toString
-	console.log(`${grid}`); // or use grid.toString() or ""+grid
+	console.log(""+grid); // or use grid.toString() or `${grid}`
 	grid.delete(); // don't forget to do this. only do it once.
 }
 if (process.argv.includes("--repl")) {

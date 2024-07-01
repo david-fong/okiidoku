@@ -38,5 +38,5 @@ endif()
 
 
 target_sources(okiidoku PRIVATE
-	${PROJECT_SOURCE_DIR}/tools/okiidoku.natvis
+	${okiidoku_SOURCE_DIR}/tools/okiidoku.natvis
 )

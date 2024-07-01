@@ -7,8 +7,6 @@ if(NOT DEFINED EMSCRIPTEN)
 	message(FATAL_ERROR "missing emscripten toolchain file. see `emcmake`")
 endif()
 
-# TODO.wait https://gitlab.kitware.com/cmake/cmake/-/issues/20745
-
 # https://emscripten.org/docs/compiling/Building-Projects.html#using-libraries
 # https://emscripten.org/docs/porting/connecting_cpp_and_javascript/embind.html#binding-libraries
 add_executable(okiidoku_js okiidoku.embind.cpp)
@@ -18,9 +16,7 @@ set_target_properties(okiidoku_js PROPERTIES
 )
 # https://emsettings.surma.technology/
 # https://github.com/emscripten-core/emscripten/blob/main/src/settings.js
-target_compile_options(okiidoku_js PRIVATE
-	-sSTRICT=1
-)
+target_compile_options(okiidoku_js PRIVATE -sSTRICT=1)
 target_link_options(okiidoku_js PRIVATE
 	--no-entry # it's a "reactor" (ie. a library)
 	# --pre-js=
@@ -48,28 +44,29 @@ target_link_libraries(okiidoku_js
 	PRIVATE okiidoku
 	PRIVATE embind
 )
+okiidoku_install_target(okiidoku_js)
 
-# too bad can't use execute_process or file(CREATE_LINK) because there's a generator expression in CMAKE_LIBRARY_OUTPUT_DIRECTORY.
+# TODO.wait https://gitlab.kitware.com/cmake/cmake/-/issues/20745
 include(GNUInstallDirs)
-install(FILES
-	"$<TARGET_FILE_DIR:okiidoku_js>/okiidoku.d.ts"
-	TYPE BIN # not super sure where best to put this. alongside the .js seems like a good idea though.
-	COMPONENT okiidoku_development
-)
-
-# make a symlink so the examples can use prettier paths.
 block()
-set(examples_dir "${CMAKE_CURRENT_SOURCE_DIR}/examples")
-set(js_symlink_dir "${examples_dir}/node/build/$<CONFIG>")
+set(src "$<TARGET_FILE_DIR:okiidoku_js>")
+set(dest "${CMAKE_CURRENT_SOURCE_DIR}/examples/node/build/$<CONFIG>")
+install(FILES "${src}/okiidoku.d.ts" TYPE BIN COMPONENT okiidoku_development)
+install(FILES "${src}/okiidoku.wasm" TYPE BIN COMPONENT okiidoku_runtime)
+install(DIRECTORY examples TYPE DOC COMPONENT okiidoku_development
+	PATTERN "build"        EXCLUDE
+	PATTERN "node_modules" EXCLUDE
+	PATTERN "*pnpm*"       EXCLUDE
+)
+# make a symlink so the examples can use prettier paths.
+# too bad can't use execute_process or file(CREATE_LINK) because there's a generator expression in CMAKE_LIBRARY_OUTPUT_DIRECTORY.
+set(c "${CMAKE_COMMAND};-E")
 add_custom_command(TARGET okiidoku_js POST_BUILD
-	COMMAND "${CMAKE_COMMAND};-E;make_directory;${js_symlink_dir}"
-	COMMAND "${CMAKE_COMMAND};-E;create_symlink"
-		"$<TARGET_FILE:okiidoku_js>"
-		"${js_symlink_dir}/$<TARGET_FILE_NAME:okiidoku_js>"
-	COMMAND "${CMAKE_COMMAND};-E;create_symlink"
-		"$<TARGET_FILE_DIR:okiidoku_js>/okiidoku.d.ts"
-		"${js_symlink_dir}/okiidoku.d.ts"
-	COMMENT "Symlinking JS+TS target output files to examples directory for convenience"
+	COMMAND "${c};make_directory;${dest}"
+	COMMAND "${c};create_symlink;$<TARGET_FILE:okiidoku_js>;${dest}/$<TARGET_FILE_NAME:okiidoku_js>"
+	COMMAND "${c};create_symlink;${src}/okiidoku.d.ts;${dest}/okiidoku.d.ts"
+	COMMAND "${c};create_symlink;${src}/okiidoku.wasm;${dest}/okiidoku.wasm"
+	COMMENT "Symlinking JS+WASM+TS target output files to examples directory for convenience"
 	VERBATIM COMMAND_EXPAND_LISTS
 )
 endblock()

@@ -6,6 +6,7 @@ add_executable(okiidoku_cli
 	src/okiidoku_cli/cli.main.cpp
 )
 set_target_properties(okiidoku_cli PROPERTIES EXPORT_NAME cli)
+okiidoku_install_target(okiidoku_cli OPTIONAL)
 
 target_include_directories(okiidoku_cli PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
 

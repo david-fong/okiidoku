@@ -11,8 +11,8 @@ include(okiidoku/installation)
 # https://cmake.org/cmake/help/latest/manual/cpack-generators.7.html
 set(CPACK_VERBATIM_VARIABLES YES)
 set(CPACK_PACKAGE_VENDOR "david-fong")
-set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/../LICENSE.txt")
-set(CPACK_RESOURCE_FILE_README "${PROJECT_SOURCE_DIR}/readme.md")
+set(CPACK_RESOURCE_FILE_LICENSE "${okiidoku_SOURCE_DIR}/../LICENSE.txt")
+set(CPACK_RESOURCE_FILE_README "${okiidoku_SOURCE_DIR}/readme.md")
 #set(CPACK_PACKAGE_ICON )
 set(CPACK_SOURCE_IGNORE_FILES
 	# see https://github.com/CLIUtils/CLI11/blob/main/CMakeLists.txt for reference

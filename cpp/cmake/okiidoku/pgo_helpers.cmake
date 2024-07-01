@@ -72,7 +72,7 @@ if(NOT _OKIIDOKU_BUILD_IS_PGO_GEN) # is PgoUse
 	ExternalProject_Add(okiidoku_pgo_gen
 		# directory options:
 		PREFIX "${_OKIIDOKU_PGO_DIR}"
-		SOURCE_DIR "${PROJECT_SOURCE_DIR}"
+		SOURCE_DIR "${okiidoku_SOURCE_DIR}"
 		# configure step options:
 		CMAKE_GENERATOR "${okiidoku_pgo_gen_cmake_generator}"
 		CMAKE_GENERATOR_PLATFORM "${CMAKE_GENERATOR_PLATFORM}"
@@ -249,7 +249,7 @@ function(okiidoku_target_pgo
 		"-D trainer_binary=${_OKIIDOKU_PGO_DIR}/out/${trainer}${CMAKE_EXECUTABLE_SUFFIX}"
 		"-D data_dir=${data_dir}"
 		"-D training_stamp_file=${training_stamp_file}"
-		"-P" "${PROJECT_SOURCE_DIR}/cmake/okiidoku/pgo.run_training.cmake"
+		"-P" "${okiidoku_SOURCE_DIR}/cmake/okiidoku/pgo.run_training.cmake"
 	)
 	set(command_train "\$<IF:${if_use},${command_train},${CMAKE_COMMAND};-E;true>")
 

@@ -19,6 +19,7 @@ set_target_properties(okiidoku PROPERTIES
 	INTERPROCEDURAL_OPTIMIZATION "${okiidoku_is_ipo_supported}"
 )
 add_subdirectory(src/okiidoku) # target_source_files
+okiidoku_install_target(okiidoku)
 
 include(GenerateExportHeader)
 generate_export_header(okiidoku EXPORT_FILE_NAME include/okiidoku/detail/export.h)
@@ -46,14 +47,14 @@ include(GNUInstallDirs)
 # TODO can this be a build event custom command?
 add_custom_target(okiidoku_copy_debugger_support_files ALL
 	"${CMAKE_COMMAND}" -E make_directory "${OKIIDOKU_DATA_OUTPUT_DIRECTORY}"
-	COMMAND "${CMAKE_COMMAND}" -E create_symlink "${PROJECT_SOURCE_DIR}/tools/okiidoku.gdb.py" "${OKIIDOKU_DATA_OUTPUT_DIRECTORY}/okiidoku.gdb.py"
-	COMMAND "${CMAKE_COMMAND}" -E create_symlink "${PROJECT_SOURCE_DIR}/tools/okiidoku.natvis" "${OKIIDOKU_DATA_OUTPUT_DIRECTORY}/okiidoku.natvis"
+	COMMAND "${CMAKE_COMMAND}" -E create_symlink "${okiidoku_SOURCE_DIR}/tools/okiidoku.gdb.py" "${OKIIDOKU_DATA_OUTPUT_DIRECTORY}/okiidoku.gdb.py"
+	COMMAND "${CMAKE_COMMAND}" -E create_symlink "${okiidoku_SOURCE_DIR}/tools/okiidoku.natvis" "${OKIIDOKU_DATA_OUTPUT_DIRECTORY}/okiidoku.natvis"
 	COMMENT "Symlinking debug-support files to data directory"
 	VERBATIM COMMAND_EXPAND_LISTS
 )
 install(FILES
-	"${PROJECT_SOURCE_DIR}/tools/okiidoku.gdb.py"
-	"${PROJECT_SOURCE_DIR}/tools/okiidoku.natvis"
+	"${okiidoku_SOURCE_DIR}/tools/okiidoku.gdb.py"
+	"${okiidoku_SOURCE_DIR}/tools/okiidoku.natvis"
 	TYPE DATA # see DEFINE_GDB_PY_SCRIPT in gdb_support.cpp
 	# also https://learn.microsoft.com/en-us/visualstudio/debugger/create-custom-views-of-native-objects#BKMK_natvis_location and https://learn.microsoft.com/en-us/cpp/build/reference/natvis-add-natvis-to-pdb so if a PDB is installed with embedded natvis, no need to install natvis separately?
 	COMPONENT okiidoku_development

@@ -10,3 +10,4 @@ okiidoku_add_compiler_options(okiidoku_py)
 target_link_libraries(okiidoku_py
 	PRIVATE okiidoku
 )
+okiidoku_install_target(okiidoku_py)
