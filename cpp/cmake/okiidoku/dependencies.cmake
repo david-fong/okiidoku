@@ -44,7 +44,7 @@ if(OKIIDOKU_BUILD_BINDINGS_FOR_PYTHON)
 	# https://pybind11.readthedocs.io/en/stable/index.html
 	# https://pybind11.readthedocs.io/en/stable/changelog.html
 
-	find_package(Python COMPONENTS Interpreter Development REQUIRED)
+	find_package(Python COMPONENTS Interpreter Development.Module REQUIRED)
 	CPMAddPackage("gh:wjakob/nanobind@2.0.0")
 	# https://github.com/wjakob/nanobind
 	# https://github.com/wjakob/nanobind/blob/master/docs/changelog.rst

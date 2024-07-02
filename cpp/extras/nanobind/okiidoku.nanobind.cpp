@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2020 David Fong
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+// https://nanobind.readthedocs.io/_/downloads/en/latest/pdf/
 // https://nanobind.readthedocs.io/en/latest/basics.html
 // https://nanobind.readthedocs.io/en/latest/porting.html#removed
 // https://nanobind.readthedocs.io/en/latest/exchanging.html
@@ -17,7 +18,7 @@ namespace nb = ::nanobind;
 // function called upon python import
 // https://nanobind.readthedocs.io/en/latest/api_core.html#c.NB_MODULE
 // https://nanobind.readthedocs.io/en/latest/basics.html
-NB_MODULE(okiidoku_py, m) { //
+NB_MODULE(_okiidoku_nb, m) { //
 	namespace oki = ::okiidoku;
 	namespace oki_m = ::okiidoku::mono;
 	namespace oki_v = ::okiidoku::visitor;

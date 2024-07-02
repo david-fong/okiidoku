@@ -36,7 +36,6 @@ endif()
 
 # short circuit this (external) project if not added by/for the PgoUse config
 # This should be called right after `include()`ing this file.
-# Note: wrap with `macro` so `return()` returns from caller instead of this `include()`ed file.
 # this would be a lot easier if ExternalProject_Add could condition upon $<CONFIG>
 macro(okiidoku_check_needs_short_circuit_pgo_gen_externalproject)
 	if(DEFINED _OKIIDOKU_PGO_CALLING_CONFIG AND NOT _OKIIDOKU_PGO_CALLING_CONFIG STREQUAL "PgoUse")
@@ -238,6 +237,14 @@ function(okiidoku_target_pgo
 	endif()
 
 	set(training_stamp_file "${data_dir}/include/${trainee}/detail/pgo_gen_last_training_timestamp.hpp")
+	# ^assumes namespaced, split include directory exists and include flag already configured
+	block()
+	set(header "okiidoku/detail/pgo_use_check_needs_rebuild.hpp")
+	set(gnu_include  "$<$<CXX_COMPILER_ID:GNU,Clang>:-include;${header}>")
+	set(msvc_include "$<$<CXX_COMPILER_ID:MSVC>:/FI;${header}>")
+	target_compile_options("${trainee}" PRIVATE "$<BUILD_INTERFACE:${gnu_include}${msvc_include}>")
+	# TODO warn on unsupported compiler?
+	endblock()
 
 	# Note: annoyingly, commands cannot be the empty string. use `cmake -E true` as a no-op instead.
 	string(JOIN ";" command_train
@@ -256,7 +263,7 @@ function(okiidoku_target_pgo
 	add_custom_target("run_${trainer}"
 		COMMAND "${command_train}"
 		BYPRODUCTS "${training_stamp_file}"
-		COMMENT "\$<IF:${if_use},Checking if '${trainer}' needs to be re-run,>"
+		COMMENT "\$<IF:${if_use},Checking if '${trainer}' needs to be re-run to train '${trainee}',>"
 		VERBATIM COMMAND_EXPAND_LISTS
 	)
 	add_dependencies("run_${trainer}" "okiidoku_pgo_gen-build") # must build trainee before training
@@ -264,10 +271,9 @@ function(okiidoku_target_pgo
 	# TODO.wait use generator expression once `add_dependencies` supports them. https://gitlab.kitware.com/cmake/cmake/-/issues/19467. currently doing workaround in the custom step COMMANDs.
 	add_dependencies(${trainee} "run_${trainer}")
 
-	# make all sources include the timestamp header to detect need for recompilation.
+	# make all sources include the last training timestamp header to detect need for recompilation.
 	#  currently, OBJECT_DEPENDS doesn't support generator expressions (https://gitlab.kitware.com/cmake/cmake/-/issues/22034).
 	#  I would just use a compile definition, but that can't be changed at build time.
-	# TODO consider using a inclusion compiler flag instead of the manual #includes. I hesitated due to relying on compiler flags (less portable?) but this whole PGO implementation is already very reliant on compiler flags. and then we can clear out this buildsystem config implementation detail from the source files.
 	target_include_directories(${trainee} PRIVATE "$<BUILD_INTERFACE:$<${if_use}:${data_dir}/include>>")
 	# target_sources(${trainee} PRIVATE "$<${if_use}:${training_stamp_file}>") # TODO why is this done?
 

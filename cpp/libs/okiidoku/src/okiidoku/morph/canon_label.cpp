@@ -1,6 +1,5 @@
 // SPDX-FileCopyrightText: 2020 David Fong
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#include <okiidoku/detail/pgo_use_check_needs_rebuild.hpp>
 #include <okiidoku/morph/rel_info.hpp>
 #include <okiidoku/morph/transform.hpp>
 #include <okiidoku/morph/canon_ties.hpp>

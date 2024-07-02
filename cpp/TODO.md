@@ -36,11 +36,10 @@ Issues I'm watching:
 
 ## Misc List
 
+- make repl support custom streams? or should that just be handled by caller of the progam? related: support saving session history files that can be later passed as program stdin to repro.
+
 - ./out/install/\<namespace directory\> := build preset name. can't see how to do this right now with there being no macro for buildPresetName in CMake Preset spec.
 - install nanobind stuff
-
-- check if ccache interferes with pgo_use_check_needs_rebuild
-- pgo_use_check_needs_rebuild via compiler flag? make sure it doesn't mess up installations (check if can use a build interface generator expression for that)
 
 - create dedicated hidden CMake configure preset starting point for packaging workflow?
 
