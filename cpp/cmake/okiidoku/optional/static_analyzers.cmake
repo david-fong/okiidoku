@@ -2,6 +2,9 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # cspell:dictionaries cpp-refined
 include_guard(DIRECTORY)
+if(NOT OKIIDOKU_BUILD_WITH_STATIC_ANALYZERS)
+	return()
+endif()
 block()
 
 if(MSVC)

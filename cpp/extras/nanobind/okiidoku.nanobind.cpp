@@ -1,12 +1,12 @@
 // SPDX-FileCopyrightText: 2020 David Fong
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-// https://nanobind.readthedocs.io/_/downloads/en/latest/pdf/
 // https://nanobind.readthedocs.io/en/latest/basics.html
 // https://nanobind.readthedocs.io/en/latest/porting.html#removed
 // https://nanobind.readthedocs.io/en/latest/exchanging.html
 // https://nanobind.readthedocs.io/en/latest/api_core.html
 // https://nanobind.readthedocs.io/en/latest/faq.html#how-can-i-reduce-build-time
+// https://nanobind.readthedocs.io/en/latest/packaging.html
 #include <nanobind/nanobind.h>
 
 #include <okiidoku/gen.hpp>

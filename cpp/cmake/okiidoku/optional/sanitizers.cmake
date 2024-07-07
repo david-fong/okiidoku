@@ -2,6 +2,9 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # cspell:words fsanitize, addresssanitizer, asan
 include_guard(DIRECTORY)
+if(NOT OKIIDOKU_BUILD_DEBUG_WITH_SANITIZERS)
+	return()
+endif()
 
 # setup tips for linking mixed-instrumentation binaries:
 #  https://stackoverflow.com/a/47022141/11107541

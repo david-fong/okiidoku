@@ -7,6 +7,8 @@ include_guard(DIRECTORY)
 # providing an option to "add" PGO support to all generated build-system
 # configs. Rationale for design: I don't see myself ever wanting PGO for
 # _anything but_ a speed-optimized release build.
+#
+# after `include()`ing this script, you must call `okiidoku_check_needs_short_circuit_pgo_gen_externalproject()`.
 
 # https://gitlab.kitware.com/cmake/cmake/-/issues/19273
 

@@ -2,6 +2,9 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 include_guard(DIRECTORY)
 include(CheckCXXSourceCompiles)
+if(NOT OKIIDOKU_BUILD_OPTIMIZE_LOCAL_NON_PORTABLE)
+	return()
+endif()
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 	add_compile_options(
@@ -10,7 +13,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 	)
 endif()
 
-if(NOT MSVC AND NOT DEFINED EMSCRIPTEN)
+if(NOT MSVC AND NOT EMSCRIPTEN)
 	add_compile_options(
 		-march=native # enable optimizing for the compiling machine's instruction set architecture.
 	)

@@ -4,7 +4,7 @@
 include_guard(DIRECTORY)
 include(GNUInstallDirs)
 
-install(FILES ../README.md TYPE DOC COMPONENT okiidoku_about)
+install(FILES ../README.md ../LICENSE.txt TYPE DOC COMPONENT okiidoku_about)
 # install(FILES ../.reuse/dep5 TYPE DOC COMPONENT okiidoku_about RENAME copying) # hm probably not right. need to make a custom one for the installation
 install(DIRECTORY ../LICENSES TYPE DOC COMPONENT okiidoku_about)
 

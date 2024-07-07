@@ -14,11 +14,11 @@ There is [SWIG](https://www.swig.org/exec.html), but from extremely shallow onli
 - the cmake preset "dev" inherits the toolchain preset's condition. If [this](https://gitlab.kitware.com/cmake/cmake/-/issues/23283) gets implemented, we can make use of it to have a clean solution.
 
 - emscripten links and things for future reference
-  - `emcmake cmake -S . -B build -G 'Ninja Multi-Config'`
+  - `cmake -S . --preset dev.emscripten`
   - [conan and emscripten](https://docs.conan.io/en/latest/integrations/cross_platform/emscripten.html)
   - [compiling](https://emscripten.org/docs/compiling/WebAssembly.html)
   - [EmBind vs WebIDL Binder](https://emscripten.org/docs/porting/connecting_cpp_and_javascript/Interacting-with-code.html#interacting-with-code-binding-cpp)
-    - I'm leaning toward embind (in-source annotations, whereas webidl uses out-of-source annotations)
+    - I'll use embind
     - [embind](https://emscripten.org/docs/porting/connecting_cpp_and_javascript/embind.html)
   - [the JS module object](https://emscripten.org/docs/api_reference/module.html#module)
   - why aren't `compare_three_way_result` and things like `is_neq` found? I can clearly see them declared in emscripten/upstream/lib/c++/v1/compare
@@ -42,4 +42,3 @@ not yet confirmed to be on roadmap.
 
 - There's JNI.
 - Java 19 has something new [](https://openjdk.org/jeps/424)
-

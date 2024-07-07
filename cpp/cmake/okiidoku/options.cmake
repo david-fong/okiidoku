@@ -49,14 +49,16 @@ option(OKIIDOKU_BUILD_DEBUG_WITH_SANITIZERS "build okiidoku debug builds with sa
 option(OKIIDOKU_BUILD_TESTING "build tests for okiidoku" "${okiidoku_IS_TOP_LEVEL}")
 
 
+if(NOT EMSCRIPTEN)
 option(
 	OKIIDOKU_BUILD_OPTIMIZE_LOCAL_NON_PORTABLE
 	"optimize for the compiling machine (less portable result). disables CPack."
 	#[[ default: ]] "${okiidoku_IS_TOP_LEVEL}"
 )
+endif()
 
 
-if(NOT DEFINED EMSCRIPTEN)
+if(NOT EMSCRIPTEN)
 	option(OKIIDOKU_BUILD_BINDINGS_FOR_PYTHON "build bindings for python" NO)
 else()
 	if(OKIIDOKU_BUILD_BINDINGS_FOR_PYTHON)

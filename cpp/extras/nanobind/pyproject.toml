@@ -1,0 +1,26 @@
+# SPDX-FileCopyrightText: 2020 David Fong
+# SPDX-License-Identifier: GPL-3.0-or-later
+# https://nanobind.readthedocs.io/en/latest/packaging.html
+# https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#writing-pyproject-toml
+
+[build-system]
+requires = ["scikit-build-core >=0.9.8", "nanobind >=2.0.0"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "okiidoku"
+version = "0.1.0"
+description = "david fong's variable-grid-size sudoku toolkit"
+readme = "README.md"
+requires-python = ">=3.12" # IDK what I'm doing
+authors = [
+	{ name = "David Fong", email = "foo@example.com" },
+]
+classifiers = [
+	"License :: AGPL-3.0-or-later",
+]
+# Optional: runtime dependency specification
+# dependencies = [ "" ]
+
+[project.urls]
+Homepage = "https://github.com/david-fong/okiidoku"

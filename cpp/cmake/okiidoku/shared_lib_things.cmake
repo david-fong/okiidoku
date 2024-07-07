@@ -15,7 +15,7 @@ endif()
 # https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/RPATH-handling
 # https://docs.conan.io/en/latest/howtos/manage_shared_libraries/rpaths.html
 # TODO.low these assume that BINDIR is one level deep and beside LIBDIR.
-if(APPLE)
+if(APPLE) # when the target system is an Apple platform
 	list(APPEND CMAKE_INSTALL_RPATH "@executable_path/../${CMAKE_INSTALL_LIBDIR}")
 else()
 	list(APPEND CMAKE_INSTALL_RPATH "\$ORIGIN/../${CMAKE_INSTALL_LIBDIR}")

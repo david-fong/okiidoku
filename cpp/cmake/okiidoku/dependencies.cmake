@@ -2,8 +2,9 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 include_guard(DIRECTORY)
 
-set(CPM_DOWNLOAD_VERSION 0.40.0) # https://github.com/cpm-cmake/CPM.cmake/releases
-include(okiidoku/dependencies.get_cpm)
+# https://github.com/cpm-cmake/CPM.cmake/releases
+include(okiidoku/get_cpm)
+
 # Note: CPM does auto EXCLUDE_FROM_ALL and SYSTEM when using shorthand add
 
 CPMAddPackage(

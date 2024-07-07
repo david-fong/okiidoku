@@ -24,18 +24,19 @@
 # -o: only-matching; -S smart-case; -I: no-filename ; -N: no-line-number
 rg -oSIN --no-filename '(\w+)?okiidoku_\w+' | sort | uniq -c
 
-# (cd to the build folder)
+# (cd into build tree)
 # install to a test directory
 cmake --install . --config=Release --prefix=install_test
 
-# (cd to the cmake build folder of interest)
+# (cd into build tree)
 # view public(-D) de-mangled(-C) symbols of the shared library sorted by address(-n)
 nm -nCD build/Release/lib/libokiidoku.so
 
+# (cd into build tree)
 # de-mangled(-C) assembler contents of executable sections(-d), intermixing source code with disassembly(-S). --visualize-jumps=extended-color
 objdump -SCd build/Release/lib/libokiidoku.so | less
 
-# (cd to the cpp folder)
+# (cd to the source tree)
 # view the grid translation unit with macros fully expanded
 g++ -E -I../libs/okiidoku/include/ -Ilibs/okiidoku/Release/include/ ../libs/okiidoku/src/okiidoku/grid.cpp | less
 
@@ -45,7 +46,16 @@ perf stat -e branch-misses:u ./build/Release/bin/okiidoku_test
 # compare sizes of pgo vs release builds
 size ./build/PgoUse/lib/libokiidoku.so ./build/Release/lib/libokiidoku.so
 
+# (cd into build tree)
 gdb --cd=build/Debug bin/okiidoku_test.o2_bit_arr
+
+# (cd into build tree)
+du -L --si -a out/install/dev.gcc/{lib,bin}
+du -L --si -a out/install/dev.gcc/{lib,bin} | sort -n
+
+# (cd into build tree)
+# https://crascit.com/2022/06/24/build-performance-insights/
+../../../tools/ninjatracing.py .ninja_log > trace.json
 ```
 
 ## CMake Things

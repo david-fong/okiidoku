@@ -28,6 +28,7 @@
 		},
 		{
 			"name": "base:user",
+			"description": "for non-dev users who want to build/install locally.",
 			"hidden": true,
 			"inherits": ["base:any"],
 			"generator": "Ninja",
@@ -40,6 +41,7 @@
 		},
 		{
 			"name": "base:dev",
+			"description": "for developers/development. not for packaging.",
 			"hidden": true,
 			"inherits": ["base:any"],
 			"generator": "Ninja Multi-Config",
@@ -50,14 +52,29 @@
 			},
 			"cacheVariables": {
 				"CMAKE_INTERPROCEDURAL_OPTIMIZATION_DEBUG": false,
-				"CPM_SOURCE_CACHE": "${sourceDir}/external/.cpm",
+				"CPM_SOURCE_CACHE": "${sourceDir}/external",
 				"OKIIDOKU_BUILD_WITH_SUGGESTED_WARNINGS": true,
 				"OKIIDOKU_BUILD_TESTING": true,
 				"OKIIDOKU_BUILD_BINDINGS_FOR_PYTHON": true,
-				"CPACK_INCLUDE_TOPLEVEL_DIRECTORY": false
+				"CPACK_INCLUDE_TOPLEVEL_DIRECTORY": false,
+				"CMAKE_CXX_FLAGS": "--param integer-share-limit=251"
 			},
 			"warnings": {
 				"dev": true
+			}
+		},
+		{
+			"name": "base:pkg",
+			"description": "for packaging",
+			"hidden": true,
+			"inherits": ["base:dev"],
+			"binaryDir": "${sourceDir}/out/pkg.build/${presetName}",
+			"installDir": "${sourceDir}/out/pkg.install/${presetName}",
+			"environment": {
+				"CMAKE_INSTALL_MODE": null
+			},
+			"cacheVariables": {
+				"OKIIDOKU_BUILD_OPTIMIZE_LOCAL_NON_PORTABLE": false
 			}
 		},
 		{
@@ -111,7 +128,6 @@
 			"toolchainFile": "$env{EMSDK}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake",
 			"cacheVariables": {
 				"CMAKE_CONFIGURATION_TYPES": "MinSizeRel;Debug;Release",
-				"CMAKE_CROSSCOMPILING_EMULATOR": "node;--experimental-wasm-threads",
 				"OKIIDOKU_BUILD_BINDINGS_FOR_PYTHON": null
 			}
 		},
@@ -138,8 +154,17 @@
 	],
 	"buildPresets": [
 		{
+			"name": "base:any",
+			"hidden": true,
+			"targets": ["all"],
+			"environment": {
+				"MOLD_JOBS": "1"
+			}
+		},
+		{
 			"name": "base:dev",
 			"hidden": true,
+			"inherits": "base:any",
 			"targets": ["all", "okiidoku_cli"]
 		},
 		{
@@ -254,5 +279,7 @@
 			"execution": {},
 			"output": {}
 		}
-	]
+	],
+	"packagePresets": [],
+	"workflowPresets": []
 }

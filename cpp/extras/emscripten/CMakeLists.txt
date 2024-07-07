@@ -1,9 +1,9 @@
 # SPDX-FileCopyrightText: 2020 David Fong
 # SPDX-License-Identifier: GPL-3.0-or-later
 # cspell:words emcmake embind emcc
-# see emcmake implementation in emsdk/upstream/emscripten/emcmake.py
-#  and emsdk/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake
-if(NOT DEFINED EMSCRIPTEN)
+# see emcmake implementation in ${EMSDK}/upstream/emscripten/emcmake.py
+#  and ${EMSDK}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake
+if(NOT EMSCRIPTEN)
 	message(FATAL_ERROR "missing emscripten toolchain file. see `emcmake`")
 endif()
 

@@ -18,7 +18,7 @@ function(okiidoku_add_compiler_options target)
 	endif()
 	# get_target_property(sources ${target} SOURCES)
 	# set_property(SOURCE ${sources}
-	# 	# DIRECTORY "${okiidoku_SOURCE_DIR}" "${PROJECT_BINARY_DIR}"
+	# 	# DIRECTORY "${okiidoku_SOURCE_DIR}" "${okiidoku_BINARY_DIR}"
 	# 	TARGET_DIRECTORY ${target}
 	# 	APPEND PROPERTY OBJECT_DEPENDS "${okiidoku_SOURCE_DIR}/cmake/okiidoku/flags"
 	# )
@@ -50,6 +50,7 @@ block()
 	target_compile_options(okiidoku_compile_options_public INTERFACE
 	)
 	target_compile_options(okiidoku_compiler_warnings INTERFACE
+		-ftabstop=1
 		"$<${v12}:-Wbidi-chars=any>" # warn on any usage of bidi text
 		-Wnormalized # warn on identifiers that look the same but are not the same
 		-Wno-unknown-pragmas

@@ -44,4 +44,6 @@ if(NOT exit_code EQUAL 0)
 endif()
 
 string(TIMESTAMP timestamp "%s" UTC)
-file(WRITE "${training_stamp_file}" "// UTC: ${timestamp}") # TODO if ccache sees through this, figure something else out. maybe an extern variable?
+file(WRITE "${training_stamp_file}" "// UTC: ${timestamp}")
+# TODO if ccache sees through this, figure something else out. maybe an extern variable?
+#  maybe the config_extra_files_to_hash option can help

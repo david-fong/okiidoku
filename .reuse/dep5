@@ -4,7 +4,15 @@ Upstream-Contact: David Fong <davidfong19@gmail.com>
 Source: https://github.com/david-fong/okiidoku
 
 Files:
+ .vscode/settings.json
+ */pnpm-lock.yaml
  sample-output/*.txt
  sample-output/*.png
+ writings/journal/*.json
 Copyright: 2020 David Fong
 License: CC0-1.0
+
+Files:
+ */package.json
+Copyright: 2020 David Fong
+License: GPL-3.0-or-later

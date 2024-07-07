@@ -2,7 +2,10 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # cspell:words shlibdeps
 include_guard(DIRECTORY)
-include(okiidoku/installation)
+if(OKIIDOKU_BUILD_OPTIMIZE_LOCAL_NON_PORTABLE)
+	message(NOTICE "note that okiidoku packaging rules are not enabled due to using `OKIIDOKU_BUILD_OPTIMIZE_LOCAL_NON_PORTABLE`.")
+	return()
+endif()
 
 # Packaging support
 # https://cmake.org/cmake/help/book/mastering-cmake/chapter/Packaging%20With%20CPack.html
