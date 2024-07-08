@@ -56,8 +56,8 @@
 				"OKIIDOKU_BUILD_WITH_SUGGESTED_WARNINGS": true,
 				"OKIIDOKU_BUILD_TESTING": true,
 				"OKIIDOKU_BUILD_BINDINGS_FOR_PYTHON": true,
-				"CPACK_INCLUDE_TOPLEVEL_DIRECTORY": false,
-				"CMAKE_CXX_FLAGS": "--param integer-share-limit=251"
+				"CPACK_PACKAGE_DIRECTORY": "${sourceDir}/out/package/",
+				"CPACK_INCLUDE_TOPLEVEL_DIRECTORY": false
 			},
 			"warnings": {
 				"dev": true
@@ -74,7 +74,8 @@
 				"CMAKE_INSTALL_MODE": null
 			},
 			"cacheVariables": {
-				"OKIIDOKU_BUILD_OPTIMIZE_LOCAL_NON_PORTABLE": false
+				"OKIIDOKU_BUILD_OPTIMIZE_LOCAL_NON_PORTABLE": false,
+				"CPACK_PACKAGE_DIRECTORY": "${sourceDir}/out/package/"
 			}
 		},
 		{
@@ -83,7 +84,8 @@
 			"condition": {"type": "notEquals", "lhs": "${hostSystemName}", "rhs": "Darwin"},
 			"cacheVariables": {
 				"CMAKE_C_COMPILER": "clang",
-				"CMAKE_CXX_COMPILER": "clang++"
+				"CMAKE_CXX_COMPILER": "clang++",
+				"CMAKE_CXX_FLAGS_DEBUG": "-Og -g"
 			}
 		},
 		{
@@ -93,7 +95,8 @@
 			"description": "use with `env LLVM_HOME=$(brew --prefix llvm) cmake --preset ...`. Note: may also need to set CMAKE_FIND_FRAMEWORK and CMAKE_FIND_APPBUNDLE to NEVER or LAST",
 			"cacheVariables": {
 				"CMAKE_C_COMPILER": "$env{LLVM_HOME}/bin/clang",
-				"CMAKE_CXX_COMPILER": "$env{LLVM_HOME}/bin/clang++"
+				"CMAKE_CXX_COMPILER": "$env{LLVM_HOME}/bin/clang++",
+				"CMAKE_CXX_FLAGS_DEBUG": "-Og -g"
 			},
 			"environment": {
 				"LDFLAGS": "-L$env{LLVM_HOME}/lib;-Wl,-rpath,$env{LLVM_HOME}/lib",
@@ -105,7 +108,8 @@
 			"hidden": true,
 			"cacheVariables": {
 				"CMAKE_C_COMPILER": "gcc",
-				"CMAKE_CXX_COMPILER": "g++"
+				"CMAKE_CXX_COMPILER": "g++",
+				"CMAKE_CXX_FLAGS_DEBUG": "-Og -g"
 			}
 		},
 		{
@@ -168,92 +172,119 @@
 			"targets": ["all", "okiidoku_cli"]
 		},
 		{
+			"name": "base:dev.clang",
+			"hidden": true,
+			"condition": {"type": "notEquals", "lhs": "${hostSystemName}", "rhs": "Darwin"},
+			"inherits": "base:dev"
+		},
+		{
+			"name": "base:dev.clang-homebrew",
+			"hidden": true,
+			"condition": {"type": "equals", "lhs": "${hostSystemName}", "rhs": "Darwin"},
+			"inherits": "base:dev"
+		},
+		{
+			"name": "base:dev.gcc",
+			"hidden": true,
+			"inherits": "base:dev",
+			"environment": {
+				"ASAN_OPTIONS": "verify_asan_link_order=false"
+			}
+		},
+		{
+			"name": "base:dev.vs:x64",
+			"hidden": true,
+			"condition": {"type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows"},
+			"inherits": "base:dev"
+		},
+		{
 			"name": "dev.clang.debug",
 			"configurePreset": "dev.clang",
 			"displayName": "debug",
-			"inherits": ["base:dev"],
+			"inherits": ["base:dev.clang"],
 			"configuration": "Debug"
 		},
 		{
 			"name": "dev.clang.release",
 			"configurePreset": "dev.clang",
 			"displayName": "release",
-			"inherits": ["base:dev"],
+			"inherits": ["base:dev.clang"],
 			"configuration": "Release"
 		},
 		{
 			"name": "dev.clang.pgo",
 			"configurePreset": "dev.clang",
 			"displayName": "pgo",
-			"inherits": ["base:dev"],
+			"inherits": ["base:dev.clang"],
 			"configuration": "PgoUse"
 		},
 		{
 			"name": "dev.clang-homebrew.debug",
 			"configurePreset": "dev.clang-homebrew",
 			"displayName": "debug",
-			"inherits": ["base:dev"],
+			"inherits": ["base:dev.clang-homebrew"],
 			"configuration": "Debug"
 		},
 		{
 			"name": "dev.clang-homebrew.release",
 			"configurePreset": "dev.clang-homebrew",
 			"displayName": "release",
-			"inherits": ["base:dev"],
+			"inherits": ["base:dev.clang-homebrew"],
 			"configuration": "Release"
 		},
 		{
 			"name": "dev.clang-homebrew.pgo",
 			"configurePreset": "dev.clang-homebrew",
 			"displayName": "pgo",
-			"inherits": ["base:dev"],
+			"inherits": ["base:dev.clang-homebrew"],
 			"configuration": "PgoUse"
 		},
 		{
 			"name": "dev.gcc.debug",
 			"configurePreset": "dev.gcc",
 			"displayName": "debug",
-			"inherits": ["base:dev"],
+			"inherits": ["base:dev.gcc"],
 			"configuration": "Debug"
 		},
 		{
 			"name": "dev.gcc.release",
 			"configurePreset": "dev.gcc",
 			"displayName": "release",
-			"inherits": ["base:dev"],
+			"inherits": ["base:dev.gcc"],
 			"configuration": "Release"
 		},
 		{
 			"name": "dev.gcc.pgo",
 			"configurePreset": "dev.gcc",
 			"displayName": "pgo",
-			"inherits": ["base:dev"],
+			"inherits": ["base:dev.gcc"],
 			"configuration": "PgoUse"
 		},
 		{
 			"name": "dev.msvc.debug",
 			"configurePreset": "dev.msvc",
 			"displayName": "debug",
-			"inherits": ["base:dev"],
+			"inherits": ["base:dev.vs:x64"],
 			"configuration": "Debug"
 		},
 		{
 			"name": "dev.msvc.release",
 			"configurePreset": "dev.msvc",
 			"displayName": "release",
-			"inherits": ["base:dev"],
+			"inherits": ["base:dev.vs:x64"],
 			"configuration": "Release"
 		},
 		{
 			"name": "dev.msvc.pgo",
 			"configurePreset": "dev.msvc",
 			"displayName": "pgo",
-			"inherits": ["base:dev"],
+			"inherits": ["base:dev.vs:x64"],
 			"configuration": "PgoUse"
 		},
 		{
 			"name": "base:dev.emscripten",
 			"hidden": true,
+			"condition": {"type": "notEquals", "lhs": "$env{EMSDK}", "rhs": ""},
 			"targets": ["all"]
 		},
 		{
@@ -280,6 +311,16 @@
 			"output": {}
 		}
 	],
-	"packagePresets": [],
+	"packagePresets": [
+		{
+			"name": "dev.emscripten.release",
+			"configurePreset": "dev.emscripten",
+			"displayName": "release",
+			"description": "equivalent of `npm pack`(?)",
+			"configurations": ["Release"],
+			"generators": ["TGZ"],
+			"configFile": "CPackConfig.cmake"
+		}
+	],
 	"workflowPresets": []
 }

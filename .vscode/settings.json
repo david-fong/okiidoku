@@ -41,6 +41,7 @@
 	"files.associations": {
 		".clang-tidy": "yaml",
 		"*.natvis": "xml",
+		"*.cmake.in": "cmake-documentation",
 	},
 	// "explorer.sortOrder": "default",
 	"C_Cpp.autoAddFileAssociations": false,
@@ -59,14 +60,14 @@
 	// the following two lines are technically not needed. only when using kits. but this project uses presets.
 	"cmake.buildDirectory": "${sourceDirectory}/out/build/${command:cmake.activeConfigurePresetName}",
 	"cmake.installPrefix": "${sourceDirectory}/out/install/${command:cmake.activeBuildPresetName}",
-	"cmake.debugConfig": {
-		"environment": [],
-		// "cwd": "",
-		"args": [],
-		"setupCommands": [],
-		"stopAtEntry": true,
-		// "visualizerFile": "${workspaceFolder}/tools/okiidoku.natvis", // TODO.try is this needed if already specified in CMake?
-	},
+	// "cmake.debugConfig": {
+	// 	"environment": [],
+	// 	"cwd": "",
+	// 	"args": [],
+	// 	"setupCommands": [],
+	// 	"stopAtEntry": true,
+	// 	// "visualizerFile": "${workspaceFolder}/tools/okiidoku.natvis", // TODO.try is this needed if already specified in CMake?
+	// },
 
 	"[json][xml][cpp][cmake][rust][python][typescript][javascript][html][css]": {
 		"editor.insertSpaces": false,

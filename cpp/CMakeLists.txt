@@ -10,7 +10,7 @@ project(okiidoku
 list(APPEND CMAKE_MODULE_PATH "${okiidoku_SOURCE_DIR}/cmake")
 set(OKIIDOKU_VERSION_COMPATIBILITY ExactVersion) # see `cmake/installation.cmake`
 # ^ I will consider switching to support `SameMajorVersion` starting at v1.0.0.
-set(CMAKE_CXX_SCAN_FOR_MODULES NO) # I'm not using C++ modules... yet. see ccache docs section on C++ Modules if/when transitioning.
+set(CMAKE_CXX_SCAN_FOR_MODULES NO) # I'm not using C++ modules... yet. see https://cmake.org/cmake/help/latest/manual/cmake-cxxmodules.7.html, https://crascit.com/2024/04/04/cxx-modules-cmake-shared-libraries/, ccache docs section on C++ Modules if/when transitioning.
 include(okiidoku/default_output_dirs)
 
 include(okiidoku/options) # see this file for more info & defaults. summary:
@@ -53,7 +53,7 @@ if(EMSCRIPTEN)
 endif()
 if(OKIIDOKU_BUILD_BINDINGS_FOR_PYTHON)
 	# add_subdirectory(extras/python) # target:  okiidoku_py
-	# add_subdirectory(extras/nanobind) # target: _okiidoku_nb
+	add_subdirectory(extras/nanobind SYSTEM) # target: _okiidoku_nb # TODO addition of SYSTEM is a temporary hack for ignoring my warnings on nanobind header
 endif()
 
 okiidoku_target_pgo(okiidoku #[[trainer:]] okiidoku_pgo_trainer_default)

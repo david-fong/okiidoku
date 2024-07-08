@@ -5,10 +5,12 @@ include_guard(DIRECTORY)
 if(NOT OKIIDOKU_BUILD_DEBUG_WITH_SANITIZERS)
 	return()
 endif()
+# https://clang.llvm.org/docs/AddressSanitizer.html
 
 # setup tips for linking mixed-instrumentation binaries:
 #  https://stackoverflow.com/a/47022141/11107541
 #  https://github.com/google/sanitizers/wiki/AddressSanitizer#faq
+#  https://github.com/google/sanitizers/wiki/AddressSanitizerAsDso
 
 block()
 	set(target "okiidoku_compiler_warnings")
@@ -31,9 +33,12 @@ block()
 	else()
 		# TODO.wait see https://gcc.gnu.org/gcc-12/changes.html#uninitialized
 		#  would this be compatible with sanitizers? or no?
-
-		target_compile_options("${target}" INTERFACE "$<${configs}:-fsanitize=address,undefined>")
-		target_link_options(   "${target}" INTERFACE "$<${configs}:-fsanitize=address,undefined>")
+		set(flags
+			"-fsanitize=address,undefined"
+			# "$<$<CXX_COMPILER_ID:Clang>:-shared-libasan>"
+		)
+		target_compile_options("${target}" INTERFACE "$<${configs}:${flags}>")
+		target_link_options(   "${target}" INTERFACE "$<${configs}:${flags}>")
 		# TODO note for emscripten https://emscripten.org/docs/debugging/Sanitizers.html#address-sanitizer (may need to configure increased startup memory)
 
 	endif()

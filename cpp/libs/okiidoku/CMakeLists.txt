@@ -18,6 +18,7 @@ set_target_properties(okiidoku PROPERTIES
 	VISIBILITY_INLINES_HIDDEN TRUE
 	INTERPROCEDURAL_OPTIMIZATION "${okiidoku_is_ipo_supported}"
 )
+okiidoku_add_compiler_options(okiidoku)
 add_subdirectory(src/okiidoku) # target_source_files
 okiidoku_install_target(okiidoku)
 
@@ -41,6 +42,10 @@ install(DIRECTORY
 	COMPONENT okiidoku_development
 )
 
+# keep inline functions for debugging purposes:
+# TODO clang doesn't support -fkeep-inline-functions, need to use something else... maybe -fno-inline-functions... :(
+add_compile_options("$<$<CONFIG:Debug,RelWithDebInfo>:$<$<CXX_COMPILER_ID:GNU>:-fkeep-inline-functions>>")
+
 # MARK: debug support
 # too bad can't use execute_process or file(CREATE_LINK) because there's a generator expression in OKIIDOKU_DATA_OUTPUT_DIRECTORY.
 include(GNUInstallDirs)
@@ -61,7 +66,6 @@ install(FILES
 )
 
 # MARK: dependencies
-okiidoku_add_compiler_options(okiidoku)
 target_link_libraries(okiidoku
 	PRIVATE range-v3::range-v3
 )

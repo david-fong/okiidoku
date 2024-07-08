@@ -7,6 +7,13 @@ add_library(okiidoku_compile_options_public INTERFACE)
 add_library(okiidoku_compiler_warnings INTERFACE IMPORTED) # Note: "IMPORTED" used to prevent auto installation
 okiidoku_install_target(okiidoku_compile_options_public)
 
+function(okiidoku_target_include_header target scope file)
+	set(gnu_include  "$<$<CXX_COMPILER_ID:GNU,Clang>:-include;${file}>")
+	set(msvc_include "$<$<CXX_COMPILER_ID:MSVC>:/FI;${file}>")
+	target_compile_options("${target}" "${scope}" "$<BUILD_INTERFACE:${gnu_include}${msvc_include}>")
+	# TODO warn on unsupported compiler?
+endfunction()
+
 function(okiidoku_add_compiler_options target)
 	target_link_libraries(${target}
 		PUBLIC okiidoku_compile_options_public
@@ -96,7 +103,7 @@ block()
 	set(v12 "$<VERSION_GREATER_EQUAL:$<CXX_COMPILER_VERSION>,12>")
 	target_compile_options(okiidoku_compiler_warnings INTERFACE
 		-Werror=date-time
-		# "$<${v12}:-ffile-prefix-map=${okiidoku_SOURCE_DIR}=.>" # TODO.low try this out and see what benefits there are. see also gdb: set substitue-path, vscode: "sourceFileMap"
+		# "$<${v12}:-ffile-prefix-map=${okiidoku_SOURCE_DIR}=.>" # TODO.low try this out and see what benefits there are. see also gdb: set substitute-path, lldb: target.source-map, vscode: "sourceFileMap"
 	)
 endblock()
 endif()

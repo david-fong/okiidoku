@@ -4,7 +4,11 @@
 function(okiidoku_test_add name #[[ ARGN are dependencies ]])
 	set(target okiidoku_test.${name})
 	add_executable(${target} test.${name}.cpp)
+	set_target_properties(${target} PROPERTIES
+		INTERPROCEDURAL_OPTIMIZATION NO # links way faster and runs about same speed
+	)
 	okiidoku_add_compiler_options(${target})
+	target_compile_options(${target} PRIVATE "$<$<CXX_COMPILER_ID:GNU>:-fwhole-program>")
 	target_link_libraries(${target}
 		PRIVATE okiidoku
 		PRIVATE okiidoku_cli_utils
@@ -28,10 +32,11 @@ endfunction()
 
 
 okiidoku_test_add(o2_bit_arr #[[ DEPS ]])
-target_sources(okiidoku_test.o2_bit_arr PRIVATE
-	# a bit of a hack to be able to test it (library internals: hidden symbols).
-	"${CMAKE_CURRENT_LIST_DIR}/../src/okiidoku/o2_bit_arr.cpp"
-)
+# target_sources(okiidoku_test.o2_bit_arr PRIVATE
+# 	# a bit of a hack to be able to test it (library internals: hidden symbols).
+# 	"${CMAKE_CURRENT_LIST_DIR}/../src/okiidoku/o2_bit_arr.cpp"
+# )
+okiidoku_target_include_header(okiidoku_test.o2_bit_arr PRIVATE "${CMAKE_CURRENT_LIST_DIR}/../src/okiidoku/o2_bit_arr.cpp")
 
 okiidoku_test_add(grid #[[ DEPS ]] o2_bit_arr)
 

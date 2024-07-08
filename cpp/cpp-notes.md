@@ -56,6 +56,9 @@ du -L --si -a out/install/dev.gcc/{lib,bin} | sort -n
 # (cd into build tree)
 # https://crascit.com/2022/06/24/build-performance-insights/
 ../../../tools/ninjatracing.py .ninja_log > trace.json
+
+# read ELF file of libokiidoku
+readelf -a --wide --demangle lib/libokiidoku.so | less
 ```
 
 ## CMake Things

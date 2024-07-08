@@ -12,7 +12,7 @@ endif()
 add_executable(okiidoku_js okiidoku.embind.cpp)
 set_target_properties(okiidoku_js PROPERTIES
 	OUTPUT_NAME "okiidoku"
-	# SUFFIX ".js" # not explicitly needed.
+	SUFFIX ".js" # not explicitly needed. defaulted CMAKE_EXECUTABLE_SUFFIX in toolchain file
 )
 # https://emsettings.surma.technology/
 # https://github.com/emscripten-core/emscripten/blob/main/src/settings.js
@@ -54,6 +54,7 @@ set(dest "${CMAKE_CURRENT_SOURCE_DIR}/examples/node/build/$<CONFIG>")
 install(FILES "${src}/okiidoku.d.ts" TYPE BIN COMPONENT okiidoku_development)
 install(FILES "${src}/okiidoku.wasm" TYPE BIN COMPONENT okiidoku_runtime)
 install(DIRECTORY examples TYPE DOC COMPONENT okiidoku_development
+	PATTERN "*.*js"        PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE
 	PATTERN "build"        EXCLUDE
 	PATTERN "node_modules" EXCLUDE
 	PATTERN "*pnpm*"       EXCLUDE

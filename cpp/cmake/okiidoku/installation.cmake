@@ -32,16 +32,23 @@ export(
 )
 
 
+# find_package support
+# https://cmake.org/cmake/help/latest/module/CMakePackageConfigHelpers.html#example-generating-package-files
+# https://cmake.org/cmake/help/latest/guide/importing-exporting/index.html#creating-relocatable-packages
 include(CMakePackageConfigHelpers)
+configure_package_config_file(
+	"${okiidoku_SOURCE_DIR}/cmake/okiidoku/okiidoku-config.cmake.in"
+	"${okiidoku_BINARY_DIR}/cmake/okiidoku-config.cmake"
+	INSTALL_DESTINATION "${OKIIDOKU_INSTALL_CMAKEDIR}"
+	# PATH_VARS INCLUDE_INSTALL_DIR SYSCONFIG_INSTALL_DIR
+)
 write_basic_package_version_file(
-	"${PROJECT_BINARY_DIR}/cmake/okiidoku-config-version.cmake"
+	"${okiidoku_BINARY_DIR}/cmake/okiidoku-config-version.cmake"
 	COMPATIBILITY "${OKIIDOKU_VERSION_COMPATIBILITY}"
 )
-# support for `find_package`. seems complicated to set up and I'm not sure anyone will want this. I don't.
-# https://cmake.org/cmake/help/latest/guide/importing-exporting/index.html#creating-relocatable-packages
-# install(FILES
-# 	# "${PROJECT_BINARY_DIR}/cmake/okiidoku-config.cmake" # TODO
-# 	"${PROJECT_BINARY_DIR}/cmake/okiidoku-config-version.cmake"
-# 	DESTINATION "${OKIIDOKU_INSTALL_CMAKEDIR}"
-# 	COMPONENT okiidoku_development
-# )
+install(FILES
+	"${okiidoku_BINARY_DIR}/cmake/okiidoku-config.cmake"
+	"${okiidoku_BINARY_DIR}/cmake/okiidoku-config-version.cmake"
+	DESTINATION "${OKIIDOKU_INSTALL_CMAKEDIR}"
+	COMPONENT okiidoku_development
+)

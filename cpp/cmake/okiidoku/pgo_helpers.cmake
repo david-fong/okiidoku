@@ -240,13 +240,7 @@ function(okiidoku_target_pgo
 
 	set(training_stamp_file "${data_dir}/include/${trainee}/detail/pgo_gen_last_training_timestamp.hpp")
 	# ^assumes namespaced, split include directory exists and include flag already configured
-	block()
-	set(header "okiidoku/detail/pgo_use_check_needs_rebuild.hpp")
-	set(gnu_include  "$<$<CXX_COMPILER_ID:GNU,Clang>:-include;${header}>")
-	set(msvc_include "$<$<CXX_COMPILER_ID:MSVC>:/FI;${header}>")
-	target_compile_options("${trainee}" PRIVATE "$<BUILD_INTERFACE:${gnu_include}${msvc_include}>")
-	# TODO warn on unsupported compiler?
-	endblock()
+	okiidoku_target_include_header("${trainee}" PRIVATE "okiidoku/detail/pgo_use_check_needs_rebuild.hpp")
 
 	# Note: annoyingly, commands cannot be the empty string. use `cmake -E true` as a no-op instead.
 	string(JOIN ";" command_train

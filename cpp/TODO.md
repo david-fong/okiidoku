@@ -30,9 +30,15 @@
 - https://en.cppreference.com/w/cpp/language/rule_of_three
 - Write comments for custom CMake commands and targets
 
+Issues I'm watching:
+
+- https://gitlab.kitware.com/cmake/cmake/-/issues/26118 cmake non-config presets don't implicitly inherit their config preset condition.
+- [Use CMAKE_CROSSCOMPILING_EMULATOR to run cross compiled executables #554](https://github.com/microsoft/vscode-cmake-tools/issues/554)
+- https://gitlab.kitware.com/cmake/cmake/-/issues/15179 -Og default for debug build configuration
+
 ## Misc List
 
-- can emscripten just install/package the runtime component?
+- can emscripten just install/package the runtime component? or how can I make it not include headers in the package? https://cmake.org/cmake/help/book/mastering-cmake/chapter/Packaging%20With%20CPack.html#cpack-and-cmake-install-commands
 - make repl support custom streams? or should that just be handled by caller of the progam? related: support saving session history files that can be later passed as program stdin to repro.
 
 - figure out why nanobind+asan is having issues. see also https://github.com/google/sanitizers/issues/796#issuecomment-294388904.

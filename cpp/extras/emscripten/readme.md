@@ -23,10 +23,10 @@ export EMSDK=#<path to emsdk>
 cmake -S . --preset=dev.emscripten
 
 # build okiidoku (rerun after modifying the library)
-# (cd to ./out/build/dev.emscripten)
-cmake --build . --config=Release
+cmake --build --preset=dev.emscripten.release
 
 # look at the symbol maps for fun
+# (cd to ./out/build/dev.emscripten)
 emnm -nC --defined-only okiidoku/Release/libokiidoku.a | less
 
 # cd into the build directory
@@ -38,3 +38,6 @@ node -i -e 'const oki = require(path.join(process.cwd(), "bin/okiidoku.js"))'
 See the [examples folder](./examples/).
 
 Friendly reminder to [call `.delete()` when you are done with an object](https://emscripten.org/docs/porting/connecting_cpp_and_javascript/embind.html#memory-management) living in the WASM memory (unless that object was bound using `emscripten::value_object`). Unfortunately there are these things you (and I) will have to deal with in using this library. It just takes some learning of how things work, and being careful.
+
+- https://developer.chrome.com/blog/wasm-debugging-2020
+- https://developer.chrome.com/docs/devtools/wasm
