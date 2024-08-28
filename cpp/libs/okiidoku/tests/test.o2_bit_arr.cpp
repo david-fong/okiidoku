@@ -50,7 +50,7 @@ template<okiidoku::Order O>
 	std::cout << "4" << std::endl;
 }}
 
-TEST_CASE("o2_bit_arr") {
+TEST_CASE("okiidoku.o2_bit_arr") {
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 	okiidoku::test_o2_bit_arr<O_>();
 	OKIIDOKU_FOREACH_O_DO_EMIT

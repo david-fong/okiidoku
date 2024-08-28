@@ -76,6 +76,7 @@ if(okiidoku_IS_TOP_LEVEL)
 		)
 	else()
 		target_compile_options(okiidoku_compiler_warnings INTERFACE
+			-fdiagnostics-parseable-fixits
 		)
 	endif()
 endif()
@@ -95,6 +96,7 @@ endif()
 
 
 # related to reproducible builds / deterministic compilation:
+# TODO is this not the wrong place to do this? wouldn't we ant this to apply to all targets?
 if(MSVC)
 	target_compile_options(okiidoku_compiler_warnings INTERFACE
 	)
@@ -102,9 +104,19 @@ else()
 block()
 	set(v12 "$<VERSION_GREATER_EQUAL:$<CXX_COMPILER_VERSION>,12>")
 	target_compile_options(okiidoku_compiler_warnings INTERFACE
-		-Werror=date-time
-		# "$<${v12}:-ffile-prefix-map=${okiidoku_SOURCE_DIR}=.>" # TODO.low try this out and see what benefits there are. see also gdb: set substitute-path, lldb: target.source-map, vscode: "sourceFileMap"
+		-Werror=date-time # error to use __TIME__, __DATE__ or __TIMESTAMP__
+		"-ffile-prefix-map=${okiidoku_SOURCE_DIR}=/okiidoku"
+		-fno-record-gcc-switches -gno-record-gcc-switches
+		# TODO.low try ^this out and see what benefits there are.
+		#  see also gdb: set substitute-path, lldb: target.source-map, vscode: "sourceFileMap"
 	)
+	# I don't think the following makes any difference(?)
+	target_link_options(okiidoku_compiler_warnings INTERFACE
+		"-ffile-prefix-map=${okiidoku_SOURCE_DIR}=/okiidoku"
+		-fno-record-gcc-switches -gno-record-gcc-switches
+	)
+	# TODO clang -fno-record-command-line
+	# -fno-record-gcc-switches -gno-record-gcc-switches
 endblock()
 endif()
 

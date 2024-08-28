@@ -16,6 +16,9 @@
 		{
 			"name": "base:any",
 			"hidden": true,
+			"environment": {
+				"LC_CTYPE": "C.UTF-8"
+			},
 			"cacheVariables": {
 				"CMAKE_CXX_STANDARD": "20",
 				"CMAKE_CXX_STANDARD_REQUIRED": true,
@@ -60,7 +63,9 @@
 				"CPACK_INCLUDE_TOPLEVEL_DIRECTORY": false
 			},
 			"warnings": {
-				"dev": true
+				"dev": true,
+				"deprecated": true,
+				"uninitialized": true
 			}
 		},
 		{
@@ -71,9 +76,14 @@
 			"binaryDir": "${sourceDir}/out/pkg.build/${presetName}",
 			"installDir": "${sourceDir}/out/pkg.install/${presetName}",
 			"environment": {
+				"LANG": "C.UTF-8",
+				"LC_ALL": "C.UTF-8",
+				"TZ": "UTC",
 				"CMAKE_INSTALL_MODE": null
 			},
 			"cacheVariables": {
+				"CMAKE_BUILD_RPATH_USE_ORIGIN": true,
+				"CPM_SOURCE_CACHE": "${sourceDir}/external",
 				"OKIIDOKU_BUILD_OPTIMIZE_LOCAL_NON_PORTABLE": false,
 				"CPACK_PACKAGE_DIRECTORY": "${sourceDir}/out/package/"
 			}

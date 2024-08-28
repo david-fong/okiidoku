@@ -6,12 +6,16 @@ include_guard(DIRECTORY)
 include(okiidoku/get_cpm)
 
 # Note: CPM does auto EXCLUDE_FROM_ALL and SYSTEM when using shorthand add
+# if("${CPM_SOURCE_CACHE}" PATH_EQUAL "${okiidoku_SOURCE_DIR}/external")
+# 	set(CUSTOM_CACHE_KEY CUSTOM_CACHE_KEY "_") # TODO this looks cleaner, but thwarts fetch when version changes (doesn't detect as dirty).
+# else()
+	set(CUSTOM_CACHE_KEY)
+# endif()
 
-CPMAddPackage(
-	NAME range-v3
-	GIT_TAG 0.12.0 # https://github.com/ericniebler/range-v3/releases
-	GITHUB_REPOSITORY "ericniebler/range-v3"
-	DOWNLOAD_ONLY YES
+
+CPMAddPackage(NAME range-v3 # https://github.com/ericniebler/range-v3/releases
+	GITHUB_REPOSITORY "ericniebler/range-v3" GIT_TAG 0.12.0
+	DOWNLOAD_ONLY YES ${CUSTOM_CACHE_KEY}
 )
 if(range-v3_ADDED)
 	add_library(range-v3 INTERFACE IMPORTED)
@@ -24,11 +28,9 @@ endif()
 
 if(OKIIDOKU_BUILD_TESTING)
 	# https://github.com/catchorg/Catch2/blob/devel/docs/cmake-integration.md
-	CPMAddPackage(
-		NAME doctest
-		VERSION 2.4.9
-		GITHUB_REPOSITORY "doctest/doctest"
-		DOWNLOAD_ONLY YES
+	CPMAddPackage(NAME doctest
+		GITHUB_REPOSITORY "doctest/doctest" VERSION 2.4.11
+		DOWNLOAD_ONLY YES ${CUSTOM_CACHE_KEY}
 	)
 	if(doctest_ADDED)
 		add_library(doctest INTERFACE IMPORTED)
@@ -46,7 +48,11 @@ if(OKIIDOKU_BUILD_BINDINGS_FOR_PYTHON)
 	# https://pybind11.readthedocs.io/en/stable/changelog.html
 
 	find_package(Python COMPONENTS Interpreter Development.Module REQUIRED)
-	CPMAddPackage("gh:wjakob/nanobind@2.0.0")
+	CPMAddPackage("gh:wjakob/nanobind@2.0.0") # TODO ${CUSTOM_CACHE_KEY}
+	foreach(lib "" "-abi3") # https://nanobind.readthedocs.io/en/latest/api_cmake.html#command:nanobind_build_library
+		nanobind_build_library("nanobind${lib}")
+		set_target_properties("nanobind${lib}" PROPERTIES SYSTEM YES)
+	endforeach()
 	# https://github.com/wjakob/nanobind
 	# https://github.com/wjakob/nanobind/blob/master/docs/changelog.rst
 	# https://nanobind.readthedocs.io/en/latest/building.html#finding-nanobind

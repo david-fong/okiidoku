@@ -35,13 +35,20 @@ Issues I'm watching:
 - https://gitlab.kitware.com/cmake/cmake/-/issues/26118 cmake non-config presets don't implicitly inherit their config preset condition.
 - [Use CMAKE_CROSSCOMPILING_EMULATOR to run cross compiled executables #554](https://github.com/microsoft/vscode-cmake-tools/issues/554)
 - https://gitlab.kitware.com/cmake/cmake/-/issues/15179 -Og default for debug build configuration
+- https://gitlab.kitware.com/cmake/cmake/-/issues/26092 cmake refer to build preset name in preset for installDir
 
 ## Misc List
+
+- consider switching deps from git tags to release tarballs?
+- https://developer.chrome.com/blog/faster-wasm-debugging/
+- reevaluate doctest vs Catch2 choice. doctest is ~10 seconds to compile the grid test without -Og, and 21 seconds with -Og. I'm not actually sure that doctest is the reason, but I wonder if it is.
 
 - can emscripten just install/package the runtime component? or how can I make it not include headers in the package? https://cmake.org/cmake/help/book/mastering-cmake/chapter/Packaging%20With%20CPack.html#cpack-and-cmake-install-commands
 - make repl support custom streams? or should that just be handled by caller of the progam? related: support saving session history files that can be later passed as program stdin to repro.
 
-- figure out why nanobind+asan is having issues. see also https://github.com/google/sanitizers/issues/796#issuecomment-294388904.
+- figure out why nanobind stub generation + asan is having issues. see also https://github.com/google/sanitizers/issues/796#issuecomment-294388904.
+  - https://github.com/wjakob/nanobind/discussions/623#discussioncomment-10238357
+  - https://drjit.readthedocs.io/en/latest/debug.html#sanitizing-python-sessions
 
 - ./out/install/\<namespace directory\> := build preset name. can't see how to do this right now with there being no macro for buildPresetName in CMake Preset spec.
 - install nanobind stuff

@@ -18,6 +18,7 @@
   - [llvm blog](https://blog.llvm.org/2019/11/deterministic-builds-with-clang-and-lld.html)
   - [blog post by conan](https://blog.conan.io/2019/09/02/Deterministic-builds-with-C-C++.html#randomness-created-by-the-compiler)
   - [someone using visual studio + bazel](https://nikhilism.com/post/2020/windows-deterministic-builds/)
+  - https://gcc.gnu.org/onlinedocs/gcc//Environment-Variables.html
 
 - want pgo
   - support multiple trainers

@@ -30,7 +30,7 @@ if(NOT DEFINED CMAKE_LIBRARY_OUTPUT_DIRECTORY)
 endif()
 # https://nanobind.readthedocs.io/en/latest/api_cmake.html#stub-generation
 # https://nanobind.readthedocs.io/en/latest/typing.html#stubs
-# TODO this is having issues when combined with sanitizers. I somehow worked around it on GCC, but can't figure out what to do on Clang.
+# TODO this is having issues when combined with sanitizers. I somehow worked around it on GCC ("ASAN_OPTIONS": "verify_asan_link_order=false" in dev debug build preset), but can't figure out what to do on Clang.
 # nanobind_add_stub(okiidoku_nb_stub
 # 	MODULE _okiidoku_nb
 # 	OUTPUT "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/okiidoku.pyi"

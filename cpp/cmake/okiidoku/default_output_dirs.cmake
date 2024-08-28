@@ -2,11 +2,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 include_guard(DIRECTORY)
 
-# I don't like relying on tinkered defaults like this, but it makes certain
-# things easier like GDB support files. Unfortunately, if you want those
-# things, but also want to adjust the output directories, you'll have to
-# make the paths work out yourself.
-
 get_property(is_multi_config GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
 if("${is_multi_config}")
 	set(base "${CMAKE_BINARY_DIR}/build/$<CONFIG>")
@@ -24,38 +19,39 @@ if(EMSCRIPTEN)
 	set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${base}")
 	set(OKIIDOKU_DATA_OUTPUT_DIRECTORY "${okiidoku_BINARY_DIR}")
 	unset(base)
+	unset(is_multi_config)
 	return()
 endif()
 
-# if user has set anything, don't set defaults for anything
+# if user hasn't set anything, set defaults for everything
 if(
-	(DEFINED CMAKE_RUNTIME_OUTPUT_DIRECTORY) OR
-	(DEFINED CMAKE_LIBRARY_OUTPUT_DIRECTORY) OR
-	(DEFINED CMAKE_ARCHIVE_OUTPUT_DIRECTORY) OR
-	(DEFINED CMAKE_COMPILE_PDB_OUTPUT_DIRECTORY) OR
-	(DEFINED CMAKE_PDB_OUTPUT_DIRECTORY)
+	(NOT DEFINED CMAKE_RUNTIME_OUTPUT_DIRECTORY) AND
+	(NOT DEFINED CMAKE_LIBRARY_OUTPUT_DIRECTORY) AND
+	(NOT DEFINED CMAKE_ARCHIVE_OUTPUT_DIRECTORY) AND
+	(NOT DEFINED CMAKE_COMPILE_PDB_OUTPUT_DIRECTORY) AND
+	(NOT DEFINED CMAKE_PDB_OUTPUT_DIRECTORY)
 )
-	if(NOT DEFINED OKIIDOKU_DATA_OUTPUT_DIRECTORY)
-		set(OKIIDOKU_DATA_OUTPUT_DIRECTORY "${okiidoku_BINARY_DIR}")
+	include(GNUInstallDirs)
+	if("${WIN32}")
+		set(CMAKE_INSTALL_LIBDIR2 "${CMAKE_INSTALL_BINDIR}") # put DLLs in bin dir
+	else()
+		set(CMAKE_INSTALL_LIBDIR2 "${CMAKE_INSTALL_LIBDIR}") # put SOs in lib dir
 	endif()
-	unset(base)
-	return()
-endif()
-
-include(GNUInstallDirs)
-if("${WIN32}")
-	set(CMAKE_INSTALL_LIBDIR2 "${CMAKE_INSTALL_BINDIR}")
+	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY     "${base}/${CMAKE_INSTALL_BINDIR}")
+	set(CMAKE_LIBRARY_OUTPUT_DIRECTORY     "${base}/${CMAKE_INSTALL_LIBDIR2}")
+	set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY     "${base}/${CMAKE_INSTALL_LIBDIR}")
+	set(CMAKE_COMPILE_PDB_OUTPUT_DIRECTORY "${base}/${CMAKE_INSTALL_BINDIR}")
+	set(CMAKE_PDB_OUTPUT_DIRECTORY         "${base}/${CMAKE_INSTALL_BINDIR}")
+	set(OKIIDOKU_TEST_WORKING_DIRECTORY    "${base}")
 else()
-	set(CMAKE_INSTALL_LIBDIR2 "${CMAKE_INSTALL_LIBDIR}")
+	set(OKIIDOKU_TEST_WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
 endif()
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY     "${base}/${CMAKE_INSTALL_BINDIR}")
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY     "${base}/${CMAKE_INSTALL_LIBDIR2}")
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY     "${base}/${CMAKE_INSTALL_LIBDIR}")
-set(CMAKE_COMPILE_PDB_OUTPUT_DIRECTORY "${base}/${CMAKE_INSTALL_BINDIR}")
-set(CMAKE_PDB_OUTPUT_DIRECTORY         "${base}/${CMAKE_INSTALL_BINDIR}")
 
 if(NOT DEFINED OKIIDOKU_DATA_OUTPUT_DIRECTORY)
 	set(OKIIDOKU_DATA_OUTPUT_DIRECTORY "${base}/${CMAKE_INSTALL_DATADIR}")
+endif()
+if (NOT DEFINED CMAKE_VS_DEBUGGER_WORKING_DIRECTORY)
+	set(CMAKE_VS_DEBUGGER_WORKING_DIRECTORY "${base}")
 endif()
 
 unset(CMAKE_INSTALL_LIBDIR2)

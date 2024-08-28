@@ -37,8 +37,8 @@ block()
 			"-fsanitize=address,undefined"
 			# "$<$<CXX_COMPILER_ID:Clang>:-shared-libasan>"
 		)
-		target_compile_options("${target}" INTERFACE "$<${configs}:${flags}>")
-		target_link_options(   "${target}" INTERFACE "$<${configs}:${flags}>")
+		target_compile_options("${target}"        INTERFACE "$<${configs}:${flags}>")
+		target_link_options(   "${target}" BEFORE INTERFACE "$<${configs}:${flags}>")
 		# TODO note for emscripten https://emscripten.org/docs/debugging/Sanitizers.html#address-sanitizer (may need to configure increased startup memory)
 
 	endif()

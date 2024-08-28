@@ -37,6 +37,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 endif()
 
 
+# TODO do we need to differentiate between build and install interface?
 target_sources(okiidoku PRIVATE
 	${okiidoku_SOURCE_DIR}/tools/okiidoku.natvis
 )

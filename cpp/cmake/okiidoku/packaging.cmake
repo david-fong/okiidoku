@@ -12,7 +12,7 @@ endif()
 # https://cmake.org/cmake/help/latest/module/CPack.html
 # https://cmake.org/cmake/help/latest/guide/importing-exporting/index.html#creating-packages
 # https://cmake.org/cmake/help/latest/manual/cpack-generators.7.html
-set(CPACK_VERBATIM_VARIABLES YES)
+set(CPACK_VERBATIM_VARIABLES YES) # NO is the default for legacy reasons. new projects should use YES.
 set(CPACK_PACKAGE_VENDOR "david-fong")
 set(CPACK_RESOURCE_FILE_LICENSE "${okiidoku_SOURCE_DIR}/../LICENSE.txt")
 set(CPACK_RESOURCE_FILE_README "${okiidoku_SOURCE_DIR}/readme.md") # TODO is this an appropriate readme for an installer?

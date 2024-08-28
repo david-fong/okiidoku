@@ -44,7 +44,7 @@ template<okiidoku::Order O>
 	}
 }}
 
-TEST_CASE("puzzle") {
+TEST_CASE("okiidoku.puzzle") {
 	const auto default_num_rounds {100U};
 	okiidoku::util::SharedRng shared_rng {std::random_device()()}; // look into using Catch2 GENERATE and random() features
 

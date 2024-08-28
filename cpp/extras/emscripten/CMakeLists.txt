@@ -16,6 +16,7 @@ set_target_properties(okiidoku_js PROPERTIES
 )
 # https://emsettings.surma.technology/
 # https://github.com/emscripten-core/emscripten/blob/main/src/settings.js
+# https://developer.chrome.com/blog/faster-wasm-debugging/
 target_compile_options(okiidoku_js PRIVATE -sSTRICT=1)
 target_link_options(okiidoku_js PRIVATE
 	--no-entry # it's a "reactor" (ie. a library)

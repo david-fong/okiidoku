@@ -1,7 +1,6 @@
 {
 	"cSpell.language": "en-GB",
 	"files.trimTrailingWhitespace": true,
-	"search.followSymlinks": false,
 
 	"files.exclude": {
 		// note: paths are relative to ${workspaceFolder} by default.
@@ -15,13 +14,29 @@
 		"**/pnpm-lock.yaml*": true,
 		"web/dist": true,
 	},
+	"search.followSymlinks": false,
 	"search.exclude": {
 		"**/node_modules": true,
-		"cpp/external": true,
+		"/cpp/external": true,
+		"/LICENSES": true,
+		"/LICENSE.txt": true,
+		"/writings/**/*trace*.json": true,
 	},
 	"files.readonlyInclude": {
+		"/usr/include/**": true,
+		"**/node_modules/**": true,
 		"cpp/external/**": true,
-		"/usr/include/**": true
+		"LICENSES/**": true,
+		"LICENSE.txt": true,
+	},
+
+	"[json][xml][cpp][cmake][rust][python][typescript][javascript][html][css]": {
+		"editor.insertSpaces": false,
+	},
+	"files.associations": {
+		".clang-tidy": "yaml",
+		"*.natvis": "xml",
+		"*.cmake.in": "cmake-documentation",
 	},
 
 	"todo-tree.filtering.useBuiltInExcludes": "file excludes",
@@ -35,17 +50,12 @@
 		"TODO.wait",
 		"TODO",
 	],
-	"cmake.ignoreCMakeListsMissing": true,
-	"cmake.useCMakePresets": "always",
 
-	"files.associations": {
-		".clang-tidy": "yaml",
-		"*.natvis": "xml",
-		"*.cmake.in": "cmake-documentation",
-	},
 	// "explorer.sortOrder": "default",
 	"C_Cpp.autoAddFileAssociations": false,
 	"C_Cpp.intelliSenseCacheSize": 0,
+	"cmake.ignoreCMakeListsMissing": true,
+	"cmake.useCMakePresets": "always",
 
 	// https://code.visualstudio.com/docs/cpp/faq-cpp
 	"C_Cpp.default.cStandard": "c17",
@@ -68,8 +78,4 @@
 	// 	"stopAtEntry": true,
 	// 	// "visualizerFile": "${workspaceFolder}/tools/okiidoku.natvis", // TODO.try is this needed if already specified in CMake?
 	// },
-
-	"[json][xml][cpp][cmake][rust][python][typescript][javascript][html][css]": {
-		"editor.insertSpaces": false,
-	},
 }

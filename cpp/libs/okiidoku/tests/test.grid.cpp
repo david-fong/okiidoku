@@ -35,7 +35,7 @@ template<okiidoku::Order O>
 	CHECK(grid_follows_rule(gen_grid));
 }}
 
-TEST_CASE("grid") {
+TEST_CASE("okiidoku.grid") {
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 	okiidoku::test_grid<O_>();
 	OKIIDOKU_FOREACH_O_DO_EMIT

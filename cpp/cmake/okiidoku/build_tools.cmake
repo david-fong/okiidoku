@@ -12,7 +12,8 @@ if(NOT DEFINED CMAKE_CXX_COMPILER_LAUNCHER)
 	if(NOT "${CCACHE_EXE}" STREQUAL "CCACHE_EXE-NOTFOUND")
 		set(CMAKE_CXX_COMPILER_LAUNCHER "${CCACHE_EXE}"
 			# "--config-path" "${okiidoku_SOURCE_DIR}/cmake/okiidoku/ccache.conf"
-			# "base_dir=${okiidoku_SOURCE_DIR}/../.."
+			# man ccache @"COMPILING IN DIFFERENT DIRECTORIES":
+			# "base_dir=${okiidoku_SOURCE_DIR}/.." "hash_dir=false"
 			# "run_second_cpp=false"
 		)
 		# add_compile_options( # see run_second_cpp docs

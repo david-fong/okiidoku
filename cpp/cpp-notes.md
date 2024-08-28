@@ -50,6 +50,10 @@ size ./build/PgoUse/lib/libokiidoku.so ./build/Release/lib/libokiidoku.so
 gdb --cd=build/Debug bin/okiidoku_test.o2_bit_arr
 
 # (cd into build tree)
+# list all tests
+ctest --show-only
+
+# (cd into build tree)
 du -L --si -a out/install/dev.gcc/{lib,bin}
 du -L --si -a out/install/dev.gcc/{lib,bin} | sort -n
 
@@ -59,6 +63,9 @@ du -L --si -a out/install/dev.gcc/{lib,bin} | sort -n
 
 # read ELF file of libokiidoku
 readelf -a --wide --demangle lib/libokiidoku.so | less
+
+LD_PRELOAD="$(g++ -print-file-name=libasan.so):$(g++ -print-file-name=libubsan.so)" cmake --build --preset=dev.gcc.debug
+LD_PRELOAD="$(clang++ -print-file-name=libasan.so):$(clang++ -print-file-name=libubsan.so)" cmake --build --preset=dev.clang.debug
 ```
 
 ## CMake Things

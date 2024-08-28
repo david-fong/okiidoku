@@ -221,6 +221,7 @@ function(okiidoku_target_pgo
 			"$<${if_use}:-fprofile-use=${data_dir}>"
 			# "$<${if_use}:-fprofile-correction>
 			# "$<${if_use}:-fprofile-partial-training> # for code not run during training, optimize as normal instead of for size. # TODO.asap should we use partial training?
+			# -fprofile-reproducible # TODO investigate https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html#index-fprofile-reproducible
 		)
 		target_link_options(${trainee} PRIVATE
 			"$<${if_gen}:-fprofile-generate=${data_dir}>"

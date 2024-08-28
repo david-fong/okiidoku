@@ -10,9 +10,9 @@ install(DIRECTORY ../LICENSES TYPE DOC COMPONENT okiidoku_about)
 
 block()
 if(BUILD_SHARED_LIBS)
-	set(lib_type shared)
+	set(lib_type "shared")
 else()
-	set(lib_type static)
+	set(lib_type "static")
 endif()
 install( # regular installation import support:
 	EXPORT okiidoku_installation_targets
@@ -44,7 +44,7 @@ configure_package_config_file(
 )
 write_basic_package_version_file(
 	"${okiidoku_BINARY_DIR}/cmake/okiidoku-config-version.cmake"
-	COMPATIBILITY "${OKIIDOKU_VERSION_COMPATIBILITY}"
+	COMPATIBILITY "${_OKIIDOKU_VERSION_COMPATIBILITY}"
 )
 install(FILES
 	"${okiidoku_BINARY_DIR}/cmake/okiidoku-config.cmake"
