@@ -171,7 +171,7 @@ function(okiidoku_target_pgo
 
 	set(data_dir "${_OKIIDOKU_PGO_DIR}/data/${trainer}")
 
-	if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR EMSCRIPTEN)
+	if((CMAKE_CXX_COMPILER_ID MATCHES [[Clang]]) OR EMSCRIPTEN)
 		# TODO test this and fix problems
 		# cspell:words "-fprofile" instr profdata profraw
 		# https://clang.llvm.org/docs/UsersManual.html#profile-guided-optimization
@@ -229,7 +229,7 @@ function(okiidoku_target_pgo
 		# https://gcc.gnu.org/wiki/AutoFDO/Tutorial
 
 
-	# elseif(CMAKE_CXX_COMPILER_ID MATCHES "Intel")
+	# elseif(CMAKE_CXX_COMPILER_ID MATCHES [[Intel]])
 		# https://www.intel.com/content/www/us/en/develop/documentation/cpp-compiler-developer-guide-and-reference/top/optimization-and-programming/profile-guided-optimization-pgo.html
 		# https://www.intel.com/content/www/us/en/develop/documentation/cpp-compiler-developer-guide-and-reference/top/optimization-and-programming/profile-guided-optimization-pgo/profile-an-application-with-instrumentation.html
 	endif()
@@ -275,7 +275,7 @@ function(okiidoku_target_pgo
 	# target_sources(${trainee} PRIVATE "$<${if_use}:${training_stamp_file}>") # TODO why is this done?
 
 
-	if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR EMSCRIPTEN)
+	if((CMAKE_CXX_COMPILER_ID MATCHES [[Clang]]) OR EMSCRIPTEN)
 	block()
 		if(NOT DEFINED CMAKE_CXX_COMPILER_VERSION)
 			message(WARNING "could not get llvm version from `CMAKE_CXX_COMPILER_VERSION`")

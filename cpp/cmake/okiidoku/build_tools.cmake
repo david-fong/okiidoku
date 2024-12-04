@@ -42,3 +42,15 @@ if(NOT DEFINED CMAKE_LINKER_TYPE)
 	# 	endif()
 	# endif()
 endif()
+
+if(CMAKE_GENERATOR MATCHES [[^Ninja]])
+install(CODE [===[
+	execute_process(
+		# TODO.optional: finer-grained for clang https://crascit.com/2022/06/24/build-performance-insights/#:~:text=ninja_log%20%3E%20cmake_build_trace.json-,Clang%20Time%20Tracing,-If%20you%20are
+		COMMAND ./ninjatracing.py .ninja_log
+		OUTPUT_FILE "build/$<CONFIG>/trace.json"
+		ECHO_ERROR_VARIABLE
+	)
+	execute_process(COMMAND ${CMAKE_COMMAND} -E echo "generated ninja trace at <file://${CMAKE_CURRENT_SOURCE_DIR}/build/$<CONFIG>/trace.json>" ECHO_OUTPUT_VARIABLE)
+]===])
+endif()

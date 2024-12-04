@@ -31,18 +31,17 @@ endif()
 # https://nanobind.readthedocs.io/en/latest/api_cmake.html#stub-generation
 # https://nanobind.readthedocs.io/en/latest/typing.html#stubs
 # TODO this is having issues when combined with sanitizers. I somehow worked around it on GCC ("ASAN_OPTIONS": "verify_asan_link_order=false" in dev debug build preset), but can't figure out what to do on Clang.
-# nanobind_add_stub(okiidoku_nb_stub
-# 	MODULE _okiidoku_nb
-# 	OUTPUT "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/okiidoku.pyi"
-# 	# OUTPUT "$<TARGET_FILE_DIR:_okiidoku_nb>/okiidoku.pyi" # TODO.wait https://gitlab.kitware.com/cmake/cmake/-/issues/21364
-# 	PYTHON_PATH "$<TARGET_FILE_DIR:_okiidoku_nb>" # supposed to be relative path?
-# 	DEPENDS _okiidoku_nb
-# )
+nanobind_add_stub(okiidoku_nb_stub
+	MODULE _okiidoku_nb
+	OUTPUT "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/okiidoku.pyi"
+	# OUTPUT "$<TARGET_FILE_DIR:_okiidoku_nb>/okiidoku.pyi" # TODO.wait https://gitlab.kitware.com/cmake/cmake/-/issues/21364
+	PYTHON_PATH "$<TARGET_FILE_DIR:_okiidoku_nb>" # supposed to be relative path?
+	DEPENDS _okiidoku_nb
+)
 # set_target_properties(_okiidoku_nb PROPERTIES OUTPUT_NAME "okiidoku") # TODO.try
 
-block()
-	set(src "$<TARGET_FILE_DIR:_okiidoku_nb>")
-	# set(dest "${CMAKE_CURRENT_SOURCE_DIR}/examples/build/$<CONFIG>")
-	install(FILES "${src}/okiidoku.pyi" TYPE LIB COMPONENT okiidoku_development)
-	# TODO the other files to install. and maybe add convenience symlinks in examples dir like we have for emscripten? or are we going to get rid of those?
-endblock()
+
+set(src "$<TARGET_FILE_DIR:_okiidoku_nb>")
+# set(dest "${CMAKE_CURRENT_SOURCE_DIR}/examples/build/$<CONFIG>")
+install(FILES "${src}/okiidoku.pyi" TYPE LIB COMPONENT okiidoku_development)
+# TODO the other files to install. and maybe add convenience symlinks in examples dir like we have for emscripten? or are we going to get rid of those?

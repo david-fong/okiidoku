@@ -152,7 +152,7 @@ else()
 		-Wmismatched-tags -Wextra-semi
 		-Wundef # warn on undefined identifier used in `#if`
 	)
-	if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR EMSCRIPTEN)
+	if((CMAKE_CXX_COMPILER_ID MATCHES [[Clang]]) OR EMSCRIPTEN)
 		target_compile_options(okiidoku_compiler_warnings INTERFACE
 			-Wimplicit-fallthrough
 		)

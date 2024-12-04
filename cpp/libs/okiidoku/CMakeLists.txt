@@ -49,21 +49,26 @@ add_compile_options("$<$<CONFIG:Debug,RelWithDebInfo>:$<$<CXX_COMPILER_ID:GNU>:-
 # MARK: debug support
 # too bad can't use execute_process or file(CREATE_LINK) because there's a generator expression in OKIIDOKU_DATA_OUTPUT_DIRECTORY.
 include(GNUInstallDirs)
-# TODO can this be a build event custom command?
-add_custom_target(okiidoku_copy_debugger_support_files ALL
-	"${CMAKE_COMMAND}" -E make_directory "${OKIIDOKU_DATA_OUTPUT_DIRECTORY}"
-	COMMAND "${CMAKE_COMMAND}" -E create_symlink "${okiidoku_SOURCE_DIR}/tools/okiidoku.gdb.py" "${OKIIDOKU_DATA_OUTPUT_DIRECTORY}/okiidoku.gdb.py"
-	COMMAND "${CMAKE_COMMAND}" -E create_symlink "${okiidoku_SOURCE_DIR}/tools/okiidoku.natvis" "${OKIIDOKU_DATA_OUTPUT_DIRECTORY}/okiidoku.natvis"
-	COMMENT "Symlinking debug-support files to data directory"
-	VERBATIM COMMAND_EXPAND_LISTS
-)
-install(FILES
-	"${okiidoku_SOURCE_DIR}/tools/okiidoku.gdb.py"
-	"${okiidoku_SOURCE_DIR}/tools/okiidoku.natvis"
-	TYPE DATA # see DEFINE_GDB_PY_SCRIPT in gdb_support.cpp
-	# also https://learn.microsoft.com/en-us/visualstudio/debugger/create-custom-views-of-native-objects#BKMK_natvis_location and https://learn.microsoft.com/en-us/cpp/build/reference/natvis-add-natvis-to-pdb so if a PDB is installed with embedded natvis, no need to install natvis separately?
-	COMPONENT okiidoku_development
-)
+block()
+	set(c "${CMAKE_COMMAND};-E")
+	set(src "${okiidoku_SOURCE_DIR}/tools")
+	# TODO can this be a build event custom command?
+	add_custom_target(okiidoku_copy_debugger_support_files ALL
+		"${c};make_directory;${OKIIDOKU_DATA_OUTPUT_DIRECTORY}"
+		COMMAND "${c};create_symlink;${src}/okiidoku.gdb.py;${OKIIDOKU_DATA_OUTPUT_DIRECTORY}/okiidoku.gdb.py"
+		COMMAND "${c};create_symlink;${src}/okiidoku.natvis;${OKIIDOKU_DATA_OUTPUT_DIRECTORY}/okiidoku.natvis"
+		COMMAND "${c};create_symlink;${src}/ninjatracing.py;${okiidoku_BINARY_DIR}/ninjatracing.py" # sigh. I want to automate generating the ninja trace, and I'm hacking install(CODE) to run it after the whole build finishes. with install(CODE|SCRIPT), there's no robust, generalized way to get the project's source directory.
+		COMMENT "Symlinking debug-support files to data / build directory"
+		VERBATIM COMMAND_EXPAND_LISTS
+	)
+	install(FILES
+		"${src}/okiidoku.gdb.py"
+		"${src}/okiidoku.natvis"
+		TYPE DATA # see DEFINE_GDB_PY_SCRIPT in gdb_support.cpp
+		# also https://learn.microsoft.com/en-us/visualstudio/debugger/create-custom-views-of-native-objects#BKMK_natvis_location and https://learn.microsoft.com/en-us/cpp/build/reference/natvis-add-natvis-to-pdb so if a PDB is installed with embedded natvis, no need to install natvis separately?
+		COMPONENT okiidoku_development
+	)
+endblock()
 
 # MARK: dependencies
 target_link_libraries(okiidoku

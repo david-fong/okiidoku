@@ -36,21 +36,43 @@ Issues I'm watching:
 - [Use CMAKE_CROSSCOMPILING_EMULATOR to run cross compiled executables #554](https://github.com/microsoft/vscode-cmake-tools/issues/554)
 - https://gitlab.kitware.com/cmake/cmake/-/issues/15179 -Og default for debug build configuration
 - https://gitlab.kitware.com/cmake/cmake/-/issues/26092 cmake refer to build preset name in preset for installDir
+- https://github.com/cpm-cmake/CPM.cmake/issues/595 CPM default shallow clone
 
 ## Misc List
 
-- consider switching deps from git tags to release tarballs?
 - https://developer.chrome.com/blog/faster-wasm-debugging/
 - reevaluate doctest vs Catch2 choice. doctest is ~10 seconds to compile the grid test without -Og, and 21 seconds with -Og. I'm not actually sure that doctest is the reason, but I wonder if it is.
 
 - can emscripten just install/package the runtime component? or how can I make it not include headers in the package? https://cmake.org/cmake/help/book/mastering-cmake/chapter/Packaging%20With%20CPack.html#cpack-and-cmake-install-commands
 - make repl support custom streams? or should that just be handled by caller of the progam? related: support saving session history files that can be later passed as program stdin to repro.
 
+- C++20
+  - `using enum`. Might want to wait for CLANG to support?
+- CMake 3.31:
+  - https://cmake.org/cmake/help/latest/command/install.html#package-info
+- C++23
+  - http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/p2214r0.html#does-adjacent-mean-2-or-n
+  - `std::to_underlying()` strange since cppref says all my standard library versions support it already? but it doesn't compile?
+  - `std::unreachable()`
+  - `std::ranges::iota()`
+  - `std::views::chunk()`
+    - could this be useful for `canon_place`? I tried messing around with range-v3 on compiler explorer and had trouble with the whole action vs algorithm, container vs view thing. Didn't know what I was doing and could achieve what I wanted.
+  - alternative to `std::chunk`, look into `mdspan` (multi-dimensional span). Seems like this is more of what I'm looking for.
+  - multidimensional subscript operator
+- C+26:
+  - https://en.cppreference.com/w/cpp/language/attributes/indeterminate
+    - https://youtu.be/FNi1-x4pojs?t=4922
+    - https://stackoverflow.com/q/78792583
+
+- https://youtu.be/7QNtiH5wTAs?t=7003 -Wl,--gc-sections does this help? does it will my SO interface? what about functions that I want defined only for debugging?
+- https://youtu.be/7QNtiH5wTAs?t=7200 -Wl,--icf=...
+- https://youtu.be/7QNtiH5wTAs?t=7322 -Wl,-s (strip-all)
+
 - figure out why nanobind stub generation + asan is having issues. see also https://github.com/google/sanitizers/issues/796#issuecomment-294388904.
   - https://github.com/wjakob/nanobind/discussions/623#discussioncomment-10238357
   - https://drjit.readthedocs.io/en/latest/debug.html#sanitizing-python-sessions
 
-- ./out/install/\<namespace directory\> := build preset name. can't see how to do this right now with there being no macro for buildPresetName in CMake Preset spec.
+- ./out/install/\<namespace directory\> := build preset name. can't see how to do this right now with there being no macro for buildPresetName in CMake Preset spec. https://gitlab.kitware.com/cmake/cmake/-/issues/26092
 - install nanobind stuff
 
 - create dedicated hidden CMake configure preset starting point for packaging workflow?
@@ -162,17 +184,6 @@ consider making cand masks have two lanes: one storing full O2BitArr, one storin
       - FTXUI
   - Can look into ncurses in the future? Or look into options for TUI libraries?
   - A web interface would be really nice.
-- C++20
-  - `using enum`. Might want to wait for CLANG to support?
-- C++23
-  - http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/p2214r0.html#does-adjacent-mean-2-or-n
-  - `std::to_underlying()` strange since cppref says all my standard library versions support it already? but it doesn't compile?
-  - `std::unreachable()`
-  - `std::ranges::iota()`
-  - `std::views::chunk()`
-    - could this be useful for `canon_place`? I tried messing around with range-v3 on compiler explorer and had trouble with the whole action vs algorithm, container vs view thing. Didn't know what I was doing and could achieve what I wanted.
-  - alternative to `std::chunk`, look into `mdspan` (multi-dimensional span). Seems like this is more of what I'm looking for.
-  - multidimensional subscript operator
 - CLI
   - implement `-h` and `--help` CLI argument.
   - give a red message when trying to continue and nothing is left to be found.

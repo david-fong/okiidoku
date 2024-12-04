@@ -3,7 +3,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 
-#include <okiidoku/o2_bit_arr.hpp>
+#include <okiidoku/o2_bit_arr.cpp> // choosing to get implementations this way because they're not exported in libokiidoku.
 #include <okiidoku/ints.hpp>
 
 namespace okiidoku {

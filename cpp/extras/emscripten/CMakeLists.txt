@@ -49,7 +49,6 @@ okiidoku_install_target(okiidoku_js)
 
 # TODO.wait https://gitlab.kitware.com/cmake/cmake/-/issues/20745
 include(GNUInstallDirs)
-block()
 set(src "$<TARGET_FILE_DIR:okiidoku_js>")
 set(dest "${CMAKE_CURRENT_SOURCE_DIR}/examples/node/build/$<CONFIG>")
 install(FILES "${src}/okiidoku.d.ts" TYPE BIN COMPONENT okiidoku_development)
@@ -71,4 +70,3 @@ add_custom_command(TARGET okiidoku_js POST_BUILD
 	COMMENT "Symlinking JS+WASM+TS target output files to examples directory for convenience"
 	VERBATIM COMMAND_EXPAND_LISTS
 )
-endblock()

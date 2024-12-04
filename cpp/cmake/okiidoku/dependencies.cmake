@@ -13,8 +13,9 @@ include(okiidoku/get_cpm)
 # endif()
 
 
-CPMAddPackage(NAME range-v3 # https://github.com/ericniebler/range-v3/releases
-	GITHUB_REPOSITORY "ericniebler/range-v3" GIT_TAG 0.12.0
+CPMAddPackage(NAME range-v3
+	# https://github.com/ericniebler/range-v3/releases
+	URL [[https://github.com/ericniebler/range-v3/archive/refs/tags/0.12.0.tar.gz]]
 	DOWNLOAD_ONLY YES ${CUSTOM_CACHE_KEY}
 )
 if(range-v3_ADDED)
@@ -29,7 +30,8 @@ endif()
 if(OKIIDOKU_BUILD_TESTING)
 	# https://github.com/catchorg/Catch2/blob/devel/docs/cmake-integration.md
 	CPMAddPackage(NAME doctest
-		GITHUB_REPOSITORY "doctest/doctest" VERSION 2.4.11
+		# https://github.com/doctest/doctest/blob/master/CHANGELOG.md
+		URL [[https://github.com/doctest/doctest/archive/refs/tags/v2.4.11.tar.gz]]
 		DOWNLOAD_ONLY YES ${CUSTOM_CACHE_KEY}
 	)
 	if(doctest_ADDED)
@@ -38,7 +40,6 @@ if(OKIIDOKU_BUILD_TESTING)
 		target_include_directories(doctest SYSTEM INTERFACE "${doctest_SOURCE_DIR}")
 	endif()
 	include("${doctest_SOURCE_DIR}/scripts/cmake/doctest.cmake")
-	# https://github.com/doctest/doctest/blob/master/CHANGELOG.md
 endif()
 
 
@@ -48,12 +49,12 @@ if(OKIIDOKU_BUILD_BINDINGS_FOR_PYTHON)
 	# https://pybind11.readthedocs.io/en/stable/changelog.html
 
 	find_package(Python COMPONENTS Interpreter Development.Module REQUIRED)
-	CPMAddPackage("gh:wjakob/nanobind@2.0.0") # TODO ${CUSTOM_CACHE_KEY}
+	# https://github.com/wjakob/nanobind
+	# https://nanobind.readthedocs.io/en/latest/changelog.html
+	# https://nanobind.readthedocs.io/en/latest/building.html#finding-nanobind
+	CPMAddPackage("gh:wjakob/nanobind@2.2.0") # TODO ${CUSTOM_CACHE_KEY} # git tag archive doesn't work since submodule deps are required
 	foreach(lib "" "-abi3") # https://nanobind.readthedocs.io/en/latest/api_cmake.html#command:nanobind_build_library
 		nanobind_build_library("nanobind${lib}")
 		set_target_properties("nanobind${lib}" PROPERTIES SYSTEM YES)
 	endforeach()
-	# https://github.com/wjakob/nanobind
-	# https://github.com/wjakob/nanobind/blob/master/docs/changelog.rst
-	# https://nanobind.readthedocs.io/en/latest/building.html#finding-nanobind
 endif()
