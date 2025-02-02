@@ -46,10 +46,15 @@ Issues I'm watching:
 - can emscripten just install/package the runtime component? or how can I make it not include headers in the package? https://cmake.org/cmake/help/book/mastering-cmake/chapter/Packaging%20With%20CPack.html#cpack-and-cmake-install-commands
 - make repl support custom streams? or should that just be handled by caller of the progam? related: support saving session history files that can be later passed as program stdin to repro.
 
+- https://youtu.be/zCzD9uSDI8c?t=620
+
 - C++20
   - `using enum`. Might want to wait for CLANG to support?
 - CMake 3.31:
   - https://cmake.org/cmake/help/latest/command/install.html#package-info
+  - presets `$comment`
+  - `CMAKE_EXPORT_BUILD_DATABASE`
+  - `add_custom_command` `CODEGEN`
 - C++23
   - http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/p2214r0.html#does-adjacent-mean-2-or-n
   - `std::to_underlying()` strange since cppref says all my standard library versions support it already? but it doesn't compile?
@@ -63,8 +68,12 @@ Issues I'm watching:
   - https://en.cppreference.com/w/cpp/language/attributes/indeterminate
     - https://youtu.be/FNi1-x4pojs?t=4922
     - https://stackoverflow.com/q/78792583
+  - https://wg21.link/P2169R4 placeholder variables with no name
 
-- https://youtu.be/7QNtiH5wTAs?t=7003 -Wl,--gc-sections does this help? does it will my SO interface? what about functions that I want defined only for debugging?
+https://wg21.link/P0847R7 deducing this? check compiler support
+
+- try adding `-fno-plt` for gcc and clang with the non-portable build option.
+- https://youtu.be/7QNtiH5wTAs?t=7003 -Wl,--gc-sections does this help? does it will my SO interface? what about functions that I want defined only for debugging? (see also gcc https://gcc.gnu.org/onlinedocs/gcc/Common-Variable-Attributes.html#index-retain-variable-attribute and https://gcc.gnu.org/onlinedocs/gcc/Common-Function-Attributes.html#index-retain-function-attribute and https://gcc.gnu.org/onlinedocs/gcc/Common-Function-Attributes.html#index-used-function-attribute)
 - https://youtu.be/7QNtiH5wTAs?t=7200 -Wl,--icf=...
 - https://youtu.be/7QNtiH5wTAs?t=7322 -Wl,-s (strip-all)
 
@@ -75,7 +84,7 @@ Issues I'm watching:
 - ./out/install/\<namespace directory\> := build preset name. can't see how to do this right now with there being no macro for buildPresetName in CMake Preset spec. https://gitlab.kitware.com/cmake/cmake/-/issues/26092
 - install nanobind stuff
 
-- create dedicated hidden CMake configure preset starting point for packaging workflow?
+- use CMake configure preset starting point for packaging workflow
 
 - launch.json https://code.visualstudio.com/docs/editor/variables-reference#_input-variables <!-- is this still useful? CMake tools has target debug stuff, right?-->
 

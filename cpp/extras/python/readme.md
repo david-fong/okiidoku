@@ -1,3 +1,9 @@
 <!-- SPDX-FileCopyrightText: 2020 David Fong -->
 <!-- SPDX-License-Identifier: CC0-1.0 -->
 # Python Bindings
+
+Recommended tools to install:
+
+```none
+python3-dev
+```

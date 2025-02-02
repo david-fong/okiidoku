@@ -52,5 +52,6 @@ install(CODE [===[
 		ECHO_ERROR_VARIABLE
 	)
 	execute_process(COMMAND ${CMAKE_COMMAND} -E echo "generated ninja trace at <file://${CMAKE_CURRENT_SOURCE_DIR}/build/$<CONFIG>/trace.json>" ECHO_OUTPUT_VARIABLE)
+	message("view at https://ui.perfetto.dev")
 ]===])
 endif()

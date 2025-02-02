@@ -7,10 +7,10 @@
 			"inherit `tool:<some_tool>` and `base:user` to build your own presets."
 		]
 	},
-	"version": 8,
+	"version": 10,
 	"cmakeMinimumRequired": {
 		"major": 3,
-		"minor": 28
+		"minor": 31
 	},
 	"configurePresets": [
 		{

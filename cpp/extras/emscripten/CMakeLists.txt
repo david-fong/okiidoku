@@ -22,6 +22,7 @@ target_link_options(okiidoku_js PRIVATE
 	--no-entry # it's a "reactor" (ie. a library)
 	# --pre-js=
 	-sSTRICT=1
+	"$<$<CONFIG:Debug,RelWithDebInfo>:-sASSERTIONS=1>"
 
 	# https://emscripten.org/docs/api_reference/module.html#module
 	-sMODULARIZE=1
@@ -36,7 +37,7 @@ target_link_options(okiidoku_js PRIVATE
 
 	-sALLOW_UNIMPLEMENTED_SYSCALLS=1 # TODO.wait workaround. why needed?
 	# -sSTANDALONE_WASM=1
-	-sWASM_BIGINT=1
+	-sWASM_BIGINT=1 # TODO.investigate what is -sMEMORY64 ?
 	# -sENVIRONMENT=web # use to exclude commonJS/Node glue-code
 	# -sMIN_NODE_VERSION
 )

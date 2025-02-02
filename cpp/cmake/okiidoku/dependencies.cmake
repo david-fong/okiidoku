@@ -52,7 +52,9 @@ if(OKIIDOKU_BUILD_BINDINGS_FOR_PYTHON)
 	# https://github.com/wjakob/nanobind
 	# https://nanobind.readthedocs.io/en/latest/changelog.html
 	# https://nanobind.readthedocs.io/en/latest/building.html#finding-nanobind
-	CPMAddPackage("gh:wjakob/nanobind@2.2.0") # TODO ${CUSTOM_CACHE_KEY} # git tag archive doesn't work since submodule deps are required
+	CPMAddPackage("gh:wjakob/nanobind@2.2.0") # TODO ${CUSTOM_CACHE_KEY}
+		# git tag archive doesn't work since submodule deps are required
+		# https://github.com/wjakob/nanobind/issues/403 could run `git submodule status` to get robin_map commit and then fetch that tarball there.
 	foreach(lib "" "-abi3") # https://nanobind.readthedocs.io/en/latest/api_cmake.html#command:nanobind_build_library
 		nanobind_build_library("nanobind${lib}")
 		set_target_properties("nanobind${lib}" PROPERTIES SYSTEM YES)

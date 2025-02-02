@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: 2020 David Fong
 # SPDX-License-Identifier: GPL-3.0-or-later
-cmake_minimum_required(VERSION 3.28)
+cmake_minimum_required(VERSION 3.31)
 project(okiidoku
 	VERSION 0.0.1
 	DESCRIPTION [[david fong's variable-grid-size sudoku toolkit]]

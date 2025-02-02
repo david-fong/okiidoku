@@ -11,11 +11,17 @@
 
 ## Using the Library
 
+Recommended tools to install:
+
+```none
+reuse g++ clang mold ninja-build cmake
+```
+
 - Requirements to build from source:
   - If you are new to C++, you will need an attitude to learn proactively about C++ and CMake.
-  - [CMake](https://cmake.org/install/) 3.28 or higher
+  - [CMake](https://cmake.org/install/) 3.31 or higher
   - a C++ compiler [supporting C++20](https://en.cppreference.com/w/cpp/compiler_support).
-    - I test on Clang 18, GCC 13, and Visual Studio 17 2022.
+    - I test on Clang 19, GCC 14, and Visual Studio 17 2022.
     - I currently have no interest in committing to support other compilers (ex. apple-clang) or lower versions of the above compilers.
     - Older versions _may_ work, but don't expect them to.
   - [a C++ build system](https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html) (ex. Ninja, Visual Studio)

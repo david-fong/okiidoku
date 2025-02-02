@@ -226,7 +226,7 @@ namespace okiidoku::mono {
 
 
 	template<Order O, class T_row, class T_col>
-	requires(Any_o2x_t<O, T_row>, Any_o2x_t<O, T_col>) [[nodiscard, gnu::const]]
+	requires(Any_o2x_t<O, T_row> && Any_o2x_t<O, T_col>) [[nodiscard, gnu::const]]
 	constexpr int_ts::o4x_t<O> row_col_to_rmi(const T_row row, const T_col col) noexcept {
 		using T = Ints<O>;
 		OKIIDOKU_CONTRACT_USE(row < T::O2);
