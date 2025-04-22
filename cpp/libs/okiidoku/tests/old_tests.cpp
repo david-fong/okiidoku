@@ -61,8 +61,7 @@ int main(const int argc, char const *const argv[]) {
 	<< "\n- arg 2 (num rounds) : " << num_rounds
 	<< std::endl;
 
-	okiidoku::util::SharedRng shared_rng;
-	shared_rng.rng.seed(srand_key);
+	okiidoku::util::SharedRng shared_rng {srand_key};
 
 	if (test_algorithms<5>(shared_rng, num_rounds) != 0) { return 1; }
 

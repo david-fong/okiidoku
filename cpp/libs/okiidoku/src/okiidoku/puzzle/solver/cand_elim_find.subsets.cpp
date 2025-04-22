@@ -5,7 +5,6 @@
 #include <okiidoku/puzzle/solver/subset_combo_walker.hpp>
 #include <okiidoku/puzzle/solver/found.hpp>
 #include <okiidoku/o2_bit_arr.hpp>
-#include <okiidoku/detail/contract.hpp>
 
 #include <functional> // bit_or
 #include <numeric> // transform_reduce

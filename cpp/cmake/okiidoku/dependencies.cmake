@@ -14,7 +14,7 @@ include(okiidoku/get_cpm)
 
 
 CPMAddPackage(NAME range-v3
-	# https://github.com/ericniebler/range-v3/releases
+	# https://github.com/ericniebler/range-v3/tags
 	URL [[https://github.com/ericniebler/range-v3/archive/refs/tags/0.12.0.tar.gz]]
 	DOWNLOAD_ONLY YES ${CUSTOM_CACHE_KEY}
 )
@@ -52,7 +52,7 @@ if(OKIIDOKU_BUILD_BINDINGS_FOR_PYTHON)
 	# https://github.com/wjakob/nanobind
 	# https://nanobind.readthedocs.io/en/latest/changelog.html
 	# https://nanobind.readthedocs.io/en/latest/building.html#finding-nanobind
-	CPMAddPackage("gh:wjakob/nanobind@2.2.0") # TODO ${CUSTOM_CACHE_KEY}
+	CPMAddPackage("gh:wjakob/nanobind@2.7.0") # TODO ${CUSTOM_CACHE_KEY}
 		# git tag archive doesn't work since submodule deps are required
 		# https://github.com/wjakob/nanobind/issues/403 could run `git submodule status` to get robin_map commit and then fetch that tarball there.
 	foreach(lib "" "-abi3") # https://nanobind.readthedocs.io/en/latest/api_cmake.html#command:nanobind_build_library

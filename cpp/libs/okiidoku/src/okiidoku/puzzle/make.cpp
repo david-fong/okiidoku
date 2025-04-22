@@ -4,7 +4,6 @@
 
 #include <okiidoku/puzzle/solve.hpp>
 #include <okiidoku/puzzle/ua_set.hpp>
-#include <okiidoku/detail/contract.hpp>
 
 #include <algorithm>
 #include <execution>

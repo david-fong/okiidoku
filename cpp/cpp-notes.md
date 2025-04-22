@@ -64,6 +64,7 @@ du -L --si -a out/install/dev.gcc/{lib,bin} | sort -n
 # read ELF file of libokiidoku
 readelf -a --wide --demangle lib/libokiidoku.so | less
 
+# TODO no longer needed once https://github.com/wjakob/nanobind/pull/1000 further improvements are made
 LD_PRELOAD="$(g++ -print-file-name=libasan.so):$(g++ -print-file-name=libubsan.so)" cmake --build --preset=dev.gcc.debug
 LD_PRELOAD="$(clang++ -print-file-name=libasan.so):$(clang++ -print-file-name=libubsan.so)" cmake --build --preset=dev.clang.debug
 ```
@@ -146,6 +147,8 @@ things I got wrong before which I couldn't understand based on gcc's error messa
 - [non-deduced contexts and template-argument deduction](https://en.cppreference.com/w/cpp/language/template_argument_deduction#Non-deduced_contexts)
 
 - [cpp core guidelines - do not over-parametrize members](https://github.com/isocpp/CppCoreGuidelines/blob/master/CppCoreGuidelines.md#t61-do-not-over-parameterize-members-scary)
+
+- [MSVC build time profiling](https://learn.microsoft.com/en-us/cpp/build-insights/?view=msvc-170)
 
 - I can specify base-class members like:
   - Derived::Base::member

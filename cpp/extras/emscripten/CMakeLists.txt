@@ -6,6 +6,7 @@
 if(NOT EMSCRIPTEN)
 	message(FATAL_ERROR "missing emscripten toolchain file. see `emcmake`")
 endif()
+# TODO.high add an assertion/warning about compatible/tested emsdk version
 
 # https://emscripten.org/docs/compiling/Building-Projects.html#using-libraries
 # https://emscripten.org/docs/porting/connecting_cpp_and_javascript/embind.html#binding-libraries
@@ -23,6 +24,7 @@ target_link_options(okiidoku_js PRIVATE
 	# --pre-js=
 	-sSTRICT=1
 	"$<$<CONFIG:Debug,RelWithDebInfo>:-sASSERTIONS=1>"
+	"$<$<CONFIG:Debug,RelWithDebInfo>:-gsource-map>" # https://emscripten.org/docs/tools_reference/emcc.html#emcc-gsource-map
 
 	# https://emscripten.org/docs/api_reference/module.html#module
 	-sMODULARIZE=1
@@ -37,11 +39,12 @@ target_link_options(okiidoku_js PRIVATE
 
 	-sALLOW_UNIMPLEMENTED_SYSCALLS=1 # TODO.wait workaround. why needed?
 	# -sSTANDALONE_WASM=1
-	-sWASM_BIGINT=1 # TODO.investigate what is -sMEMORY64 ?
+	# TODO.investigate what is -sMEMORY64 ? (associated with -sWASM_BIGINT=1, which is enabled by default)
 	# -sENVIRONMENT=web # use to exclude commonJS/Node glue-code
 	# -sMIN_NODE_VERSION
 )
 okiidoku_add_compiler_options(okiidoku_js)
+# TODO: look into emscripten issue ticket #23035 about SIMD targetting
 target_link_libraries(okiidoku_js
 	PRIVATE okiidoku
 	PRIVATE embind

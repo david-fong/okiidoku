@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: 2020 David Fong
+# SPDX-License-Identifier: GPL-3.0-or-later
+version = 1
+SPDX-PackageName = "okiidoku"
+SPDX-PackageSupplier = "David Fong <davidfong19@gmail.com>"
+SPDX-PackageDownloadLocation = "https://github.com/david-fong/okiidoku"
+
+[[annotations]]
+path = [".vscode/settings.json", "**/pnpm-lock.yaml", "sample-output/**.txt", "sample-output/**.png", "writings/journal/**.json"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2020 David Fong"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = "**/package.json"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2020 David Fong"
+SPDX-License-Identifier = "GPL-3.0-or-later"

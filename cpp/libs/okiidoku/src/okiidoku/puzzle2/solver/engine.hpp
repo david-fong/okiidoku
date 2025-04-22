@@ -138,7 +138,7 @@ namespace okiidoku::mono::detail::solver2 {
 		void enqueue_cand_elims_for_new_cell_claim_sym_(rmi_t rmi) noexcept;
 
 
-		Frame frame_ {
+		Frame frame_ { // TODO: is this how I want to init?
 			.cands_povs {},
 			.find_cache_subsets {},
 			.find_cache_fish {},

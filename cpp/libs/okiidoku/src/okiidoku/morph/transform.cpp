@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include <okiidoku/morph/transform.hpp>
 
-#include <okiidoku/detail/contract.hpp>
-
 #include <utility> // swap
 
 namespace okiidoku::mono {
@@ -30,7 +28,7 @@ namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
 	Transformation<O> Transformation<O>::inverted() const noexcept {
-		Transformation<O> _;
+		OKIIDOKU_NO_PRE_INIT_AUTOVAR Transformation<O> _;
 		for (o2i_t i {0}; i < T::O2; ++i) {
 			_.label_map[label_map[i]] = static_cast<mapping_t>(i);
 		}

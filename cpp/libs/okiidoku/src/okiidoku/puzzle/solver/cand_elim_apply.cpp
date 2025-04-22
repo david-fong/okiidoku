@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include <okiidoku/puzzle/solver/cand_elim_apply.hpp>
 
-#include <okiidoku/detail/contract.hpp>
-
 #include <algorithm>
 
 namespace okiidoku::mono::detail::solver {
@@ -159,15 +157,17 @@ namespace okiidoku::mono::detail::solver {
 	) noexcept {
 		const auto isec_base {[&]{
 			switch (desc.remove_from_rest_of) {
-			case BoxOrLine::box:  return static_cast<o3i_t>(((desc.isec/T::O2)*T::O2)+(desc.isec%T::O1));
-			case BoxOrLine::line: return static_cast<o3i_t>(desc.isec - (desc.isec%T::O1));
+				using enum BoxOrLine;
+				case box:  return static_cast<o3i_t>(((desc.isec/T::O2)*T::O2)+(desc.isec%T::O1));
+				case line: return static_cast<o3i_t>(desc.isec - (desc.isec%T::O1));
 			}
 			OKIIDOKU_UNREACHABLE;
 		}()};
 		const auto nb_scale {[&]{
 			switch (desc.remove_from_rest_of) {
-			case BoxOrLine::box:  return static_cast<o3i_t>(T::O1);
-			case BoxOrLine::line: return static_cast<o3i_t>(1);
+				using enum BoxOrLine;
+				case box:  return static_cast<o3i_t>(T::O1);
+				case line: return static_cast<o3i_t>(1);
 			}
 			OKIIDOKU_UNREACHABLE;
 		}()};

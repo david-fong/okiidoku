@@ -4,9 +4,6 @@
 #define HPP_OKIIDOKU__PUZZLE__SOLVER__SUBSET_COMBO_WALKER
 
 #include <okiidoku/ints.hpp>
-#include <okiidoku/detail/contract.hpp>
-#include <okiidoku/detail/export.h>
-
 #include <array>
 
 namespace okiidoku::mono::detail::solver {

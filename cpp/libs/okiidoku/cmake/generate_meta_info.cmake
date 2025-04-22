@@ -35,11 +35,11 @@ block()
 	endif()
 	# Note: need to use add_custom_command instead of configure_file to execute at build-time.
 	add_custom_command(
+		COMMENT "Generating Git info source file"
+		OUTPUT  "${output}"
 		COMMAND "${CMAKE_COMMAND}" "-D OUTPUT=${output}" -P "${script}"
 		DEPENDS "${script}" "$<IF:$<BOOL:Git_FOUND>,${GIT_TOP_LEVEL}/.git/index,>"
-		OUTPUT  "${output}"
-		COMMENT "Generating Git info source file"
-		VERBATIM
+		VERBATIM CODEGEN
 	)
 	# execute at configure time in case we also need to get/set properties of the file or read it then:
 	execute_process(COMMAND "${CMAKE_COMMAND}" "-D OUTPUT=${output}" -P "${script}")

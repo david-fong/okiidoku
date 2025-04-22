@@ -42,9 +42,9 @@ namespace okiidoku::mono { namespace {
 
 	template<Order O> requires(is_order_compiled(O))
 	void CanonLabel<O>::do_a_pass_(CanonLabel<O>::State& s) noexcept {
-		detail::Gridlike<O, Rel<O>> scratch;
+		OKIIDOKU_NO_PRE_INIT_AUTOVAR detail::Gridlike<O, Rel<O>> scratch;
 
-		label_map_t<O> to_tied;
+		OKIIDOKU_NO_PRE_INIT_AUTOVAR label_map_t<O> to_tied;
 		std::iota(to_tied.begin(), to_tied.end(), mapping_t{0});
 		for (const auto tie : s.ties) {
 			if (tie.size() == 1) [[likely]] { continue; }
@@ -77,7 +77,7 @@ namespace okiidoku::mono { namespace {
 
 		{
 			// update s.to_og:
-			label_map_t<O> tied_to_og {s.to_og};
+			OKIIDOKU_NO_PRE_INIT_AUTOVAR label_map_t<O> tied_to_og {s.to_og};
 			for (o2i_t i {0}; i < T::O2; ++i) {
 				s.to_og[i] = tied_to_og[to_tied[i]];
 			}
@@ -93,8 +93,8 @@ namespace okiidoku::mono { namespace {
 
 	template<Order O> requires(is_order_compiled(O))
 	label_map_t<O> CanonLabel<O>::do_it(Grid<O>& grid) noexcept {
-		const label_map_t<O> label_og_to_canon {[&](){
-			State s(grid);
+		OKIIDOKU_NO_PRE_INIT_AUTOVAR const label_map_t<O> label_og_to_canon {[&](){
+			OKIIDOKU_NO_PRE_INIT_AUTOVAR State s(grid);
 			while (s.has_ties()) {
 				auto old_ties {s.ties};
 				do_a_pass_(s);
@@ -109,7 +109,7 @@ namespace okiidoku::mono { namespace {
 				}
 			}
 
-			label_map_t<O> _;
+			OKIIDOKU_NO_PRE_INIT_AUTOVAR label_map_t<O> _;
 			for (o2i_t canon_i {0}; canon_i < T::O2; ++canon_i) {
 				_[s.to_og[canon_i]] = static_cast<mapping_t>(canon_i);
 			}

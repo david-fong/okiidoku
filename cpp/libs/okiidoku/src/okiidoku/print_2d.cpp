@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include <okiidoku/print_2d.hpp>
 #include <okiidoku/print_2d.emoji.hpp>
-#include <okiidoku/detail/contract.hpp>
 
 #include <iostream>
 #include <random> // minstd_rand
@@ -33,12 +32,14 @@ namespace okiidoku { namespace {
 			}
 		}
 		// first try to find a single set large enough:
-			// unlike before, don't use anything not in top prefs list here.
+		// unlike before, don't use anything not in top prefs list here.
 		for (size_t b {0}, e_i_ {0}; e_i_ < prefs.size(); ++e_i_) {
 			const size_t e {prefs[e_i_]};
 			for (size_t i {b}; i < e; ++i) {
 				if (emoji::sets.at(shuffled_sets.at(i)).entries.size() >= O2) {
-					return {shuffled_sets.at(i)};
+					shuffled_sets[0] = shuffled_sets[i];
+					shuffled_sets.resize(1);
+					return shuffled_sets;
 			}	}
 			b = e;
 		}

@@ -3,8 +3,6 @@
 #ifndef HPP_OKIIDOKU__ABOUT
 #define HPP_OKIIDOKU__ABOUT
 
-#include <okiidoku/detail/export.h>
-
 #include <string_view>
 #include <array>
 #include <cstdint>

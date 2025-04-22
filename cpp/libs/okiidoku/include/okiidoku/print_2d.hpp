@@ -4,7 +4,6 @@
 #define HPP_OKIIDOKU__PRINT_2D
 
 #include <okiidoku/grid.hpp>
-#include <okiidoku/detail/contract.hpp>
 
 #include <iosfwd>
 #include <functional> // function

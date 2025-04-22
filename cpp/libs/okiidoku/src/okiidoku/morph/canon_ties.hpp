@@ -5,7 +5,6 @@
 
 #include <okiidoku/ints.hpp>
 #include <okiidoku/detail/order_templates.hpp>
-#include <okiidoku/detail/contract.hpp>
 
 #include <range/v3/view/iota.hpp>
 

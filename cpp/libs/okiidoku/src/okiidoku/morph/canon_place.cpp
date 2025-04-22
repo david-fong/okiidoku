@@ -58,13 +58,13 @@ namespace okiidoku::mono { namespace {
 		const PolarState& row_state,
 		const PolarState& col_state
 	) noexcept {
-		Grid<O> table; {
-			const auto t {Transformation<O>{
+		OKIIDOKU_NO_PRE_INIT_AUTOVAR Grid<O> table; {
+			const Transformation<O> t {
 				// .label_map {Transformation<O>::identity_label_map},
 				.row_map {row_state.to_og},
 				.col_map {col_state.to_og},
 				.post_transpose {is_post_transpose},
-			}};
+			};
 			t.inverted().apply_from_to(src_grid, table);
 		}
 
@@ -88,7 +88,7 @@ namespace okiidoku::mono { namespace {
 						}
 					);
 				}
-				std::array<val_t, T::O2> copy; // NOLINT(cppcoreguidelines-pro-type-member-init) see next line
+				OKIIDOKU_NO_PRE_INIT_AUTOVAR std::array<val_t, T::O2> copy; // NOLINT(cppcoreguidelines-pro-type-member-init) see next line
 				std::copy(row_sp.begin(), row_sp.end(), copy.begin());
 				for (o1i_t i {0}; i < T::O1; ++i) {
 					std::copy(
@@ -104,7 +104,7 @@ namespace okiidoku::mono { namespace {
 
 	template<Order O> requires(is_order_compiled(O))
 	void CanonPlace<O>::PolarState::do_a_pass(const Grid<O>& table) noexcept {
-		std::array<mapping_t, T::O2> to_tied; // NOLINT(cppcoreguidelines-pro-type-member-init) see next line
+		OKIIDOKU_NO_PRE_INIT_AUTOVAR std::array<mapping_t, T::O2> to_tied; // NOLINT(cppcoreguidelines-pro-type-member-init) see next line
 		std::iota(to_tied.begin(), to_tied.end(), mapping_t{0});
 		for (const auto tie : line_ties) {
 			// Note: intentionally do not skip ties here since updated table
@@ -143,7 +143,7 @@ namespace okiidoku::mono { namespace {
 
 		{
 			// update s.to_og:
-			std::array<mapping_t, T::O2> tied_to_og; // NOLINT(cppcoreguidelines-pro-type-member-init) see next line
+			OKIIDOKU_NO_PRE_INIT_AUTOVAR std::array<mapping_t, T::O2> tied_to_og; // NOLINT(cppcoreguidelines-pro-type-member-init) see next line
 			for (o2i_t i {0}; i < T::O2; ++i) {
 				tied_to_og[i] = to_og[i/T::O1][i%T::O1];
 			}

@@ -8,7 +8,7 @@ add_library(okiidoku_compiler_warnings INTERFACE IMPORTED) # Note: "IMPORTED" us
 okiidoku_install_target(okiidoku_compile_options_public)
 
 function(okiidoku_target_include_header target scope file)
-	set(gnu_include  "$<$<CXX_COMPILER_ID:GNU,Clang>:-include;${file}>")
+	set(gnu_include  "$<$<CXX_COMPILER_ID:GNU,Clang>:SHELL:-include '${file}'>")
 	set(msvc_include "$<$<CXX_COMPILER_ID:MSVC>:/FI;${file}>")
 	target_compile_options("${target}" "${scope}" "$<BUILD_INTERFACE:${gnu_include}${msvc_include}>")
 	# TODO warn on unsupported compiler?
@@ -23,18 +23,6 @@ function(okiidoku_add_compiler_options target)
 			PRIVATE okiidoku_compiler_warnings
 		)
 	endif()
-	# get_target_property(sources ${target} SOURCES)
-	# set_property(SOURCE ${sources}
-	# 	# DIRECTORY "${okiidoku_SOURCE_DIR}" "${okiidoku_BINARY_DIR}"
-	# 	TARGET_DIRECTORY ${target}
-	# 	APPEND PROPERTY OBJECT_DEPENDS "${okiidoku_SOURCE_DIR}/cmake/okiidoku/flags"
-	# )
-	# # TODO.asap delete commented out code
-	# message("${sources}")
-	# foreach(source ${sources})
-	# 	get_source_file_property(deps "${source}" DIRECTORY "${okiidoku_SOURCE_DIR}" OBJECT_DEPENDS)
-	# 	message("dep: ${source}: ${deps}")
-	# endforeach()
 endfunction()
 
 set_target_properties(okiidoku_compile_options_public PROPERTIES EXPORT_NAME _compile_options)
@@ -105,10 +93,12 @@ block()
 	set(v12 "$<VERSION_GREATER_EQUAL:$<CXX_COMPILER_VERSION>,12>")
 	target_compile_options(okiidoku_compiler_warnings INTERFACE
 		-Werror=date-time # error to use __TIME__, __DATE__ or __TIMESTAMP__
-		"-ffile-prefix-map=${okiidoku_SOURCE_DIR}=/okiidoku"
 		-fno-record-gcc-switches -gno-record-gcc-switches
+		"-ffile-prefix-map=${okiidoku_SOURCE_DIR}=/okiidoku"
 		# TODO.low try ^this out and see what benefits there are.
 		#  see also gdb: set substitute-path, lldb: target.source-map, vscode: "sourceFileMap"
+		#  and https://github.com/emscripten-core/emscripten/blob/main/ChangeLog.md#406---032625
+		#  https://emscripten.org/docs/tools_reference/settings_reference.html#source-map-prefixes
 	)
 	# I don't think the following makes any difference(?)
 	target_link_options(okiidoku_compiler_warnings INTERFACE
@@ -129,7 +119,11 @@ if(MSVC)
 else()
 	# set(flags_file "${okiidoku_SOURCE_DIR}/cmake/okiidoku/compile_opts/warnings.gcc.txt")
 	# set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${flags_file}")
+	target_compile_definitions(okiidoku_compiler_warnings INTERFACE
+		"$<$<CONFIG:Debug,RelWithDebInfo>:_GLIBCXX_ASSERTIONS>"
+	)
 	target_compile_options(okiidoku_compiler_warnings INTERFACE
+		"$<$<CONFIG:Debug,RelWithDebInfo>:-U_FORTIFY_SOURCE;-D_FORTIFY_SOURCE=3>"
 		-Wfatal-errors # stop compilation on first error. I found it hard to read multiple.
 		# "@${flags_file}"
 		-Wall -Wextra -Wpedantic -pedantic-errors
@@ -141,7 +135,7 @@ else()
 
 		-Wdisabled-optimization # not an error. notification that function is too big. gcc gave up on optimizing.
 
-		-Wformat=2
+		-Wformat=2 -Werror=format-security
 		-Wcast-qual -Wcast-align
 		-Wshadow -Woverloaded-virtual
 		-Wnon-virtual-dtor
@@ -174,6 +168,7 @@ else()
 			-Wsuggest-attribute=pure
 			-Wsuggest-attribute=const
 			-Wsuggest-attribute=noreturn
+			-Wnrvo
 			# TODO.try
 			# -fno-implicit-templates or -frepo # https://gcc.gnu.org/onlinedocs/gcc-4.7.2/gcc/Template-Instantiation.html#Template-Instantiation
 

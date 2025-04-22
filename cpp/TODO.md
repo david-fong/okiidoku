@@ -40,6 +40,8 @@ Issues I'm watching:
 
 ## Misc List
 
+- `[[gnu::designated_init]]`
+
 - https://developer.chrome.com/blog/faster-wasm-debugging/
 - reevaluate doctest vs Catch2 choice. doctest is ~10 seconds to compile the grid test without -Og, and 21 seconds with -Og. I'm not actually sure that doctest is the reason, but I wonder if it is.
 
@@ -48,36 +50,38 @@ Issues I'm watching:
 
 - https://youtu.be/zCzD9uSDI8c?t=620
 
-- C++20
-  - `using enum`. Might want to wait for CLANG to support?
 - CMake 3.31:
   - https://cmake.org/cmake/help/latest/command/install.html#package-info
   - presets `$comment`
   - `CMAKE_EXPORT_BUILD_DATABASE`
-  - `add_custom_command` `CODEGEN`
+- CMake 4.0:
+  - https://cmake.org/cmake/help/latest/prop_tgt/DEBUGGER_WORKING_DIRECTORY.html#prop_tgt:DEBUGGER_WORKING_DIRECTORY
+  - https://cmake.org/cmake/help/latest/variable/CMAKE_DEBUGGER_WORKING_DIRECTORY.html#variable:CMAKE_DEBUGGER_WORKING_DIRECTORY
 - C++23
   - http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/p2214r0.html#does-adjacent-mean-2-or-n
   - `std::to_underlying()` strange since cppref says all my standard library versions support it already? but it doesn't compile?
-  - `std::unreachable()`
   - `std::ranges::iota()`
   - `std::views::chunk()`
     - could this be useful for `canon_place`? I tried messing around with range-v3 on compiler explorer and had trouble with the whole action vs algorithm, container vs view thing. Didn't know what I was doing and could achieve what I wanted.
   - alternative to `std::chunk`, look into `mdspan` (multi-dimensional span). Seems like this is more of what I'm looking for.
   - multidimensional subscript operator
 - C+26:
-  - https://en.cppreference.com/w/cpp/language/attributes/indeterminate
-    - https://youtu.be/FNi1-x4pojs?t=4922
-    - https://stackoverflow.com/q/78792583
+  - create an attribute that expands to these in release mode:
+    - https://en.cppreference.com/w/cpp/language/attributes/indeterminate
+      - https://youtu.be/FNi1-x4pojs?t=4922
+      - https://stackoverflow.com/q/78792583
+    - see also GCC's `uninitialized` variable attribute
   - https://wg21.link/P2169R4 placeholder variables with no name
 
 https://wg21.link/P0847R7 deducing this? check compiler support
 
-- try adding `-fno-plt` for gcc and clang with the non-portable build option.
-- https://youtu.be/7QNtiH5wTAs?t=7003 -Wl,--gc-sections does this help? does it will my SO interface? what about functions that I want defined only for debugging? (see also gcc https://gcc.gnu.org/onlinedocs/gcc/Common-Variable-Attributes.html#index-retain-variable-attribute and https://gcc.gnu.org/onlinedocs/gcc/Common-Function-Attributes.html#index-retain-function-attribute and https://gcc.gnu.org/onlinedocs/gcc/Common-Function-Attributes.html#index-used-function-attribute)
+- https://youtu.be/7QNtiH5wTAs?t=7003 -Wl,--gc-sections does this help? does it mess with my SO interface? what about functions that I want defined only for debugging? (see also gcc https://gcc.gnu.org/onlinedocs/gcc/Common-Variable-Attributes.html#index-retain-variable-attribute and https://gcc.gnu.org/onlinedocs/gcc/Common-Function-Attributes.html#index-retain-function-attribute and https://gcc.gnu.org/onlinedocs/gcc/Common-Function-Attributes.html#index-used-function-attribute)
 - https://youtu.be/7QNtiH5wTAs?t=7200 -Wl,--icf=...
 - https://youtu.be/7QNtiH5wTAs?t=7322 -Wl,-s (strip-all)
 
 - figure out why nanobind stub generation + asan is having issues. see also https://github.com/google/sanitizers/issues/796#issuecomment-294388904.
+  - or it's now addressed? https://github.com/wjakob/nanobind/pull/1000
+    - TODO: wait for https://github.com/wjakob/nanobind/pull/1000#issuecomment-2820231142 to get addressed and update dep
   - https://github.com/wjakob/nanobind/discussions/623#discussioncomment-10238357
   - https://drjit.readthedocs.io/en/latest/debug.html#sanitizing-python-sessions
 
@@ -85,8 +89,6 @@ https://wg21.link/P0847R7 deducing this? check compiler support
 - install nanobind stuff
 
 - use CMake configure preset starting point for packaging workflow
-
-- launch.json https://code.visualstudio.com/docs/editor/variables-reference#_input-variables <!-- is this still useful? CMake tools has target debug stuff, right?-->
 
 check `CMAKE_LANG_COMPILER_FRONTEND_VARIANT` to use msvc flags when compiler is clang-cl?
 
@@ -99,8 +101,6 @@ check `CMAKE_LANG_COMPILER_FRONTEND_VARIANT` to use msvc flags when compiler is 
   - it's being inlined for both the training and optimized builds... do I need to make it not get inlined for the training build?
 
 - ctest for emscripten configuration
-
-- GCC -Wnrvo? or is it in -Wall?
 
 usage docs for CMake:
 - building an app target (cmake --build . --config=Release --target okiidoku_cli)

@@ -16,7 +16,7 @@ block()
 	set(target "okiidoku_compiler_warnings")
 	set(configs "$<CONFIG:Debug,RelWithDebInfo>")
 	if(MSVC)
-		# add_compile_options("$<$<CONFIG:Debug>:/RTC>")
+		# add_compile_options("$<$<CONFIG:Debug>:/RTC>") # https://cmake.org/cmake/help/latest/prop_tgt/MSVC_RUNTIME_CHECKS.html
 		# /RTC is incompatible with asan.
 
 		# https://docs.microsoft.com/en-us/cpp/sanitizers/asan

@@ -24,6 +24,7 @@ okiidoku_install_target(okiidoku)
 
 include(GenerateExportHeader)
 generate_export_header(okiidoku EXPORT_FILE_NAME include/okiidoku/detail/export.h)
+okiidoku_target_include_header(okiidoku PUBLIC "okiidoku/detail/export.h")
 target_compile_definitions(okiidoku PUBLIC "$<$<NOT:$<BOOL:${BUILD_SHARED_LIBS}>>:OKIIDOKU_STATIC_DEFINE>")
 
 include(./cmake/generate_meta_info.cmake)
@@ -34,6 +35,7 @@ target_include_directories(okiidoku
 	PUBLIC  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
 	PRIVATE "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>"
 )
+okiidoku_target_include_header(okiidoku PUBLIC "okiidoku/detail/util.hpp")
 # Future Note: if switching back to FILE_SET, make sure headers get installed. not sure why they weren't when previously using FILE_SET. maybe each header file needs to be listed out explicitly?
 install(DIRECTORY
 	"${CMAKE_CURRENT_BINARY_DIR}/include/okiidoku"
@@ -52,14 +54,18 @@ include(GNUInstallDirs)
 block()
 	set(c "${CMAKE_COMMAND};-E")
 	set(src "${okiidoku_SOURCE_DIR}/tools")
-	# TODO can this be a build event custom command?
-	add_custom_target(okiidoku_copy_debugger_support_files ALL
-		"${c};make_directory;${OKIIDOKU_DATA_OUTPUT_DIRECTORY}"
+	add_custom_command(
+		OUTPUT
+			"${OKIIDOKU_DATA_OUTPUT_DIRECTORY}/okiidoku.gdb.py"
+			"${OKIIDOKU_DATA_OUTPUT_DIRECTORY}/okiidoku.natvis"
+			"${okiidoku_BINARY_DIR}/ninjatracing.py"
+		COMMAND "${c};make_directory;${OKIIDOKU_DATA_OUTPUT_DIRECTORY}"
 		COMMAND "${c};create_symlink;${src}/okiidoku.gdb.py;${OKIIDOKU_DATA_OUTPUT_DIRECTORY}/okiidoku.gdb.py"
 		COMMAND "${c};create_symlink;${src}/okiidoku.natvis;${OKIIDOKU_DATA_OUTPUT_DIRECTORY}/okiidoku.natvis"
 		COMMAND "${c};create_symlink;${src}/ninjatracing.py;${okiidoku_BINARY_DIR}/ninjatracing.py" # sigh. I want to automate generating the ninja trace, and I'm hacking install(CODE) to run it after the whole build finishes. with install(CODE|SCRIPT), there's no robust, generalized way to get the project's source directory.
+		DEPENDS "${src}/okiidoku.gdb.py" "${src}/okiidoku.natvis" "${src}/ninjatracing.py"
 		COMMENT "Symlinking debug-support files to data / build directory"
-		VERBATIM COMMAND_EXPAND_LISTS
+		VERBATIM CODEGEN COMMAND_EXPAND_LISTS
 	)
 	install(FILES
 		"${src}/okiidoku.gdb.py"

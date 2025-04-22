@@ -61,6 +61,11 @@
 	"C_Cpp.default.cStandard": "c17",
 	"C_Cpp.default.cppStandard": "c++20",
 	"C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+	// "C_Cpp.default.compileCommands": [
+	// 	"${workspaceFolder}/cpp/out/build/dev.clang/compile_commands.json",
+	// 	"${workspaceFolder}/cpp/out/build/dev.gcc/compile_commands.json",
+	// 	// "${command:cmake.buildDirectory}/compile_commands.json",
+	// ],
 	"C_Cpp.default.browse.limitSymbolsToIncludedHeaders": true,
 	"C_Cpp.default.browse.path": ["${workspaceFolder}"],
 
@@ -70,12 +75,15 @@
 	// the following two lines are technically not needed. only when using kits. but this project uses presets.
 	"cmake.buildDirectory": "${sourceDirectory}/out/build/${command:cmake.activeConfigurePresetName}",
 	"cmake.installPrefix": "${sourceDirectory}/out/install/${command:cmake.activeBuildPresetName}",
-	// "cmake.debugConfig": {
-	// 	"environment": [],
-	// 	"cwd": "",
-	// 	"args": [],
-	// 	"setupCommands": [],
-	// 	"stopAtEntry": true,
-	// 	// "visualizerFile": "${workspaceFolder}/tools/okiidoku.natvis", // TODO.try is this needed if already specified in CMake?
-	// },
+	"cmake.debugConfig": {
+		"environment": [],
+		"args": [],
+		"setupCommands": [],
+		"stopAtEntry": true,
+		// "visualizerFile": "${workspaceFolder}/tools/okiidoku.natvis", // TODO.try is this needed if already specified in CMake?
+		// "showDisplayString": true, // https://code.visualstudio.com/docs/cpp/launch-json-reference#_showdisplaystring
+		"sourceFileMap": { // https://code.visualstudio.com/docs/cpp/launch-json-reference#_sourcefilemap
+			"/okiidoku": "${workspaceFolder}/cpp" // -ffile-prefix-map=${okiidoku_SOURCE_DIR}=/okiidoku
+		},
+	},
 }

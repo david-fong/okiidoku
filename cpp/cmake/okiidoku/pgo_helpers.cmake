@@ -148,7 +148,10 @@ function(okiidoku_target_pgo
 		unset(trainer_target_type)
 	endif()
 
-	# TODO.asap append to a cache variable's STRINGS property to help users know what trainers exist to choose from for this trainee.
+	# to help users know what trainers exist to choose from for this trainee.
+	set("OKIIDOKU_PGO_TRAINER_FOR_${trainee}" "${trainer}" CACHE STRING [[the trainer program to use to train this target for PGO]])
+	set_property(CACHE "OKIIDOKU_PGO_TRAINER_FOR_${trainee}" APPEND PROPERTY STRINGS "${trainer}")
+	# TODO use the user-chosen value?
 
 	set(if_pgo "$<CONFIG:PgoGen,PgoUse>")
 	set(if_gen "$<CONFIG:PgoGen>")
@@ -216,7 +219,6 @@ function(okiidoku_target_pgo
 
 		target_compile_options(${trainee} PRIVATE
 			"$<${if_pgo}:-fprofile-prefix-path=${objects_dir}>"
-			# "-ffile-prefix-map=${okiidoku_SOURCE_DIR}=." # TODO.wait this is only available in GCC 12 and I don't even know if it will change the mangled filenames like I want it to.
 			"$<${if_gen}:-fprofile-generate=${data_dir}>"
 			"$<${if_use}:-fprofile-use=${data_dir}>"
 			# "$<${if_use}:-fprofile-correction>
@@ -285,7 +287,6 @@ function(okiidoku_target_pgo
 		list(GET llvm_version_list 0 llvm_major_version)
 		find_program(LLVM_PROFDATA "llvm-profdata-${llvm_major_version}")
 		add_custom_command(TARGET "run_${trainer}" POST_BUILD VERBATIM COMMAND_EXPAND_LISTS
-			DEPENDS
 			# https://llvm.org/docs/CommandGuide/llvm-profdata.html#profdata-merge
 			COMMAND "$<${if_gen}:${LLVM_PROFDATA};merge;--output='${data_file_for_clang}';${data_dir}/*.profraw>"
 			BYPRODUCTS "${data_file_for_clang}"

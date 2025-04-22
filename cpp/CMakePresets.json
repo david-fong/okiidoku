@@ -196,10 +196,7 @@
 		{
 			"name": "base:dev.gcc",
 			"hidden": true,
-			"inherits": "base:dev",
-			"environment": {
-				"ASAN_OPTIONS": "verify_asan_link_order=false"
-			}
+			"inherits": "base:dev"
 		},
 		{
 			"name": "base:dev.vs:x64",

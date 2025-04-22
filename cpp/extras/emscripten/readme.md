@@ -5,10 +5,11 @@
 
 ## Required Tools
 
-- [Emscripten](https://emscripten.org/docs/getting_started/downloads.html) 3.1.62 or higher (includes compiler and NodeJS for _building_)
-- CMake 3.31 or higher
+- CMake 4.0 or higher
 - [A C++ build system](https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html). Recommended: Ninja
-- For running the output JS, Node 16 or higher. (`rg '^var MIN_NODE_VERSION\s?=\s\d+;' ${EMSDK}/upstream/emscripten/src/settings.js`)
+- [Emscripten](https://emscripten.org/docs/getting_started/downloads.html) 4.0.7 or higher (which comes with [compiler, and NodeJS for _building_](https://emscripten.org/docs/building_from_source/toolchain_what_is_needed.html))
+- For running the output JS, Node 16 or higher.
+  <!-- maintainer note: From `rg '^var MIN_NODE_VERSION\s?=\s\d+;' ${EMSDK}/upstream/emscripten/src/settings.js`. Reflect in package.json::engines -->
 
 I have no intention to support versions of Emscripten older than the latest at the time of my last pull.
 

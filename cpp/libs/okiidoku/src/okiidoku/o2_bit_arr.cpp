@@ -146,7 +146,7 @@ namespace okiidoku::mono {
 	template<Order O> requires(is_order_compiled(O))
 	std::array<char, Ints<O>::O2>
 	O2BitArr<O>::to_chars() const noexcept {
-		std::array<char, T::O2> _; // NOLINT(cppcoreguidelines-pro-type-member-init) see next line
+		OKIIDOKU_NO_PRE_INIT_AUTOVAR std::array<char, T::O2> _; // NOLINT(cppcoreguidelines-pro-type-member-init) see next line
 		_.fill('.');
 		for (o2i_t i {0}; i < T::O2; ++i) {
 			if (test(static_cast<o2x_t>(i))) { _[i] = '1'; }

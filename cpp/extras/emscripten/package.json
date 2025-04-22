@@ -3,7 +3,9 @@
 	"name": "okiidoku",
 	"version": "0.1.0",
 	"description": "david fong's variable-grid-size sudoku toolkit",
-	"keywords": ["sudoku"],
+	"keywords": [
+		"sudoku"
+	],
 	"homepage": "https://github.com/david-fong/okiidoku",
 	"license": "AGPL-3.0-or-later",
 	"author": "David Fong (https://github.com/david-fong)",
@@ -21,7 +23,7 @@
 		"postinstall": "cmake -S ../.. --preset dev.emscripten"
 	},
 	"devDependencies": {
-		"typescript": "^5.5.3"
+		"typescript": "^5.8.2"
 	},
 	"engines": {
 		"node": ">=16.0.0"

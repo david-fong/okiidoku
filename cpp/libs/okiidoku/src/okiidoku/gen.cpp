@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include <okiidoku/gen.hpp>
 
-#include <okiidoku/detail/contract.hpp>
-
 #include <random>    // minstd_rand
 #include <algorithm> // swap, copy, shuffle, count
 #include <numeric>   // iota

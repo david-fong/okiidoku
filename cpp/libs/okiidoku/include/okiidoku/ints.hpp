@@ -4,7 +4,6 @@
 #define HPP_OKIIDOKU__INTS
 
 #include <okiidoku/detail/order_templates.hpp> // Order, largest_compiled_order
-#include <okiidoku/detail/contract.hpp>
 
 #include <array>
 #include <bit>         // bit_width
@@ -217,9 +216,10 @@ namespace okiidoku::mono {
 		OKIIDOKU_CONTRACT_USE(rmi < T::O4);
 		using o2x_t = int_ts::o2x_t<O>;
 		switch (house_type) {
-		case HouseType::row: return static_cast<o2x_t>(rmi_to_row<O>(rmi));
-		case HouseType::col: return static_cast<o2x_t>(rmi_to_col<O>(rmi));
-		case HouseType::box: return static_cast<o2x_t>(rmi_to_box<O>(rmi));
+			using enum HouseType;
+			case row: return static_cast<o2x_t>(rmi_to_row<O>(rmi));
+			case col: return static_cast<o2x_t>(rmi_to_col<O>(rmi));
+			case box: return static_cast<o2x_t>(rmi_to_box<O>(rmi));
 		}
 		OKIIDOKU_UNREACHABLE;
 	}
@@ -254,9 +254,10 @@ namespace okiidoku::mono {
 	requires(Any_o2x_t<O, T_house> && Any_o2x_t<O, T_house_cell>) [[nodiscard, gnu::const]]
 	constexpr int_ts::o4x_t<O> house_cell_to_rmi(const HouseType house_type, const T_house house, const T_house_cell house_cell) noexcept {
 		switch (house_type) {
-		case HouseType::row: return row_col_to_rmi<O>(house, house_cell);
-		case HouseType::col: return row_col_to_rmi<O>(house_cell, house);
-		case HouseType::box: return box_cell_to_rmi<O>(house, house_cell);
+			using enum HouseType;
+			case row: return row_col_to_rmi<O>(house, house_cell);
+			case col: return row_col_to_rmi<O>(house_cell, house);
+			case box: return box_cell_to_rmi<O>(house, house_cell);
 		}
 		OKIIDOKU_UNREACHABLE;
 	}
@@ -269,8 +270,9 @@ namespace okiidoku::mono {
 		OKIIDOKU_CONTRACT_USE(chute_cell < T::O3);
 		using o4x_t = int_ts::o4x_t<O>;
 		switch (line_type) {
-		case LineType::row: return static_cast<o4x_t>((T::O3*chute)+chute_cell);
-		case LineType::col: return static_cast<o4x_t>((T::O1*chute)+((chute_cell%T::O2)*T::O2)+(chute_cell/T::O2));
+			using enum LineType;
+			case row: return static_cast<o4x_t>((T::O3*chute)+chute_cell);
+			case col: return static_cast<o4x_t>((T::O1*chute)+((chute_cell%T::O2)*T::O2)+(chute_cell/T::O2));
 		}
 		OKIIDOKU_UNREACHABLE;
 	}

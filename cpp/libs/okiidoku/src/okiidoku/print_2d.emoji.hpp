@@ -3,8 +3,6 @@
 #ifndef HPP_OKIIDOKU__PRINT_2D__EMOJI
 #define HPP_OKIIDOKU__PRINT_2D__EMOJI
 
-#include <okiidoku/detail/export.h>
-
 #include <vector>
 #include <array>
 #include <string_view>

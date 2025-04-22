@@ -6,11 +6,7 @@
 	// For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
 	"version": "0.2.0",
 	"configurations": [
-		// {
-		// 	"name": "dev.okiidoku_cli",
-		// 	"type": "cppdbg",
-		// 	"program": "${cmake}/a.out",
-		// 	"cwd": "${cmake.launchTargetDirectory}"
-		// }
+		// probably this will only be useful for launching language binding examples
+		// CMake Tools provides a good automatic interface for C++/CMake debug/launch
 	]
 }

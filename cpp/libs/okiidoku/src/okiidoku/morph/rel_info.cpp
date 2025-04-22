@@ -85,7 +85,7 @@ namespace okiidoku::mono::detail {
 		using chute_imbalance_t = typename Rel<O>::chute_imbalance_t;
 
 		const detail::Gridlike<O, RelMasks<O>> masks {make_rel_masks_<O>(grid_in)};
-		detail::Gridlike<O, Rel<O>> table; // uninitialized!
+		OKIIDOKU_NO_PRE_INIT_AUTOVAR detail::Gridlike<O, Rel<O>> table; // uninitialized!
 		for (o2i_t sym_a {0}; sym_a < T::O2; ++sym_a) {
 		for (o2i_t sym_b {0}; sym_b < T::O2; ++sym_b) {
 			const auto& mask {masks.at(sym_a,sym_b)};
@@ -99,8 +99,8 @@ namespace okiidoku::mono::detail {
 			rel.count = static_cast<int_ts::o2is_t<O>>(count);
 			rel.polar_count_lesser = static_cast<typename Rel<O>::polar_count_lesser_t>(std::min(mask.boxes_h.count(), mask.boxes_v.count()));
 
-			std::array<chute_imbalance_t, T::O1> h_chute_imbalance; // NOLINT(cppcoreguidelines-pro-type-member-init) initialized in following loop
-			std::array<chute_imbalance_t, T::O1> v_chute_imbalance; // NOLINT(cppcoreguidelines-pro-type-member-init) initialized in following loop
+			OKIIDOKU_NO_PRE_INIT_AUTOVAR std::array<chute_imbalance_t, T::O1> h_chute_imbalance; // NOLINT(cppcoreguidelines-pro-type-member-init) initialized in following loop
+			OKIIDOKU_NO_PRE_INIT_AUTOVAR std::array<chute_imbalance_t, T::O1> v_chute_imbalance; // NOLINT(cppcoreguidelines-pro-type-member-init) initialized in following loop
 			for (o1i_t chute {0}; chute < T::O1; ++chute) {
 				h_chute_imbalance[chute] = static_cast<chute_imbalance_t>((chute_box_masks<O>::row[chute] & rel_at_mask).count());
 				v_chute_imbalance[chute] = static_cast<chute_imbalance_t>((chute_box_masks<O>::col[chute] & rel_at_mask).count());

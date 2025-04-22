@@ -19,6 +19,12 @@ if(NOT MSVC AND NOT EMSCRIPTEN)
 	)
 endif()
 
+if(NOT MSVC)
+	add_compile_options(
+		-fno-plt # https://gcc.gnu.org/onlinedocs/gcc/Code-Gen-Options.html#index-fno-plt
+	)
+endif()
+
 
 # Note: wrapping with functions to scope changes to `CMAKE_CXX_FLAGS`
 # cspell:dictionaries cpp-refined

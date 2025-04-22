@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2020 David Fong
+# SPDX-License-Identifier: GPL-3.0-or-later
 # TODO I have no idea what the heck I'm doing and have not tested this
 # set(OKIIDOKU_VERSION x.y.z)
 cmake_minimum_required(VERSION 3.19) # TODO what best to set this to?

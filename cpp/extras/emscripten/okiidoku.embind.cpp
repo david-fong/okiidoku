@@ -5,7 +5,7 @@
 // https://emscripten.org/docs/api_reference/bind.h.html
 // https://github.com/emscripten-core/emscripten/blob/main/ChangeLog.md
 // https://emscripten.org/docs/porting/connecting_cpp_and_javascript/embind.html#object-ownership
-static_assert(__EMSCRIPTEN__);
+static_assert(__EMSCRIPTEN__); // https://emscripten.org/docs/compiling/Building-Projects.html#detecting-emscripten-in-preprocessor
 #include <emscripten/bind.h>
 #include <emscripten/emscripten.h>
 #include <emscripten/val.h>
