@@ -84,7 +84,7 @@ endif()
 
 
 # related to reproducible builds / deterministic compilation:
-# TODO is this not the wrong place to do this? wouldn't we ant this to apply to all targets?
+# TODO is this not the wrong place to do this? wouldn't we want this to apply to all targets?
 if(MSVC)
 	target_compile_options(okiidoku_compiler_warnings INTERFACE
 	)
@@ -99,14 +99,9 @@ block()
 		#  see also gdb: set substitute-path, lldb: target.source-map, vscode: "sourceFileMap"
 		#  and https://github.com/emscripten-core/emscripten/blob/main/ChangeLog.md#406---032625
 		#  https://emscripten.org/docs/tools_reference/settings_reference.html#source-map-prefixes
-	)
-	# I don't think the following makes any difference(?)
-	target_link_options(okiidoku_compiler_warnings INTERFACE
-		"-ffile-prefix-map=${okiidoku_SOURCE_DIR}=/okiidoku"
-		-fno-record-gcc-switches -gno-record-gcc-switches
+		# TODO: why am I still getting absolute paths in debug builds for GCC?
 	)
 	# TODO clang -fno-record-command-line
-	# -fno-record-gcc-switches -gno-record-gcc-switches
 endblock()
 endif()
 
@@ -120,10 +115,10 @@ else()
 	# set(flags_file "${okiidoku_SOURCE_DIR}/cmake/okiidoku/compile_opts/warnings.gcc.txt")
 	# set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${flags_file}")
 	target_compile_definitions(okiidoku_compiler_warnings INTERFACE
-		"$<$<CONFIG:Debug,RelWithDebInfo>:_GLIBCXX_ASSERTIONS>"
+		"$<${debug_configs}:_GLIBCXX_ASSERTIONS>"
 	)
 	target_compile_options(okiidoku_compiler_warnings INTERFACE
-		"$<$<CONFIG:Debug,RelWithDebInfo>:-U_FORTIFY_SOURCE;-D_FORTIFY_SOURCE=3>"
+		"$<${debug_configs}:-U_FORTIFY_SOURCE;-D_FORTIFY_SOURCE=3>"
 		-Wfatal-errors # stop compilation on first error. I found it hard to read multiple.
 		# "@${flags_file}"
 		-Wall -Wextra -Wpedantic -pedantic-errors

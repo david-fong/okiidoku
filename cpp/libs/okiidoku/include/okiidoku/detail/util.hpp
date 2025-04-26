@@ -26,7 +26,7 @@
 	#endif
 #else
 	#define OKIIDOKU_CONTRACT_USE(expr) assert(expr) // NOLINT(cert-dcl03-c,misc-static-assert) runtime abort desirable here.
-	#include <cstdlib> // std::abort
+	#include <cstdlib> // abort
 	#define OKIIDOKU_UNREACHABLE std::abort()
 #endif
 

@@ -14,7 +14,6 @@ endif()
 
 block()
 	set(target "okiidoku_compiler_warnings")
-	set(configs "$<CONFIG:Debug,RelWithDebInfo>")
 	if(MSVC)
 		# add_compile_options("$<$<CONFIG:Debug>:/RTC>") # https://cmake.org/cmake/help/latest/prop_tgt/MSVC_RUNTIME_CHECKS.html
 		# /RTC is incompatible with asan.
@@ -23,7 +22,7 @@ block()
 		# https://docs.microsoft.com/en-us/cpp/sanitizers/asan-building
 		# known issues: https://docs.microsoft.com/en-us/cpp/sanitizers/asan-known-issues
 		#  in particular, see the section "#addresssanitizer-runtime-dll-locations."
-		target_compile_options("${target}" INTERFACE "$<${configs}:/fsanitize=address>")
+		target_compile_options("${target}" INTERFACE "$<${debug_configs}:/fsanitize=address>")
 
 		# TODO.try consider trying /sdl (additional security checks)
 		#  Note: It has both compile-time and runtime checks, and I only want the runtime checks
@@ -37,8 +36,8 @@ block()
 			"-fsanitize=address,undefined"
 			# "$<$<CXX_COMPILER_ID:Clang>:-shared-libasan>"
 		)
-		target_compile_options("${target}"        INTERFACE "$<${configs}:${flags}>")
-		target_link_options(   "${target}" BEFORE INTERFACE "$<${configs}:${flags}>")
+		target_compile_options("${target}"        INTERFACE "$<${debug_configs}:${flags}>")
+		target_link_options(   "${target}" BEFORE INTERFACE "$<${debug_configs}:${flags}>")
 		# TODO note for emscripten https://emscripten.org/docs/debugging/Sanitizers.html#address-sanitizer (may need to configure increased startup memory)
 
 	endif()

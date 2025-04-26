@@ -9,6 +9,18 @@ else()
 	set(base "${CMAKE_BINARY_DIR}/build")
 endif()
 
+# not really about output dirs, but throwing this in here. sigh. why isn't this default?
+get_property(DEBUG_CONFIGURATIONS GLOBAL PROPERTY DEBUG_CONFIGURATIONS)
+list(APPEND DEBUG_CONFIGURATIONS Debug RelWithDebInfo)
+set_property(GLOBAL PROPERTY DEBUG_CONFIGURATIONS "${DEBUG_CONFIGURATIONS}")
+set(debug_configs "$<CONFIG:${DEBUG_CONFIGURATIONS}>")
+string(REPLACE ";" "," debug_configs "${debug_configs}")
+
+if (NOT DEFINED CMAKE_DEBUGGER_WORKING_DIRECTORY)
+	set(CMAKE_DEBUGGER_WORKING_DIRECTORY "${base}")
+	# CMAKE_VS_DEBUGGER_WORKING_DIRECTORY falls back to this. at time of this writing (2504..), seems to only be used for VS generator and CMake file api: https://github.com/search?q=repo%3AKitware%2FCMake%20%22GetDebuggerWorkingDirectory%22&type=code
+endif()
+
 if(EMSCRIPTEN)
 	set(CMAKE_INSTALL_BINDIR .)
 	set(CMAKE_INSTALL_LIBDIR .)
@@ -49,9 +61,6 @@ endif()
 
 if(NOT DEFINED OKIIDOKU_DATA_OUTPUT_DIRECTORY)
 	set(OKIIDOKU_DATA_OUTPUT_DIRECTORY "${base}/${CMAKE_INSTALL_DATADIR}")
-endif()
-if (NOT DEFINED CMAKE_VS_DEBUGGER_WORKING_DIRECTORY)
-	set(CMAKE_VS_DEBUGGER_WORKING_DIRECTORY "${base}")
 endif()
 
 unset(CMAKE_INSTALL_LIBDIR2)

@@ -7,6 +7,7 @@
 
 // #include <algorithm>
 #include <array>
+#include <utility> // forward
 
 #include <okiidoku/puzzle/solver/cand_elim_find.macros.hpp>
 
@@ -19,10 +20,13 @@ namespace okiidoku::mono::detail::solver { namespace {
 		std::array<O2BitArr<O>, T::O2> arr_ {};
 	public:
 		// inner dimension is for intersections in a line, outer dimension for intersections in a box.
-		[[nodiscard, gnu::pure]] const O2BitArr<O>& at_isec(const o2i_t isec_i) const noexcept { return arr_[isec_i]; }
-		[[nodiscard, gnu::pure]]       O2BitArr<O>& at_isec(const o2i_t isec_i)       noexcept { return arr_[isec_i]; }
-		[[nodiscard, gnu::pure]] const O2BitArr<O>& at_isec(const o1i_t box_isec_i, const o1i_t line_isec_i) const noexcept { return arr_[static_cast<o2i_t>(static_cast<o2i_t>(T::O1*box_isec_i)+line_isec_i)]; }
-		[[nodiscard, gnu::pure]]       O2BitArr<O>& at_isec(const o1i_t box_isec_i, const o1i_t line_isec_i)       noexcept { return arr_[static_cast<o2i_t>(static_cast<o2i_t>(T::O1*box_isec_i)+line_isec_i)]; }
+		template<class Self> [[nodiscard, gnu::pure]]
+		auto&& at_isec(this Self&& self, const o2i_t isec_i) noexcept { return std::forward<Self>(self).arr_[isec_i]; }
+
+		template<class Self> [[nodiscard, gnu::pure]]
+		auto&& at_isec(this Self&& self, const o1i_t box_isec_i, const o1i_t line_isec_i) noexcept {
+			return std::forward<Self>(self).arr_[static_cast<o2i_t>(static_cast<o2i_t>(T::O1*box_isec_i)+line_isec_i)];
+		}
 	};
 
 	template<Order O> requires(is_order_compiled(O))

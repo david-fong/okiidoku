@@ -9,6 +9,7 @@
 #include <array>
 #include <span>
 #include <compare>
+#include <utility> // forward
 
 namespace okiidoku::mono {
 
@@ -71,36 +72,31 @@ namespace okiidoku::mono {
 		}
 		Gridlike() noexcept requires(!std::same_as<V_, grid_val_t<O>>) = default;
 
-		[[nodiscard, gnu::pure]]       array_t& get_underlying_array()       noexcept { return arr_; }
-		[[nodiscard, gnu::pure]] const array_t& get_underlying_array() const noexcept { return arr_; }
+		template<class Self>
+		[[nodiscard, gnu::pure]] auto&& get_underlying_array(this Self&& self) noexcept { return std::forward<Self>(self).arr_; }
 
 		// TODO.low why does adding an assumption that the value is lteq T::O2 result in increased code size on clang?
 		// contract: `rmi` is in [0, O4).
-		template<class T_rmi> requires(Any_o4x_t<O, T_rmi>)
-		[[nodiscard, gnu::pure]] constexpr       val_t& at_rmi(const T_rmi rmi)       noexcept {
+		template<class T_rmi, class Self> requires(Any_o4x_t<O, T_rmi>)
+		[[nodiscard, gnu::pure]] constexpr auto&& at_rmi(this Self&& self, const T_rmi rmi) noexcept {
 			OKIIDOKU_CONTRACT_USE(rmi < T::O4);
 			// if constexpr (std::same_as<V_, grid_val_t<O>>) { OKIIDOKU_CONTRACT_USE(arr_[rmi] <= T::O2); }
-			return arr_[rmi];
-		}
-		template<class T_rmi> requires(Any_o4x_t<O, T_rmi>)
-		[[nodiscard, gnu::pure]] constexpr const val_t& at_rmi(const T_rmi rmi) const noexcept {
-			OKIIDOKU_CONTRACT_USE(rmi < T::O4);
-			// if constexpr (std::same_as<V_, grid_val_t<O>>) { OKIIDOKU_CONTRACT_USE(arr_[rmi] <= T::O2); }
-			return arr_[rmi];
+			return std::forward<Self>(self).arr_[rmi];
 		}
 
 		// TODO.low why is using row_col_to_rmi slower than "inlining" the expression here? Is it because of the return-type cast? even adding bounds assumptions seems to increase code size...
 		// contract: `row` and `col` are in [0, O2).
-		template<class T_row, class T_col> requires(Any_o2x_t<O, T_row> && Any_o2x_t<O, T_col>)
-		[[nodiscard]] constexpr       val_t& at(const T_row row, const T_col col)       noexcept { return arr_[static_cast<int_ts::o4x_t<O>>(static_cast<int_ts::o4x_t<O>>(T::O2*row)+col)]; }
-		template<class T_row, class T_col> requires(Any_o2x_t<O, T_row> && Any_o2x_t<O, T_col>)
-		[[nodiscard]] constexpr const val_t& at(const T_row row, const T_col col) const noexcept { return arr_[static_cast<int_ts::o4x_t<O>>(static_cast<int_ts::o4x_t<O>>(T::O2*row)+col)]; }
+		// TODO: why didn't I mark this with [[gnu::pure]]?
+		template<class T_row, class T_col, class Self> requires(Any_o2x_t<O, T_row> && Any_o2x_t<O, T_col>)
+		[[nodiscard]] constexpr auto&& at(this Self&& self, const T_row row, const T_col col) noexcept {
+			return std::forward<Self>(self).arr_[static_cast<int_ts::o4x_t<O>>(static_cast<int_ts::o4x_t<O>>(T::O2*row)+col)];
+		}
 
 		// contract: `box` and `box_cell` are in [0, O2).
-		template<class T_house, class T_house_cell> requires(Any_o2x_t<O, T_house> && Any_o2x_t<O, T_house_cell>)
-		[[nodiscard]] constexpr       val_t& at_box_cell(const T_house box, const T_house_cell box_cell)       noexcept { return arr_[box_cell_to_rmi<O>(box, box_cell)]; }
-		template<class T_house, class T_house_cell> requires(Any_o2x_t<O, T_house> && Any_o2x_t<O, T_house_cell>)
-		[[nodiscard]] constexpr const val_t& at_box_cell(const T_house box, const T_house_cell box_cell) const noexcept { return arr_[box_cell_to_rmi<O>(box, box_cell)]; }
+		template<class T_house, class T_house_cell, class Self> requires(Any_o2x_t<O, T_house> && Any_o2x_t<O, T_house_cell>)
+		[[nodiscard]] constexpr auto&& at_box_cell(this Self&& self, const T_house box, const T_house_cell box_cell) noexcept {
+			return std::forward<Self>(self).arr_[box_cell_to_rmi<O>(box, box_cell)];
+		}
 
 		// contract: `row` is in [0, O2).
 		template<class T_row> requires(Any_o2x_t<O, T_row>)

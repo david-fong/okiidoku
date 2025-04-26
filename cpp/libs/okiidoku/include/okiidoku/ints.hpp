@@ -7,6 +7,7 @@
 
 #include <array>
 #include <bit>         // bit_width
+#include <utility>     // forward, to_underlying
 #include <limits>      // numeric_limits<T>::max
 #include <type_traits> // conditional_t
 #include <concepts>    // unsigned_integral
@@ -27,10 +28,10 @@ namespace okiidoku {
 	template<typename V> requires(!std::is_reference_v<V>)
 	struct HouseTypeMap final {
 		// HouseTypeMap();
-		[[nodiscard, gnu::pure]] const V& at(const HouseType key) const noexcept { return arr_[static_cast<unsigned char>(key)]; } // TODO.wait std::to_underlying
-		[[nodiscard, gnu::pure]]       V& at(const HouseType key)       noexcept { return arr_[static_cast<unsigned char>(key)]; }
-		[[nodiscard, gnu::pure]] const auto& get_underlying_arr() const noexcept { return arr_; }
-		[[nodiscard, gnu::pure]]       auto& get_underlying_arr()       noexcept { return arr_; }
+		template<class Self> [[nodiscard, gnu::pure]]
+		auto&& at(this Self&& self, const HouseType key) noexcept { return std::forward<Self>(self).arr_[std::to_underlying(key)]; }
+		template<class Self> [[nodiscard, gnu::pure]]
+		auto&& get_underlying_arr(this Self&& self) noexcept { return std::forward<Self>(self).arr_; }
 	private:
 		std::array<V, house_types.size()> arr_;
 	};
@@ -45,10 +46,10 @@ namespace okiidoku {
 	template<typename V> requires(!std::is_reference_v<V>)
 	struct LineTypeMap final {
 		// HouseTypeMap();
-		[[nodiscard, gnu::pure]] const V& at(const LineType key) const noexcept { return arr_[static_cast<unsigned char>(key)]; } // TODO.wait std::to_underlying
-		[[nodiscard, gnu::pure]]       V& at(const LineType key)       noexcept { return arr_[static_cast<unsigned char>(key)]; }
-		[[nodiscard, gnu::pure]] const auto& get_underlying_arr() const noexcept { return arr_; }
-		[[nodiscard, gnu::pure]]       auto& get_underlying_arr()       noexcept { return arr_; }
+		template<class Self> [[nodiscard, gnu::pure]]
+		auto&& at(this Self&& self, const LineType key) noexcept { return std::forward<Self>(self).arr_[std::to_underlying(key)]; }
+		template<class Self> [[nodiscard, gnu::pure]]
+		auto&& get_underlying_arr(this Self&& self) noexcept { return std::forward<Self>(self).arr_; }
 	private:
 		std::array<V, line_types.size()> arr_;
 	};

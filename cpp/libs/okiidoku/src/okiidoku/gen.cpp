@@ -6,6 +6,7 @@
 #include <algorithm> // swap, copy, shuffle, count
 #include <numeric>   // iota
 #include <array>
+#include <utility>   // forward
 
 namespace okiidoku::mono { namespace {
 
@@ -22,15 +23,11 @@ namespace okiidoku::mono { namespace {
 		[[nodiscard, gnu::pure]] o3i_t count_num_missing_syms() const noexcept {
 			return static_cast<o3i_t>(std::count(store_.cbegin(), store_.cend(), V{0}));
 		}
-		[[nodiscard, gnu::pure]] const V& ch_count_sym(const ch_t ch, const sym_t sym) const noexcept {
+		template<class Self> [[nodiscard, gnu::pure]]
+		auto&& ch_count_sym(this Self&& self, const ch_t ch, const sym_t sym) noexcept {
 			OKIIDOKU_CONTRACT_USE(ch < T::O1);
 			OKIIDOKU_CONTRACT_USE(sym < T::O2);
-			return store_[static_cast<o3i_t>(static_cast<o3i_t>(T::O1*sym)+ch)];
-		}
-		[[nodiscard, gnu::pure]] V& ch_count_sym(const ch_t ch, const sym_t sym) noexcept {
-			OKIIDOKU_CONTRACT_USE(ch < T::O1);
-			OKIIDOKU_CONTRACT_USE(sym < T::O2);
-			return store_[static_cast<o3i_t>(static_cast<o3i_t>(T::O1*sym)+ch)];
+			return std::forward<Self>(self).store_[static_cast<o3i_t>(static_cast<o3i_t>(T::O1*sym)+ch)];
 		}
 	private:
 		// outer dimension (rows) for each of the O2 symbols

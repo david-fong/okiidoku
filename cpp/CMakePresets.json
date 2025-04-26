@@ -9,8 +9,8 @@
 	},
 	"version": 10,
 	"cmakeMinimumRequired": {
-		"major": 3,
-		"minor": 31
+		"major": 4,
+		"minor": 0
 	},
 	"configurePresets": [
 		{
@@ -205,14 +205,21 @@
 			"inherits": "base:dev"
 		},
 		{
-			"name": "dev.clang.debug",
+			"name": "dev.clang.dbg",
 			"configurePreset": "dev.clang",
 			"displayName": "debug",
 			"inherits": ["base:dev.clang"],
 			"configuration": "Debug"
 		},
 		{
-			"name": "dev.clang.release",
+			"name": "dev.clang.reldbg",
+			"configurePreset": "dev.clang",
+			"displayName": "release with debug info",
+			"inherits": ["base:dev.clang"],
+			"configuration": "RelWithDebInfo"
+		},
+		{
+			"name": "dev.clang.rel",
 			"configurePreset": "dev.clang",
 			"displayName": "release",
 			"inherits": ["base:dev.clang"],
@@ -226,14 +233,21 @@
 			"configuration": "PgoUse"
 		},
 		{
-			"name": "dev.clang-homebrew.debug",
+			"name": "dev.clang-homebrew.dbg",
 			"configurePreset": "dev.clang-homebrew",
 			"displayName": "debug",
 			"inherits": ["base:dev.clang-homebrew"],
 			"configuration": "Debug"
 		},
 		{
-			"name": "dev.clang-homebrew.release",
+			"name": "dev.clang-homebrew.reldbg",
+			"configurePreset": "dev.clang-homebrew",
+			"displayName": "release with debug info",
+			"inherits": ["base:dev.clang-homebrew"],
+			"configuration": "RelWithDebInfo"
+		},
+		{
+			"name": "dev.clang-homebrew.rel",
 			"configurePreset": "dev.clang-homebrew",
 			"displayName": "release",
 			"inherits": ["base:dev.clang-homebrew"],
@@ -247,14 +261,21 @@
 			"configuration": "PgoUse"
 		},
 		{
-			"name": "dev.gcc.debug",
+			"name": "dev.gcc.dbg",
 			"configurePreset": "dev.gcc",
 			"displayName": "debug",
 			"inherits": ["base:dev.gcc"],
 			"configuration": "Debug"
 		},
 		{
-			"name": "dev.gcc.release",
+			"name": "dev.gcc.reldbg",
+			"configurePreset": "dev.gcc",
+			"displayName": "release with debug info",
+			"inherits": ["base:dev.gcc"],
+			"configuration": "RelWithDebInfo"
+		},
+		{
+			"name": "dev.gcc.rel",
 			"configurePreset": "dev.gcc",
 			"displayName": "release",
 			"inherits": ["base:dev.gcc"],
@@ -268,14 +289,14 @@
 			"configuration": "PgoUse"
 		},
 		{
-			"name": "dev.msvc.debug",
+			"name": "dev.msvc.dbg",
 			"configurePreset": "dev.msvc",
 			"displayName": "debug",
 			"inherits": ["base:dev.vs:x64"],
 			"configuration": "Debug"
 		},
 		{
-			"name": "dev.msvc.release",
+			"name": "dev.msvc.rel",
 			"configurePreset": "dev.msvc",
 			"displayName": "release",
 			"inherits": ["base:dev.vs:x64"],
@@ -295,14 +316,21 @@
 			"targets": ["all"]
 		},
 		{
-			"name": "dev.emscripten.debug",
+			"name": "dev.emscripten.dbg",
 			"configurePreset": "dev.emscripten",
 			"displayName": "debug",
 			"inherits": ["base:dev.emscripten"],
 			"configuration": "Debug"
 		},
 		{
-			"name": "dev.emscripten.release",
+			"name": "dev.emscripten.reldbg",
+			"configurePreset": "dev.emscripten",
+			"displayName": "release with debug info",
+			"inherits": ["base:dev.emscripten"],
+			"configuration": "RelWithDebInfo"
+		},
+		{
+			"name": "dev.emscripten.rel",
 			"configurePreset": "dev.emscripten",
 			"displayName": "release",
 			"inherits": ["base:dev.emscripten"],
@@ -320,7 +348,7 @@
 	],
 	"packagePresets": [
 		{
-			"name": "dev.emscripten.release",
+			"name": "dev.emscripten.rel",
 			"configurePreset": "dev.emscripten",
 			"displayName": "release",
 			"description": "equivalent of `npm pack`(?)",

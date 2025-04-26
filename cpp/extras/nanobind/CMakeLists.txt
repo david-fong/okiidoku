@@ -30,14 +30,16 @@ target_link_libraries(_okiidoku_nb
 include(GNUInstallDirs)
 okiidoku_install_target(_okiidoku_nb DESTINATION "${CMAKE_INSTALL_LIBDIR}")
 
-if(NOT DEFINED CMAKE_LIBRARY_OUTPUT_DIRECTORY)
-	message(FATAL_ERROR "I do not have the patience to gracefully handle this right now") # TODO.wait see below OUTPUT argument comment
+block()
+set(output "okiidoku.pyi")
+if(DEFINED CMAKE_LIBRARY_OUTPUT_DIRECTORY)
+	set(output "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${output}")
 endif()
 # https://nanobind.readthedocs.io/en/latest/api_cmake.html#stub-generation
 # https://nanobind.readthedocs.io/en/latest/typing.html#stubs
 nanobind_add_stub(okiidoku_nb_stub
 	MODULE _okiidoku_nb
-	OUTPUT "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/okiidoku.pyi"
+	OUTPUT "${output}"
 	# OUTPUT "$<TARGET_FILE_DIR:_okiidoku_nb>/okiidoku.pyi" # TODO.wait https://gitlab.kitware.com/cmake/cmake/-/issues/21364
 	PYTHON_PATH "$<TARGET_FILE_DIR:_okiidoku_nb>" # supposed to be relative path?
 	DEPENDS
@@ -46,6 +48,7 @@ nanobind_add_stub(okiidoku_nb_stub
 		okiidoku_compiler_warnings # necessary for nanobind v2.7.0's very basic sanitizer detection. I attach sanitizer flags to this target.
 )
 # set_target_properties(_okiidoku_nb PROPERTIES OUTPUT_NAME "okiidoku") # TODO.try
+endblock()
 
 
 set(src "$<TARGET_FILE_DIR:_okiidoku_nb>")

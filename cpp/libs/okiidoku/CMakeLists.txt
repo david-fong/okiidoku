@@ -7,7 +7,7 @@
 
 add_library(okiidoku #[[ uses BUILD_SHARED_LIBS ]] "")
 add_library("${PROJECT_NAME}::okiidoku" ALIAS okiidoku)
-target_compile_features(okiidoku PUBLIC cxx_std_20)
+target_compile_features(okiidoku PUBLIC cxx_std_23)
 set_target_properties(okiidoku PROPERTIES
 	# https://www.youtube.com/watch?v=m0DwB4OvDXk&ab_channel=CppCon&t=17m13s
 	VERSION   ${okiidoku_VERSION}
@@ -46,7 +46,7 @@ install(DIRECTORY
 
 # keep inline functions for debugging purposes:
 # TODO clang doesn't support -fkeep-inline-functions, need to use something else... maybe -fno-inline-functions... :(
-add_compile_options("$<$<CONFIG:Debug,RelWithDebInfo>:$<$<CXX_COMPILER_ID:GNU>:-fkeep-inline-functions>>")
+add_compile_options("$<${debug_configs}:$<$<CXX_COMPILER_ID:GNU>:-fkeep-inline-functions>>")
 
 # MARK: debug support
 # too bad can't use execute_process or file(CREATE_LINK) because there's a generator expression in OKIIDOKU_DATA_OUTPUT_DIRECTORY.

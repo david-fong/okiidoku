@@ -23,8 +23,8 @@ target_link_options(okiidoku_js PRIVATE
 	--no-entry # it's a "reactor" (ie. a library)
 	# --pre-js=
 	-sSTRICT=1
-	"$<$<CONFIG:Debug,RelWithDebInfo>:-sASSERTIONS=1>"
-	"$<$<CONFIG:Debug,RelWithDebInfo>:-gsource-map>" # https://emscripten.org/docs/tools_reference/emcc.html#emcc-gsource-map
+	"$<${debug_configs}:-sASSERTIONS=1>"
+	"$<${debug_configs}:-gsource-map>" # https://emscripten.org/docs/tools_reference/emcc.html#emcc-gsource-map
 
 	# https://emscripten.org/docs/api_reference/module.html#module
 	-sMODULARIZE=1
@@ -53,10 +53,11 @@ okiidoku_install_target(okiidoku_js)
 
 # TODO.wait https://gitlab.kitware.com/cmake/cmake/-/issues/20745
 include(GNUInstallDirs)
-set(src "$<TARGET_FILE_DIR:okiidoku_js>")
+set(src "$<TARGET_FILE_DIR:okiidoku_js>/$<TARGET_FILE_BASE_NAME:okiidoku_js>")
 set(dest "${CMAKE_CURRENT_SOURCE_DIR}/examples/node/build/$<CONFIG>")
-install(FILES "${src}/okiidoku.d.ts" TYPE BIN COMPONENT okiidoku_development)
-install(FILES "${src}/okiidoku.wasm" TYPE BIN COMPONENT okiidoku_runtime)
+# intentional abuse of BIN type to get sibling destination
+install(FILES "${src}.d.ts" "$<${debug_configs}:${src}.wasm.map>" TYPE BIN COMPONENT okiidoku_development)
+install(FILES "${src}.wasm" TYPE BIN COMPONENT okiidoku_runtime)
 install(DIRECTORY examples TYPE DOC COMPONENT okiidoku_development
 	PATTERN "*.*js"        PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE
 	PATTERN "build"        EXCLUDE
@@ -69,8 +70,9 @@ set(c "${CMAKE_COMMAND};-E")
 add_custom_command(TARGET okiidoku_js POST_BUILD
 	COMMAND "${c};make_directory;${dest}"
 	COMMAND "${c};create_symlink;$<TARGET_FILE:okiidoku_js>;${dest}/$<TARGET_FILE_NAME:okiidoku_js>"
-	COMMAND "${c};create_symlink;${src}/okiidoku.d.ts;${dest}/okiidoku.d.ts"
-	COMMAND "${c};create_symlink;${src}/okiidoku.wasm;${dest}/okiidoku.wasm"
+	COMMAND "${c};create_symlink;${src}.d.ts;${dest}/okiidoku.d.ts"
+	COMMAND "${c};create_symlink;${src}.wasm;${dest}/okiidoku.wasm"
+	COMMAND "${c};create_symlink;${src}.wasm.map;${dest}/okiidoku.wasm.map"
 	COMMENT "Symlinking JS+WASM+TS target output files to examples directory for convenience"
 	VERBATIM COMMAND_EXPAND_LISTS
 )

@@ -11,6 +11,7 @@
 // #include <stack>
 #include <vector>
 #include <type_traits>
+#include <utility> // forward
 
 /**
 The "engine" is a primitive for building a solver capable of finding all

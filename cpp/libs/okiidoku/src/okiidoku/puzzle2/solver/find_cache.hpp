@@ -5,6 +5,8 @@
 
 #include <okiidoku/o2_bit_arr.hpp>
 
+#include <utility> // forward
+
 namespace okiidoku::mono::detail::solver2 {
 
 	// TODO.design hmmm why couldn't this just be part of the cands interfaces? I suppose because fish needs one of these, but fish can share cands pov with sym-major subset pov?
@@ -33,8 +35,8 @@ namespace okiidoku::mono::detail::solver2 {
 		std::array<Set, T::O2> sets_;
 	public:
 		// TODO an initialization function. maybe a reinit
-		[[nodiscard, gnu::pure]] const Set& operator[](const o2i_t set) const noexcept { return sets_[set]; }
-		[[nodiscard, gnu::pure]]       Set& operator[](const o2i_t set)       noexcept { return sets_[set]; }
+		template<class Self> [[nodiscard, gnu::pure]]
+		auto&& operator[](this Self&& self, const o2i_t set) noexcept { return std::forward<Self>(self).sets_[set]; }
 
 		void learn_complementary_partition(const O2BitArr<O>&) noexcept;
 	};

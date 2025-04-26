@@ -6,6 +6,7 @@
 #include <immintrin.h>
 #endif
 
+#include <algorithm> // find_if
 #include <numeric> // transform_reduce
 #include <execution>
 

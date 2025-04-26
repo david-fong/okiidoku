@@ -9,6 +9,7 @@
 #include <array>
 #include <variant>
 #include <compare>
+#include <utility> // forward
 
 namespace okiidoku {
 
@@ -27,7 +28,7 @@ namespace okiidoku {
 	}
 	// exists because my template instantiation macro has no delimiter
 	// argument, so I hack this to ignore a leading comma at a usage site.
-	inline constexpr auto compiled_orders {detail::CompiledOrdersHelper_make_array<
+	inline constexpr auto compiled_orders {::okiidoku::detail::CompiledOrdersHelper_make_array<
 		/* ignored: */Order{0}
 		#define OKIIDOKU_FOREACH_O_EMIT(O_) , O_
 		OKIIDOKU_FOREACH_O_DO_EMIT
@@ -115,24 +116,17 @@ namespace okiidoku {
 
 			// Though public, you shouldn't need to use this. The rest of the visitor
 			// interface of the library wraps operations around it with nicer syntax.
-			[[nodiscard, gnu::pure]]       variant_t& get_mono_variant()       noexcept { return variant_; }
-			[[nodiscard, gnu::pure]] const variant_t& get_mono_variant() const noexcept { return variant_; }
+			template<class Self> [[nodiscard, gnu::pure]]
+			auto&& get_mono_variant(this Self&& self) noexcept { return std::forward<Self>(self).variant_; }
 
 			// Sugar wrapper around an unchecked dereference of `std::get_if` for the underlying variant.
 			// Note: not using `std::get` since it could throw and we're going all in with the unchecked thing here.
-			template<Order O> [[nodiscard, gnu::pure]]
-			typename Adaptor::template type<O>& unchecked_get_mono_exact() noexcept {
+			template<Order O, class Self> [[nodiscard, gnu::pure]]
+			auto&& unchecked_get_mono_exact(this Self&& self) noexcept {
 				using T_var = typename Adaptor::template type<O>;
-				OKIIDOKU_CONTRACT_USE(std::holds_alternative<T_var>(variant_));
-				OKIIDOKU_CONTRACT_USE(std::get_if<T_var>(&variant_) != nullptr);
-				return *std::get_if<T_var>(&variant_);
-			}
-			template<Order O> [[nodiscard, gnu::pure]]
-			const typename Adaptor::template type<O>& unchecked_get_mono_exact() const noexcept {
-				using T_var = typename Adaptor::template type<O>;
-				OKIIDOKU_CONTRACT_USE(std::holds_alternative<T_var>(variant_));
-				OKIIDOKU_CONTRACT_USE(std::get_if<T_var>(&variant_) != nullptr);
-				return *std::get_if<T_var>(&variant_);
+				OKIIDOKU_CONTRACT_USE(std::holds_alternative<T_var>(std::forward<Self>(self).variant_));
+				OKIIDOKU_CONTRACT_USE(std::get_if<T_var>(&std::forward<Self>(self).variant_) != nullptr);
+				return *std::get_if<T_var>(&std::forward<Self>(self).variant_);
 			}
 		private:
 			variant_t variant_;

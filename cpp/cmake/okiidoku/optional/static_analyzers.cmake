@@ -15,7 +15,7 @@ else()
 	#^ https://gcc.gnu.org/onlinedocs/gcc/Static-Analyzer-Options.html
 	#  it's intended for C code and unlikely to be useful for C++ (see https://gcc.gnu.org/gcc-13/changes.html)
 	target_compile_definitions(okiidoku_compiler_warnings INTERFACE
-		"$<$<CONFIG:Debug,RelWithDebInfo>:_GLIBCXX_CONCEPT_CHECKS>"
+		"$<${debug_configs}:_GLIBCXX_CONCEPT_CHECKS>"
 	)
 endif()
 

@@ -4,8 +4,9 @@
 
 #include <okiidoku/o2_bit_arr.hpp>
 
-#include <algorithm> // swap, sort, ranges::next_permutation
-#include <numeric>   // abs
+#include <algorithm>  // swap, sort, ranges::next_permutation
+#include <functional> // greater
+#include <cstdlib>    // abs
 
 namespace okiidoku::mono { namespace {
 
