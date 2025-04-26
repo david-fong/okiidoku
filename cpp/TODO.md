@@ -70,7 +70,11 @@ Issues I'm watching:
     - see also GCC's `uninitialized` variable attribute
   - https://wg21.link/P2169R4 placeholder variables with no name
 
-- https://youtu.be/7QNtiH5wTAs?t=7003 -Wl,--gc-sections does this help? does it mess with my SO interface? what about functions that I want defined only for debugging? (see also gcc https://gcc.gnu.org/onlinedocs/gcc/Common-Variable-Attributes.html#index-retain-variable-attribute and https://gcc.gnu.org/onlinedocs/gcc/Common-Function-Attributes.html#index-retain-function-attribute and https://gcc.gnu.org/onlinedocs/gcc/Common-Function-Attributes.html#index-used-function-attribute)
+- https://youtu.be/7QNtiH5wTAs?t=7003 -Wl,--gc-sections does this help? does it mess with my SO interface?
+  - what about functions that I want defined only for debugging? see also
+    - https://gcc.gnu.org/onlinedocs/gcc/Common-Variable-Attributes.html#index-retain-variable-attribute
+    - https://gcc.gnu.org/onlinedocs/gcc/Common-Function-Attributes.html#index-retain-function-attribute and https://gcc.gnu.org/onlinedocs/gcc/Common-Function-Attributes.html#index-used-function-attribute
+    - https://clang.llvm.org/docs/UsersManual.html#cmdoption-feliminate-unused-debug-types
 - https://youtu.be/7QNtiH5wTAs?t=7200 -Wl,--icf=...
 - https://youtu.be/7QNtiH5wTAs?t=7322 -Wl,-s (strip-all)
 

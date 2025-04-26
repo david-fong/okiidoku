@@ -9,7 +9,7 @@ okiidoku_install_target(okiidoku_compile_options_public)
 
 function(okiidoku_target_include_header target scope file)
 	set(gnu_include  "$<$<CXX_COMPILER_ID:GNU,Clang>:SHELL:-include '${file}'>")
-	set(msvc_include "$<$<CXX_COMPILER_ID:MSVC>:/FI;${file}>")
+	set(msvc_include "$<$<CXX_COMPILER_ID:MSVC>:SHELL:/FI ${file}>")
 	target_compile_options("${target}" "${scope}" "$<BUILD_INTERFACE:${gnu_include}${msvc_include}>")
 	# TODO warn on unsupported compiler?
 endfunction()

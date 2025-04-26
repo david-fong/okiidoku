@@ -123,7 +123,7 @@ endif()
 
 # MARK: okiidoku_target_pgo
 # add a PGO trainee+trainer pair
-# trainee a target shared library
+# trainee a target library
 # trainer a target executable- ideally lightweight
 # remarks: due to CMake quirks, this must be called in the same directory scope as the one defining the pgo_gen ExternalProject
 # TODO.low consider making this work for training executables as well?
@@ -135,11 +135,6 @@ function(okiidoku_target_pgo
 	if(NOT CMAKE_CURRENT_BINARY_DIR STREQUAL PROJECT_BINARY_DIR)
 		message(FATAL_ERROR "for some reason custom steps for ExternalProject need to be registered in the same directory as the ExternalProject was registered.")
 	endif()
-	get_target_property(trainee_target_type ${trainee} TYPE)
-	if(NOT trainee_target_type STREQUAL "SHARED_LIBRARY")
-		message(FATAL_ERROR "pgo trainee must be a SHARED_LIBRARY target, but '${trainee}' is a ${trainee_target_type}")
-	endif()
-	unset(trainee_target_type)
 	if(_OKIIDOKU_BUILD_IS_PGO_GEN)
 		get_target_property(trainer_target_type ${trainer} TYPE)
 		if(NOT trainer_target_type STREQUAL "EXECUTABLE")
@@ -179,10 +174,12 @@ function(okiidoku_target_pgo
 		# cspell:words "-fprofile" instr profdata profraw
 		# https://clang.llvm.org/docs/UsersManual.html#profile-guided-optimization
 		# https://clang.llvm.org/docs/UsersManual.html#profiling-with-instrumentation
-		set(data_file_for_clang "${data_dir}/${trainer}.profdata")
+		set(data_file_for_clang "${data_dir}/merged.profdata")
 		target_compile_options(${trainee} PRIVATE
-			"$<${if_gen}:-fprofile-instr-generate=${data_dir}>"
-			"$<${if_use}:-fprofile-instr-use=${data_file_for_clang}>"
+			"$<${if_gen}:-fprofile-generate=${data_dir}>"
+			"$<${if_use}:-fprofile-use=${data_file_for_clang}>"
+			# TODO: try https://clang.llvm.org/docs/UsersManual.html#cmdoption-ftemporal-profile
+			# https://clang.llvm.org/docs/UsersManual.html#instrumenting-only-selected-files-or-functions
 		)
 		target_link_options(${trainee} PRIVATE
 			"$<${if_gen}:-fprofile-generate=${data_dir}>"
@@ -245,26 +242,44 @@ function(okiidoku_target_pgo
 	# ^assumes namespaced, split include directory exists and include flag already configured
 	okiidoku_target_include_header("${trainee}" PRIVATE "okiidoku/detail/pgo_use_check_needs_rebuild.hpp")
 
+	block()
 	# Note: annoyingly, commands cannot be the empty string. use `cmake -E true` as a no-op instead.
-	string(JOIN ";" command_train
+	list(APPEND command
 		"${CMAKE_COMMAND}"
 		"-D _OKIIDOKU_PGO_DIR=${_OKIIDOKU_PGO_DIR}"
 		"-D trainee=${trainee}"
 		"-D trainer=${trainer}"
-		"-D trainee_binary=${_OKIIDOKU_PGO_DIR}/out/${CMAKE_SHARED_LIBRARY_PREFIX}${trainee}${CMAKE_SHARED_LIBRARY_SUFFIX}"
+		"-D trainee_binary=${_OKIIDOKU_PGO_DIR}/out/$<TARGET_FILE_NAME:${trainee}>"
 		"-D trainer_binary=${_OKIIDOKU_PGO_DIR}/out/${trainer}${CMAKE_EXECUTABLE_SUFFIX}"
 		"-D data_dir=${data_dir}"
 		"-D training_stamp_file=${training_stamp_file}"
-		"-P" "${okiidoku_SOURCE_DIR}/cmake/okiidoku/pgo.run_training.cmake"
 	)
-	set(command_train "\$<IF:${if_use},${command_train},${CMAKE_COMMAND};-E;true>")
-
+	set(byproducts "${training_stamp_file}")
+	if((CMAKE_CXX_COMPILER_ID MATCHES [[Clang]]) OR EMSCRIPTEN)
+		if(NOT DEFINED CMAKE_CXX_COMPILER_VERSION)
+			message(WARNING "could not get llvm version from `CMAKE_CXX_COMPILER_VERSION`")
+			return()
+		endif()
+		string(REPLACE "." ";" llvm_version_list "${CMAKE_CXX_COMPILER_VERSION}")
+		list(GET llvm_version_list 0 llvm_major_version)
+		find_program(LLVM_PROFDATA "llvm-profdata-${llvm_major_version}")
+		# https://llvm.org/docs/CommandGuide/llvm-profdata.html#profdata-merge
+		list(APPEND command
+			"-D llvm_profdata=${LLVM_PROFDATA}"
+			"-D data_file_for_clang=${data_file_for_clang}"
+		)
+		list(APPEND byproducts "${data_file_for_clang}")
+	endif()
+	list(APPEND command "-P" "${okiidoku_SOURCE_DIR}/cmake/okiidoku/pgo.run_training.cmake")
+	set(command "\$<IF:${if_use},${command},${CMAKE_COMMAND};-E;true>")
 	add_custom_target("run_${trainer}"
-		COMMAND "${command_train}"
-		BYPRODUCTS "${training_stamp_file}"
-		COMMENT "\$<IF:${if_use},Checking if '${trainer}' needs to be re-run to train '${trainee}',>"
+		COMMAND "${command}"
+		BYPRODUCTS "${byproducts}"
+		WORKING_DIRECTORY "${data_dir}"
+		COMMENT "\$<IF:${if_use},PGO: Checking if '${trainer}' needs to be re-run to train '${trainee}',>"
 		VERBATIM COMMAND_EXPAND_LISTS
 	)
+	endblock()
 	add_dependencies("run_${trainer}" "okiidoku_pgo_gen-build") # must build trainee before training
 	# build will stop if run_trainer fails
 	# TODO.wait use generator expression once `add_dependencies` supports them. https://gitlab.kitware.com/cmake/cmake/-/issues/19467. currently doing workaround in the custom step COMMANDs.
@@ -275,24 +290,5 @@ function(okiidoku_target_pgo
 	#  I would just use a compile definition, but that can't be changed at build time.
 	target_include_directories(${trainee} PRIVATE "$<BUILD_INTERFACE:$<${if_use}:${data_dir}/include>>")
 	# target_sources(${trainee} PRIVATE "$<${if_use}:${training_stamp_file}>") # TODO why is this done?
-
-
-	if((CMAKE_CXX_COMPILER_ID MATCHES [[Clang]]) OR EMSCRIPTEN)
-	block()
-		if(NOT DEFINED CMAKE_CXX_COMPILER_VERSION)
-			message(WARNING "could not get llvm version from `CMAKE_CXX_COMPILER_VERSION`")
-			return()
-		endif()
-		string(REPLACE "llvm_version" "." ";" llvm_version_list "${CMAKE_CXX_COMPILER_VERSION}")
-		list(GET llvm_version_list 0 llvm_major_version)
-		find_program(LLVM_PROFDATA "llvm-profdata-${llvm_major_version}")
-		add_custom_command(TARGET "run_${trainer}" POST_BUILD VERBATIM COMMAND_EXPAND_LISTS
-			# https://llvm.org/docs/CommandGuide/llvm-profdata.html#profdata-merge
-			COMMAND "$<${if_gen}:${LLVM_PROFDATA};merge;--output='${data_file_for_clang}';${data_dir}/*.profraw>"
-			BYPRODUCTS "${data_file_for_clang}"
-			COMMENT "Merging LLVM profile data files"
-		)
-	endblock()
-	endif()
 
 endfunction()

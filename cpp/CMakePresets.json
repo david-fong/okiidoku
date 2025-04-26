@@ -202,7 +202,8 @@
 			"name": "base:dev.vs:x64",
 			"hidden": true,
 			"condition": {"type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows"},
-			"inherits": "base:dev"
+			"inherits": "base:dev",
+			"targets": ["ALL_BUILD", "okiidoku_cli"]
 		},
 		{
 			"name": "dev.clang.dbg",

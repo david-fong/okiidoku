@@ -14,8 +14,9 @@
 Recommended tools to install:
 
 ```none
-reuse g++ clang mold ninja-build cmake
+reuse g++ clang ninja-build cmake
 ```
+<!-- mold didn't make the cut. see related journal entry -->
 
 - Requirements to build from source:
   - If you are new to C++, you will need an attitude to learn proactively about C++ and CMake.

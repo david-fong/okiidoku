@@ -1,10 +1,13 @@
 // SPDX-FileCopyrightText: 2020 David Fong
 // SPDX-License-Identifier: CC0-1.0
 {
-   "recommendations": [
-      "Gruntfuggly.todo-tree",
+	"recommendations": [
+		"Gruntfuggly.todo-tree",
 		"ms-vscode.cpptools",
 		"ms-vscode.cmake-tools",
 		"josetr.cmake-language-support-vscode"
-   ]
+	],
+	"unwantedRecommendations": [
+		"twxs.cmake",
+	],
 }

@@ -4,8 +4,8 @@
 
 #include <okiidoku_cli_utils/console_setup.hpp>
 
-#include <string>
-#include <iostream>  // cout,
+#include <string>    // stoi
+#include <iostream>  // cout
 
 /**
 ARGUMENTS

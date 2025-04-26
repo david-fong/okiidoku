@@ -3,6 +3,7 @@
 include_guard(DIRECTORY)
 
 # https://github.com/cpm-cmake/CPM.cmake/releases
+# copy the latest release's get_cpm.cmake file
 include(okiidoku/get_cpm)
 
 # Note: CPM does auto EXCLUDE_FROM_ALL and SYSTEM when using shorthand add

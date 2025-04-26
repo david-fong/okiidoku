@@ -12,6 +12,9 @@ endif()
 # trainer_binary
 # data_dir
 # training_stamp_file
+# -
+# llvm_profdata
+# data_file_for_clang
 if(NOT EXISTS "${trainee_binary}")
 	message(FATAL_ERROR "PGO: trainee binary was not found: '${trainee_binary}'")
 endif()
@@ -28,7 +31,7 @@ if(
 endif()
 message(STATUS "PGO: train '${trainee}' using '${trainer}'")
 
-if(NOT data_dir STREQUAL "")
+if(NOT "${data_dir}" STREQUAL "")
 	message(STATUS "     removing any old PGO data")
 	file(REMOVE_RECURSE "${data_dir}")
 endif()
@@ -39,8 +42,22 @@ execute_process(COMMAND "${trainer_binary}"
 	WORKING_DIRECTORY "${data_dir}"
 	RESULT_VARIABLE exit_code
 )
-if(NOT exit_code EQUAL 0)
+if(NOT "${exit_code}" EQUAL "0")
 	message(FATAL_ERROR "PGO: '${trainer}' exited with code ${exit_code}")
+endif()
+
+# clang PGO post-processing:
+if(DEFINED "CACHE{llvm_profdata}")
+	file(GLOB profraw_files LIST_DIRECTORIES NO "${data_dir}/*")
+	message(STATUS "PGO: merging ${profraw_files} to ${data_file_for_clang}")
+	execute_process(
+		COMMAND "${llvm_profdata}" merge "--output=${data_file_for_clang}" "${profraw_files}"
+		WORKING_DIRECTORY "${data_dir}"
+		RESULT_VARIABLE prof_merge_exit_code
+	)
+	if(NOT "${prof_merge_exit_code}" EQUAL "0")
+		message(FATAL_ERROR "PGO: failed to merge profraw files")
+	endif()
 endif()
 
 string(TIMESTAMP timestamp "%s" UTC)

@@ -18,6 +18,9 @@
 	"search.exclude": {
 		"**/node_modules": true,
 		"/cpp/external": true,
+		"/cpp/out/": true, // repeated from exclude to
+		"/cpp/build*/": true,
+		"/cpp/install*/": true,
 		"/LICENSES": true,
 		"/LICENSE.txt": true,
 		"/writings/**/*trace*.json": true,
@@ -26,12 +29,18 @@
 		"/usr/include/**": true,
 		"**/node_modules/**": true,
 		"cpp/external/**": true,
+		"cpp/out/": true,
+		"cpp/build*/": true,
+		"cpp/install*/": true,
 		"LICENSES/**": true,
 		"LICENSE.txt": true,
 	},
 
 	"[json][xml][cpp][cmake][rust][python][typescript][javascript][html][css]": {
 		"editor.insertSpaces": false,
+	},
+	"[bat]": {
+		"files.eol": "\r\n", // also reflected in .gitattributes
 	},
 	"files.associations": {
 		".clang-tidy": "yaml",

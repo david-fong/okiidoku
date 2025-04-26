@@ -9,6 +9,7 @@
 #include <iostream>  // cout
 #include <iomanip>   // hex
 #include <charconv>
+#include <string>    // stoi
 #include <string_view>
 #include <random>    // random_device
 
