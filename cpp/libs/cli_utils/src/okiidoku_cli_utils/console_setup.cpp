@@ -4,7 +4,6 @@
 
 #include <ios>      // ios_base::sync_with_stdio
 #include <iostream> // cout
-#include <locale>   // numpunct
 #include <cstdlib>  // atexit
 
 #ifdef _WIN32
@@ -15,13 +14,6 @@
 // https://docs.microsoft.com/en-us/windows/console/classic-vs-vt#exceptions-for-using-windows-console-apis
 
 namespace okiidoku::util {
-
-	class MyNumPunct final : public std::numpunct<char> {
-	protected:
-		std::string do_grouping() const override {
-			return "\03";
-		}
-	};
 
 	namespace {
 		#ifdef _WIN32
@@ -39,10 +31,11 @@ namespace okiidoku::util {
 		}
 	}
 
-	void setup_console() {
+	MyNumPunct* setup_console() {
 		// My implementation specifies this as safe:
 		std::ios_base::sync_with_stdio(false);
-		const auto pushed_locale {std::cout.imbue(std::locale(std::cout.getloc(), new MyNumPunct))};
+		auto numpunct {new MyNumPunct};
+		const auto pushed_locale {std::cout.imbue(std::locale(std::cout.getloc(), numpunct))};
 
 		#ifdef _WIN32
 		{
@@ -64,5 +57,6 @@ namespace okiidoku::util {
 		if (registration_failure != 0) {
 			restore_console_config_(); // just undo the console things immediately.
 		}
+		return numpunct;
 	}
 }

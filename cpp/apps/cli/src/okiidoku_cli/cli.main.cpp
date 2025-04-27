@@ -19,7 +19,7 @@ ARGUMENTS
 2: RNG seed (default: get from device)
 */
 int main(const int argc, char const *const argv[]) {
-	okiidoku::util::setup_console();
+	auto numpunct {okiidoku::util::setup_console()};
 
 	// NOLINTBEGIN(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays, cppcoreguidelines-pro-bounds-pointer-arithmetic)
 	const unsigned user_order {(argc > 1)
@@ -41,8 +41,9 @@ int main(const int argc, char const *const argv[]) {
 
 	std::cout << "\nparsed arguments:"
 		<< "\n- arg 1 (grid order) : " << user_order
-		<< "\n- arg 2 (srand key)  : " << std::hex << srand_key << std::dec // TODO.mid ugh. it's using my numpunct grouping.
-		<< std::endl;
+		<< "\n- arg 2 (srand key)  : " << std::hex;
+	numpunct->set_grouping(0); std::cout << srand_key;
+	numpunct->set_grouping(3); std::cout << std::dec << std::endl;
 
 	okiidoku::util::SharedRng shared_rng {srand_key};
 

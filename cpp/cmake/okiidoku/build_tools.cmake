@@ -24,12 +24,13 @@ if(NOT DEFINED CMAKE_CXX_COMPILER_LAUNCHER)
 endif()
 
 if(NOT DEFINED CMAKE_LINKER_TYPE)
-	if(LINUX AND (CMAKE_CXX_COMPILER_ID STREQUAL GNU))
-		find_program(GOLD_EXE NAMES gold DOC "Path to gold executable")
-		if(NOT "${GOLD_EXE}" STREQUAL "GOLD_EXE-NOTFOUND")
-			set(CMAKE_LINKER_TYPE GOLD)
-		endif()
-	endif()
+	# TODO.wait why is gold+ninja giving FP's for dirtiness?
+	# if(LINUX AND (CMAKE_CXX_COMPILER_ID STREQUAL GNU))
+	# 	find_program(GOLD_EXE NAMES gold DOC "Path to gold executable")
+	# 	if(NOT "${GOLD_EXE}" STREQUAL "GOLD_EXE-NOTFOUND")
+	# 		set(CMAKE_LINKER_TYPE GOLD)
+	# 	endif()
+	# endif()
 	# disappointingly, Mold is slower for release builds and only slightly faster than Gold for debug.
 	# if(LINUX)
 	# 	find_program(MOLD_EXE NAMES mold DOC "Path to mold executable")
@@ -44,14 +45,15 @@ if(NOT DEFINED CMAKE_LINKER_TYPE)
 endif()
 
 if(CMAKE_GENERATOR MATCHES [[^Ninja]])
-install(CODE [===[
-	execute_process(
-		# TODO.optional: finer-grained for clang https://crascit.com/2022/06/24/build-performance-insights/#:~:text=ninja_log%20%3E%20cmake_build_trace.json-,Clang%20Time%20Tracing,-If%20you%20are
-		COMMAND ./ninjatracing.py .ninja_log
-		OUTPUT_FILE "build/$<CONFIG>/trace.json"
-		ECHO_ERROR_VARIABLE
-	)
-	execute_process(COMMAND ${CMAKE_COMMAND} -E echo "generated ninja trace at <file://${CMAKE_CURRENT_SOURCE_DIR}/build/$<CONFIG>/trace.json>" ECHO_OUTPUT_VARIABLE)
-	message("view at https://ui.perfetto.dev")
-]===])
+install(CODE "
+file(MAKE_DIRECTORY \"${OKIIDOKU_DATA_OUTPUT_DIRECTORY}\")
+execute_process(
+	# TODO.optional: finer-grained for clang https://crascit.com/2022/06/24/build-performance-insights/#:~:text=ninja_log%20%3E%20cmake_build_trace.json-,Clang%20Time%20Tracing,-If%20you%20are
+	COMMAND \"${okiidoku_SOURCE_DIR}/tools/ninjatracing.py\" \"${CMAKE_BINARY_DIR}/.ninja_log\"
+	OUTPUT_FILE \"${OKIIDOKU_DATA_OUTPUT_DIRECTORY}/trace.json\"
+	ECHO_ERROR_VARIABLE
+)
+message(\"generated ninja trace at <file://${OKIIDOKU_DATA_OUTPUT_DIRECTORY}/trace.json>\")
+message(\"view at https://ui.perfetto.dev\")
+")
 endif()

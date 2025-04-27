@@ -168,6 +168,7 @@ function(okiidoku_target_pgo
 
 
 	set(data_dir "${_OKIIDOKU_PGO_DIR}/data/${trainer}")
+	file(MAKE_DIRECTORY "${data_dir}")
 
 	if((CMAKE_CXX_COMPILER_ID MATCHES [[Clang]]) OR EMSCRIPTEN)
 		# TODO test this and fix problems
@@ -239,6 +240,10 @@ function(okiidoku_target_pgo
 	endif()
 
 	set(training_stamp_file "${data_dir}/include/${trainee}/detail/pgo_gen_last_training_timestamp.hpp")
+	if(NOT EXISTS "${training_stamp_file}")
+		file(MAKE_DIRECTORY "${data_dir}/include/${trainee}/detail")
+		file(TOUCH "${training_stamp_file}")
+	endif()
 	# ^assumes namespaced, split include directory exists and include flag already configured
 	okiidoku_target_include_header("${trainee}" PRIVATE "okiidoku/detail/pgo_use_check_needs_rebuild.hpp")
 
@@ -271,10 +276,9 @@ function(okiidoku_target_pgo
 		list(APPEND byproducts "${data_file_for_clang}")
 	endif()
 	list(APPEND command "-P" "${okiidoku_SOURCE_DIR}/cmake/okiidoku/pgo.run_training.cmake")
-	set(command "\$<IF:${if_use},${command},${CMAKE_COMMAND};-E;true>")
 	add_custom_target("run_${trainer}"
-		COMMAND "${command}"
-		BYPRODUCTS "${byproducts}"
+		COMMAND "\$<IF:${if_use},${command},${CMAKE_COMMAND};-E;true>"
+		BYPRODUCTS "\$<IF:${if_use},${byproducts},>"
 		WORKING_DIRECTORY "${data_dir}"
 		COMMENT "\$<IF:${if_use},PGO: Checking if '${trainer}' needs to be re-run to train '${trainee}',>"
 		VERBATIM COMMAND_EXPAND_LISTS
