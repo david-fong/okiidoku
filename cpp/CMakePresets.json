@@ -54,7 +54,9 @@
 				"CMAKE_INSTALL_MODE": "REL_SYMLINK_OR_COPY"
 			},
 			"cacheVariables": {
+				"CMAKE_PROJECT_TOP_LEVEL_INCLUDES": "${sourceDir}/tools/cmake_top_project_include.cmake",
 				"CMAKE_INTERPROCEDURAL_OPTIMIZATION_DEBUG": false,
+				"CMAKE_OPTIMIZE_DEPENDENCIES": true,
 				"CPM_SOURCE_CACHE": "${sourceDir}/external",
 				"OKIIDOKU_BUILD_WITH_SUGGESTED_WARNINGS": true,
 				"OKIIDOKU_BUILD_TESTING": true,

@@ -3,13 +3,15 @@
 #ifndef HPP_OKIIDOKU__DETAIL__UTIL
 #define HPP_OKIIDOKU__DETAIL__UTIL
 
-#include <cassert>
+#include <cassert> // assert
 
-// OKIIDOKU_CONTRACT_USE
-// translates to assertion for debug builds.
-// translates to assumption for release builds.
-// if the condition expression is complex to evaluate, this may possibly backfire
-// for performance, so avoid using this in such cases, or benchmark carefully.
+/*
+OKIIDOKU_CONTRACT_USE
+translates to assertion for debug builds.
+translates to assumption for release builds.
+if the condition expression is complex to evaluate, this may possibly backfire
+for performance, so avoid using this in such cases, or benchmark carefully.
+*/
 
 // Note: C++23 has std::unreachable in <utility>, but it might be good to keep this header slim
 #ifdef NDEBUG
@@ -54,6 +56,15 @@
 #endif
 #define OKIIDOKU_NO_PRE_INIT_AUTOVAR OKIIDOKU_DETAIL_NO_PRE_INIT_AUTOVAR_INDETERMINATE OKIIDOKU_DETAIL_NO_PRE_INIT_AUTOVAR_GCC_UNINITIALIZED
 // TODO: gnu::noinit for global data. linker for ELF will put in .noinit section
+
+
+#ifdef NDEBUG
+	// gnu::retain: marks for retention during linker section garbage collection
+	// gnu::used:   I'm actually not sure if this is needed
+	#define OKIIDOKU_KEEP_FOR_DEBUG [[maybe_unused, gnu::retain, gnu::used]]
+#else
+	#define OKIIDOKU_KEEP_FOR_DEBUG
+#endif
 
 
 #endif

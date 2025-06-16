@@ -35,7 +35,7 @@ reuse g++ clang ninja-build cmake
 - Make sure to read and follow the api contracts documented in the headers. Exceptions are intentionally not thrown for precondition violations (if you would like to run against a build of libokiidoku with assertions for debugging purposes, use a debug build of libokiidoku). None of the current okiidoku APIs throw exceptions.
   - As a result, for MSVC, any [exception handling policy](https://docs.microsoft.com/en-us/cpp/build/reference/eh-exception-handling-model#standard-c-exception-handling) should be ok. Note that [CMake currently defaults to `/EHsc`](https://gitlab.kitware.com/cmake/cmake/-/issues/20610) if unspecified.
 
-- Code examples can be found in [the examples folder](./libs/okiidoku/examples/).
+- Usage examples can be found in [the examples folder](./libs/okiidoku/examples/).
 
 ## CMake Setup Options
 
@@ -46,7 +46,7 @@ reuse g++ clang ninja-build cmake
 
 - If using [`FetchContent`](https://cmake.org/cmake/help/latest/module/FetchContent.html), to fetch from this GitHub repo, declare the [`SOURCE_SUBDIR`] option to point to the `cpp` subdirectory of the repo.
 
-- You can build and then do a system install and then import from the system install, but that's not recommended if you only want to use the library as a dependency. I think a system install would only really make sense if you want to use the cli tool and have it in your system PATH.
+- You can build and then do a system install and then import from the system install.
 
 ## Known Issues
 
@@ -62,17 +62,4 @@ You can use `tput rmam` to disable the terminal's line wrapping, and `tput smam`
 
 The project is set up for use with VS Code. After installing and enabling the recommended extensions, select a configure preset and build preset.
 
-Note: if you installed cmake via snap (like I did on my Ubuntu machine): https://github.com/microsoft/vscode-cmake-tools/issues/838#issuecomment-1035123514
-
-## Acknowledgements
-
-This project wouldn't be possible without the hard work of those who develop
-
-- The C++ language standard and standard library
-- GCC, Clang, MSVC, and Emscripten
-- CMake and Ninja
-- The range-v3 library
-- Educational materials for the above technologies
-- Computers
-
-Perhaps it's a silly thing to say since it's so obvious, but I can't help but be amazed at what powerful technologies are made available to me at largely no cost. Any inkling of amazement anyone could have at this project pales in comparison to the shoulders of the giants it stands on.
+Note: if you installed CMake as a Snap: https://github.com/microsoft/vscode-cmake-tools/issues/838#issuecomment-1035123514

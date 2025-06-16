@@ -13,6 +13,7 @@ include(okiidoku/get_cpm)
 	set(CUSTOM_CACHE_KEY)
 # endif()
 
+# https://docs.github.com/en/repositories/working-with-files/using-files/downloading-source-code-archives#source-code-archive-urls
 
 CPMAddPackage(NAME range-v3
 	# https://github.com/ericniebler/range-v3/tags
@@ -28,11 +29,25 @@ if(range-v3_ADDED)
 endif()
 
 
+CPMAddPackage(NAME pcg
+	# https://github.com/imneme/pcg-cpp/tags
+	# https://github.com/imneme/pcg-cpp/issues/73 new release hasn't been made in a long time
+	# https://www.pcg-random.org/using-pcg-cpp.html
+	URL [[https://github.com/imneme/pcg-cpp/archive/428802d1a5634f96bcd0705fab379ff0113bcf13.tar.gz]] # take latest
+	DOWNLOAD_ONLY YES ${CUSTOM_CACHE_KEY}
+)
+if(pcg_ADDED)
+	add_library(pcg INTERFACE IMPORTED)
+	add_library(pcg::pcg ALIAS pcg)
+	target_include_directories(pcg SYSTEM INTERFACE "${pcg_SOURCE_DIR}/include")
+endif()
+
+
 if(OKIIDOKU_BUILD_TESTING)
 	# https://github.com/catchorg/Catch2/blob/devel/docs/cmake-integration.md
 	CPMAddPackage(NAME doctest
 		# https://github.com/doctest/doctest/blob/master/CHANGELOG.md
-		URL [[https://github.com/doctest/doctest/archive/refs/tags/v2.4.11.tar.gz]]
+		URL [[https://github.com/doctest/doctest/archive/refs/tags/v2.4.11.tar.gz]] # take latest
 		DOWNLOAD_ONLY YES ${CUSTOM_CACHE_KEY}
 	)
 	if(doctest_ADDED)
@@ -49,7 +64,7 @@ if(OKIIDOKU_BUILD_BINDINGS_FOR_PYTHON)
 	# https://pybind11.readthedocs.io/en/stable/index.html
 	# https://pybind11.readthedocs.io/en/stable/changelog.html
 
-	find_package(Python COMPONENTS Interpreter Development.Module REQUIRED)
+	find_package(Python COMPONENTS Interpreter Development.Module REQUIRED) # https://nanobind.readthedocs.io/en/latest/building.html#preliminaries
 	# https://github.com/wjakob/nanobind
 	# https://nanobind.readthedocs.io/en/latest/changelog.html
 	# https://nanobind.readthedocs.io/en/latest/building.html#finding-nanobind

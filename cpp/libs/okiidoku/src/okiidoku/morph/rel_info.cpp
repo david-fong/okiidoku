@@ -32,6 +32,9 @@ namespace okiidoku::mono { namespace {
 	// if so, to hide the detail of setting a bit for both halves, make the at getter const, and
 	// have a separate setter method.
 
+	// Returns a Gridlike where rows and columns index symbol pairs, and values
+	// are masks indicating blocks where the pair occurs in an atom.
+	// Does not include self-to-self relationship bit for main diagonal entries.
 	template<Order O> requires(is_order_compiled(O))
 	detail::Gridlike<O, RelMasks<O>> make_rel_masks_(const Grid<O>& grid) noexcept {
 		OKIIDOKU_MONO_INT_TS_TYPEDEFS
@@ -50,10 +53,8 @@ namespace okiidoku::mono { namespace {
 		// but that comes at the cost of having to reconstruct the two masks
 		// when they are later used. That direction doesn't sound appealing.
 
-		// rows and columns are symbols. cells are masks indicating blocks
-		// where the two symbols indicated by the row and col are in a same line.
-		// Does not include self-to-self relationship bit for main diagonal entries.
 		detail::Gridlike<O, RelMasks<O>> masks {};
+		// iterate over atoms in lines:
 		for (o2i_t line {0}; line < T::O2; ++line) {
 		for (o2i_t atom {0}; atom < T::O2; atom += T::O1) {
 			// Go through all unique pairs in the atom:

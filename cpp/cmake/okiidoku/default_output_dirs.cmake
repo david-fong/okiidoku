@@ -8,13 +8,15 @@ if("${is_multi_config}")
 else()
 	set(base "${CMAKE_BINARY_DIR}/build")
 endif()
+set (OKIIDOKU_LTO_CACHE_DIR "${base}/lto")
 
-# not really about output dirs, but throwing this in here. sigh. why isn't this default?
+# not really about output dirs, but throwing this in here.
 get_property(DEBUG_CONFIGURATIONS GLOBAL PROPERTY DEBUG_CONFIGURATIONS)
 list(APPEND DEBUG_CONFIGURATIONS Debug RelWithDebInfo)
 set_property(GLOBAL PROPERTY DEBUG_CONFIGURATIONS "${DEBUG_CONFIGURATIONS}")
 set(debug_configs "$<CONFIG:${DEBUG_CONFIGURATIONS}>")
 string(REPLACE ";" "," debug_configs "${debug_configs}")
+add_compile_definitions("$<$<NOT:${debug_configs}>:NDEBUG>") # CMake handles for its builtin release configs, but not custom ones.
 
 if (NOT DEFINED CMAKE_DEBUGGER_WORKING_DIRECTORY)
 	set(CMAKE_DEBUGGER_WORKING_DIRECTORY "${base}")

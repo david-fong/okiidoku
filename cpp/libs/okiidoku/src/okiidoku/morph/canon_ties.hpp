@@ -55,6 +55,7 @@ namespace okiidoku::mono::detail {
 	private:
 		links_t links_ {0};
 	public:
+		// starts completely unresolved
 		TieLinks() noexcept: links_{[]{ links_t _{0}; _[0] = size_; return _; }()} {}
 		[[nodiscard, gnu::pure]] friend bool operator==(const TieLinks&, const TieLinks&) noexcept = default;
 		Iterator begin() const noexcept { return Iterator(links_); }
@@ -63,6 +64,8 @@ namespace okiidoku::mono::detail {
 		[[nodiscard, gnu::pure]] bool has_unresolved() const noexcept { return std::any_of(links_.cbegin(), links_.cend(), [](const auto& e){ return e == 0; }); }
 		[[nodiscard, gnu::pure]] bool is_completely_unresolved() const noexcept { return links_[0] == size_; }
 
+		// pass a function that compares consecutive values in a range to update
+		// the record of which ranges' values are still tied.
 		template<class IsEq>
 		// requires (std::regular_invocable<IsEq, link_t, link_t>)
 		void update(const IsEq is_eq) noexcept {

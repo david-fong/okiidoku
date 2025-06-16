@@ -42,32 +42,44 @@ Issues I'm watching:
 
 - `[[gnu::designated_init]]`
 
+- https://www.pcg-random.org/using-pcg-cpp.html
+  https://github.com/imneme/pcg-cpp/tags
+  - https://github.com/apache/arrow/pull/35597/files vendor to get rid of the static_arbitrary_seed
+
+- reproducible builds for msvc: /experimental:deterministic, /d1nodatetime, /Brepro
+
+- mscv presets: https://gitlab.kitware.com/cmake/cmake/-/issues/21567#note_1141922
+  `UseMultiToolTask:true`
+  `EnforceProcessCountAcrossBuilds:true`
+  `EnableClServerMode:true`
+  `BuildPassReferences:true`
+
 - https://developer.chrome.com/blog/faster-wasm-debugging/
 - reevaluate doctest vs Catch2 choice. doctest is ~10 seconds to compile the grid test without -Og, and 21 seconds with -Og. I'm not actually sure that doctest is the reason, but I wonder if it is.
 
 - can emscripten just install/package the runtime component? or how can I make it not include headers in the package? https://cmake.org/cmake/help/book/mastering-cmake/chapter/Packaging%20With%20CPack.html#cpack-and-cmake-install-commands
 - make repl support custom streams? or should that just be handled by caller of the progam? related: support saving session history files that can be later passed as program stdin to repro.
 
+- pgo external project check cache args defined or not to mirror
+
 - https://youtu.be/zCzD9uSDI8c?t=620
 
 - CMake 3.31:
-  - https://cmake.org/cmake/help/latest/command/install.html#package-info
+  - once no longer experimental: https://cmake.org/cmake/help/latest/command/install.html#package-info
   - presets `$comment`
   - `CMAKE_EXPORT_BUILD_DATABASE`
+- CMake 4.0:
+  - `EXPORT_PACKAGE_DEPENDENCIES` in `export()` and `install` once no longer experimental
+- GCC 15:
+  - try benchmarking with https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html#index-fipa-reorder-for-locality
 - C++23
   - http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/p2214r0.html#does-adjacent-mean-2-or-n
-  - `std::to_underlying()` strange since cppref says all my standard library versions support it already? but it doesn't compile?
   - `std::ranges::iota()`
   - `std::views::chunk()`
     - could this be useful for `canon_place`? I tried messing around with range-v3 on compiler explorer and had trouble with the whole action vs algorithm, container vs view thing. Didn't know what I was doing and could achieve what I wanted.
   - alternative to `std::chunk`, look into `mdspan` (multi-dimensional span). Seems like this is more of what I'm looking for.
   - multidimensional subscript operator
 - C+26:
-  - create an attribute that expands to these in release mode:
-    - https://en.cppreference.com/w/cpp/language/attributes/indeterminate
-      - https://youtu.be/FNi1-x4pojs?t=4922
-      - https://stackoverflow.com/q/78792583
-    - see also GCC's `uninitialized` variable attribute
   - https://wg21.link/P2169R4 placeholder variables with no name
 
 - https://youtu.be/7QNtiH5wTAs?t=7003 -Wl,--gc-sections does this help? does it mess with my SO interface?

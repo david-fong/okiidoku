@@ -46,6 +46,7 @@ write_basic_package_version_file(
 	"${okiidoku_BINARY_DIR}/cmake/okiidoku-config-version.cmake"
 	COMPATIBILITY "${_OKIIDOKU_VERSION_COMPATIBILITY}"
 )
+# TODO.wait: https://cmake.org/cmake/help/latest/command/install.html#package-info
 install(FILES
 	"${okiidoku_BINARY_DIR}/cmake/okiidoku-config.cmake"
 	"${okiidoku_BINARY_DIR}/cmake/okiidoku-config-version.cmake"

@@ -5,13 +5,30 @@ if(NOT okiidoku_IS_TOP_LEVEL)
 	return()
 endif()
 
+# see also tools/cmake_top_project_include.cmake
 # do not wrap these with `block()`
 
+# linker section garbage collection
+if(NOT "${CMAKE_CXX_COMPILER_LINKER_FRONTEND_VARIANT}" STREQUAL "MSVC")
+	if(NOT "${CMAKE_CXX_COMPILER_FRONTEND_VARIANT}" STREQUAL "MSVC")
+		add_compile_options("-ffunction-sections" "-fdata-sections")
+	endif()
+	add_link_options("LINKER:--gc-sections")
+endif()
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+	#add_compile_options("-fipa-reorder-for-locality") # TODO.wait GCC v15
+	# https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html#index-fipa-reorder-for-locality
+	# If using this option it is recommended to also use profile feedback
+	# otherwise https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html#index-freorder-functions default for -O2, -O3, -Os.
+endif()
+
+
+# ccache
 if(NOT DEFINED CMAKE_CXX_COMPILER_LAUNCHER)
 	find_program(CCACHE_EXE NAMES ccache DOC "Path to ccache executable")
 	if(NOT "${CCACHE_EXE}" STREQUAL "CCACHE_EXE-NOTFOUND")
 		set(CMAKE_CXX_COMPILER_LAUNCHER "${CCACHE_EXE}"
-			# "--config-path" "${okiidoku_SOURCE_DIR}/cmake/okiidoku/ccache.conf"
+			# "--config-path" "${okiidoku_SOURCE_DIR}/tools/ccache.conf"
 			# man ccache @"COMPILING IN DIFFERENT DIRECTORIES":
 			# "base_dir=${okiidoku_SOURCE_DIR}/.." "hash_dir=false"
 			# "run_second_cpp=false"
@@ -23,27 +40,9 @@ if(NOT DEFINED CMAKE_CXX_COMPILER_LAUNCHER)
 	endif()
 endif()
 
-if(NOT DEFINED CMAKE_LINKER_TYPE)
-	# TODO.wait why is gold+ninja giving FP's for dirtiness?
-	# if(LINUX AND (CMAKE_CXX_COMPILER_ID STREQUAL GNU))
-	# 	find_program(GOLD_EXE NAMES gold DOC "Path to gold executable")
-	# 	if(NOT "${GOLD_EXE}" STREQUAL "GOLD_EXE-NOTFOUND")
-	# 		set(CMAKE_LINKER_TYPE GOLD)
-	# 	endif()
-	# endif()
-	# disappointingly, Mold is slower for release builds and only slightly faster than Gold for debug.
-	# if(LINUX)
-	# 	find_program(MOLD_EXE NAMES mold DOC "Path to mold executable")
-	# 	if(NOT "${MOLD_EXE}" STREQUAL "MOLD_EXE-NOTFOUND" AND LINUX)
-	# 		set(CMAKE_LINKER_TYPE MOLD)
-	# 		set(CMAKE_JOB_POOLS "compile=7" "link=1")
-	# 		set(CMAKE_JOB_POOL_COMPILE "compile")
-	# 		set(CMAKE_JOB_POOL_LINK "link")
-	# 		return()
-	# 	endif()
-	# endif()
-endif()
 
+# ninjatracing
+# TODO.wait this might be unnecessary in the future? I vaguely recall hearing something about builtin build perf tracing but can't remember where. might have been https://www.kitware.com/webinars/cmake-4-0-what-you-need-to-know/
 if(CMAKE_GENERATOR MATCHES [[^Ninja]])
 install(CODE "
 file(MAKE_DIRECTORY \"${OKIIDOKU_DATA_OUTPUT_DIRECTORY}\")

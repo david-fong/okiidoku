@@ -68,7 +68,7 @@
 
 	// https://code.visualstudio.com/docs/cpp/faq-cpp
 	"C_Cpp.default.cStandard": "c17",
-	"C_Cpp.default.cppStandard": "c++20",
+	"C_Cpp.default.cppStandard": "c++23",
 	"C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
 	// "C_Cpp.default.compileCommands": [
 	// 	"${workspaceFolder}/cpp/out/build/dev.clang/compile_commands.json",
@@ -81,9 +81,9 @@
 	// https://vector-of-bool.github.io/docs/vscode-cmake-tools/settings.html
 
 	"cmake.sourceDirectory": ["${workspaceFolder}/cpp"],
-	// the following two lines are technically not needed. only when using kits. but this project uses presets.
+	// the following line is only needed when using kits, but this project uses presets.
 	"cmake.buildDirectory": "${sourceDirectory}/out/build/${command:cmake.activeConfigurePresetName}",
-	"cmake.installPrefix": "${sourceDirectory}/out/install/${command:cmake.activeBuildPresetName}",
+	"cmake.installPrefix": "${sourceDirectory}/out/install/${command:cmake.activeBuildPresetName}", // doesn't work (?) :(
 	"cmake.debugConfig": {
 		"environment": [],
 		"args": [],
