@@ -13,6 +13,7 @@
 #include <concepts>    // unsigned_integral
 #include <cstdint>     // uint_...
 
+/** top-level namespace for the okiidoku project */
 namespace okiidoku {
 
 	using rng_seed_t = std::uint_fast32_t; // see `std::minstd_rand`
@@ -64,6 +65,13 @@ namespace okiidoku {
 }
 
 
+/**
+this namespace is for the per-grid-order definitions of okiidoku library features.
+most things are templatized based on grid order to optimize memory usage (at the
+expense of generating code for each grid order seleted by the user). to choose what
+grid orders to generate, create a [tweak header](https://vector-of-bool.github.io/2020/10/04/lib-configuration.html#providing-a-tweak-header)
+for [`./libs/okiidoku/include/okiidoku/config/defaults.hpp`](./libs/okiidoku/include/okiidoku/config/defaults.hpp).
+*/
 namespace okiidoku::mono {
 
 	namespace detail {
@@ -178,12 +186,14 @@ namespace okiidoku::mono {
 		OKIIDOKU_CONTRACT_USE(rmi < T::O4);
 		return static_cast<int_ts::o2i_t<O>>(rmi / (Ints<O>::O2));
 	}
+
 	template<Order O> [[nodiscard, gnu::const]]
 	constexpr int_ts::o2i_t<O> rmi_to_col(const int_ts::o4i_t<O> rmi) noexcept {
 		using T = Ints<O>;
 		OKIIDOKU_CONTRACT_USE(rmi < T::O4);
 		return static_cast<int_ts::o2i_t<O>>(rmi % (Ints<O>::O2));
 	}
+
 	template<Order O> [[nodiscard, gnu::const]]
 	constexpr int_ts::o2i_t<O> rmi_to_box(const int_ts::o2i_t<O> row, const int_ts::o2i_t<O> col) noexcept {
 		using T = Ints<O>;
@@ -194,12 +204,14 @@ namespace okiidoku::mono {
 		OKIIDOKU_CONTRACT_USE(box < T::O2);
 		return box;
 	}
+
 	template<Order O> [[nodiscard, gnu::const]]
 	constexpr int_ts::o2i_t<O> rmi_to_box(const int_ts::o4i_t<O> rmi) noexcept {
 		using T = Ints<O>;
 		OKIIDOKU_CONTRACT_USE(rmi < T::O4);
 		return rmi_to_box<O>(rmi_to_row<O>(rmi), rmi_to_col<O>(rmi));
 	}
+
 	template<Order O> [[nodiscard, gnu::const]]
 	constexpr int_ts::o2x_t<O> rmi_to_box_cell(const int_ts::o4x_t<O> rmi) noexcept {
 		using T = Ints<O>;
@@ -210,6 +222,7 @@ namespace okiidoku::mono {
 		OKIIDOKU_CONTRACT_USE(box_cell < T::O2);
 		return box_cell;
 	}
+
 	template<Order O, class T_rmi>
 	requires(Any_o4x_t<O, T_rmi>) [[nodiscard, gnu::const]]
 	constexpr int_ts::o2x_t<O> rmi_to_house(const HouseType house_type, const T_rmi rmi) noexcept {
@@ -225,7 +238,6 @@ namespace okiidoku::mono {
 		OKIIDOKU_UNREACHABLE;
 	}
 
-
 	template<Order O, class T_row, class T_col>
 	requires(Any_o2x_t<O, T_row> && Any_o2x_t<O, T_col>) [[nodiscard, gnu::const]]
 	constexpr int_ts::o4x_t<O> row_col_to_rmi(const T_row row, const T_col col) noexcept {
@@ -238,7 +250,10 @@ namespace okiidoku::mono {
 		return rmi;
 	}
 
-
+	/**
+	\param box row-major index of a box in a grid.
+	\param box_cell row-major index of a cell within `box`.
+	\pre `box` and `box_cell` are in `[0, O2)`. */
 	template<Order O, class T_house, class T_house_cell>
 	requires(Any_o2x_t<O, T_house> && Any_o2x_t<O, T_house_cell>) [[nodiscard, gnu::const]]
 	constexpr int_ts::o4x_t<O> box_cell_to_rmi(const T_house box, const T_house_cell box_cell) noexcept {
@@ -280,6 +295,12 @@ namespace okiidoku::mono {
 }
 
 
+/**
+this namespace generally mirrors `okiidoku::mono`, except it wraps the per-grid-order
+templates into algebraic types (tagged unions) for convience for applications which
+work with grid orders selected at runtime. it's named `visitor` because it uses the
+visitor pattern to dispatch to the right template instantiations of function calls.
+*/
 namespace okiidoku::visitor {
 
 	// using Ints = mono::Ints<largest_compiled_order>;

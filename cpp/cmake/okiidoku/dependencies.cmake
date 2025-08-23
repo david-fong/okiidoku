@@ -76,3 +76,23 @@ if(OKIIDOKU_BUILD_BINDINGS_FOR_PYTHON)
 		set_target_properties("nanobind${lib}" PROPERTIES SYSTEM YES)
 	endforeach()
 endif()
+
+
+if(OKIIDOKU_BUILD_DOCS)
+	CPMAddPackage(NAME doxygen-awesome-css
+		# https://github.com/jothepro/doxygen-awesome-css/releases
+		URL [[https://github.com/jothepro/doxygen-awesome-css/archive/refs/tags/v2.3.4.tar.gz]]
+		DOWNLOAD_ONLY YES ${CUSTOM_CACHE_KEY}
+	)
+	if(doxygen-awesome-css_ADDED)
+		list(APPEND DOXYGEN_HTML_EXTRA_STYLESHEET
+			"${doxygen-awesome-css_SOURCE_DIR}/doxygen-awesome.css"
+			"${doxygen-awesome-css_SOURCE_DIR}/doxygen-awesome-sidebar-only.css"
+		)
+		# https://github.com/jothepro/doxygen-awesome-css?tab=readme-ov-file#choosing-a-layout
+		set(DOXYGEN_DISABLE_INDEX NO)
+		set(DOXYGEN_GENERATE_TREEVIEW YES)
+		set(DOXYGEN_FULL_SIDEBAR NO)
+		set(DOXYGEN_HTML_COLORSTYLE "LIGHT")
+	endif()
+endif()

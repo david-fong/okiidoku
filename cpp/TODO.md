@@ -40,11 +40,15 @@ Issues I'm watching:
 
 ## Misc List
 
+- continue adoption of doxygen
+
 - `[[gnu::designated_init]]`
+  - try on the `Transformation` class
 
 - https://www.pcg-random.org/using-pcg-cpp.html
   https://github.com/imneme/pcg-cpp/tags
   - https://github.com/apache/arrow/pull/35597/files vendor to get rid of the static_arbitrary_seed
+- https://squaresrng.wixsite.com/rand
 
 - reproducible builds for msvc: /experimental:deterministic, /d1nodatetime, /Brepro
 
@@ -64,11 +68,13 @@ Issues I'm watching:
 
 - https://youtu.be/zCzD9uSDI8c?t=620
 
+- CMake 4.1:
+  - `project(COMPAT_VERSION)` (`CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_INFO`)
 - CMake 3.31:
   - once no longer experimental: https://cmake.org/cmake/help/latest/command/install.html#package-info
   - presets `$comment`
   - `CMAKE_EXPORT_BUILD_DATABASE`
-- CMake 4.0:
+- CMake 4.1:
   - `EXPORT_PACKAGE_DEPENDENCIES` in `export()` and `install` once no longer experimental
 - GCC 15:
   - try benchmarking with https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html#index-fipa-reorder-for-locality
@@ -207,5 +213,3 @@ consider making cand masks have two lanes: one storing full O2BitArr, one storin
 - CLI
   - implement `-h` and `--help` CLI argument.
   - give a red message when trying to continue and nothing is left to be found.
-- do I want to generate doxygen docs?
-  - https://jothepro.github.io/doxygen-awesome-css/index.html

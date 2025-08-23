@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: 2020 David Fong
 # SPDX-License-Identifier: GPL-3.0-or-later
-cmake_minimum_required(VERSION 4.0)
+cmake_minimum_required(VERSION 4.1)
 project(okiidoku
 	VERSION 0.0.1
 	DESCRIPTION [[david fong's variable-grid-size sudoku toolkit]]
@@ -18,6 +18,7 @@ include(okiidoku/options) # see this file for more info & defaults. summary:
 # - OKIIDOKU_BUILD_WITH_STATIC_ANALYZERS
 # - OKIIDOKU_BUILD_DEBUG_WITH_SANITIZERS
 # - OKIIDOKU_BUILD_TESTING
+# - OKIIDOKU_BUILD_DOCS
 # - OKIIDOKU_BUILD_OPTIMIZE_LOCAL_NON_PORTABLE
 # - OKIIDOKU_BUILD_BINDINGS_FOR_PYTHON
 
@@ -61,5 +62,6 @@ endif()
 
 okiidoku_target_pgo(okiidoku #[[trainer:]] okiidoku_pgo_trainer_default)
 
+include(okiidoku/optional/doxygen)
 include(okiidoku/installation)
 include(okiidoku/packaging)

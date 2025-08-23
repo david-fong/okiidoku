@@ -101,6 +101,7 @@ if(NOT _OKIIDOKU_BUILD_IS_PGO_GEN) # is PgoUse
 			"-D OKIIDOKU_BUILD_WITH_STATIC_ANALYZERS:BOOL=NO"
 			"-D OKIIDOKU_BUILD_DEBUG_WITH_SANITIZERS:BOOL=NO"
 			"-D OKIIDOKU_BUILD_TESTING:BOOL=NO"
+			"-D OKIIDOKU_BUILD_DOCS:BOOL=NO"
 			"-D OKIIDOKU_BUILD_OPTIMIZE_LOCAL_NON_PORTABLE:BOOL=${OKIIDOKU_BUILD_OPTIMIZE_LOCAL_NON_PORTABLE}"
 			"-D OKIIDOKU_BUILD_BINDINGS_FOR_PYTHON:BOOL=NO"
 		CONFIGURE_HANDLED_BY_BUILD YES
@@ -239,13 +240,17 @@ function(okiidoku_target_pgo
 		return()
 	endif()
 
-	set(training_stamp_file "${data_dir}/include/${trainee}/detail/pgo_gen_last_training_timestamp.hpp")
+	# TODO: try to simplify to just put header under data_dir and skip defining include_dir
+	target_include_directories(${trainee} PRIVATE "$<${if_use}:$<BUILD_INTERFACE:${data_dir}/include>>")
+	set(timestamp_dir "${data_dir}/include/${trainee}/detail")
+	file(MAKE_DIRECTORY "${timestamp_dir}")
+	set(training_stamp_file "${timestamp_dir}/pgo_gen_last_training_timestamp.hpp")
 	if(NOT EXISTS "${training_stamp_file}")
-		file(MAKE_DIRECTORY "${data_dir}/include/${trainee}/detail")
 		file(TOUCH "${training_stamp_file}")
 	endif()
-	# ^assumes namespaced, split include directory exists and include flag already configured
-	okiidoku_target_include_header("${trainee}" PRIVATE "okiidoku/detail/pgo_use_check_needs_rebuild.hpp")
+	okiidoku_make_include_flag("${trainee}/detail/pgo_gen_last_training_timestamp.hpp" training_stamp_include_flag)
+	target_compile_options("${trainee}" PRIVATE "$<${if_use}:$<BUILD_INTERFACE:${training_stamp_include_flag}>>")
+	# target_sources(${trainee} PRIVATE "$<${if_use}:${training_stamp_file}>") # TODO why is this done? just to show up in some IDEs?
 
 	block()
 	# Note: annoyingly, commands cannot be the empty string. use `cmake -E true` as a no-op instead.
@@ -288,11 +293,5 @@ function(okiidoku_target_pgo
 	# build will stop if run_trainer fails
 	# TODO.wait use generator expression once `add_dependencies` supports them. https://gitlab.kitware.com/cmake/cmake/-/issues/19467. currently doing workaround in the custom step COMMANDs.
 	add_dependencies(${trainee} "run_${trainer}")
-
-	# make all sources include the last training timestamp header to detect need for recompilation.
-	#  currently, OBJECT_DEPENDS doesn't support generator expressions (https://gitlab.kitware.com/cmake/cmake/-/issues/22034).
-	#  I would just use a compile definition, but that can't be changed at build time.
-	target_include_directories(${trainee} PRIVATE "$<BUILD_INTERFACE:$<${if_use}:${data_dir}/include>>")
-	# target_sources(${trainee} PRIVATE "$<${if_use}:${training_stamp_file}>") # TODO why is this done?
 
 endfunction()

@@ -71,7 +71,7 @@ EMSCRIPTEN_BINDINGS(okiidoku) {
 
 	em::class_<oki_v::Grid>("Grid")
 		.constructor<oki::Order>()
-		// .function("getMonoOrder", &oki::visitor::Grid::get_mono_order) // TODO need to define the base class to do this https://emscripten.org/docs/porting/connecting_cpp_and_javascript/embind.html#base-classes
+		// .function("getMonoOrder", &oki_v::Grid::get_mono_order) // TODO need to define the base class to do this https://emscripten.org/docs/porting/connecting_cpp_and_javascript/embind.html#base-classes
 		.function("atRmi",       &oki_v::Grid::at_rmi)
 		.function("at",          &oki_v::Grid::at)
 		.function("followsRule", &oki_v::grid_follows_rule)

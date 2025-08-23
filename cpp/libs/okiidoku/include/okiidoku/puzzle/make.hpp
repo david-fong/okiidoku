@@ -8,36 +8,49 @@
 
 namespace okiidoku::mono {
 
-	// contract: grid is filled or a proper puzzle.
-	// post-condition: the grid is a minimal puzzle. solution unchanged.
-	template<Order O> requires(is_order_compiled(O))
-	OKIIDOKU_EXPORT
-	void make_minimal_puzzle(Grid<O>&, rng_seed_t rng_seed) noexcept;
 
 	template<Order O> requires(is_order_compiled(O))
 	[[nodiscard, gnu::pure]] OKIIDOKU_EXPORT
+	/**
+	a puzzle is a non-full grid. it is "proper" if the canonicalizations of all
+	its fillings that follow the one rule are the same. i.e. it effectively only
+	has one solution.
+	\relates okiidoku::mono::Grid */
 	bool grid_is_proper_puzzle(const Grid<O>&) noexcept;
 
-	// contract: grid is a proper puzzle.
+
 	template<Order O> requires(is_order_compiled(O))
 	[[nodiscard, gnu::pure]] OKIIDOKU_EXPORT
-	bool grid_is_minimal_puzzle(const Grid<O>&) noexcept;
+	/**
+	\returns `true` if clearing any cell of the puzzle would make it improper
+		(see \ref okiidoku::mono::grid_is_proper_puzzle).
+	\pre `grid` is a proper puzzle.
+	\relates okiidoku::mono::Grid */
+	bool grid_is_minimal_puzzle(const Grid<O>& grid) noexcept;
+
+
+	template<Order O> requires(is_order_compiled(O))
+	OKIIDOKU_EXPORT
+	/**
+	\pre grid is filled or a proper puzzle (see \ref okiidoku::mono::grid_is_proper_puzzle).
+	\post grid is a minimal puzzle whose solution canonicalizes to the same grid
+		as the original input.
+	\relates okiidoku::mono::Grid */
+	void make_minimal_puzzle(Grid<O>&, rng_seed_t rng_seed) noexcept;
 }
 
 
 namespace okiidoku::visitor {
 
-	// contract: grid is filled or a proper puzzle.
-	// post-condition: the grid is a minimal puzzle. solution unchanged.
-	OKIIDOKU_EXPORT void make_minimal_puzzle(Grid&, rng_seed_t rng_seed) noexcept;
-
-	template<Order O> requires(is_order_compiled(O))
+	/// \copydoc okiidoku::mono::grid_is_proper_puzzle
 	[[nodiscard, gnu::pure]] OKIIDOKU_EXPORT
 	bool grid_is_proper_puzzle(const Grid&) noexcept;
 
-	// contract: grid is a proper puzzle.
-	template<Order O> requires(is_order_compiled(O))
+	/// \copydoc okiidoku::mono::grid_is_minimal_puzzle
 	[[nodiscard, gnu::pure]] OKIIDOKU_EXPORT
 	bool grid_is_minimal_puzzle(const Grid&) noexcept;
+
+	/// \copydoc okiidoku::mono::make_minimal_puzzle
+	OKIIDOKU_EXPORT void make_minimal_puzzle(Grid&, rng_seed_t rng_seed) noexcept;
 }
 #endif

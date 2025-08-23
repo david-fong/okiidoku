@@ -47,6 +47,7 @@ option(OKIIDOKU_BUILD_WITH_SUGGESTED_WARNINGS "build okiidoku with suggested war
 option(OKIIDOKU_BUILD_WITH_STATIC_ANALYZERS "build okiidoku with static analyzers" NO) # off by default because it's slow
 option(OKIIDOKU_BUILD_DEBUG_WITH_SANITIZERS "build okiidoku debug builds with sanitizers" "${okiidoku_IS_TOP_LEVEL}")
 option(OKIIDOKU_BUILD_TESTING "build tests for okiidoku" "${okiidoku_IS_TOP_LEVEL}")
+option(OKIIDOKU_BUILD_DOCS "build Doxygen docs for okiidoku" "${okiidoku_IS_TOP_LEVEL}")
 
 
 if(NOT EMSCRIPTEN)

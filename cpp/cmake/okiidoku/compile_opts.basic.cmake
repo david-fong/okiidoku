@@ -7,11 +7,13 @@ add_library(okiidoku_compile_options_public INTERFACE)
 add_library(okiidoku_compiler_warnings INTERFACE IMPORTED) # Note: "IMPORTED" used to prevent auto installation
 okiidoku_install_target(okiidoku_compile_options_public)
 
-function(okiidoku_target_include_header target scope file)
+function(okiidoku_make_include_flag file return_var_name)
+	# intentionally leaves target_compile_options and target_sources up to the caller.
+	# things like wrapping with generator expression(s) is hard to do in a CMake function.
 	set(gnu_include  "$<$<CXX_COMPILER_ID:GNU,Clang>:SHELL:-include '${file}'>")
 	set(msvc_include "$<$<CXX_COMPILER_ID:MSVC>:SHELL:/FI ${file}>")
-	target_compile_options("${target}" "${scope}" "$<BUILD_INTERFACE:${gnu_include}${msvc_include}>")
 	# TODO warn on unsupported compiler?
+	set("${return_var_name}" "${gnu_include}${msvc_include}" PARENT_SCOPE)
 endfunction()
 
 function(okiidoku_add_compiler_options target)

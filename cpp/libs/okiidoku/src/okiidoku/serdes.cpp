@@ -31,7 +31,7 @@ namespace okiidoku::mono { namespace {
 			h_chute_boxes_cands_.fill(O2BitArr_ones<O>);
 			cols_cands_.fill(O2BitArr_ones<O>);
 		}
-		[[nodiscard]] o4i_t get_cell_rmi() const noexcept { return cell_rmi_; }
+		[[nodiscard, gnu::pure]] o4i_t get_cell_rmi() const noexcept { return cell_rmi_; }
 		void advance() noexcept;
 
 		// automatically removes val as a candidate of future cells.

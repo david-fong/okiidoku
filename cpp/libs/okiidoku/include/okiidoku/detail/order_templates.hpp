@@ -26,8 +26,8 @@ namespace okiidoku {
 		template<Order Ignored, Order... Orders>
 		consteval auto CompiledOrdersHelper_make_array() noexcept { return std::to_array({Orders...}); }
 	}
-	// exists because my template instantiation macro has no delimiter
-	// argument, so I hack this to ignore a leading comma at a usage site.
+	/// \internal exists because my template instantiation macro has no delimiter
+	/// argument, so I hack this to ignore a leading comma at a usage site.
 	inline constexpr auto compiled_orders {::okiidoku::detail::CompiledOrdersHelper_make_array<
 		/* ignored: */Order{0}
 		#define OKIIDOKU_FOREACH_O_EMIT(O_) , O_
@@ -45,7 +45,7 @@ namespace okiidoku {
 
 
 	namespace visitor::detail {
-		// exists so that OrderVariantFor can use container templates that have other
+		// exists so that `OrderVariantFor` can use container templates that have other
 		// template parameters other than just the order.
 		template<typename T>
 		concept MonoToVisitorAdaptor = requires(T x) {
@@ -59,9 +59,9 @@ namespace okiidoku {
 			#undef OKIIDOKU_FOREACH_O_EMIT
 		};
 
-		/* This helper is here because there's no great way to correctly put commas
-		between compiled order template instantiation entries if I want there to be
-		no monostate entries in the variant. */
+		/** \internal This helper is here because there's no great way to correctly
+		put commas between compiled order template instantiation entries if I want
+		there to be no monostate entries in the variant. */
 		template<class Ignored, class... Args>
 		using VariantSkipFirstHelper = std::variant<Args...>;
 
@@ -74,8 +74,6 @@ namespace okiidoku {
 		>;
 
 
-		// unless otherwise specified by functions on derived classes, calling such
-		// functions on moved-from instances is UB.
 		template<MonoToVisitorAdaptor Adaptor>
 		struct ContainerBase {
 		public:
@@ -88,8 +86,8 @@ namespace okiidoku {
 			template<Order O>
 			explicit ContainerBase(typename Adaptor::template type<O>&& mono_obj) noexcept: variant_(std::move(mono_obj)) {}
 
-			// default-for-order constructor.
-			// If the provided order is not compiled, defaults to the lowest compiled order.
+			/// default-for-order constructor.
+			/// If the provided order is not compiled, defaults to the lowest compiled order.
 			explicit ContainerBase(const Order O) noexcept requires(
 				!Adaptor::is_borrow_type
 				#define OKIIDOKU_FOREACH_O_EMIT(O_) \
@@ -111,11 +109,12 @@ namespace okiidoku {
 
 			[[nodiscard, gnu::pure]] friend constexpr bool operator==(const ContainerBase&, const ContainerBase&) noexcept = default;
 
-			// Note to self: no need to export these members which are public and inline
+			/** get the `Order` of the current value
+			\internal no need to export these members which are public and inline. */
 			[[nodiscard, gnu::pure]] constexpr Order get_mono_order() const noexcept { return compiled_orders[variant_.index()]; }
 
-			// Though public, you shouldn't need to use this. The rest of the visitor
-			// interface of the library wraps operations around it with nicer syntax.
+			/** Though public, you shouldn't need to use this. The rest of the visitor
+			interface of the library should wrap around it with nicer syntax. */
 			template<class Self> [[nodiscard, gnu::pure]]
 			auto&& get_mono_variant(this Self&& self) noexcept { return std::forward<Self>(self).variant_; }
 

@@ -30,6 +30,14 @@ namespace okiidoku::mono {
 
 
 	template<Order O> requires(is_order_compiled(O))
+	bool grid_is_minimal_puzzle(const Grid<O>& grid) noexcept {
+		Grid<O> copy {grid};
+		make_minimal_puzzle(copy, rng_seed_t{0});
+		return grid == copy;
+	}
+
+
+	template<Order O> requires(is_order_compiled(O))
 	void make_minimal_puzzle(Grid<O>& grid, const rng_seed_t rng_seed) noexcept {
 		OKIIDOKU_CONTRACT_ASSERT(grid_is_proper_puzzle(grid));
 
@@ -43,14 +51,15 @@ namespace okiidoku::mono {
 		// Note: this implementation never "backtracks". once it removes a given,
 		// it never puts it back.
 
-		o4i_t num_puzcell_cands {0};
-		std::array<rmi_t, T::O4> puzcell_cand_rmis; // non-candidates: either removed, or can't be removed.
+		o4x_t num_puzcell_cands {0};
+		OKIIDOKU_NO_PRE_INIT_AUTOVAR std::array<rmi_t, T::O4> puzcell_cand_rmis; // non-candidates: either removed, or can't be removed.
 		for (o4i_t rmi {0}; rmi < T::O4; ++rmi) {
 			OKIIDOKU_CONTRACT_USE(grid.at_rmi(rmi) <= T::O2);
 			if (grid.at_rmi(rmi) < T::O2) [[likely]] {
 				puzcell_cand_rmis[num_puzcell_cands] = static_cast<rmi_t>(rmi);
 				++num_puzcell_cands;
 		}	}
+		OKIIDOKU_CONTRACT_ASSERT(num_puzcell_cands < T::O4);
 
 		const auto remove_puzcell_cand_at {[&](const o4i_t cand_i){
 			OKIIDOKU_CONTRACT_USE(cand_i < num_puzcell_cands);
@@ -72,8 +81,9 @@ namespace okiidoku::mono {
 
 		FastSolver<O> solver {};
 		while (num_puzcell_cands > 0) {
-			const auto puzcell_cand_i {static_cast<o4i_t>((rng() - rng_t::min()) % num_puzcell_cands)};
+			const auto puzcell_cand_i {static_cast<o4x_t>((rng() - rng_t::min()) % num_puzcell_cands)};
 			OKIIDOKU_CONTRACT_USE(puzcell_cand_i < num_puzcell_cands);
+			OKIIDOKU_CONTRACT_USE(puzcell_cand_i < T::O2);
 
 			const auto rmi {puzcell_cand_rmis[puzcell_cand_i]};
 			const auto val {std::exchange(grid.at_rmi(rmi), static_cast<grid_val_t<O>>(T::O2))};
@@ -118,8 +128,22 @@ namespace okiidoku::mono {
 
 
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-		template void make_minimal_puzzle<O_>(Grid<O_>&, rng_seed_t) noexcept; \
-		template bool grid_is_proper_puzzle<O_>(const Grid<O_>&) noexcept;
+	template bool grid_is_proper_puzzle<O_>(const Grid<O_>&) noexcept; \
+	template bool grid_is_minimal_puzzle<O_>(const Grid<O_>&) noexcept; \
+	template void make_minimal_puzzle<O_>(Grid<O_>&, rng_seed_t) noexcept;
 	OKIIDOKU_FOREACH_O_DO_EMIT
 	#undef OKIIDOKU_FOREACH_O_EMIT
+}
+
+
+namespace okiidoku::visitor {
+
+	// TODO: implement
+	bool grid_is_proper_puzzle(const Grid&) noexcept;
+
+	// TODO: implement
+	bool grid_is_minimal_puzzle(const Grid&) noexcept;
+
+	// TODO: implement
+	void make_minimal_puzzle(Grid&, rng_seed_t rng_seed) noexcept;
 }

@@ -79,11 +79,12 @@
 #endif
 
 
-// At usage sites, first #define OKIIDOKU_FOREACH_O_EMIT and then #undef it right after.
-// Note: This _seems_ to violate pitchfork library spec:
-//  "A library should not offer the user controls for tweaking its public interface."...
-//  https://api.csswg.org/bikeshed/?force=1&url=https://raw.githubusercontent.com/vector-of-bool/pitchfork/develop/data/spec.bs#libraries
-//  But I think it's okay. Each order could be technically be treated as its own standalone API.
+/**
+At usage sites, first #define OKIIDOKU_FOREACH_O_EMIT and then #undef it right after.
+\internal This _seems_ to violate pitchfork library spec:
+	"A library should not offer the user controls for tweaking its public interface."...
+	https://api.csswg.org/bikeshed/?force=1&url=https://raw.githubusercontent.com/vector-of-bool/pitchfork/develop/data/spec.bs#libraries
+	But I think it's okay. Each order could be technically be treated as its own standalone API. */
 #define OKIIDOKU_FOREACH_O_DO_EMIT \
 OKIIDOKU_DETAIL_TEMPLATE_FOR_O2 \
 OKIIDOKU_DETAIL_TEMPLATE_FOR_O3 \

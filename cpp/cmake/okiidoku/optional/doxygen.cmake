@@ -1,0 +1,34 @@
+# SPDX-FileCopyrightText: 2020 David Fong
+# SPDX-License-Identifier: GPL-3.0-or-later
+include_guard(DIRECTORY)
+if((NOT okiidoku_IS_TOP_LEVEL) OR (NOT OKIIDOKU_BUILD_DOCS))
+	return()
+endif()
+
+# include(FindDoxygen)
+find_package(Doxygen 1.9) # (minimum version)
+if(Doxygen_FOUND)
+	list(APPEND DOXYGEN_EXCLUDE "${okiidoku_SOURCE_DIR}/external/")
+	list(APPEND DOXYGEN_EXCLUDE_PATTERNS "*/node_modules/*")
+	# set(DOXYGEN_USE_MDFILE_AS_MAINPAGE "${okiidoku_SOURCE_DIR}/../README.md")
+	set(DOXYGEN_GENERATE_MAN YES)
+	set(DOXYGEN_WARN_IF_UNDOCUMENTED NO)
+	set(DOXYGEN_QUIET YES)
+	list(APPEND DOXYGEN_HTML_EXTRA_STYLESHEET
+		"${okiidoku_SOURCE_DIR}/cmake/okiidoku/optional/okiidoku-doxygen.css"
+	)
+	set(DOXYGEN_TAB_SIZE "3")
+	# set(DOXYGEN_BUILTIN_STL_SUPPORT YES) # TODO try this
+
+	doxygen_add_docs(okiidoku_docs
+		"${okiidoku_SOURCE_DIR}"
+		# "${okiidoku_SOURCE_DIR}/.."
+		# "${okiidoku_SOURCE_DIR}/../writings"
+		"${DOXYGEN_USE_MDFILE_AS_MAINPAGE}"
+		ALL
+	)
+	# TODO: wire up installation of manpages / html doc pages
+	# also look into separate installation components for lib user vs. cli user vs. internal dev docs.
+	#   (cli user docs maybe not needed through doxygen(?) look into various cli lib capabilities)
+	#   https://www.doxygen.nl/manual/config.html#cfg_output_directory may help
+endif()

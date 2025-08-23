@@ -24,7 +24,8 @@ okiidoku_install_target(okiidoku)
 
 include(GenerateExportHeader)
 generate_export_header(okiidoku EXPORT_FILE_NAME include/okiidoku/detail/export.h)
-okiidoku_target_include_header(okiidoku PUBLIC "okiidoku/detail/export.h")
+okiidoku_make_include_flag("okiidoku/detail/export.h" export_header_include_flag)
+target_compile_options(okiidoku PUBLIC "${export_header_include_flag}")
 target_compile_definitions(okiidoku PUBLIC "$<$<NOT:$<BOOL:${BUILD_SHARED_LIBS}>>:OKIIDOKU_STATIC_DEFINE>")
 
 include(./cmake/generate_meta_info.cmake)
@@ -35,7 +36,8 @@ target_include_directories(okiidoku
 	PUBLIC  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
 	PRIVATE "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>"
 )
-okiidoku_target_include_header(okiidoku PUBLIC "okiidoku/detail/util.hpp")
+okiidoku_make_include_flag("okiidoku/detail/util.hpp" util_header_include_flag)
+target_compile_options(okiidoku PUBLIC "${util_header_include_flag}")
 # Future Note: if switching back to FILE_SET, make sure headers get installed. not sure why they weren't when previously using FILE_SET. maybe each header file needs to be listed out explicitly?
 install(DIRECTORY
 	"${CMAKE_CURRENT_BINARY_DIR}/include/okiidoku"

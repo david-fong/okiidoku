@@ -5,7 +5,7 @@
 
 ## Required Tools
 
-- CMake 4.0 or higher
+- CMake 4.1 or higher
 - [A C++ build system](https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html). Recommended: Ninja
 - [Emscripten](https://emscripten.org/docs/getting_started/downloads.html) 4.0.7 or higher (which comes with [compiler, and NodeJS for _building_](https://emscripten.org/docs/building_from_source/toolchain_what_is_needed.html))
 - For running the output JS, Node 16 or higher.

@@ -5,13 +5,6 @@
 
 #include <cassert> // assert
 
-/*
-OKIIDOKU_CONTRACT_USE
-translates to assertion for debug builds.
-translates to assumption for release builds.
-if the condition expression is complex to evaluate, this may possibly backfire
-for performance, so avoid using this in such cases, or benchmark carefully.
-*/
 
 // Note: C++23 has std::unreachable in <utility>, but it might be good to keep this header slim
 #ifdef NDEBUG
@@ -27,18 +20,23 @@ for performance, so avoid using this in such cases, or benchmark carefully.
 	#define OKIIDOKU_UNREACHABLE
 	#endif
 #else
+	/** \def OKIIDOKU_CONTRACT_USE(cond)
+	translates to assertion for debug builds, and assumption for release builds.
+	\note if the condition expression is complex to evaluate, this may possibly
+		backfire for performance, so avoid using this in such cases, or benchmark
+		carefully. */
 	#define OKIIDOKU_CONTRACT_USE(expr) assert(expr) // NOLINT(cert-dcl03-c,misc-static-assert) runtime abort desirable here.
 	#include <cstdlib> // abort
 	#define OKIIDOKU_UNREACHABLE std::abort()
 #endif
 
 
-// OKIIDOKU_CONTRACT_ASSERT
-// alias of standard `assert`
+/** \def OKIIDOKU_CONTRACT_ASSERT(expr)
+alias of standard `assert` */
 #define OKIIDOKU_CONTRACT_ASSERT(expr) assert(expr)
 
 
-// TODO enable only for release builds
+/// \todo enable only for release builds? or does that thwart ubsan?
 #if __cplusplus >= 202403L
 	#define OKIIDOKU_DETAIL_NO_PRE_INIT_AUTOVAR_INDETERMINATE [[indeterminate]]
 #endif
@@ -55,12 +53,13 @@ for performance, so avoid using this in such cases, or benchmark carefully.
 	#define OKIIDOKU_DETAIL_NO_PRE_INIT_AUTOVAR_GCC_UNINITIALIZED
 #endif
 #define OKIIDOKU_NO_PRE_INIT_AUTOVAR OKIIDOKU_DETAIL_NO_PRE_INIT_AUTOVAR_INDETERMINATE OKIIDOKU_DETAIL_NO_PRE_INIT_AUTOVAR_GCC_UNINITIALIZED
-// TODO: gnu::noinit for global data. linker for ELF will put in .noinit section
+/// \todo gnu::noinit for global data. linker for ELF will put in .noinit section
 
 
 #ifdef NDEBUG
-	// gnu::retain: marks for retention during linker section garbage collection
-	// gnu::used:   I'm actually not sure if this is needed
+	/** \def OKIIDOKU_KEEP_FOR_DEBUG
+	- `gnu::retain`: marks for retention during linker section garbage collection
+	- `gnu::used`:   I'm actually not sure if this is needed */
 	#define OKIIDOKU_KEEP_FOR_DEBUG [[maybe_unused, gnu::retain, gnu::used]]
 #else
 	#define OKIIDOKU_KEEP_FOR_DEBUG
