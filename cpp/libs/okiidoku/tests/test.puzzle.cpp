@@ -30,16 +30,16 @@ template<okiidoku::Order O>
 	// Grid<O> canon_grid;
 
 	for (unsigned round {0}; round < num_rounds; ++round) {
-		generate_shuffled(gen_grid, shared_rng.get_rng_seed());
+		generate_shuffled(gen_grid, shared_rng.get());
 		CHECK(grid_follows_rule(gen_grid));
 
 		INFO("making puzzle #" << int(round));
 		Grid<O> puz_grid {gen_grid};
 		auto ua_sets {find_size_4_minimal_unavoidable_sets(puz_grid)};
 		// CAPTURE(unsigned(ua_sets.ua_set_4s.size());
-		make_minimal_puzzle(puz_grid, shared_rng.get_rng_seed());
+		make_minimal_puzzle(puz_grid, shared_rng.get());
 		// #ifndef OKIIDOKU_NO_LOGGING
-		// print_2d<O>(std::clog, shared_rng.get_rng_seed(), gen_grid, puz_grid);
+		// print_2d<O>(std::clog, shared_rng.get(), gen_grid, puz_grid);
 		// #endif
 	}
 }}

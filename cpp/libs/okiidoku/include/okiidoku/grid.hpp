@@ -94,7 +94,7 @@ namespace okiidoku::mono {
 		}
 
 		/**
-		see \ref okiidoku::mono::box_cell_to_rmi.
+		see `okiidoku::mono::box_cell_to_rmi`.
 		\pre `box` and `box_cell` are in `[0, O2)`. */
 		template<class T_house, class T_house_cell, class Self> requires(Any_o2x_t<O, T_house> && Any_o2x_t<O, T_house_cell>)
 		[[nodiscard, gnu::pure]] constexpr auto&& at_box_cell(this Self&& self, const T_house box, const T_house_cell box_cell) noexcept {
@@ -126,7 +126,7 @@ namespace okiidoku::mono {
 
 namespace okiidoku::visitor {
 
-	struct Grid;
+	struct Grid; // (see below for definition)
 
 	[[nodiscard, gnu::pure]] OKIIDOKU_EXPORT
 	/// \copydoc okiidoku::mono::grid_follows_rule

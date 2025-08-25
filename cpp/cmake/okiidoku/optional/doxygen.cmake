@@ -9,8 +9,9 @@ endif()
 find_package(Doxygen 1.9) # (minimum version)
 if(Doxygen_FOUND)
 	list(APPEND DOXYGEN_EXCLUDE "${okiidoku_SOURCE_DIR}/external/")
-	list(APPEND DOXYGEN_EXCLUDE_PATTERNS "*/node_modules/*")
+	list(APPEND DOXYGEN_EXCLUDE_PATTERNS "*/node_modules/*" "*/extras/*/build/*")
 	# set(DOXYGEN_USE_MDFILE_AS_MAINPAGE "${okiidoku_SOURCE_DIR}/../README.md")
+	set(DOXYGEN_BUILTIN_STL_SUPPORT YES)
 	set(DOXYGEN_GENERATE_MAN YES)
 	set(DOXYGEN_WARN_IF_UNDOCUMENTED NO)
 	set(DOXYGEN_QUIET YES)
@@ -20,13 +21,18 @@ if(Doxygen_FOUND)
 	set(DOXYGEN_TAB_SIZE "3")
 	# set(DOXYGEN_BUILTIN_STL_SUPPORT YES) # TODO try this
 
-	doxygen_add_docs(okiidoku_docs
-		"${okiidoku_SOURCE_DIR}"
-		# "${okiidoku_SOURCE_DIR}/.."
-		# "${okiidoku_SOURCE_DIR}/../writings"
-		"${DOXYGEN_USE_MDFILE_AS_MAINPAGE}"
-		ALL
-	)
+	block() # generate user-facing docs
+		list(APPEND DOXYGEN_FILE_PATTERNS "*.hpp")
+		list(APPEND DOXYGEN_EXCLUDE_PATTERNS "*/src/*")
+		list(APPEND DOXYGEN_EXTRACT_ALL YES)
+		doxygen_add_docs(okiidoku_docs
+			"${okiidoku_SOURCE_DIR}"
+			# "${okiidoku_SOURCE_DIR}/.."
+			# "${okiidoku_SOURCE_DIR}/../writings"
+			"${DOXYGEN_USE_MDFILE_AS_MAINPAGE}"
+			ALL
+		)
+	endblock()
 	# TODO: wire up installation of manpages / html doc pages
 	# also look into separate installation components for lib user vs. cli user vs. internal dev docs.
 	#   (cli user docs maybe not needed through doxygen(?) look into various cli lib capabilities)

@@ -29,7 +29,7 @@ template<okiidoku::Order O>
 	// Grid<O> canon_grid;
 
 	for (unsigned round {0}; round < num_rounds; ++round) {
-		generate_shuffled(gen_grid, shared_rng.get_rng_seed());
+		generate_shuffled(gen_grid, shared_rng.get());
 		CHECK(grid_follows_rule(gen_grid));
 
 		/* const auto gen_canon_transform {canonicalize(gen_grid)};
@@ -39,7 +39,7 @@ template<okiidoku::Order O>
 		}
 
 		canon_grid = gen_grid;
-		scramble(canon_grid, shared_rng.get_rng_seed());
+		scramble(canon_grid, shared_rng.get());
 		canonicalize(canon_grid);
 
 		CHECK(gen_grid == canon_grid);

@@ -93,13 +93,13 @@ namespace okiidoku::cli {
 		const clock_t clock_start {std::clock()};
 		Grid grid(config_.order());
 		init_most_canonical_grid(grid);
-		generate_shuffled(grid, shared_rng_.get_rng_seed());
+		generate_shuffled(grid, shared_rng_.get());
 		const double processor_time {(static_cast<double>(std::clock() - clock_start)) / CLOCKS_PER_SEC};
 		{
 			if (config_.canonicalize()) {
 				canonicalize(grid); // should we make a copy and print as a second grid image?
 			}
-			print_2d(std::cout, shared_rng_.get_rng_seed(), grid);
+			print_2d(std::cout, shared_rng_.get(), grid);
 		}
 		std::cout << std::setprecision(4)
 			<< "\nprocessor time: " << processor_time << " seconds"
@@ -125,7 +125,7 @@ namespace okiidoku::cli {
 			Grid grid(config_.order());
 			init_most_canonical_grid(grid);
 			for (unsigned long long prog {0}; prog < how_many; ++prog) {
-				generate_shuffled(grid, shared_rng_.get_rng_seed());
+				generate_shuffled(grid, shared_rng_.get());
 				if (config_.canonicalize()) {
 					canonicalize(grid);
 				}

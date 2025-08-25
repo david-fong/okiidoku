@@ -20,7 +20,7 @@ namespace okiidoku::util {
 
 		explicit SharedRng(rng_t::result_type seed) noexcept: rng{seed} {}
 
-		[[nodiscard]] std::uint_fast32_t get_rng_seed() noexcept {
+		[[nodiscard]] std::uint_fast32_t get() noexcept {
 			std::scoped_lock scoped_lock {mutex};
 			#ifndef __clang__
 			#pragma GCC diagnostic push

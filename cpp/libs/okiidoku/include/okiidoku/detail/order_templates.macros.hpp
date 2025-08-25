@@ -79,8 +79,9 @@
 #endif
 
 
-/**
-At usage sites, first #define OKIIDOKU_FOREACH_O_EMIT and then #undef it right after.
+/** emits `OKIIDOKU_FOREACH_O_EMIT(O)` for each `O` chosen to be compiled.
+
+at usage sites, first `#define OKIIDOKU_FOREACH_O_EMIT` and then `#undef` it right after.
 \internal This _seems_ to violate pitchfork library spec:
 	"A library should not offer the user controls for tweaking its public interface."...
 	https://api.csswg.org/bikeshed/?force=1&url=https://raw.githubusercontent.com/vector-of-bool/pitchfork/develop/data/spec.bs#libraries

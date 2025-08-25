@@ -23,11 +23,11 @@ void do_training(okiidoku::util::SharedRng& shared_rng, const unsigned num_round
 	// Grid<O> canon_grid;
 
 	for (unsigned round {0}; round < num_rounds; ++round) {
-		generate_shuffled(gen_grid, shared_rng.get_rng_seed());
+		generate_shuffled(gen_grid, shared_rng.get());
 
 		/* const auto gen_canon_transform {canonicalize(gen_grid)};
 		canon_grid = gen_grid;
-		scramble(canon_grid, shared_rng.get_rng_seed());
+		scramble(canon_grid, shared_rng.get());
 		canonicalize(canon_grid);
 		*/
 	}

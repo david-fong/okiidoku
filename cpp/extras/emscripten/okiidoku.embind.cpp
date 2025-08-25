@@ -31,7 +31,7 @@ namespace okiidoku::em { namespace {
 		void seed(const std::uint_fast64_t seed) noexcept {
 			rng_.seed(seed);
 		}
-		[[nodiscard]] rng_seed_t get_rng_seed() noexcept {
+		[[nodiscard]] rng_seed_t get() noexcept {
 			return static_cast<rng_seed_t>(rng_() - decltype(rng_)::min());
 		}
 		// auto get_next() noexcept { return rng_(); } // haven't found a need for this
@@ -40,12 +40,12 @@ namespace okiidoku::em { namespace {
 
 	std::string grid_to_emoji_string(Grid& grid) noexcept {
 		std::stringstream ss {};
-		print_2d(ss, rng.get_rng_seed(), grid);
+		print_2d(ss, rng.get(), grid);
 		return ss.str();
 	}
 
 	void generate_shuffled(Grid& grid) noexcept {
-		generate_shuffled(grid, rng.get_rng_seed());
+		generate_shuffled(grid, rng.get());
 	}
 }}
 namespace okiidoku::mono {
@@ -65,7 +65,7 @@ EMSCRIPTEN_BINDINGS(okiidoku) {
 
 	em::class_<oki::em::Rng>("Rng")
 		.function("seed", &oki::em::Rng::seed)
-		.function("getRngSeed", &oki::em::Rng::get_rng_seed)
+		.function("getRngSeed", &oki::em::Rng::get)
 		;
 	em::constant("rng", oki::em::rng);
 

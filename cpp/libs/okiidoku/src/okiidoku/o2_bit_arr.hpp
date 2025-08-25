@@ -63,9 +63,9 @@ namespace okiidoku::mono {
 			}
 		}
 
-		// Internal Note: If user follows contracts, excess top bits are always zero.
+		/// \internal If user follows contracts, excess top bits are always zero.
 		using words_t = std::array<word_t, num_words>;
-		words_t words_ {word_t{0}};
+		words_t words_ {word_t{0}}; ///< \copydoc words_t
 
 	public:
 		constexpr O2BitArr() noexcept = default;
@@ -216,7 +216,8 @@ namespace okiidoku::mono {
 
 
 	template<Order O>
-	struct chute_box_masks final {
+	struct ChuteBoxMasks final {
+		/// `[111'000'000, 000'111'000, 000'000'111]`
 		static constexpr std::array<O2BitArr<O>, O> row {[]{
 			std::array<O2BitArr<O>, O> mask;
 			for (unsigned chute {0}; chute < O; ++chute) {
@@ -225,6 +226,7 @@ namespace okiidoku::mono {
 			}	}
 			return mask;
 		}()};
+		/// `[100'100'100, 010'010'010, 001'001'001]`
 		static constexpr std::array<O2BitArr<O>, O> col {[]{
 			std::array<O2BitArr<O>, O> mask;
 			for (unsigned chute {0}; chute < O; ++chute) {

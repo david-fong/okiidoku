@@ -29,12 +29,12 @@ namespace okiidoku::mono {
 		FastSolver() noexcept;
 		~FastSolver() noexcept;
 
-		struct CandSymToIgnore final {
+		struct [[gnu::designated_init]] CandSymToIgnore final {
 			int_ts::o4xs_t<O> rmi;
 			int_ts::o2x_t<O> val;
 		};
 
-		// contract: none. puzzle can even blatantly break the one rule.
+		/// \pre none. puzzle can even blatantly break the one rule.
 		void reinit_with_puzzle(const Grid<O>& puzzle, const std::optional<CandSymToIgnore> = {}) noexcept;
 
 		// return of `std::nullopt` means no more solutions exist for the puzzle.

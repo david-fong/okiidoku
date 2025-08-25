@@ -10,7 +10,7 @@ namespace okiidoku::cli {
 	struct Timer final {
 		using time_point = std::chrono::steady_clock::time_point;
 
-		struct Elapsed final {
+		struct [[gnu::designated_init]] Elapsed final {
 			double proc_seconds;
 			double wall_seconds;
 		};

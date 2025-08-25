@@ -13,23 +13,23 @@ namespace okiidoku::mono::detail::solver::found {
 	// TODO.mid consider making the constructors private and friending to the corresponding finder. will need to forward declare the finders here.
 
 	template<Order O> requires(is_order_compiled(O))
-	struct CellClaimSym final {
+	struct [[gnu::designated_init]] CellClaimSym final {
 		int_ts::o4xs_t<O> rmi;
 		int_ts::o2xs_t<O> val;
 	};
 
 	template<Order O> requires(is_order_compiled(O))
-	struct SymClaimCell final {
+	struct [[gnu::designated_init]] SymClaimCell final {
 		int_ts::o4xs_t<O> rmi;
 		int_ts::o2xs_t<O> val;
 	};
 
 	template<Order O> requires(is_order_compiled(O))
-	struct Subset final {
+	struct [[gnu::designated_init]] Subset final {
 	};
 
 	template<Order O> requires(is_order_compiled(O))
-	struct LockedCands final {
+	struct [[gnu::designated_init]] LockedCands final {
 		O2BitArr<O> syms;
 		int_ts::o3xs_t<O> isec;
 		LineType line_type;
@@ -37,7 +37,7 @@ namespace okiidoku::mono::detail::solver::found {
 	};
 
 	template<Order O> requires(is_order_compiled(O))
-	struct Fish final {
+	struct [[gnu::designated_init]] Fish final {
 		O2BitArr<O> syms;
 		O2BitArr<O> lines;
 		LineType elim_from_line_type;

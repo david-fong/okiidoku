@@ -18,8 +18,8 @@ namespace okiidoku::mono::detail::solver2 {
 		using T = Ints<O>;
 		using o2i_t = int_ts::o2i_t<O>;
 	public:
-		struct Set final {
-			struct Tag final {
+		struct [[gnu::designated_init]] Set final {
+			struct [[gnu::designated_init]] Tag final {
 				// for house cell, how many cand syms - 1?
 				// for house sym, how many cand cells - 1?
 				// for sym line,  how many cand cells - 1?

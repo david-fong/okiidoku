@@ -23,7 +23,7 @@ namespace okiidoku::mono {
 	[[nodiscard, gnu::pure]] OKIIDOKU_EXPORT
 	/**
 	\returns `true` if clearing any cell of the puzzle would make it improper
-		(see \ref okiidoku::mono::grid_is_proper_puzzle).
+		(see `okiidoku::mono::grid_is_proper_puzzle`).
 	\pre `grid` is a proper puzzle.
 	\relates okiidoku::mono::Grid */
 	bool grid_is_minimal_puzzle(const Grid<O>& grid) noexcept;
@@ -32,7 +32,7 @@ namespace okiidoku::mono {
 	template<Order O> requires(is_order_compiled(O))
 	OKIIDOKU_EXPORT
 	/**
-	\pre grid is filled or a proper puzzle (see \ref okiidoku::mono::grid_is_proper_puzzle).
+	\pre grid is filled or a proper puzzle (see `okiidoku::mono::grid_is_proper_puzzle`).
 	\post grid is a minimal puzzle whose solution canonicalizes to the same grid
 		as the original input.
 	\relates okiidoku::mono::Grid */

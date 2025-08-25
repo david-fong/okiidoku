@@ -67,6 +67,10 @@ readelf -a --wide --demangle lib/libokiidoku.so | less
 # TODO no longer needed once https://github.com/wjakob/nanobind/pull/1000 further improvements are made
 LD_PRELOAD="$(g++ -print-file-name=libasan.so):$(g++ -print-file-name=libubsan.so)" cmake --build --preset=dev.gcc.debug
 LD_PRELOAD="$(clang++ -print-file-name=libasan.so):$(clang++ -print-file-name=libubsan.so)" cmake --build --preset=dev.clang.debug
+
+# print something like a minified version of a c++ file
+# unfortunately -dI doesn't seem to be effective with this flag combo
+g++ -I libs/okiidoku/include/ -E libs/okiidoku/include/okiidoku/ints.hpp -P -dI -fmax-include-depth=0 | less
 ```
 
 ## CMake Things

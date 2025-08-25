@@ -13,6 +13,7 @@ namespace okiidoku::mono::detail::solver2 {
 
 	inline constexpr Order order_threshold_to_use_compact_cands {6}; // TODO experiment
 
+	// a `house_type_`-oriented PoV of which cells are solved, or what candidates remain.
 	// non-memory-concerned implementation.
 	template<Order O> requires(is_order_compiled(O) && (O < order_threshold_to_use_compact_cands))
 	struct CandsPov final {
@@ -32,6 +33,7 @@ namespace okiidoku::mono::detail::solver2 {
 	};
 
 
+	// a `house_type_`-oriented PoV of which cells are solved, or what candidates remain.
 	// memory-concerned implementation. some indirection overhead. see `gc` member fn.
 	template<Order O> requires(is_order_compiled(O) && (O >= order_threshold_to_use_compact_cands))
 	struct CandsPov final {

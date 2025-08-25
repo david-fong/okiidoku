@@ -146,6 +146,7 @@ else()
 	if((CMAKE_CXX_COMPILER_ID MATCHES [[Clang]]) OR EMSCRIPTEN)
 		target_compile_options(okiidoku_compiler_warnings INTERFACE
 			-Wimplicit-fallthrough
+			-Wno-unknown-attributes # I'd like to use these warnings, but they're just too annoying
 		)
 	elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 		target_compile_options(okiidoku_compiler_warnings INTERFACE

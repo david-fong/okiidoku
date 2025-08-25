@@ -29,9 +29,11 @@
 - Check which `#ifdef __EMSCRIPTEN__` / `__cpp_lib_...` blocks can be removed as emscripten updates its sysroot libc++.
 - https://en.cppreference.com/w/cpp/language/rule_of_three
 - Write comments for custom CMake commands and targets
+- places to use `[[gnu::designated_init]]`
 
 Issues I'm watching:
 
+- https://github.com/doxygen/doxygen/issues/8159
 - https://gitlab.kitware.com/cmake/cmake/-/issues/26118 cmake non-config presets don't implicitly inherit their config preset condition.
 - [Use CMAKE_CROSSCOMPILING_EMULATOR to run cross compiled executables #554](https://github.com/microsoft/vscode-cmake-tools/issues/554)
 - https://gitlab.kitware.com/cmake/cmake/-/issues/15179 -Og default for debug build configuration
@@ -40,10 +42,8 @@ Issues I'm watching:
 
 ## Misc List
 
+- move ContainerBase to separate header?
 - continue adoption of doxygen
-
-- `[[gnu::designated_init]]`
-  - try on the `Transformation` class
 
 - https://www.pcg-random.org/using-pcg-cpp.html
   https://github.com/imneme/pcg-cpp/tags
@@ -68,14 +68,13 @@ Issues I'm watching:
 
 - https://youtu.be/zCzD9uSDI8c?t=620
 
-- CMake 4.1:
-  - `project(COMPAT_VERSION)` (`CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_INFO`)
 - CMake 3.31:
   - once no longer experimental: https://cmake.org/cmake/help/latest/command/install.html#package-info
   - presets `$comment`
   - `CMAKE_EXPORT_BUILD_DATABASE`
 - CMake 4.1:
   - `EXPORT_PACKAGE_DEPENDENCIES` in `export()` and `install` once no longer experimental
+  - `project(COMPAT_VERSION)` (`CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_INFO`)
 - GCC 15:
   - try benchmarking with https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html#index-fipa-reorder-for-locality
 - C++23

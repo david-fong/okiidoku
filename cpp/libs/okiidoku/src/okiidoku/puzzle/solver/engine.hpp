@@ -66,7 +66,7 @@ namespace okiidoku::mono::detail::solver {
 	using CandsGrid = detail::Gridlike<O, O2BitArr<O>>;
 
 	template<Order O> requires(is_order_compiled(O))
-	struct Guess final {
+	struct [[gnu::designated_init]] Guess final {
 		int_ts::o4xs_t<O> rmi;
 		int_ts::o2xs_t<O> val;
 	};
@@ -86,12 +86,12 @@ namespace okiidoku::mono::detail::solver {
 		using rmi_t = int_ts::o4xs_t<O>;
 	public:
 		struct HouseSubsets final {
-			struct CellTag {
+			struct [[gnu::designated_init]] CellTag {
 				rmi_t rmi;
 				int_ts::o2is_t<O> count_cache;
 			};
 			O2BitArr<O> is_begin;
-			std::array<CellTag, T::O2> cell_tags;
+			std::array<CellTag, T::O2> cell_tags; // TODO consider struct of arrays instead
 		};
 		using houses_subsets_t = HouseTypeMap<
 			std::array<HouseSubsets, T::O2>

@@ -116,7 +116,7 @@ namespace okiidoku {
 			/** Though public, you shouldn't need to use this. The rest of the visitor
 			interface of the library should wrap around it with nicer syntax. */
 			template<class Self> [[nodiscard, gnu::pure]]
-			auto&& get_mono_variant(this Self&& self) noexcept { return std::forward<Self>(self).variant_; }
+			auto&& get_underlying_variant(this Self&& self) noexcept { return std::forward<Self>(self).variant_; }
 
 			// Sugar wrapper around an unchecked dereference of `std::get_if` for the underlying variant.
 			// Note: not using `std::get` since it could throw and we're going all in with the unchecked thing here.

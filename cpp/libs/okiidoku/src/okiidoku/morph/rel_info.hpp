@@ -11,11 +11,11 @@
 namespace okiidoku::mono::detail {
 
 	template<Order O> requires(is_order_compiled(O))
-	struct Rel final {
+	struct [[gnu::designated_init]] Rel final {
 		using polar_count_lesser_t = detail::uint_smolN_t<std::bit_width((O*O)/2)>;
 		using chute_imbalance_t = detail::uint_smolN_t<std::bit_width(2*(O/2)*(O-(O/2)))>;
 
-		int_ts::o2is_t<O> count;
+		int_ts::o2is_t<O> count; // how many boxes the two symbols cohabit an atom in
 		polar_count_lesser_t polar_count_lesser; // smaller value means more imbalance
 		chute_imbalance_t chute_imbalance_a;
 		chute_imbalance_t chute_imbalance_b;
