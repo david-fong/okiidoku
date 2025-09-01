@@ -28,10 +28,10 @@ namespace okiidoku::mono { namespace {
 	private:
 		OKIIDOKU_MONO_INT_TS_TYPEDEFS
 		using val_t = int_ts::o2is_t<O>;
-		using mapping_t = typename Transformation<O>::mapping_t;
+		using to_t = typename Transformation<O>::to_t;
 
 		struct PolarState final {
-			line_map_t<O> to_og {Transformation<O>::identity_line_map};
+			line_map_t<O> to_og {Transformation<O>::identity.row_map};
 			detail::TieLinks<O, 2> line_ties {};
 			detail::TieLinks<O, 1> chute_ties {};
 
@@ -60,7 +60,7 @@ namespace okiidoku::mono { namespace {
 	) noexcept {
 		OKIIDOKU_NO_PRE_INIT_AUTOVAR Grid<O> table; {
 			const Transformation<O> t {
-				// .label_map {Transformation<O>::identity_label_map},
+				// .sym_map {Transformation<O>::identity_sym_map},
 				.row_map {row_state.to_og},
 				.col_map {col_state.to_og},
 				.post_transpose {is_post_transpose},
@@ -104,8 +104,8 @@ namespace okiidoku::mono { namespace {
 
 	template<Order O> requires(is_order_compiled(O))
 	void CanonPlace<O>::PolarState::do_a_pass(const Grid<O>& table) noexcept {
-		OKIIDOKU_NO_PRE_INIT_AUTOVAR std::array<mapping_t, T::O2> to_tied; // NOLINT(cppcoreguidelines-pro-type-member-init) see next line
-		std::iota(to_tied.begin(), to_tied.end(), mapping_t{0});
+		OKIIDOKU_NO_PRE_INIT_AUTOVAR std::array<to_t, T::O2> to_tied; // NOLINT(cppcoreguidelines-pro-type-member-init) see next line
+		std::iota(to_tied.begin(), to_tied.end(), to_t{0});
 		for (const auto tie : line_ties) {
 			// Note: intentionally do not skip ties here since updated table
 			// rows could (and likely will) be used by chute tie resolution.
@@ -143,7 +143,7 @@ namespace okiidoku::mono { namespace {
 
 		{
 			// update s.to_og:
-			OKIIDOKU_NO_PRE_INIT_AUTOVAR std::array<mapping_t, T::O2> tied_to_og; // NOLINT(cppcoreguidelines-pro-type-member-init) see next line
+			OKIIDOKU_NO_PRE_INIT_AUTOVAR std::array<to_t, T::O2> tied_to_og; // NOLINT(cppcoreguidelines-pro-type-member-init) see next line
 			for (o2i_t i {0}; i < T::O2; ++i) {
 				tied_to_og[i] = to_og[i/T::O1][i%T::O1];
 			}
@@ -178,7 +178,7 @@ namespace okiidoku::mono { namespace {
 		}
 
 		Transformation<O> transformation {
-			// .label_map {Transformation<O>::identity_label_map},
+			// .sym_map {Transformation<O>::identity_sym_map},
 			.row_map {row_state.to_og},
 			.col_map {col_state.to_og},
 			.post_transpose {false},
@@ -193,12 +193,12 @@ namespace okiidoku::mono { namespace {
 namespace okiidoku::mono::detail {
 
 	template<Order O> requires(is_order_compiled(O))
-	Transformation<O> canon_place(Grid<O>& grid) noexcept {
+	Transformation<O> canon_pos(Grid<O>& grid) noexcept {
 		return CanonPlace<O>::do_it(grid);
 	}
 
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-		template Transformation<O_> canon_place<O_>(Grid<O_>&) noexcept;
+		template Transformation<O_> canon_pos<O_>(Grid<O_>&) noexcept;
 	OKIIDOKU_FOREACH_O_DO_EMIT
 	#undef OKIIDOKU_FOREACH_O_EMIT
 }

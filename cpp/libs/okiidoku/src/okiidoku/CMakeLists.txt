@@ -13,9 +13,8 @@ target_sources(okiidoku PRIVATE
 
 	morph/transform.cpp
 	morph/scramble.cpp
-	morph/rel_info.cpp
-	morph/canon_label.cpp
-	morph/canon_place.cpp
+	morph/canon_sym.cpp
+	morph/canon_pos.cpp
 	morph/canon.cpp
 
 	puzzle/ua_set.cpp

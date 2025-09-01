@@ -37,6 +37,7 @@ template<okiidoku::Order O>
 			std::clog << "\ntransformation twice-inverted must equal itself.";
 			std::exit(1);
 		}
+		// TODO: test that performing various transforms and then performing the invert truly reverts the transform.
 
 		canon_grid = gen_grid;
 		scramble(canon_grid, shared_rng.get());

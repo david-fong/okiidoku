@@ -6,11 +6,11 @@
 #include <okiidoku/ints.hpp>
 #include <okiidoku/detail/order_templates.hpp>
 
-#include <range/v3/view/iota.hpp>
-
-#include <algorithm>
 #include <array>
-#include <type_traits>
+#include <ranges>      // views::iota
+#include <iterator>    // input_iterator_tag
+#include <functional>  // invoke
+#include <type_traits> // conditional_t
 
 namespace okiidoku::mono::detail {
 
@@ -20,6 +20,7 @@ namespace okiidoku::mono::detail {
 	an externally-driven cache of subranges of an external array which are tied with
 	each other by some externally-defined ordering (see `TieLinks::update`). assumes
 	that tied sections will only be further broken down and do not "move around". */
+	// TODO try to implement this in terms of O2BitArray and iterator in terms of O2BitArray::SetBitsWalker
 	struct TieLinks final {
 		using T = Ints<O>;
 		static constexpr std::size_t size_ {(O1_OR_O2 == 1) ? T::O1 : T::O2};
@@ -27,20 +28,24 @@ namespace okiidoku::mono::detail {
 		using links_t = std::array<link_t, size_>;
 
 		/** defines a range in `[begin_, end_)`
-		\invariant `begin_ < end_` */
+		\invariant `begin_ < end_`, `begin_ < size_` */
 		class TieRange final {
 		public:
 			link_t begin_;
 			link_t end_;
 			TieRange(const link_t begin, const link_t end) noexcept: begin_{begin}, end_{end} {
+				check_invariants();
+			}
+			[[nodiscard, gnu::pure]] link_t size() const noexcept { OKIIDOKU_CONTRACT_USE(begin_ < end_); return static_cast<link_t>(end_ - begin_); }
+			auto begin() const noexcept { check_invariants(); return std::views::iota(begin_, end_).begin(); }
+			auto end()   const noexcept { check_invariants(); return std::views::iota(begin_, end_).end(); }
+		private:
+			void check_invariants() const noexcept {
 				OKIIDOKU_CONTRACT_USE(begin_ < end_);
 				OKIIDOKU_CONTRACT_USE(begin_ < size_);
 				OKIIDOKU_CONTRACT_USE(end_ <= size_);
 				OKIIDOKU_CONTRACT_USE(end_ > link_t{0});
 			}
-			[[nodiscard, gnu::pure]] link_t size() const noexcept { OKIIDOKU_CONTRACT_USE(begin_ < end_); return static_cast<link_t>(end_ - begin_); }
-			auto begin() const noexcept { OKIIDOKU_CONTRACT_USE(begin_ < end_); return ranges::views::iota(begin_, end_).begin(); }
-			auto end()   const noexcept { OKIIDOKU_CONTRACT_USE(begin_ < end_); return ranges::views::iota(begin_, end_).end(); }
 		};
 
 		class Iterator final {

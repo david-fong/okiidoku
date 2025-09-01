@@ -15,27 +15,28 @@ namespace okiidoku::mono {
 		using o1i_t = int_ts::o1i_t<O>;
 		using o2i_t = int_ts::o2i_t<O>;
 	public:
-		using mapping_t = int_ts::o2xs_t<O>;
-		/// legal operations: swap two entries
-		using label_map_t = std::array<mapping_t, T::O2>;
-		/// legal operations: swap two entries of the outer layer,
-		/// or of an inner layer (but not between inner layers)
-		using  line_map_t = std::array<std::array<mapping_t, T::O1>, T::O1>;
+		using to_t = int_ts::o2xs_t<O>;
 
-		static constexpr label_map_t identity_label_map {[]{ label_map_t _{}; for (o2i_t i {0}; i < T::O2; ++i) { _[i] = static_cast<mapping_t>(i); } return _; }()};
-		static constexpr  line_map_t identity_line_map  {[]{ line_map_t _{};  for (o2i_t i {0}; i < T::O2; ++i) { _[i/T::O1][i%T::O1] = static_cast<mapping_t>(i); } return _; }()};
-		static constexpr        bool identity_post_transpose {false};
+		/** legal operations: swap two entries. */
+		using sym_map_t = std::array<to_t, T::O2>;
+
+		/** legal operations: swap two entries of the outer layer,
+		or of an inner layer (but not between inner layers) */
+		using line_map_t = std::array<std::array<to_t, T::O1>, T::O1>;
+
+		static const Transformation identity;
 
 	public:
-		label_map_t label_map {identity_label_map}; ///< \copydoc label_map_t
-		line_map_t row_map {identity_line_map}; ///< \copydoc line_map_t
-		line_map_t col_map {identity_line_map}; ///< \copydoc line_map_t
-		bool post_transpose {identity_post_transpose}; /// whether to transpose after line remapping
+		sym_map_t sym_map {identity.sym_map}; //!< `map[label_orig] -> label_new`.
+		line_map_t row_map {identity.row_map}; //!< `map[chute_orig][chute_cell_orig] -> line_new`.
+		line_map_t col_map {identity.col_map}; ///< `map[chute_orig][chute_cell_orig] -> line_new`.
+		bool post_transpose {identity.post_transpose}; ///< whether to transpose after line remapping
 
 		[[nodiscard, gnu::pure]] friend bool operator==(const Transformation&, const Transformation&) noexcept = default;
 		// [[nodiscard, gnu::pure]] friend std::strong_ordering operator<=>(const Transformation&, const Transformation&) noexcept = default;
 
 		/**
+		\pre `&src != &dest`.
 		\internal I thought about changing this to return dest instead of an outparam,
 			which could rely on NRVO, and maybe help the compiler not have to worry that
 			dest will be touched by other threads, but I'm not sure how NRVO plays out if
@@ -49,6 +50,14 @@ namespace okiidoku::mono {
 
 		// TODO: for fun: a transformation chaining operation
 		// [[nodiscard, gnu::pure]] Transformation<O> chain(const Transformation<O>&) const noexcept;
+	};
+
+	template<Order O> requires(is_order_compiled(O))
+	constexpr Transformation<O> Transformation<O>::identity {
+		.sym_map {[]{ sym_map_t _{}; for (o2i_t i {0}; i < T::O2; ++i) { _[i] = static_cast<to_t>(i); } return _; }()},
+		.row_map {[]{ line_map_t _{};  for (o2i_t i {0}; i < T::O2; ++i) { _[i/T::O1][i%T::O1] = static_cast<to_t>(i); } return _; }()},
+		.col_map {[]{ line_map_t _{};  for (o2i_t i {0}; i < T::O2; ++i) { _[i/T::O1][i%T::O1] = static_cast<to_t>(i); } return _; }()},
+		.post_transpose {false},
 	};
 }
 

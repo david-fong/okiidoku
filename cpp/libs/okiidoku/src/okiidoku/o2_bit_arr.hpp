@@ -7,9 +7,10 @@
 #include <okiidoku/detail/order_templates.hpp>
 
 #include <array>
-#include <bit>
-#include <compare>
-#include <type_traits> // conditional_t
+#include <bit>         // countr_zero
+#include <cstdint>     // uint..._t
+#include <compare>     // strong_ordering
+#include <type_traits> // conditional_t, is_aggregate_v
 
 namespace okiidoku::mono {
 
@@ -24,10 +25,9 @@ namespace okiidoku::mono {
 		// TODO.low investigate ways to store small but expand to a fast(er) int type
 		// when doing bit-twiddling operations and whether the tradeoff is good pareto-wise.
 		using word_t =
-			std::conditional_t<(O <  8), std::uint_fast32_t,
-			std::conditional_t<(O == 8), std::uint_fast64_t,
+			std::conditional_t<(O*O <= 32), std::uint_fast32_t,
 			std::uint_fast64_t
-		>>;
+		>;
 		// since last measured for clang, the above is slightly faster for O=3, with
 		// slightly better codegen and slightly bigger code size.
 		// using word_t =
@@ -36,23 +36,27 @@ namespace okiidoku::mono {
 		// >;
 
 		// Note: use of unsigned char is safe for grid-orders < 128. That should be fine.
-		using word_i_t = unsigned char;
-		using word_bit_i_t = unsigned char;
+		using word_i_t = std::uint_fast8_t;
+		using word_bit_i_t = std::uint_fast8_t;
 
 	private:
 		static constexpr word_t word_t_num_bits {8 * sizeof(word_t)};
-		static constexpr word_i_t num_words {(T::O2 + word_t_num_bits-1) / word_t_num_bits}; static_assert(num_words != 0);
+		static constexpr word_i_t num_words {(T::O2 + word_t_num_bits-1) / word_t_num_bits};
 		static constexpr word_bit_i_t num_excess_bits {(num_words * word_t_num_bits) - T::O2};
+		static_assert(num_words > 0);
+		static_assert((num_words * word_t_num_bits) >= T::O2);
+		static_assert(((num_words-1) * word_t_num_bits) < T::O2);
 
-		// contract: `bit_i < T::O2`
+		/** \pre `bit_i < T::O2`. */
 		[[nodiscard, gnu::const]]
 		static constexpr word_i_t bit_i_to_word_i(const o2x_t bit_i) noexcept {
 			OKIIDOKU_CONTRACT_USE(bit_i < T::O2);
+			if constexpr (num_words == 1) { return 0; }
 			const auto word_i {static_cast<word_i_t>(bit_i / word_t_num_bits)};
 			OKIIDOKU_CONTRACT_USE(word_i < num_words);
 			return word_i;
 		}
-		// contract: `bit_i < T::O2`
+		/** \pre `bit_i < T::O2`. */
 		[[nodiscard, gnu::const]]
 		static constexpr word_t word_bit_mask_for_bit_i(const o2x_t bit_i) noexcept {
 			OKIIDOKU_CONTRACT_USE(bit_i < T::O2);
@@ -84,22 +88,22 @@ namespace okiidoku::mono {
 		[[nodiscard, gnu::pure]] o2i_t count() const noexcept;
 
 		// count the number of set bits below the specified bit index.
-		// contract: `end < O2`.
+		/** \pre `end < O2`. */
 		[[nodiscard, gnu::pure]] o2x_t count_below(const o2x_t end) const noexcept;
 
-		// contract: `at < O2`
+		/** \pre `at < O2`. */
 		[[nodiscard, gnu::pure]] bool test(const o2x_t at) const noexcept {
 			OKIIDOKU_CONTRACT_USE(at < T::O2);
 			const word_t word_bit_mask {word_bit_mask_for_bit_i(at)};
 			return (words_[bit_i_to_word_i(at)] & word_bit_mask) != 0;
 		}
-		// contract: `at < O2`
+		/** \pre `at < O2`. */
 		constexpr void set(const o2x_t at) noexcept {
 			OKIIDOKU_CONTRACT_USE(at < T::O2);
 			const word_t word_bit_mask {word_bit_mask_for_bit_i(at)};
 			words_[bit_i_to_word_i(at)] |= word_bit_mask;
 		}
-		// contract: `at < O2`
+		/** \pre `at < O2`. */
 		constexpr void unset(const o2x_t at) noexcept {
 			OKIIDOKU_CONTRACT_USE(at < T::O2);
 			const word_t word_bit_mask {word_bit_mask_for_bit_i(at)};
@@ -121,7 +125,7 @@ namespace okiidoku::mono {
 			words_.fill(0);
 		}
 
-		// contract: `at < O2`
+		/** \pre `at < O2`. */
 		[[nodiscard, gnu::pure]] static bool test_any3(const o2x_t at, const O2BitArr& a, const O2BitArr& b, const O2BitArr& c) noexcept {
 			OKIIDOKU_CONTRACT_USE(at < T::O2);
 			const auto word_i {bit_i_to_word_i(at)};
@@ -129,7 +133,7 @@ namespace okiidoku::mono {
 			// TODO consider rewriting to just logical-or testing each one separately
 			return ((a.words_[word_i] | b.words_[word_i] | c.words_[word_i]) & word_bit_mask) != 0;
 		}
-		// contract: `at < O2`
+		/** \pre `at < O2`. */
 		static void set3(const o2x_t at, O2BitArr& a, O2BitArr& b, O2BitArr& c) noexcept {
 			OKIIDOKU_CONTRACT_USE(at < T::O2);
 			const auto word_i {bit_i_to_word_i(at)};
@@ -138,7 +142,7 @@ namespace okiidoku::mono {
 			b.words_[word_i] |= word_bit_mask;
 			c.words_[word_i] |= word_bit_mask;
 		}
-		// contract: `at < O2`
+		/** \pre `at < O2`. */
 		static void unset3(const o2x_t at, O2BitArr& a, O2BitArr& b, O2BitArr& c) noexcept {
 			OKIIDOKU_CONTRACT_USE(at < T::O2);
 			const auto word_i {bit_i_to_word_i(at)};
@@ -163,37 +167,40 @@ namespace okiidoku::mono {
 			lhs &= rhs; return lhs;
 		}
 
-		// contract: this mask has at least one set bit.
-		// Note: an ugly name for a "sharp knife".
+		/** \pre this mask has at least one set bit.
+		\note an ugly name for a "sharp knife". */
 		[[nodiscard, gnu::pure]] o2xs_t first_set_bit_require_exists() const noexcept;
 
-		// contract: `set_bit_i` < O2 and there are at least `set_bit_i+1` set bits.
+		/** \pre `set_bit_i` < O2 and there are at least `set_bit_i+1` set bits. */
 		[[nodiscard, gnu::pure]] o2x_t get_index_of_nth_set_bit(o2x_t set_bit_i) const noexcept;
+
 
 		class SetBitsWalker final {
 		public:
 			explicit SetBitsWalker(const O2BitArr arr) noexcept: arr_{arr} {
 				advance();
 			}
-			[[nodiscard, gnu::pure]] bool has_more() const noexcept { return word_i < num_words; }
+			[[nodiscard, gnu::pure]] bool has_more() const noexcept { return word_i_ < num_words; }
+			/** \pre `has_more()` */
 			[[nodiscard, gnu::pure]] o2x_t value() const noexcept {
 				OKIIDOKU_CONTRACT_USE(has_more());
-				return static_cast<o2x_t>((word_i * word_t_num_bits) + word_bit_i);
+				return static_cast<o2x_t>((word_i_ * word_t_num_bits) + word_bit_i_);
 			}
+			/** \pre `has_more()` */
 			void advance() noexcept {
 				OKIIDOKU_CONTRACT_USE(has_more());
-				while (word_i < num_words && arr_.words_[word_i] == 0) { ++word_i; }
+				while (word_i_ < num_words && arr_.words_[word_i_] == 0) { ++word_i_; }
 				if (has_more()) {
-					OKIIDOKU_CONTRACT_USE(word_i < num_words); // MSVC analyzer has trouble deducing this.
-					auto& word {arr_.words_[word_i]};
-					word_bit_i = static_cast<word_bit_i_t>(std::countr_zero(word));
+					OKIIDOKU_CONTRACT_USE(word_i_ < num_words); // should be obvious, but MSVC is struggling :/
+					auto& word {arr_.words_[word_i_]};
+					word_bit_i_ = static_cast<word_bit_i_t>(std::countr_zero(word));
 					word &= static_cast<word_t>(word-1U); // unset lowest bit
 				}
 			}
 		private:
 			O2BitArr arr_;
-			word_i_t word_i {0};
-			word_bit_i_t word_bit_i {0};
+			word_i_t word_i_ {0};
+			word_bit_i_t word_bit_i_ {0};
 		};
 		[[nodiscard, gnu::pure]] SetBitsWalker set_bits_walker() const noexcept {
 			return SetBitsWalker(*this);

@@ -97,10 +97,10 @@ namespace okiidoku {
 			): variant_([O]{
 				switch (O) {
 				#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-				case O_: return variant_t(std::in_place_type<typename Adaptor::template type<O_>>);
+				case O_: return variant_t{std::in_place_type<typename Adaptor::template type<O_>>};
 				OKIIDOKU_FOREACH_O_DO_EMIT
 				#undef OKIIDOKU_FOREACH_O_EMIT
-				default: return variant_t(); // default to the lowest compiled order.
+				default: return variant_t{}; // default to the lowest compiled order.
 				}
 			}()) {}
 

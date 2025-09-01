@@ -195,7 +195,7 @@ namespace okiidoku::mono {
 	}
 
 	template<Order O> [[nodiscard, gnu::const]]
-	constexpr int_ts::o2i_t<O> rmi_to_box(const int_ts::o2i_t<O> row, const int_ts::o2i_t<O> col) noexcept {
+	constexpr int_ts::o2i_t<O> row_col_to_box(const int_ts::o2i_t<O> row, const int_ts::o2i_t<O> col) noexcept {
 		using T = Ints<O>;
 		OKIIDOKU_CONTRACT_USE(row < T::O2);
 		OKIIDOKU_CONTRACT_USE(col < T::O2);
@@ -206,10 +206,21 @@ namespace okiidoku::mono {
 	}
 
 	template<Order O> [[nodiscard, gnu::const]]
+	constexpr int_ts::o2x_t<O> row_col_to_box_cell(const int_ts::o2i_t<O> row, const int_ts::o2i_t<O> col) noexcept {
+		using T = Ints<O>;
+		OKIIDOKU_CONTRACT_USE(row < T::O2);
+		OKIIDOKU_CONTRACT_USE(col < T::O2);
+		using o2i_t = int_ts::o2i_t<O>;
+		const auto box_cell {static_cast<o2i_t>(static_cast<o2i_t>((row % O) * O) + (col % O))};
+		OKIIDOKU_CONTRACT_USE(box_cell < T::O2);
+		return box_cell;
+	}
+
+	template<Order O> [[nodiscard, gnu::const]]
 	constexpr int_ts::o2i_t<O> rmi_to_box(const int_ts::o4i_t<O> rmi) noexcept {
 		using T = Ints<O>;
 		OKIIDOKU_CONTRACT_USE(rmi < T::O4);
-		return rmi_to_box<O>(rmi_to_row<O>(rmi), rmi_to_col<O>(rmi));
+		return row_col_to_box<O>(rmi_to_row<O>(rmi), rmi_to_col<O>(rmi));
 	}
 
 	template<Order O> [[nodiscard, gnu::const]]

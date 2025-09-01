@@ -16,7 +16,7 @@ namespace okiidoku::mono {
 		{
 			using rng_t = std::minstd_rand;
 			rng_t rng {rng_seed}; // TODO try std::ranges::shuffle on my compilers
-			ranges::shuffle(t.label_map, rng);
+			ranges::shuffle(t.sym_map, rng);
 			ranges::shuffle(t.row_map, rng);
 			ranges::shuffle(t.col_map, rng);
 			for (int_ts::o1i_t<O> chute {0}; chute < T::O1; ++chute) {
