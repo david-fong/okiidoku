@@ -3,6 +3,12 @@
 #include <okiidoku/morph/transform.hpp>
 #include <okiidoku/morph/canon_ties.hpp>
 #include <okiidoku/grid.hpp>
+// TODO prune
+#include <algorithm>  // swap, sort, ranges::next_permutation
+#include <functional> // greater
+#include <numeric>    // iota
+#include <cstdlib>    // abs
+#include <compare>    // is_eq
 
 /** for each pair of symbols, given something like this (each item place is for a box,
 showing whether, and in what orientation the two symbols cohabit an atom in that box):
@@ -24,13 +30,6 @@ and `b`, and `O^2 * (O-1)^2` blanks.
 		- how many cells does it see "orthogonal to" it?
 */
 
-// TODO prune
-#include <algorithm>  // swap, sort, ranges::next_permutation
-#include <functional> // greater
-#include <numeric>    // iota
-#include <cstdlib>    // abs
-#include <compare>    // is_eq
-
 namespace okiidoku::mono { namespace {
 
 	template<Order O>
@@ -38,20 +37,20 @@ namespace okiidoku::mono { namespace {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	class CanonLabel final {
+	class CanonLabel {
 	private:
 		OKIIDOKU_MONO_INT_TS_TYPEDEFS
 		using val_t = int_ts::o2is_t<O>;
 		using to_t = typename Transformation<O>::to_t;
 
-		struct State final {
+		struct State {
 			/** for a given grid, sym (AKA "label"), and box, what boxcell is the sym in?
 			\internal alternatively:
 			O^2 * O^2 * [2*log2(O)] foreach sym, foreach box, which boxatoms is it in?
 			O^2 * 2*O * O^2 - foreach sym, for each boxatom, in which boxes is it in that boxatom? */
 			Grid<O> sym_box_to_boxcell_map;
-			sym_map_t<O> to_og;
-			detail::TieLinks<O, 2> ties {};
+			sym_map_t<O> to_og; ///< `map[sym_new] -> sym_orig`.
+			detail::Ties<O, 2> ties {};
 			explicit constexpr State(const Grid<O>& grid) noexcept {
 				for (o2i_t row {0}; row < T::O2; ++row) {
 				for (o2i_t col {0}; col < T::O2; ++col) {
@@ -81,21 +80,21 @@ namespace okiidoku::mono { namespace {
 		// 		const auto boxcell_b {sym_box_to_boxcell_map.at(sym_b, box)};
 		// 	}
 		// }}
-		OKIIDOKU_NO_PRE_INIT_AUTOVAR sym_map_t<O> tiebreak_map;
+		OKIIDOKU_DEFER_INIT sym_map_t<O> tiebreak_map;
 		std::iota(tiebreak_map.begin(), tiebreak_map.end(), to_t{0});
-		for (const auto tie : s.ties) {
-			if (tie.size() == 1) [[likely]] { continue; }
-			for (const auto rel_i : tie) {
-			}
-			// std::sort(
-			// 	std::next(tiebreak_map.begin(), tie.begin_),
-			// 	std::next(tiebreak_map.begin(), tie.end_),
-			// 	[&](auto a, auto b){ return std::lexicographical_compare(
-			// 		scratch.row_span_at(a).begin(), scratch.row_span_at(a).end(),
-			// 		scratch.row_span_at(b).begin(), scratch.row_span_at(b).end()
-			// 	); } // TODO.low why doesn't the ranges version work?
-			// );
-		}
+		// for (const auto tie : s.ties) {
+		// 	if (tie.size() == 1) [[likely]] { continue; }
+		// 	for (const auto rel_i : tie) {
+		// 	}
+		// 	// std::sort(
+		// 	// 	std::next(tiebreak_map.begin(), tie.begin_),
+		// 	// 	std::next(tiebreak_map.begin(), tie.end_),
+		// 	// 	[&](auto a, auto b){ return std::lexicographical_compare(
+		// 	// 		scratch.row_span_at(a).begin(), scratch.row_span_at(a).end(),
+		// 	// 		scratch.row_span_at(b).begin(), scratch.row_span_at(b).end()
+		// 	// 	); } // TODO.low why doesn't the ranges version work?
+		// 	// );
+		// }
 		// s.ties.update([&](auto a, auto b){
 		// 	const auto a_row_sp {scratch.row_span_at(tiebreak_map[a])};
 		// 	const auto b_row_sp {scratch.row_span_at(tiebreak_map[b])};
@@ -114,12 +113,12 @@ namespace okiidoku::mono { namespace {
 
 	template<Order O> requires(is_order_compiled(O))
 	sym_map_t<O> CanonLabel<O>::do_it(Grid<O>& grid) noexcept {
-		OKIIDOKU_NO_PRE_INIT_AUTOVAR const sym_map_t<O> label_og_to_canon {[&](){
-			OKIIDOKU_NO_PRE_INIT_AUTOVAR State s(grid);
+		const sym_map_t<O> label_og_to_canon {[&](){
+			OKIIDOKU_DEFER_INIT State s(grid);
 			while (s.has_ties()) {
 				auto old_ties {s.ties};
 				do_a_pass_(s);
-				if (s.ties.is_completely_unresolved()) {
+				if (s.ties.none_resolved()) {
 					// encountered the most canonical grid.
 					break;
 				}
@@ -129,7 +128,7 @@ namespace okiidoku::mono { namespace {
 				}
 			}
 
-			OKIIDOKU_NO_PRE_INIT_AUTOVAR sym_map_t<O> map;
+			OKIIDOKU_DEFER_INIT sym_map_t<O> map;
 			for (o2i_t canon_i {0}; canon_i < T::O2; ++canon_i) {
 				map[s.to_og[canon_i]] = static_cast<to_t>(canon_i);
 			}

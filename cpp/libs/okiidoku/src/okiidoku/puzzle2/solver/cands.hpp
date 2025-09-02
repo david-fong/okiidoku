@@ -16,7 +16,7 @@ namespace okiidoku::mono::detail::solver2 {
 	// a `house_type_`-oriented PoV of which cells are solved, or what candidates remain.
 	// non-memory-concerned implementation.
 	template<Order O> requires(is_order_compiled(O) && (O < order_threshold_to_use_compact_cands))
-	struct CandsPov final {
+	struct CandsPov {
 	private:
 		using T = Ints<O>;
 		using o2xs_t = int_ts::o2xs_t<O>;
@@ -36,7 +36,7 @@ namespace okiidoku::mono::detail::solver2 {
 	// a `house_type_`-oriented PoV of which cells are solved, or what candidates remain.
 	// memory-concerned implementation. some indirection overhead. see `gc` member fn.
 	template<Order O> requires(is_order_compiled(O) && (O >= order_threshold_to_use_compact_cands))
-	struct CandsPov final {
+	struct CandsPov {
 	private:
 		using T = Ints<O>;
 		using o2xs_t = int_ts::o2xs_t<O>;
@@ -45,7 +45,7 @@ namespace okiidoku::mono::detail::solver2 {
 
 		// if a bit is set in `solved`, its corresponding entry in sym_or_offset is
 		// a sym, and otherwise an offset to add to `offset` to index into `cands_pool_`.
-		struct HouseData final {
+		struct HouseData {
 			O2BitArr<O> solved;
 			rmi_t offset;
 			std::array<o2xs_t, T::O2> sym_or_offset;
@@ -66,7 +66,7 @@ namespace okiidoku::mono::detail::solver2 {
 	FindStat unwind_one_stack_frame_of_(EngineImpl<O>&) noexcept;
 
 
-	struct [[nodiscard]] FindStat final {
+	struct [[nodiscard]] FindStat {
 		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 		friend FindStat unwind_one_stack_frame_of_<O_>(EngineImpl<O_>&) noexcept;
 		OKIIDOKU_FOREACH_O_DO_EMIT
@@ -93,7 +93,7 @@ namespace okiidoku::mono::detail::solver2 {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	struct CandsPovs final {
+	struct CandsPovs {
 	private:
 		using T = Ints<O>;
 		using o2i_t = int_ts::o2i_t<O>;

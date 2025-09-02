@@ -15,7 +15,7 @@ namespace okiidoku::mono::detail::solver {
 	template<Order O> requires(is_order_compiled(O)) class CandElimApply;
 
 	template<Order O> requires(is_order_compiled(O))
-	struct FoundQueues final {
+	struct FoundQueues {
 		friend class CandElimApply<O>;
 	public:
 		template<class T>

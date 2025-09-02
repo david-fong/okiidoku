@@ -7,7 +7,7 @@
 #endif
 
 #include <algorithm> // find_if
-#include <numeric> // transform_reduce
+#include <numeric>   // transform_reduce
 #include <execution>
 
 namespace okiidoku::mono {
@@ -96,11 +96,10 @@ namespace okiidoku::mono {
 			if constexpr (num_words == 1) { return word_i_t{0}; }
 			else {
 				for (word_i_t wd_i {0}; wd_i < num_words; ++wd_i) {
-					const auto& word {words_[wd_i]};
-					const auto word_popcount {static_cast<o2i_t>(std::popcount(word))};
-					OKIIDOKU_CONTRACT_USE(word_popcount <= word_t_num_bits);
-					if (set_bit_index >= word_popcount) [[likely]] {
-						set_bit_index = static_cast<o2x_t>(set_bit_index - word_popcount);
+					const auto wd_popcount {static_cast<word_bit_i_t>(std::popcount(words_[wd_i]))};
+					OKIIDOKU_CONTRACT_USE(wd_popcount <= word_t_num_bits);
+					if (set_bit_index >= wd_popcount) [[likely]] {
+						set_bit_index = static_cast<o2x_t>(set_bit_index - wd_popcount);
 					} else {
 						return wd_i;
 					}
@@ -147,10 +146,10 @@ namespace okiidoku::mono {
 	template<Order O> requires(is_order_compiled(O))
 	std::array<char, Ints<O>::O2>
 	O2BitArr<O>::to_chars() const noexcept {
-		OKIIDOKU_NO_PRE_INIT_AUTOVAR std::array<char, T::O2> _; // NOLINT(cppcoreguidelines-pro-type-member-init) see next line
+		OKIIDOKU_DEFER_INIT std::array<char, T::O2> _; // NOLINT(*-init)
 		_.fill('.');
 		for (o2i_t i {0}; i < T::O2; ++i) {
-			if (test(static_cast<o2x_t>(i))) { _[i] = '1'; }
+			if (operator[](i)) { _[i] = '1'; }
 		}
 		return _;
 	}

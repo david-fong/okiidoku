@@ -9,15 +9,14 @@
 #include <okiidoku/gen.hpp>
 #include <okiidoku/print_2d.hpp>
 #include <okiidoku/grid.hpp>
-#include <okiidoku/o2_bit_arr.hpp>
 
 #include <okiidoku_cli_utils/shared_rng.hpp>
 
 #include <random> // random_device,
 
 namespace okiidoku {
-template<okiidoku::Order O>
-[[gnu::noinline]] void test_puzzle(okiidoku::util::SharedRng& shared_rng, const unsigned num_rounds) {
+template<okiidoku::Order O> OKIIDOKU_KEEP_FOR_DEBUG // NOLINTNEXTLINE(*-internal-linkage)
+void test_puzzle(okiidoku::util::SharedRng& shared_rng, const unsigned num_rounds) {
 	if constexpr (O >= 4) { return; } // TODO.high enable when solver for order=5 is faster?
 	using namespace ::okiidoku;
 	using namespace ::okiidoku::mono;
@@ -29,6 +28,7 @@ template<okiidoku::Order O>
 
 	// Grid<O> canon_grid;
 
+	FastSolver<O> solver;
 	for (unsigned round {0}; round < num_rounds; ++round) {
 		generate_shuffled(gen_grid, shared_rng.get());
 		CHECK(grid_follows_rule(gen_grid));
@@ -38,6 +38,11 @@ template<okiidoku::Order O>
 		auto ua_sets {find_size_4_minimal_unavoidable_sets(puz_grid)};
 		// CAPTURE(unsigned(ua_sets.ua_set_4s.size());
 		make_minimal_puzzle(puz_grid, shared_rng.get());
+		solver.reinit_with_puzzle(puz_grid);
+		auto soln {solver.get_next_solution()};
+		CHECK(soln.has_value());
+		CHECK(soln.value() == gen_grid);
+		CHECK(!solver.get_next_solution().has_value());
 		// #ifndef OKIIDOKU_NO_LOGGING
 		// print_2d<O>(std::clog, shared_rng.get(), gen_grid, puz_grid);
 		// #endif
@@ -45,7 +50,7 @@ template<okiidoku::Order O>
 }}
 
 TEST_CASE("okiidoku.puzzle") {
-	const auto default_num_rounds {100U};
+	const auto default_num_rounds {100u};
 	okiidoku::util::SharedRng shared_rng {std::random_device()()}; // look into using Catch2 GENERATE and random() features
 
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \

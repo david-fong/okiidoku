@@ -5,7 +5,6 @@ include_guard(DIRECTORY)
 if(NOT OKIIDOKU_BUILD_WITH_STATIC_ANALYZERS)
 	return()
 endif()
-block()
 
 if(MSVC)
 	target_compile_options(okiidoku_compiler_warnings INTERFACE "/analyze")
@@ -24,9 +23,9 @@ endif()
 find_program(CLANG_TIDY_EXE NAMES "clang-tidy" DOC "Path to clang-tidy executable")
 if(NOT "${CLANG_TIDY_EXE}" STREQUAL "CLANG_TIDY_EXE-NOTFOUND")
 	set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_EXE}")
-	# if(CMAKE_COLOR_DIAGNOSTICS) # it already detects if terminal supports colours
-	# 	list(APPEND CMAKE_CXX_CLANG_TIDY "--use-color")
-	# endif()
+	if(CMAKE_COLOR_DIAGNOSTICS) # it already detects if terminal supports colours
+		list(APPEND CMAKE_CXX_CLANG_TIDY "--use-color")
+	endif()
 	# TODO.mid sort out the warnings
 endif()
 
@@ -42,7 +41,8 @@ endif()
 
 find_program(IWYU_EXE NAMES "iwyu" DOC "Path to iwyu executable")
 if(NOT "${IWYU_EXE}" STREQUAL "IWYU_EXE-NOTFOUND")
-	set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE "${IWYU_EXE}" "--cxx17ns")
+	set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE "${IWYU_EXE}"
+		"-Xiwyu" "--cxx17ns"
+		"-Xiwyu" "--prefix_header_includes=keep"
+	)
 endif()
-
-endblock()

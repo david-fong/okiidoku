@@ -15,8 +15,8 @@
 #include <random> // random_device,
 
 namespace okiidoku {
-template<okiidoku::Order O>
-[[gnu::noinline]] void test_morph(okiidoku::util::SharedRng& shared_rng, const unsigned num_rounds) {
+template<okiidoku::Order O> OKIIDOKU_KEEP_FOR_DEBUG // NOLINTNEXTLINE(*-internal-linkage)
+void test_morph(okiidoku::util::SharedRng& shared_rng, const unsigned num_rounds) {
 	if constexpr (O >= 4) { return; } // TODO.high enable when solver for order=5 is faster?
 	using namespace ::okiidoku;
 	using namespace ::okiidoku::mono;
@@ -26,13 +26,13 @@ template<okiidoku::Order O>
 	Grid<O> gen_grid;
 	init_most_canonical_grid(gen_grid);
 
-	// Grid<O> canon_grid;
+	Grid<O> canon_grid;
 
 	for (unsigned round {0}; round < num_rounds; ++round) {
 		generate_shuffled(gen_grid, shared_rng.get());
 		CHECK(grid_follows_rule(gen_grid));
 
-		/* const auto gen_canon_transform {canonicalize(gen_grid)};
+		const auto gen_canon_transform {canonicalize(gen_grid)};
 		if (gen_canon_transform.inverted().inverted() != gen_canon_transform) {
 			std::clog << "\ntransformation twice-inverted must equal itself.";
 			std::exit(1);
@@ -44,12 +44,11 @@ template<okiidoku::Order O>
 		canonicalize(canon_grid);
 
 		CHECK(gen_grid == canon_grid);
-		*/
 	}
 }}
 
 TEST_CASE("okiidoku.morph") {
-	const auto default_num_rounds {100U};
+	const auto default_num_rounds {100u};
 	okiidoku::util::SharedRng shared_rng {std::random_device()()}; // look into using Catch2 GENERATE and random() features
 
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \

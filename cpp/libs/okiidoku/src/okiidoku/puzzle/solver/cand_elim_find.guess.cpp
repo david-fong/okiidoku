@@ -33,15 +33,14 @@ namespace okiidoku::mono::detail::solver { namespace {
 				const auto house {rmi_to_house<O>(house_type, rmi)};
 				for (o2i_t house_cell {0}; house_cell < T::O2; ++house_cell) {
 					const auto& other_cell {cells_cands.at_rmi(house_cell_to_rmi<O>(house_type, house, house_cell))};
-					if (other_cell.test(sym)) { ++num_other_cand_cells; }
+					if (other_cell[sym]) { ++num_other_cand_cells; }
 				}
 			}
 			return num_other_cand_cells;
 		}};
 		auto best_sym {best_cell_cands.first_set_bit_require_exists()};
 		o3i_t best_sym_num_other_cand_cells {0};
-		for (auto set_bits_walker {best_cell_cands.set_bits_walker()}; set_bits_walker.has_more(); set_bits_walker.advance()) {
-			const auto sym {set_bits_walker.value()};
+		for (const auto sym : best_cell_cands.set_bits()) {
 			const auto sym_num_other_cand_cells {get_sym_num_other_cand_cells(sym)};
 			if (sym_num_other_cand_cells > best_sym_num_other_cand_cells) [[unlikely]] {
 				best_sym = sym;
@@ -53,6 +52,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 
 
 	template<Order O> requires(is_order_compiled(O))
+	// NOLINTNEXTLINE(*-cognitive-complexity)
 	Guess<O> find_good_guess_candidate_for_fast_solver(
 		const CandsGrid<O>& cells_cands,
 		[[maybe_unused]] const typename EngineImpl<O>::guess_stack_t& guess_stack
@@ -113,7 +113,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 		[[maybe_unused]] auto best_guess_grouping {get_guess_grouping(best_rmi)};
 
 		// TODO is there a same-or-better-perf way to write this search using std::transform_reduce or std::min?
-		for (o4i_t rmi {static_cast<o4i_t>(best_rmi+1U)}; rmi < T::O4; ++rmi) {
+		for (o4i_t rmi {static_cast<o4i_t>(best_rmi+1u)}; rmi < T::O4; ++rmi) {
 			const auto cand_count {cells_cands.at_rmi(rmi).count()};
 			OKIIDOKU_CONTRACT_USE(cand_count != 0);
 			if (cand_count <= 1) [[unlikely]] { continue; } // no guessing for solved cell.

@@ -75,6 +75,11 @@
 	// 	"${workspaceFolder}/cpp/out/build/dev.gcc/compile_commands.json",
 	// 	// "${command:cmake.buildDirectory}/compile_commands.json",
 	// ],
+	"C_Cpp.default.defines": [
+		// intellisense chokes otherwise :/
+		"OKIIDOKU_EXPORT=",
+		"OKIIDOKU_KEEP_FOR_DEBUG="
+	],
 	"C_Cpp.default.browse.limitSymbolsToIncludedHeaders": true,
 	// "C_Cpp.default.browse.path": ["${workspaceFolder}"],
 	"C_Cpp.default.browse.path": [],
@@ -99,4 +104,7 @@
 			"/okiidoku": "${workspaceFolder}/cpp" // -ffile-prefix-map=${okiidoku_SOURCE_DIR}=/okiidoku
 		},
 	},
+	"cmake.configureArgs": [
+		"-D OKIIDOKU_BUILD_WITH_STATIC_ANALYZERS:BOOL=YES"
+	],
 }

@@ -1,13 +1,13 @@
 // SPDX-FileCopyrightText: 2020 David Fong
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#include <okiidoku_cli/repl.hpp>
-
 #include <okiidoku_cli/config.hpp>
+
 #include <okiidoku_cli_utils/str.hpp>
+#include <okiidoku/detail/order_templates.hpp>
 
 #include <iostream> // cout, endl,
 #include <charconv> // from_chars
-#include <cassert>
+#include <system_error> // errc
 
 namespace okiidoku::cli {
 

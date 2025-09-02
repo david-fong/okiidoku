@@ -9,6 +9,7 @@ Checks: "
   readability-*,
     -readability-identifier-length,
   performance-*,
+    -performance-avoid-endl,
   modernize-*,
     -modernize-use-trailing-return-type,
 
@@ -16,6 +17,7 @@ Checks: "
     -cppcoreguidelines-avoid-magic-numbers,
     -cppcoreguidelines-pro-bounds-constant-array-index,
     -cppcoreguidelines-macro-usage,
+    -cppcoreguidelines-avoid-do-while,
   clang-analyzer-*,
   cert-*,
   hicpp-avoid-goto,
@@ -29,10 +31,19 @@ Checks: "
   darwin-*,
   misc-*,
     -misc-non-private-member-variables-in-classes,
-"
-CheckOptions:
-  readability-function-cognitive-complexity.IgnoreMacros: yes
+    -misc-include-cleaner
+  "
 # hicpp is mostly aliases to other rules. I just added specifically all
 # that are not aliases to rules I already include. On a similar note,
 # some of the excluded rules are just alias exclusions so I don't have
 # to write inline ignore-comments for both a rule and its alias.
+# turned off include-cleaner since we have include-what-you-use.
+
+CheckOptions:
+  readability-magic-numbers.IgnorePowersOf2IntegerValues: true
+  readability-magic-numbers.IgnoredFloatingPointValues: "1.0;10.0;100.0"
+  readability-function-cognitive-complexity.IgnoreMacros: true
+  readability-uppercase-literal-suffix.NewSuffixes: "L;LL;uL;uLL"
+
+HeaderFilterRegex: "^$"
+ExcludeHeaderFilterRegex: ".*(/cpp/external/).*"

@@ -6,7 +6,7 @@
 #include <okiidoku/o2_bit_arr.hpp>
 
 // #include <algorithm>
-#include <array>
+// #include <array>
 
 #include <okiidoku/puzzle/solver/cand_elim_find.macros.hpp>
 

@@ -9,7 +9,8 @@
 #include <array>
 #include <span>
 #include <compare>
-#include <utility> // forward
+#include <utility>     // forward
+#include <type_traits> // conditional, is_reference_v
 
 namespace okiidoku::mono {
 
@@ -22,7 +23,7 @@ namespace okiidoku::mono {
 	\note a numerically encoded value of `O2` symbolizes an empty (non-given/puzzle) cell.
 	\note not exported. all public members are defined inline in this header. */
 	template<Order O> requires(is_order_compiled(O))
-	struct Grid final : public detail::Gridlike<O, grid_val_t<O>> {
+	struct Grid : public detail::Gridlike<O, grid_val_t<O>> {
 		using T = Ints<O>;
 		/// \note default initialize as an empty grid (to be safe).
 		Grid() noexcept: detail::Gridlike<O, grid_val_t<O>>{T::O2} { }
@@ -146,7 +147,7 @@ namespace okiidoku::visitor {
 
 
 	namespace detail {
-		class GridAdaptor final {
+		class GridAdaptor {
 		public:
 			static constexpr bool is_borrow_type = false;
 			template<Order O>
@@ -160,7 +161,7 @@ namespace okiidoku::visitor {
 	is that of the largest member type. large collections could be space wasteful.
 	either prefer streaming, or write a collection wrapper that handles that. */
 	// TODO.mid make collection wrapper template that stores the mono version and returns variant version from accessors.
-	struct OKIIDOKU_EXPORT Grid final : public detail::ContainerBase<detail::GridAdaptor> {
+	struct OKIIDOKU_EXPORT Grid : public detail::ContainerBase<detail::GridAdaptor> {
 	public:
 		using ContainerBase::ContainerBase;
 		using val_t = grid_val_t;

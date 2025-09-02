@@ -5,14 +5,14 @@
 #include <okiidoku/o2_bit_arr.hpp>
 
 #include <iostream>
-#include <algorithm>
+// #include <algorithm>
 #include <array>
-#include <limits> // numeric_limits
+// #include <limits> // numeric_limits
 
 namespace okiidoku::mono { namespace {
 
 	template<Order O> requires(is_order_compiled(O))
-	class SerdesHelper final {
+	class SerdesHelper {
 	private:
 		using T = Ints<O>;
 		using cands_t = O2BitArr<O>;
@@ -21,7 +21,7 @@ namespace okiidoku::mono { namespace {
 
 		static constexpr unsigned num_buf_bytes {1};
 		using buf_t = detail::uint_smolN_t<2*8*num_buf_bytes>; // x2 to prevent overflow
-		static_assert((1U<<(2*8*num_buf_bytes)) > (2U*T::O2)); // requirement to handle overflow
+		static_assert((1u<<(2u*8u*num_buf_bytes)) > (2u*T::O2)); // requirement to handle overflow
 
 	public:
 		SerdesHelper() noexcept:
@@ -76,7 +76,7 @@ namespace okiidoku::mono { namespace {
 
 	template<Order O> requires(is_order_compiled(O))
 	void SerdesHelper<O>::print_val(std::ostream& os, const typename SerdesHelper<O>::val_t val) noexcept {
-		OKIIDOKU_CONTRACT_ASSERT(cell_cands_.test(val));
+		OKIIDOKU_CONTRACT_ASSERT(cell_cands_[val]);
 		// The number of possible different values that this cell could be
 		// based on the values that have already been encountered.
 		auto smol_val_buf_remaining {cell_cands_.count()};
@@ -221,8 +221,8 @@ namespace okiidoku::visitor {
 		case O_: return mono::write_solution_grid_to_stream(vis_src.unchecked_get_mono_exact<O_>(), os);
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
+		default: OKIIDOKU_UNREACHABLE;
 		}
-		OKIIDOKU_UNREACHABLE;
 	}
 
 	void parse_solution_grid_from_stream(Grid& vis_sink, std::istream& is) noexcept {
@@ -231,8 +231,8 @@ namespace okiidoku::visitor {
 		case O_: return mono::parse_solution_grid_from_stream(vis_sink.unchecked_get_mono_exact<O_>(), is);
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
+		default: OKIIDOKU_UNREACHABLE;
 		}
-		OKIIDOKU_UNREACHABLE;
 	}
 
 	void print_puzzle_grid_to_stream(const Grid& vis_src, std::ostream& os) noexcept {
@@ -241,8 +241,8 @@ namespace okiidoku::visitor {
 		case O_: return mono::print_puzzle_grid_to_stream(vis_src.unchecked_get_mono_exact<O_>(), os);
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
+		default: OKIIDOKU_UNREACHABLE;
 		}
-		OKIIDOKU_UNREACHABLE;
 	}
 
 	void parse_puzzle_grid_from_stream(Grid& vis_sink, std::istream& is) noexcept {
@@ -251,7 +251,7 @@ namespace okiidoku::visitor {
 		case O_: return mono::parse_puzzle_grid_from_stream(vis_sink.unchecked_get_mono_exact<O_>(), is);
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
+		default: OKIIDOKU_UNREACHABLE;
 		}
-		OKIIDOKU_UNREACHABLE;
 	}
 }

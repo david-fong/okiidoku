@@ -14,7 +14,7 @@
 
 namespace okiidoku::util::str {
 
-	struct [[gnu::designated_init]] SgrPair final {
+	struct [[gnu::designated_init]] SgrPair {
 		std::string_view on;
 		std::string_view off;
 	};

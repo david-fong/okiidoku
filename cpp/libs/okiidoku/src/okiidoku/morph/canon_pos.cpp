@@ -24,16 +24,16 @@ namespace okiidoku::mono { namespace {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	class CanonPlace final {
+	class CanonPlace {
 	private:
 		OKIIDOKU_MONO_INT_TS_TYPEDEFS
 		using val_t = int_ts::o2is_t<O>;
 		using to_t = typename Transformation<O>::to_t;
 
-		struct PolarState final {
+		struct PolarState {
 			line_map_t<O> to_og {Transformation<O>::identity.row_map};
-			detail::TieLinks<O, 2> line_ties {};
-			detail::TieLinks<O, 1> chute_ties {};
+			detail::Ties<O, 2> line_ties {};
+			detail::Ties<O, 1> chute_ties {};
 
 			explicit PolarState() noexcept {
 				line_ties.update([](auto a, auto b)noexcept{
@@ -58,7 +58,7 @@ namespace okiidoku::mono { namespace {
 		const PolarState& row_state,
 		const PolarState& col_state
 	) noexcept {
-		OKIIDOKU_NO_PRE_INIT_AUTOVAR Grid<O> table; {
+		OKIIDOKU_DEFER_INIT Grid<O> table; {
 			const Transformation<O> t {
 				// .sym_map {Transformation<O>::identity_sym_map},
 				.row_map {row_state.to_og},
@@ -88,7 +88,7 @@ namespace okiidoku::mono { namespace {
 						}
 					);
 				}
-				OKIIDOKU_NO_PRE_INIT_AUTOVAR std::array<val_t, T::O2> copy; // NOLINT(cppcoreguidelines-pro-type-member-init) see next line
+				OKIIDOKU_DEFER_INIT std::array<val_t, T::O2> copy; // NOLINT(*-init)
 				std::copy(row_sp.begin(), row_sp.end(), copy.begin());
 				for (o1i_t i {0}; i < T::O1; ++i) {
 					std::copy(
@@ -104,7 +104,7 @@ namespace okiidoku::mono { namespace {
 
 	template<Order O> requires(is_order_compiled(O))
 	void CanonPlace<O>::PolarState::do_a_pass(const Grid<O>& table) noexcept {
-		OKIIDOKU_NO_PRE_INIT_AUTOVAR std::array<to_t, T::O2> to_tied; // NOLINT(cppcoreguidelines-pro-type-member-init) see next line
+		OKIIDOKU_DEFER_INIT std::array<to_t, T::O2> to_tied; // NOLINT(*-init)
 		std::iota(to_tied.begin(), to_tied.end(), to_t{0});
 		for (const auto tie : line_ties) {
 			// Note: intentionally do not skip ties here since updated table
@@ -133,7 +133,7 @@ namespace okiidoku::mono { namespace {
 			);
 		}
 
-		line_ties.update([&](auto a, auto b){
+		line_ties.update([&](o2is_t a, o2is_t b){
 			return ranges::equal(table.row_span_at(to_tied[a]), table.row_span_at(to_tied[b]));
 		});
 		chute_ties.update([&](o1i_t a, o1i_t b){
@@ -143,7 +143,7 @@ namespace okiidoku::mono { namespace {
 
 		{
 			// update s.to_og:
-			OKIIDOKU_NO_PRE_INIT_AUTOVAR std::array<to_t, T::O2> tied_to_og; // NOLINT(cppcoreguidelines-pro-type-member-init) see next line
+			OKIIDOKU_DEFER_INIT std::array<to_t, T::O2> tied_to_og; // NOLINT(*-init)
 			for (o2i_t i {0}; i < T::O2; ++i) {
 				tied_to_og[i] = to_og[i/T::O1][i%T::O1];
 			}

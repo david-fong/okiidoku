@@ -5,6 +5,7 @@
 
 #include <okiidoku/morph/transform.hpp>
 #include <okiidoku/grid.hpp>
+#include <okiidoku/ints.hpp>
 #include <okiidoku/detail/order_templates.hpp>
 
 namespace okiidoku::mono {

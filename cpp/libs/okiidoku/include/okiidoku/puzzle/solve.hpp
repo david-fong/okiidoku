@@ -15,7 +15,7 @@
 namespace okiidoku::mono::detail::solver {
 
 	template<Order O> requires(is_order_compiled(O))
-	class Engine /* final */;
+	class Engine;
 }
 
 namespace okiidoku::mono {
@@ -24,12 +24,12 @@ namespace okiidoku::mono {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	class OKIIDOKU_EXPORT FastSolver final {
+	class OKIIDOKU_EXPORT FastSolver {
 	public:
 		FastSolver() noexcept;
 		~FastSolver() noexcept;
 
-		struct [[gnu::designated_init]] CandSymToIgnore final {
+		struct [[gnu::designated_init]] CandSymToIgnore {
 			int_ts::o4xs_t<O> rmi;
 			int_ts::o2x_t<O> val;
 		};

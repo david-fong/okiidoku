@@ -3,12 +3,15 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 
-#include <okiidoku/o2_bit_arr.cpp> // choosing to get implementations this way because they're not exported in libokiidoku.
+#include <okiidoku/o2_bit_arr.hpp>
+#include <okiidoku/o2_bit_arr.cpp> // NOLINT(*include*) implementations aren't exported in libokiidoku.
 #include <okiidoku/ints.hpp>
 
+#include <iostream>
+
 namespace okiidoku {
-template<okiidoku::Order O>
-[[gnu::noinline]] void test_o2_bit_arr() {
+template<okiidoku::Order O> OKIIDOKU_KEEP_FOR_DEBUG // NOLINTNEXTLINE(*-internal-linkage)
+void test_o2_bit_arr() {
 	using namespace ::okiidoku;
 	using namespace ::okiidoku::mono;
 	OKIIDOKU_MONO_INT_TS_TYPEDEFS
@@ -23,9 +26,9 @@ template<okiidoku::Order O>
 	{
 		O2BitArr<O> arr {};
 		for (o2i_t i {0}; i < T::O2; ++i) {
-			CHECK(!arr.test(static_cast<o2x_t>(i)));
+			CHECK(!arr[i]);
 			arr.set(i);
-			CHECK(arr.test(i));
+			CHECK(arr[i]);
 		}
 	}
 	std::cout << "2" << std::endl;
@@ -34,15 +37,15 @@ template<okiidoku::Order O>
 		for (o2i_t i {0}; i < T::O2; ++i) {
 			CHECK(ones.count_below(static_cast<o2x_t>(i)) == 0);
 			CHECK(ones.get_index_of_nth_set_bit(0) == i);
-			CHECK(ones.test(ones.first_set_bit_require_exists()));
+			CHECK(ones[ones.first_set_bit_require_exists()]);
 			ones.unset(ones.first_set_bit_require_exists());
 		}
 	}
 	std::cout << "3" << std::endl;
 	{
 		o2i_t count {0};
-		for (auto walker {O2BitArr_ones<O>.set_bits_walker()}; walker.has_more(); walker.advance()) {
-			CHECK(walker.value() == count);
+		for (const auto val : O2BitArr_ones<O>.set_bits()) {
+			CHECK(val == count);
 			++count;
 		}
 		CHECK(count == T::O2);

@@ -30,7 +30,7 @@ namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
 	Transformation<O> Transformation<O>::inverted() const noexcept {
-		OKIIDOKU_NO_PRE_INIT_AUTOVAR Transformation<O> inv;
+		OKIIDOKU_DEFER_INIT Transformation<O> inv;
 		for (o2i_t i {0}; i < T::O2; ++i) {
 			inv.sym_map[sym_map[i]] = static_cast<to_t>(i);
 		}
@@ -73,8 +73,8 @@ namespace okiidoku::visitor {
 		);
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
+		default: OKIIDOKU_UNREACHABLE;
 		}
-		OKIIDOKU_UNREACHABLE;
 	}
 
 
@@ -89,8 +89,8 @@ namespace okiidoku::visitor {
 		);
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
+		default: OKIIDOKU_UNREACHABLE;
 		}
-		OKIIDOKU_UNREACHABLE;
 	}
 
 
@@ -100,7 +100,7 @@ namespace okiidoku::visitor {
 		case O_: return static_cast<Transformation>(this->unchecked_get_mono_exact<O_>().inverted());
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
+		default: OKIIDOKU_UNREACHABLE;
 		}
-		OKIIDOKU_UNREACHABLE;
 	}
 }

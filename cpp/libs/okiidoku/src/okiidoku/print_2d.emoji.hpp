@@ -9,7 +9,7 @@
 
 namespace okiidoku::emoji {
 
-	struct Set final {
+	struct Set {
 		std::string_view name;
 		std::vector<std::string_view> entries;
 	};

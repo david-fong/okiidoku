@@ -9,7 +9,7 @@
 
 namespace okiidoku::about {
 
-	struct SemanticVersion final {
+	struct SemanticVersion {
 		std::uint32_t major;
 		std::uint32_t minor;
 		std::uint32_t patch;
@@ -17,7 +17,7 @@ namespace okiidoku::about {
 	};
 	OKIIDOKU_EXPORT extern const SemanticVersion semver;
 
-	struct GitInfo final {
+	struct GitInfo {
 		std::string_view remotes;
 		std::string_view branch;
 		std::string_view commit;

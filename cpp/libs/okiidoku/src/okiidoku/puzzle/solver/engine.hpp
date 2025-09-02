@@ -6,12 +6,14 @@
 #include <okiidoku/puzzle/solver/found_queue.hpp>
 #include <okiidoku/grid.hpp>
 #include <okiidoku/o2_bit_arr.hpp>
+#include <okiidoku/ints.hpp>
 #include <okiidoku/detail/order_templates.hpp>
 
 // #include <stack>
 #include <vector>
+#include <array>
 #include <type_traits>
-#include <utility> // forward
+#include <cstdint>
 
 /**
 The "engine" is a primitive for building a solver capable of finding all
@@ -37,7 +39,7 @@ namespace okiidoku::mono::detail::solver {
 	UnwindInfo unwind_one_stack_frame_of_(EngineImpl<O>&) noexcept;
 
 
-	struct [[nodiscard]] UnwindInfo final {
+	struct [[nodiscard]] UnwindInfo {
 		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 		friend UnwindInfo unwind_one_stack_frame_of_<O_>(EngineImpl<O_>&) noexcept;
 		OKIIDOKU_FOREACH_O_DO_EMIT
@@ -66,7 +68,7 @@ namespace okiidoku::mono::detail::solver {
 	using CandsGrid = detail::Gridlike<O, O2BitArr<O>>;
 
 	template<Order O> requires(is_order_compiled(O))
-	struct [[gnu::designated_init]] Guess final {
+	struct [[gnu::designated_init]] Guess {
 		int_ts::o4xs_t<O> rmi;
 		int_ts::o2xs_t<O> val;
 	};
@@ -85,7 +87,7 @@ namespace okiidoku::mono::detail::solver {
 		using val_t = int_ts::o2xs_t<O>;
 		using rmi_t = int_ts::o4xs_t<O>;
 	public:
-		struct HouseSubsets final {
+		struct HouseSubsets {
 			struct [[gnu::designated_init]] CellTag {
 				rmi_t rmi;
 				int_ts::o2is_t<O> count_cache;
@@ -97,7 +99,7 @@ namespace okiidoku::mono::detail::solver {
 			std::array<HouseSubsets, T::O2>
 		>;
 
-		struct Frame final {
+		struct Frame {
 			o4i_t num_unsolved;
 			CandsGrid<O> cells_cands;
 			houses_subsets_t houses_subsets;
@@ -107,7 +109,7 @@ namespace okiidoku::mono::detail::solver {
 		// entry of the guess_stack_. no_more_solns_ is implied when the guess stack size is zero.
 		//  This would make the EngineImpl struct size small enough to probably justify no longer wrapping
 		//   Engine with unique_ptr in the Solver classes.
-		struct GuessStackFrame final {
+		struct GuessStackFrame {
 			Frame frame;
 			Guess<O> guess;
 			GuessStackFrame(const Frame& frame_, const Guess<O> guess_) noexcept:
@@ -211,7 +213,7 @@ namespace okiidoku::mono::detail::solver {
 	// Note: The current usage of inheritance (rather than composition) is _only_
 	// done to reduce boilerplate in writing the delegating member functions.
 	template<Order O> requires(is_order_compiled(O))
-	class Engine final : private EngineImpl<O> {
+	class Engine : private EngineImpl<O> {
 		friend class CandElimFind<O>;  // the class wraps implementations that can only see what they need.
 		friend class CandElimApply<O>;
 		friend class CandElimApplyImpl<O>;

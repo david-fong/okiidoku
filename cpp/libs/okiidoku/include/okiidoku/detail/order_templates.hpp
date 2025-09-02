@@ -13,7 +13,7 @@
 
 namespace okiidoku {
 
-	using Order = unsigned;
+	using Order = unsigned long;
 
 	constexpr bool is_order_compiled(const Order O) noexcept {
 		#define OKIIDOKU_FOREACH_O_EMIT(O_) if (O == O_) { return true; }

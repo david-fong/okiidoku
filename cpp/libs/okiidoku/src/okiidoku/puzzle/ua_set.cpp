@@ -26,7 +26,7 @@ namespace okiidoku::mono { namespace {
 		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
 		OKIIDOKU_CONTRACT_USE(chute < T::O1);
 		const auto chute_lines_sym_to_cell {[&](){
-			OKIIDOKU_NO_PRE_INIT_AUTOVAR chute_lines_sym_to_cell_t<O> map;
+			OKIIDOKU_DEFER_INIT chute_lines_sym_to_cell_t<O> map;
 			for (o1i_t chute_line {0}; chute_line < T::O1; ++chute_line) {
 			for (o2i_t house_cell {0}; house_cell < T::O2; ++house_cell) {
 				const auto chute_cell_i {static_cast<o3i_t>((T::O2*chute_line)+house_cell)};

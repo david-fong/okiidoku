@@ -42,15 +42,15 @@ namespace okiidoku::mono {
 
 namespace okiidoku::visitor {
 
-	/// \copydoc okiidoku::mono::grid_is_proper_puzzle
+	/// see `okiidoku::mono::grid_is_proper_puzzle`
 	[[nodiscard, gnu::pure]] OKIIDOKU_EXPORT
 	bool grid_is_proper_puzzle(const Grid&) noexcept;
 
-	/// \copydoc okiidoku::mono::grid_is_minimal_puzzle
+	/// see `okiidoku::mono::grid_is_minimal_puzzle`
 	[[nodiscard, gnu::pure]] OKIIDOKU_EXPORT
 	bool grid_is_minimal_puzzle(const Grid&) noexcept;
 
-	/// \copydoc okiidoku::mono::make_minimal_puzzle
+	/// see `okiidoku::mono::make_minimal_puzzle`
 	OKIIDOKU_EXPORT void make_minimal_puzzle(Grid&, rng_seed_t rng_seed) noexcept;
 }
 #endif

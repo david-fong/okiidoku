@@ -23,6 +23,8 @@
 ## Periodic Checkups
 
 - `reuse lint` (check licensing)
+- if any `NOLINT` comments are no longer needed
+- if any `static_cast`s are no longer needed
 - Examine contents of exported symbols (`nm -nCD build/<config>/lib/libokiidoku.so | less`) and make sure nothing is exported that isn't intended to be.
 - Ensure dependencies that should be private to the library implementation aren't exposed in any way to the library interface.
 - Run static analyzers
@@ -33,7 +35,7 @@
 
 Issues I'm watching:
 
-- https://github.com/doxygen/doxygen/issues/8159
+- https://github.com/doxygen/doxygen/issues/8159 copydoc with templated functions
 - https://gitlab.kitware.com/cmake/cmake/-/issues/26118 cmake non-config presets don't implicitly inherit their config preset condition.
 - [Use CMAKE_CROSSCOMPILING_EMULATOR to run cross compiled executables #554](https://github.com/microsoft/vscode-cmake-tools/issues/554)
 - https://gitlab.kitware.com/cmake/cmake/-/issues/15179 -Og default for debug build configuration
@@ -42,11 +44,18 @@ Issues I'm watching:
 
 ## Misc List
 
+- OKIIDOKU_UNREACHABLE; in switch default to satisfy clang-tidy
 - move ContainerBase to separate header?
 - make `scramble` just generate a random `Transformation`.
-- rename `canon_pos` to `canon_pos` and `canon_sym` to `canon_sym`.
 - rename `label` to `sym` and `val` to `sym`.
 - continue adoption of doxygen
+
+- unsigned integers. sigh.
+  - https://en.cppreference.com/w/cpp/language/operator_arithmetic.html
+  - https://en.cppreference.com/w/cpp/language/usual_arithmetic_conversions.html
+  - https://en.cppreference.com/w/cpp/language/implicit_cast.html#Integral_promotion
+    > In particular, arithmetic operators do not accept types smaller than int as arguments, and integral promotions are automatically applied after lvalue-to-rvalue conversion, if applicable.
+  - https://en.cppreference.com/w/cpp/language/usual_arithmetic_conversions.html#Integer_conversion_rank
 
 - https://www.pcg-random.org/using-pcg-cpp.html
   https://github.com/imneme/pcg-cpp/tags

@@ -3,11 +3,12 @@
 #ifndef HPP_OKIIDOKU_CLI_UTILS__CONSOLE_SETUP
 #define HPP_OKIIDOKU_CLI_UTILS__CONSOLE_SETUP
 
+#include <string>
 #include <locale> // numpunct
 
 namespace okiidoku::util {
 
-	class MyNumPunct final : public std::numpunct<char> {
+	class MyNumPunct : public std::numpunct<char> {
 	public: void set_grouping(char grouping) { grouping_[0] = grouping; }
 	protected: std::string do_grouping() const override { return grouping_; }
 	private: std::string grouping_ {"\003"};

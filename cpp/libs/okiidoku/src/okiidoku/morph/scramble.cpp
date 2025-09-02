@@ -46,7 +46,7 @@ namespace okiidoku::visitor {
 		case O_: return static_cast<Transformation>(mono::scramble(vis_grid.unchecked_get_mono_exact<O_>(), rng_seed));
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
+		default: OKIIDOKU_UNREACHABLE;
 		}
-		OKIIDOKU_UNREACHABLE;
 	}
 }

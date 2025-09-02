@@ -4,12 +4,11 @@
 #define HPP_OKIIDOKU_CLI__REPL
 
 #include <okiidoku_cli/config.hpp>
-
 #include <okiidoku_cli_utils/shared_rng.hpp>
+#include <okiidoku/detail/order_templates.hpp>
 
 #include <map>
 #include <string_view>
-#include <array>
 
 namespace okiidoku::cli {
 
@@ -49,7 +48,7 @@ namespace okiidoku::cli {
 	// }
 
 
-	class Repl final {
+	class Repl {
 	public:
 		explicit Repl(Order O, util::SharedRng& rng);
 

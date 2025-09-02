@@ -6,12 +6,14 @@
 #include <okiidoku_cli_utils/console_setup.hpp>
 #include <okiidoku/about.hpp>
 
-#include <iostream>  // cout
-#include <iomanip>   // hex
+#include <iostream>     // cout
+#include <ios>          // hex
 #include <charconv>
-#include <string>    // stoi
+#include <string>       // stoi
 #include <string_view>
-#include <random>    // random_device
+#include <random>       // random_device
+#include <cstdint>      // uint..._t
+#include <system_error> // errc
 
 /**
 ARGUMENTS
@@ -19,11 +21,11 @@ ARGUMENTS
 2: RNG seed (default: get from device)
 */
 int main(const int argc, char const *const argv[]) {
-	auto numpunct {okiidoku::util::setup_console()};
+	auto* numpunct {okiidoku::util::setup_console()};
 
 	// NOLINTBEGIN(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays, cppcoreguidelines-pro-bounds-pointer-arithmetic)
-	const unsigned user_order {(argc > 1)
-		? static_cast<unsigned>(std::stoi(argv[1]))
+	const auto user_order {(argc > 1)
+		? static_cast<okiidoku::Order>(std::stoi(argv[1]))
 		: okiidoku::compiled_orders[0]
 	};
 	const auto srand_key {[&]() -> std::uint_fast64_t {
@@ -43,13 +45,14 @@ int main(const int argc, char const *const argv[]) {
 		<< "\n- arg 1 (grid order) : " << user_order
 		<< "\n- arg 2 (srand key)  : " << std::hex;
 	numpunct->set_grouping(0); std::cout << srand_key;
-	numpunct->set_grouping(3); std::cout << std::dec << std::endl;
+	numpunct->set_grouping(3); std::cout << std::dec;
+	std::cout << std::endl;
 
 	okiidoku::util::SharedRng shared_rng {srand_key};
 
 	okiidoku::cli::Repl repl {user_order, shared_rng};
 	repl.start();
 
-	std::cout << "\nbye bye!\n" << std::endl;
+	std::cout << "\nbye bye!\n\n";
 	return 0;
 }

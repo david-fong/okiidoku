@@ -2,19 +2,25 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include <okiidoku_cli/repl.hpp>
 
+#include <okiidoku_cli/config.hpp>
 #include <okiidoku_cli/timer.hpp>
 #include <okiidoku_cli_utils/str.hpp>
+#include <okiidoku_cli_utils/shared_rng.hpp>
 #include <okiidoku/morph/canon.hpp>
 #include <okiidoku/gen.hpp>
 #include <okiidoku/print_2d.hpp>
-#include <okiidoku/serdes.hpp>
+// #include <okiidoku/serdes.hpp> TODO
+#include <okiidoku/grid.hpp>
+#include <okiidoku/detail/order_templates.hpp>
 
-#include <iostream>   // cout, endl,
+#include <iostream>     // cout, endl,
 #include <fstream>
-#include <filesystem> // create_directories
-#include <iomanip>    // setw,
+#include <filesystem>   // create_directories
+#include <iomanip>      // setw,
 #include <string>
 #include <charconv>
+#include <ctime>        // clock, CLOCKS_PER_SEC
+#include <system_error> // errc
 
 namespace okiidoku::cli {
 
@@ -113,9 +119,9 @@ namespace okiidoku::cli {
 		const Timer timer{};
 		{
 			std::filesystem::create_directories("gen");
-			std::string file_path {std::string{} + "gen/" + std::to_string(config_.order()) + ".bin"};
+			const std::string file_path {std::string{} + "gen/" + std::to_string(config_.order()) + ".bin"};
 			std::cout << "output file path: " << file_path << std::endl;
-			std::ofstream of(file_path, std::ios::binary|std::ios::ate);
+			// std::ofstream of(file_path, std::ios::binary|std::ios::ate);
 			// TODO.wait change this to use the archiving operations.
 			// try {
 			// 	of.exceptions()

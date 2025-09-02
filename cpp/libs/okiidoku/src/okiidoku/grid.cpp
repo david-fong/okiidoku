@@ -3,8 +3,10 @@
 #include <okiidoku/grid.hpp>
 
 #include <okiidoku/o2_bit_arr.hpp>
+#include <okiidoku/detail/order_templates.hpp>
 
 #include <algorithm> // all_of
+#include <array>
 #include <execution>
 
 namespace okiidoku::mono {

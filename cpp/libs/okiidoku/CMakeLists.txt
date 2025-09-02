@@ -5,6 +5,14 @@
 # https://www.reddit.com/r/cpp/comments/m0rt7v/building_a_dual_shared_and_static_library_with/
 # TODO.low try Alex's tutorial things for installation utilities.
 
+okiidoku_make_include_flag("okiidoku/detail/export.h" export_header_include_flag)
+okiidoku_make_include_flag("okiidoku/detail/util.hpp" util_header_include_flag)
+# if(NOT "${IWYU_EXE}" STREQUAL "IWYU_EXE-NOTFOUND")
+# 	list(APPEND CMAKE_CXX_INCLUDE_WHAT_YOU_USE
+# 		"${export_header_include_flag}" "${util_header_include_flag}"
+# 	)
+# endif()
+
 add_library(okiidoku #[[ uses BUILD_SHARED_LIBS ]] "")
 add_library("${PROJECT_NAME}::okiidoku" ALIAS okiidoku)
 target_compile_features(okiidoku PUBLIC cxx_std_23)
@@ -24,7 +32,6 @@ okiidoku_install_target(okiidoku)
 
 include(GenerateExportHeader)
 generate_export_header(okiidoku EXPORT_FILE_NAME include/okiidoku/detail/export.h)
-okiidoku_make_include_flag("okiidoku/detail/export.h" export_header_include_flag)
 target_compile_options(okiidoku PUBLIC "${export_header_include_flag}")
 target_compile_definitions(okiidoku PUBLIC "$<$<NOT:$<BOOL:${BUILD_SHARED_LIBS}>>:OKIIDOKU_STATIC_DEFINE>")
 
@@ -36,7 +43,6 @@ target_include_directories(okiidoku
 	PUBLIC  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
 	PRIVATE "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>"
 )
-okiidoku_make_include_flag("okiidoku/detail/util.hpp" util_header_include_flag)
 target_compile_options(okiidoku PUBLIC "${util_header_include_flag}")
 # Future Note: if switching back to FILE_SET, make sure headers get installed. not sure why they weren't when previously using FILE_SET. maybe each header file needs to be listed out explicitly?
 install(DIRECTORY

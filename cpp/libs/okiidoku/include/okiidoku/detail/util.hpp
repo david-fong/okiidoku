@@ -52,7 +52,8 @@ alias of standard `assert` */
 #ifndef OKIIDOKU_DETAIL_NO_PRE_INIT_AUTOVAR_GCC_UNINITIALIZED
 	#define OKIIDOKU_DETAIL_NO_PRE_INIT_AUTOVAR_GCC_UNINITIALIZED
 #endif
-#define OKIIDOKU_NO_PRE_INIT_AUTOVAR OKIIDOKU_DETAIL_NO_PRE_INIT_AUTOVAR_INDETERMINATE OKIIDOKU_DETAIL_NO_PRE_INIT_AUTOVAR_GCC_UNINITIALIZED
+/// \note will probably need to pair usage-site with `// NOLINT(*-init)`.
+#define OKIIDOKU_DEFER_INIT OKIIDOKU_DETAIL_NO_PRE_INIT_AUTOVAR_INDETERMINATE OKIIDOKU_DETAIL_NO_PRE_INIT_AUTOVAR_GCC_UNINITIALIZED
 /// \todo gnu::noinit for global data. linker for ELF will put in .noinit section
 
 
@@ -60,7 +61,7 @@ alias of standard `assert` */
 	/** \def OKIIDOKU_KEEP_FOR_DEBUG
 	- `gnu::retain`: marks for retention during linker section garbage collection
 	- `gnu::used`:   I'm actually not sure if this is needed */
-	#define OKIIDOKU_KEEP_FOR_DEBUG [[maybe_unused, gnu::retain, gnu::used]]
+	#define OKIIDOKU_KEEP_FOR_DEBUG [[maybe_unused, gnu::retain, gnu::used, gnu::noinline]]
 #else
 	#define OKIIDOKU_KEEP_FOR_DEBUG
 #endif

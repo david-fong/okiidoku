@@ -27,7 +27,7 @@ namespace okiidoku {
 		HouseType::box,
 	})};
 	template<typename V> requires(!std::is_reference_v<V>)
-	struct HouseTypeMap final {
+	struct HouseTypeMap {
 		// HouseTypeMap();
 		template<class Self> [[nodiscard, gnu::pure]]
 		auto&& at(this Self&& self, const HouseType key) noexcept { return std::forward<Self>(self).arr_[std::to_underlying(key)]; }
@@ -45,7 +45,7 @@ namespace okiidoku {
 		LineType::col,
 	})};
 	template<typename V> requires(!std::is_reference_v<V>)
-	struct LineTypeMap final {
+	struct LineTypeMap {
 		// HouseTypeMap();
 		template<class Self> [[nodiscard, gnu::pure]]
 		auto&& at(this Self&& self, const LineType key) noexcept { return std::forward<Self>(self).arr_[std::to_underlying(key)]; }
@@ -78,32 +78,32 @@ namespace okiidoku::mono {
 
 		template<int N>
 		using uint_fastN_t =
-			std::conditional_t<(N <=   8U), std::uint_fast8_t,
-			std::conditional_t<(N <=  16U), std::uint_fast16_t,
-			std::conditional_t<(N <=  32U), std::uint_fast32_t,
-			std::conditional_t<(N <=  64U), std::uint_fast64_t,
-			// std::conditional_t<(N <= 128U), __uint128_t, // currently unused. Note: won't work with MSVC
+			std::conditional_t<(N <=   8), std::uint_fast8_t,
+			std::conditional_t<(N <=  16), std::uint_fast16_t,
+			std::conditional_t<(N <=  32), std::uint_fast32_t,
+			std::conditional_t<(N <=  64), std::uint_fast64_t,
+			// std::conditional_t<(N <= 128u), __uint128_t, // currently unused. Note: won't work with MSVC
 			void
 		>>>>;
 
 		template<int N>
 		using uint_smolN_t =
-			std::conditional_t<(N <=   8U), std::uint_least8_t,
-			std::conditional_t<(N <=  16U), std::uint_least16_t,
-			std::conditional_t<(N <=  32U), std::uint_least32_t,
-			std::conditional_t<(N <=  64U), std::uint_least64_t,
-			// std::conditional_t<(N <= 128U), __uint128_t,
+			std::conditional_t<(N <=   8), std::uint_least8_t,
+			std::conditional_t<(N <=  16), std::uint_least16_t,
+			std::conditional_t<(N <=  32), std::uint_least32_t,
+			std::conditional_t<(N <=  64), std::uint_least64_t,
+			// std::conditional_t<(N <= 128u), __uint128_t,
 			void
 		>>>>;
 
 		// Note: this is optional based on whether the target architecture supports these fixed-width types.
 		template<int N>
 		using uint_fixedN_t =
-			std::conditional_t<(N <=   8U), std::uint8_t,
-			std::conditional_t<(N <=  16U), std::uint16_t,
-			std::conditional_t<(N <=  32U), std::uint32_t,
-			std::conditional_t<(N <=  64U), std::uint64_t,
-			// std::conditional_t<(N <= 128U), __uint128_t,
+			std::conditional_t<(N <=   8), std::uint8_t,
+			std::conditional_t<(N <=  16), std::uint16_t,
+			std::conditional_t<(N <=  32), std::uint32_t,
+			std::conditional_t<(N <=  64), std::uint64_t,
+			// std::conditional_t<(N <= 128u), __uint128_t,
 			void
 		>>>>;
 	}
@@ -113,19 +113,19 @@ namespace okiidoku::mono {
 		template<Order O> using o1x_t = detail::uint_fastN_t<std::bit_width(O)>;
 		template<Order O> using o1i_t = detail::uint_fastN_t<std::bit_width(O)>;
 
-		template<Order O> using o2x_t = detail::uint_fastN_t<std::bit_width(O*O-1)>;
+		template<Order O> using o2x_t = detail::uint_fastN_t<std::bit_width(O*O-1u)>;
 		template<Order O> using o2i_t = detail::uint_fastN_t<std::bit_width(O*O)>;
-		template<Order O> using o2xs_t = detail::uint_smolN_t<std::bit_width(O*O-1)>;
+		template<Order O> using o2xs_t = detail::uint_smolN_t<std::bit_width(O*O-1u)>;
 		template<Order O> using o2is_t = detail::uint_smolN_t<std::bit_width(O*O)>;
 
-		template<Order O> using o3x_t = detail::uint_fastN_t<std::bit_width(O*O*O-1)>;
+		template<Order O> using o3x_t = detail::uint_fastN_t<std::bit_width(O*O*O-1u)>;
 		template<Order O> using o3i_t = detail::uint_fastN_t<std::bit_width(O*O*O)>;
-		template<Order O> using o3xs_t = detail::uint_smolN_t<std::bit_width(O*O*O-1)>;
+		template<Order O> using o3xs_t = detail::uint_smolN_t<std::bit_width(O*O*O-1u)>;
 		template<Order O> using o3is_t = detail::uint_smolN_t<std::bit_width(O*O*O)>;
 
-		template<Order O> using o4x_t = detail::uint_fastN_t<std::bit_width(O*O*O*O-1)>;
+		template<Order O> using o4x_t = detail::uint_fastN_t<std::bit_width(O*O*O*O-1u)>;
 		template<Order O> using o4i_t = detail::uint_fastN_t<std::bit_width(O*O*O*O)>;
-		template<Order O> using o4xs_t = detail::uint_smolN_t<std::bit_width(O*O*O*O-1)>;
+		template<Order O> using o4xs_t = detail::uint_smolN_t<std::bit_width(O*O*O*O-1u)>;
 		template<Order O> using o4is_t = detail::uint_smolN_t<std::bit_width(O*O*O*O)>;
 
 		template<Order O> using o5i = detail::uint_fastN_t<std::bit_width(O*O*O*O*O)>;
@@ -135,7 +135,7 @@ namespace okiidoku::mono {
 
 	// Note: when printing things, make sure to cast to int, since byte-like types will be interpreted as characters.
 	template<Order O>
-	struct Ints final {
+	struct Ints {
 
 		Ints() = delete;
 
@@ -164,16 +164,16 @@ namespace okiidoku::mono {
 		// using rmi_t [[maybe_unused]] = int_ts::o4xs_t<O>;
 
 	template<Order O, typename T>
-	concept Any_o1x_t = std::unsigned_integral<T> && std::numeric_limits<T>::max() >= (Ints<O>::O1-1);
+	concept Any_o1x_t = std::unsigned_integral<T> && std::numeric_limits<T>::max() >= (Ints<O>::O1-1u);
 
 	template<Order O, typename T>
-	concept Any_o2x_t = std::unsigned_integral<T> && std::numeric_limits<T>::max() >= (Ints<O>::O2-1);
+	concept Any_o2x_t = std::unsigned_integral<T> && std::numeric_limits<T>::max() >= (Ints<O>::O2-1u);
 
 	template<Order O, typename T>
-	concept Any_o3x_t = std::unsigned_integral<T> && std::numeric_limits<T>::max() >= (Ints<O>::O3-1);
+	concept Any_o3x_t = std::unsigned_integral<T> && std::numeric_limits<T>::max() >= (Ints<O>::O3-1u);
 
 	template<Order O, typename T>
-	concept Any_o4x_t = std::unsigned_integral<T> && std::numeric_limits<T>::max() >= (Ints<O>::O4-1);
+	concept Any_o4x_t = std::unsigned_integral<T> && std::numeric_limits<T>::max() >= (Ints<O>::O4-1u);
 
 
 	template<Order O>

@@ -9,7 +9,7 @@
 namespace okiidoku::mono::detail::solver {
 
 	template<Order O> requires(is_order_compiled(O))
-	class CandElimApply final {
+	class CandElimApply {
 	public:
 		// contract: `engine.has_queued_cand_elims` returns `true`.
 		static UnwindInfo apply_first_queued(Engine<O>&) noexcept;
@@ -19,7 +19,7 @@ namespace okiidoku::mono::detail::solver {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	class CandElimApplyImpl final {
+	class CandElimApplyImpl {
 	private:
 		using T = Ints<O>;
 		using o1i_t = int_ts::o1i_t<O>;

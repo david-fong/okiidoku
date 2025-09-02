@@ -8,7 +8,7 @@
 namespace okiidoku::mono::detail::solver {
 
 	template<Order O> requires(is_order_compiled(O))
-	class CandElimFind final {
+	class CandElimFind {
 		// Note: use of class wrapper instead of individual template functions eases friending.
 	public:
 		// common contracts and invariants for all finders:

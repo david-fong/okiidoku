@@ -54,7 +54,7 @@ int main(const int argc, char const *const argv[]) {
 		}
 		return std::random_device()();
 	}()};
-	const unsigned int num_rounds {(argc > 2) ? static_cast<unsigned>(std::stoi(argv[2])) : 1000U};
+	const unsigned int num_rounds {(argc > 2) ? static_cast<unsigned>(std::stoi(argv[2])) : 1000u};
 	// NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic,*-avoid-c-arrays)
 
 	std::cout << "\nparsed arguments:"

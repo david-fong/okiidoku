@@ -52,7 +52,8 @@ namespace okiidoku::mono {
 		// it never puts it back.
 
 		o4x_t num_puzcell_cands {0};
-		OKIIDOKU_NO_PRE_INIT_AUTOVAR std::array<rmi_t, T::O4> puzcell_cand_rmis; // non-candidates: either removed, or can't be removed.
+		OKIIDOKU_DEFER_INIT // NOLINTNEXTLINE(*-init)
+		std::array<rmi_t, T::O4> puzcell_cand_rmis; // non-candidates: either removed, or can't be removed.
 		for (o4i_t rmi {0}; rmi < T::O4; ++rmi) {
 			OKIIDOKU_CONTRACT_USE(grid.at_rmi(rmi) <= T::O2);
 			if (grid.at_rmi(rmi) < T::O2) [[likely]] {

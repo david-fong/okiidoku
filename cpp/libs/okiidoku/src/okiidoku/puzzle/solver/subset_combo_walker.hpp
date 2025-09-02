@@ -10,7 +10,7 @@ namespace okiidoku::mono::detail::solver {
 
 	// Helper for finding candidate eliminations using the subset techniques.
 	template<Order O> requires(is_order_compiled(O))
-	class SubsetComboWalker final {
+	class SubsetComboWalker {
 	private:
 		using T = Ints<O>;
 		using o2xs_t = int_ts::o2xs_t<O>;
@@ -67,7 +67,7 @@ namespace okiidoku::mono::detail::solver {
 			OKIIDOKU_CONTRACT_USE(end_ <= T::O2);
 			OKIIDOKU_CONTRACT_USE(naked_subset_size_ > 0);
 			OKIIDOKU_CONTRACT_USE(naked_subset_size_ < T::O2);
-			auto i {static_cast<o2x_t>(naked_subset_size_-1U)};
+			auto i {static_cast<o2x_t>(naked_subset_size_-1u)};
 			++combo_[i];
 			while (combo_[i] > end_ - naked_subset_size_ + i) [[likely]] {
 				if (i > 0) [[likely]] {
@@ -79,7 +79,7 @@ namespace okiidoku::mono::detail::solver {
 				}
 			}
 			for (++i; i < naked_subset_size_; ++i) {
-				combo_[i] = static_cast<o2xs_t>(combo_[i-1U] + 1U);
+				combo_[i] = static_cast<o2xs_t>(combo_[i-1u] + 1u);
 			}
 			assert_is_state_valid_();
 		}

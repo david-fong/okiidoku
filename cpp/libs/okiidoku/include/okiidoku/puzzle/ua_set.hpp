@@ -12,12 +12,12 @@
 namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
-	struct UaSet4 final {
+	struct UaSet4 {
 		std::array<int_ts::o4xs_t<O>, 4> rmis;
 	};
 
 	template<Order O> requires(is_order_compiled(O))
-	struct MinimalUnavoidableSets final {
+	struct MinimalUnavoidableSets {
 		std::vector<UaSet4<O>> ua_set_4s;
 	};
 

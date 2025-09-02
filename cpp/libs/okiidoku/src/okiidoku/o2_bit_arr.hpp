@@ -7,15 +7,17 @@
 #include <okiidoku/detail/order_templates.hpp>
 
 #include <array>
+#include <iterator>    // input_iterator_tag
 #include <bit>         // countr_zero
 #include <cstdint>     // uint..._t
+#include <cstddef>     // ptrdiff_t
 #include <compare>     // strong_ordering
 #include <type_traits> // conditional_t, is_aggregate_v
 
 namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
-	struct O2BitArr final {
+	struct O2BitArr {
 	private:
 		using T = Ints<O>;
 		using o2xs_t = int_ts::o2xs_t<O>;
@@ -35,21 +37,22 @@ namespace okiidoku::mono {
 		// 	std::uint_least64_t
 		// >;
 
-		// Note: use of unsigned char is safe for grid-orders < 128. That should be fine.
+		// note: use of one byte is safe for grid orders < 128. that should be fine.
 		using word_i_t = std::uint_fast8_t;
-		using word_bit_i_t = std::uint_fast8_t;
+		using word_bit_i_t = std::uint_fast8_t; // assumes `word_t` is not wider than 256 bits.
 
 	private:
-		static constexpr word_t word_t_num_bits {8 * sizeof(word_t)};
-		static constexpr word_i_t num_words {(T::O2 + word_t_num_bits-1) / word_t_num_bits};
+		static constexpr word_bit_i_t word_t_num_bits {8 * sizeof(word_t)};
+		static constexpr word_i_t     num_words       {(T::O2 + word_t_num_bits-1) / word_t_num_bits};
 		static constexpr word_bit_i_t num_excess_bits {(num_words * word_t_num_bits) - T::O2};
 		static_assert(num_words > 0);
-		static_assert((num_words * word_t_num_bits) >= T::O2);
-		static_assert(((num_words-1) * word_t_num_bits) < T::O2);
+		static_assert((num_words * word_t_num_bits) >= T::O2, "enough words");
+		static_assert(((num_words-1) * word_t_num_bits) < T::O2, "no excess words");
 
 		/** \pre `bit_i < T::O2`. */
+		template<class T_index> requires(Any_o2x_t<O, T_index>)
 		[[nodiscard, gnu::const]]
-		static constexpr word_i_t bit_i_to_word_i(const o2x_t bit_i) noexcept {
+		static constexpr word_i_t bit_i_to_word_i(const T_index bit_i) noexcept {
 			OKIIDOKU_CONTRACT_USE(bit_i < T::O2);
 			if constexpr (num_words == 1) { return 0; }
 			const auto word_i {static_cast<word_i_t>(bit_i / word_t_num_bits)};
@@ -57,8 +60,9 @@ namespace okiidoku::mono {
 			return word_i;
 		}
 		/** \pre `bit_i < T::O2`. */
+		template<class T_index> requires(Any_o2x_t<O, T_index>)
 		[[nodiscard, gnu::const]]
-		static constexpr word_t word_bit_mask_for_bit_i(const o2x_t bit_i) noexcept {
+		static constexpr word_t word_bit_mask_for_bit_i(const T_index bit_i) noexcept {
 			OKIIDOKU_CONTRACT_USE(bit_i < T::O2);
 			if constexpr (num_words == 1) {
 				return static_cast<word_t>(word_t{1} << bit_i);
@@ -67,7 +71,8 @@ namespace okiidoku::mono {
 			}
 		}
 
-		/// \internal If user follows contracts, excess top bits are always zero.
+	private:
+		/** \internal If user follows contracts, excess top bits are always zero. */
 		using words_t = std::array<word_t, num_words>;
 		words_t words_ {word_t{0}}; ///< \copydoc words_t
 
@@ -82,32 +87,39 @@ namespace okiidoku::mono {
 			return _;
 		}
 
-		[[nodiscard, gnu::pure]] friend bool operator==(const O2BitArr& a, const O2BitArr& b) noexcept = default;
+		[[nodiscard, gnu::pure]] constexpr friend bool operator==(const O2BitArr& a, const O2BitArr& b) noexcept = default;
 
-		// count the number of set bits.
+		/** count the number of set bits. */
 		[[nodiscard, gnu::pure]] o2i_t count() const noexcept;
 
-		// count the number of set bits below the specified bit index.
+		/** count the number of set bits below the specified bit index. */
 		/** \pre `end < O2`. */
 		[[nodiscard, gnu::pure]] o2x_t count_below(const o2x_t end) const noexcept;
 
 		/** \pre `at < O2`. */
-		[[nodiscard, gnu::pure]] bool test(const o2x_t at) const noexcept {
+		template<class T_index> requires(Any_o2x_t<O, T_index>)
+		[[nodiscard, gnu::pure]] constexpr bool operator[](const T_index at) const noexcept {
 			OKIIDOKU_CONTRACT_USE(at < T::O2);
 			const word_t word_bit_mask {word_bit_mask_for_bit_i(at)};
 			return (words_[bit_i_to_word_i(at)] & word_bit_mask) != 0;
 		}
 		/** \pre `at < O2`. */
-		constexpr void set(const o2x_t at) noexcept {
+		template<class T_index> requires(Any_o2x_t<O, T_index>)
+		constexpr void set(const T_index at) noexcept {
 			OKIIDOKU_CONTRACT_USE(at < T::O2);
-			const word_t word_bit_mask {word_bit_mask_for_bit_i(at)};
-			words_[bit_i_to_word_i(at)] |= word_bit_mask;
+			words_[bit_i_to_word_i(at)] |= word_bit_mask_for_bit_i(at);
 		}
 		/** \pre `at < O2`. */
-		constexpr void unset(const o2x_t at) noexcept {
+		template<class T_index> requires(Any_o2x_t<O, T_index>)
+		constexpr void unset(const T_index at) noexcept {
 			OKIIDOKU_CONTRACT_USE(at < T::O2);
-			const word_t word_bit_mask {word_bit_mask_for_bit_i(at)};
-			words_[bit_i_to_word_i(at)] &= static_cast<word_t>(~word_bit_mask);
+			words_[bit_i_to_word_i(at)] &= static_cast<word_t>(~word_bit_mask_for_bit_i(at));
+		}
+		/** \pre `at < O2`. */
+		template<class T_index> requires(Any_o2x_t<O, T_index>)
+		constexpr void flip(const T_index at) noexcept {
+			OKIIDOKU_CONTRACT_USE(at < T::O2);
+			words_[bit_i_to_word_i(at)] ^= word_bit_mask_for_bit_i(at);
 		}
 
 		void remove(const O2BitArr& to_remove) noexcept {
@@ -171,46 +183,67 @@ namespace okiidoku::mono {
 		\note an ugly name for a "sharp knife". */
 		[[nodiscard, gnu::pure]] o2xs_t first_set_bit_require_exists() const noexcept;
 
-		/** \pre `set_bit_i` < O2 and there are at least `set_bit_i+1` set bits. */
+		/** \pre `set_bit_i < O2` and there are at least `set_bit_i+1` set bits. */
 		[[nodiscard, gnu::pure]] o2x_t get_index_of_nth_set_bit(o2x_t set_bit_i) const noexcept;
 
 
-		class SetBitsWalker final {
+		/** use to iterate through set bits of a snapshot of an `O2BitArr`. */
+		class Iter {
 		public:
-			explicit SetBitsWalker(const O2BitArr arr) noexcept: arr_{arr} {
-				advance();
-			}
-			[[nodiscard, gnu::pure]] bool has_more() const noexcept { return word_i_ < num_words; }
-			/** \pre `has_more()` */
-			[[nodiscard, gnu::pure]] o2x_t value() const noexcept {
-				OKIIDOKU_CONTRACT_USE(has_more());
-				return static_cast<o2x_t>((word_i_ * word_t_num_bits) + word_bit_i_);
-			}
-			/** \pre `has_more()` */
-			void advance() noexcept {
-				OKIIDOKU_CONTRACT_USE(has_more());
-				while (word_i_ < num_words && arr_.words_[word_i_] == 0) { ++word_i_; }
-				if (has_more()) {
-					OKIIDOKU_CONTRACT_USE(word_i_ < num_words); // should be obvious, but MSVC is struggling :/
-					auto& word {arr_.words_[word_i_]};
-					word_bit_i_ = static_cast<word_bit_i_t>(std::countr_zero(word));
-					word &= static_cast<word_t>(word-1U); // unset lowest bit
-				}
-			}
+			using iterator_category = std::input_iterator_tag;
+			using difference_type = o2i_t;
+			using value_type = o2x_t;
+			using reference  = o2x_t;
+			using pointer    = o2x_t;
 		private:
 			O2BitArr arr_;
-			word_i_t word_i_ {0};
-			word_bit_i_t word_bit_i_ {0};
+			o2i_t i_;
+		public:
+			explicit Iter(const O2BitArr& arr) noexcept: arr_{arr} { advance(); }
+			[[nodiscard, gnu::pure]] constexpr bool not_end() const noexcept { return i_ < T::O2; }
+			/** \pre `not_end()` */
+			[[nodiscard, gnu::pure]] constexpr o2x_t value() const noexcept {
+				OKIIDOKU_CONTRACT_USE(i_ < T::O2);
+				return static_cast<o2x_t>(i_);
+			}
+			// 1110010001101101100001
+			// 0
+			/** \pre `not_end()` */
+			void advance() noexcept {
+				OKIIDOKU_CONTRACT_USE(i_ < T::O2);
+				word_i_t word_i = i_ / word_t_num_bits;
+				OKIIDOKU_CONTRACT_USE(word_i < num_words); // should be obvious, but MSVC is struggling :/
+				while (word_i < num_words && arr_.words_[word_i] == 0) /*[[unlikely]]*/ { ++word_i; }
+				if (word_i < num_words) [[likely]] {
+					OKIIDOKU_CONTRACT_USE(arr_.words_[word_i] != 0);
+					auto& word {arr_.words_[word_i]};
+					OKIIDOKU_CONTRACT_USE(((word_i * word_t_num_bits) + std::countr_zero(word)) < T::O2);
+					i_ = static_cast<o2i_t>((word_i * word_t_num_bits) + std::countr_zero(word));
+					word &= static_cast<word_t>(word-word_t{1}); // unset lowest bit
+				} else {
+					i_ = T::O2;
+				}
+			}
+			reference operator* () const noexcept { return value(); }
+			pointer   operator->() const noexcept { return value(); }
+			Iter& operator++()    noexcept { advance(); return *this; }
+			Iter  operator++(int) noexcept { Iter tmp = *this; ++(*this); return tmp; }
+			// [[nodiscard, gnu::pure]] friend bool operator==(const Iter& a, const Iter& b) noexcept { return (a.arr_ == b.arr_); }
+			// [[nodiscard, gnu::pure]] friend bool operator!=(const Iter& a, const Iter& b) noexcept { return (a.arr_ != b.arr_); }
+			// [[nodiscard, gnu::pure]] friend bool operator==(const Iter& i, [[maybe_unused]] const std::default_sentinel_t s) noexcept { return !i.not_end(); }
+			[[nodiscard, gnu::pure]] friend bool operator!=(const Iter& i, [[maybe_unused]] const std::default_sentinel_t s) noexcept { return  i.not_end(); }
+			[[nodiscard, gnu::pure]] auto& begin() { return *this; }
+			[[nodiscard, gnu::pure]] auto  end()   { return std::default_sentinel; }
 		};
-		[[nodiscard, gnu::pure]] SetBitsWalker set_bits_walker() const noexcept {
-			return SetBitsWalker(*this);
+		[[nodiscard, gnu::pure]] Iter set_bits() const noexcept {
+			return Iter(*this);
 		}
 
 		// Defines a strong ordering between masks. Needs design and testing work.
 		[[nodiscard, gnu::pure]] static std::strong_ordering cmp_differences(const O2BitArr& a, const O2BitArr& b) noexcept;
 
 		// least-significant bit is the least-significant (left-most) character.
-		[[nodiscard, gnu::pure]] std::array<char, T::O2> to_chars() const noexcept;
+		[[nodiscard, gnu::pure]] OKIIDOKU_KEEP_FOR_DEBUG std::array<char, T::O2> to_chars() const noexcept;
 	};
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 		static_assert(!std::is_aggregate_v<O2BitArr<O_>>);
@@ -223,13 +256,13 @@ namespace okiidoku::mono {
 
 
 	template<Order O>
-	struct ChuteBoxMasks final {
+	struct ChuteBoxMasks {
 		/// `[111'000'000, 000'111'000, 000'000'111]`
 		static constexpr std::array<O2BitArr<O>, O> row {[]{
 			std::array<O2BitArr<O>, O> mask;
 			for (unsigned chute {0}; chute < O; ++chute) {
 				for (unsigned i {0}; i < O; ++i) {
-					mask[chute].set(static_cast<int_ts::o2x_t<O>>((O*chute) + i));
+					mask[chute].set((O*chute) + i);
 			}	}
 			return mask;
 		}()};
@@ -238,7 +271,7 @@ namespace okiidoku::mono {
 			std::array<O2BitArr<O>, O> mask;
 			for (unsigned chute {0}; chute < O; ++chute) {
 				for (unsigned i {0}; i < O; ++i) {
-					mask[chute].set(static_cast<int_ts::o2x_t<O>>((O*i) + chute));
+					mask[chute].set((O*i) + chute);
 			}	}
 			return mask;
 		}()};

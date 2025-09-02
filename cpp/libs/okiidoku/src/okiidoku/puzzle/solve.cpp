@@ -31,7 +31,7 @@ namespace okiidoku::mono {
 			const auto check {engine_->do_elim_remove_sym_(ignore.rmi, ignore.val)};
 			(void)check; // `no_more_solns` will be handled by `get_next_solution`.
 		}
-		num_solns_found_ = 0;
+		num_solns_found_ = 0u;
 	}
 
 
@@ -41,25 +41,25 @@ namespace okiidoku::mono {
 			return std::nullopt;
 		}
 		engine_t& e {*engine_};
-		if (num_solns_found() > 0) {
-			OKIIDOKU_CONTRACT_ASSERT(e.get_num_unsolved() == 0);
+		if (num_solns_found() > 0u) {
+			OKIIDOKU_CONTRACT_ASSERT(e.get_num_unsolved() == 0u);
 			const auto check {e.unwind_one_stack_frame()};
 			if (check.did_unwind_root()) { return std::nullopt; }
 		}
 		// using T = Ints<O>;
 		using Find = detail::solver::CandElimFind<O>;
 		static constexpr auto find_intersections {[]([[maybe_unused]] detail::solver::Engine<O>& e_) noexcept {
-			if constexpr (O < 4) { // NOLINT(readability-magic-numbers)
+			if constexpr (O < 4u) {
 				return detail::solver::UnwindInfo::make_no_unwind();
 			} else {
 				return Find::locked_cands(e_);
 			}
 		}};
 		static constexpr auto find_subsets {[]([[maybe_unused]] detail::solver::Engine<O>& e_) noexcept {
-			if constexpr (O < 5) { // NOLINT(readability-magic-numbers)
+			if constexpr (O < 5u) { // NOLINT(readability-magic-numbers)
 				return detail::solver::UnwindInfo::make_no_unwind();
 			} else {
-				return Find::subsets(e_, e_.get_guess_stack_depth() == 0 ? 4 : 2);
+				return Find::subsets(e_, e_.get_guess_stack_depth() == 0u ? 4u : 2u);
 			}
 		}};
 		using finder_t = detail::solver::UnwindInfo (*)(detail::solver::Engine<O>&) noexcept;
@@ -68,12 +68,12 @@ namespace okiidoku::mono {
 			std::cref(*static_cast<finder_t>(find_intersections)),
 			std::cref(*static_cast<finder_t>(find_subsets)),
 		})};
-		while (e.get_num_unsolved() > 0) [[likely]] {
+		while (e.get_num_unsolved() > 0u) [[likely]] {
 			{
 				using Apply = detail::solver::CandElimApply<O>;
 				const auto check {Apply::apply_all_queued(e)};
 				if (check.did_unwind_root()) [[unlikely]] { return std::nullopt; }
-				if (e.get_num_unsolved() == 0) [[unlikely]] { break; }
+				if (e.get_num_unsolved() == 0u) [[unlikely]] { break; }
 			}
 			{
 				auto check {detail::solver::UnwindInfo::make_no_unwind()};

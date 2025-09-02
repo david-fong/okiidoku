@@ -16,7 +16,7 @@
 
 namespace okiidoku::mono::archive {
 
-	class OKIIDOKU_EXPORT Reader final {
+	class OKIIDOKU_EXPORT Reader {
 	public:
 		Reader() noexcept = default; // TODO
 		~Reader() noexcept = default;
@@ -36,7 +36,7 @@ namespace okiidoku::mono::archive {
 		#endif
 	};
 
-	struct  [[gnu::designated_init]] Header final {
+	struct  [[gnu::designated_init]] Header {
 		bool is_locked; // true if another operation is currently using this Reader already.
 		std::uint8_t order;
 		bool is_solved;

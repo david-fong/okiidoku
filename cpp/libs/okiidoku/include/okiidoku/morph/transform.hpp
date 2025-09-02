@@ -9,7 +9,7 @@
 namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
-	struct OKIIDOKU_EXPORT [[gnu::designated_init]] Transformation final {
+	struct OKIIDOKU_EXPORT [[gnu::designated_init]] Transformation {
 	private:
 		using T = Ints<O>;
 		using o1i_t = int_ts::o1i_t<O>;
@@ -63,7 +63,7 @@ namespace okiidoku::mono {
 
 
 namespace okiidoku::visitor::detail {
-	class TransformationAdaptor final {
+	class TransformationAdaptor {
 	public:
 		static constexpr bool is_borrow_type = false;
 		template<Order O>
@@ -72,20 +72,18 @@ namespace okiidoku::visitor::detail {
 }
 namespace okiidoku::visitor {
 
-	struct OKIIDOKU_EXPORT Transformation final : public detail::ContainerBase<detail::TransformationAdaptor> {
+	struct OKIIDOKU_EXPORT Transformation : public detail::ContainerBase<detail::TransformationAdaptor> {
 		using ContainerBase::ContainerBase;
 
 		[[nodiscard, gnu::pure]] friend bool operator==(const Transformation&, const Transformation&) noexcept = default;
 
-		/**
-		\copydoc okiidoku::mono::apply_from_to
-		Does nothing if the transformation's order is not the same as the source grid's.
+		/** see `okiidoku::mono::apply_from_to`.
+		does nothing if the transformation's order is not the same as the source grid's.
 		If the dest grid has a different order, it is changed to match the source grid. */
 		void apply_from_to(const Grid& src, Grid& dest) const noexcept;
 
-		/**
-		\copydoc okiidoku::mono::apply_in_place
-		Does nothing if the transformation's order is not the same as the grid's. */
+		/** see `okiidoku::mono::apply_in_place`.
+		does nothing if the transformation's order is not the same as the grid's. */
 		void apply_in_place(Grid&) const noexcept;
 
 		[[nodiscard, gnu::pure]] Transformation inverted() const noexcept;

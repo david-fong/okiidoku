@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include <okiidoku_cli_utils/console_setup.hpp>
 
-#include <ios>      // ios_base::sync_with_stdio
+// #include <ios>      // ios_base::sync_with_stdio
 #include <iostream> // cout
 #include <cstdlib>  // atexit
 
@@ -34,7 +34,7 @@ namespace okiidoku::util {
 	MyNumPunct* setup_console() {
 		// My implementation specifies this as safe:
 		std::ios_base::sync_with_stdio(false);
-		auto numpunct {new MyNumPunct};
+		auto* numpunct {new MyNumPunct};
 		const auto pushed_locale {std::cout.imbue(std::locale(std::cout.getloc(), numpunct))};
 
 		#ifdef _WIN32

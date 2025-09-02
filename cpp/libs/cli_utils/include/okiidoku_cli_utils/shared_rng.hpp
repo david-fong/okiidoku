@@ -11,7 +11,7 @@
 
 namespace okiidoku::util {
 
-	class SharedRng final {
+	class SharedRng {
 	public:
 		// Internal Notes:
 		// - consider not using this for any hot-loop operations.
