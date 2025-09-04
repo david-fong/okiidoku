@@ -44,6 +44,8 @@ Issues I'm watching:
 
 ## Misc List
 
+- rename `detail/order_templates.hpp` to `order.hpp`
+- see if helpful to add `/// \cond detail` wrapper to `detail` namespaces to suppress doxygen for them
 - OKIIDOKU_UNREACHABLE; in switch default to satisfy clang-tidy
 - move ContainerBase to separate header?
 - make `scramble` just generate a random `Transformation`.
@@ -91,13 +93,15 @@ Issues I'm watching:
   - try benchmarking with https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html#index-fipa-reorder-for-locality
 - C++23
   - http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/p2214r0.html#does-adjacent-mean-2-or-n
-  - `std::ranges::iota()`
+  - `[[assume(expr)]]`. update `OKIIDOKU_CONTRACT_USE` to use it after assert in debug, and
+  - `std::ranges::iota()` clang libc++ doesn't have it yet :( (which impacts emscripten build)
   - `std::views::chunk()`
     - could this be useful for `canon_pos`? I tried messing around with range-v3 on compiler explorer and had trouble with the whole action vs algorithm, container vs view thing. Didn't know what I was doing and could achieve what I wanted.
   - alternative to `std::chunk`, look into `mdspan` (multi-dimensional span). Seems like this is more of what I'm looking for.
   - multidimensional subscript operator
 - C+26:
   - https://wg21.link/P2169R4 placeholder variables with no name
+  - [postcondition assertions](https://en.cppreference.com/w/cpp/language/function.html#Postcondition_assertions)
 
 - https://youtu.be/7QNtiH5wTAs?t=7003 -Wl,--gc-sections does this help? does it mess with my SO interface?
   - what about functions that I want defined only for debugging? see also

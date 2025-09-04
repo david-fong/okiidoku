@@ -5,10 +5,11 @@
 
 #include <okiidoku_cli/config.hpp>
 #include <okiidoku_cli_utils/shared_rng.hpp>
-#include <okiidoku/detail/order_templates.hpp>
+#include <okiidoku/order.hpp>
 
 #include <map>
 #include <string_view>
+#include <utility> // iwyu says this is for std::pair??
 
 namespace okiidoku::cli {
 
@@ -50,6 +51,7 @@ namespace okiidoku::cli {
 
 	class Repl {
 	public:
+		// TODO: consider taking ownership of rng? or if we can get a space-cheap implementation, doesn't matter
 		explicit Repl(Order O, util::SharedRng& rng);
 
 		// disallow copies and moves:

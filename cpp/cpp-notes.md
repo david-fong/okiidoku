@@ -153,6 +153,7 @@ things I got wrong before which I couldn't understand based on gcc's error messa
 - [cpp core guidelines - do not over-parametrize members](https://github.com/isocpp/CppCoreGuidelines/blob/master/CppCoreGuidelines.md#t61-do-not-over-parameterize-members-scary)
 
 - [MSVC build time profiling](https://learn.microsoft.com/en-us/cpp/build-insights/?view=msvc-170)
+- https://slides.com/onqtam/faster_builds#/48/0/10
 
 - I can specify base-class members like:
   - Derived::Base::member

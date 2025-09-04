@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2020 David Fong
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
-#include <doctest/doctest.h>
+#include <doctest.h>
 
 #include <okiidoku/puzzle/make.hpp>
 #include <okiidoku/puzzle/solve.hpp>
@@ -41,7 +41,9 @@ void test_puzzle(okiidoku::util::SharedRng& shared_rng, const unsigned num_round
 		solver.reinit_with_puzzle(puz_grid);
 		auto soln {solver.get_next_solution()};
 		CHECK(soln.has_value());
-		CHECK(soln.value() == gen_grid);
+		if (soln.has_value()) {
+			CHECK(soln.value() == gen_grid);
+		}
 		CHECK(!solver.get_next_solution().has_value());
 		// #ifndef OKIIDOKU_NO_LOGGING
 		// print_2d<O>(std::clog, shared_rng.get(), gen_grid, puz_grid);

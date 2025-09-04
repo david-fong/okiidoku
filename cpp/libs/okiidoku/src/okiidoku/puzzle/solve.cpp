@@ -36,6 +36,7 @@ namespace okiidoku::mono {
 
 
 	template<Order O> requires(is_order_compiled(O))
+	// NOLINTNEXTLINE(*-cognitive-complexity)
 	std::optional<Grid<O>> FastSolver<O>::get_next_solution() noexcept {
 		if (!engine_ || engine_->no_more_solns()) [[unlikely]] {
 			return std::nullopt;

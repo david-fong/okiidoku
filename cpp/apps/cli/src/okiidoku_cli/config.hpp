@@ -3,7 +3,7 @@
 #ifndef HPP_OKIIDOKU_CLI__CONFIG
 #define HPP_OKIIDOKU_CLI__CONFIG
 
-#include <okiidoku/detail/order_templates.hpp>
+#include <okiidoku/order.hpp>
 
 #include <string_view>
 #include <array>

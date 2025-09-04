@@ -15,7 +15,7 @@ namespace okiidoku { namespace {
 
 	// current implementation is pretty simple (dumb?)
 	std::vector<size_t> make_random_emoji_set(const Order O, const rng_seed_t rng_seed) noexcept {
-		const unsigned long O2 {O*O};
+		const auto O2 {static_cast<okiidoku::visitor::int_ts::o2i_t>(O*O)};
 		const auto& prefs {emoji::top_set_preferences};
 		std::vector<size_t> shuffled_sets(emoji::sets.size());
 		std::ranges::iota(shuffled_sets, size_t{0});
@@ -111,7 +111,7 @@ namespace okiidoku {
 							os << set.at(val);
 							break;
 						}
-						val -= set.size();
+						val -= static_cast<o2i_t>(set.size());
 					}
 				}
 				os << " │";

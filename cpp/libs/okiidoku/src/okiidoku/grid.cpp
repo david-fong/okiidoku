@@ -3,7 +3,7 @@
 #include <okiidoku/grid.hpp>
 
 #include <okiidoku/o2_bit_arr.hpp>
-#include <okiidoku/detail/order_templates.hpp>
+#include <okiidoku/order.hpp>
 
 #include <algorithm> // all_of
 #include <array>
@@ -113,8 +113,8 @@ namespace okiidoku::visitor {
 		case O_: return mono::grid_follows_rule(vis_grid.unchecked_get_mono_exact<O_>());
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
+		default: OKIIDOKU_UNREACHABLE;
 		}
-		OKIIDOKU_UNREACHABLE;
 	}
 
 	bool grid_is_filled(const Grid& vis_grid) noexcept {
@@ -123,8 +123,8 @@ namespace okiidoku::visitor {
 		case O_: return mono::grid_is_filled(vis_grid.unchecked_get_mono_exact<O_>());
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
+		default: OKIIDOKU_UNREACHABLE;
 		}
-		OKIIDOKU_UNREACHABLE;
 	}
 
 	bool grid_is_empty(const Grid& vis_grid) noexcept {
@@ -133,8 +133,8 @@ namespace okiidoku::visitor {
 		case O_: return mono::grid_is_empty(vis_grid.unchecked_get_mono_exact<O_>());
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
+		default: OKIIDOKU_UNREACHABLE;
 		}
-		OKIIDOKU_UNREACHABLE;
 	}
 
 	void init_most_canonical_grid(Grid& vis_grid) noexcept {
@@ -143,8 +143,8 @@ namespace okiidoku::visitor {
 		case O_: return mono::init_most_canonical_grid(vis_grid.unchecked_get_mono_exact<O_>());
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
+		default: OKIIDOKU_UNREACHABLE;
 		}
-		OKIIDOKU_UNREACHABLE;
 	}
 
 
@@ -154,8 +154,8 @@ namespace okiidoku::visitor {
 		case O_: return this->unchecked_get_mono_exact<O_>().at_rmi(rmi);
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
+		default: OKIIDOKU_UNREACHABLE;
 		}
-		OKIIDOKU_UNREACHABLE;
 	}
 
 	Grid::val_t Grid::at(const int_ts::o2i_t row, const int_ts::o2i_t col) const noexcept {
@@ -164,7 +164,7 @@ namespace okiidoku::visitor {
 		case O_: return this->unchecked_get_mono_exact<O_>().at(row, col);
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
+		default: OKIIDOKU_UNREACHABLE;
 		}
-		OKIIDOKU_UNREACHABLE;
 	}
 }

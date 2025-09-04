@@ -4,7 +4,7 @@
 #define HPP_OKIIDOKU__PUZZLE__SOLVER__FOUND_QUEUE
 
 #include <okiidoku/puzzle/solver/found.hpp>
-#include <okiidoku/detail/order_templates.hpp>
+#include <okiidoku/order.hpp>
 
 #include <deque>
 #include <tuple>

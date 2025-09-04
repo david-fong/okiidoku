@@ -1,11 +1,11 @@
 // SPDX-FileCopyrightText: 2020 David Fong
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
-#include <doctest/doctest.h>
+#include <doctest.h>
 
 #include <okiidoku/grid.hpp>
 #include <okiidoku/ints.hpp>
-#include <okiidoku/detail/order_templates.hpp>
+#include <okiidoku/order.hpp>
 
 namespace okiidoku {
 template<okiidoku::Order O> OKIIDOKU_KEEP_FOR_DEBUG // NOLINTNEXTLINE(*-internal-linkage)

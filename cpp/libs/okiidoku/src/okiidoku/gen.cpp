@@ -2,11 +2,13 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include <okiidoku/gen.hpp>
 
+#include <okiidoku/grid.hpp>
+#include <okiidoku/order.hpp>
+
 #include <random>    // minstd_rand
-#include <algorithm> // swap, copy, shuffle, count
-#include <numeric>   // iota
+#include <algorithm> // count, shuffle
 #include <array>
-#include <utility>   // forward
+#include <utility>   // swap, forward
 
 namespace okiidoku::mono { namespace {
 
@@ -184,7 +186,7 @@ namespace okiidoku::visitor {
 		case O_: return mono::generate_shuffled(vis_sink.unchecked_get_mono_exact<O_>(), rng_seed);
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
+		default: OKIIDOKU_UNREACHABLE;
 		}
-		OKIIDOKU_UNREACHABLE;
 	}
 }

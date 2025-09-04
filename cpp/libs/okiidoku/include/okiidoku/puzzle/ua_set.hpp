@@ -4,7 +4,7 @@
 #define HPP_OKIIDOKU__PUZZLE__UNAVOIDABLE_SET
 
 #include <okiidoku/grid.hpp>
-#include <okiidoku/detail/order_templates.hpp>
+#include <okiidoku/order.hpp>
 
 #include <vector>
 #include <array>

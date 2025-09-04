@@ -46,7 +46,7 @@ namespace okiidoku::mono::detail::solver {
 			return naked_subset_size_;
 		}
 
-		[[nodiscard, gnu::pure]] bool has_more() const noexcept {
+		[[nodiscard, gnu::pure]] constexpr bool has_more() const noexcept {
 			return has_more_;
 		}
 

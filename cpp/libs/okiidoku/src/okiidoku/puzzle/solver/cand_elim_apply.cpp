@@ -2,7 +2,15 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include <okiidoku/puzzle/solver/cand_elim_apply.hpp>
 
+#include "okiidoku/puzzle/solver/engine.hpp"      // UnwindInfo, Engine...
+#include "okiidoku/puzzle/solver/found_queue.hpp" // FoundQueues
+#include "okiidoku/puzzle/solver/found.hpp"       // CellClaimSym, Lock...
+#include <okiidoku/order.hpp>
+
 #include <algorithm>
+#include <tuple>       // apply, get
+#include <type_traits> // decay_t, is_same_v
+#include <utility>     // move, tuple_element_t
 
 namespace okiidoku::mono::detail::solver {
 

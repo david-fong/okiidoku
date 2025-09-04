@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2020 David Fong
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
-#include <doctest/doctest.h>
+#include <doctest.h>
 
 #include <okiidoku/morph/canon.hpp>
 #include <okiidoku/morph/scramble.hpp>
@@ -33,10 +33,7 @@ void test_morph(okiidoku::util::SharedRng& shared_rng, const unsigned num_rounds
 		CHECK(grid_follows_rule(gen_grid));
 
 		const auto gen_canon_transform {canonicalize(gen_grid)};
-		if (gen_canon_transform.inverted().inverted() != gen_canon_transform) {
-			std::clog << "\ntransformation twice-inverted must equal itself.";
-			std::exit(1);
-		}
+		CHECK_MESSAGE(gen_canon_transform.inverted().inverted() != gen_canon_transform, "transformation twice-inverted must equal itself.");
 		// TODO: test that performing various transforms and then performing the invert truly reverts the transform.
 
 		canon_grid = gen_grid;

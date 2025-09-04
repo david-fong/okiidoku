@@ -17,6 +17,9 @@ function(okiidoku_test_add name #[[ ARGN are dependencies ]])
 	target_include_directories("${target}" PRIVATE
 		"${CMAKE_CURRENT_LIST_DIR}/../src"
 	)
+	target_compile_definitions("${target}" PRIVATE
+		DOCTEST_CONFIG_SUPER_FAST_ASSERTS
+	)
 	# https://crascit.com/2016/10/18/test-fixtures-with-cmake-ctest/
 	set(dependencies "")
 	foreach(dependency ${ARGN})

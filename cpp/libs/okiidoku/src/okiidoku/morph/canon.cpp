@@ -2,6 +2,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include <okiidoku/morph/canon.hpp>
 
+#include <okiidoku/morph/transform.hpp>
+#include <okiidoku/grid.hpp>
+#include <okiidoku/order.hpp>
+
 namespace okiidoku::mono::detail {
 
 	/** implemented in canon_sym.cpp.
@@ -44,7 +48,7 @@ namespace okiidoku::visitor {
 		case O_: return static_cast<Transformation>(mono::canonicalize(vis_grid.unchecked_get_mono_exact<O_>()));
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
+		default: OKIIDOKU_UNREACHABLE;
 		}
-		OKIIDOKU_UNREACHABLE;
 	}
 }

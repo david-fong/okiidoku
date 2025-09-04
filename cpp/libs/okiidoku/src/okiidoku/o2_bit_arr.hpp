@@ -4,13 +4,12 @@
 #define HPP_OKIIDOKU__O2_BIT_ARR
 
 #include <okiidoku/ints.hpp>
-#include <okiidoku/detail/order_templates.hpp>
+#include <okiidoku/order.hpp>
 
 #include <array>
-#include <iterator>    // input_iterator_tag
+#include <iterator>    // input_iterator_tag, default_sentinel
 #include <bit>         // countr_zero
 #include <cstdint>     // uint..._t
-#include <cstddef>     // ptrdiff_t
 #include <compare>     // strong_ordering
 #include <type_traits> // conditional_t, is_aggregate_v
 
@@ -33,7 +32,7 @@ namespace okiidoku::mono {
 		// since last measured for clang, the above is slightly faster for O=3, with
 		// slightly better codegen and slightly bigger code size.
 		// using word_t =
-		// 	std::conditional_t<(O <= 8), detail::uint_smolN_t<T::O2>,
+		// 	std::conditional_t<(O <= 8), detail::uint_small_for_width_t<T::O2>,
 		// 	std::uint_least64_t
 		// >;
 

@@ -11,7 +11,7 @@
 #include <okiidoku/print_2d.hpp>
 // #include <okiidoku/serdes.hpp> TODO
 #include <okiidoku/grid.hpp>
-#include <okiidoku/detail/order_templates.hpp>
+#include <okiidoku/order.hpp>
 
 #include <iostream>     // cout, endl,
 #include <fstream>
@@ -43,7 +43,7 @@ namespace okiidoku::cli {
 		<< std::endl;
 
 		while (true) {
-			std::cout << "\n[" << std::dec << config_.order() << "]: ";
+			std::cout << "\n[" << std::dec << uint_fast32_t{config_.order()} << "]: ";
 			std::string command;
 			std::getline(std::cin, command);
 			if (!std::cin) {
@@ -77,18 +77,20 @@ namespace okiidoku::cli {
 		}
 		switch (it->second) {
 			using Command::E;
-			case E::help:
+			case E::help: {
 				std::cout
 				<< Command::helpMessage /* << str::dim.on
 				important subcommand help messages can go here if needed
 				<< str::dim.off */ << std::endl;
 				break;
-			case E::quit:
+			}
+			case E::quit: {
 				return false;
-			case E::config_order:       config_.order(cmd_args); break;
-			case E::config_auto_canonicalize: config_.canonicalize(cmd_args); break;
-			case E::gen_single:   gen_single(); break;
-			case E::gen_multiple: gen_multiple(cmd_args); break;
+			}
+			case E::config_order: { config_.order(cmd_args); break; }
+			case E::config_auto_canonicalize: { config_.canonicalize(cmd_args); break; }
+			case E::gen_single: { gen_single(); break; }
+			case E::gen_multiple: { gen_multiple(cmd_args); break; }
 		}
 		return true;
 	}
@@ -119,7 +121,7 @@ namespace okiidoku::cli {
 		const Timer timer{};
 		{
 			std::filesystem::create_directories("gen");
-			const std::string file_path {std::string{} + "gen/" + std::to_string(config_.order()) + ".bin"};
+			const std::string file_path {std::string{"gen/"} + std::to_string(uint_fast32_t{config_.order()}) + ".bin"};
 			std::cout << "output file path: " << file_path << std::endl;
 			// std::ofstream of(file_path, std::ios::binary|std::ios::ate);
 			// TODO.wait change this to use the archiving operations.

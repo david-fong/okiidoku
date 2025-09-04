@@ -71,7 +71,7 @@ namespace okiidoku::mono {
 
 		// Note: will remove the logging once I'm done working on solver (ie. far in the future)
 		static constexpr auto call_debug_log_fn {[]([[maybe_unused]] auto&& fn){
-			if constexpr (O < 5) {
+			if constexpr (O < 5) { // NOLINT(*-branch-clone, *magic-number*)
 				#ifndef NDEBUG
 				fn();
 				#endif
@@ -139,12 +139,12 @@ namespace okiidoku::mono {
 
 namespace okiidoku::visitor {
 
-	// TODO: implement
-	bool grid_is_proper_puzzle(const Grid&) noexcept;
+	/// \todo implement
+	bool grid_is_proper_puzzle(const Grid&) noexcept { return false; }
 
-	// TODO: implement
-	bool grid_is_minimal_puzzle(const Grid&) noexcept;
+	/// \todo implement
+	bool grid_is_minimal_puzzle(const Grid&) noexcept { return false; }
 
-	// TODO: implement
-	void make_minimal_puzzle(Grid&, rng_seed_t rng_seed) noexcept;
+	/// \todo implement
+	void make_minimal_puzzle(Grid&, rng_seed_t rng_seed) noexcept { }
 }

@@ -4,8 +4,9 @@
 #define HPP_OKIIDOKU__MORPH__CANON
 
 #include <okiidoku/morph/transform.hpp>
-#include <okiidoku/grid.hpp>
-#include <okiidoku/detail/order_templates.hpp>
+#include <okiidoku/order.hpp>
+namespace okiidoku::mono { template <Order O> requires (is_order_compiled(O)) struct Grid; }
+namespace okiidoku::visitor { struct Grid; }
 
 namespace okiidoku::mono {
 

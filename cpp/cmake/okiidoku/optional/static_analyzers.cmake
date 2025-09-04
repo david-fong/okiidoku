@@ -27,6 +27,10 @@ if(NOT "${CLANG_TIDY_EXE}" STREQUAL "CLANG_TIDY_EXE-NOTFOUND")
 		list(APPEND CMAKE_CXX_CLANG_TIDY "--use-color")
 	endif()
 	# TODO.mid sort out the warnings
+	set(CMAKE_CXX_CLANG_TIDY_EXPORT_FIXES_DIR "${CMAKE_BINARY_DIR}")
+
+	set(CMAKE_C_CLANG_TIDY "${CMAKE_CXX_CLANG_TIDY}")
+	set(CMAKE_C_CLANG_TIDY_EXPORT_FIXES_DIR "${CMAKE_CXX_CLANG_TIDY_EXPORT_FIXES_DIR}")
 endif()
 
 
@@ -36,6 +40,7 @@ if(NOT "${CPPCHECK_EXE}" STREQUAL "CPPCHECK_EXE-NOTFOUND")
 	# enable suppressing inline with comments like: "cppcheck-suppress [aaaa,bbbb]"
 	# It's choking on the tweak header's `#if __has_include(...)`.
 	# Other people also mention this issue on sourceforge.
+	set(CMAKE_C_CPPCHECK "${CMAKE_CXX_CPPCHECK}")
 endif()
 
 
@@ -45,4 +50,8 @@ if(NOT "${IWYU_EXE}" STREQUAL "IWYU_EXE-NOTFOUND")
 		"-Xiwyu" "--cxx17ns"
 		"-Xiwyu" "--prefix_header_includes=keep"
 	)
+	set(CMAKE_C_INCLUDE_WHAT_YOU_USE "${CMAKE_CXX_INCLUDE_WHAT_YOU_USE}")
 endif()
+
+
+set(CMAKE_LINK_WHAT_YOU_USE ON)

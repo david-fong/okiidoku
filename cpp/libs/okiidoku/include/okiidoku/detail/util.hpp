@@ -22,9 +22,10 @@
 #else
 	/** \def OKIIDOKU_CONTRACT_USE(cond)
 	translates to assertion for debug builds, and assumption for release builds.
-	\note if the condition expression is complex to evaluate, this may possibly
-		backfire for performance, so avoid using this in such cases, or benchmark
-		carefully. */
+	\note if the condition expression is costly to evaluate, and the compiler can't
+		figure out it has no side-effects, or const pure expressions haven't or won't
+		happen anyway, this could backfire for performance, so avoid using this in such
+		cases, or benchmark carefully, or check codegen. */
 	#define OKIIDOKU_CONTRACT_USE(expr) assert(expr) // NOLINT(cert-dcl03-c,misc-static-assert) runtime abort desirable here.
 	#include <cstdlib> // abort
 	#define OKIIDOKU_UNREACHABLE std::abort()

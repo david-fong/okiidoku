@@ -3,8 +3,10 @@
 #ifndef HPP_OKIIDOKU__GEN
 #define HPP_OKIIDOKU__GEN
 
-#include <okiidoku/grid.hpp>
-#include <okiidoku/detail/order_templates.hpp>
+#include <okiidoku/ints.hpp> // for rng_seed_t
+#include <okiidoku/order.hpp>
+namespace okiidoku::mono { template <Order O> requires (is_order_compiled(O)) struct Grid; }
+namespace okiidoku::visitor { struct Grid; }
 
 namespace okiidoku::mono {
 

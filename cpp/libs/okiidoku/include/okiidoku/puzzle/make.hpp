@@ -4,7 +4,7 @@
 #define HPP_OKIIDOKU__PUZZLE__MAKE
 
 #include <okiidoku/grid.hpp>
-#include <okiidoku/detail/order_templates.hpp>
+#include <okiidoku/order.hpp>
 
 namespace okiidoku::mono {
 

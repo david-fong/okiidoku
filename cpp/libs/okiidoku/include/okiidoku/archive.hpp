@@ -3,7 +3,7 @@
 #ifndef HPP_OKIIDOKU__ARCHIVE
 #define HPP_OKIIDOKU__ARCHIVE
 
-#include <okiidoku/detail/order_templates.hpp>
+#include <okiidoku/order.hpp>
 
 // #include <iosfwd>
 #include <string_view>

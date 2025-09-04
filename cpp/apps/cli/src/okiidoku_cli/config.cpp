@@ -3,7 +3,7 @@
 #include <okiidoku_cli/config.hpp>
 
 #include <okiidoku_cli_utils/str.hpp>
-#include <okiidoku/detail/order_templates.hpp>
+#include <okiidoku/order.hpp>
 
 #include <iostream> // cout, endl,
 #include <charconv> // from_chars
@@ -22,10 +22,10 @@ namespace okiidoku::cli {
 
 	void Config::order(const std::string_view arg) {
 		if (arg.empty()) {
-			std::cout << "is: " << order() << std::endl;
+			std::cout << "is: " << uint_fast32_t{order()} << std::endl;
 			return;
 		}
-		unsigned int new_order {};
+		Order new_order {};
 		const auto parse_result {std::from_chars(
 			arg.data(), arg.data()+arg.size(), new_order
 		)};

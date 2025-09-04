@@ -5,7 +5,7 @@
 #include <okiidoku/grid.hpp>
 #include <okiidoku/o2_bit_arr.hpp>
 #include <okiidoku/ints.hpp>
-#include <okiidoku/detail/order_templates.hpp>
+#include <okiidoku/order.hpp>
 
 // #ifndef NDEBUG
 #include <algorithm> // count_if

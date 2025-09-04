@@ -27,8 +27,8 @@ namespace okiidoku::mono::detail::solver2 {
 		HouseType house_type_;
 	public:
 		[[nodiscard, gnu::pure]] auto is_unsolved (const o2i_t house, const o2i_t at) const noexcept -> bool { return cands_.at(house, at).count() == 1; }
-		[[nodiscard, gnu::pure]] auto at_unsolved (const o2i_t house, const o2i_t at) const noexcept -> const O2BitArr<O>& { OKIIDOKU_CONTRACT_USE( is_unsolved(house, at)); return cands_.at(house, at); }
-		[[nodiscard, gnu::pure]] auto at_solved   (const o2i_t house, const o2i_t at) const noexcept -> o2xs_t             { OKIIDOKU_CONTRACT_USE(!is_unsolved(house, at)); return cands_.at(house, at).first_set_bit_require_exists(); }
+		[[nodiscard, gnu::pure]] auto at_unsolved (const o2i_t house, const o2i_t at) const noexcept -> const O2BitArr<O>& { OKIIDOKU_CONTRACT_ASSERT( is_unsolved(house, at)); return cands_.at(house, at); }
+		[[nodiscard, gnu::pure]] auto at_solved   (const o2i_t house, const o2i_t at) const noexcept -> o2xs_t             { OKIIDOKU_CONTRACT_ASSERT(!is_unsolved(house, at)); return cands_.at(house, at).first_set_bit_require_exists(); }
 		void gc() const noexcept {/* noop */}
 	};
 

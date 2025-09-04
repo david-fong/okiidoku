@@ -2,9 +2,13 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include <okiidoku/morph/scramble.hpp>
 
-#include <range/v3/algorithm/shuffle.hpp>
+#include <okiidoku/morph/transform.hpp> // Transformation
+#include <okiidoku/grid.hpp>            // grid_follows_rule, Grid
+#include <okiidoku/ints.hpp>            // rng_seed_t, Ints, o1i_t
+#include <okiidoku/order.hpp>
 
-#include <random> // minstd_rand
+#include <algorithm> // ranges::shuffle
+#include <random>    // minstd_rand
 #include <array>
 
 namespace okiidoku::mono {
@@ -12,16 +16,17 @@ namespace okiidoku::mono {
 	template<Order O> requires(is_order_compiled(O))
 	Transformation<O> scramble(Grid<O>& grid, const rng_seed_t rng_seed) noexcept {
 		using T = Ints<O>;
+		namespace stdr = std::ranges;
 		Transformation<O> t {};
 		{
 			using rng_t = std::minstd_rand;
 			rng_t rng {rng_seed}; // TODO try std::ranges::shuffle on my compilers
-			ranges::shuffle(t.sym_map, rng);
-			ranges::shuffle(t.row_map, rng);
-			ranges::shuffle(t.col_map, rng);
+			stdr::shuffle(t.sym_map, rng);
+			stdr::shuffle(t.row_map, rng);
+			stdr::shuffle(t.col_map, rng);
 			for (int_ts::o1i_t<O> chute {0}; chute < T::O1; ++chute) {
-				ranges::shuffle(t.row_map[chute], rng);
-				ranges::shuffle(t.col_map[chute], rng);
+				stdr::shuffle(t.row_map[chute], rng);
+				stdr::shuffle(t.col_map[chute], rng);
 			}
 			// t.post_transpose = static_cast<bool>(rng() % 2); // TODO add this back when canonicalize can handle it
 		}

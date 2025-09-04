@@ -37,6 +37,7 @@ if(NOT DEFINED CMAKE_CXX_COMPILER_LAUNCHER)
 		# 	"$<$<CXX_COMPILER_ID:GNU>:-fdirectives-only>"
 		# 	"$<$<CXX_COMPILER_ID:Clang>:-frewrite-includes>"
 		# )
+		set(CMAKE_C_COMPILER_LAUNCHER "${CMAKE_CXX_COMPILER_LAUNCHER}")
 	endif()
 endif()
 

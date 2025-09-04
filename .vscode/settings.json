@@ -78,7 +78,8 @@
 	"C_Cpp.default.defines": [
 		// intellisense chokes otherwise :/
 		"OKIIDOKU_EXPORT=",
-		"OKIIDOKU_KEEP_FOR_DEBUG="
+		"OKIIDOKU_KEEP_FOR_DEBUG=",
+		"OKIIDOKU_UNREACHABLE",
 	],
 	"C_Cpp.default.browse.limitSymbolsToIncludedHeaders": true,
 	// "C_Cpp.default.browse.path": ["${workspaceFolder}"],
@@ -105,6 +106,6 @@
 		},
 	},
 	"cmake.configureArgs": [
-		"-D OKIIDOKU_BUILD_WITH_STATIC_ANALYZERS:BOOL=YES"
+		// "-D OKIIDOKU_BUILD_WITH_STATIC_ANALYZERS:BOOL=YES"
 	],
 }

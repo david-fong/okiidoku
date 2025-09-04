@@ -1,11 +1,12 @@
 // SPDX-FileCopyrightText: 2020 David Fong
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
-#include <doctest/doctest.h>
+#include <doctest.h>
 
 #include <okiidoku/o2_bit_arr.hpp>
 #include <okiidoku/o2_bit_arr.cpp> // NOLINT(*include*) implementations aren't exported in libokiidoku.
 #include <okiidoku/ints.hpp>
+#include <okiidoku/order.hpp>
 
 #include <iostream>
 

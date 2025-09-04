@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2020 David Fong
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#ifndef HPP_OKIIDOKU__DETAIL__ORDER_TEMPLATES
-#define HPP_OKIIDOKU__DETAIL__ORDER_TEMPLATES
+#ifndef HPP_OKIIDOKU__ORDER
+#define HPP_OKIIDOKU__ORDER
 
 #include <okiidoku/config/defaults.hpp>
 #include <okiidoku/detail/order_templates.macros.hpp>
@@ -13,9 +13,10 @@
 
 namespace okiidoku {
 
-	using Order = unsigned long;
+	using Order = unsigned char;
 
-	constexpr bool is_order_compiled(const Order O) noexcept {
+	[[nodiscard, gnu::const]] constexpr
+	bool is_order_compiled(const Order O) noexcept {
 		#define OKIIDOKU_FOREACH_O_EMIT(O_) if (O == O_) { return true; }
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT

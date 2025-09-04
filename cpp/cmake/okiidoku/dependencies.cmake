@@ -47,30 +47,29 @@ if(OKIIDOKU_BUILD_TESTING)
 	# https://github.com/catchorg/Catch2/blob/devel/docs/cmake-integration.md
 	CPMAddPackage(NAME doctest
 		# https://github.com/doctest/doctest/blob/master/CHANGELOG.md
-		URL [[https://github.com/doctest/doctest/archive/refs/tags/v2.4.11.tar.gz]] # take latest
+		URL [[https://github.com/doctest/doctest/archive/refs/tags/v2.4.12.tar.gz]] # take latest
 		DOWNLOAD_ONLY YES ${CUSTOM_CACHE_KEY}
 	)
 	if(doctest_ADDED)
 		add_library(doctest INTERFACE IMPORTED)
 		add_library(doctest::doctest ALIAS doctest)
-		target_include_directories(doctest SYSTEM INTERFACE "${doctest_SOURCE_DIR}")
+		target_include_directories(doctest SYSTEM INTERFACE "${doctest_SOURCE_DIR}/doctest")
 	endif()
 	include("${doctest_SOURCE_DIR}/scripts/cmake/doctest.cmake")
 endif()
 
 
 if(OKIIDOKU_BUILD_BINDINGS_FOR_PYTHON)
-	# CPMAddPackage("gh:pybind/pybind11@2.9.2")
+	# CPMAddPackage("gh:pybind/pybind11@3.0.1")
 	# https://pybind11.readthedocs.io/en/stable/index.html
 	# https://pybind11.readthedocs.io/en/stable/changelog.html
 
 	find_package(Python COMPONENTS Interpreter Development.Module REQUIRED) # https://nanobind.readthedocs.io/en/latest/building.html#preliminaries
 	# https://github.com/wjakob/nanobind
 	# https://nanobind.readthedocs.io/en/latest/changelog.html
-	# https://nanobind.readthedocs.io/en/latest/building.html#finding-nanobind
-	CPMAddPackage("gh:wjakob/nanobind@2.7.0") # TODO ${CUSTOM_CACHE_KEY}
-		# git tag archive doesn't work since submodule deps are required
-		# https://github.com/wjakob/nanobind/issues/403 could run `git submodule status` to get robin_map commit and then fetch that tarball there.
+	CPMAddPackage("gh:wjakob/nanobind@2.8.0") # TODO ${CUSTOM_CACHE_KEY}
+		# git tag archive link doesn't work since submodule deps are required
+		# TODO https://github.com/wjakob/nanobind/issues/403 could run `git submodule status` to get robin_map commit and then fetch that tarball there.
 	foreach(lib "" "-abi3") # https://nanobind.readthedocs.io/en/latest/api_cmake.html#command:nanobind_build_library
 		nanobind_build_library("nanobind${lib}")
 		set_target_properties("nanobind${lib}" PROPERTIES SYSTEM YES)

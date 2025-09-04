@@ -2,12 +2,16 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include <okiidoku/o2_bit_arr.hpp>
 
+#include <okiidoku/ints.hpp>
+#include <okiidoku/order.hpp>
+
 #if __has_include(<immintrin.h>)
 #include <immintrin.h>
 #endif
 
-#include <algorithm> // find_if
-#include <numeric>   // transform_reduce
+#include <algorithm>  // find_if
+#include <functional> // plus
+#include <numeric>    // transform_reduce
 #include <execution>
 
 namespace okiidoku::mono {
@@ -65,7 +69,7 @@ namespace okiidoku::mono {
 	O2BitArr<O>::first_set_bit_require_exists() const noexcept {
 		// Note: without the non-empty-mask assumption, we'd have to
 		//  handle discounting excess top zeros in the empty-mask case.
-		OKIIDOKU_CONTRACT_USE(count() > 0);
+		OKIIDOKU_CONTRACT_ASSERT(count() > 0);
 		if constexpr (num_words == 1) {
 			const auto count {static_cast<o2xs_t>(std::countr_zero(words_[0]))};
 			OKIIDOKU_CONTRACT_USE(count < T::O2);
@@ -91,7 +95,7 @@ namespace okiidoku::mono {
 	typename O2BitArr<O>::o2x_t
 	O2BitArr<O>::get_index_of_nth_set_bit(O2BitArr::o2x_t set_bit_index) const noexcept {
 		OKIIDOKU_CONTRACT_USE(set_bit_index < T::O2);
-		OKIIDOKU_CONTRACT_USE(count() > set_bit_index);
+		OKIIDOKU_CONTRACT_ASSERT(count() > set_bit_index);
 		const word_i_t word_i {[&](){
 			if constexpr (num_words == 1) { return word_i_t{0}; }
 			else {

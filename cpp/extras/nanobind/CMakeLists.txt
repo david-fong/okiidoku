@@ -53,5 +53,5 @@ endblock()
 
 set(src "$<TARGET_FILE_DIR:_okiidoku_nb>")
 # set(dest "${CMAKE_CURRENT_SOURCE_DIR}/examples/build/$<CONFIG>")
-install(FILES "${src}/okiidoku.pyi" TYPE LIB COMPONENT okiidoku_development)
+# install(FILES "${src}/okiidoku.pyi" TYPE LIB COMPONENT okiidoku_development)
 # TODO the other files to install. and maybe add convenience symlinks in examples dir like we have for emscripten? or are we going to get rid of those?

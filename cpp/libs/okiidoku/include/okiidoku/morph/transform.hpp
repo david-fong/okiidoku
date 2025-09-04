@@ -4,7 +4,7 @@
 #define HPP_OKIIDOKU__MORPH__TRANSFORM
 
 #include <okiidoku/grid.hpp>
-#include <okiidoku/detail/order_templates.hpp>
+#include <okiidoku/order.hpp>
 
 namespace okiidoku::mono {
 
@@ -47,16 +47,17 @@ namespace okiidoku::mono {
 		void apply_in_place(Grid<O>&) const noexcept;
 
 		[[nodiscard, gnu::pure]] Transformation<O> inverted() const noexcept;
+		// TODO: consider aliasing as operator~
 
-		// TODO: for fun: a transformation chaining operation
+		// TODO: for fun: a transformation chaining operation. maybe use || operator? need to investigate commutativity and operator order of evaluation
 		// [[nodiscard, gnu::pure]] Transformation<O> chain(const Transformation<O>&) const noexcept;
 	};
 
 	template<Order O> requires(is_order_compiled(O))
 	constexpr Transformation<O> Transformation<O>::identity {
 		.sym_map {[]{ sym_map_t _{}; for (o2i_t i {0}; i < T::O2; ++i) { _[i] = static_cast<to_t>(i); } return _; }()},
-		.row_map {[]{ line_map_t _{};  for (o2i_t i {0}; i < T::O2; ++i) { _[i/T::O1][i%T::O1] = static_cast<to_t>(i); } return _; }()},
-		.col_map {[]{ line_map_t _{};  for (o2i_t i {0}; i < T::O2; ++i) { _[i/T::O1][i%T::O1] = static_cast<to_t>(i); } return _; }()},
+		.row_map {[]{ line_map_t _{}; for (o2i_t i {0}; i < T::O2; ++i) { _[i/T::O1][i%T::O1] = static_cast<to_t>(i); } return _; }()},
+		.col_map {[]{ line_map_t _{}; for (o2i_t i {0}; i < T::O2; ++i) { _[i/T::O1][i%T::O1] = static_cast<to_t>(i); } return _; }()},
 		.post_transpose {false},
 	};
 }

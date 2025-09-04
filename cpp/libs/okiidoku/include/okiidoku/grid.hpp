@@ -4,7 +4,7 @@
 #define HPP_OKIIDOKU__GRID
 
 #include <okiidoku/ints.hpp>
-#include <okiidoku/detail/order_templates.hpp>
+#include <okiidoku/order.hpp>
 
 #include <array>
 #include <span>

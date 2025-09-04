@@ -9,7 +9,7 @@ endif()
 find_package(Doxygen 1.9) # (minimum version)
 if(Doxygen_FOUND)
 	list(APPEND DOXYGEN_EXCLUDE "${okiidoku_SOURCE_DIR}/external/")
-	list(APPEND DOXYGEN_EXCLUDE_PATTERNS "*/node_modules/*" "*/extras/*/build/*")
+	list(APPEND DOXYGEN_EXCLUDE_PATTERNS "*/node_modules/*" "*/extras/*/build/*" "*/out/build/*" "*/out/install/*")
 	# set(DOXYGEN_USE_MDFILE_AS_MAINPAGE "${okiidoku_SOURCE_DIR}/../README.md")
 	set(DOXYGEN_BUILTIN_STL_SUPPORT YES)
 	set(DOXYGEN_GENERATE_MAN YES)
@@ -29,7 +29,7 @@ if(Doxygen_FOUND)
 			"${okiidoku_SOURCE_DIR}"
 			# "${okiidoku_SOURCE_DIR}/.."
 			# "${okiidoku_SOURCE_DIR}/../writings"
-			"${DOXYGEN_USE_MDFILE_AS_MAINPAGE}"
+			# "${DOXYGEN_USE_MDFILE_AS_MAINPAGE}"
 			ALL
 		)
 	endblock()

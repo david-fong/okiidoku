@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include <okiidoku/morph/transform.hpp>
 
+#include <okiidoku/grid.hpp>
+#include <okiidoku/order.hpp>
+
 #include <utility> // swap
 
 namespace okiidoku::mono {
