@@ -4,6 +4,8 @@
 
 #include <okiidoku/puzzle/solver/found.hpp>
 #include <okiidoku/o2_bit_arr.hpp>
+#include <okiidoku/ints.hpp>
+#include <okiidoku/order.hpp>
 
 // #include <algorithm>
 #include <array>
@@ -44,7 +46,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 	template<Order O> requires(is_order_compiled(O))
 	void find_locked_cands_in_chute(
 		const LineType line_type,
-		const int_ts::o1i_t<O> chute,
+		const typename Ints<O>::o1i_t chute,
 		const CandsGrid<O>& cells_cands,
 		FoundQueues<O>& found_queues
 	) noexcept {

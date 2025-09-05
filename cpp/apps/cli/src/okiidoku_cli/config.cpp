@@ -5,9 +5,10 @@
 #include <okiidoku_cli_utils/str.hpp>
 #include <okiidoku/order.hpp>
 
-#include <iostream> // cout, endl,
-#include <charconv> // from_chars
+#include <iostream>     // cout, endl,
+#include <charconv>     // from_chars
 #include <system_error> // errc
+#include <cstdint>      // uint_fast32_t
 
 namespace okiidoku::cli {
 
@@ -22,7 +23,7 @@ namespace okiidoku::cli {
 
 	void Config::order(const std::string_view arg) {
 		if (arg.empty()) {
-			std::cout << "is: " << uint_fast32_t{order()} << std::endl;
+			std::cout << "is: " << std::uint_fast32_t{order()} << std::endl;
 			return;
 		}
 		Order new_order {};

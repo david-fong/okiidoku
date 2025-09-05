@@ -69,8 +69,8 @@ namespace okiidoku::mono::detail::solver {
 
 	template<Order O> requires(is_order_compiled(O))
 	struct [[gnu::designated_init]] Guess {
-		int_ts::o4xs_t<O> rmi;
-		int_ts::o2xs_t<O> val;
+		Ints<O>::o4xs_t rmi;
+		Ints<O>::o2xs_t val;
 	};
 
 
@@ -82,15 +82,15 @@ namespace okiidoku::mono::detail::solver {
 		friend UnwindInfo unwind_one_stack_frame_of_<O>(EngineImpl<O>&) noexcept;
 	private:
 		using T = Ints<O>;
-		using o2i_t = int_ts::o2i_t<O>;
-		using o4i_t = int_ts::o4i_t<O>;
-		using val_t = int_ts::o2xs_t<O>;
-		using rmi_t = int_ts::o4xs_t<O>;
+		using o2i_t = T::o2i_t;
+		using o4i_t = T::o4i_t;
+		using val_t = T::o2xs_t;
+		using rmi_t = T::o4xs_t;
 	public:
 		struct HouseSubsets {
 			struct [[gnu::designated_init]] CellTag {
 				rmi_t rmi;
-				int_ts::o2is_t<O> count_cache;
+				Ints<O>::o2is_t count_cache;
 			};
 			O2BitArr<O> is_begin;
 			std::array<CellTag, T::O2> cell_tags; // TODO consider struct of arrays instead
@@ -219,8 +219,8 @@ namespace okiidoku::mono::detail::solver {
 		friend class CandElimApplyImpl<O>;
 	private:
 		using T = Ints<O>;
-		using val_t = int_ts::o2xs_t<O>;
-		using rmi_t = int_ts::o4xs_t<O>;
+		using val_t = T::o2xs_t;
+		using rmi_t = T::o4xs_t;
 	public:
 		// Engine() noexcept = default; // TODO was this ever needed? why was it written?
 

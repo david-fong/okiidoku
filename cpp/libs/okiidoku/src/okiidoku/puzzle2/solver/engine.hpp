@@ -38,8 +38,8 @@ namespace okiidoku::mono::detail::solver2 {
 
 	template<Order O> requires(is_order_compiled(O))
 	struct Guess {
-		int_ts::o4xs_t<O> rmi;
-		int_ts::o2xs_t<O> val;
+		Ints<O>::o4xs_t rmi;
+		Ints<O>::o2xs_t val;
 	};
 
 
@@ -48,10 +48,10 @@ namespace okiidoku::mono::detail::solver2 {
 		friend FindStat unwind_one_stack_frame_of_<O>(EngineImpl<O>&) noexcept;
 	private:
 		using T = Ints<O>;
-		using o2i_t = int_ts::o2i_t<O>;
-		using o4i_t = int_ts::o4i_t<O>;
-		using val_t = int_ts::o2xs_t<O>;
-		using rmi_t = int_ts::o4xs_t<O>;
+		using o2i_t = T::o2i_t;
+		using o4i_t = T::o4i_t;
+		using val_t = T::o2xs_t;
+		using rmi_t = T::o4xs_t;
 	public:
 
 		struct Frame {

@@ -3,12 +3,15 @@
 #include <okiidoku/puzzle/solver/cand_elim_find.hpp>
 
 #include <okiidoku/puzzle/solver/found.hpp>
+#include <okiidoku/ints.hpp>
+#include <okiidoku/order.hpp>
 
-#include <numeric> // transform_reduce <- will not be needed if we do the get_guess_grouping bookkeeping optimization
-#include <algorithm> // sort
+#include <numeric>    // transform_reduce <- will not be needed if we do the get_guess_grouping bookkeeping optimization
+#include <algorithm>  // sort
+#include <functional> // greater
 #include <execution>
 #include <array>
-#include <tuple> // tie (for comparisons)
+#include <tuple>      // tie (for comparisons)
 
 #include <okiidoku/puzzle/solver/cand_elim_find.macros.hpp>
 
@@ -21,9 +24,9 @@ namespace okiidoku::mono::detail::solver { namespace {
 	*/
 
 	template<Order O> requires(is_order_compiled(O))
-	int_ts::o2xs_t<O> find_good_guess_sym_for_cell(
+	Ints<O>::o2xs_t find_good_guess_sym_for_cell(
 		const CandsGrid<O>& cells_cands,
-		const int_ts::o4i_t<O> rmi
+		const typename Ints<O>::o4i_t rmi
 	) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
 		const auto best_cell_cands {cells_cands.at_rmi(rmi)};

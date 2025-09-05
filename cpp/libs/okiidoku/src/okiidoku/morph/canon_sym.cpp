@@ -3,6 +3,9 @@
 #include <okiidoku/morph/transform.hpp>
 #include <okiidoku/morph/canon_ties.hpp>
 #include <okiidoku/grid.hpp>
+#include <okiidoku/ints.hpp>
+#include <okiidoku/order.hpp>
+
 // TODO prune
 #include <algorithm>  // swap, sort, ranges::next_permutation
 #include <functional> // greater
@@ -40,7 +43,7 @@ namespace okiidoku::mono { namespace {
 	class CanonLabel {
 	private:
 		OKIIDOKU_MONO_INT_TS_TYPEDEFS
-		using val_t = int_ts::o2is_t<O>;
+		using val_t = T::o2is_t;
 		using to_t = typename Transformation<O>::to_t;
 
 		struct State {

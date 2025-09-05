@@ -16,6 +16,7 @@ namespace okiidoku::mono {
 	template<Order O> requires(is_order_compiled(O))
 	Transformation<O> scramble(Grid<O>& grid, const rng_seed_t rng_seed) noexcept {
 		using T = Ints<O>;
+		using o1i_t = T::o1i_t;
 		namespace stdr = std::ranges;
 		Transformation<O> t {};
 		{
@@ -24,7 +25,7 @@ namespace okiidoku::mono {
 			stdr::shuffle(t.sym_map, rng);
 			stdr::shuffle(t.row_map, rng);
 			stdr::shuffle(t.col_map, rng);
-			for (int_ts::o1i_t<O> chute {0}; chute < T::O1; ++chute) {
+			for (o1i_t chute {0}; chute < T::O1; ++chute) {
 				stdr::shuffle(t.row_map[chute], rng);
 				stdr::shuffle(t.col_map[chute], rng);
 			}

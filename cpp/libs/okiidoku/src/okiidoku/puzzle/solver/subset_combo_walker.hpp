@@ -13,9 +13,9 @@ namespace okiidoku::mono::detail::solver {
 	class SubsetComboWalker {
 	private:
 		using T = Ints<O>;
-		using o2xs_t = int_ts::o2xs_t<O>;
-		using o2x_t = int_ts::o2x_t<O>;
-		using o2i_t = int_ts::o2i_t<O>;
+		using o2xs_t = T::o2xs_t;
+		using o2x_t  = T::o2x_t;
+		using o2i_t  = T::o2i_t;
 		using combo_t = std::array<o2xs_t, T::O2-1>;
 	public:
 

@@ -3,6 +3,7 @@
 #include <okiidoku/gen.hpp>
 
 #include <okiidoku/grid.hpp>
+#include <okiidoku/ints.hpp>
 #include <okiidoku/order.hpp>
 
 #include <random>    // minstd_rand
@@ -18,10 +19,10 @@ namespace okiidoku::mono { namespace {
 	template<Order O> requires(is_order_compiled(O))
 	struct SymCountsForChuteHouses {
 		using T = Ints<O>;
-		using V = int_ts::o1i_t<O>;
-		using o3i_t = int_ts::o3i_t<O>;
-		using ch_t = int_ts::o1x_t<O>;
-		using sym_t = int_ts::o2i_t<O>;
+		using V = T::o1i_t;
+		using o3i_t = T::o3i_t;
+		using ch_t = T::o1x_t;
+		using sym_t = T::o2i_t;
 		[[nodiscard, gnu::pure]] o3i_t count_num_missing_syms() const noexcept {
 			return static_cast<o3i_t>(std::count(store_.cbegin(), store_.cend(), V{0}));
 		}
@@ -38,7 +39,7 @@ namespace okiidoku::mono { namespace {
 	};
 
 	template<Order O> requires(is_order_compiled(O))
-	void make_boxes_valid(Grid<O>& grid, const int_ts::o2i_t<O> h_chute, rng_t& rng) noexcept {
+	void make_boxes_valid(Grid<O>& grid, const typename Ints<O>::o2i_t h_chute, rng_t& rng) noexcept {
 		OKIIDOKU_MONO_INT_TS_TYPEDEFS
 		OKIIDOKU_CONTRACT_USE(h_chute <= T::O2-T::O1);
 
@@ -91,7 +92,7 @@ namespace okiidoku::mono { namespace {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	void make_cols_valid(Grid<O>& grid, const int_ts::o2i_t<O> v_chute, rng_t& rng) noexcept {
+	void make_cols_valid(Grid<O>& grid, const typename Ints<O>::o2i_t v_chute, rng_t& rng) noexcept {
 		OKIIDOKU_MONO_INT_TS_TYPEDEFS
 		OKIIDOKU_CONTRACT_USE(v_chute <= T::O2-T::O1);
 
@@ -144,7 +145,7 @@ namespace okiidoku::mono {
 	template<Order O> requires(is_order_compiled(O))
 	void generate_shuffled(Grid<O>& grid, const rng_seed_t rng_seed) noexcept {
 		using T = Ints<O>;
-		using o2i_t = int_ts::o2i_t<O>;
+		using o2i_t = T::o2i_t;
 		OKIIDOKU_CONTRACT_ASSERT(grid_is_filled(grid));
 		// TODO.low assert that rows follow the rule.
 

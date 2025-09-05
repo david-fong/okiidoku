@@ -14,14 +14,14 @@ namespace okiidoku::mono::detail::solver::found {
 
 	template<Order O> requires(is_order_compiled(O))
 	struct [[gnu::designated_init]] CellClaimSym {
-		int_ts::o4xs_t<O> rmi;
-		int_ts::o2xs_t<O> val;
+		Ints<O>::o4xs_t rmi;
+		Ints<O>::o2xs_t val;
 	};
 
 	template<Order O> requires(is_order_compiled(O))
 	struct [[gnu::designated_init]] SymClaimCell {
-		int_ts::o4xs_t<O> rmi;
-		int_ts::o2xs_t<O> val;
+		Ints<O>::o4xs_t rmi;
+		Ints<O>::o2xs_t val;
 	};
 
 	template<Order O> requires(is_order_compiled(O))
@@ -31,7 +31,7 @@ namespace okiidoku::mono::detail::solver::found {
 	template<Order O> requires(is_order_compiled(O))
 	struct [[gnu::designated_init]] LockedCands {
 		O2BitArr<O> syms;
-		int_ts::o3xs_t<O> isec;
+		Ints<O>::o3xs_t isec;
 		LineType line_type;
 		BoxOrLine remove_from_rest_of;
 	};

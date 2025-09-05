@@ -19,9 +19,9 @@ namespace okiidoku::mono::detail::solver2 {
 	struct CandsPov {
 	private:
 		using T = Ints<O>;
-		using o2xs_t = int_ts::o2xs_t<O>;
-		using o2i_t = int_ts::o2i_t<O>;
-		using rmi_t = int_ts::o4xs_t<O>;
+		using o2xs_t = T::o2xs_t;
+		using o2i_t  = T::o2i_t;
+		using rmi_t  = T::o4xs_t;
 
 		detail::Gridlike<O, O2BitArr<O>> cands_;
 		HouseType house_type_;
@@ -39,9 +39,9 @@ namespace okiidoku::mono::detail::solver2 {
 	struct CandsPov {
 	private:
 		using T = Ints<O>;
-		using o2xs_t = int_ts::o2xs_t<O>;
-		using o2i_t = int_ts::o2i_t<O>;
-		using rmi_t = int_ts::o4xs_t<O>;
+		using o2xs_t = T::o2xs_t;
+		using o2i_t  = T::o2i_t;
+		using rmi_t  = T::o4xs_t;
 
 		// if a bit is set in `solved`, its corresponding entry in sym_or_offset is
 		// a sym, and otherwise an offset to add to `offset` to index into `cands_pool_`.
@@ -96,9 +96,9 @@ namespace okiidoku::mono::detail::solver2 {
 	struct CandsPovs {
 	private:
 		using T = Ints<O>;
-		using o2i_t = int_ts::o2i_t<O>;
-		using o4i_t = int_ts::o4i_t<O>;
-		using rmi_t = int_ts::o4xs_t<O>;
+		using o2i_t = T::o2i_t;
+		using o4i_t = T::o4i_t;
+		using rmi_t = T::o4xs_t;
 
 		// Invariant: all POVs must be consistent with one another at all times.
 		HouseTypeMap<CandsPov<O>> pov_cell_major_;

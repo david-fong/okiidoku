@@ -16,17 +16,17 @@ namespace okiidoku::mono::detail::solver2 {
 	struct CandPartitions {
 	private:
 		using T = Ints<O>;
-		using o2i_t = int_ts::o2i_t<O>;
+		using o2i_t = T::o2i_t;
 	public:
 		struct [[gnu::designated_init]] Set {
 			struct [[gnu::designated_init]] Tag {
 				// for house cell, how many cand syms - 1?
 				// for house sym, how many cand cells - 1?
 				// for sym line,  how many cand cells - 1?
-				int_ts::o2xs_t<O> num_alts;
+				Ints<O>::o2xs_t num_alts;
 				// for subsets, points to house set's cell or sym
 				// for fish, points to sym set's line
-				int_ts::o2xs_t<O> at;
+				Ints<O>::o2xs_t at;
 			};
 			O2BitArr<O> is_begin;
 			std::array<Tag, T::O2> tags;
@@ -46,7 +46,7 @@ namespace okiidoku::mono::detail::solver2 {
 	struct FindCacheForSubsets {
 	private:
 		using T = Ints<O>;
-		using o2i_t = int_ts::o2i_t<O>;
+		using o2i_t = T::o2i_t;
 		HouseTypeMap<CandPartitions> types_;
 	public:
 		[[nodiscard, gnu::pure]]
@@ -59,7 +59,7 @@ namespace okiidoku::mono::detail::solver2 {
 	struct FindCacheForFish {
 	private:
 		using T = Ints<O>;
-		using o2i_t = int_ts::o2i_t<O>;
+		using o2i_t = T::o2i_t;
 		LineTypeMap<CandPartitions> types_;
 	public:
 		[[nodiscard, gnu::pure]]

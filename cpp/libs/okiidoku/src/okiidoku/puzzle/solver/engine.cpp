@@ -243,7 +243,7 @@ namespace okiidoku::mono::detail::solver {
 
 	template<Order O> requires(is_order_compiled(O))
 	bool EngineImpl<O>::debug_check_correct_num_unsolved_() const noexcept {
-		return get_num_unsolved() == Ints<O>::O4 - static_cast<int_ts::o4i_t<O>>(std::count_if(
+		return get_num_unsolved() == T::O4 - T::o4i(std::count_if(
 			#ifdef __cpp_lib_execution
 			std::execution::unseq,
 			#endif

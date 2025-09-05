@@ -1,6 +1,9 @@
 // SPDX-FileCopyrightText: 2020 David Fong
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include <okiidoku/puzzle/ua_set.hpp>
+#include <okiidoku/grid.hpp>
+#include <okiidoku/ints.hpp>
+#include <okiidoku/order.hpp>
 
 #include <array>
 
@@ -12,7 +15,7 @@ namespace okiidoku::mono { namespace {
 	// inner dimension maps syms to house-cells.
 	template<Order O> requires(is_order_compiled(O))
 	using chute_lines_sym_to_cell_t = std::array<
-		std::array<int_ts::o2xs_t<O>, Ints<O>::O2>,
+		std::array<typename Ints<O>::o2xs_t, Ints<O>::O2>,
 		Ints<O>::O1
 	>;
 
@@ -21,7 +24,7 @@ namespace okiidoku::mono { namespace {
 		const Grid<O>& soln_grid,
 		MinimalUnavoidableSets<O>& found,
 		const LineType line_type,
-		const int_ts::o1i_t<O> chute
+		const typename Ints<O>::o1i_t chute
 	) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
 		OKIIDOKU_CONTRACT_USE(chute < T::O1);

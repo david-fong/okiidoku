@@ -106,6 +106,6 @@
 		},
 	},
 	"cmake.configureArgs": [
-		// "-D OKIIDOKU_BUILD_WITH_STATIC_ANALYZERS:BOOL=YES"
+		"-D OKIIDOKU_BUILD_WITH_STATIC_ANALYZERS:BOOL=NO",
 	],
 }

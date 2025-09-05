@@ -10,7 +10,7 @@ namespace okiidoku::mono::detail::solver {
 
 	#define OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS \
 		OKIIDOKU_MONO_INT_TS_TYPEDEFS \
-		using rmi_t [[maybe_unused]] = int_ts::o4xs_t<O>;
+		using rmi_t [[maybe_unused]] = T::o4xs_t;
 
 
 	#define OKIIDOKU_CAND_ELIM_FINDER_DEF(TECHNIQUE_NAME) \

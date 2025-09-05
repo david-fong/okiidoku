@@ -61,8 +61,8 @@ namespace okiidoku::mono::detail::solver { namespace {
 	[[nodiscard]] bool prepare_try_decompose_subset_and_check_can_skip(
 		const CandsGrid<O>& cells_cands,
 		typename EngineImpl<O>::HouseSubsets& subs,
-		int_ts::o2i_t<O>& sub_a,
-		const int_ts::o2i_t<O> sub_z
+		typename Ints<O>::o2i_t& sub_a,
+		const typename Ints<O>::o2i_t sub_z
 	) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
 		OKIIDOKU_CONTRACT_USE(sub_z <= T::O2);
@@ -121,9 +121,9 @@ namespace okiidoku::mono::detail::solver { namespace {
 	std::optional<FoundSubsetInfo<O>> try_decompose_subset(
 		const CandsGrid<O>& cells_cands,
 		const typename EngineImpl<O>::HouseSubsets& subs,
-		const int_ts::o2i_t<O> sub_a,
-		const int_ts::o2i_t<O> sub_z,
-		const int_ts::o2x_t<O> max_subset_size // try up-to-and-including this size
+		const typename Ints<O>::o2i_t sub_a,
+		const typename Ints<O>::o2i_t sub_z,
+		const typename Ints<O>::o2x_t max_subset_size // try up-to-and-including this size
 	) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
 		OKIIDOKU_CONTRACT_USE(sub_z <= T::O2);
@@ -179,7 +179,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 	UnwindInfo find_subsets_for_house_and_check_needs_unwind(
 		EngineImpl<O>& engine,
 		typename EngineImpl<O>::HouseSubsets& subs,
-		const int_ts::o2x_t<O> max_subset_size // try up-to-and-including this size
+		const typename Ints<O>::o2x_t max_subset_size // try up-to-and-including this size
 	) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
 		OKIIDOKU_CONTRACT_USE(max_subset_size >= 2);
@@ -260,7 +260,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 	template<Order O> requires(is_order_compiled(O))
 	UnwindInfo find_subsets_and_check_needs_unwind(
 		EngineImpl<O>& engine,
-		const int_ts::o2x_t<O> max_subset_size
+		const typename Ints<O>::o2x_t max_subset_size
 	) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
 		OKIIDOKU_CONTRACT_USE(max_subset_size <= static_cast<o2x_t>((T::O2+1)/2));
@@ -291,7 +291,7 @@ namespace okiidoku::mono::detail::solver {
 	#undef OKIIDOKU_CAND_ELIM_FINDER
 
 	template<Order O> requires(is_order_compiled(O)) \
-	UnwindInfo CandElimFind<O>::subsets(Engine<O>& engine, const int_ts::o2x_t<O> max_subset_size) noexcept {
+	UnwindInfo CandElimFind<O>::subsets(Engine<O>& engine, const typename Ints<O>::o2x_t max_subset_size) noexcept {
 		OKIIDOKU_CONTRACT_ASSERT(!engine.no_more_solns());
 		if (engine.get_num_unsolved() == 0) [[unlikely]] { return UnwindInfo::make_no_unwind(); }
 		return find_subsets_and_check_needs_unwind(engine, max_subset_size);
@@ -299,7 +299,7 @@ namespace okiidoku::mono::detail::solver {
 
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 		template UnwindInfo CandElimFind<O_>::sym_claim_cell(Engine<O_>&) noexcept; \
-		template UnwindInfo CandElimFind<O_>::subsets(Engine<O_>&, int_ts::o2x_t<O_> max_subset_size) noexcept;
+		template UnwindInfo CandElimFind<O_>::subsets(Engine<O_>&, typename Ints<O_>::o2x_t max_subset_size) noexcept;
 	OKIIDOKU_FOREACH_O_DO_EMIT
 	#undef OKIIDOKU_FOREACH_O_EMIT
 }

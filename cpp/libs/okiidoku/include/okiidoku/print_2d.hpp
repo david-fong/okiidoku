@@ -4,11 +4,15 @@
 #define HPP_OKIIDOKU__PRINT_2D
 
 #include <okiidoku/grid.hpp>
+#include <okiidoku/ints.hpp>
+#include <okiidoku/order.hpp>
 
 #include <iosfwd>
 #include <functional> // function
 #include <tuple>
+#include <array>
 #include <span>
+#include <concepts>
 
 namespace okiidoku {
 

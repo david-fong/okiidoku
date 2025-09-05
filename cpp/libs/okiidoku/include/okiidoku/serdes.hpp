@@ -3,8 +3,9 @@
 #ifndef HPP_OKIIDOKU__SERDES
 #define HPP_OKIIDOKU__SERDES
 
-#include <okiidoku/grid.hpp>
 #include <okiidoku/order.hpp>
+namespace okiidoku::mono { template <Order O> requires (is_order_compiled(O)) struct Grid; }
+namespace okiidoku::visitor { struct Grid; }
 
 #include <iosfwd>
 

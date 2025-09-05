@@ -3,8 +3,9 @@
 #ifndef HPP_OKIIDOKU__PUZZLE__UNAVOIDABLE_SET
 #define HPP_OKIIDOKU__PUZZLE__UNAVOIDABLE_SET
 
-#include <okiidoku/grid.hpp>
+#include <okiidoku/ints.hpp>
 #include <okiidoku/order.hpp>
+namespace okiidoku::mono { template <Order O> requires (is_order_compiled(O)) struct Grid; }
 
 #include <vector>
 #include <array>
@@ -13,7 +14,7 @@ namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
 	struct UaSet4 {
-		std::array<int_ts::o4xs_t<O>, 4> rmis;
+		std::array<typename Ints<O>::o4xs_t, 4> rmis;
 	};
 
 	template<Order O> requires(is_order_compiled(O))

@@ -24,8 +24,7 @@ namespace okiidoku::mono::detail {
 	that tied sections will only be further broken down and do not "move around". */
 	struct Ties {
 		using T = Ints<O>;
-		using o2i_t = int_ts::o2i_t<O>;
-		using i_t = std::conditional_t<(O1_OR_O2 == 1), int_ts::o1i_t<O>, int_ts::o2is_t<O>>;
+		using i_t = std::conditional_t<(O1_OR_O2 == 1), typename T::o1i_t, typename T::o2is_t>;
 		static constexpr i_t size_ {(O1_OR_O2 == 1) ? T::O1 : T::O2};
 
 		/** defines a range in `[begin_, end_)`.
@@ -56,7 +55,7 @@ namespace okiidoku::mono::detail {
 			using pointer    = TieRange;
 		private:
 			O2BitArr<O>::Iter it_;
-			o2i_t begin_;
+			i_t begin_;
 		public:
 			Iter(const O2BitArr<O>& links) noexcept: it_{links.set_bits()}, begin_{*it_} { ++it_; }
 

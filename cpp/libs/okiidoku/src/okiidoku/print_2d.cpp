@@ -4,12 +4,11 @@
 #include <okiidoku/print_2d.emoji.hpp>
 
 #include <iostream>
-#include <random>    // minstd_rand
-#include <algorithm>
-#include <ranges>    // ranges::iota
-#include <iterator>  // next, operator+
+#include <random>      // minstd_rand
 #include <vector>
-#include <cassert>
+#include <string_view> // operator<<
+#include <algorithm>
+#include <iterator>    // next, operator+
 
 namespace okiidoku { namespace {
 

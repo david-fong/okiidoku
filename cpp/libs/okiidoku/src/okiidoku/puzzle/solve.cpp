@@ -5,9 +5,11 @@
 #include <okiidoku/puzzle/solver/cand_elim_apply.hpp>
 #include <okiidoku/puzzle/solver/cand_elim_find.hpp>
 #include <okiidoku/puzzle/solver/engine.hpp>
+#include <okiidoku/order.hpp>
 
 #include <functional> // cref
-#include <array> // to_array
+#include <array>      // to_array
+#include <utility>    // in_place
 
 namespace okiidoku::mono {
 

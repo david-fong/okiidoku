@@ -3,8 +3,12 @@
 #ifndef HPP_OKIIDOKU__MORPH__TRANSFORM
 #define HPP_OKIIDOKU__MORPH__TRANSFORM
 
-#include <okiidoku/grid.hpp>
+#include <okiidoku/ints.hpp>
 #include <okiidoku/order.hpp>
+namespace okiidoku::mono { template <Order O> requires (is_order_compiled(O)) struct Grid; }
+namespace okiidoku::visitor { struct Grid; }
+
+#include <array>
 
 namespace okiidoku::mono {
 
@@ -12,10 +16,10 @@ namespace okiidoku::mono {
 	struct OKIIDOKU_EXPORT [[gnu::designated_init]] Transformation {
 	private:
 		using T = Ints<O>;
-		using o1i_t = int_ts::o1i_t<O>;
-		using o2i_t = int_ts::o2i_t<O>;
+		using o1i_t = T::o1i_t;
+		using o2i_t = T::o2i_t;
 	public:
-		using to_t = int_ts::o2xs_t<O>;
+		using to_t = T::o2xs_t;
 
 		/** legal operations: swap two entries. */
 		using sym_map_t = std::array<to_t, T::O2>;

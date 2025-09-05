@@ -31,14 +31,14 @@ namespace okiidoku::mono {
 	template<Order O>
 	struct Ints final {
 		Ints() = delete;
-		static constexpr int_ts::o2i_t<O> O2 {O*O};
+		static constexpr Ints<O>::o2i_t O2 {O*O};
 	};
 	template<Order O, typename T>
 	concept Any_o2x_t = std::unsigned_integral<T> && std::numeric_limits<T>::max() >= (Ints<O>::O2-1);
 
 	template<Order O, class T_row, class T_col>
 	requires(Any_o2x_t<O, T_row>, Any_o2x_t<O, T_col>) [[nodiscard, gnu::const]]
-	constexpr int_ts::o4x_t<O> row_col_to_rmi(const T_row row, const T_col col) noexcept {
+	constexpr Ints<O>::o4x_t row_col_to_rmi(const T_row row, const T_col col) noexcept {
 		return 0;
 	}
 }

@@ -47,7 +47,7 @@ namespace okiidoku::mono {
 		rng_t rng {rng_seed};
 
 		OKIIDOKU_MONO_INT_TS_TYPEDEFS
-		using rmi_t = int_ts::o4xs_t<O>;
+		using rmi_t = T::o4xs_t;
 		// Note: this implementation never "backtracks". once it removes a given,
 		// it never puts it back.
 

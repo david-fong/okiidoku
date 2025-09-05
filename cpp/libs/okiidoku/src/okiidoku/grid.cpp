@@ -3,6 +3,7 @@
 #include <okiidoku/grid.hpp>
 
 #include <okiidoku/o2_bit_arr.hpp>
+#include <okiidoku/ints.hpp>
 #include <okiidoku/order.hpp>
 
 #include <algorithm> // all_of

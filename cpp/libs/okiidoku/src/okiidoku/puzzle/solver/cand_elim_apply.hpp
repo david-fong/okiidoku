@@ -22,11 +22,11 @@ namespace okiidoku::mono::detail::solver {
 	class CandElimApplyImpl {
 	private:
 		using T = Ints<O>;
-		using o1i_t = int_ts::o1i_t<O>;
-		using o2x_t = int_ts::o2x_t<O>;
-		using o2i_t = int_ts::o2i_t<O>;
-		using o3i_t = int_ts::o3i_t<O>;
-		using rmi_t = int_ts::o4xs_t<O>;
+		using o1i_t = T::o1i_t;
+		using o2x_t = T::o2x_t;
+		using o2i_t = T::o2i_t;
+		using o3i_t = T::o3i_t;
+		using rmi_t = T::o4xs_t;
 		// Important implementation reminder: if any candidate elimination done
 		// as part of an `apply` function unwinds the guess stack, any remaining
 		// eliminations that would have been done as part of the `apply` must not

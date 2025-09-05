@@ -17,7 +17,7 @@ namespace okiidoku::mono::detail::solver {
 
 		static UnwindInfo sym_claim_cell(Engine<O>&) noexcept;
 
-		static UnwindInfo subsets(Engine<O>&, int_ts::o2x_t<O> max_subset_size) noexcept;
+		static UnwindInfo subsets(Engine<O>&, Ints<O>::o2x_t max_subset_size) noexcept;
 
 		static UnwindInfo locked_cands(Engine<O>&) noexcept;
 

@@ -4,6 +4,7 @@
 
 #include <okiidoku_cli_utils/shared_rng.hpp>
 #include <okiidoku_cli_utils/console_setup.hpp>
+#include <okiidoku/order.hpp>
 #include <okiidoku/about.hpp>
 
 #include <iostream>     // cout

@@ -4,6 +4,7 @@
 #define HPP_OKIIDOKU__PUZZLE__SOLVE
 
 #include <okiidoku/grid.hpp>
+#include <okiidoku/ints.hpp>
 #include <okiidoku/order.hpp>
 
 #include <optional>
@@ -30,8 +31,8 @@ namespace okiidoku::mono {
 		~FastSolver() noexcept;
 
 		struct [[gnu::designated_init]] CandSymToIgnore {
-			int_ts::o4xs_t<O> rmi;
-			int_ts::o2x_t<O> val;
+			Ints<O>::o4xs_t rmi;
+			Ints<O>::o2x_t val;
 		};
 
 		/// \pre none. puzzle can even blatantly break the one rule.

@@ -2,7 +2,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include <okiidoku/serdes.hpp>
 
+#include <okiidoku/grid.hpp>
 #include <okiidoku/o2_bit_arr.hpp>
+#include <okiidoku/ints.hpp>
+#include <okiidoku/order.hpp>
 
 #include <iostream>
 // #include <algorithm>
@@ -16,8 +19,8 @@ namespace okiidoku::mono { namespace {
 	private:
 		using T = Ints<O>;
 		using cands_t = O2BitArr<O>;
-		using val_t = int_ts::o2x_t<O>;
-		using o4i_t = int_ts::o4i_t<O>;
+		using val_t = T::o2x_t;
+		using o4i_t = T::o4i_t;
 
 		static constexpr unsigned num_buf_bytes {1};
 		using buf_t = detail::uint_small_for_width_t<2*8*num_buf_bytes>; // x2 to prevent overflow
@@ -95,7 +98,7 @@ namespace okiidoku::mono { namespace {
 				OKIIDOKU_CONTRACT_USE(buf_pos_ != 0 && buf_pos_ < buf_end);
 				buf_pos_ *= use_factor;
 				smol_val_buf /= static_cast<val_t>(use_factor);
-				smol_val_buf_remaining /= static_cast<int_ts::o2i_t<O>>(use_factor);
+				smol_val_buf_remaining /= static_cast<Ints<O>::o2i_t>(use_factor);
 			}
 			if (buf_pos_ >= buf_end) { // TODO.asap should this be a while loop?
 				static_assert(num_buf_bytes == 1); // otherwise the below needs to change.
@@ -157,7 +160,7 @@ namespace okiidoku::mono {
 			if ((T::O1-1-row)/T::O1 == col/T::O1) {
 				continue; // skip cells in the anti-diagonal boxes
 			}
-			using val_t = int_ts::o2x_t<O>;
+			using val_t = T::o2x_t;
 			const auto val {static_cast<val_t>(grid.at_rmi(helper.get_cell_rmi()))};
 			helper.print_val(os, val);
 		}

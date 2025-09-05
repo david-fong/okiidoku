@@ -80,7 +80,7 @@ namespace okiidoku::mono {
 
 		// TODO.low why does adding an assumption that the value is lteq T::O2 result in increased code size on clang?
 		/// \pre `rmi` is in `[0, O4)`.
-		template<class T_rmi, class Self> requires(Any_o4x_t<O, T_rmi>)
+		template<class T_rmi, class Self> requires(Any_o4x_t<O, T_rmi>) // TODO can I just use the concept in the parameter type slot?
 		[[nodiscard, gnu::pure]] constexpr auto&& at_rmi(this Self&& self, const T_rmi rmi) noexcept {
 			OKIIDOKU_CONTRACT_USE(rmi < T::O4);
 			// if constexpr (std::same_as<V_, grid_val_t<O>>) { OKIIDOKU_CONTRACT_USE(arr_[rmi] <= T::O2); }
@@ -91,7 +91,7 @@ namespace okiidoku::mono {
 		/// \pre `row` and `col` are in `[0, O2)`.
 		template<class T_row, class T_col, class Self> requires(Any_o2x_t<O, T_row> && Any_o2x_t<O, T_col>)
 		[[nodiscard, gnu::pure]] constexpr auto&& at(this Self&& self, const T_row row, const T_col col) noexcept {
-			return std::forward<Self>(self).arr_[static_cast<int_ts::o4x_t<O>>(static_cast<int_ts::o4x_t<O>>(T::O2*row)+col)];
+			return std::forward<Self>(self).arr_[T::o4x(T::o4x(T::O2*row)+col)];
 		}
 
 		/**
@@ -116,7 +116,7 @@ namespace okiidoku::mono {
 
 
 	template<Order O> [[nodiscard, gnu::const]]
-	constexpr bool cells_share_house(int_ts::o4i_t<O> c1_rmi, int_ts::o4i_t<O> c2_rmi) noexcept {
+	constexpr bool cells_share_house(typename Ints<O>::o4i_t c1_rmi, typename Ints<O>::o4i_t c2_rmi) noexcept {
 		return (rmi_to_row<O>(c1_rmi) == rmi_to_row<O>(c2_rmi))
 			||  (rmi_to_col<O>(c1_rmi) == rmi_to_col<O>(c2_rmi))
 			||  (rmi_to_box<O>(c1_rmi) == rmi_to_box<O>(c2_rmi));

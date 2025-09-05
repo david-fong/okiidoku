@@ -3,6 +3,8 @@
 #include <okiidoku/morph/transform.hpp>
 #include <okiidoku/morph/canon_ties.hpp>
 #include <okiidoku/grid.hpp>
+#include <okiidoku/ints.hpp>
+#include <okiidoku/order.hpp>
 
 #include <range/v3/view/common.hpp>
 #include <range/v3/view/drop.hpp>
@@ -15,6 +17,7 @@
 
 #include <algorithm> // sort
 #include <iterator>  // next
+#include <array>
 #include <numeric>   // ranges::iota
 
 namespace okiidoku::mono { namespace {
@@ -27,7 +30,7 @@ namespace okiidoku::mono { namespace {
 	class CanonPlace {
 	private:
 		OKIIDOKU_MONO_INT_TS_TYPEDEFS
-		using val_t = int_ts::o2is_t<O>;
+		using val_t = T::o2is_t;
 		using to_t = typename Transformation<O>::to_t;
 
 		struct PolarState {
