@@ -104,25 +104,25 @@ namespace okiidoku::mono::detail::solver {
 		// The "unrolled" version is ~3% faster for O=3 :/
 		{
 			const auto desc_row {rmi_to_row<O>(desc.rmi)};
-			for (o2i_t nb_col {0}; nb_col < T::O2; ++nb_col) {
+			for (const auto nb_col : T::O2) {
 				const auto nb_rmi {static_cast<rmi_t>(row_col_to_rmi<O>(desc_row, nb_col))};
 				OKIIDOKU_TRY_ELIM_NB_CAND
 		}	}
 		{
 			const auto desc_col {rmi_to_col<O>(desc.rmi)};
-			for (o2i_t nb_row {0}; nb_row < T::O2; ++nb_row) {
+			for (const auto nb_row : T::O2) {
 				const auto nb_rmi {static_cast<rmi_t>(row_col_to_rmi<O>(nb_row, desc_col))};
 				OKIIDOKU_TRY_ELIM_NB_CAND
 		}	}
 		{
 			const auto desc_box {rmi_to_box<O>(desc.rmi)};
-			for (o2i_t nb_box_cell {0}; nb_box_cell < T::O2; ++nb_box_cell) {
+			for (const auto nb_box_cell : T::O2) {
 				const auto nb_rmi {static_cast<rmi_t>(box_cell_to_rmi<O>(desc_box, nb_box_cell))};
 				OKIIDOKU_TRY_ELIM_NB_CAND
 		}	}
 		// for (const auto house_type : house_types) {
 		// 	const auto desc_house {rmi_to_house<O>(house_type, desc.rmi)};
-		// 	for (o2i_t nb_house_cell {0}; nb_house_cell < T::O2; ++nb_house_cell) {
+		// 	for (const auto nb_house_cell : T::O2) {
 		// 		const auto nb_rmi {static_cast<rmi_t>(house_cell_to_rmi<O>(house_type, desc_house, nb_house_cell))};
 		// 		OKIIDOKU_TRY_ELIM_NB_CAND
 		// 	}
@@ -166,27 +166,27 @@ namespace okiidoku::mono::detail::solver {
 		const auto isec_base {[&]{
 			switch (desc.remove_from_rest_of) {
 				using enum BoxOrLine;
-				case box:  return T::o3i(((desc.isec/T::O2)*T::O2)+(desc.isec%T::O1));
-				case line: return T::o3i(desc.isec - (desc.isec%T::O1));
+				case box:  return T::o3x(((desc.isec/T::O2)*T::O2)+(desc.isec%T::O1));
+				case line: return T::o3x(desc.isec - (desc.isec%T::O1));
 			}
 			OKIIDOKU_UNREACHABLE;
 		}()};
 		const auto nb_scale {[&]{
 			switch (desc.remove_from_rest_of) {
 				using enum BoxOrLine;
-				case box:  return T::o3i(T::O1);
-				case line: return T::o3i(1);
+				case box:  return T::O1;
+				case line: return T::o1i(1u);
 			}
 			OKIIDOKU_UNREACHABLE;
 		}()};
-		for (o1i_t nb_i {0}; nb_i < T::O1; ++nb_i) {
+		for (const auto nb_i : T::O1) {
 			const auto isec {isec_base + (nb_i * nb_scale)};
 			if (isec == desc.isec) [[unlikely]] { continue; }
-			for (o1i_t isec_cell_i {0}; isec_cell_i < T::O1; ++isec_cell_i) {
-				const auto chute {T::o1i(isec/T::O2)};
+			for (const auto isec_cell_i : T::O1) {
+				const auto chute {T::o1x(isec/T::O2)};
 				OKIIDOKU_CONTRACT_ASSERT(chute == T::o1i(desc.isec/T::O2));
-				const auto chute_cell {T::o3i(((isec*T::O1)%T::O3) + isec_cell_i)};
-				const auto rmi {chute_cell_to_rmi<O>(desc.line_type, chute, chute_cell)};
+				const auto chute_cell {(((isec*T::O1)%T::O3) + isec_cell_i)};
+				const auto rmi {chute_cell_to_rmi<O>(desc.line_type, chute, chute_cell.get_underlying())}; // TODO figure out the bounds things instead of get_underlying
 				const auto check {engine.do_elim_remove_syms_(static_cast<rmi_t>(rmi), desc.syms)};
 				if (check.did_unwind()) [[unlikely]] {
 					return check;

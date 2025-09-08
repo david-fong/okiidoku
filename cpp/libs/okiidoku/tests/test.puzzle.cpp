@@ -12,11 +12,12 @@
 
 #include <okiidoku_cli_utils/shared_rng.hpp>
 
-#include <random> // random_device,
+#include <random>  // random_device,
+#include <cstdint>
 
 namespace okiidoku {
 template<okiidoku::Order O> OKIIDOKU_KEEP_FOR_DEBUG // NOLINTNEXTLINE(*-internal-linkage)
-void test_puzzle(okiidoku::util::SharedRng& shared_rng, const unsigned num_rounds) {
+void test_puzzle(okiidoku::util::SharedRng& shared_rng, const std::uintmax_t num_rounds) {
 	if constexpr (O >= 4) { return; } // TODO.high enable when solver for order=5 is faster?
 	using namespace ::okiidoku;
 	using namespace ::okiidoku::mono;
@@ -29,7 +30,7 @@ void test_puzzle(okiidoku::util::SharedRng& shared_rng, const unsigned num_round
 	// Grid<O> canon_grid;
 
 	FastSolver<O> solver;
-	for (unsigned round {0}; round < num_rounds; ++round) {
+	for (std::uintmax_t round {0u}; round < num_rounds; ++round) {
 		generate_shuffled(gen_grid, shared_rng.get());
 		CHECK(grid_follows_rule(gen_grid));
 

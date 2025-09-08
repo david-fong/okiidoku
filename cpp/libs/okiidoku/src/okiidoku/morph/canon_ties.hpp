@@ -25,7 +25,7 @@ namespace okiidoku::mono::detail {
 	struct Ties {
 		using T = Ints<O>;
 		using i_t = std::conditional_t<(O1_OR_O2 == 1), typename T::o1i_t, typename T::o2is_t>;
-		static constexpr i_t size_ {(O1_OR_O2 == 1) ? T::O1 : T::O2};
+		static constexpr i_t size_ {i_t::max};
 
 		/** defines a range in `[begin_, end_)`.
 		\invariant `begin_ < size_`, `begin_+1 < end_`, `end_ <= size_`, `end_ > 0`. */
@@ -57,16 +57,12 @@ namespace okiidoku::mono::detail {
 			O2BitArr<O>::Iter it_;
 			i_t begin_;
 		public:
-			Iter(const O2BitArr<O>& links) noexcept: it_{links.set_bits()}, begin_{*it_} { ++it_; }
+			Iter(const O2BitArr<O>& links) noexcept: it_{links.set_bits()}, begin_{(*it_).get_underlying()} { ++it_; }
 
-			TieRange operator* () const noexcept { return TieRange{begin_, *it_}; }
-			TieRange operator->() const noexcept { return TieRange{begin_, *it_}; }
-			Iter& operator++()    noexcept { ++it_; begin_ = *it_; ++it_; return *this; }
+			TieRange operator*() const noexcept { return TieRange{begin_, (*it_).get_underlying()}; }
+			Iter& operator++()    noexcept { ++it_; begin_ = (*it_).get_underlying(); ++it_; return *this; }
 			Iter  operator++(int) noexcept { Iter tmp {*this}; operator++(); return tmp; }
-			// [[nodiscard, gnu::pure]] friend bool operator==(const Iter& a, const Iter& b) noexcept { return a.it_ == b.it_; }
-			// [[nodiscard, gnu::pure]] friend bool operator!=(const Iter& a, const Iter& b) noexcept { return a.it_ != b.it_; }
-			// [[nodiscard, gnu::pure]] friend bool operator==(const Iter& i, [[maybe_unused]] const std::default_sentinel_t s) noexcept { return !i.it_.not_end(); }
-			[[nodiscard, gnu::pure]] friend bool operator!=(const Iter& i, [[maybe_unused]] const std::default_sentinel_t s) noexcept { return  i.it_.not_end(); }
+			[[nodiscard, gnu::pure]] constexpr friend bool operator!=(const Iter& i, [[maybe_unused]] const std::default_sentinel_t s) noexcept { return  i.it_.not_end(); }
 		};
 
 	private:
@@ -96,11 +92,11 @@ namespace okiidoku::mono::detail {
 		requires (std::regular_invocable<IsEq, i_t, i_t>)
 		void update(const IsEq is_eq) noexcept {
 			for (const auto&& cached_tie : *this) {
-				for (i_t i {cached_tie.begin_}; i+i_t{1u} < cached_tie.end_; ++i) {
-					OKIIDOKU_CONTRACT_USE(i+1u < size_);
-					if (!std::invoke(is_eq, i, i+i_t{1u})) [[likely]] {
+				for (i_t i {cached_tie.begin_}; i.next() < cached_tie.end_; ++i) {
+					OKIIDOKU_CONTRACT_USE(i.next() < size_);
+					if (!std::invoke(is_eq, i, i.next())) [[likely]] {
 						bookends_.flip(i);
-						bookends_.flip(static_cast<i_t>(i+i_t{1}));
+						bookends_.flip(i.next());
 			}	}	}
 		}
 	};

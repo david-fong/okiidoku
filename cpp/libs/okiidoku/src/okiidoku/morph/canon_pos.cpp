@@ -71,7 +71,7 @@ namespace okiidoku::mono { namespace {
 			t.inverted().apply_from_to(src_grid, table);
 		}
 
-		for (o2i_t row_i {0}; row_i < T::O2; ++row_i) {
+		for (const auto row_i : T::O2) {
 			const auto row_sp {table.row_span_at(row_i)};
 			const auto& ortho {is_post_transpose ? row_state : col_state};
 			// loop over orthogonal partially-resolved line ranges to normalize:
@@ -93,7 +93,7 @@ namespace okiidoku::mono { namespace {
 				}
 				OKIIDOKU_DEFER_INIT std::array<val_t, T::O2> copy; // NOLINT(*-init)
 				std::copy(row_sp.begin(), row_sp.end(), copy.begin());
-				for (o1i_t i {0}; i < T::O1; ++i) {
+				for (const auto i : T::O1) {
 					std::copy(
 						std::next(copy.begin(), i*T::O1), std::next(copy.begin(), (i+1)*T::O1),
 						std::next(row_sp.begin(), i*T::O1)
@@ -122,7 +122,7 @@ namespace okiidoku::mono { namespace {
 		}
 		const auto chute_tie_data {[&](o2i_t chute) {
 			namespace v = ::ranges::views;
-			return to_tied | v::drop(chute*T::O1) | v::take(T::O1) | v::transform([&](auto i){ return v::common(table.row_span_at(i)); }) | v::join;
+			return to_tied | v::drop((chute*T::O1).get_underlying()) | v::take(T::O1.get_underlying()) | v::transform([&](auto i){ return v::common(table.row_span_at(i)); }) | v::join;
 		}};
 		// try to resolve tied chute ranges:
 		for (const auto tie : chute_ties) {
@@ -147,10 +147,10 @@ namespace okiidoku::mono { namespace {
 		{
 			// update s.to_og:
 			OKIIDOKU_DEFER_INIT std::array<to_t, T::O2> tied_to_og; // NOLINT(*-init)
-			for (o2i_t i {0}; i < T::O2; ++i) {
+			for (const auto i : T::O2) {
 				tied_to_og[i] = to_og[i/T::O1][i%T::O1];
 			}
-			for (o2i_t i {0}; i < T::O2; ++i) {
+			for (const auto i : T::O2) {
 				to_og[i/T::O1][i%T::O1] = tied_to_og[to_tied[i]];
 			}
 		}

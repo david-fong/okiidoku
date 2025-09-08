@@ -28,9 +28,9 @@ namespace okiidoku::mono::detail::solver {
 		frame_.num_unsolved = T::O4;
 		mut_cells_cands().get_underlying_array().fill(O2BitArr_ones<O>);
 		for (const auto house_type : house_types) {
-		for (o2i_t house {0}; house < T::O2; ++house) {
+		for (const auto house : T::O2) {
 			auto& subs {frame_.houses_subsets.at(house_type)[house]};
-			for (o2i_t house_cell {0}; house_cell < T::O2; ++house_cell) {
+			for (const auto house_cell : T::O2) {
 				auto& cell_tag {subs.cell_tags[house_cell]};
 				cell_tag.rmi = static_cast<rmi_t>(house_cell_to_rmi<O>(house_type, house, house_cell));
 				cell_tag.count_cache = T::O2;
@@ -45,7 +45,7 @@ namespace okiidoku::mono::detail::solver {
 		total_guesses_ = 0;
 		no_more_solns_ = false;
 
-		for (o4i_t rmi {0}; rmi < T::O4; ++rmi) {
+		for (const auto rmi : T::O4) {
 			const auto& val {puzzle.at_rmi(rmi)};
 			OKIIDOKU_CONTRACT_USE(val <= T::O2);
 			if (val < T::O2) [[likely]] {
@@ -60,7 +60,7 @@ namespace okiidoku::mono::detail::solver {
 		OKIIDOKU_CONTRACT_ASSERT(!no_more_solns());
 		OKIIDOKU_CONTRACT_ASSERT(get_num_unsolved() == 0);
 		Grid<O> soln;
-		for (o4i_t rmi {0}; rmi < T::O4; ++rmi) {
+		for (const auto rmi : T::O4) {
 			const auto& cell_cands {cells_cands().at_rmi(rmi)};
 			OKIIDOKU_CONTRACT_USE(cell_cands.count() == 1);
 			soln.at_rmi(rmi) = cell_cands.first_set_bit_require_exists();
@@ -232,7 +232,7 @@ namespace okiidoku::mono::detail::solver {
 
 	template<Order O> requires(is_order_compiled(O))
 	void EngineImpl<O>::debug_print_cells_cands_() const noexcept {
-		for (o4i_t rmi {0}; rmi < T::O4; ++rmi) {
+		for (const auto rmi : T::O4) {
 			if (rmi % T::O2 == 0) { std::clog << '\n'; }
 			const auto& mask {cells_cands().at_rmi(rmi)};
 			const auto chars {mask.to_chars()};

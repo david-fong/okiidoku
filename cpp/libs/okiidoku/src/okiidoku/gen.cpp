@@ -22,7 +22,7 @@ namespace okiidoku::mono { namespace {
 		using V = T::o1i_t;
 		using o3i_t = T::o3i_t;
 		using ch_t = T::o1x_t;
-		using sym_t = T::o2i_t;
+		using sym_t = T::o2x_t;
 		[[nodiscard, gnu::pure]] o3i_t count_num_missing_syms() const noexcept {
 			return T::o3i(std::count(store_.cbegin(), store_.cend(), V{0}));
 		}
@@ -30,7 +30,7 @@ namespace okiidoku::mono { namespace {
 		auto&& ch_count_sym(this Self&& self, const ch_t ch, const sym_t sym) noexcept {
 			OKIIDOKU_CONTRACT_USE(ch < T::O1);
 			OKIIDOKU_CONTRACT_USE(sym < T::O2);
-			return std::forward<Self>(self).store_[T::o3i(T::o3i(T::O1*sym)+ch)];
+			return std::forward<Self>(self).store_[(T::O1*sym)+ch];
 		}
 	private:
 		// outer dimension (rows) for each of the O2 symbols
@@ -39,17 +39,17 @@ namespace okiidoku::mono { namespace {
 	};
 
 	template<Order O> requires(is_order_compiled(O))
-	void make_boxes_valid(Grid<O>& grid, const typename Ints<O>::o2x_t h_chute, rng_t& rng) noexcept {
+	void make_boxes_valid(Grid<O>& grid, const typename detail::Int<O*(O-1u)> h_chute, rng_t& rng) noexcept {
 		OKIIDOKU_MONO_INT_TS_TYPEDEFS
 		OKIIDOKU_CONTRACT_USE(h_chute <= T::O2-T::O1);
 
-		// unsigned long long op_count {0};
+		// std::uintmax_t op_count {0};
 		SymCountsForChuteHouses<O> boxes_has {};
 		#pragma clang loop unroll(disable)
 		for (o2i_t row {h_chute}; row < h_chute+T::O1; ++row) {
-		for (o2i_t col {0}; col < T::O2; ++col) {
+		for (const auto col : T::O2) {
 			auto& count {boxes_has.ch_count_sym(
-				T::o1x(col/T::O1),
+				col/T::O1,
 				grid.at(row,col)
 			)};
 			++count;
@@ -92,15 +92,15 @@ namespace okiidoku::mono { namespace {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	void make_cols_valid(Grid<O>& grid, const typename Ints<O>::o2x_t v_chute, rng_t& rng) noexcept {
+	void make_cols_valid(Grid<O>& grid, const typename detail::Int<O*(O-1u)> v_chute, rng_t& rng) noexcept {
 		OKIIDOKU_MONO_INT_TS_TYPEDEFS
 		OKIIDOKU_CONTRACT_USE(v_chute <= T::O2-T::O1);
 
-		// unsigned long long op_count {0};
+		// std::uintmax_t op_count {0};
 		SymCountsForChuteHouses<O> cols_has {};
 		#pragma clang loop unroll(disable)
-		for (o2i_t row {0}; row < T::O2; ++row) {
-		for (o1i_t box_col {0}; box_col < T::O1; ++box_col) {
+		for (const auto row : T::O2) {
+		for (const auto box_col : T::O1) {
 			auto& count {cols_has.ch_count_sym(
 				T::o1x(box_col),
 				grid.at(row, T::o2x(v_chute + box_col))
@@ -151,7 +151,7 @@ namespace okiidoku::mono {
 
 		rng_t rng {rng_seed};
 		// #pragma clang loop unroll(disable)
-		for (o2i_t row {0}; row < T::O2; ++row) {
+		for (const auto row : T::O2) {
 			const auto row_sp {grid.row_span_at(row)};
 			std::shuffle(row_sp.begin(), row_sp.end(), rng);
 		}
@@ -160,12 +160,12 @@ namespace okiidoku::mono {
 
 		// Note: iterations _can_ safely run concurrently.
 		for (o2i_t h_chute {0}; h_chute < T::O2; h_chute += T::O1) {
-			make_boxes_valid(grid, T::o2x(h_chute), rng);
+			make_boxes_valid(grid, h_chute.get_underlying(), rng);
 		}
 		// Note: iterations _can_ safely run concurrently, but cache-write-back might
 		// get hairy due to vertical chutes "interleaving" in the row-major grid.
 		for (o2i_t v_chute {0}; v_chute < T::O2; v_chute += T::O1) {
-			make_cols_valid(grid, T::o2x(v_chute), rng);
+			make_cols_valid(grid, v_chute.get_underlying(), rng);
 		}
 		OKIIDOKU_CONTRACT_ASSERT(grid_is_filled(grid));
 		OKIIDOKU_CONTRACT_ASSERT(grid_follows_rule<O>(grid));

@@ -17,11 +17,11 @@ namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
 	bool grid_is_proper_puzzle(const Grid<O>& puzzle) noexcept {
-		if (grid_is_filled(puzzle)) {
+		if (grid_is_filled(puzzle)) [[unlikely]] {
 			return grid_follows_rule(puzzle);
 		}
 		// a quick check for obvious big mistake (empty grid):
-		if (grid_is_empty(puzzle)) { return false; }
+		if (grid_is_empty(puzzle)) [[unlikely]] { return false; }
 
 		FastSolver<O> solver {};
 		solver.reinit_with_puzzle(puzzle);
@@ -54,8 +54,7 @@ namespace okiidoku::mono {
 		o4x_t num_puzcell_cands {0};
 		OKIIDOKU_DEFER_INIT // NOLINTNEXTLINE(*-init)
 		std::array<rmi_t, T::O4> puzcell_cand_rmis; // non-candidates: either removed, or can't be removed.
-		for (o4i_t rmi {0}; rmi < T::O4; ++rmi) {
-			OKIIDOKU_CONTRACT_USE(grid.at_rmi(rmi) <= T::O2);
+		for (const auto rmi : T::O4) {
 			if (grid.at_rmi(rmi) < T::O2) [[likely]] {
 				puzcell_cand_rmis[num_puzcell_cands] = static_cast<rmi_t>(rmi);
 				++num_puzcell_cands;
@@ -139,12 +138,33 @@ namespace okiidoku::mono {
 
 namespace okiidoku::visitor {
 
-	/// \todo implement
-	bool grid_is_proper_puzzle(const Grid&) noexcept { return false; }
+	bool grid_is_proper_puzzle(const Grid& grid) noexcept {
+		switch (grid.get_order()) {
+		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
+		case O_: return mono::grid_is_proper_puzzle<O_>(grid.unchecked_get_mono_exact<O_>());
+		OKIIDOKU_FOREACH_O_DO_EMIT
+		#undef OKIIDOKU_FOREACH_O_EMIT
+		default: OKIIDOKU_UNREACHABLE;
+		}
+	}
 
-	/// \todo implement
-	bool grid_is_minimal_puzzle(const Grid&) noexcept { return false; }
+	bool grid_is_minimal_puzzle(const Grid& grid) noexcept {
+		switch (grid.get_order()) {
+		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
+		case O_: return mono::grid_is_minimal_puzzle<O_>(grid.unchecked_get_mono_exact<O_>());
+		OKIIDOKU_FOREACH_O_DO_EMIT
+		#undef OKIIDOKU_FOREACH_O_EMIT
+		default: OKIIDOKU_UNREACHABLE;
+		}
+	}
 
-	/// \todo implement
-	void make_minimal_puzzle(Grid&, rng_seed_t rng_seed) noexcept { }
+	void make_minimal_puzzle(Grid& grid, const rng_seed_t rng_seed) noexcept {
+		switch (grid.get_order()) {
+		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
+		case O_: return mono::make_minimal_puzzle<O_>(grid.unchecked_get_mono_exact<O_>(), rng_seed);
+		OKIIDOKU_FOREACH_O_DO_EMIT
+		#undef OKIIDOKU_FOREACH_O_EMIT
+		default: OKIIDOKU_UNREACHABLE;
+		}
+	}
 }

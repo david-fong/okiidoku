@@ -68,7 +68,7 @@ namespace okiidoku::cli {
 
 		void gen_single();
 
-		void gen_multiple(unsigned long long how_many);
+		void gen_multiple(std::uintmax_t how_many);
 		void gen_multiple(std::string_view how_many_str);
 	};
 }

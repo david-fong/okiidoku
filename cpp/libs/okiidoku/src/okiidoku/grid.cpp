@@ -21,8 +21,8 @@ namespace okiidoku::mono {
 		std::array<has_mask_t, T::O1> h_chute_boxes_has;
 		std::array<has_mask_t, T::O2> cols_has;
 
-		for (o2i_t row {0}; row < T::O2; ++row) {
-		for (o2i_t col {0}; col < T::O2; ++col) {
+		for (const auto row : T::O2) {
+		for (const auto col : T::O2) {
 			if (col == 0) [[unlikely]] { row_has = has_mask_t{}; }
 			if (row % T::O1 == 0) [[unlikely]] { h_chute_boxes_has.fill(has_mask_t{}); }
 
@@ -74,15 +74,15 @@ namespace okiidoku::mono {
 	template<Order O> requires(is_order_compiled(O))
 	void init_most_canonical_grid(Grid<O>& grid) noexcept {
 		OKIIDOKU_MONO_INT_TS_TYPEDEFS
-		for (o2i_t box {0}; box < T::O2; ++box) {
-			const auto h_chute {T::o1x(box/T::O1)};
-			const auto v_chute {T::o1x(box%T::O1)};
-			for (o2i_t box_cell {0}; box_cell < T::O2; ++box_cell) {
-				const auto boxrow {T::o1x(box_cell/T::O1)};
-				const auto boxcol {T::o1x(box_cell%T::O1)};
+		for (const auto box : T::O2) {
+			const auto h_chute {box/T::O1};
+			const auto v_chute {box%T::O1};
+			for (const auto box_cell : T::O2) {
+				const auto boxrow {box_cell/T::O1};
+				const auto boxcol {box_cell%T::O1};
 				const auto rmi {box_cell_to_rmi<O>(box, box_cell)};
-				const auto val_row {T::o1x((boxrow+v_chute) % T::O1)};
-				const auto val_col {T::o1x((boxcol+h_chute) % T::O1)};
+				const auto val_row {(boxrow+v_chute) % T::O1};
+				const auto val_col {(boxcol+h_chute) % T::O1};
 				const auto val {static_cast<grid_val_t<O>>(
 					(T::O1*val_row)+val_col
 				)};

@@ -34,7 +34,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 			o3i_t num_other_cand_cells {0};
 			for (const auto house_type : house_types) {
 				const auto house {rmi_to_house<O>(house_type, rmi)};
-				for (o2i_t house_cell {0}; house_cell < T::O2; ++house_cell) {
+				for (const auto house_cell : T::O2) {
 					const auto& other_cell {cells_cands.at_rmi(house_cell_to_rmi<O>(house_type, house, house_cell))};
 					if (other_cell[sym]) { ++num_other_cand_cells; }
 				}
@@ -65,7 +65,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 		using house_solved_counts_t = HouseTypeMap<o2is_t>;
 		// TODO consider a way of caching this information? I can't guess whether it will be better or worse. This isn't like the guess network, I think bookkeeping for this may require one copy of the info for each stack frame to make sense from a POV of avoiding re-computation.
 		std::array<house_solved_counts_t, T::O2> houses_solved_counts {};
-		for (o4i_t rmi {0}; rmi < T::O4; ++rmi) {
+		for (const auto rmi : T::O4) {
 			if (cells_cands.at_rmi(rmi).count() == 1) [[unlikely]] {
 				for (const auto house_type : house_types) {
 					++(houses_solved_counts[rmi_to_house<O>(house_type, rmi)].at(house_type));
@@ -94,18 +94,18 @@ namespace okiidoku::mono::detail::solver { namespace {
 				#ifdef __cpp_lib_execution
 				std::execution::unseq,
 				#endif
-				guess_stack.cbegin(), guess_stack.cend(), T::o3i(0), std::plus<o3i_t>{},
-				[rmi](const auto& frame) -> o3i_t {
+				guess_stack.cbegin(), guess_stack.cend(), std::uintmax_t{0u}, std::plus<std::uintmax_t>{},
+				[rmi](const auto& frame) -> auto {
 					const auto other_rmi {frame.guess.rmi};
-					return T::o3i(// TODO consider using gcc's __builtin_expect to annotate as unlikely. standard attribute cannot be used for ternary.
-					  (rmi_to_row<O>(rmi) == rmi_to_row<O>(other_rmi) ? o3i_t{1} : o3i_t{0})
-					+ (rmi_to_col<O>(rmi) == rmi_to_col<O>(other_rmi) ? o3i_t{1} : o3i_t{0})
-					+ (rmi_to_box<O>(rmi) == rmi_to_box<O>(other_rmi) ? o3i_t{1} : o3i_t{0}));
+					return (// TODO consider using gcc's __builtin_expect to annotate as unlikely. standard attribute cannot be used for ternary.
+					  (rmi_to_row<O>(rmi) == rmi_to_row<O>(other_rmi) ? 1u : 0u)
+					+ (rmi_to_col<O>(rmi) == rmi_to_col<O>(other_rmi) ? 1u : 0u)
+					+ (rmi_to_box<O>(rmi) == rmi_to_box<O>(other_rmi) ? 1u : 0u));
 				}
 			);
 		}};
 		o4i_t best_rmi {T::O4};
-		for (o4i_t rmi {0}; rmi < T::O4; ++rmi) {
+		for (const auto rmi : T::O4) {
 			if (cells_cands.at_rmi(rmi).count() > 1) [[likely]] {
 				best_rmi = rmi;
 				break;

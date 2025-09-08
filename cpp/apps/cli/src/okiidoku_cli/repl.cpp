@@ -116,11 +116,11 @@ namespace okiidoku::cli {
 	}
 
 
-	void Repl::gen_multiple(unsigned long long how_many) {
+	void Repl::gen_multiple(const std::uintmax_t how_many) {
 		using namespace ::okiidoku::visitor;
 		const Timer timer{};
 		{
-			std::filesystem::create_directories("gen");
+			// std::filesystem::create_directories("gen");
 			const std::string file_path {std::string{"gen/"} + std::to_string(uint_fast32_t{config_.order()}) + ".bin"};
 			std::cout << "output file path: " << file_path << std::endl;
 			// std::ofstream of(file_path, std::ios::binary|std::ios::ate);
@@ -132,7 +132,7 @@ namespace okiidoku::cli {
 			// }
 			Grid grid(config_.order());
 			init_most_canonical_grid(grid);
-			for (unsigned long long prog {0}; prog < how_many; ++prog) {
+			for (std::uintmax_t prog {0}; prog < how_many; ++prog) {
 				generate_shuffled(grid, shared_rng_.get());
 				if (config_.canonicalize()) {
 					canonicalize(grid);
@@ -159,7 +159,7 @@ namespace okiidoku::cli {
 
 
 	void Repl::gen_multiple(const std::string_view how_many_str) {
-		unsigned long long how_many {};
+		std::uintmax_t how_many {};
 		const auto parse_result {std::from_chars(
 			how_many_str.data(), how_many_str.data()+how_many_str.size(), how_many
 		)};

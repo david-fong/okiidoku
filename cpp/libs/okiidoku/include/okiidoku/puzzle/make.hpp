@@ -15,6 +15,12 @@ namespace okiidoku::mono {
 	a puzzle is a non-full grid. it is "proper" if the canonicalizations of all
 	its fillings that follow the one rule are the same. i.e. it effectively only
 	has one solution.
+	\todo should this have a alternative function that checks whether there is
+		_truly_ only one solution (no others- even if they are canonically equivalent)?
+		how to implement this in a way that isn't wasteful? maybe an effort param to
+		denote whether to check that solution set is canonically equivalent or short-
+		circuit if size greater than one? also, maybe there should be a way for
+		caller to get a copy of the solution? like an optional outparam?
 	\relates okiidoku::mono::Grid */
 	bool grid_is_proper_puzzle(const Grid<O>&) noexcept;
 

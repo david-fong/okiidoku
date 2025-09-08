@@ -14,8 +14,8 @@ void test_grid() {
 	using namespace ::okiidoku::mono;
 	OKIIDOKU_MONO_INT_TS_TYPEDEFS
 
-	for (o2i_t i {0}; i < T::O2; ++i) {
-	for (o2i_t j {0}; j < T::O2; ++j) {
+	for (const auto i : T::O2) {
+	for (const auto j : T::O2) {
 		const auto box_cell_rmi {box_cell_to_rmi<O>(i,j)};
 		CHECK(rmi_to_box<O>(box_cell_rmi) == i);
 		CHECK(rmi_to_box_cell<O>(box_cell_rmi) == j);

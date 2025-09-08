@@ -21,7 +21,7 @@ namespace okiidoku::mono::detail::solver {
 
 namespace okiidoku::mono {
 
-	using num_solns_found_t = unsigned long long;
+	using num_solns_found_t = std::uintmax_t;
 
 
 	template<Order O> requires(is_order_compiled(O))

@@ -20,6 +20,8 @@ namespace okiidoku::mono {
 	// 	return (std::bit_width(max_value) + 7) / 8;
 	// }
 
+	// TODO efficient mechanism to opt-in/out of error-checking in the parsing functions.
+
 	/**
 	\pre the grid is filled and follows the one rule. */
 	template<Order O> requires(is_order_compiled(O))

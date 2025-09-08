@@ -15,7 +15,6 @@ namespace okiidoku::mono {
 	template<Order O> requires(is_order_compiled(O))
 	void scramble(Transformation<O>& it, const rng_seed_t rng_seed) noexcept {
 		using T = Ints<O>;
-		using o1i_t = T::o1i_t;
 		namespace stdr = std::ranges;
 		{
 			using rng_t = std::minstd_rand;
@@ -23,7 +22,7 @@ namespace okiidoku::mono {
 			stdr::shuffle(it.sym_map, rng);
 			stdr::shuffle(it.row_map, rng);
 			stdr::shuffle(it.col_map, rng);
-			for (o1i_t chute {0}; chute < T::O1; ++chute) {
+			for (const auto chute : T::O1) {
 				stdr::shuffle(it.row_map[chute], rng);
 				stdr::shuffle(it.col_map[chute], rng);
 			}

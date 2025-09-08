@@ -26,8 +26,8 @@ namespace okiidoku::mono::detail::solver { namespace {
 		auto&& at_isec(this Self&& self, const o2i_t isec_i) noexcept { return std::forward<Self>(self).arr_[isec_i]; }
 
 		template<class Self> [[nodiscard, gnu::pure]]
-		auto&& at_isec(this Self&& self, const o1i_t box_isec_i, const o1i_t line_isec_i) noexcept {
-			return std::forward<Self>(self).arr_[T::o2i(T::o2i(T::O1*box_isec_i)+line_isec_i)];
+		auto&& at_isec(this Self&& self, const o1x_t box_isec_i, const o1x_t line_isec_i) noexcept {
+			return std::forward<Self>(self).arr_[((T::O1*box_isec_i)+line_isec_i)];
 		}
 	};
 
@@ -46,7 +46,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 	template<Order O> requires(is_order_compiled(O))
 	void find_locked_cands_in_chute(
 		const LineType line_type,
-		const typename Ints<O>::o1i_t chute,
+		const typename Ints<O>::o1x_t chute,
 		const CandsGrid<O>& cells_cands,
 		FoundQueues<O>& found_queues
 	) noexcept {
@@ -54,8 +54,8 @@ namespace okiidoku::mono::detail::solver { namespace {
 		// TODO optimize by interleaving entries of syms_non_single and syms?
 		ChuteIsecsSyms<O> chute_isecs_syms_non_single {}; // syms with multiple cand cells in each chute isec
 		ChuteIsecsSyms<O> chute_isecs_syms {}; // all cand syms in each chute isec
-		for (o2i_t chute_isec {0}; chute_isec < T::O2; ++chute_isec) {
-		for (o1i_t isec_cell {0}; isec_cell < T::O1; ++isec_cell) {
+		for (const auto chute_isec : T::O2) {
+		for (const auto isec_cell : T::O1) {
 			const auto chute_cell {T::o3i((T::O1*chute_isec)+isec_cell)};
 			const auto rmi {chute_cell_to_rmi<O>(line_type, chute, chute_cell)};
 			const auto& cell_cands {cells_cands.at_rmi(rmi)};
@@ -70,26 +70,25 @@ namespace okiidoku::mono::detail::solver { namespace {
 			chute_house_syms_t<O> lines_syms;
 			chute_house_syms_t<O> boxes_syms;
 			// TODO.low compare speed and lib-size if the initialization is not interleaved.
-			for (o1i_t isec_i {0}; isec_i < T::O1; ++isec_i) {
-				for (o1i_t isec_j {0}; isec_j < T::O1; ++isec_j) {{
-					const auto& line_isec_syms {chute_isecs_syms.at_isec(isec_i, isec_j)};
-					lines_syms_claiming_an_isec[isec_i].remove(lines_syms[isec_i] & line_isec_syms);
-					lines_syms[isec_i] |= line_isec_syms;
-					}{
-					const auto& box_isec_syms {chute_isecs_syms.at_isec(isec_j, isec_i)};
-					boxes_syms_claiming_an_isec[isec_i].remove(boxes_syms[isec_i] & box_isec_syms);
-					boxes_syms[isec_i] |= box_isec_syms;
-				}}
-			}
+			for (const auto isec_i : T::O1) {
+			for (const auto isec_j : T::O1) {{
+				const auto& line_isec_syms {chute_isecs_syms.at_isec(isec_i, isec_j)};
+				lines_syms_claiming_an_isec[isec_i].remove(lines_syms[isec_i] & line_isec_syms);
+				lines_syms[isec_i] |= line_isec_syms;
+				}{
+				const auto& box_isec_syms {chute_isecs_syms.at_isec(isec_j, isec_i)};
+				boxes_syms_claiming_an_isec[isec_i].remove(boxes_syms[isec_i] & box_isec_syms);
+				boxes_syms[isec_i] |= box_isec_syms;
+			}}}
 		}
-		for (o1i_t box_isec {0}; box_isec < T::O1; ++box_isec) {
-		for (o1i_t line_isec {0}; line_isec < T::O1; ++line_isec) {
+		for (const auto box_isec : T::O1) {
+		for (const auto line_isec : T::O1) {
 			const auto& isec_syms_non_single {chute_isecs_syms_non_single.at_isec(box_isec, line_isec)};
 			auto line_match {lines_syms_claiming_an_isec[box_isec] & isec_syms_non_single}; line_match.remove(boxes_syms_claiming_an_isec[line_isec]);
 			auto box_match {boxes_syms_claiming_an_isec[line_isec] & isec_syms_non_single};  box_match.remove(lines_syms_claiming_an_isec[box_isec]);
 			const auto isec {T::o3xs(
-				T::o3xs(T::O2*chute)
-				+ T::o3xs(T::O1*box_isec)
+				(T::O2*chute)
+				+ (T::O1*box_isec)
 				+ line_isec
 			)};
 			if (line_match.count() > 0) [[unlikely]] {
@@ -122,7 +121,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 		// if S's only candidate cells in L are in I, the same must hold true for B
 		// if S's only candidate cells in B are in I, the same must hold true for L
 		for (const auto line_type : line_types) {
-			for (o1i_t chute {0}; chute < T::O1; ++chute) {
+			for (const auto chute : T::O1) {
 				find_locked_cands_in_chute(line_type, chute, cells_cands, found_queues);
 			}
 		}

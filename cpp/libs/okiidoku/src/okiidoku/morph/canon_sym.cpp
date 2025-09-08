@@ -55,8 +55,8 @@ namespace okiidoku::mono { namespace {
 			sym_map_t<O> to_og; ///< `map[sym_new] -> sym_orig`.
 			detail::Ties<O, 2> ties {};
 			explicit constexpr State(const Grid<O>& grid) noexcept {
-				for (o2i_t row {0}; row < T::O2; ++row) {
-				for (o2i_t col {0}; col < T::O2; ++col) {
+				for (const auto row : T::O2) {
+				for (const auto col : T::O2) {
 					const auto box {row_col_to_box<O>(row, col)};
 					const auto sym {grid.at(row, col)};
 					const auto box_cell = row_col_to_box_cell<O>(row, col);
@@ -74,11 +74,11 @@ namespace okiidoku::mono { namespace {
 
 	template<Order O> requires(is_order_compiled(O))
 	void CanonLabel<O>::do_a_pass_(CanonLabel<O>::State& s) noexcept {
-		// for (o2i_t sym_a {0}; sym_a < T::O2; ++sym_a) {
-		// for (o2i_t sym_b {0}; sym_b < T::O2; ++sym_b) {
+		// for (const auto sym_a : T::O2) {
+		// for (const auto sym_b : T::O2) {
 		// 	O2BitArr<O> r_atom, col_atom;
 		// 	std::array<HouseType, T::O2> pic;
-		// 	for (o2i_t box {0}; box < T::O2; ++box) {
+		// 	for (const auto box : T::O2) {
 		// 		const auto boxcell_a {sym_box_to_boxcell_map.at(sym_a, box)};
 		// 		const auto boxcell_b {sym_box_to_boxcell_map.at(sym_b, box)};
 		// 	}
@@ -107,7 +107,7 @@ namespace okiidoku::mono { namespace {
 		{
 			// update s.to_og:
 			sym_map_t<O> to_og {s.to_og};
-			for (o2i_t i {0}; i < T::O2; ++i) {
+			for (const auto i : T::O2) {
 				s.to_og[i] = to_og[tiebreak_map[i]];
 			}
 		}
@@ -132,14 +132,14 @@ namespace okiidoku::mono { namespace {
 			}
 
 			OKIIDOKU_DEFER_INIT sym_map_t<O> map;
-			for (o2i_t canon_i {0}; canon_i < T::O2; ++canon_i) {
+			for (const auto canon_i : T::O2) {
 				map[s.to_og[canon_i]] = static_cast<to_t>(canon_i);
 			}
 			return map;
 		}()};
 
-		for (o4i_t i {0}; i < Ints<O>::O4; ++i) {
-			grid.at_rmi(i) = static_cast<val_t>(sym_og_to_canon[grid.at_rmi(i)]);
+		for (const auto i : T::O4) {
+			grid.at_rmi(i) = sym_og_to_canon[grid.at_rmi(i)];
 		}
 		OKIIDOKU_CONTRACT_ASSERT(grid_follows_rule<O>(grid));
 		return sym_og_to_canon;

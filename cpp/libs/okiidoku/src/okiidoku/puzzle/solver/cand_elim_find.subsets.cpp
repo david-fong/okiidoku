@@ -25,10 +25,10 @@ namespace okiidoku::mono::detail::solver { namespace {
 	) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
 		for (const auto house_type : house_types) {
-		for (o2i_t house {0}; house < T::O2; ++house) {
+		for (const auto house : T::O2) {
 			O2BitArr<O> syms_claiming_a_cell {O2BitArr_ones<O>}; {
 				O2BitArr<O> syms_seen {};
-				for (o2i_t house_cell {0}; house_cell < T::O2; ++house_cell) {
+				for (const auto house_cell : T::O2) {
 					const auto& cell_cands {cells_cands.at_rmi(house_cell_to_rmi<O>(house_type, house, house_cell))};
 					syms_claiming_a_cell.remove(syms_seen & cell_cands);
 					syms_seen |= cell_cands;
@@ -37,7 +37,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 					return true; // sym(s) with no cand cells.
 				}
 			}
-			for (o2i_t house_cell {0}; house_cell < T::O2; ++house_cell) {
+			for (const auto house_cell : T::O2) {
 				const auto rmi {house_cell_to_rmi<O>(house_type, house, house_cell)};
 				const auto& cell_cands {cells_cands.at_rmi(rmi)};
 				const auto match_cands {cell_cands & syms_claiming_a_cell};
@@ -275,7 +275,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 			// 	return houses_subsets[a].is_begin.count() < houses_subsets[b].is_begin.count();
 			// });
 			// for (const auto house : houses) {
-			for (o2i_t house {0}; house < T::O2; ++house) {
+			for (const auto house : T::O2) {
 				const auto check {find_subsets_for_house_and_check_needs_unwind<O>(
 					engine, houses_subsets[house], max_subset_size
 				)};
