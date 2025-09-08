@@ -37,7 +37,9 @@ void test_morph(okiidoku::util::SharedRng& shared_rng, const unsigned num_rounds
 		// TODO: test that performing various transforms and then performing the invert truly reverts the transform.
 
 		canon_grid = gen_grid;
-		scramble(canon_grid, shared_rng.get());
+		Transformation<O> scramble_transform {};
+		scramble(scramble_transform, shared_rng.get());
+
 		canonicalize(canon_grid);
 
 		CHECK(gen_grid == canon_grid);

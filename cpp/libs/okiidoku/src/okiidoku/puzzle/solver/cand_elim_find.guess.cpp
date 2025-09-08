@@ -50,7 +50,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 				best_sym_num_other_cand_cells = sym_num_other_cand_cells;
 			}
 		}
-		return static_cast<o2xs_t>(best_sym);
+		return T::o2xs(best_sym);
 	}
 
 
@@ -94,10 +94,10 @@ namespace okiidoku::mono::detail::solver { namespace {
 				#ifdef __cpp_lib_execution
 				std::execution::unseq,
 				#endif
-				guess_stack.cbegin(), guess_stack.cend(), static_cast<o3i_t>(0), std::plus<o3i_t>{},
+				guess_stack.cbegin(), guess_stack.cend(), T::o3i(0), std::plus<o3i_t>{},
 				[rmi](const auto& frame) -> o3i_t {
 					const auto other_rmi {frame.guess.rmi};
-					return static_cast<o3i_t>(// TODO consider using gcc's __builtin_expect to annotate as unlikely. standard attribute cannot be used for ternary.
+					return T::o3i(// TODO consider using gcc's __builtin_expect to annotate as unlikely. standard attribute cannot be used for ternary.
 					  (rmi_to_row<O>(rmi) == rmi_to_row<O>(other_rmi) ? o3i_t{1} : o3i_t{0})
 					+ (rmi_to_col<O>(rmi) == rmi_to_col<O>(other_rmi) ? o3i_t{1} : o3i_t{0})
 					+ (rmi_to_box<O>(rmi) == rmi_to_box<O>(other_rmi) ? o3i_t{1} : o3i_t{0}));
@@ -116,7 +116,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 		[[maybe_unused]] auto best_guess_grouping {get_guess_grouping(best_rmi)};
 
 		// TODO is there a same-or-better-perf way to write this search using std::transform_reduce or std::min?
-		for (o4i_t rmi {static_cast<o4i_t>(best_rmi+1u)}; rmi < T::O4; ++rmi) {
+		for (o4i_t rmi {T::o4i(best_rmi+1u)}; rmi < T::O4; ++rmi) {
 			const auto cand_count {cells_cands.at_rmi(rmi).count()};
 			OKIIDOKU_CONTRACT_USE(cand_count != 0);
 			if (cand_count <= 1) [[unlikely]] { continue; } // no guessing for solved cell.

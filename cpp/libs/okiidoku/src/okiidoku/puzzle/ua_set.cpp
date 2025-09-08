@@ -32,20 +32,20 @@ namespace okiidoku::mono { namespace {
 			OKIIDOKU_DEFER_INIT chute_lines_sym_to_cell_t<O> map;
 			for (o1i_t chute_line {0}; chute_line < T::O1; ++chute_line) {
 			for (o2i_t house_cell {0}; house_cell < T::O2; ++house_cell) {
-				const auto chute_cell_i {static_cast<o3i_t>((T::O2*chute_line)+house_cell)};
+				const auto chute_cell_i {T::o3i((T::O2*chute_line)+house_cell)};
 				OKIIDOKU_CONTRACT_USE(chute_cell_i < T::O3);
 				const auto rmi {chute_cell_to_rmi<O>(line_type, chute, chute_cell_i)};
 				const auto& sym {soln_grid.at_rmi(rmi)};
 				OKIIDOKU_CONTRACT_USE(sym < T::O2);
-				map[chute_line][sym] = static_cast<o2xs_t>(house_cell);
+				map[chute_line][sym] = T::o2xs(house_cell);
 			}}
 			return map;
 		}()};
-		for (o1i_t chute_line_a {0}; static_cast<o1i_t>(chute_line_a+1) < T::O1; ++chute_line_a) {
-		for (o1i_t chute_line_b {static_cast<o1i_t>(chute_line_a+1)}; chute_line_b < T::O1; ++chute_line_b) {
+		for (o1i_t chute_line_a {0}; T::o1i(chute_line_a+1) < T::O1; ++chute_line_a) {
+		for (o1i_t chute_line_b {T::o1i(chute_line_a+1)}; chute_line_b < T::O1; ++chute_line_b) {
 			for (o2i_t slice_c {0}; slice_c < T::O2; ++slice_c) {
-				const auto c_a_rmi {chute_cell_to_rmi<O>(line_type, chute, static_cast<o3i_t>((T::O2*chute_line_a)+slice_c))};
-				const auto c_b_rmi {chute_cell_to_rmi<O>(line_type, chute, static_cast<o3i_t>((T::O2*chute_line_b)+slice_c))};
+				const auto c_a_rmi {chute_cell_to_rmi<O>(line_type, chute, T::o3i((T::O2*chute_line_a)+slice_c))};
+				const auto c_b_rmi {chute_cell_to_rmi<O>(line_type, chute, T::o3i((T::O2*chute_line_b)+slice_c))};
 				const auto& c_a_sym {soln_grid.at_rmi(c_a_rmi)}; OKIIDOKU_CONTRACT_USE(c_a_sym < T::O2);
 				const auto& c_b_sym {soln_grid.at_rmi(c_b_rmi)}; OKIIDOKU_CONTRACT_USE(c_b_sym < T::O2);
 				const auto& d_a_cell {chute_lines_sym_to_cell[chute_line_a][c_b_sym]};
@@ -54,8 +54,8 @@ namespace okiidoku::mono { namespace {
 					found.ua_set_4s.emplace_back(UaSet4<O>{
 						static_cast<rmi_t>(c_a_rmi),
 						static_cast<rmi_t>(c_b_rmi),
-						static_cast<rmi_t>(chute_cell_to_rmi<O>(line_type, chute, static_cast<o3i_t>((T::O2*chute_line_a)+d_a_cell))),
-						static_cast<rmi_t>(chute_cell_to_rmi<O>(line_type, chute, static_cast<o3i_t>((T::O2*chute_line_b)+d_b_cell))),
+						static_cast<rmi_t>(chute_cell_to_rmi<O>(line_type, chute, T::o3i((T::O2*chute_line_a)+d_a_cell))),
+						static_cast<rmi_t>(chute_cell_to_rmi<O>(line_type, chute, T::o3i((T::O2*chute_line_b)+d_b_cell))),
 					});
 				}
 			}

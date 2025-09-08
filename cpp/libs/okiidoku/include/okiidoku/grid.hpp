@@ -4,6 +4,7 @@
 #define HPP_OKIIDOKU__GRID
 
 #include <okiidoku/ints.hpp>
+#include <okiidoku/detail/visitor.hpp>
 #include <okiidoku/order.hpp>
 
 #include <array>
@@ -30,14 +31,14 @@ namespace okiidoku::mono {
 	};
 	// using Grid = detail::Gridlike<O, grid_val_t<O>>;
 	// Note: the above commented-out type alias results in large exported, mangled
-	//  symbol names from `int_ts`'s heavy usage of `std::conditional_t` (but why?).
+	//  symbol names from `ints`'s heavy usage of `std::conditional_t` (but why?).
 	//  Using inheritance gains nice mangled symbol names. Speed seems to suffer a
 	//  negligible drop (~1%?) or maybe it doesn't. I am happy with this outcome.
 
 
 	template<Order O> requires(is_order_compiled(O))
 	[[nodiscard, gnu::pure]] OKIIDOKU_EXPORT
-	/// \return `false` if any cells in a same house contain the same value.
+	/// \return `false` if any cells in a same house contain the same value (other than `O2`).
 	/// \note can be used with incomplete grids.
 	bool grid_follows_rule(const Grid<O>&) noexcept;
 
@@ -78,34 +79,31 @@ namespace okiidoku::mono {
 		template<class Self>
 		[[nodiscard, gnu::pure]] auto&& get_underlying_array(this Self&& self) noexcept { return std::forward<Self>(self).arr_; }
 
-		// TODO.low why does adding an assumption that the value is lteq T::O2 result in increased code size on clang?
 		/// \pre `rmi` is in `[0, O4)`.
-		template<class T_rmi, class Self> requires(Any_o4x_t<O, T_rmi>) // TODO can I just use the concept in the parameter type slot?
+		template<class T_rmi, class Self> requires(Any_o4x_t<O,T_rmi>)
 		[[nodiscard, gnu::pure]] constexpr auto&& at_rmi(this Self&& self, const T_rmi rmi) noexcept {
 			OKIIDOKU_CONTRACT_USE(rmi < T::O4);
-			// if constexpr (std::same_as<V_, grid_val_t<O>>) { OKIIDOKU_CONTRACT_USE(arr_[rmi] <= T::O2); }
 			return std::forward<Self>(self).arr_[rmi];
 		}
 
-		// TODO.low why is using row_col_to_rmi slower than "inlining" the expression here? Is it because of the return-type cast? even adding bounds assumptions seems to increase code size...
 		/// \pre `row` and `col` are in `[0, O2)`.
-		template<class T_row, class T_col, class Self> requires(Any_o2x_t<O, T_row> && Any_o2x_t<O, T_col>)
+		template<class T_row, class T_col, class Self> requires(Any_o2x_t<O,T_row> && Any_o2x_t<O,T_col>)
 		[[nodiscard, gnu::pure]] constexpr auto&& at(this Self&& self, const T_row row, const T_col col) noexcept {
-			return std::forward<Self>(self).arr_[T::o4x(T::o4x(T::O2*row)+col)];
+			return std::forward<Self>(self).arr_[row_col_to_rmi<O>(row, col)];
 		}
 
 		/**
 		see `okiidoku::mono::box_cell_to_rmi`.
 		\pre `box` and `box_cell` are in `[0, O2)`. */
-		template<class T_house, class T_house_cell, class Self> requires(Any_o2x_t<O, T_house> && Any_o2x_t<O, T_house_cell>)
+		template<class T_house, class T_house_cell, class Self> requires(Any_o2x_t<O,T_house> && Any_o2x_t<O,T_house_cell>)
 		[[nodiscard, gnu::pure]] constexpr auto&& at_box_cell(this Self&& self, const T_house box, const T_house_cell box_cell) noexcept {
 			return std::forward<Self>(self).arr_[box_cell_to_rmi<O>(box, box_cell)];
 		}
 
 		/// \pre `row` is in [0, O2).
-		template<class T_row> requires(Any_o2x_t<O, T_row>)
+		template<class T_row> requires(Any_o2x_t<O,T_row>)
 		[[nodiscard]] std::span<      val_t, T::O2> row_span_at(const T_row i)       noexcept { return static_cast<std::span<      val_t, T::O2>>(std::span(arr_).subspan(T::O2*i, T::O2)); }
-		template<class T_row> requires(Any_o2x_t<O, T_row>)
+		template<class T_row> requires(Any_o2x_t<O,T_row>)
 		[[nodiscard]] std::span<const val_t, T::O2> row_span_at(const T_row i) const noexcept { return static_cast<std::span<const val_t, T::O2>>(std::span(arr_).subspan(T::O2*i, T::O2)); }
 
 		// [[nodiscard]] auto row_spans() noexcept { namespace v = ::ranges::views; return v::iota(o2i_t{0}, o2i_t{T::O2}) | v::transform([&](auto r){ return row_span_at(r); }); }
@@ -173,12 +171,12 @@ namespace okiidoku::visitor {
 		// Or we could just take the easy route and make setter methods.
 
 		/// \pre `rmi` is in `[0, O4)`.
-		// [[nodiscard]] val_t& at_rmi(const int_ts::o4i_t rmi)       noexcept;
-		[[nodiscard, gnu::pure]] val_t at_rmi(const int_ts::o4i_t rmi) const noexcept;
+		// [[nodiscard]] val_t& at_rmi(const ints::o4i_t rmi)       noexcept;
+		[[nodiscard, gnu::pure]] val_t at_rmi(const ints::o4i_t rmi) const noexcept;
 
 		/// \pre `row` and `col` are in `[0, O2)`.
-		// [[nodiscard]] val_t& at(const int_ts::o2i_t row, const int_ts::o2i_t col)       noexcept;
-		[[nodiscard, gnu::pure]] val_t at(const int_ts::o2i_t row, const int_ts::o2i_t col) const noexcept;
+		// [[nodiscard]] val_t& at(const ints::o2i_t row, const ints::o2i_t col)       noexcept;
+		[[nodiscard, gnu::pure]] val_t at(const ints::o2i_t row, const ints::o2i_t col) const noexcept;
 	};
 }
 #endif

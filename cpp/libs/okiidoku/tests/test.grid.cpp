@@ -20,8 +20,8 @@ void test_grid() {
 		CHECK(rmi_to_box<O>(box_cell_rmi) == i);
 		CHECK(rmi_to_box_cell<O>(box_cell_rmi) == j);
 
-		const auto chute {static_cast<o1x_t>(i/T::O1)};
-		const auto chute_cell {static_cast<o3x_t>(((i%T::O1)*T::O2)+j)};
+		const auto chute {T::o1x(i/T::O1)};
+		const auto chute_cell {T::o3x(((i%T::O1)*T::O2)+j)};
 		const auto h_chute_cell_rmi {chute_cell_to_rmi<O>(LineType::row, chute, chute_cell)};
 		const auto v_chute_cell_rmi {chute_cell_to_rmi<O>(LineType::col, chute, chute_cell)};
 		CHECK(h_chute_cell_rmi == row_col_to_rmi<O>(i,j));

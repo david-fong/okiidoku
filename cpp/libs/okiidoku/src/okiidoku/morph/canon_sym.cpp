@@ -116,7 +116,7 @@ namespace okiidoku::mono { namespace {
 
 	template<Order O> requires(is_order_compiled(O))
 	sym_map_t<O> CanonLabel<O>::do_it(Grid<O>& grid) noexcept {
-		const sym_map_t<O> label_og_to_canon {[&](){
+		const sym_map_t<O> sym_og_to_canon {[&](){
 			OKIIDOKU_DEFER_INIT State s(grid);
 			while (s.has_ties()) {
 				auto old_ties {s.ties};
@@ -139,10 +139,10 @@ namespace okiidoku::mono { namespace {
 		}()};
 
 		for (o4i_t i {0}; i < Ints<O>::O4; ++i) {
-			grid.at_rmi(i) = static_cast<val_t>(label_og_to_canon[grid.at_rmi(i)]);
+			grid.at_rmi(i) = static_cast<val_t>(sym_og_to_canon[grid.at_rmi(i)]);
 		}
 		OKIIDOKU_CONTRACT_ASSERT(grid_follows_rule<O>(grid));
-		return label_og_to_canon;
+		return sym_og_to_canon;
 	}
 }}
 namespace okiidoku::mono::detail {

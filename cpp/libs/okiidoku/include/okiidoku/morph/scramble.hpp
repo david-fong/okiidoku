@@ -6,21 +6,17 @@
 #include <okiidoku/morph/transform.hpp>
 #include <okiidoku/ints.hpp>
 #include <okiidoku/order.hpp>
-namespace okiidoku::mono { template <Order O> requires (is_order_compiled(O)) struct Grid; }
-namespace okiidoku::visitor { struct Grid; }
 
 
 namespace okiidoku::mono {
 
-	// post-condition: before and after states of the grid canonicalize to the same grid.
 	template<Order O> requires(is_order_compiled(O))
-	OKIIDOKU_EXPORT Transformation<O> scramble(Grid<O>&, rng_seed_t rng_seed) noexcept;
+	OKIIDOKU_EXPORT void scramble(Transformation<O>&, const rng_seed_t rng_seed) noexcept;
 }
 
 
 namespace okiidoku::visitor {
 
-	// post-condition: before and after states of the grid canonicalize to the same grid.
-	OKIIDOKU_EXPORT Transformation scramble(Grid&, rng_seed_t rng_seed) noexcept;
+	OKIIDOKU_EXPORT void scramble(Transformation&, const rng_seed_t rng_seed) noexcept;
 }
 #endif

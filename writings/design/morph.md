@@ -43,7 +43,9 @@ I decided not to try to support direct canonicalization of puzzles. I don't know
 
 ### Time Complexity
 
-If anyone would like to verify my evaluation here it would be much appreciated. Take a look at [`canon_label.cpp`](./canon_label.cpp) and [`canon_place.cpp`](./canon_place.cpp).
+TODO: update this.
+
+If anyone would like to verify my evaluation here it would be much appreciated. Take a look at [`canon_sym.cpp`](./canon_sym.cpp) and [`canon_pos.cpp`](./canon_pos.cpp).
 
 - label
   - getting rel mask table: iterate atoms (`O3`). for each atom, iterate pairs of labels (`nCr(O1,2) = O1!/(2*(O1-2)!)`). total: `O3 * O1!/(2*(O1-2)!)`.
@@ -62,10 +64,10 @@ Note that there are many possible variations on the calculations / measures used
 
 The end result of the specific choices made is that:
 
-- Labels are given such that lower valued labels "play favourites". (they will cohabit atoms with some label values more than others).
+- Symbols are given such that lower valued ones "play favourites". (they will cohabit atoms with some label values more than others).
 - Instances of favouritism will be more concentrated at the top and left of the grid.
 
-This may help with solving- labelling and positioning are "sorted" to specific relationship patterns.
+This may help with solving- symbol labelling and positioning are "sorted" to specific relationship patterns.
 
 ## Other Approaches For Exploration
 
@@ -78,7 +80,7 @@ This was originally more of a "things that I tried and didn't work" section, but
   - This doesn't work for order 2. I know order 2 isn't even marginally interesting, but I think the solution should work for any order, and if it doesn't work for order 2, then something's wrong with it. That being said, I didn't explore this route much. Perhaps with adjustments, it can be useful.
 
 - Graph Theory Route:
-  - Could the relabelling canonicalization be approached as a travelling salesman problem? I wonder if this would succeed. The cost of each edge would be the probability of that edge's count.
+  - Could the symbol canonicalization be approached as a travelling salesman problem? I wonder if this would succeed. The cost of each edge would be the probability of that edge's count.
     - See https://www.math.northwestern.edu/documents/book-markov-chains.pdf section 8.2.2.
     - Is NP
   - Graph Bandwidth Problem.

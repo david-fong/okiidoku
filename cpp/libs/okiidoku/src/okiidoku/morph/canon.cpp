@@ -43,7 +43,7 @@ namespace okiidoku::visitor {
 
 	// contract: `vis_grid` is filled and follows the one rule.
 	Transformation canonicalize(Grid& vis_grid) noexcept {
-		switch (vis_grid.get_mono_order()) {
+		switch (vis_grid.get_order()) {
 		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 		case O_: return static_cast<Transformation>(mono::canonicalize(vis_grid.unchecked_get_mono_exact<O_>()));
 		OKIIDOKU_FOREACH_O_DO_EMIT

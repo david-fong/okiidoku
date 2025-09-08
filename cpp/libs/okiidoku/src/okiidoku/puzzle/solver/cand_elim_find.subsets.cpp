@@ -46,8 +46,8 @@ namespace okiidoku::mono::detail::solver { namespace {
 					const auto sym {match_cands.first_set_bit_require_exists()};
 					if (cell_cands.count() > 1) [[likely]] {
 						found_queues.push_back(found::SymClaimCell<O>{
-							.rmi{static_cast<rmi_t>(rmi)},
-							.val{static_cast<o2xs_t>(sym)},
+							.rmi{T::o4xs(rmi)},
+							.val{T::o2xs(sym)},
 						});
 						// TODO consider flagging house for re-scan?
 				}	}
@@ -73,7 +73,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 			bool no_change {true};
 			for (o2i_t i {sub_a}; i < sub_z; ++i) {
 				auto& cell_tag {subs.cell_tags[i]};
-				const auto updated_count {static_cast<o2is_t>(cells_cands.at_rmi(cell_tag.rmi).count())};
+				const auto updated_count {T::o2is(cells_cands.at_rmi(cell_tag.rmi).count())};
 				OKIIDOKU_CONTRACT_USE(cell_tag.count_cache <= T::O2);
 				OKIIDOKU_CONTRACT_USE(cell_tag.count_cache >= updated_count);
 				if (cell_tag.count_cache > updated_count) {
@@ -129,20 +129,20 @@ namespace okiidoku::mono::detail::solver { namespace {
 		OKIIDOKU_CONTRACT_USE(sub_z <= T::O2);
 		OKIIDOKU_CONTRACT_USE(sub_a < sub_z);
 		OKIIDOKU_CONTRACT_USE(max_subset_size >= 2);
-		OKIIDOKU_CONTRACT_USE(max_subset_size <= static_cast<o2x_t>((T::O2+1)/2));
+		OKIIDOKU_CONTRACT_USE(max_subset_size <= T::o2x((T::O2+1)/2));
 		for (o2x_t subset_i {0}; subset_i < (sub_z-sub_a-3) && subset_i+2 < 2*max_subset_size; ++subset_i) {
 			const auto naked_or_hidden {(subset_i % 2 == 0) ? NakedOrHidden::naked : NakedOrHidden::hidden};
 			const auto naked_subset_size {[&]() -> o2x_t {
 				if (naked_or_hidden == NakedOrHidden::naked) {
-					return static_cast<o2x_t>(2+(subset_i/2));
+					return T::o2x(2+(subset_i/2));
 				}
-				return static_cast<o2x_t>((sub_z-sub_a)-2-(subset_i/2));
+				return T::o2x((sub_z-sub_a)-2-(subset_i/2));
 			}()};
 			OKIIDOKU_CONTRACT_USE(sub_a+naked_subset_size+1 < sub_z);
 			// ^plus one to skip finding hidden singles. // TODO or also try to find them?
 			std::optional<FoundSubsetInfo<O>> found {{ // Note: wrap with optional to allow NRVO
 				.combo_walker {
-					static_cast<o2x_t>(sub_a),
+					T::o2x(sub_a),
 					[&]{
 						auto sized_z {sub_a};
 						while (sized_z < T::O2 && subs.cell_tags[sized_z].count_cache <= naked_subset_size) { ++sized_z; }
@@ -183,12 +183,12 @@ namespace okiidoku::mono::detail::solver { namespace {
 	) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
 		OKIIDOKU_CONTRACT_USE(max_subset_size >= 2);
-		OKIIDOKU_CONTRACT_USE(max_subset_size <= static_cast<o2x_t>((T::O2+1)/2));
+		OKIIDOKU_CONTRACT_USE(max_subset_size <= T::o2x((T::O2+1)/2));
 		o2i_t sub_a {0};
 		o2i_t sub_z {0};
 		const auto get_next_sub_a {[&]{
 			OKIIDOKU_CONTRACT_USE(sub_a < T::O2);
-			auto next {static_cast<o2i_t>(sub_a+1)};
+			auto next {T::o2i(sub_a+1)};
 			while (next < T::O2 && !subs.is_begin[next]) { ++next; }
 			OKIIDOKU_CONTRACT_USE(next <= T::O2);
 			OKIIDOKU_CONTRACT_USE(next > sub_a);
@@ -202,7 +202,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 			non_first_members.remove(subs.is_begin);
 			const auto second_non_single_member {non_first_members.first_set_bit_require_exists()};
 			OKIIDOKU_CONTRACT_USE(second_non_single_member > 0);
-			sub_a = static_cast<o2i_t>(second_non_single_member-1);
+			sub_a = T::o2i(second_non_single_member-1);
 		}
 
 		while (sub_a < T::O2) [[likely]] {
@@ -210,7 +210,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 			OKIIDOKU_CONTRACT_USE(sub_z <= T::O2);
 			OKIIDOKU_CONTRACT_USE(sub_a < sub_z);
 			OKIIDOKU_CONTRACT_ASSERT(subs.is_begin[sub_a]);
-			for (auto i {static_cast<o2i_t>(sub_a+1)}; i < sub_z; ++i) {
+			for (auto i {T::o2i(sub_a+1)}; i < sub_z; ++i) {
 				OKIIDOKU_CONTRACT_ASSERT(!subs.is_begin[i]);
 			}
 			if (prepare_try_decompose_subset_and_check_can_skip(engine.cells_cands(), subs, sub_a, sub_z)) {
@@ -238,8 +238,8 @@ namespace okiidoku::mono::detail::solver { namespace {
 				subs.is_begin.set(sub_a);
 			} else {
 				for (o2x_t combo_at {0}; combo_at < naked_subset_size; ++combo_at) {
-					auto& entry {subs.cell_tags[combo_walker.combo_at(static_cast<o2x_t>(naked_subset_size-1-combo_at))]};
-					std::swap(subs.cell_tags[static_cast<o2x_t>(sub_z-1)], entry);
+					auto& entry {subs.cell_tags[combo_walker.combo_at(T::o2x(naked_subset_size-1-combo_at))]};
+					std::swap(subs.cell_tags[T::o2x(sub_z-1)], entry);
 					--sub_z;
 				}
 				subs.is_begin.set(sub_z);
@@ -263,7 +263,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 		const typename Ints<O>::o2x_t max_subset_size
 	) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
-		OKIIDOKU_CONTRACT_USE(max_subset_size <= static_cast<o2x_t>((T::O2+1)/2));
+		OKIIDOKU_CONTRACT_USE(max_subset_size <= T::o2x((T::O2+1)/2));
 		if (max_subset_size < 2) [[unlikely]] {
 			return UnwindInfo::make_no_unwind();
 		}

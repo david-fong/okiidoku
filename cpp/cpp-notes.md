@@ -156,11 +156,11 @@ things I got wrong before which I couldn't understand based on gcc's error messa
 - https://slides.com/onqtam/faster_builds#/48/0/10
 
 - I can specify base-class members like:
-  - Derived::Base::member
+  - `Derived::Base::member`
     https://en.cppreference.com/w/cpp/language/injected-class-name
-  - this.Base->member
-  - this->member
-  - Base<ARGS>::member
+  - `this.Base->member`
+  - `this->member`
+  - `Base<ARGS>::member`
 
 - Tricky business with globals in static libraries being inlined into multiple DSOs / executables linked together: [cppcon talk](https://www.youtube.com/watch?v=xVT1y0xWgww&ab_channel=CppCon&t=4m25s). Try to avoid this scenario by avoiding globals, but if need be, make sure DSOs are specified first in the link order. See the questions section at t=33m19s for more info.
 
@@ -183,12 +183,19 @@ things I got wrong before which I couldn't understand based on gcc's error messa
 
 - [floats in `(0.0,1.0]` can be slower to process](https://en.wikipedia.org/wiki/Subnormal_number#Performance_issues) (apparently?)
 
+- unsigned integers. sigh.
+  - https://en.cppreference.com/w/cpp/language/operator_arithmetic.html
+  - https://en.cppreference.com/w/cpp/language/usual_arithmetic_conversions.html
+  - https://en.cppreference.com/w/cpp/language/implicit_cast.html#Integral_promotion
+    > In particular, arithmetic operators do not accept types smaller than int as arguments, and integral promotions are automatically applied after lvalue-to-rvalue conversion, if applicable.
+  - https://en.cppreference.com/w/cpp/language/usual_arithmetic_conversions.html#Integer_conversion_rank
+
 ## misc VS Code regexes
 
 filter source code: `*.hpp,*.cpp`
 
 ```regex
-static_cast<(int_ts|o[1-5])
+static_cast<(ints|o[1-5])
 const [^{]*&
 [>=]= \S+::O2
 ```

@@ -27,7 +27,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 
 		template<class Self> [[nodiscard, gnu::pure]]
 		auto&& at_isec(this Self&& self, const o1i_t box_isec_i, const o1i_t line_isec_i) noexcept {
-			return std::forward<Self>(self).arr_[static_cast<o2i_t>(static_cast<o2i_t>(T::O1*box_isec_i)+line_isec_i)];
+			return std::forward<Self>(self).arr_[T::o2i(T::o2i(T::O1*box_isec_i)+line_isec_i)];
 		}
 	};
 
@@ -56,7 +56,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 		ChuteIsecsSyms<O> chute_isecs_syms {}; // all cand syms in each chute isec
 		for (o2i_t chute_isec {0}; chute_isec < T::O2; ++chute_isec) {
 		for (o1i_t isec_cell {0}; isec_cell < T::O1; ++isec_cell) {
-			const auto chute_cell {static_cast<o3i_t>((T::O1*chute_isec)+isec_cell)};
+			const auto chute_cell {T::o3i((T::O1*chute_isec)+isec_cell)};
 			const auto rmi {chute_cell_to_rmi<O>(line_type, chute, chute_cell)};
 			const auto& cell_cands {cells_cands.at_rmi(rmi)};
 			auto& seen_once {chute_isecs_syms.at_isec(chute_isec)};
@@ -87,9 +87,9 @@ namespace okiidoku::mono::detail::solver { namespace {
 			const auto& isec_syms_non_single {chute_isecs_syms_non_single.at_isec(box_isec, line_isec)};
 			auto line_match {lines_syms_claiming_an_isec[box_isec] & isec_syms_non_single}; line_match.remove(boxes_syms_claiming_an_isec[line_isec]);
 			auto box_match {boxes_syms_claiming_an_isec[line_isec] & isec_syms_non_single};  box_match.remove(lines_syms_claiming_an_isec[box_isec]);
-			const auto isec {static_cast<o3xs_t>(
-				static_cast<o3xs_t>(T::O2*chute)
-				+ static_cast<o3xs_t>(T::O1*box_isec)
+			const auto isec {T::o3xs(
+				T::o3xs(T::O2*chute)
+				+ T::o3xs(T::O1*box_isec)
 				+ line_isec
 			)};
 			if (line_match.count() > 0) [[unlikely]] {

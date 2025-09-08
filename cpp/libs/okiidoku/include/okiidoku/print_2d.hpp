@@ -17,7 +17,7 @@
 namespace okiidoku {
 
 	using print_2d_grid_view = std::function<
-		visitor::int_ts::o2is_t (visitor::int_ts::o4xs_t rmi)
+		visitor::ints::o2is_t (visitor::ints::o4xs_t rmi)
 	>;
 
 	// contract: each grid view's domain is [0, O4), and range is [0, O2].
@@ -35,8 +35,8 @@ namespace okiidoku {
 		void print_2d(std::ostream& os, rng_seed_t rng_seed, const Gs&... grids) noexcept {
 			static_assert(sizeof...(grids) > 0);
 			const auto printers {std::to_array<print_2d_grid_view>({
-				[&](const visitor::int_ts::o4xs_t rmi){
-					return static_cast<visitor::int_ts::o2is_t>(grids.at_rmi(rmi));
+				[&](const visitor::ints::o4xs_t rmi){
+					return static_cast<visitor::ints::o2is_t>(grids.at_rmi(rmi));
 				}...,
 			})};
 			return print_2d_base(O, os, rng_seed, printers);
@@ -54,7 +54,7 @@ namespace okiidoku {
 			std::vector<print_2d_grid_view> printers;
 			printers.reserve(grids.size());
 			for (const auto& grid : grids) {
-				printers.emplace_back([&](const visitor::int_ts::o4xs_t rmi){
+				printers.emplace_back([&](const visitor::ints::o4xs_t rmi){
 					return grid.get().at_rmi(rmi);
 				});
 			}
@@ -70,9 +70,9 @@ namespace okiidoku {
 			static_assert(sizeof...(grids) > 0);
 			// if (sizeof...(grids) == 0) [[unlikely]] { return; }
 			const auto tup {std::forward_as_tuple(grids...)};
-			if (!(... && (std::get<0>(tup).get_mono_order() == grids.get_mono_order()))) [[unlikely]] { return; }
+			if (!(... && (std::get<0>(tup).get_order() == grids.get_order()))) [[unlikely]] { return; }
 
-			switch (std::get<0>(tup).get_mono_order()) {
+			switch (std::get<0>(tup).get_order()) {
 			#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 			case O_: return mono::print_2d<O_>(os, rng_seed, (grids.template unchecked_get_mono_exact<O_>())...);
 			OKIIDOKU_FOREACH_O_DO_EMIT

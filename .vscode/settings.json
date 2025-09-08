@@ -108,4 +108,5 @@
 	"cmake.configureArgs": [
 		"-D OKIIDOKU_BUILD_WITH_STATIC_ANALYZERS:BOOL=NO",
 	],
+	"editor.autoClosingComments": "languageDefined",
 }

@@ -98,7 +98,7 @@ namespace okiidoku::mono { namespace {
 				OKIIDOKU_CONTRACT_USE(buf_pos_ != 0 && buf_pos_ < buf_end);
 				buf_pos_ *= use_factor;
 				smol_val_buf /= static_cast<val_t>(use_factor);
-				smol_val_buf_remaining /= static_cast<Ints<O>::o2i_t>(use_factor);
+				smol_val_buf_remaining /= T::o2i(use_factor);
 			}
 			if (buf_pos_ >= buf_end) { // TODO.asap should this be a while loop?
 				static_assert(num_buf_bytes == 1); // otherwise the below needs to change.
@@ -219,7 +219,7 @@ namespace okiidoku::mono {
 namespace okiidoku::visitor {
 
 	void write_solution_grid_to_stream(const Grid& vis_src, std::ostream& os) noexcept {
-		switch (vis_src.get_mono_order()) {
+		switch (vis_src.get_order()) {
 		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 		case O_: return mono::write_solution_grid_to_stream(vis_src.unchecked_get_mono_exact<O_>(), os);
 		OKIIDOKU_FOREACH_O_DO_EMIT
@@ -229,7 +229,7 @@ namespace okiidoku::visitor {
 	}
 
 	void parse_solution_grid_from_stream(Grid& vis_sink, std::istream& is) noexcept {
-		switch (vis_sink.get_mono_order()) {
+		switch (vis_sink.get_order()) {
 		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 		case O_: return mono::parse_solution_grid_from_stream(vis_sink.unchecked_get_mono_exact<O_>(), is);
 		OKIIDOKU_FOREACH_O_DO_EMIT
@@ -239,7 +239,7 @@ namespace okiidoku::visitor {
 	}
 
 	void print_puzzle_grid_to_stream(const Grid& vis_src, std::ostream& os) noexcept {
-		switch (vis_src.get_mono_order()) {
+		switch (vis_src.get_order()) {
 		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 		case O_: return mono::print_puzzle_grid_to_stream(vis_src.unchecked_get_mono_exact<O_>(), os);
 		OKIIDOKU_FOREACH_O_DO_EMIT
@@ -249,7 +249,7 @@ namespace okiidoku::visitor {
 	}
 
 	void parse_puzzle_grid_from_stream(Grid& vis_sink, std::istream& is) noexcept {
-		switch (vis_sink.get_mono_order()) {
+		switch (vis_sink.get_order()) {
 		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 		case O_: return mono::parse_puzzle_grid_from_stream(vis_sink.unchecked_get_mono_exact<O_>(), is);
 		OKIIDOKU_FOREACH_O_DO_EMIT

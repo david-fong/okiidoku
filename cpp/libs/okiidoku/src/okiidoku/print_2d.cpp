@@ -14,7 +14,7 @@ namespace okiidoku { namespace {
 
 	// current implementation is pretty simple (dumb?)
 	std::vector<size_t> make_random_emoji_set(const Order O, const rng_seed_t rng_seed) noexcept {
-		const auto O2 {static_cast<okiidoku::visitor::int_ts::o2i_t>(O*O)};
+		const auto O2 {static_cast<okiidoku::visitor::ints::o2i_t>(O*O)};
 		const auto& prefs {emoji::top_set_preferences};
 		std::vector<size_t> shuffled_sets(emoji::sets.size());
 		std::ranges::iota(shuffled_sets, size_t{0});
@@ -57,7 +57,7 @@ namespace okiidoku {
 	) noexcept {
 		OKIIDOKU_CONTRACT_USE(O <= largest_compiled_order);
 		OKIIDOKU_CONTRACT_USE(is_order_compiled(O));
-		using o2i_t = visitor::int_ts::o2i_t;
+		using o2i_t = visitor::ints::o2i_t;
 		const o2i_t O2 {static_cast<o2i_t>(O*O)};
 
 		const auto print_box_row_sep_string_ {[&os, O](const Order border_i) -> void {
@@ -98,7 +98,7 @@ namespace okiidoku {
 					if ((col % O) == 0) [[unlikely]] { os << " │"; }
 
 					auto val {o2i_t{grid_views[grid_i].operator()(
-						static_cast<visitor::int_ts::o4xs_t>((row * O2) + col)
+						static_cast<visitor::ints::o4xs_t>((row * O2) + col)
 					)}};
 					if (val == O2) {
 						os << "  ";

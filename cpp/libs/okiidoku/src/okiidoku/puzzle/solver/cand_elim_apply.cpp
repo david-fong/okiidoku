@@ -166,16 +166,16 @@ namespace okiidoku::mono::detail::solver {
 		const auto isec_base {[&]{
 			switch (desc.remove_from_rest_of) {
 				using enum BoxOrLine;
-				case box:  return static_cast<o3i_t>(((desc.isec/T::O2)*T::O2)+(desc.isec%T::O1));
-				case line: return static_cast<o3i_t>(desc.isec - (desc.isec%T::O1));
+				case box:  return T::o3i(((desc.isec/T::O2)*T::O2)+(desc.isec%T::O1));
+				case line: return T::o3i(desc.isec - (desc.isec%T::O1));
 			}
 			OKIIDOKU_UNREACHABLE;
 		}()};
 		const auto nb_scale {[&]{
 			switch (desc.remove_from_rest_of) {
 				using enum BoxOrLine;
-				case box:  return static_cast<o3i_t>(T::O1);
-				case line: return static_cast<o3i_t>(1);
+				case box:  return T::o3i(T::O1);
+				case line: return T::o3i(1);
 			}
 			OKIIDOKU_UNREACHABLE;
 		}()};
@@ -183,9 +183,9 @@ namespace okiidoku::mono::detail::solver {
 			const auto isec {isec_base + (nb_i * nb_scale)};
 			if (isec == desc.isec) [[unlikely]] { continue; }
 			for (o1i_t isec_cell_i {0}; isec_cell_i < T::O1; ++isec_cell_i) {
-				const auto chute {static_cast<o1i_t>(isec/T::O2)};
-				OKIIDOKU_CONTRACT_ASSERT(chute == static_cast<o1i_t>(desc.isec/T::O2));
-				const auto chute_cell {static_cast<o3i_t>(((isec*T::O1)%T::O3) + isec_cell_i)};
+				const auto chute {T::o1i(isec/T::O2)};
+				OKIIDOKU_CONTRACT_ASSERT(chute == T::o1i(desc.isec/T::O2));
+				const auto chute_cell {T::o3i(((isec*T::O1)%T::O3) + isec_cell_i)};
 				const auto rmi {chute_cell_to_rmi<O>(desc.line_type, chute, chute_cell)};
 				const auto check {engine.do_elim_remove_syms_(static_cast<rmi_t>(rmi), desc.syms)};
 				if (check.did_unwind()) [[unlikely]] {

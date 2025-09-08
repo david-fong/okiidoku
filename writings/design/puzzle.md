@@ -49,7 +49,7 @@ How is it done?
 
 - Perhaps by searching for the next given to remove that retains the most symbol and cell candidates?
 
-- Perhaps there is some correlation to the properties currently being used for canonicalizing labels?
+- Perhaps there is some correlation to the properties currently being used for canonicalizing symbols?
 
 hypothesis: if removing a given breaks properness, the only way to change that is by adding back other removed givens ("backtracking" of removing a given). If this is true, once a given is known to break properness if removed, if no backtracking is done ever, then it can never be removed.
 

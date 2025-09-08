@@ -4,6 +4,7 @@
 #define HPP_OKIIDOKU__MORPH__TRANSFORM
 
 #include <okiidoku/ints.hpp>
+#include <okiidoku/detail/visitor.hpp>
 #include <okiidoku/order.hpp>
 namespace okiidoku::mono { template <Order O> requires (is_order_compiled(O)) struct Grid; }
 namespace okiidoku::visitor { struct Grid; }
@@ -12,6 +13,10 @@ namespace okiidoku::visitor { struct Grid; }
 
 namespace okiidoku::mono {
 
+	/**
+	\note `post_transpose == pre_transpose + swap(row_map, col_map)`.
+	\note `pre_transpose == post_transpose + swap(row_map, col_map)`.
+	*/
 	template<Order O> requires(is_order_compiled(O))
 	struct OKIIDOKU_EXPORT [[gnu::designated_init]] Transformation {
 	private:
@@ -31,7 +36,7 @@ namespace okiidoku::mono {
 		static const Transformation identity;
 
 	public:
-		sym_map_t sym_map {identity.sym_map}; //!< `map[label_orig] -> label_new`.
+		sym_map_t sym_map {identity.sym_map}; //!< `map[sym_orig] -> sym_new`.
 		line_map_t row_map {identity.row_map}; //!< `map[chute_orig][chute_cell_orig] -> line_new`.
 		line_map_t col_map {identity.col_map}; ///< `map[chute_orig][chute_cell_orig] -> line_new`.
 		bool post_transpose {identity.post_transpose}; ///< whether to transpose after line remapping

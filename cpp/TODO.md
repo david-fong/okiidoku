@@ -44,20 +44,11 @@ Issues I'm watching:
 
 ## Misc List
 
-- rename `detail/order_templates.hpp` to `order.hpp`
 - see if helpful to add `/// \cond detail` wrapper to `detail` namespaces to suppress doxygen for them
-- OKIIDOKU_UNREACHABLE; in switch default to satisfy clang-tidy
 - move ContainerBase to separate header?
 - make `scramble` just generate a random `Transformation`.
 - rename `label` to `sym` and `val` to `sym`.
 - continue adoption of doxygen
-
-- unsigned integers. sigh.
-  - https://en.cppreference.com/w/cpp/language/operator_arithmetic.html
-  - https://en.cppreference.com/w/cpp/language/usual_arithmetic_conversions.html
-  - https://en.cppreference.com/w/cpp/language/implicit_cast.html#Integral_promotion
-    > In particular, arithmetic operators do not accept types smaller than int as arguments, and integral promotions are automatically applied after lvalue-to-rvalue conversion, if applicable.
-  - https://en.cppreference.com/w/cpp/language/usual_arithmetic_conversions.html#Integer_conversion_rank
 
 - https://www.pcg-random.org/using-pcg-cpp.html
   https://github.com/imneme/pcg-cpp/tags

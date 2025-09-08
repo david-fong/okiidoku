@@ -33,10 +33,10 @@ namespace okiidoku::mono {
 			auto& col_has {cols_has[col]};
 			auto& box_has {h_chute_boxes_has[col / T::O1]};
 
-			if (has_mask_t::test_any3(static_cast<o2x_t>(val), row_has, col_has, box_has)) [[unlikely]] {
+			if (has_mask_t::test_any3(T::o2x(val), row_has, col_has, box_has)) [[unlikely]] {
 				return false;
 			}
-			has_mask_t::set3(static_cast<o2x_t>(val), row_has, col_has, box_has);
+			has_mask_t::set3(T::o2x(val), row_has, col_has, box_has);
 		}}
 		return true;
 	}
@@ -75,14 +75,14 @@ namespace okiidoku::mono {
 	void init_most_canonical_grid(Grid<O>& grid) noexcept {
 		OKIIDOKU_MONO_INT_TS_TYPEDEFS
 		for (o2i_t box {0}; box < T::O2; ++box) {
-			const auto h_chute {static_cast<o1i_t>(box/T::O1)};
-			const auto v_chute {static_cast<o1i_t>(box%T::O1)};
+			const auto h_chute {T::o1x(box/T::O1)};
+			const auto v_chute {T::o1x(box%T::O1)};
 			for (o2i_t box_cell {0}; box_cell < T::O2; ++box_cell) {
-				const auto boxrow {static_cast<o1i_t>(box_cell/T::O1)};
-				const auto boxcol {static_cast<o1i_t>(box_cell%T::O1)};
+				const auto boxrow {T::o1x(box_cell/T::O1)};
+				const auto boxcol {T::o1x(box_cell%T::O1)};
 				const auto rmi {box_cell_to_rmi<O>(box, box_cell)};
-				const auto val_row {static_cast<o1i_t>((boxrow+v_chute) % T::O1)};
-				const auto val_col {static_cast<o1i_t>((boxcol+h_chute) % T::O1)};
+				const auto val_row {T::o1x((boxrow+v_chute) % T::O1)};
+				const auto val_col {T::o1x((boxcol+h_chute) % T::O1)};
 				const auto val {static_cast<grid_val_t<O>>(
 					(T::O1*val_row)+val_col
 				)};
@@ -109,7 +109,7 @@ namespace okiidoku::mono {
 namespace okiidoku::visitor {
 
 	bool grid_follows_rule(const Grid& vis_grid) noexcept {
-		switch (vis_grid.get_mono_order()) {
+		switch (vis_grid.get_order()) {
 		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 		case O_: return mono::grid_follows_rule(vis_grid.unchecked_get_mono_exact<O_>());
 		OKIIDOKU_FOREACH_O_DO_EMIT
@@ -119,7 +119,7 @@ namespace okiidoku::visitor {
 	}
 
 	bool grid_is_filled(const Grid& vis_grid) noexcept {
-		switch (vis_grid.get_mono_order()) {
+		switch (vis_grid.get_order()) {
 		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 		case O_: return mono::grid_is_filled(vis_grid.unchecked_get_mono_exact<O_>());
 		OKIIDOKU_FOREACH_O_DO_EMIT
@@ -129,7 +129,7 @@ namespace okiidoku::visitor {
 	}
 
 	bool grid_is_empty(const Grid& vis_grid) noexcept {
-		switch (vis_grid.get_mono_order()) {
+		switch (vis_grid.get_order()) {
 		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 		case O_: return mono::grid_is_empty(vis_grid.unchecked_get_mono_exact<O_>());
 		OKIIDOKU_FOREACH_O_DO_EMIT
@@ -139,7 +139,7 @@ namespace okiidoku::visitor {
 	}
 
 	void init_most_canonical_grid(Grid& vis_grid) noexcept {
-		switch (vis_grid.get_mono_order()) {
+		switch (vis_grid.get_order()) {
 		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 		case O_: return mono::init_most_canonical_grid(vis_grid.unchecked_get_mono_exact<O_>());
 		OKIIDOKU_FOREACH_O_DO_EMIT
@@ -149,8 +149,8 @@ namespace okiidoku::visitor {
 	}
 
 
-	Grid::val_t Grid::at_rmi(const int_ts::o4i_t rmi) const noexcept {
-		switch (this->get_mono_order()) {
+	Grid::val_t Grid::at_rmi(const ints::o4i_t rmi) const noexcept {
+		switch (this->get_order()) {
 		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 		case O_: return this->unchecked_get_mono_exact<O_>().at_rmi(rmi);
 		OKIIDOKU_FOREACH_O_DO_EMIT
@@ -159,8 +159,8 @@ namespace okiidoku::visitor {
 		}
 	}
 
-	Grid::val_t Grid::at(const int_ts::o2i_t row, const int_ts::o2i_t col) const noexcept {
-		switch (this->get_mono_order()) {
+	Grid::val_t Grid::at(const ints::o2i_t row, const ints::o2i_t col) const noexcept {
+		switch (this->get_order()) {
 		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 		case O_: return this->unchecked_get_mono_exact<O_>().at(row, col);
 		OKIIDOKU_FOREACH_O_DO_EMIT

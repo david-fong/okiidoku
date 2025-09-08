@@ -26,7 +26,7 @@ namespace okiidoku::mono::detail::solver {
 		// contract: `begin + naked_subset_size <= O2`
 		SubsetComboWalker(const o2x_t begin, const o2i_t end, const o2x_t naked_subset_size) noexcept:
 			begin_{begin}, end_{end}, naked_subset_size_{naked_subset_size},
-			has_more_{static_cast<o2i_t>(begin + naked_subset_size) <= end}
+			has_more_{T::o2i(begin + naked_subset_size) <= end}
 		{
 			OKIIDOKU_CONTRACT_USE(end_ <= T::O2);
 			OKIIDOKU_CONTRACT_USE(naked_subset_size_ > 0);
@@ -34,7 +34,7 @@ namespace okiidoku::mono::detail::solver {
 			OKIIDOKU_CONTRACT_USE(begin_ + naked_subset_size_ <= T::O2);
 			if (has_more()) [[likely]] {
 				for (o2x_t i {0}; i < naked_subset_size_; ++i) {
-					combo_[i] = static_cast<o2xs_t>(begin_ + i);
+					combo_[i] = T::o2xs(begin_ + i);
 				}
 			}
 			assert_is_state_valid_();
@@ -67,7 +67,7 @@ namespace okiidoku::mono::detail::solver {
 			OKIIDOKU_CONTRACT_USE(end_ <= T::O2);
 			OKIIDOKU_CONTRACT_USE(naked_subset_size_ > 0);
 			OKIIDOKU_CONTRACT_USE(naked_subset_size_ < T::O2);
-			auto i {static_cast<o2x_t>(naked_subset_size_-1u)};
+			auto i {T::o2x(naked_subset_size_-1u)};
 			++combo_[i];
 			while (combo_[i] > end_ - naked_subset_size_ + i) [[likely]] {
 				if (i > 0) [[likely]] {
@@ -79,7 +79,7 @@ namespace okiidoku::mono::detail::solver {
 				}
 			}
 			for (++i; i < naked_subset_size_; ++i) {
-				combo_[i] = static_cast<o2xs_t>(combo_[i-1u] + 1u);
+				combo_[i] = T::o2xs(combo_[i-1u] + 1u);
 			}
 			assert_is_state_valid_();
 		}
@@ -96,14 +96,14 @@ namespace okiidoku::mono::detail::solver {
 
 		void assert_is_state_valid_() const noexcept {
 			#ifndef NDEBUG
-			if (static_cast<o2i_t>(begin_ + naked_subset_size_) > end_) {
+			if (T::o2i(begin_ + naked_subset_size_) > end_) {
 				OKIIDOKU_CONTRACT_ASSERT(!has_more_);
 				return;
 			}
 			OKIIDOKU_CONTRACT_ASSERT(combo_[0] >= begin_);
-			OKIIDOKU_CONTRACT_ASSERT(combo_[static_cast<o2x_t>(naked_subset_size_-1)] < end_);
+			OKIIDOKU_CONTRACT_ASSERT(combo_[T::o2x(naked_subset_size_-1)] < end_);
 			for (o2x_t i {1}; i < naked_subset_size_; ++i) {
-				OKIIDOKU_CONTRACT_ASSERT(combo_[static_cast<o2x_t>(i-1)] < combo_[i]);
+				OKIIDOKU_CONTRACT_ASSERT(combo_[T::o2x(i-1)] < combo_[i]);
 			}
 			#endif
 		}
