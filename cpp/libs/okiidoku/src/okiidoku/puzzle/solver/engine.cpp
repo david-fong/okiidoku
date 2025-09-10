@@ -36,7 +36,7 @@ namespace okiidoku::mono::detail::solver {
 				cell_tag.count_cache = T::O2;
 			}
 			subs.is_begin.unset_all();
-			subs.is_begin.set(0u);
+			subs.is_begin.set(o2x_t{0u});
 		}}
 
 		found_queues_.clear();
@@ -243,14 +243,14 @@ namespace okiidoku::mono::detail::solver {
 
 	template<Order O> requires(is_order_compiled(O))
 	bool EngineImpl<O>::debug_check_correct_num_unsolved_() const noexcept {
-		return get_num_unsolved() == T::O4 - T::o4i(std::count_if(
+		return get_num_unsolved() == T::O4 - o4i_t{std::count_if(
 			#ifdef __cpp_lib_execution
 			std::execution::unseq,
 			#endif
 			cells_cands().get_underlying_array().cbegin(),
 			cells_cands().get_underlying_array().cend(),
 			[](const auto& c){ return c.count() == 1; }
-		));
+		)};
 	}
 
 

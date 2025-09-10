@@ -22,22 +22,23 @@ namespace okiidoku::mono { namespace {
 		using val_t = T::o2x_t;
 		using o4x_t = T::o4x_t;
 		using o4i_t = T::o4i_t;
+		using o2i_t = T::o2i_t;
 
 		static constexpr unsigned num_buf_bytes {1};
 		using buf_t = detail::uint_small_for_width_t<2*8*num_buf_bytes>; // x2 to prevent overflow
 		static_assert((1u<<(2u*8u*num_buf_bytes)) > (2u*T::O2)); // requirement to handle overflow
 
 	public:
-		SerdesHelper() noexcept:
+		constexpr SerdesHelper() noexcept:
 			row_cands_ {O2BitArr_ones<O>},
 			cell_cands_ {O2BitArr_ones<O>}
 		{
 			h_chute_boxes_cands_.fill(O2BitArr_ones<O>);
 			cols_cands_.fill(O2BitArr_ones<O>);
 		}
-		[[nodiscard, gnu::pure]] bool done() const noexcept { return cell_rmi_ == T::O4; }
+		[[nodiscard, gnu::pure]] constexpr bool done() const noexcept { return cell_rmi_ == T::O4; }
 		/** \pre `!done()` */
-		[[nodiscard, gnu::pure]] o4x_t get_cell_rmi() const noexcept { return o4x_t{cell_rmi_}; }
+		[[nodiscard, gnu::pure]] constexpr o4x_t get_cell_rmi() const noexcept { return o4x_t{cell_rmi_}; }
 		void advance() noexcept;
 
 		// automatically removes val as a candidate of future cells.
@@ -70,6 +71,8 @@ namespace okiidoku::mono { namespace {
 
 	template<Order O> requires(is_order_compiled(O))
 	void SerdesHelper<O>::advance() noexcept {
+		OKIIDOKU_CONTRACT_USE(cell_rmi_ < T::O4);
+		OKIIDOKU_CONTRACT_USE(!done());
 		++cell_rmi_;
 		if (cell_rmi_ % T::O2 == 0u) [[unlikely]] { row_cands_ = O2BitArr_ones<O>; }
 		if (cell_rmi_ % T::O3 == 0u) [[unlikely]] { h_chute_boxes_cands_.fill(O2BitArr_ones<O>); }
@@ -101,7 +104,7 @@ namespace okiidoku::mono { namespace {
 				OKIIDOKU_CONTRACT_USE(buf_pos_ != 0 && buf_pos_ < buf_end);
 				buf_pos_ *= use_factor;
 				smol_val_buf /= static_cast<val_t>(use_factor);
-				smol_val_buf_remaining /= T::o2i(use_factor);
+				smol_val_buf_remaining /= o2i_t{use_factor};
 			}
 			if (buf_pos_ >= buf_end) { // TODO.asap should this be a while loop?
 				static_assert(num_buf_bytes == 1); // otherwise the below needs to change.
@@ -157,7 +160,7 @@ namespace okiidoku::mono {
 		using T = Ints<O>;
 
 		SerdesHelper<O> helper {};
-		for (; helper.get_cell_rmi() < T::O4; helper.advance()) {
+		for (; !helper.done(); helper.advance()) {
 			const auto row {helper.get_cell_rmi() / T::O2};
 			const auto col {helper.get_cell_rmi() % T::O2};
 			if ((T::O1-1-row)/T::O1 == col/T::O1) {

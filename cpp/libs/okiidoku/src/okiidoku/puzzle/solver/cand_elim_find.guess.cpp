@@ -50,7 +50,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 				best_sym_num_other_cand_cells = sym_num_other_cand_cells;
 			}
 		}
-		return T::o2xs(best_sym);
+		return best_sym;
 	}
 
 

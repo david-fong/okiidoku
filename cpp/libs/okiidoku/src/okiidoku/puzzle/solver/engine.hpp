@@ -81,9 +81,7 @@ namespace okiidoku::mono::detail::solver {
 	struct EngineImpl {
 		friend UnwindInfo unwind_one_stack_frame_of_<O>(EngineImpl<O>&) noexcept;
 	private:
-		using T = Ints<O>;
-		using o2i_t = T::o2i_t;
-		using o4i_t = T::o4i_t;
+		OKIIDOKU_MONO_INT_TS_TYPEDEFS
 		using val_t = T::o2xs_t;
 		using rmi_t = T::o4xs_t;
 	public:

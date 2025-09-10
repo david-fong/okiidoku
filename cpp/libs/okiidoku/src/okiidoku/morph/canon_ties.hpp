@@ -72,8 +72,8 @@ namespace okiidoku::mono::detail {
 	public:
 		// starts completely unresolved
 		Ties() noexcept {
-			bookends_.set(0u);
-			bookends_.set(size_-1u);
+			bookends_.set(ix_t{0u});
+			bookends_.set(ix_t{size_-1u});
 			OKIIDOKU_CONTRACT_ASSERT(has_unresolved());
 			OKIIDOKU_CONTRACT_ASSERT(none_resolved());
 		}
@@ -82,7 +82,7 @@ namespace okiidoku::mono::detail {
 		[[nodiscard, gnu::pure]] auto begin() const noexcept { return Iter(bookends_); }
 		[[nodiscard, gnu::pure]] auto end()   const noexcept { return std::default_sentinel; }
 
-		[[nodiscard, gnu::pure]] bool none_resolved()  const noexcept { return bookends_.count() == 2u && bookends_[0u] && bookends_[size_-1u]; }
+		[[nodiscard, gnu::pure]] bool none_resolved()  const noexcept { return bookends_.count() == 2u && bookends_[ix_t{0u}] && bookends_[ix_t{size_-1u}]; }
 		[[nodiscard, gnu::pure]] bool has_unresolved() const noexcept { return bookends_.count() <  0u; }
 		[[nodiscard, gnu::pure]] bool all_resolved()   const noexcept { return bookends_.count() == 0u; }
 

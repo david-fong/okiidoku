@@ -31,12 +31,12 @@ namespace okiidoku {
 
 
 	namespace mono {
-		template<Order O, std::same_as<Grid<O>>... Gs> requires(is_order_compiled(O))
+		template<Order O, std::same_as<Grid<O>>... Gs> requires(is_order_compiled(O) && sizeof...(Gs) > 0u)
 		void print_2d(std::ostream& os, rng_seed_t rng_seed, const Gs&... grids) noexcept {
-			static_assert(sizeof...(grids) > 0);
+			static_assert(sizeof...(grids) > 0u);
 			const auto printers {std::to_array<print_2d_grid_view>({
-				[&](const visitor::ints::o4xs_t rmi){
-					return static_cast<visitor::ints::o2is_t>(grids.at_rmi(rmi));
+				[&](const visitor::ints::o4xs_t rmi) -> visitor::ints::o2is_t {
+					return grids.at_rmi(typename Ints<O>::o4x_t{rmi});
 				}...,
 			})};
 			return print_2d_base(O, os, rng_seed, printers);

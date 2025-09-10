@@ -44,6 +44,7 @@ Issues I'm watching:
 
 ## Misc List
 
+- try using `Int<...>` for word and bit indices in `O2BitArr`.
 - see if helpful to add `/// \cond detail` wrapper to `detail` namespaces to suppress doxygen for them
 - make `scramble` just generate a random `Transformation`.
 - rename `label` to `sym` and `val` to `sym`.

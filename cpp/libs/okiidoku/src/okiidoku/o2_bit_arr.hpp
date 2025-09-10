@@ -44,29 +44,27 @@ namespace okiidoku::mono {
 		static constexpr word_bit_i_t word_t_num_bits {8 * sizeof(word_t)};
 		static constexpr word_i_t     num_words       {(T::O2 + word_t_num_bits-1) / word_t_num_bits};
 		static constexpr word_bit_i_t num_excess_bits {(num_words * word_t_num_bits) - T::O2};
-		static_assert(num_words > 0);
-		static_assert((num_words * word_t_num_bits) >= T::O2, "enough words");
-		static_assert(((num_words-1) * word_t_num_bits) < T::O2, "no excess words");
+		static_assert(num_words > 0u);
+		static_assert(( num_words     * word_t_num_bits) >= T::O2, "enough words"   );
+		static_assert(((num_words-1u) * word_t_num_bits)  < T::O2, "no excess words");
 
 		/** \pre `bit_i < T::O2`. */
-		template<class T_index> requires(Any_o2x_t<O,T_index>)
 		[[nodiscard, gnu::const]]
-		static constexpr word_i_t bit_i_to_word_i(const T_index bit_i) noexcept {
+		static constexpr word_i_t bit_i_to_word_i(const typename Ints<O>::o2x_t bit_i) noexcept {
 			OKIIDOKU_CONTRACT_USE(bit_i < T::O2);
-			if constexpr (num_words == 1) { return 0; }
+			if constexpr (num_words == 1u) { return 0u; }
 			const auto word_i {static_cast<word_i_t>(bit_i / word_t_num_bits)};
 			OKIIDOKU_CONTRACT_USE(word_i < num_words);
 			return word_i;
 		}
 		/** \pre `bit_i < T::O2`. */
-		template<class T_index> requires(Any_o2x_t<O,T_index>)
 		[[nodiscard, gnu::const]]
-		static constexpr word_t word_bit_mask_for_bit_i(const T_index bit_i) noexcept {
+		static constexpr word_t word_bit_mask_for_bit_i(const typename Ints<O>::o2x_t bit_i) noexcept {
 			OKIIDOKU_CONTRACT_USE(bit_i < T::O2);
-			if constexpr (num_words == 1) {
-				return static_cast<word_t>(word_t{1} << bit_i);
+			if constexpr (num_words == 1u) {
+				return static_cast<word_t>(word_t{1u} << bit_i);
 			} else {
-				return static_cast<word_t>(word_t{1} << (bit_i % word_t_num_bits));
+				return static_cast<word_t>(word_t{1u} << (bit_i % word_t_num_bits));
 			}
 		}
 
@@ -96,27 +94,23 @@ namespace okiidoku::mono {
 		[[nodiscard, gnu::pure]] o2x_t count_below(const o2x_t end) const noexcept;
 
 		/** \pre `at < O2`. */
-		template<class T_index> requires(Any_o2x_t<O,T_index>)
-		[[nodiscard, gnu::pure]] constexpr bool operator[](const T_index at) const noexcept {
+		[[nodiscard, gnu::pure]] constexpr bool operator[](const typename Ints<O>::o2x_t at) const noexcept {
 			OKIIDOKU_CONTRACT_USE(at < T::O2);
 			const word_t word_bit_mask {word_bit_mask_for_bit_i(at)};
 			return (words_[bit_i_to_word_i(at)] & word_bit_mask) != word_t{0u};
 		}
 		/** \pre `at < O2`. */
-		template<class T_index> requires(Any_o2x_t<O,T_index>)
-		constexpr void set(const T_index at) noexcept {
+		constexpr void set(const typename Ints<O>::o2x_t at) noexcept {
 			OKIIDOKU_CONTRACT_USE(at < T::O2);
 			words_[bit_i_to_word_i(at)] |= word_bit_mask_for_bit_i(at);
 		}
 		/** \pre `at < O2`. */
-		template<class T_index> requires(Any_o2x_t<O,T_index>)
-		constexpr void unset(const T_index at) noexcept {
+		constexpr void unset(const typename Ints<O>::o2x_t at) noexcept {
 			OKIIDOKU_CONTRACT_USE(at < T::O2);
 			words_[bit_i_to_word_i(at)] &= static_cast<word_t>(~word_bit_mask_for_bit_i(at));
 		}
 		/** \pre `at < O2`. */
-		template<class T_index> requires(Any_o2x_t<O,T_index>)
-		constexpr void flip(const T_index at) noexcept {
+		constexpr void flip(const typename Ints<O>::o2x_t at) noexcept {
 			OKIIDOKU_CONTRACT_USE(at < T::O2);
 			words_[bit_i_to_word_i(at)] ^= word_bit_mask_for_bit_i(at);
 		}
@@ -214,7 +208,7 @@ namespace okiidoku::mono {
 					OKIIDOKU_CONTRACT_USE(arr_.words_[word_i] != 0);
 					auto& word {arr_.words_[word_i]};
 					OKIIDOKU_CONTRACT_USE(((word_i * word_t_num_bits) + std::countr_zero(word)) < T::O2);
-					i_ = T::o2i((word_i * word_t_num_bits) + std::countr_zero(word));
+					i_ = o2i_t{(word_i * word_t_num_bits) + std::countr_zero(word)};
 					word &= static_cast<word_t>(word-word_t{1}); // unset lowest bit
 				} else {
 					i_ = T::O2;

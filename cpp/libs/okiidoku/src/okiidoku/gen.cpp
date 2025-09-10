@@ -23,9 +23,9 @@ namespace okiidoku::mono { namespace {
 		using ch_t  = T::o1x_t;
 		using sym_t = T::o2x_t;
 		using count_t = typename T::o1is_t;
-		constexpr SymCountsForChuteHouses() noexcept { store_.fill(count_t{0u}); } // is the fill needed? can we just init list the store_ member declaration?
+		// constexpr SymCountsForChuteHouses() noexcept { store_.fill(count_t{0u}); }
 		[[nodiscard, gnu::pure]] o3i_t count_num_missing_syms() const noexcept {
-			return T::o3i(std::count(store_.cbegin(), store_.cend(), o3i_t{0u}));
+			return o3i_t{std::count(store_.cbegin(), store_.cend(), o3i_t{0u})};
 		}
 		template<class Self> [[nodiscard, gnu::pure]]
 		auto&& ch_count_sym(this Self&& self, const ch_t ch, const sym_t sym) noexcept {
@@ -42,7 +42,7 @@ namespace okiidoku::mono { namespace {
 		laid out this way for cache locality: common operation is symbol moving to
 			a different block: decrement and increment.
 		\todo experiment with https://en.cppreference.com/w/cpp/thread/hardware_destructive_interference_size.html */
-		std::array<count_t, T::O3> store_;
+		std::array<count_t, T::O3> store_ {};
 	};
 
 	template<Order O> requires(is_order_compiled(O))

@@ -20,17 +20,17 @@ namespace okiidoku::mono {
 	typename O2BitArr<O>::o2i_t
 	O2BitArr<O>::count() const noexcept {
 		if constexpr (num_words == 1) {
-			const auto count {T::o2i(std::popcount(words_[0]))};
+			const auto count {o2i_t{std::popcount(words_[0])}};
 			OKIIDOKU_CONTRACT_USE(count <= T::O2);
 			return count;
 		} else {
-			const auto count {T::o2i(std::transform_reduce(
+			const o2i_t count {std::transform_reduce(
 				#ifdef __cpp_lib_execution
 				std::execution::unseq,
 				#endif
 				words_.cbegin(), words_.cend(), o2i_t{0}, std::plus<o2i_t>{},
-				[](const auto& word){ return T::o2i(std::popcount(word)); }
-			))};
+				[](const auto& word){ return o2i_t{std::popcount(word)}; }
+			)};
 			OKIIDOKU_CONTRACT_USE(count <= T::O2);
 			return count;
 		}
@@ -43,23 +43,23 @@ namespace okiidoku::mono {
 	O2BitArr<O>::count_below(const typename O2BitArr<O>::o2x_t end) const noexcept {
 		OKIIDOKU_CONTRACT_USE(end < T::O2);
 		if constexpr (num_words == 1) {
-			return T::o2x(std::popcount(static_cast<word_t>(
+			return o2x_t{std::popcount(
 				words_[0] & static_cast<word_t>(word_bit_mask_for_bit_i(end) - word_t{1})
-			)));
+			)};
 		} else {
 			const auto end_at_int {bit_i_to_word_i(end)};
 			OKIIDOKU_CONTRACT_USE(end_at_int < num_words);
-			return T::o2x(std::transform_reduce(
+			return o2x_t{std::transform_reduce(
 				#ifdef __cpp_lib_execution
 				std::execution::unseq,
 				#endif
 				words_.cbegin(), std::next(words_.cbegin(), end_at_int),
-				/* init value: */T::o2x(std::popcount(static_cast<word_t>(
+				/* init value: */o2x_t{std::popcount(
 					words_[end_at_int] & static_cast<word_t>(word_bit_mask_for_bit_i(end) - word_t{1})
-				))),
+				)},
 				std::plus<o2x_t>{},
-				[](const auto& word){ return T::o2x(std::popcount(word)); }
-			));
+				[](const auto& word){ return o2x_t{std::popcount(word)}; }
+			)};
 		}
 	}
 
@@ -71,7 +71,7 @@ namespace okiidoku::mono {
 		//  handle discounting excess top zeros in the empty-mask case.
 		OKIIDOKU_CONTRACT_ASSERT(count() > 0);
 		if constexpr (num_words == 1) {
-			const auto count {T::o2xs(std::countr_zero(words_[0]))};
+			const o2xs_t count {std::countr_zero(words_[0])};
 			OKIIDOKU_CONTRACT_USE(count < T::O2);
 			return count;
 		} else {
@@ -81,10 +81,10 @@ namespace okiidoku::mono {
 				#endif
 				words_.cbegin(), words_.cend(), [](const auto& w){ return w != 0; }
 			)};
-			const o2xs_t count {T::o2x(
-				/* T::o2x */(word_t_num_bits*T::o2x(std::distance(words_.cbegin(), word)))
-				+ T::o2x(std::countr_zero(*word))
-			)};
+			const o2xs_t count {
+				/* T::o2x */(word_t_num_bits * std::distance(words_.cbegin(), word))
+				+ std::countr_zero(*word)
+			};
 			OKIIDOKU_CONTRACT_USE(count < T::O2);
 			return count;
 		}
@@ -103,7 +103,7 @@ namespace okiidoku::mono {
 					const auto wd_popcount {static_cast<word_bit_i_t>(std::popcount(words_[wd_i]))};
 					OKIIDOKU_CONTRACT_USE(wd_popcount <= word_t_num_bits);
 					if (set_bit_index >= wd_popcount) [[likely]] {
-						set_bit_index -= T::o2x(wd_popcount);
+						set_bit_index -= o2x_t{wd_popcount};
 					} else {
 						return wd_i;
 					}
@@ -115,10 +115,10 @@ namespace okiidoku::mono {
 		#ifdef OKIIDOKU_TARGET_SUPPORTS_X86_BMI2
 			if constexpr (sizeof(word_t) >= sizeof(std::uint64_t)) {
 				const auto bit_mask {_pdep_u64(static_cast<word_t>(word_t{1} << set_bit_index), word)};
-				return T::o2x(T::o2x(word_t_num_bits*word_i) + std::countr_zero(bit_mask));
+				return o2x_t{o2x_t{word_t_num_bits*word_i} + std::countr_zero(bit_mask)};
 			} else {
 				const auto bit_mask {_pdep_u32(static_cast<word_t>(word_t{1} << set_bit_index), word)};
-				return T::o2x(T::o2x(word_t_num_bits*word_i) + std::countr_zero(bit_mask));
+				return o2x_t{o2x_t{word_t_num_bits*word_i} + std::countr_zero(bit_mask)};
 			}
 		#else
 		for (word_t word_bit_i {0}; word_bit_i < word_t_num_bits; ++word_bit_i) { // TODO.mid possible optimization: skip consecutive set bits by somehow using std::countr_<>
@@ -126,7 +126,7 @@ namespace okiidoku::mono {
 			if (word & bit_mask) {
 				if (set_bit_index == 0) {
 					// word &= ~bit_mask;
-					return T::o2x((word_t_num_bits * word_i) + word_bit_i);
+					return o2x_t{(word_t_num_bits * word_i) + word_bit_i};
 				}
 				--set_bit_index;
 			}

@@ -26,7 +26,7 @@
 		figure out it has no side-effects, or const pure expressions haven't or won't
 		happen anyway, this could backfire for performance, so avoid using this in such
 		cases, or benchmark carefully, or check codegen.
-	\todo not sure if the above note is differe with c++23 [[assume]], which cppref
+	\todo not sure if the above note is different with c++23 [[assume]], which cppref
 		says the expression is "not evaluated, but potentially evaluated"... (??) */
 	#define OKIIDOKU_CONTRACT_USE(expr) assert(expr) // NOLINT(cert-dcl03-c,misc-static-assert) runtime abort desirable here.
 	#include <cstdlib> // abort

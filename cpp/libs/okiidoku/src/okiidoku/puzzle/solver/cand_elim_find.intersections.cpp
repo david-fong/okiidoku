@@ -86,26 +86,26 @@ namespace okiidoku::mono::detail::solver { namespace {
 			const auto& isec_syms_non_single {chute_isecs_syms_non_single.at_isec(box_isec, line_isec)};
 			auto line_match {lines_syms_claiming_an_isec[box_isec] & isec_syms_non_single}; line_match.remove(boxes_syms_claiming_an_isec[line_isec]);
 			auto box_match {boxes_syms_claiming_an_isec[line_isec] & isec_syms_non_single};  box_match.remove(lines_syms_claiming_an_isec[box_isec]);
-			const auto isec {T::o3xs(
+			const o3xs_t isec {
 				(T::O2*chute)
 				+ (T::O1*box_isec)
 				+ line_isec
-			)};
+			};
 			if (line_match.count() > 0) [[unlikely]] {
 				found_queues.push_back(found::LockedCands<O>{
-					.syms{line_match},
-					.isec{isec},
-					.line_type{line_type},
-					.remove_from_rest_of{BoxOrLine::box},
+					.syms {line_match},
+					.isec {isec},
+					.line_type {line_type},
+					.remove_from_rest_of {BoxOrLine::box},
 				});
 			}
 			// Note: not an else-if: may be for different syms.
 			if (box_match.count() > 0) [[unlikely]] {
 				found_queues.push_back(found::LockedCands<O>{
-					.syms{box_match},
-					.isec{isec},
-					.line_type{line_type},
-					.remove_from_rest_of{BoxOrLine::line},
+					.syms {box_match},
+					.isec {isec},
+					.line_type {line_type},
+					.remove_from_rest_of {BoxOrLine::line},
 				});
 			}
 		}}

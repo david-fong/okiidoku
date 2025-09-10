@@ -36,12 +36,12 @@ namespace okiidoku::mono { namespace {
 				const auto rmi {chute_cell_to_rmi<O>(line_type, chute, chute_cell_i)};
 				const auto& sym {soln_grid.at_rmi(rmi)};
 				OKIIDOKU_CONTRACT_USE(sym < T::O2);
-				map[chute_line][sym] = T::o2xs(house_cell);
+				map[chute_line][sym] = house_cell;
 			}}
 			return map;
 		}()};
-		for (o1i_t chute_line_a {0}; T::o1i(chute_line_a+1u) < T::O1; ++chute_line_a) {
-		for (o1i_t chute_line_b {T::o1i(chute_line_a+1u)}; chute_line_b < T::O1; ++chute_line_b) {
+		for (o1i_t chute_line_a {0}; o1i_t{chute_line_a+1u} < T::O1; ++chute_line_a) {
+		for (o1i_t chute_line_b {o1i_t{chute_line_a+1u}}; chute_line_b < T::O1; ++chute_line_b) {
 			for (const auto slice_c : T::O2) {
 				const auto c_a_rmi {chute_cell_to_rmi<O>(line_type, chute, (T::O2*o1x_t{chute_line_a})+slice_c)};
 				const auto c_b_rmi {chute_cell_to_rmi<O>(line_type, chute, (T::O2*o1x_t{chute_line_b})+slice_c)};

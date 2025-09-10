@@ -20,8 +20,8 @@ void test_o2_bit_arr() {
 	std::cout << "0" << std::endl;
 	CHECK(O2BitArr_ones<O>.count() == T::O2);
 	for (const auto i : T::O2) {
-		CHECK(O2BitArr_ones<O>.count_below(T::o2x(i)) == i);
-		CHECK(O2BitArr_ones<O>.get_index_of_nth_set_bit(T::o2x(i)) == i);
+		CHECK(O2BitArr_ones<O>.count_below(i) == i);
+		CHECK(O2BitArr_ones<O>.get_index_of_nth_set_bit(i) == i);
 	}
 	std::cout << "1" << std::endl;
 	{
@@ -36,7 +36,7 @@ void test_o2_bit_arr() {
 	{
 		auto ones {O2BitArr_ones<O>};
 		for (const auto i : T::O2) {
-			CHECK(ones.count_below(T::o2x(i)) == 0);
+			CHECK(ones.count_below(i) == 0);
 			CHECK(ones.get_index_of_nth_set_bit(o2x_t{0u}) == i);
 			CHECK(ones[ones.first_set_bit_require_exists()]);
 			ones.unset(ones.first_set_bit_require_exists());

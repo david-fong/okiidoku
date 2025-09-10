@@ -186,8 +186,8 @@ namespace okiidoku::mono::detail::solver {
 			for (const auto isec_cell_i : T::O1) {
 				const auto chute {isec / T::O2};
 				OKIIDOKU_CONTRACT_ASSERT(chute == desc.isec/T::O2);
-				const auto chute_cell {(((isec*T::O1)%T::O3) + isec_cell_i)};
-				const auto rmi {chute_cell_to_rmi<O>(desc.line_type, chute, chute_cell.get_underlying())}; // TODO figure out the bounds things instead of get_underlying
+				const auto chute_cell {((isec%T::O2)*T::O1) + isec_cell_i};
+				const auto rmi {chute_cell_to_rmi<O>(desc.line_type, chute, chute_cell)};
 				const auto check {engine.do_elim_remove_syms_(rmi, desc.syms)};
 				if (check.did_unwind()) [[unlikely]] {
 					return check;

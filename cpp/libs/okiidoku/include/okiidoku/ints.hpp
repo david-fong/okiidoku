@@ -171,35 +171,24 @@ namespace okiidoku::mono {
 				uint_fast_for_width_t<std::bit_width(max)>
 			>;
 			using difference_type = int_fast_for_max_t<max>;
-			// using difference_type = std::make_signed_t<i_t>; // TODO is this wide enough? :/
 		private:
-			i_t val_ {0u}; // TODO does adding initializer to zero impact performance?
+			i_t val_ {0u};
 			static_assert(std::is_unsigned_v<i_t>, "underlying type is unsigned");
 			static_assert(std::numeric_limits<i_t>::max() >= max, "underlying type has enough capacity");
+		public:
 			[[gnu::always_inline]] constexpr void check() const noexcept {
 				OKIIDOKU_CONTRACT_USE(val_ <= max);
 			}
-		public:
+
 			constexpr Int() noexcept = default;
 			// constexpr Int(const Int& other) noexcept = default;
 
-			// constexpr Int(const Int& other) noexcept: val_{other.val_} { check(); }
-			// /** \pre `0 <= in <= max` */
-			// template<class T_in> requires(std::integral<T_in> && std::numeric_limits<T_in>::max() <= std::numeric_limits<max_t>::max())
-			// consteval Int(T_in in) noexcept: val_{static_cast<i_t>(in)} {
-			// 	static_assert(sizeof(Int) == sizeof(i_t));
-			// 	if constexpr (std::is_signed_v<T_in>) {
-			// 		OKIIDOKU_CONTRACT_USE(in >= T_in{0});
-			// 	}
-			// 	OKIIDOKU_CONTRACT_USE(max_t(in) <= max);
-			// 	check();
-			// }
 			/** \pre `0 <= in <= max` */
 			template<class T_in> requires(std::integral<T_in> && std::numeric_limits<T_in>::max() <= std::numeric_limits<max_t>::max())
 			explicit constexpr Int(T_in in) noexcept: val_{static_cast<i_t>(in)} {
-				static_assert(sizeof(Int) == sizeof(i_t));
+				static_assert(sizeof(T_in) <= sizeof(max_t));
 				if constexpr (std::is_signed_v<T_in>) {
-					OKIIDOKU_CONTRACT_USE(in >= T_in{0});
+					OKIIDOKU_CONTRACT_USE(in >= 0);
 				}
 				OKIIDOKU_CONTRACT_USE(max_t(in) <= max);
 				check();
@@ -228,7 +217,7 @@ namespace okiidoku::mono {
 			constexpr auto  operator++(int) & noexcept { const auto old {*this}; operator++(); return old; }
 			constexpr auto& operator--(   ) & noexcept { OKIIDOKU_CONTRACT_USE(val_ > i_t{0u}); --val_; check(); return *this; }
 
-			// TODO move this into dedicate iter_x class?
+			// TODO move this into dedicated iter_x class?
 			[[nodiscard, gnu::pure]] constexpr auto  begin() const noexcept { check(); return Int{0u}; }
 			[[nodiscard, gnu::pure]] constexpr auto  end()   const noexcept { check(); return *this; }
 			[[nodiscard, gnu::pure]] constexpr auto  next()  const noexcept { check(); return Int{val_+1u}; }
@@ -277,7 +266,7 @@ namespace okiidoku::mono {
 			template<max_t ML, IntKind KL, max_t MR, IntKind KR> requires(ML >= MR) constexpr friend auto operator-(const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept;
 			template<max_t ML, IntKind KL, max_t MR, IntKind KR> constexpr friend auto operator* (const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept;
 			template<max_t ML, IntKind KL, max_t MR, IntKind KR> constexpr friend auto operator/ (const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept;
-			template<max_t ML, IntKind KL, max_t MR, IntKind KR> requires(MR > 0u) constexpr friend auto operator% (const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept;
+			template<max_t ML, IntKind KL, max_t MR, IntKind KR> requires(MR >  0u) constexpr friend auto operator% (const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept;
 			template<max_t MR, IntKind KR> requires(MR > 0u) constexpr friend auto operator%(const std::unsigned_integral auto lhs, const Int<MR,KR>& rhs) noexcept;
 		};
 
@@ -295,7 +284,7 @@ namespace okiidoku::mono {
 			lhs.check(); rhs.check();
 			constexpr auto m_out {ML + MR};
 			constexpr auto k_out {pick_int_op_result_kind(KL,KR)};
-			return Int<m_out, k_out>{lhs.val_ + rhs.val_};
+			return Int<m_out,k_out>{lhs.val_ + rhs.val_};
 		}
 
 		/**
@@ -306,7 +295,7 @@ namespace okiidoku::mono {
 			lhs.check(); rhs.check();
 			constexpr auto m_out {ML};
 			constexpr auto k_out {pick_int_op_result_kind(KL,KR)};
-			return Int<m_out, k_out>{lhs.val_ - rhs.val_};
+			return Int<m_out,k_out>{lhs.val_ - rhs.val_};
 		}
 
 		template<std::uintmax_t ML, IntKind KL, std::uintmax_t MR, IntKind KR>
@@ -314,7 +303,7 @@ namespace okiidoku::mono {
 			lhs.check(); rhs.check();
 			constexpr auto m_out {ML * MR};
 			constexpr auto k_out {pick_int_op_result_kind(KL,KR)};
-			return Int<m_out, k_out>{lhs.val_ * rhs.val_};
+			return Int<m_out,k_out>{lhs.val_ * rhs.val_};
 		}
 
 		/// \pre `rhs` is its type's maximum value.
@@ -324,7 +313,7 @@ namespace okiidoku::mono {
 			OKIIDOKU_CONTRACT_USE(rhs.val_ == MR);
 			constexpr auto m_out {ML / MR};
 			constexpr auto k_out {pick_int_op_result_kind(KL,KR)};
-			return Int<m_out, k_out>{lhs.val_ / rhs.val_};
+			return Int<m_out,k_out>{lhs.val_ / rhs.val_};
 		}
 
 		template<std::uintmax_t ML, IntKind KL, std::uintmax_t MR, IntKind KR> requires(MR > 0u)
@@ -332,7 +321,7 @@ namespace okiidoku::mono {
 			lhs.check(); rhs.check();
 			constexpr auto m_out {MR - 1u};
 			constexpr auto k_out {pick_int_op_result_kind(KL,KR)};
-			const Int<m_out, k_out> ret {lhs.val_ % rhs.val_};
+			const Int<m_out,k_out> ret {lhs.val_ % rhs.val_};
 			OKIIDOKU_CONTRACT_USE(ret.val_ < rhs.val_);
 			OKIIDOKU_CONTRACT_USE(ret < rhs);
 			return ret;
@@ -365,12 +354,13 @@ namespace okiidoku::mono {
 		#define DEFINE_OX_TYPES(P_, SUFFIX_, MAX_) \
 		using o##P_##SUFFIX_##_t  = detail::Int<uintmax_t{1}*(MAX_), detail::IntKind::fast>; \
 		using o##P_##SUFFIX_##s_t = detail::Int<uintmax_t{1}*(MAX_), detail::IntKind::small>; \
+		static_assert(sizeof(o##P_##SUFFIX_## _t) == sizeof(typename o##P_##SUFFIX_## _t::i_t)); \
+		static_assert(sizeof(o##P_##SUFFIX_##s_t) == sizeof(typename o##P_##SUFFIX_##s_t::i_t)); \
 		static_assert(std::is_trivially_copyable_v<o##P_##SUFFIX_##_t>); \
 		static_assert(std::is_trivially_copyable_v<o##P_##SUFFIX_##s_t>); \
 		static_assert(std::is_nothrow_convertible_v<o##P_##SUFFIX_##_t,  o##P_##SUFFIX_##s_t>, "can convert fast to small"); \
-		static_assert(std::is_nothrow_convertible_v<o##P_##SUFFIX_##s_t, o##P_##SUFFIX_##_t >, "can convert small to fast"); \
-		template<class T_in> requires ((!std::integral<T_in> && std::is_nothrow_convertible_v<T_in, o##P_##SUFFIX_##_t >) || std::integral<T_in>) [[gnu::const, gnu::always_inline]] static constexpr o##P_##SUFFIX_##_t  o##P_##SUFFIX_   (const T_in in) noexcept { static_assert(sizeof(std::uintmax_t) >= sizeof(T_in)); OKIIDOKU_CONTRACT_USE(in >= 0); OKIIDOKU_CONTRACT_USE(static_cast<std::uintmax_t>(in) <= std::uintmax_t{1u}*(MAX_)); return static_cast<o##P_##SUFFIX_##_t >(in); } \
-		template<class T_in> requires ((!std::integral<T_in> && std::is_nothrow_convertible_v<T_in, o##P_##SUFFIX_##s_t>) || std::integral<T_in>) [[gnu::const, gnu::always_inline]] static constexpr o##P_##SUFFIX_##s_t o##P_##SUFFIX_##s(const T_in in) noexcept { static_assert(sizeof(std::uintmax_t) >= sizeof(T_in)); OKIIDOKU_CONTRACT_USE(in >= 0); OKIIDOKU_CONTRACT_USE(static_cast<std::uintmax_t>(in) <= std::uintmax_t{1u}*(MAX_)); return static_cast<o##P_##SUFFIX_##s_t>(in); }
+		static_assert(std::is_nothrow_convertible_v<o##P_##SUFFIX_##s_t, o##P_##SUFFIX_##_t >, "can convert small to fast");
+
 		DEFINE_OX_TYPES(1, i,  O)
 		DEFINE_OX_TYPES(2, i,  O*O)
 		DEFINE_OX_TYPES(3, i,  O*O*O)
@@ -391,17 +381,7 @@ namespace okiidoku::mono {
 		static constexpr o3i_t O3 {o3i_t::max};
 		static constexpr o4i_t O4 {o4i_t::max};
 	};
-	// TODO try getting rid of the converter/factory functions
 
-	// defines `Any_oPx_t<O,T>`, `Any_oPi_t<O,T>` concepts.
-	#define DEFINE_OX_TYPES(P_, OX_) \
-	template<Order O, typename T> concept Any_o##P_##x_t = (!std::integral<T> && std::is_nothrow_convertible_v<T, typename Ints<O>::o##P_##xs_t>) || (std::unsigned_integral<T> && std::numeric_limits<T>::max() >= (std::uintmax_t{1}*OX_-1u)); \
-	template<Order O, typename T> concept Any_o##P_##i_t = (!std::integral<T> && std::is_nothrow_convertible_v<T, typename Ints<O>::o##P_##xs_t>) || (std::unsigned_integral<T> && std::numeric_limits<T>::max() >= (std::uintmax_t{1}*OX_   ));
-	DEFINE_OX_TYPES(1, O)
-	DEFINE_OX_TYPES(2, O*O)
-	DEFINE_OX_TYPES(3, O*O*O)
-	DEFINE_OX_TYPES(4, O*O*O*O)
-	#undef DEFINE_OX_TYPES
 
 	#define OKIIDOKU_MONO_INT_TS_TYPEDEFS \
 		using T       [[maybe_unused]] = Ints<O>;    \
@@ -438,56 +418,54 @@ namespace okiidoku::mono {
 	using grid_val_t = Ints<O>::o2is_t;
 
 
-	template<Order O, class T_rmi> requires(Any_o4x_t<O,T_rmi>)
-	[[nodiscard, gnu::const]] constexpr
-	Ints<O>::o2x_t rmi_to_row(const T_rmi rmi) noexcept {
+	template<Order O> [[nodiscard, gnu::const]] constexpr
+	Ints<O>::o2x_t rmi_to_row(const typename Ints<O>::o4x_t rmi) noexcept {
 		using T = Ints<O>;
-		return T::o4x(rmi) / T::O2;
+		return rmi / T::O2;
 	}
 
-	template<Order O, class T_rmi> requires(Any_o4x_t<O,T_rmi>)
-	[[nodiscard, gnu::const]] constexpr
-	Ints<O>::o2x_t rmi_to_col(const T_rmi rmi) noexcept {
+	template<Order O> [[nodiscard, gnu::const]] constexpr
+	Ints<O>::o2x_t rmi_to_col(const typename Ints<O>::o4x_t rmi) noexcept {
 		using T = Ints<O>;
-		return T::o4x(rmi) % T::O2;
+		return rmi % T::O2;
 	}
 
-	template<Order O>
-	[[nodiscard, gnu::const]] constexpr
-	Ints<O>::o2x_t row_col_to_box(const typename Ints<O>::o2x_t row, const typename Ints<O>::o2x_t col) noexcept {
+	template<Order O> [[nodiscard, gnu::const]] constexpr
+	Ints<O>::o2x_t row_col_to_box(
+		const typename Ints<O>::o2x_t row,
+		const typename Ints<O>::o2x_t col
+	) noexcept {
 		using T = Ints<O>;
 		const auto box {((row / T::O1) * T::O1) + (col / T::O1)};
 		return box;
 	}
 
-	template<Order O>
-	[[nodiscard, gnu::const]] constexpr
-	Ints<O>::o2x_t row_col_to_box_cell(const typename Ints<O>::o2x_t row, const typename Ints<O>::o2x_t col) noexcept {
+	template<Order O> [[nodiscard, gnu::const]] constexpr
+	Ints<O>::o2x_t row_col_to_box_cell(
+		const typename Ints<O>::o2x_t row,
+		const typename Ints<O>::o2x_t col
+	) noexcept {
 		using T = Ints<O>;
 		const typename T::o2x_t box_cell {((row % T::O1) * T::O1) + (col % O)};
 		return box_cell;
 	}
 
-	template<Order O, class T_rmi> requires(Any_o4x_t<O,T_rmi>)
-	[[nodiscard, gnu::const]] constexpr
-	Ints<O>::o2x_t rmi_to_box(const T_rmi rmi) noexcept {
-		OKIIDOKU_CONTRACT_USE(rmi < Ints<O>::O4);
+	template<Order O> [[nodiscard, gnu::const]] constexpr
+	Ints<O>::o2x_t rmi_to_box(const typename Ints<O>::o4x_t rmi) noexcept {
 		return row_col_to_box<O>(rmi_to_row<O>(rmi), rmi_to_col<O>(rmi));
 	}
 
-	template<Order O>
-	[[nodiscard, gnu::const]] constexpr
+	template<Order O> [[nodiscard, gnu::const]] constexpr
 	Ints<O>::o2x_t rmi_to_box_cell(const typename Ints<O>::o4x_t rmi) noexcept {
 		using T = Ints<O>;
-		const auto boxrow {rmi/T::O2 % T::O1};
+		const auto boxrow {(rmi/T::O2) % T::O1};
 		const auto boxcol {rmi % T::O1};
 		const auto box_cell {((T::O1*boxrow)+boxcol)};
 		return box_cell;
 	}
 
-	template<Order O, class T_rmi> requires(Any_o4x_t<O,T_rmi>)
-	[[nodiscard, gnu::const]] constexpr
-	Ints<O>::o2x_t rmi_to_house(const HouseType house_type, const T_rmi rmi) noexcept {
+	template<Order O> [[nodiscard, gnu::const]] constexpr
+	Ints<O>::o2x_t rmi_to_house(const HouseType house_type, const typename Ints<O>::o4x_t rmi) noexcept {
 		using T = Ints<O>;
 		OKIIDOKU_CONTRACT_USE(rmi < T::O4);
 		switch (house_type) {
@@ -499,37 +477,36 @@ namespace okiidoku::mono {
 		OKIIDOKU_UNREACHABLE;
 	}
 
-	template<Order O, class T_row, class T_col>
-	requires(Any_o2x_t<O,T_row> && Any_o2x_t<O,T_col>)
-	[[nodiscard, gnu::const]] constexpr
-	Ints<O>::o4x_t row_col_to_rmi(const T_row row, const T_col col) noexcept {
+	template<Order O> [[nodiscard, gnu::const]] constexpr
+	Ints<O>::o4x_t row_col_to_rmi(
+		const typename Ints<O>::o2x_t row,
+		const typename Ints<O>::o2x_t col
+	) noexcept {
 		using T = Ints<O>;
-		OKIIDOKU_CONTRACT_USE(row < T::O2);
-		OKIIDOKU_CONTRACT_USE(col < T::O2);
-		const auto rmi {(T::O2 * T::o2x(row)) + T::o2x(col)};
-		return rmi;
+		return (T::O2 * row) + col;
 	}
 
 	/**
 	\param box row-major index of a box in a grid.
 	\param box_cell row-major index of a cell within `box`.
 	\pre `box` and `box_cell` are in `[0, O2)`. */
-	template<Order O, class T_house, class T_house_cell>
-	requires(Any_o2x_t<O,T_house> && Any_o2x_t<O,T_house_cell>)
-	[[nodiscard, gnu::const]] constexpr
-	Ints<O>::o4x_t box_cell_to_rmi(const T_house box, const T_house_cell box_cell) noexcept {
+	template<Order O> [[nodiscard, gnu::const]] constexpr
+	Ints<O>::o4x_t box_cell_to_rmi(
+		const typename Ints<O>::o2x_t box,
+		const typename Ints<O>::o2x_t box_cell
+	) noexcept {
 		using T = Ints<O>;
-		OKIIDOKU_CONTRACT_USE(box < T::O2);
-		OKIIDOKU_CONTRACT_USE(box_cell < T::O2);
-		const typename T::o2x_t row {(((T::o2x(box)/T::O1)*T::O1) + (T::o2x(box_cell)/T::O1))};
-		const typename T::o2x_t col {(((T::o2x(box)%T::O1)*T::O1) + (T::o2x(box_cell)%T::O1))};
+		const auto row {((box/T::O1)*T::O1) + (box_cell/T::O1)};
+		const auto col {((box%T::O1)*T::O1) + (box_cell%T::O1)};
 		return row_col_to_rmi<O>(row, col);
 	}
 
-	template<Order O, class T_house, class T_house_cell>
-	requires(Any_o2x_t<O,T_house> && Any_o2x_t<O,T_house_cell>)
-	[[nodiscard, gnu::const]] constexpr
-	Ints<O>::o4x_t house_cell_to_rmi(const HouseType house_type, const T_house house, const T_house_cell house_cell) noexcept {
+	template<Order O> [[nodiscard, gnu::const]] constexpr
+	Ints<O>::o4x_t house_cell_to_rmi(
+		const HouseType house_type,
+		const typename Ints<O>::o2x_t house,
+		const typename Ints<O>::o2x_t house_cell
+	) noexcept {
 		switch (house_type) {
 			using enum HouseType;
 			case row: return row_col_to_rmi<O>(house, house_cell);
@@ -539,17 +516,17 @@ namespace okiidoku::mono {
 		OKIIDOKU_UNREACHABLE;
 	}
 
-	template<Order O, class T_chute, class T_chute_cell>
-	requires(Any_o1x_t<O,T_chute> && Any_o3x_t<O,T_chute_cell>)
-	[[nodiscard, gnu::const]] constexpr
-	Ints<O>::o4x_t chute_cell_to_rmi(const LineType line_type, const T_chute chute, const T_chute_cell chute_cell) noexcept {
+	template<Order O> [[nodiscard, gnu::const]] constexpr
+	Ints<O>::o4x_t chute_cell_to_rmi(
+		const LineType line_type,
+		const typename Ints<O>::o1x_t chute,
+		const typename Ints<O>::o3x_t chute_cell
+	) noexcept {
 		using T = Ints<O>;
-		OKIIDOKU_CONTRACT_USE(chute < T::O1);
-		OKIIDOKU_CONTRACT_USE(chute_cell < T::O3);
 		switch (line_type) {
 			using enum LineType;
-			case row: return (T::O3*T::o1x(chute)) + T::o3x(chute_cell);
-			case col: return ((T::O1*T::o1x(chute))+((T::o3x(chute_cell)%T::O2)*T::O2)+(T::o3x(chute_cell)/T::O2));
+			case row: return (T::O3*chute) + chute_cell;
+			case col: return ((T::O1*chute)+((chute_cell%T::O2)*T::O2)+(chute_cell/T::O2));
 		}
 		OKIIDOKU_UNREACHABLE;
 	}
