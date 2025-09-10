@@ -4,6 +4,7 @@
 #define HPP_OKIIDOKU__PUZZLE__SOLVER__SUBSET_COMBO_WALKER
 
 #include <okiidoku/ints.hpp>
+#include <okiidoku/puzzle/solver/cand_elim_find.macros.hpp>
 #include <array>
 
 namespace okiidoku::mono::detail::solver {

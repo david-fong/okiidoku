@@ -20,6 +20,7 @@ namespace okiidoku::mono { namespace {
 		using T = Ints<O>;
 		using cands_t = O2BitArr<O>;
 		using val_t = T::o2x_t;
+		using o4x_t = T::o4x_t;
 		using o4i_t = T::o4i_t;
 
 		static constexpr unsigned num_buf_bytes {1};
@@ -34,7 +35,9 @@ namespace okiidoku::mono { namespace {
 			h_chute_boxes_cands_.fill(O2BitArr_ones<O>);
 			cols_cands_.fill(O2BitArr_ones<O>);
 		}
-		[[nodiscard, gnu::pure]] o4i_t get_cell_rmi() const noexcept { return cell_rmi_; }
+		[[nodiscard, gnu::pure]] bool done() const noexcept { return cell_rmi_ == T::O4; }
+		/** \pre `!done()` */
+		[[nodiscard, gnu::pure]] o4x_t get_cell_rmi() const noexcept { return o4x_t{cell_rmi_}; }
 		void advance() noexcept;
 
 		// automatically removes val as a candidate of future cells.
@@ -173,7 +176,7 @@ namespace okiidoku::mono {
 		using T = Ints<O>;
 
 		SerdesHelper<O> helper {};
-		for (; helper.get_cell_rmi() < T::O4; helper.advance()) {
+		for (; !helper.done(); helper.advance()) {
 			const auto row {helper.get_cell_rmi() / T::O2};
 			const auto col {helper.get_cell_rmi() % T::O2};
 			if ((T::O1-1-row)/T::O1 == col/T::O1) {

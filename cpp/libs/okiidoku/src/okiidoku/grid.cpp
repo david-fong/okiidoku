@@ -26,17 +26,18 @@ namespace okiidoku::mono {
 			if (col == 0) [[unlikely]] { row_has = has_mask_t{}; }
 			if (row % T::O1 == 0) [[unlikely]] { h_chute_boxes_has.fill(has_mask_t{}); }
 
-			const auto& val {grid.at(row,col)};
-			OKIIDOKU_CONTRACT_USE(val <= T::O2);
-			if (val == T::O2) { continue; }
+			const auto& val_ {grid.at(row,col)};
+			OKIIDOKU_CONTRACT_USE(val_ <= T::O2);
+			if (val_ == T::O2) { continue; }
+			const o2x_t val {val_};
 
 			auto& col_has {cols_has[col]};
 			auto& box_has {h_chute_boxes_has[col / T::O1]};
 
-			if (has_mask_t::test_any3(T::o2x(val), row_has, col_has, box_has)) [[unlikely]] {
+			if (has_mask_t::test_any3(val, row_has, col_has, box_has)) [[unlikely]] {
 				return false;
 			}
-			has_mask_t::set3(T::o2x(val), row_has, col_has, box_has);
+			has_mask_t::set3(val, row_has, col_has, box_has);
 		}}
 		return true;
 	}

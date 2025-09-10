@@ -26,7 +26,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 	template<Order O> requires(is_order_compiled(O))
 	Ints<O>::o2xs_t find_good_guess_sym_for_cell(
 		const CandsGrid<O>& cells_cands,
-		const typename Ints<O>::o4i_t rmi
+		const typename Ints<O>::o4x_t rmi
 	) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
 		const auto best_cell_cands {cells_cands.at_rmi(rmi)};
@@ -54,6 +54,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 	}
 
 
+	/** \pre a guess candidate exists. */
 	template<Order O> requires(is_order_compiled(O))
 	// NOLINTNEXTLINE(*-cognitive-complexity)
 	Guess<O> find_good_guess_candidate_for_fast_solver(
@@ -63,14 +64,14 @@ namespace okiidoku::mono::detail::solver { namespace {
 		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
 
 		using house_solved_counts_t = HouseTypeMap<o2is_t>;
-		// TODO consider a way of caching this information? I can't guess whether it will be better or worse. This isn't like the guess network, I think bookkeeping for this may require one copy of the info for each stack frame to make sense from a POV of avoiding re-computation.
+		// TODO consider a way of caching this information in the engine data? I can't guess whether it will be better or worse. This isn't like the guess network, I think bookkeeping for this may require one copy of the info for each stack frame to make sense from a POV of avoiding re-computation.
 		std::array<house_solved_counts_t, T::O2> houses_solved_counts {};
 		for (const auto rmi : T::O4) {
-			if (cells_cands.at_rmi(rmi).count() == 1) [[unlikely]] {
+			if (cells_cands.at_rmi(rmi).count() == 1u) [[unlikely]] {
 				for (const auto house_type : house_types) {
 					++(houses_solved_counts[rmi_to_house<O>(house_type, rmi)].at(house_type));
 		}	}	}
-		const auto get_house_solved_counts {[&](const o4i_t rmi){
+		const auto get_house_solved_counts {[&](const o4x_t rmi){
 			if constexpr (O < 5) { // NOLINT(readability-magic-numbers)
 				o3i_t _ {0};
 				for (const auto house_type : house_types) {
@@ -89,7 +90,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 			}
 		}};
 		// TODO.try doing bookkeeping in the engine to avoid re-computation. (keep a guess-count for each house). slightly more relevant now that large fields of guess stack frames aren't heap-allocated (ie. the guess field of each stack entry are farther apart).
-		[[maybe_unused]] const auto get_guess_grouping {[&](const o4i_t rmi) -> o3i_t {
+		[[maybe_unused]] const auto get_guess_grouping {[&](const o4x_t rmi) -> std::uintmax_t {
 			return std::transform_reduce(
 				#ifdef __cpp_lib_execution
 				std::execution::unseq,
@@ -104,24 +105,24 @@ namespace okiidoku::mono::detail::solver { namespace {
 				}
 			);
 		}};
-		o4i_t best_rmi {T::O4};
-		for (const auto rmi : T::O4) {
-			if (cells_cands.at_rmi(rmi).count() > 1) [[likely]] {
-				best_rmi = rmi;
-				break;
-		}	}
-		OKIIDOKU_CONTRACT_USE(best_rmi < T::O4);
+		o4x_t best_rmi {[&](){
+			for (const auto rmi : T::O4) {
+				if (cells_cands.at_rmi(rmi).count() > 1u) [[likely]] {
+					return rmi;
+			}	}
+			OKIIDOKU_UNREACHABLE;
+		}()};
 		auto best_cand_count {cells_cands.at_rmi(best_rmi).count()};
 		auto best_house_solved_counts {get_house_solved_counts(best_rmi)};
 		[[maybe_unused]] auto best_guess_grouping {get_guess_grouping(best_rmi)};
 
 		// TODO is there a same-or-better-perf way to write this search using std::transform_reduce or std::min?
-		for (o4i_t rmi {T::o4i(best_rmi+1u)}; rmi < T::O4; ++rmi) {
-			const auto cand_count {cells_cands.at_rmi(rmi).count()};
+		for (o4i_t rmi {o4i_t{best_rmi+1u}}; rmi < T::O4; ++rmi) {
+			const auto cand_count {cells_cands.at_rmi(o4x_t{rmi}).count()};
 			OKIIDOKU_CONTRACT_USE(cand_count != 0);
 			if (cand_count <= 1) [[unlikely]] { continue; } // no guessing for solved cell.
-			[[maybe_unused]] const auto guess_grouping {get_guess_grouping(rmi)};
-			[[maybe_unused]] const auto house_solved_counts {get_house_solved_counts(rmi)};
+			[[maybe_unused]] const auto guess_grouping {get_guess_grouping(o4x_t{rmi})};
+			[[maybe_unused]] const auto house_solved_counts {get_house_solved_counts(o4x_t{rmi})};
 			if ([&]{
 				if constexpr (O <= 3) {
 					return std::tie(     cand_count)
@@ -134,7 +135,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 			  		     < std::tie(best_cand_count, best_guess_grouping,      house_solved_counts);
 				}
 			}()) [[unlikely]] {
-				best_rmi = rmi;
+				best_rmi = o4x_t{rmi};
 				best_cand_count = cand_count;
 				best_house_solved_counts = house_solved_counts;
 				best_guess_grouping = guess_grouping;

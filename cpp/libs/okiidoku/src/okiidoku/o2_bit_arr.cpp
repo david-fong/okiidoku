@@ -103,7 +103,7 @@ namespace okiidoku::mono {
 					const auto wd_popcount {static_cast<word_bit_i_t>(std::popcount(words_[wd_i]))};
 					OKIIDOKU_CONTRACT_USE(wd_popcount <= word_t_num_bits);
 					if (set_bit_index >= wd_popcount) [[likely]] {
-						set_bit_index = T::o2x(set_bit_index - wd_popcount);
+						set_bit_index -= T::o2x(wd_popcount);
 					} else {
 						return wd_i;
 					}
@@ -152,7 +152,7 @@ namespace okiidoku::mono {
 	O2BitArr<O>::to_chars() const noexcept {
 		OKIIDOKU_DEFER_INIT std::array<char, T::O2> _; // NOLINT(*-init)
 		_.fill('.');
-		for (o2i_t i {0}; i < T::O2; ++i) {
+		for (const auto i : T::O2) {
 			if (operator[](i)) { _[i] = '1'; }
 		}
 		return _;

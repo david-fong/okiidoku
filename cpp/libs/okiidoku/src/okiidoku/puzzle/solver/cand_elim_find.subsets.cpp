@@ -99,7 +99,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 			do {
 				++sub_a;
 				if (sub_a == T::O2) [[unlikely]] { break; }
-				subs.is_begin.set(sub_a);
+				subs.is_begin.set(o2x_t{sub_a});
 			} while (sub_a < sub_z && subs.cell_tags[sub_a].count_cache == 1);
 			return true; // TODO somehow optimize to skip the above sort when re-loop?
 		}
@@ -128,13 +128,13 @@ namespace okiidoku::mono::detail::solver { namespace {
 		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
 		OKIIDOKU_CONTRACT_USE(sub_z <= T::O2);
 		OKIIDOKU_CONTRACT_USE(sub_a < sub_z);
-		OKIIDOKU_CONTRACT_USE(max_subset_size >= 2);
+		OKIIDOKU_CONTRACT_USE(max_subset_size >= 2u);
 		OKIIDOKU_CONTRACT_USE(max_subset_size <= T::o2x((T::O2+1)/2));
-		for (o2x_t subset_i {0}; subset_i < (sub_z-sub_a-3) && subset_i+2 < 2*max_subset_size; ++subset_i) {
+		for (o2x_t subset_i {0u}; subset_i < (sub_z-sub_a-3) && subset_i+2 < 2*max_subset_size; ++subset_i) {
 			const auto naked_or_hidden {(subset_i % 2 == 0) ? NakedOrHidden::naked : NakedOrHidden::hidden};
 			const auto naked_subset_size {[&]() -> o2x_t {
 				if (naked_or_hidden == NakedOrHidden::naked) {
-					return T::o2x(2+(subset_i/2));
+					return T::o2x(2u+(subset_i/2u));
 				}
 				return T::o2x((sub_z-sub_a)-2-(subset_i/2));
 			}()};
@@ -142,7 +142,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 			// ^plus one to skip finding hidden singles. // TODO or also try to find them?
 			std::optional<FoundSubsetInfo<O>> found {{ // Note: wrap with optional to allow NRVO
 				.combo_walker {
-					T::o2x(sub_a),
+					o2x_t{sub_a},
 					[&]{
 						auto sized_z {sub_a};
 						while (sized_z < T::O2 && subs.cell_tags[sized_z].count_cache <= naked_subset_size) { ++sized_z; }
@@ -188,8 +188,8 @@ namespace okiidoku::mono::detail::solver { namespace {
 		o2i_t sub_z {0};
 		const auto get_next_sub_a {[&]{
 			OKIIDOKU_CONTRACT_USE(sub_a < T::O2);
-			auto next {T::o2i(sub_a+1)};
-			while (next < T::O2 && !subs.is_begin[next]) { ++next; }
+			auto next {o2i_t{sub_a+1u}};
+			while (next < T::O2 && !subs.is_begin[o2x_t{next}]) { ++next; }
 			OKIIDOKU_CONTRACT_USE(next <= T::O2);
 			OKIIDOKU_CONTRACT_USE(next > sub_a);
 			return next;
@@ -202,16 +202,16 @@ namespace okiidoku::mono::detail::solver { namespace {
 			non_first_members.remove(subs.is_begin);
 			const auto second_non_single_member {non_first_members.first_set_bit_require_exists()};
 			OKIIDOKU_CONTRACT_USE(second_non_single_member > 0);
-			sub_a = T::o2i(second_non_single_member-1);
+			sub_a = o2i_t{second_non_single_member-1u};
 		}
 
 		while (sub_a < T::O2) [[likely]] {
 			sub_z = get_next_sub_a();
 			OKIIDOKU_CONTRACT_USE(sub_z <= T::O2);
-			OKIIDOKU_CONTRACT_USE(sub_a < sub_z);
-			OKIIDOKU_CONTRACT_ASSERT(subs.is_begin[sub_a]);
-			for (auto i {T::o2i(sub_a+1)}; i < sub_z; ++i) {
-				OKIIDOKU_CONTRACT_ASSERT(!subs.is_begin[i]);
+			OKIIDOKU_CONTRACT_USE(sub_a <  sub_z);
+			OKIIDOKU_CONTRACT_ASSERT(subs.is_begin[o2x_t{sub_a}]);
+			for (auto i {o2i_t{sub_a+1u}}; i < sub_z; ++i) {
+				OKIIDOKU_CONTRACT_ASSERT(!subs.is_begin[o2x_t{i}]);
 			}
 			if (prepare_try_decompose_subset_and_check_can_skip(engine.cells_cands(), subs, sub_a, sub_z)) {
 				continue;
@@ -235,14 +235,14 @@ namespace okiidoku::mono::detail::solver { namespace {
 					std::swap(subs.cell_tags[sub_a], entry);
 					++sub_a;
 				}
-				subs.is_begin.set(sub_a);
+				subs.is_begin.set(o2x_t{sub_a});
 			} else {
 				for (o2x_t combo_at {0}; combo_at < naked_subset_size; ++combo_at) {
-					auto& entry {subs.cell_tags[combo_walker.combo_at(T::o2x(naked_subset_size-1-combo_at))]};
-					std::swap(subs.cell_tags[T::o2x(sub_z-1)], entry);
+					auto& entry {subs.cell_tags[combo_walker.combo_at(T::o2x(naked_subset_size-1u-combo_at))]};
+					std::swap(subs.cell_tags[T::o2x(sub_z-1u)], entry);
 					--sub_z;
 				}
-				subs.is_begin.set(sub_z);
+				subs.is_begin.set(o2x_t{sub_z});
 			}
 			for (auto i {sub_a}; i < sub_z; ++i) {
 				const auto check {engine.do_elim_remove_syms_(subs.cell_tags[i].rmi, combo_syms)};
@@ -263,7 +263,6 @@ namespace okiidoku::mono::detail::solver { namespace {
 		const typename Ints<O>::o2x_t max_subset_size
 	) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
-		OKIIDOKU_CONTRACT_USE(max_subset_size <= T::o2x((T::O2+1)/2));
 		if (max_subset_size < 2) [[unlikely]] {
 			return UnwindInfo::make_no_unwind();
 		}

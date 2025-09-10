@@ -37,7 +37,7 @@ void test_o2_bit_arr() {
 		auto ones {O2BitArr_ones<O>};
 		for (const auto i : T::O2) {
 			CHECK(ones.count_below(T::o2x(i)) == 0);
-			CHECK(ones.get_index_of_nth_set_bit(0) == i);
+			CHECK(ones.get_index_of_nth_set_bit(o2x_t{0u}) == i);
 			CHECK(ones[ones.first_set_bit_require_exists()]);
 			ones.unset(ones.first_set_bit_require_exists());
 		}

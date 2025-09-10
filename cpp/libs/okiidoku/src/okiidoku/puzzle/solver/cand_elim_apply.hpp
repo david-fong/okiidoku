@@ -5,6 +5,9 @@
 
 #include <okiidoku/puzzle/solver/engine.hpp>
 #include <okiidoku/puzzle/solver/found.hpp>
+#include <okiidoku/puzzle/solver/cand_elim_find.macros.hpp>
+#include <okiidoku/ints.hpp>
+#include <okiidoku/order.hpp>
 
 namespace okiidoku::mono::detail::solver {
 
@@ -21,12 +24,7 @@ namespace okiidoku::mono::detail::solver {
 	template<Order O> requires(is_order_compiled(O))
 	class CandElimApplyImpl {
 	private:
-		using T = Ints<O>;
-		using o1i_t = T::o1i_t;
-		using o2x_t = T::o2x_t;
-		using o2i_t = T::o2i_t;
-		using o3i_t = T::o3i_t;
-		using rmi_t = T::o4xs_t;
+		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
 		// Important implementation reminder: if any candidate elimination done
 		// as part of an `apply` function unwinds the guess stack, any remaining
 		// eliminations that would have been done as part of the `apply` must not

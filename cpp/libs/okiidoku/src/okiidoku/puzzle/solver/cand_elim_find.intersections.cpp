@@ -56,7 +56,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 		ChuteIsecsSyms<O> chute_isecs_syms {}; // all cand syms in each chute isec
 		for (const auto chute_isec : T::O2) {
 		for (const auto isec_cell : T::O1) {
-			const auto chute_cell {T::o3i((T::O1*chute_isec)+isec_cell)};
+			const auto chute_cell {(T::O1*chute_isec)+isec_cell};
 			const auto rmi {chute_cell_to_rmi<O>(line_type, chute, chute_cell)};
 			const auto& cell_cands {cells_cands.at_rmi(rmi)};
 			auto& seen_once {chute_isecs_syms.at_isec(chute_isec)};

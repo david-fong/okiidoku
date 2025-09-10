@@ -3,8 +3,10 @@
 #ifndef HPP_OKIIDOKU__PUZZLE__MAKE
 #define HPP_OKIIDOKU__PUZZLE__MAKE
 
-#include <okiidoku/grid.hpp>
+#include <okiidoku/ints.hpp>
 #include <okiidoku/order.hpp>
+namespace okiidoku::mono { template <Order O> requires (is_order_compiled(O)) struct Grid; }
+namespace okiidoku::visitor { struct Grid; }
 
 namespace okiidoku::mono {
 

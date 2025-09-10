@@ -50,7 +50,7 @@ namespace okiidoku::visitor::detail {
 
 		// move-from-mono constructor
 		template<Order O>
-		explicit ContainerBase(typename Adaptor::template type<O>&& mono_obj) noexcept: variant_(std::move(mono_obj)) {}
+		ContainerBase(typename Adaptor::template type<O>&& mono_obj) noexcept: variant_{std::move(mono_obj)} {}
 
 		/// default-for-order constructor.
 		/// If the provided order is not compiled, defaults to the lowest compiled order.

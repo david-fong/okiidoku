@@ -28,9 +28,14 @@ namespace okiidoku::mono::detail::solver::found {
 	struct [[gnu::designated_init]] Subset {
 	};
 
+	/**
+	at isec (O1 contiguous cells) `isec` with orientation of `line_type`,
+	`syms` can be eliminated from the house of type `remove_from_rest_of`
+	containing isec because in the other house type can only (i.e. must)
+	have them in that isec. */
 	template<Order O> requires(is_order_compiled(O))
 	struct [[gnu::designated_init]] LockedCands {
-		O2BitArr<O> syms;
+		O2BitArr<O> syms; // TODO: change this into array<o2i_t, O1>, where items that are O2 are nulls. much better space usage. move field lower
 		Ints<O>::o3xs_t isec;
 		LineType line_type;
 		BoxOrLine remove_from_rest_of;

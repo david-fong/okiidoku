@@ -61,12 +61,16 @@ namespace okiidoku::mono {
 		// TODO: for fun: a transformation chaining operation. maybe use || operator? need to investigate commutativity and operator order of evaluation
 		// [[nodiscard, gnu::pure]] Transformation<O> chain(const Transformation<O>&) const noexcept;
 	};
+	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
+		static_assert(std::is_aggregate_v<Transformation<O_>>);
+	OKIIDOKU_FOREACH_O_DO_EMIT
+	#undef OKIIDOKU_FOREACH_O_EMIT
 
 	template<Order O> requires(is_order_compiled(O))
 	constexpr Transformation<O> Transformation<O>::identity {
-		.sym_map {[]{ sym_map_t _{};  for (const auto i : T::O2) { _[i] = static_cast<to_t>(i); } return _; }()},
-		.row_map {[]{ line_map_t _{}; for (const auto i : T::O2) { _[i/T::O1][i%T::O1] = static_cast<to_t>(i); } return _; }()},
-		.col_map {[]{ line_map_t _{}; for (const auto i : T::O2) { _[i/T::O1][i%T::O1] = static_cast<to_t>(i); } return _; }()},
+		.sym_map {[]{ sym_map_t  _; for (const auto i : T::O2) { _[i] = static_cast<to_t>(i); } return _; }()},
+		.row_map {[]{ line_map_t _; for (const auto i : T::O2) { _[i/T::O1][i%T::O1] = to_t{i}; } return _; }()},
+		.col_map {[]{ line_map_t _; for (const auto i : T::O2) { _[i/T::O1][i%T::O1] = to_t{i}; } return _; }()},
 		.post_transpose {false},
 	};
 }

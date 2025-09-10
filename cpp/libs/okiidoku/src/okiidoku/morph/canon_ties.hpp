@@ -24,16 +24,17 @@ namespace okiidoku::mono::detail {
 	that tied sections will only be further broken down and do not "move around". */
 	struct Ties {
 		using T = Ints<O>;
-		using i_t = std::conditional_t<(O1_OR_O2 == 1), typename T::o1i_t, typename T::o2is_t>;
+		using i_t  = std::conditional_t<(O1_OR_O2 == 1), typename T::o1i_t, typename T::o2is_t>;
+		using ix_t = std::conditional_t<(O1_OR_O2 == 1), typename T::o1x_t, typename T::o2xs_t>;
 		static constexpr i_t size_ {i_t::max};
 
 		/** defines a range in `[begin_, end_)`.
 		\invariant `begin_ < size_`, `begin_+1 < end_`, `end_ <= size_`, `end_ > 0`. */
 		class TieRange {
 		public:
-			i_t begin_;
-			i_t end_;
-			TieRange(const i_t begin, const i_t end) noexcept: begin_{begin}, end_{end} { check_invariants(); }
+			ix_t begin_;
+			i_t  end_;
+			TieRange(const ix_t begin, const i_t end) noexcept: begin_{begin}, end_{end} { check_invariants(); }
 			[[nodiscard, gnu::pure]] i_t  size()  const noexcept { check_invariants(); return static_cast<i_t>(end_ - begin_); }
 			[[nodiscard, gnu::pure]] auto begin() const noexcept { check_invariants(); return std::views::iota(begin_, end_).begin(); }
 			[[nodiscard, gnu::pure]] auto end()   const noexcept { check_invariants(); return std::views::iota(begin_, end_).end(); }
@@ -57,10 +58,10 @@ namespace okiidoku::mono::detail {
 			O2BitArr<O>::Iter it_;
 			i_t begin_;
 		public:
-			Iter(const O2BitArr<O>& links) noexcept: it_{links.set_bits()}, begin_{(*it_).get_underlying()} { ++it_; }
+			Iter(const O2BitArr<O>& links) noexcept: it_{links.set_bits()}, begin_{ix_t::unchecked_from(*it_)} { ++it_; }
 
-			TieRange operator*() const noexcept { return TieRange{begin_, (*it_).get_underlying()}; }
-			Iter& operator++()    noexcept { ++it_; begin_ = (*it_).get_underlying(); ++it_; return *this; }
+			TieRange operator*() const noexcept { return TieRange{ix_t{begin_}, i_t::unchecked_from(*it_)}; }
+			Iter& operator++()    noexcept { ++it_; begin_ = ix_t::unchecked_from(*it_); ++it_; return *this; }
 			Iter  operator++(int) noexcept { Iter tmp {*this}; operator++(); return tmp; }
 			[[nodiscard, gnu::pure]] constexpr friend bool operator!=(const Iter& i, [[maybe_unused]] const std::default_sentinel_t s) noexcept { return  i.it_.not_end(); }
 		};
@@ -72,7 +73,7 @@ namespace okiidoku::mono::detail {
 		// starts completely unresolved
 		Ties() noexcept {
 			bookends_.set(0u);
-			bookends_.set(size_);
+			bookends_.set(size_-1u);
 			OKIIDOKU_CONTRACT_ASSERT(has_unresolved());
 			OKIIDOKU_CONTRACT_ASSERT(none_resolved());
 		}
@@ -81,7 +82,7 @@ namespace okiidoku::mono::detail {
 		[[nodiscard, gnu::pure]] auto begin() const noexcept { return Iter(bookends_); }
 		[[nodiscard, gnu::pure]] auto end()   const noexcept { return std::default_sentinel; }
 
-		[[nodiscard, gnu::pure]] bool none_resolved()  const noexcept { return bookends_.count() == 2u && bookends_[0u] && bookends_[size_]; }
+		[[nodiscard, gnu::pure]] bool none_resolved()  const noexcept { return bookends_.count() == 2u && bookends_[0u] && bookends_[size_-1u]; }
 		[[nodiscard, gnu::pure]] bool has_unresolved() const noexcept { return bookends_.count() <  0u; }
 		[[nodiscard, gnu::pure]] bool all_resolved()   const noexcept { return bookends_.count() == 0u; }
 
@@ -92,7 +93,7 @@ namespace okiidoku::mono::detail {
 		requires (std::regular_invocable<IsEq, i_t, i_t>)
 		void update(const IsEq is_eq) noexcept {
 			for (const auto&& cached_tie : *this) {
-				for (i_t i {cached_tie.begin_}; i.next() < cached_tie.end_; ++i) {
+				for (auto i {cached_tie.begin_}; i.next() < cached_tie.end_; ++i) {
 					OKIIDOKU_CONTRACT_USE(i.next() < size_);
 					if (!std::invoke(is_eq, i, i.next())) [[likely]] {
 						bookends_.flip(i);

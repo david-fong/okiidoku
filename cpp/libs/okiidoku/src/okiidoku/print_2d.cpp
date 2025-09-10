@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include <okiidoku/print_2d.hpp>
 #include <okiidoku/print_2d.emoji.hpp>
+#include <okiidoku/ints.hpp>
+#include <okiidoku/order.hpp>
 
 #include <iostream>
 #include <random>      // minstd_rand

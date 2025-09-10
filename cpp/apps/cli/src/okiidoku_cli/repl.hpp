@@ -10,6 +10,7 @@
 #include <map>
 #include <string_view>
 #include <utility> // iwyu says this is for std::pair??
+#include <cstdint>
 
 namespace okiidoku::cli {
 

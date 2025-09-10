@@ -44,12 +44,9 @@ Issues I'm watching:
 
 ## Misc List
 
-- int types used in parameter interfaces aren't machine-dependent
 - see if helpful to add `/// \cond detail` wrapper to `detail` namespaces to suppress doxygen for them
-- move ContainerBase to separate header?
 - make `scramble` just generate a random `Transformation`.
 - rename `label` to `sym` and `val` to `sym`.
-- continue adoption of doxygen
 
 - https://www.pcg-random.org/using-pcg-cpp.html
   https://github.com/imneme/pcg-cpp/tags
@@ -95,6 +92,7 @@ Issues I'm watching:
   - https://wg21.link/P2169R4 placeholder variables with no name
   - [postcondition assertions](https://en.cppreference.com/w/cpp/language/function.html#Postcondition_assertions)
   - with reflection, I might be able to do what I'm currently doing with macros like `OKIIDOKU_FOREACH_O_EMIT` and `OKIIDOKU_FOREACH_O_DO_EMIT`, and be in a better position to use C++ modules :O.
+  - try using `pre` and `post()` on default and copy constructors of `Int<...>` to describe pre and postconditions
 
 - https://youtu.be/7QNtiH5wTAs?t=7003 -Wl,--gc-sections does this help? does it mess with my SO interface?
   - what about functions that I want defined only for debugging? see also

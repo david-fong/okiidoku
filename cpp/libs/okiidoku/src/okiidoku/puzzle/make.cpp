@@ -4,10 +4,14 @@
 
 #include <okiidoku/puzzle/solve.hpp>
 #include <okiidoku/puzzle/ua_set.hpp>
+#include <okiidoku/grid.hpp>
+#include <okiidoku/order.hpp>
 
 #include <algorithm>
 #include <execution>
 #include <random> // TODO remove once we make a smarter puzzle maker. currently a dumb implementation.
+#include <array>
+#include <utility>
 
 #include <iostream>
 
@@ -51,7 +55,7 @@ namespace okiidoku::mono {
 		// Note: this implementation never "backtracks". once it removes a given,
 		// it never puts it back.
 
-		o4x_t num_puzcell_cands {0};
+		o4i_t num_puzcell_cands {0};
 		OKIIDOKU_DEFER_INIT // NOLINTNEXTLINE(*-init)
 		std::array<rmi_t, T::O4> puzcell_cand_rmis; // non-candidates: either removed, or can't be removed.
 		for (const auto rmi : T::O4) {
@@ -59,12 +63,11 @@ namespace okiidoku::mono {
 				puzcell_cand_rmis[num_puzcell_cands] = static_cast<rmi_t>(rmi);
 				++num_puzcell_cands;
 		}	}
-		OKIIDOKU_CONTRACT_ASSERT(num_puzcell_cands < T::O4);
 
 		const auto remove_puzcell_cand_at {[&](const o4i_t cand_i){
 			OKIIDOKU_CONTRACT_USE(cand_i < num_puzcell_cands);
 			--num_puzcell_cands;
-			puzcell_cand_rmis[cand_i] = std::move(puzcell_cand_rmis[num_puzcell_cands]);
+			std::swap(puzcell_cand_rmis[cand_i], puzcell_cand_rmis[num_puzcell_cands]);
 		}};
 		o4i_t num_keepers {0};
 
@@ -81,13 +84,9 @@ namespace okiidoku::mono {
 
 		FastSolver<O> solver {};
 		while (num_puzcell_cands > 0) {
-			const auto puzcell_cand_i {T::o4x((rng() - rng_t::min()) % num_puzcell_cands)};
-			OKIIDOKU_CONTRACT_USE(puzcell_cand_i < num_puzcell_cands);
-			OKIIDOKU_CONTRACT_USE(puzcell_cand_i < T::O2);
-
+			const auto puzcell_cand_i {(rng()-rng_t::min()) % num_puzcell_cands};
 			const auto rmi {puzcell_cand_rmis[puzcell_cand_i]};
-			const auto val {std::exchange(grid.at_rmi(rmi), static_cast<grid_val_t<O>>(T::O2))};
-			OKIIDOKU_CONTRACT_USE(val < T::O2);
+			const auto val {std::exchange(grid.at_rmi(rmi), T::O2)};
 
 			call_debug_log_fn([&]{
 				std::clog << "\n\n#puzcell cands: " << int(num_puzcell_cands) << ". try rm @ " << int(rmi) << std::flush;
@@ -111,7 +110,7 @@ namespace okiidoku::mono {
 			// 	std::clog << "\ncannot remove at " << int(rmi) << " since it is the last given for a ua_set_4.";
 			// }
 
-			solver.reinit_with_puzzle(grid, {{.rmi{rmi}, .val{T::o2x(val)}}});
+			solver.reinit_with_puzzle(grid, {{.rmi{rmi}, .val{o2x_t{val}}}});
 			if (const auto new_soln_opt {solver.get_next_solution()}; new_soln_opt) {
 				// multiple solutions now possible. removal would break properness. don't remove.
 				call_debug_log_fn([&]{

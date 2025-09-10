@@ -58,7 +58,7 @@ namespace okiidoku::mono { namespace {
 				for (const auto row : T::O2) {
 				for (const auto col : T::O2) {
 					const auto box {row_col_to_box<O>(row, col)};
-					const auto sym {grid.at(row, col)};
+					const o2x_t sym {grid.at(row, col)};
 					const auto box_cell = row_col_to_box_cell<O>(row, col);
 					sym_box_to_boxcell_map.at(sym, box) = box_cell;
 				}}

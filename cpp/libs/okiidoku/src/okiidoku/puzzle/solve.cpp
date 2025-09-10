@@ -5,7 +5,9 @@
 #include <okiidoku/puzzle/solver/cand_elim_apply.hpp>
 #include <okiidoku/puzzle/solver/cand_elim_find.hpp>
 #include <okiidoku/puzzle/solver/engine.hpp>
+#include <okiidoku/puzzle/solver/cand_elim_find.macros.hpp>
 #include <okiidoku/order.hpp>
+namespace okiidoku::mono { template <Order O> requires (is_order_compiled(O)) struct Grid; }
 
 #include <functional> // cref
 #include <array>      // to_array
@@ -62,7 +64,7 @@ namespace okiidoku::mono {
 			if constexpr (O < 5u) { // NOLINT(readability-magic-numbers)
 				return detail::solver::UnwindInfo::make_no_unwind();
 			} else {
-				return Find::subsets(e_, e_.get_guess_stack_depth() == 0u ? 4u : 2u);
+				return Find::subsets(e_, e_.get_guess_stack_depth() == 0u ? typename Ints<O>::o2x_t{4u} : typename Ints<O>::o2x_t{2u});
 			}
 		}};
 		using finder_t = detail::solver::UnwindInfo (*)(detail::solver::Engine<O>&) noexcept;

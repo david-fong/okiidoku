@@ -12,6 +12,7 @@
 #include <okiidoku/gen.hpp>
 #include <okiidoku/print_2d.hpp>
 #include <okiidoku/grid.hpp>
+#include <okiidoku/ints.hpp>
 
 namespace nb = ::nanobind;
 
@@ -25,5 +26,5 @@ NB_MODULE(_okiidoku_nb, m) { //
 
 	m.doc() = "pybind11 build of okiidoku";
 
-	m.def("generate_shuffled", &oki_v::generate_shuffled, "generate a random filled sudoku grid");
+	// m.def("generate_shuffled", &oki_v::generate_shuffled, "generate a random filled sudoku grid");
 }

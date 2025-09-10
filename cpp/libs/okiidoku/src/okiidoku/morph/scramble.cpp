@@ -26,7 +26,7 @@ namespace okiidoku::mono {
 				stdr::shuffle(it.row_map[chute], rng);
 				stdr::shuffle(it.col_map[chute], rng);
 			}
-			it.post_transpose = static_cast<bool>((rng()-rng.min()) % 2u);
+			it.post_transpose = static_cast<bool>((rng()-rng_t::min()) % 2u);
 		}
 	}
 

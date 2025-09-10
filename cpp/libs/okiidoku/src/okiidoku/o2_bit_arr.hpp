@@ -202,10 +202,8 @@ namespace okiidoku::mono {
 			[[nodiscard, gnu::pure]] constexpr bool not_end() const noexcept { return i_ < T::O2; }
 			/** \pre `not_end()` */
 			[[nodiscard, gnu::pure]] constexpr o2x_t value() const noexcept {
-				return T::o2x(i_);
+				return o2x_t{i_};
 			}
-			// 1110010001101101100001
-			// 0
 			/** \pre `not_end()` */
 			void advance() noexcept {
 				OKIIDOKU_CONTRACT_USE(i_ < T::O2);

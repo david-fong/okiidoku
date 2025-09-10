@@ -163,31 +163,32 @@ namespace okiidoku::mono::detail::solver {
 		Engine<O>& engine,
 		const found::LockedCands<O>& desc
 	) noexcept {
-		const auto isec_base {[&]{
+		/** first isec-rmi of first isec in target house */
+		const o3x1_t isec_base {[&]{
 			switch (desc.remove_from_rest_of) {
 				using enum BoxOrLine;
-				case box:  return T::o3x(((desc.isec/T::O2)*T::O2)+(desc.isec%T::O1));
-				case line: return T::o3x(desc.isec - (desc.isec%T::O1));
+				case box:  return o3x1_t{((desc.isec/T::O2)*T::O2)+(desc.isec%T::O1)};
+				case line: return o3x1_t{(desc.isec/T::O1)*T::O1};
 			}
 			OKIIDOKU_UNREACHABLE;
 		}()};
-		const auto nb_scale {[&]{
+		const o1i_t neighbour_scale {[&]{
 			switch (desc.remove_from_rest_of) {
 				using enum BoxOrLine;
 				case box:  return T::O1;
-				case line: return T::o1i(1u);
+				case line: return o1i_t{1u};
 			}
 			OKIIDOKU_UNREACHABLE;
 		}()};
-		for (const auto nb_i : T::O1) {
-			const auto isec {isec_base + (nb_i * nb_scale)};
+		for (const auto house_isec_i : T::O1) {
+			const auto isec {o3x_t::unchecked_from(isec_base + (house_isec_i * neighbour_scale))};
 			if (isec == desc.isec) [[unlikely]] { continue; }
 			for (const auto isec_cell_i : T::O1) {
-				const auto chute {T::o1x(isec/T::O2)};
-				OKIIDOKU_CONTRACT_ASSERT(chute == T::o1i(desc.isec/T::O2));
+				const auto chute {isec / T::O2};
+				OKIIDOKU_CONTRACT_ASSERT(chute == desc.isec/T::O2);
 				const auto chute_cell {(((isec*T::O1)%T::O3) + isec_cell_i)};
 				const auto rmi {chute_cell_to_rmi<O>(desc.line_type, chute, chute_cell.get_underlying())}; // TODO figure out the bounds things instead of get_underlying
-				const auto check {engine.do_elim_remove_syms_(static_cast<rmi_t>(rmi), desc.syms)};
+				const auto check {engine.do_elim_remove_syms_(rmi, desc.syms)};
 				if (check.did_unwind()) [[unlikely]] {
 					return check;
 				}
