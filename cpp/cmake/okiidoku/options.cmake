@@ -36,7 +36,7 @@ if(okiidoku_target_supports_shared_libs)
 		set(BUILD_SHARED_LIBS "${OKIIDOKU_BUILD_SHARED_LIBS}")
 		unset(OKIIDOKU_BUILD_SHARED_LIBS)
 	endif()
-	include(okiidoku/shared_lib_things) # TODO should this still be included if no shared libs?
+	include(okiidoku/shared_lib_things)
 else()
 	# do nothing. CMake will give an appropriate warning down the line if needed.
 endif()

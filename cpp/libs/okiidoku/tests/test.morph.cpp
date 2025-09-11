@@ -19,7 +19,6 @@ namespace okiidoku {
 template<okiidoku::Order O> OKIIDOKU_KEEP_FOR_DEBUG // NOLINTNEXTLINE(*-internal-linkage)
 void test_morph(okiidoku::util::SharedRng& shared_rng, const std::uintmax_t num_rounds) {
 	if constexpr (O >= 4) { return; } // TODO.high enable when solver for order=5 is faster?
-	using namespace ::okiidoku;
 	using namespace ::okiidoku::mono;
 	// OKIIDOKU_MONO_INT_TS_TYPEDEFS
 	INFO("testing for order " << O);

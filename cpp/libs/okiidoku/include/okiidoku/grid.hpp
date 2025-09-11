@@ -82,18 +82,14 @@ namespace okiidoku::mono {
 
 		/// \pre `rmi` is in `[0, O4)`.
 		template<class Self> [[nodiscard, gnu::pure]] constexpr
-		auto&& at_rmi(this Self&& self, const typename Ints<O>::o4x_t rmi) noexcept {
+		auto&& at_rmi(this Self&& self, const T::o4x_t rmi) noexcept {
 			OKIIDOKU_CONTRACT_USE(rmi < T::O4);
 			return std::forward<Self>(self).arr_[rmi];
 		}
 
 		/// \pre `row` and `col` are in `[0, O2)`.
 		template<class Self> [[nodiscard, gnu::pure]] constexpr
-		auto&& at(
-			this Self&& self,
-			const typename Ints<O>::o2x_t row,
-			const typename Ints<O>::o2x_t col
-		) noexcept {
+		auto&& at(this Self&& self, const T::o2x_t row, const T::o2x_t col) noexcept {
 			return std::forward<Self>(self).arr_[row_col_to_rmi<O>(row, col)];
 		}
 
@@ -101,20 +97,16 @@ namespace okiidoku::mono {
 		see `okiidoku::mono::box_cell_to_rmi`.
 		\pre `box` and `box_cell` are in `[0, O2)`. */
 		template<class Self> [[nodiscard, gnu::pure]] constexpr
-		auto&& at_box_cell(
-			this Self&& self,
-			const typename Ints<O>::o2x_t box,
-			const typename Ints<O>::o2x_t box_cell
-		) noexcept {
+		auto&& at_box_cell(this Self&& self, const T::o2x_t box, const T::o2x_t box_cell) noexcept {
 			return std::forward<Self>(self).arr_[box_cell_to_rmi<O>(box, box_cell)];
 		}
 
 		/// \pre `row` is in [0, O2).
-		[[nodiscard]] std::span<      val_t, T::O2> row_span_at(const typename Ints<O>::o2x_t i)       noexcept { return static_cast<std::span<      val_t, T::O2>>(std::span(arr_).subspan(T::O2*i, T::O2)); }
-		[[nodiscard]] std::span<const val_t, T::O2> row_span_at(const typename Ints<O>::o2x_t i) const noexcept { return static_cast<std::span<const val_t, T::O2>>(std::span(arr_).subspan(T::O2*i, T::O2)); }
+		[[nodiscard]] std::span<      val_t, T::O2> row_span_at(const T::o2x_t i)       noexcept { return static_cast<std::span<      val_t, T::O2>>(std::span(arr_).subspan(T::O2*i, T::O2)); }
+		[[nodiscard]] std::span<const val_t, T::O2> row_span_at(const T::o2x_t i) const noexcept { return static_cast<std::span<const val_t, T::O2>>(std::span(arr_).subspan(T::O2*i, T::O2)); }
 
-		// [[nodiscard]] auto row_spans() noexcept { namespace v = ::ranges::views; return v::iota(o2i_t{0}, o2i_t{T::O2}) | v::transform([&](auto r){ return row_span_at(r); }); }
-		// [[nodiscard]] auto row_spans() const noexcept { namespace v = ::ranges::views; return v::iota(o2i_t{0}, T::O2) | v::transform([&](auto r){ return row_span_at(r); }); }
+		// [[nodiscard]] auto row_spans() noexcept { namespace v = ::ranges::views; return v::iota(o2i_t{0u}, o2i_t{T::O2}) | v::transform([&](auto r){ return row_span_at(r); }); }
+		// [[nodiscard]] auto row_spans() const noexcept { namespace v = ::ranges::views; return v::iota(o2i_t{0u}, T::O2) | v::transform([&](auto r){ return row_span_at(r); }); }
 	private:
 		array_t arr_;
 	};

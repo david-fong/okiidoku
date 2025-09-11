@@ -7,13 +7,14 @@
 #include <okiidoku/order.hpp>
 
 #include <random>    // minstd_rand
-#include <algorithm> // count, shuffle
+#include <algorithm> // ranges::count, shuffle
 #include <array>
 #include <utility>   // swap, forward
 
 namespace okiidoku::mono { namespace {
 
 	using rng_t = std::minstd_rand; // other good LCG parameters: https://arxiv.org/pdf/2001.05304v3.pdf
+	namespace stdr = std::ranges;
 
 
 	template<Order O> requires(is_order_compiled(O))
@@ -25,12 +26,11 @@ namespace okiidoku::mono { namespace {
 		using count_t = typename T::o1is_t;
 		// constexpr SymCountsForChuteHouses() noexcept { store_.fill(count_t{0u}); }
 		[[nodiscard, gnu::pure]] o3i_t count_num_missing_syms() const noexcept {
-			return o3i_t{std::count(store_.cbegin(), store_.cend(), o3i_t{0u})};
+			return o3i_t{stdr::count(store_, count_t{0u})};
 		}
 		template<class Self> [[nodiscard, gnu::pure]]
 		auto&& ch_count_sym(this Self&& self, const ch_t ch, const sym_t sym) noexcept {
-			OKIIDOKU_CONTRACT_USE(ch < T::O1);
-			OKIIDOKU_CONTRACT_USE(sym < T::O2);
+			ch.check(); sym.check();
 			return std::forward<Self>(self).store_[(T::O1*sym) + ch];
 		}
 	private:
@@ -55,7 +55,7 @@ namespace okiidoku::mono { namespace {
 		for (const auto col : T::O2) {
 			auto& count {boxes_has.ch_count_sym(
 				col/T::O1,
-				o2x_t{grid.at(h_chute+chute_row, col)}
+				*grid.at(h_chute+chute_row, col)
 			)};
 			++count;
 			OKIIDOKU_CONTRACT_USE(count <= T::O1);
@@ -73,20 +73,20 @@ namespace okiidoku::mono { namespace {
 			auto& b_sym {grid.at(row,b_col)}; // ↲ so need reference type
 			OKIIDOKU_CONTRACT_USE(a_sym != b_sym);
 			const auto num_resolved {static_cast<signed char>(
-				(boxes_has.ch_count_sym(a_box,o2x_t{a_sym}) == 1 ? -1 : 0) + // regression
-				(boxes_has.ch_count_sym(a_box,o2x_t{b_sym}) == 0 ?  1 : 0) + // improvement
-				(boxes_has.ch_count_sym(b_box,o2x_t{b_sym}) == 1 ? -1 : 0) + // regression
-				(boxes_has.ch_count_sym(b_box,o2x_t{a_sym}) == 0 ?  1 : 0)   // improvement
+				(boxes_has.ch_count_sym(a_box,*a_sym) == 1 ? -1 : 0) + // regression
+				(boxes_has.ch_count_sym(a_box,*b_sym) == 0 ?  1 : 0) + // improvement
+				(boxes_has.ch_count_sym(b_box,*b_sym) == 1 ? -1 : 0) + // regression
+				(boxes_has.ch_count_sym(b_box,*a_sym) == 0 ?  1 : 0)   // improvement
 			)};
 			OKIIDOKU_CONTRACT_USE(num_resolved <=  2);
 			OKIIDOKU_CONTRACT_USE(num_resolved >= -2);
 			if (num_resolved >= 0) [[unlikely]] { // TODO.low for fun: find out on average at what op_count it starts being unlikely
 				OKIIDOKU_CONTRACT_USE(num_missing_syms >= detail::Int<2>{num_resolved});
 				num_missing_syms -= detail::Int<2>{num_resolved};
-				--boxes_has.ch_count_sym(a_box,o2x_t{a_sym});
-				++boxes_has.ch_count_sym(b_box,o2x_t{a_sym});
-				--boxes_has.ch_count_sym(b_box,o2x_t{b_sym});
-				++boxes_has.ch_count_sym(a_box,o2x_t{b_sym});
+				--boxes_has.ch_count_sym(a_box,*a_sym);
+				++boxes_has.ch_count_sym(b_box,*a_sym);
+				--boxes_has.ch_count_sym(b_box,*b_sym);
+				++boxes_has.ch_count_sym(a_box,*b_sym);
 				std::swap(a_sym, b_sym);
 			}
 			// ++op_count;
@@ -105,7 +105,7 @@ namespace okiidoku::mono { namespace {
 		for (const auto box_col : T::O1) {
 			auto& count {cols_has.ch_count_sym(
 				box_col,
-				o2x_t{grid.at(row, v_chute + box_col)}
+				*grid.at(row, v_chute + box_col)
 			)};
 			++count;
 			OKIIDOKU_CONTRACT_USE(count <= T::O1);
@@ -120,20 +120,20 @@ namespace okiidoku::mono { namespace {
 			auto& b_sym {grid.at(row, v_chute + b_col)}; // ↲ so need reference type
 			OKIIDOKU_CONTRACT_USE(a_sym != b_sym);
 			const auto num_resolved {static_cast<signed char>(
-				(cols_has.ch_count_sym(a_col,o2x_t{a_sym}) == 1 ? -1 : 0) + // regression
-				(cols_has.ch_count_sym(a_col,o2x_t{b_sym}) == 0 ?  1 : 0) + // improvement
-				(cols_has.ch_count_sym(b_col,o2x_t{b_sym}) == 1 ? -1 : 0) + // regression
-				(cols_has.ch_count_sym(b_col,o2x_t{a_sym}) == 0 ?  1 : 0)   // improvement
+				(cols_has.ch_count_sym(a_col,*a_sym) == 1 ? -1 : 0) + // regression
+				(cols_has.ch_count_sym(a_col,*b_sym) == 0 ?  1 : 0) + // improvement
+				(cols_has.ch_count_sym(b_col,*b_sym) == 1 ? -1 : 0) + // regression
+				(cols_has.ch_count_sym(b_col,*a_sym) == 0 ?  1 : 0)   // improvement
 			)};
 			OKIIDOKU_CONTRACT_USE(num_resolved <=  2);
 			OKIIDOKU_CONTRACT_USE(num_resolved >= -2);
 			if (num_resolved >= 0) [[unlikely]] {
 				OKIIDOKU_CONTRACT_USE(num_missing_syms >= detail::Int<2>{num_resolved});
 				num_missing_syms -= detail::Int<2>{num_resolved};
-				--cols_has.ch_count_sym(a_col,o2x_t{a_sym});
-				++cols_has.ch_count_sym(a_col,o2x_t{b_sym});
-				--cols_has.ch_count_sym(b_col,o2x_t{b_sym});
-				++cols_has.ch_count_sym(b_col,o2x_t{a_sym});
+				--cols_has.ch_count_sym(a_col,*a_sym);
+				++cols_has.ch_count_sym(a_col,*b_sym);
+				--cols_has.ch_count_sym(b_col,*b_sym);
+				++cols_has.ch_count_sym(b_col,*a_sym);
 				std::swap(a_sym, b_sym);
 			}
 			// ++op_count;

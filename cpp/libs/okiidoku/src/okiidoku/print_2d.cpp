@@ -10,6 +10,7 @@
 #include <vector>
 #include <string_view> // operator<<
 #include <algorithm>
+#include <numeric>     // ranges::iota
 #include <iterator>    // next, operator+
 
 namespace okiidoku { namespace {

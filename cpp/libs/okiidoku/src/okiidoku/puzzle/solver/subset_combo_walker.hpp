@@ -20,17 +20,17 @@ namespace okiidoku::mono::detail::solver {
 		using combo_t = std::array<o2xs_t, T::O2-1>;
 	public:
 
-		// contract: `end <= O2`
-		// contract: `naked_subset_size > 0`
-		// contract: `naked_subset_size < O2`. Reason: for a puzzle with at least one
-		//  solution, there is always exactly one subset of size O2.
-		// contract: `begin + naked_subset_size <= O2`
+		// \pre `end <= O2`
+		// \pre `naked_subset_size > 0`
+		// \pre `naked_subset_size < O2`. Reason: for a puzzle with at least one
+		//  solution, there is always exactly one subset of size `O2`.
+		// \pre `begin + naked_subset_size <= O2`
 		SubsetComboWalker(const o2x_t begin, const o2i_t end, const o2x_t naked_subset_size) noexcept:
 			begin_{begin}, end_{end}, naked_subset_size_{naked_subset_size},
 			has_more_{(begin + naked_subset_size) <= end}
 		{
 			OKIIDOKU_CONTRACT_USE(end_ <= T::O2);
-			OKIIDOKU_CONTRACT_USE(naked_subset_size_ > 0);
+			OKIIDOKU_CONTRACT_USE(naked_subset_size_ > 0u);
 			OKIIDOKU_CONTRACT_USE(naked_subset_size_ < T::O2);
 			OKIIDOKU_CONTRACT_USE(begin_ + naked_subset_size_ <= T::O2);
 			if (has_more()) [[likely]] {
@@ -41,7 +41,7 @@ namespace okiidoku::mono::detail::solver {
 		}
 
 		[[nodiscard, gnu::pure]] o2x_t get_naked_subset_size() const noexcept {
-			OKIIDOKU_CONTRACT_USE(naked_subset_size_ > 0);
+			OKIIDOKU_CONTRACT_USE(naked_subset_size_ > 0u);
 			OKIIDOKU_CONTRACT_USE(naked_subset_size_ < T::O2);
 			return naked_subset_size_;
 		}

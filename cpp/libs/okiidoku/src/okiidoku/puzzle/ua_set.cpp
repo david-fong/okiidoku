@@ -40,11 +40,11 @@ namespace okiidoku::mono { namespace {
 			}}
 			return map;
 		}()};
-		for (o1i_t chute_line_a {0}; o1i_t{chute_line_a+1u} < T::O1; ++chute_line_a) {
-		for (o1i_t chute_line_b {o1i_t{chute_line_a+1u}}; chute_line_b < T::O1; ++chute_line_b) {
+		for (o1i_t chute_line_a {0u}; o1i_t{chute_line_a+1u} < T::O1; ++chute_line_a) {
+		for (o1i_t chute_line_b {chute_line_a+1u}; chute_line_b < T::O1; ++chute_line_b) {
 			for (const auto slice_c : T::O2) {
-				const auto c_a_rmi {chute_cell_to_rmi<O>(line_type, chute, (T::O2*o1x_t{chute_line_a})+slice_c)};
-				const auto c_b_rmi {chute_cell_to_rmi<O>(line_type, chute, (T::O2*o1x_t{chute_line_b})+slice_c)};
+				const auto c_a_rmi {chute_cell_to_rmi<O>(line_type, chute, (T::O2*(*chute_line_a))+slice_c)};
+				const auto c_b_rmi {chute_cell_to_rmi<O>(line_type, chute, (T::O2*(*chute_line_b))+slice_c)};
 				const auto& c_a_sym {soln_grid.at_rmi(c_a_rmi)}; OKIIDOKU_CONTRACT_USE(c_a_sym < T::O2);
 				const auto& c_b_sym {soln_grid.at_rmi(c_b_rmi)}; OKIIDOKU_CONTRACT_USE(c_b_sym < T::O2);
 				const auto& d_a_cell {chute_lines_sym_to_cell[chute_line_a][c_b_sym]};
@@ -53,8 +53,8 @@ namespace okiidoku::mono { namespace {
 					found.ua_set_4s.emplace_back(UaSet4<O>{
 						c_a_rmi,
 						c_b_rmi,
-						chute_cell_to_rmi<O>(line_type, chute, (T::O2*o1x_t{chute_line_a})+d_a_cell),
-						chute_cell_to_rmi<O>(line_type, chute, (T::O2*o1x_t{chute_line_b})+d_b_cell),
+						chute_cell_to_rmi<O>(line_type, chute, (T::O2*(*chute_line_a))+d_a_cell),
+						chute_cell_to_rmi<O>(line_type, chute, (T::O2*(*chute_line_b))+d_b_cell),
 					});
 				}
 			}

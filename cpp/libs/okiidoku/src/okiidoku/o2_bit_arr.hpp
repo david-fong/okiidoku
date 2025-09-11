@@ -35,16 +35,14 @@ namespace okiidoku::mono {
 		// 	std::conditional_t<(O <= 8), detail::uint_small_for_width_t<T::O2>,
 		// 	std::uint_least64_t
 		// >;
-
+	private:
 		// note: use of one byte is safe for grid orders < 128. that should be fine.
 		using word_i_t = std::uint_fast8_t;
 		using word_bit_i_t = std::uint_fast8_t; // assumes `word_t` is not wider than 256 bits.
-
-	private:
-		static constexpr word_bit_i_t word_t_num_bits {8 * sizeof(word_t)};
-		static constexpr word_i_t     num_words       {(T::O2 + word_t_num_bits-1) / word_t_num_bits};
+		static constexpr word_bit_i_t word_t_num_bits {8u * sizeof(word_t)};
+		static constexpr word_i_t     num_words       {(T::O2 + word_t_num_bits-1u) / word_t_num_bits};
 		static constexpr word_bit_i_t num_excess_bits {(num_words * word_t_num_bits) - T::O2};
-		static_assert(num_words > 0u);
+		static_assert(  num_words > 0u);
 		static_assert(( num_words     * word_t_num_bits) >= T::O2, "enough words"   );
 		static_assert(((num_words-1u) * word_t_num_bits)  < T::O2, "no excess words");
 
@@ -53,9 +51,11 @@ namespace okiidoku::mono {
 		static constexpr word_i_t bit_i_to_word_i(const typename Ints<O>::o2x_t bit_i) noexcept {
 			OKIIDOKU_CONTRACT_USE(bit_i < T::O2);
 			if constexpr (num_words == 1u) { return 0u; }
-			const auto word_i {static_cast<word_i_t>(bit_i / word_t_num_bits)};
-			OKIIDOKU_CONTRACT_USE(word_i < num_words);
-			return word_i;
+			else {
+				const auto word_i {static_cast<word_i_t>(bit_i / word_t_num_bits)};
+				OKIIDOKU_CONTRACT_USE(word_i < num_words);
+				return word_i;
+			}
 		}
 		/** \pre `bit_i < T::O2`. */
 		[[nodiscard, gnu::const]]
@@ -184,7 +184,7 @@ namespace okiidoku::mono {
 		class Iter {
 		public:
 			using iterator_category = std::input_iterator_tag;
-			using difference_type = o2i_t;
+			using difference_type = detail::int_fast_for_max_t<T::O2>;
 			using value_type = o2x_t;
 			using reference  = o2x_t;
 			using pointer    = o2x_t;
@@ -196,7 +196,7 @@ namespace okiidoku::mono {
 			[[nodiscard, gnu::pure]] constexpr bool not_end() const noexcept { return i_ < T::O2; }
 			/** \pre `not_end()` */
 			[[nodiscard, gnu::pure]] constexpr o2x_t value() const noexcept {
-				return o2x_t{i_};
+				return *i_;
 			}
 			/** \pre `not_end()` */
 			void advance() noexcept {

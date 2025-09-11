@@ -99,7 +99,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 				[rmi](const auto& frame) -> auto {
 					const auto other_rmi {frame.guess.rmi};
 					return (// TODO consider using gcc's __builtin_expect to annotate as unlikely. standard attribute cannot be used for ternary.
-					  (rmi_to_row<O>(rmi) == rmi_to_row<O>(other_rmi) ? 1u : 0u)
+					  (rmi_to_row<O>(rmi) == rmi_to_row<O>(other_rmi) ? 1u : 0u) // consider extracting this into a `count_shared_houses` function that returns Int<3>
 					+ (rmi_to_col<O>(rmi) == rmi_to_col<O>(other_rmi) ? 1u : 0u)
 					+ (rmi_to_box<O>(rmi) == rmi_to_box<O>(other_rmi) ? 1u : 0u));
 				}
@@ -117,17 +117,17 @@ namespace okiidoku::mono::detail::solver { namespace {
 		[[maybe_unused]] auto best_guess_grouping {get_guess_grouping(best_rmi)};
 
 		// TODO is there a same-or-better-perf way to write this search using std::transform_reduce or std::min?
-		for (o4i_t rmi {o4i_t{best_rmi+1u}}; rmi < T::O4; ++rmi) {
-			const auto cand_count {cells_cands.at_rmi(o4x_t{rmi}).count()};
-			OKIIDOKU_CONTRACT_USE(cand_count != 0);
-			if (cand_count <= 1) [[unlikely]] { continue; } // no guessing for solved cell.
-			[[maybe_unused]] const auto guess_grouping {get_guess_grouping(o4x_t{rmi})};
-			[[maybe_unused]] const auto house_solved_counts {get_house_solved_counts(o4x_t{rmi})};
+		for (o4i_t rmi {best_rmi+1u}; rmi < T::O4; ++rmi) {
+			const auto cand_count {cells_cands.at_rmi(*rmi).count()};
+			OKIIDOKU_CONTRACT_USE(cand_count != 0u);
+			if (cand_count <= 1u) [[unlikely]] { continue; } // no guessing for solved cell.
+			[[maybe_unused]] const auto guess_grouping {get_guess_grouping(*rmi)};
+			[[maybe_unused]] const auto house_solved_counts {get_house_solved_counts(*rmi)};
 			if ([&]{
-				if constexpr (O <= 3) {
+				if constexpr (O <= 3u) {
 					return std::tie(     cand_count)
 			  		     < std::tie(best_cand_count);
-				} else if constexpr (O <= 4) {
+				} else if constexpr (O <= 4u) {
 					return std::tie(     cand_count,      house_solved_counts)
 			  		     < std::tie(best_cand_count, best_house_solved_counts);
 				} else {
@@ -135,7 +135,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 			  		     < std::tie(best_cand_count, best_guess_grouping,      house_solved_counts);
 				}
 			}()) [[unlikely]] {
-				best_rmi = o4x_t{rmi};
+				best_rmi = *rmi;
 				best_cand_count = cand_count;
 				best_house_solved_counts = house_solved_counts;
 				best_guess_grouping = guess_grouping;

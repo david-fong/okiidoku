@@ -38,7 +38,7 @@ namespace okiidoku::mono { namespace {
 		}
 		[[nodiscard, gnu::pure]] constexpr bool done() const noexcept { return cell_rmi_ == T::O4; }
 		/** \pre `!done()` */
-		[[nodiscard, gnu::pure]] constexpr o4x_t get_cell_rmi() const noexcept { return o4x_t{cell_rmi_}; }
+		[[nodiscard, gnu::pure]] constexpr o4x_t get_cell_rmi() const noexcept { return *cell_rmi_; }
 		void advance() noexcept;
 
 		// automatically removes val as a candidate of future cells.
@@ -60,12 +60,12 @@ namespace okiidoku::mono { namespace {
 		// hypothetical candidates of cell to print/parse.
 		cands_t cell_cands_;
 
-		o4i_t cell_rmi_ {0};
+		o4i_t cell_rmi_ {0u};
 
 		// current small buffer of data to print/parse.
-		static constexpr buf_t buf_end {buf_t{8*num_buf_bytes}};
-		buf_t buf_ {0};
-		buf_t buf_pos_ {1};
+		static constexpr buf_t buf_end {8u*num_buf_bytes};
+		buf_t buf_ {0u};
+		buf_t buf_pos_ {1u};
 	};
 
 
@@ -89,28 +89,28 @@ namespace okiidoku::mono { namespace {
 		// The number of possible different values that this cell could be
 		// based on the values that have already been encountered.
 		auto smol_val_buf_remaining {cell_cands_.count()};
-		OKIIDOKU_CONTRACT_USE(smol_val_buf_remaining > 0); // implied by contract (grid_follows_rule)
+		OKIIDOKU_CONTRACT_USE(smol_val_buf_remaining > 0u); // implied by contract (grid_follows_rule)
 
 		// Some slightly-weird-looking logic stems from the fact that it is
 		// a "null" action to try to print something that can only take on one
 		// value (as in- the buffer will be unchanged). Just keep that in mind.
 		auto smol_val_buf {cell_cands_.count_below(val)};
 		OKIIDOKU_CONTRACT_USE(smol_val_buf < smol_val_buf_remaining);
-		while (smol_val_buf_remaining > 1) {
+		while (smol_val_buf_remaining > 1u) {
 			buf_ += static_cast<buf_t>(buf_pos_ * smol_val_buf); // should never overflow
 			// const auto buf_remaining {(buf_pos_ == 1) ? buf_end : static_cast<buf_t>(buf_end - buf_pos_)};
 			{
 				const auto use_factor {static_cast<buf_t>(smol_val_buf_remaining)};
-				OKIIDOKU_CONTRACT_USE(buf_pos_ != 0 && buf_pos_ < buf_end);
+				OKIIDOKU_CONTRACT_USE(buf_pos_ != 0u && buf_pos_ < buf_end);
 				buf_pos_ *= use_factor;
 				smol_val_buf /= static_cast<val_t>(use_factor);
 				smol_val_buf_remaining /= o2i_t{use_factor};
 			}
 			if (buf_pos_ >= buf_end) { // TODO.asap should this be a while loop?
-				static_assert(num_buf_bytes == 1); // otherwise the below needs to change.
+				static_assert(num_buf_bytes == 1u); // otherwise the below needs to change.
 				os.put(static_cast<char>(buf_));
-				buf_ >>= 8 * num_buf_bytes;
-				buf_pos_ = static_cast<buf_t>((buf_pos_ % buf_end) + 1);
+				buf_ >>= 8u * num_buf_bytes;
+				buf_pos_ = static_cast<buf_t>((buf_pos_ % buf_end) + 1u);
 			}
 		}
 		remove_cand_at_current_rmi_(val);
@@ -131,10 +131,10 @@ namespace okiidoku::mono { namespace {
 		// The number of possible different values that this cell could be
 		// based on the values that have already been encountered.
 		auto smol_val_buf_remaining {cell_cands_.count()};
-		OKIIDOKU_CONTRACT_USE(smol_val_buf_remaining > 0); // implied by contract (grid_follows_rule)
+		OKIIDOKU_CONTRACT_USE(smol_val_buf_remaining > 0u); // implied by contract (grid_follows_rule)
 		(void)smol_val_buf_remaining; (void)is;
 
-		val_t smol_val_buf {0};
+		val_t smol_val_buf {0u};
 		// TODO
 
 		OKIIDOKU_CONTRACT_USE(smol_val_buf < smol_val_buf_remaining);
@@ -163,11 +163,10 @@ namespace okiidoku::mono {
 		for (; !helper.done(); helper.advance()) {
 			const auto row {helper.get_cell_rmi() / T::O2};
 			const auto col {helper.get_cell_rmi() % T::O2};
-			if ((T::O1-1-row)/T::O1 == col/T::O1) {
+			if ((T::O1-1u-row)/T::O1 == col/T::O1) {
 				continue; // skip cells in the anti-diagonal boxes
 			}
-			using val_t = T::o2x_t;
-			const auto val {static_cast<val_t>(grid.at_rmi(helper.get_cell_rmi()))};
+			const auto val {*grid.at_rmi(helper.get_cell_rmi())};
 			helper.print_val(os, val);
 		}
 		helper.print_remaining_buf(os);

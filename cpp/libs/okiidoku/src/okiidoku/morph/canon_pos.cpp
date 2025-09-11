@@ -16,9 +16,9 @@
 #include <range/v3/algorithm/lexicographical_compare.hpp>
 
 #include <algorithm> // sort
+#include <numeric>   // ranges::iota
 #include <iterator>  // next
 #include <array>
-#include <numeric>   // ranges::iota
 
 namespace okiidoku::mono { namespace {
 
@@ -81,7 +81,7 @@ namespace okiidoku::mono { namespace {
 			// loop over orthogonal partially-resolved chute ranges to normalize:
 			{
 				std::array<o1i_t, T::O1> resolve; // TODO.high where is this being used?
-				std::ranges::iota(resolve, o1i_t{0});
+				std::ranges::iota(resolve, o1i_t{0u});
 				for (const auto t : ortho.chute_ties) {
 					ranges::sort(
 						std::next(resolve.begin(), t.begin_),
@@ -108,7 +108,7 @@ namespace okiidoku::mono { namespace {
 	template<Order O> requires(is_order_compiled(O))
 	void CanonPlace<O>::PolarState::do_a_pass(const Grid<O>& table) noexcept {
 		OKIIDOKU_DEFER_INIT std::array<to_t, T::O2> to_tied; // NOLINT(*-init)
-		std::ranges::iota(to_tied, to_t{0});
+		std::ranges::iota(to_tied, to_t{0u});
 		for (const auto tie : line_ties) {
 			// Note: intentionally do not skip ties here since updated table
 			// rows could (and likely will) be used by chute tie resolution.

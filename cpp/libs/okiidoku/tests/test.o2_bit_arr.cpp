@@ -13,7 +13,6 @@
 namespace okiidoku {
 template<okiidoku::Order O> OKIIDOKU_KEEP_FOR_DEBUG // NOLINTNEXTLINE(*-internal-linkage)
 void test_o2_bit_arr() {
-	using namespace ::okiidoku;
 	using namespace ::okiidoku::mono;
 	OKIIDOKU_MONO_INT_TS_TYPEDEFS
 
@@ -36,7 +35,7 @@ void test_o2_bit_arr() {
 	{
 		auto ones {O2BitArr_ones<O>};
 		for (const auto i : T::O2) {
-			CHECK(ones.count_below(i) == 0);
+			CHECK(ones.count_below(i) == 0u);
 			CHECK(ones.get_index_of_nth_set_bit(o2x_t{0u}) == i);
 			CHECK(ones[ones.first_set_bit_require_exists()]);
 			ones.unset(ones.first_set_bit_require_exists());

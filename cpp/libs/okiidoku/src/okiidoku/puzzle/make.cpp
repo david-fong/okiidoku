@@ -55,7 +55,7 @@ namespace okiidoku::mono {
 		// Note: this implementation never "backtracks". once it removes a given,
 		// it never puts it back.
 
-		o4i_t num_puzcell_cands {0};
+		o4i_t num_puzcell_cands {0u};
 		OKIIDOKU_DEFER_INIT // NOLINTNEXTLINE(*-init)
 		std::array<rmi_t, T::O4> puzcell_cand_rmis; // non-candidates: either removed, or can't be removed.
 		for (const auto rmi : T::O4) {
@@ -110,7 +110,7 @@ namespace okiidoku::mono {
 			// 	std::clog << "\ncannot remove at " << int(rmi) << " since it is the last given for a ua_set_4.";
 			// }
 
-			solver.reinit_with_puzzle(grid, {{.rmi{rmi}, .val{o2x_t{val}}}});
+			solver.reinit_with_puzzle(grid, {{.rmi{rmi}, .val{*val}}});
 			if (const auto new_soln_opt {solver.get_next_solution()}; new_soln_opt) {
 				// multiple solutions now possible. removal would break properness. don't remove.
 				call_debug_log_fn([&]{

@@ -41,10 +41,10 @@ namespace okiidoku::mono::detail::solver { namespace {
 				const auto rmi {house_cell_to_rmi<O>(house_type, house, house_cell)};
 				const auto& cell_cands {cells_cands.at_rmi(rmi)};
 				const auto match_cands {cell_cands & syms_claiming_a_cell};
-				if (match_cands.count() > 0) [[unlikely]] {
-					if (match_cands.count() > 1) [[unlikely]] { return true; } // multiple syms want same cell.
+				if (match_cands.count() > 0u) [[unlikely]] {
+					if (match_cands.count() > 1u) [[unlikely]] { return true; } // multiple syms want same cell.
 					const auto sym {match_cands.first_set_bit_require_exists()};
-					if (cell_cands.count() > 1) [[likely]] {
+					if (cell_cands.count() > 1u) [[likely]] {
 						found_queues.push_back(found::SymClaimCell<O>{
 							.rmi{rmi},
 							.val{sym},
@@ -73,7 +73,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 			bool no_change {true};
 			for (o2i_t i {sub_a}; i < sub_z; ++i) {
 				auto& cell_tag {subs.cell_tags[i]};
-				const auto updated_count {o2i_t{cells_cands.at_rmi(cell_tag.rmi).count()}};
+				const auto updated_count {cells_cands.at_rmi(cell_tag.rmi).count()};
 				OKIIDOKU_CONTRACT_USE(cell_tag.count_cache <= T::O2);
 				OKIIDOKU_CONTRACT_USE(cell_tag.count_cache >= updated_count);
 				if (cell_tag.count_cache > updated_count) {
@@ -95,12 +95,12 @@ namespace okiidoku::mono::detail::solver { namespace {
 			}
 		);
 		// detect and update state for already-found `CellClaimSym`:
-		if (subs.cell_tags[sub_a].count_cache == 1) [[unlikely]] {
+		if (subs.cell_tags[sub_a].count_cache == 1u) [[unlikely]] {
 			do {
 				++sub_a;
 				if (sub_a == T::O2) [[unlikely]] { break; }
-				subs.is_begin.set(o2x_t{sub_a});
-			} while (sub_a < sub_z && subs.cell_tags[sub_a].count_cache == 1);
+				subs.is_begin.set(*sub_a);
+			} while (sub_a < sub_z && subs.cell_tags[sub_a].count_cache == 1u);
 			return true; // TODO somehow optimize to skip the above sort when re-loop?
 		}
 		return false;
@@ -130,21 +130,21 @@ namespace okiidoku::mono::detail::solver { namespace {
 		OKIIDOKU_CONTRACT_USE(sub_a < sub_z);
 		OKIIDOKU_CONTRACT_USE(max_subset_size >= 2u);
 		OKIIDOKU_CONTRACT_USE(max_subset_size <= o2x_t{(T::O2+1u)/2u});
-		for (o2x_t subset_i {0u}; subset_i < (sub_z-sub_a-3) && subset_i+2 < 2*max_subset_size; ++subset_i) {
-			const auto naked_or_hidden {(subset_i % 2 == 0) ? NakedOrHidden::naked : NakedOrHidden::hidden};
+		for (o2x_t subset_i {0u}; subset_i < (sub_z-sub_a-3) && subset_i+2u < 2u*max_subset_size; ++subset_i) {
+			const auto naked_or_hidden {(subset_i % 2u == 0u) ? NakedOrHidden::naked : NakedOrHidden::hidden};
 			const auto naked_subset_size {[&]() -> o2x_t {
 				if (naked_or_hidden == NakedOrHidden::naked) {
 					return o2x_t{2u+(subset_i/2u)};
 				}
-				return o2x_t{(sub_z-sub_a)-2-(subset_i/2)};
+				return o2x_t{(sub_z-sub_a)-2u-(subset_i/2u)};
 			}()};
-			OKIIDOKU_CONTRACT_USE(sub_a+naked_subset_size+1 < sub_z);
+			OKIIDOKU_CONTRACT_USE(sub_a+naked_subset_size+1u < sub_z);
 			// ^plus one to skip finding hidden singles. // TODO or also try to find them?
 			std::optional<FoundSubsetInfo<O>> found {{ // Note: wrap with optional to allow NRVO
 				.combo_walker {
-					o2x_t{sub_a},
+					*sub_a,
 					[&]{
-						auto sized_z {sub_a};
+						o2i_t sized_z {sub_a};
 						while (sized_z < T::O2 && subs.cell_tags[sized_z].count_cache <= naked_subset_size) { ++sized_z; }
 						return sized_z;
 					}(),
@@ -188,10 +188,10 @@ namespace okiidoku::mono::detail::solver { namespace {
 		o2i_t sub_z {0};
 		const auto get_next_sub_a {[&]{
 			OKIIDOKU_CONTRACT_USE(sub_a < T::O2);
-			auto next {o2i_t{sub_a+1u}};
-			while (next < T::O2 && !subs.is_begin[o2x_t{next}]) { ++next; }
+			o2i_t next {sub_a+1u};
+			while (next < T::O2 && !subs.is_begin[*next]) { ++next; }
 			OKIIDOKU_CONTRACT_USE(next <= T::O2);
-			OKIIDOKU_CONTRACT_USE(next > sub_a);
+			OKIIDOKU_CONTRACT_USE(next >  sub_a);
 			return next;
 		}};
 		// optional speed optimization to skip leading already-found singles:
@@ -209,9 +209,9 @@ namespace okiidoku::mono::detail::solver { namespace {
 			sub_z = get_next_sub_a();
 			OKIIDOKU_CONTRACT_USE(sub_z <= T::O2);
 			OKIIDOKU_CONTRACT_USE(sub_a <  sub_z);
-			OKIIDOKU_CONTRACT_ASSERT(subs.is_begin[o2x_t{sub_a}]);
-			for (auto i {o2i_t{sub_a+1u}}; i < sub_z; ++i) {
-				OKIIDOKU_CONTRACT_ASSERT(!subs.is_begin[o2x_t{i}]);
+			OKIIDOKU_CONTRACT_ASSERT(subs.is_begin[*sub_a]);
+			for (o2i_t i {sub_a+1u}; i < sub_z; ++i) {
+				OKIIDOKU_CONTRACT_ASSERT(!subs.is_begin[*i]);
 			}
 			if (prepare_try_decompose_subset_and_check_can_skip(engine.cells_cands(), subs, sub_a, sub_z)) {
 				continue;
@@ -235,14 +235,14 @@ namespace okiidoku::mono::detail::solver { namespace {
 					std::swap(subs.cell_tags[sub_a], entry);
 					++sub_a;
 				}
-				subs.is_begin.set(o2x_t{sub_a});
+				subs.is_begin.set(*sub_a);
 			} else {
 				for (o2x_t combo_at {0}; combo_at < naked_subset_size; ++combo_at) {
 					auto& entry {subs.cell_tags[combo_walker.combo_at(o2x_t{naked_subset_size-1u-combo_at})]};
 					std::swap(subs.cell_tags[o2x_t{sub_z-1u}], entry);
 					--sub_z;
 				}
-				subs.is_begin.set(o2x_t{sub_z});
+				subs.is_begin.set(*sub_z);
 			}
 			for (auto i {sub_a}; i < sub_z; ++i) {
 				const auto check {engine.do_elim_remove_syms_(subs.cell_tags[i].rmi, combo_syms)};

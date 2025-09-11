@@ -173,8 +173,8 @@ namespace okiidoku::mono {
 			using difference_type = int_fast_for_max_t<max>;
 		private:
 			i_t val_ {0u};
-			static_assert(std::is_unsigned_v<i_t>, "underlying type is unsigned");
-			static_assert(std::numeric_limits<i_t>::max() >= max, "underlying type has enough capacity");
+			static_assert(std::is_unsigned_v<i_t>);
+			static_assert(std::numeric_limits<i_t>::max() >= max, "has enough capacity");
 		public:
 			[[gnu::always_inline]] constexpr void check() const noexcept {
 				OKIIDOKU_CONTRACT_USE(val_ <= max);
@@ -186,6 +186,7 @@ namespace okiidoku::mono {
 			/** \pre `0 <= in <= max` */
 			template<class T_in> requires(std::integral<T_in> && std::numeric_limits<T_in>::max() <= std::numeric_limits<max_t>::max())
 			explicit constexpr Int(T_in in) noexcept: val_{static_cast<i_t>(in)} {
+				static_assert(!std::is_convertible_v<Int<max+1u,kind>,Int>); // see `Int<max+1u,>` constructor and `operator*()`.
 				static_assert(sizeof(T_in) <= sizeof(max_t));
 				if constexpr (std::is_signed_v<T_in>) {
 					OKIIDOKU_CONTRACT_USE(in >= 0);
@@ -197,8 +198,8 @@ namespace okiidoku::mono {
 			template<max_t M_from, IntKind K_from> requires(M_from <= max)
 			constexpr Int(const Int<M_from,K_from>& other) noexcept: Int{other.val_} { check(); }
 
-			template<max_t M_from, IntKind K_from> requires(M_from == max+1u) // (leeway for range sentinel)
-			explicit constexpr Int(const Int<M_from,K_from>& other) noexcept: Int{other.val_} { check(); }
+			template<IntKind K_from> // (leeway for range sentinel)
+			explicit constexpr Int(const Int<max+1u,K_from>& other) noexcept: Int{other.val_} { check(); }
 
 			template<max_t M_from, IntKind K_from>
 			static constexpr Int unchecked_from(const Int<M_from,K_from>& other) noexcept {
@@ -266,7 +267,7 @@ namespace okiidoku::mono {
 			template<max_t ML, IntKind KL, max_t MR, IntKind KR> requires(ML >= MR) constexpr friend auto operator-(const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept;
 			template<max_t ML, IntKind KL, max_t MR, IntKind KR> constexpr friend auto operator* (const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept;
 			template<max_t ML, IntKind KL, max_t MR, IntKind KR> constexpr friend auto operator/ (const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept;
-			template<max_t ML, IntKind KL, max_t MR, IntKind KR> requires(MR >  0u) constexpr friend auto operator% (const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept;
+			template<max_t ML, IntKind KL, max_t MR, IntKind KR> requires(MR >  0u) constexpr friend auto operator%(const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept;
 			template<max_t MR, IntKind KR> requires(MR > 0u) constexpr friend auto operator%(const std::unsigned_integral auto lhs, const Int<MR,KR>& rhs) noexcept;
 		};
 
@@ -352,14 +353,15 @@ namespace okiidoku::mono {
 		Ints() = delete;
 
 		#define DEFINE_OX_TYPES(P_, SUFFIX_, MAX_) \
-		using o##P_##SUFFIX_##_t  = detail::Int<uintmax_t{1}*(MAX_), detail::IntKind::fast>; \
-		using o##P_##SUFFIX_##s_t = detail::Int<uintmax_t{1}*(MAX_), detail::IntKind::small>; \
+		using o##P_##SUFFIX_##_t  = detail::Int<uintmax_t{1u}*(MAX_), detail::IntKind::fast >; \
+		using o##P_##SUFFIX_##s_t = detail::Int<uintmax_t{1u}*(MAX_), detail::IntKind::small>; \
 		static_assert(sizeof(o##P_##SUFFIX_## _t) == sizeof(typename o##P_##SUFFIX_## _t::i_t)); \
 		static_assert(sizeof(o##P_##SUFFIX_##s_t) == sizeof(typename o##P_##SUFFIX_##s_t::i_t)); \
-		static_assert(std::is_trivially_copyable_v<o##P_##SUFFIX_##_t>); \
+		static_assert(std::is_trivially_copyable_v<o##P_##SUFFIX_## _t>); \
 		static_assert(std::is_trivially_copyable_v<o##P_##SUFFIX_##s_t>); \
-		static_assert(std::is_nothrow_convertible_v<o##P_##SUFFIX_##_t,  o##P_##SUFFIX_##s_t>, "can convert fast to small"); \
-		static_assert(std::is_nothrow_convertible_v<o##P_##SUFFIX_##s_t, o##P_##SUFFIX_##_t >, "can convert small to fast");
+		static_assert(std::is_trivially_copyable_v<o##P_##SUFFIX_##s_t>); \
+		static_assert(std::is_nothrow_convertible_v<o##P_##SUFFIX_## _t, o##P_##SUFFIX_##s_t>, "can convert fast to small"); \
+		static_assert(std::is_nothrow_convertible_v<o##P_##SUFFIX_##s_t, o##P_##SUFFIX_## _t>, "can convert small to fast");
 
 		DEFINE_OX_TYPES(1, i,  O)
 		DEFINE_OX_TYPES(2, i,  O*O)

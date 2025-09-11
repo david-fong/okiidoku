@@ -68,9 +68,9 @@ namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
 	constexpr Transformation<O> Transformation<O>::identity {
-		.sym_map {[]{ sym_map_t  _; for (const auto i : T::O2) { _[i] = static_cast<to_t>(i); } return _; }()},
-		.row_map {[]{ line_map_t _; for (const auto i : T::O2) { _[i/T::O1][i%T::O1] = to_t{i}; } return _; }()},
-		.col_map {[]{ line_map_t _; for (const auto i : T::O2) { _[i/T::O1][i%T::O1] = to_t{i}; } return _; }()},
+		.sym_map {[]{ sym_map_t  _; for (const auto i : T::O2) { _[i] = i; } return _; }()},
+		.row_map {[]{ line_map_t _; for (const auto i : T::O2) { _[i/T::O1][i%T::O1] = i; } return _; }()},
+		.col_map {[]{ line_map_t _; for (const auto i : T::O2) { _[i/T::O1][i%T::O1] = i; } return _; }()},
 		.post_transpose {false},
 	};
 }

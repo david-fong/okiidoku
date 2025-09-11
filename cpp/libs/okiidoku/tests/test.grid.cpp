@@ -10,7 +10,6 @@
 namespace okiidoku {
 template<okiidoku::Order O> OKIIDOKU_KEEP_FOR_DEBUG // NOLINTNEXTLINE(*-internal-linkage)
 void test_grid() {
-	using namespace ::okiidoku;
 	using namespace ::okiidoku::mono;
 	OKIIDOKU_MONO_INT_TS_TYPEDEFS
 

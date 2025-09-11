@@ -62,7 +62,7 @@ namespace okiidoku::mono { namespace {
 					const auto box_cell = row_col_to_box_cell<O>(row, col);
 					sym_box_to_boxcell_map.at(sym, box) = box_cell;
 				}}
-				std::iota(to_og.begin(), to_og.end(), to_t{0});
+				std::iota(to_og.begin(), to_og.end(), to_t{0u});
 			}
 			[[nodiscard]] bool has_ties() const noexcept { return ties.has_unresolved(); }
 		};
@@ -84,7 +84,7 @@ namespace okiidoku::mono { namespace {
 		// 	}
 		// }}
 		OKIIDOKU_DEFER_INIT sym_map_t<O> tiebreak_map;
-		std::iota(tiebreak_map.begin(), tiebreak_map.end(), to_t{0});
+		std::iota(tiebreak_map.begin(), tiebreak_map.end(), to_t{0u});
 		// for (const auto tie : s.ties) {
 		// 	if (tie.size() == 1) [[likely]] { continue; }
 		// 	for (const auto rel_i : tie) {
