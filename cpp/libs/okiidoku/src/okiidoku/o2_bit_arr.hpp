@@ -6,6 +6,7 @@
 #include <okiidoku/ints.hpp>
 #include <okiidoku/order.hpp>
 
+#include <algorithm>   // min
 #include <array>
 #include <iterator>    // input_iterator_tag, default_sentinel
 #include <bit>         // countr_zero
@@ -37,10 +38,12 @@ namespace okiidoku::mono {
 		// >;
 	private:
 		// note: use of one byte is safe for grid orders < 128. that should be fine.
-		using word_i_t = std::uint_fast8_t;
-		using word_bit_i_t = std::uint_fast8_t; // assumes `word_t` is not wider than 256 bits.
-		static constexpr word_bit_i_t word_t_num_bits {8u * sizeof(word_t)};
-		static constexpr word_i_t     num_words       {(T::O2 + word_t_num_bits-1u) / word_t_num_bits};
+		using word_bit_i_t  = detail::Int<std::min(T::O2.max, 8u * sizeof(word_t))>;
+		using word_bit_ix_t = detail::Int<word_bit_i_t::max-1u>;
+		using word_i_t  = detail::Int<(T::O2.max + word_bit_i_t::max-1u) / word_bit_i_t::max>;
+		using word_ix_t = detail::Int<word_i_t::max-1u>;
+		static constexpr word_bit_i_t word_t_num_bits {word_bit_i_t::max};
+		static constexpr word_i_t     num_words       {word_i_t::max};
 		static constexpr word_bit_i_t num_excess_bits {(num_words * word_t_num_bits) - T::O2};
 		static_assert(  num_words > 0u);
 		static_assert(( num_words     * word_t_num_bits) >= T::O2, "enough words"   );
@@ -48,11 +51,11 @@ namespace okiidoku::mono {
 
 		/** \pre `bit_i < T::O2`. */
 		[[nodiscard, gnu::const]]
-		static constexpr word_i_t bit_i_to_word_i(const typename Ints<O>::o2x_t bit_i) noexcept {
+		static constexpr word_ix_t bit_i_to_word_i(const typename Ints<O>::o2x_t bit_i) noexcept {
 			OKIIDOKU_CONTRACT_USE(bit_i < T::O2);
-			if constexpr (num_words == 1u) { return 0u; }
+			if constexpr (num_words == 1u) { return word_ix_t{0u}; }
 			else {
-				const auto word_i {static_cast<word_i_t>(bit_i / word_t_num_bits)};
+				const word_ix_t word_i {bit_i / word_t_num_bits};
 				OKIIDOKU_CONTRACT_USE(word_i < num_words);
 				return word_i;
 			}
@@ -116,12 +119,12 @@ namespace okiidoku::mono {
 		}
 
 		void remove(const O2BitArr& to_remove) noexcept {
-			for (word_i_t i {0}; i < num_words; ++i) {
+			for (const auto i : num_words) {
 				words_[i] &= static_cast<word_t>(~to_remove.words_[i]);
 			}
 		}
 		void retain_only(const O2BitArr& to_retain) noexcept {
-			for (word_i_t i {0}; i < num_words; ++i) {
+			for (const auto i : num_words) {
 				words_[i] &= to_retain.words_[i];
 			}
 		}
@@ -158,11 +161,11 @@ namespace okiidoku::mono {
 		}
 
 		O2BitArr& operator|=(const O2BitArr& rhs) noexcept {
-			for (word_i_t i {0}; i < num_words; ++i) { words_[i] |= rhs.words_[i]; };
+			for (const auto i : num_words) { words_[i] |= rhs.words_[i]; };
 			return *this;
 		}
 		O2BitArr& operator&=(const O2BitArr& rhs) noexcept {
-			for (word_i_t i {0}; i < num_words; ++i) { words_[i] &= rhs.words_[i]; };
+			for (const auto i : num_words) { words_[i] &= rhs.words_[i]; };
 			return *this;
 		}
 		[[nodiscard, gnu::pure]] friend O2BitArr operator|(O2BitArr lhs, const O2BitArr& rhs) noexcept {
@@ -247,11 +250,12 @@ namespace okiidoku::mono {
 
 	template<Order O>
 	struct ChuteBoxMasks {
+		using T = Ints<O>;
 		/// `[111'000'000, 000'111'000, 000'000'111]`
 		static constexpr std::array<O2BitArr<O>, O> row {[]{
 			std::array<O2BitArr<O>, O> mask;
-			for (unsigned chute {0}; chute < O; ++chute) {
-				for (unsigned i {0}; i < O; ++i) {
+			for (const auto chute : T::O1) {
+				for (const auto i : T::O1) {
 					mask[chute].set((O*chute) + i);
 			}	}
 			return mask;
@@ -259,8 +263,8 @@ namespace okiidoku::mono {
 		/// `[100'100'100, 010'010'010, 001'001'001]`
 		static constexpr std::array<O2BitArr<O>, O> col {[]{
 			std::array<O2BitArr<O>, O> mask;
-			for (unsigned chute {0}; chute < O; ++chute) {
-				for (unsigned i {0}; i < O; ++i) {
+			for (const auto chute : T::O1) {
+				for (const auto i : T::O1) {
 					mask[chute].set((O*i) + chute);
 			}	}
 			return mask;

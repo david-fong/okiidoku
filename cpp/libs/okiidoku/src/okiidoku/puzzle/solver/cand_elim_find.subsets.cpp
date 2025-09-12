@@ -161,7 +161,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 					#endif
 					combo_walker.at_it(),
 					std::next(combo_walker.at_it(), naked_subset_size),
-					O2BitArr<O>{}, std::bit_or{}, [&](const auto i) -> const auto& {
+					O2BitArr<O>{}, std::bit_or{}, [&][[gnu::pure]](const auto i) -> const auto& {
 						return cells_cands.at_rmi(subs.cell_tags[i].rmi);
 					}
 				);

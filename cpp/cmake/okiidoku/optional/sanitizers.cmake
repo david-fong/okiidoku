@@ -34,7 +34,8 @@ block()
 		#  would this be compatible with sanitizers? or no?
 		set(flags
 			"-fsanitize=address,undefined"
-			# "$<$<CXX_COMPILER_ID:Clang>:-shared-libasan>"
+			"-fno-omit-frame-pointer" # for nicer stack traces
+			"$<$<CXX_COMPILER_ID:Clang>:-shared-libasan>"
 		)
 		target_compile_options("${target}"        INTERFACE "$<${debug_configs}:${flags}>")
 		target_link_options(   "${target}" BEFORE INTERFACE "$<${debug_configs}:${flags}>")

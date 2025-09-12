@@ -15,16 +15,21 @@
 #include <okiidoku/ints.hpp>
 
 namespace nb = ::nanobind;
+using namespace nb::literals;
 
 // function called upon python import
 // https://nanobind.readthedocs.io/en/latest/api_core.html#c.NB_MODULE
 // https://nanobind.readthedocs.io/en/latest/basics.html
-NB_MODULE(_okiidoku_nb, m) { //
+NB_MODULE(okiidoku_nb, m) { //
 	namespace oki = ::okiidoku;
 	namespace oki_m = ::okiidoku::mono;
 	namespace oki_v = ::okiidoku::visitor;
 
-	m.doc() = "pybind11 build of okiidoku";
+	m.doc() = "nanobind build of okiidoku";
 
-	// m.def("generate_shuffled", &oki_v::generate_shuffled, "generate a random filled sudoku grid");
+	nb::class_<oki_v::Grid>(m, "Grid")
+		.def(nb::init<>())
+		.def(nb::init<oki_v::Grid&>());
+
+	// m.def("generate_shuffled", static_cast<void(*)(oki_v::Grid&, oki_m::rng_seed_t)>(&oki_v::generate_shuffled), "generate a random filled sudoku grid");
 }

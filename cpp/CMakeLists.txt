@@ -9,7 +9,7 @@ project(okiidoku
 )
 list(APPEND CMAKE_MODULE_PATH "${okiidoku_SOURCE_DIR}/cmake")
 set(_OKIIDOKU_VERSION_COMPATIBILITY ExactVersion) # see `cmake/installation.cmake`
-# ^ I will consider switching to support `SameMajorVersion` starting at v1.0.0.
+# ^consider switching to support `SameMajorVersion` starting at v1.0.0.
 set(CMAKE_CXX_SCAN_FOR_MODULES NO) # I'm not using C++ modules... yet. see https://cmake.org/cmake/help/latest/manual/cmake-cxxmodules.7.html, https://crascit.com/2024/04/04/cxx-modules-cmake-shared-libraries/, ccache docs section on C++ Modules if/when transitioning.
 include(okiidoku/default_output_dirs)
 
@@ -42,7 +42,7 @@ include(okiidoku/optional/sanitizers)
 
 include(okiidoku/dependencies)
 
-# Note: these are done _after_ adding dependencies to avoid doing this work on them.
+# note: these are done _after_ adding dependencies to avoid doing this work on them.
 include(okiidoku/optional/static_analyzers)
 if(OKIIDOKU_BUILD_TESTING)
 	enable_testing() # not `include(CTest)` because I don't use CDash.
@@ -56,8 +56,8 @@ if(EMSCRIPTEN)
 	add_subdirectory(extras/emscripten) # target: okiidoku_js
 endif()
 if(OKIIDOKU_BUILD_BINDINGS_FOR_PYTHON)
-	# add_subdirectory(extras/python) # target:  okiidoku_py
-	add_subdirectory(extras/nanobind) # target: _okiidoku_nb
+	# add_subdirectory(extras/python) # target: okiidoku_py
+	add_subdirectory(extras/nanobind) # target: okiidoku_nb
 endif()
 
 okiidoku_target_pgo(okiidoku #[[trainer:]] okiidoku_pgo_trainer_default)

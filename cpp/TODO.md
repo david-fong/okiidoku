@@ -35,6 +35,7 @@
 
 Issues I'm watching:
 
+- `std::ranges::iota()` clang libc++ doesn't have it yet :( (which impacts emscripten build) https://github.com/llvm/llvm-project/issues/105184
 - https://github.com/doxygen/doxygen/issues/8159 copydoc with templated functions
 - https://gitlab.kitware.com/cmake/cmake/-/issues/26118 cmake non-config presets don't implicitly inherit their config preset condition.
 - [Use CMAKE_CROSSCOMPILING_EMULATOR to run cross compiled executables #554](https://github.com/microsoft/vscode-cmake-tools/issues/554)
@@ -81,10 +82,10 @@ Issues I'm watching:
   - `project(COMPAT_VERSION)` (`CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_INFO`)
 - GCC 15:
   - try benchmarking with https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html#index-fipa-reorder-for-locality
-- C++23
+- C++23:
   - http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/p2214r0.html#does-adjacent-mean-2-or-n
   - `[[assume(expr)]]`. update `OKIIDOKU_CONTRACT_USE` to use it after assert in debug, and
-  - `std::ranges::iota()` clang libc++ doesn't have it yet :( (which impacts emscripten build)
+  - `std::ranges::iota()` see above note in issues watching
   - `std::views::chunk()`
     - could this be useful for `canon_pos`? I tried messing around with range-v3 on compiler explorer and had trouble with the whole action vs algorithm, container vs view thing. Didn't know what I was doing and could achieve what I wanted.
   - alternative to `std::chunk`, look into `mdspan` (multi-dimensional span). Seems like this is more of what I'm looking for.

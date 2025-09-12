@@ -201,3 +201,10 @@ const [^{]*&
 (?<!\+)\+(?!\+)           # addition operator?
 (?<![\*\/])\/(?![\/\*])   # division operator?
 ```
+
+---
+
+https://libcxx.llvm.org/Status/Cxx23.html
+https://libcxx.llvm.org/Status/Cxx2c.html
+https://releases.llvm.org/
+https://releases.llvm.org/21.1.0/projects/libcxx/docs/ReleaseNotes.html

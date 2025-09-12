@@ -142,7 +142,7 @@
 			"toolchainFile": "$env{EMSDK}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake",
 			"cacheVariables": {
 				"CMAKE_CONFIGURATION_TYPES": "MinSizeRel;Debug;Release",
-				"OKIIDOKU_BUILD_BINDINGS_FOR_PYTHON": null
+				"OKIIDOKU_BUILD_DOCS": false
 			}
 		},
 		{

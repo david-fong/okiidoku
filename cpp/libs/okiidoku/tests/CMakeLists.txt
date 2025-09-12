@@ -8,7 +8,7 @@ function(okiidoku_test_add name #[[ ARGN are dependencies ]])
 		INTERPROCEDURAL_OPTIMIZATION NO # links way faster and runs about same speed
 	)
 	okiidoku_add_compiler_options("${target}")
-	target_compile_options("${target}" PRIVATE "$<$<CXX_COMPILER_ID:GNU>:-fwhole-program>")
+	target_compile_options("${target}" PRIVATE "$<$<CXX_COMPILER_ID:GNU>:-fwhole-program>") # TODO... when did I add this? how much slower does it make the build? how much faster does it make tests run? did I forget that I explicitly turned of LTO just a few lines above because it make link run slow?
 	target_link_libraries("${target}"
 		PRIVATE okiidoku
 		PRIVATE okiidoku_cli_utils

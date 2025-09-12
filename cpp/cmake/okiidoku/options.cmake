@@ -45,9 +45,9 @@ unset(okiidoku_target_supports_shared_libs)
 
 option(OKIIDOKU_BUILD_WITH_SUGGESTED_WARNINGS "build okiidoku with suggested warnings" "${okiidoku_IS_TOP_LEVEL}")
 option(OKIIDOKU_BUILD_WITH_STATIC_ANALYZERS "build okiidoku with static analyzers" NO) # off by default because it's slow
-option(OKIIDOKU_BUILD_DEBUG_WITH_SANITIZERS "build okiidoku debug builds with sanitizers" "${okiidoku_IS_TOP_LEVEL}")
-option(OKIIDOKU_BUILD_TESTING "build tests for okiidoku" "${okiidoku_IS_TOP_LEVEL}")
-option(OKIIDOKU_BUILD_DOCS "build Doxygen docs for okiidoku" "${okiidoku_IS_TOP_LEVEL}")
+option(OKIIDOKU_BUILD_DEBUG_WITH_SANITIZERS "build okiidoku debug builds with sanitizers" NO) # default off <- see :/writings/journal/toolchain-papercuts.
+option(OKIIDOKU_BUILD_TESTING "build tests and examples for okiidoku" "${okiidoku_IS_TOP_LEVEL}")
+option(OKIIDOKU_BUILD_DOCS "build doxygen docs for okiidoku" "${okiidoku_IS_TOP_LEVEL}")
 
 
 if(NOT EMSCRIPTEN)

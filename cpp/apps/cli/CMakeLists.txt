@@ -7,7 +7,6 @@ add_executable(okiidoku_cli
 )
 set_target_properties(okiidoku_cli PROPERTIES
 	EXPORT_NAME cli
-	INTERPROCEDURAL_OPTIMIZATION "${okiidoku_is_ipo_supported}"
 )
 okiidoku_install_target(okiidoku_cli OPTIONAL)
 

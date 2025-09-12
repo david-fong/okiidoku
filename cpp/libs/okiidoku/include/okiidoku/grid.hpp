@@ -162,6 +162,7 @@ namespace okiidoku::visitor {
 	public:
 		using ContainerBase::ContainerBase;
 		using val_t = grid_val_t;
+		Grid() noexcept = default;
 
 		// Note: the accessors here are readonly right now, meaning
 		// library users can only use mutators defined inside the library. That seems

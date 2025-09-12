@@ -172,7 +172,7 @@ namespace okiidoku::mono::detail::solver {
 			}
 			OKIIDOKU_UNREACHABLE;
 		}()};
-		const o1i_t neighbour_scale {[&]{
+		const o1i_t neighbour_scale {[&][[gnu::pure]]{
 			switch (desc.remove_from_rest_of) {
 				using enum BoxOrLine;
 				case box:  return T::O1;

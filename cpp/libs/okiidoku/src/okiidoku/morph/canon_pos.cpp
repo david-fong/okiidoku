@@ -81,12 +81,12 @@ namespace okiidoku::mono { namespace {
 			// loop over orthogonal partially-resolved chute ranges to normalize:
 			{
 				std::array<o1i_t, T::O1> resolve; // TODO.high where is this being used?
-				std::ranges::iota(resolve, o1i_t{0u});
+				std::iota(resolve.begin(), resolve.end(), o1i_t{0u});
 				for (const auto t : ortho.chute_ties) {
 					ranges::sort(
 						std::next(resolve.begin(), t.begin_),
 						std::next(resolve.begin(), t.end_),
-						[&](auto a, auto b){
+						[&][[gnu::pure]](auto a, auto b){
 							return ranges::lexicographical_compare(row_sp.subspan(a*T::O1,T::O1), row_sp.subspan(b*T::O1,T::O1));
 						}
 					);
@@ -108,7 +108,7 @@ namespace okiidoku::mono { namespace {
 	template<Order O> requires(is_order_compiled(O))
 	void CanonPlace<O>::PolarState::do_a_pass(const Grid<O>& table) noexcept {
 		OKIIDOKU_DEFER_INIT std::array<to_t, T::O2> to_tied; // NOLINT(*-init)
-		std::ranges::iota(to_tied, to_t{0u});
+		std::iota(to_tied.begin(), to_tied.end(), to_t{0u});
 		for (const auto tie : line_ties) {
 			// Note: intentionally do not skip ties here since updated table
 			// rows could (and likely will) be used by chute tie resolution.

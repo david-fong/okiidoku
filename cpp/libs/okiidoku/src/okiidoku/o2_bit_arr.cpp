@@ -94,14 +94,14 @@ namespace okiidoku::mono {
 	template<Order O> requires(is_order_compiled(O))
 	typename O2BitArr<O>::o2x_t
 	O2BitArr<O>::get_index_of_nth_set_bit(O2BitArr::o2x_t set_bit_index) const noexcept {
-		OKIIDOKU_CONTRACT_USE(set_bit_index < T::O2);
+		set_bit_index.check();
 		OKIIDOKU_CONTRACT_ASSERT(count() > set_bit_index);
-		const word_i_t word_i {[&](){
-			if constexpr (num_words == 1u) { return word_i_t{0u}; }
+		const word_ix_t word_i {[&](){
+			if constexpr (num_words == 1u) { return word_ix_t{0u}; }
 			else {
-				for (word_i_t wd_i {0u}; wd_i < num_words; ++wd_i) {
-					const auto wd_popcount {static_cast<word_bit_i_t>(std::popcount(words_[wd_i]))};
-					OKIIDOKU_CONTRACT_USE(wd_popcount <= word_t_num_bits);
+				for (const auto wd_i : num_words) {
+					const word_bit_i_t wd_popcount {std::popcount(words_[wd_i])};
+					wd_popcount.check();
 					if (set_bit_index >= wd_popcount) [[likely]] {
 						set_bit_index -= o2x_t{wd_popcount};
 					} else {
@@ -115,13 +115,13 @@ namespace okiidoku::mono {
 		#ifdef OKIIDOKU_TARGET_SUPPORTS_X86_BMI2
 			if constexpr (sizeof(word_t) >= sizeof(std::uint64_t)) {
 				const auto bit_mask {_pdep_u64(static_cast<word_t>(word_t{1u} << set_bit_index), word)};
-				return o2x_t{o2x_t{word_t_num_bits*word_i} + std::countr_zero(bit_mask)};
+				return o2x_t{o2x_t(word_t_num_bits*word_i) + std::countr_zero(bit_mask)};
 			} else {
 				const auto bit_mask {_pdep_u32(static_cast<word_t>(word_t{1u} << set_bit_index), word)};
-				return o2x_t{o2x_t{word_t_num_bits*word_i} + std::countr_zero(bit_mask)};
+				return o2x_t{o2x_t(word_t_num_bits*word_i) + std::countr_zero(bit_mask)};
 			}
 		#else
-		for (word_t word_bit_i {0u}; word_bit_i < word_t_num_bits; ++word_bit_i) { // TODO.mid possible optimization: skip consecutive set bits by somehow using std::countr_<>
+		for (const auto word_bit_i : word_t_num_bits) { // TODO.mid possible optimization: skip consecutive set bits by somehow using std::countr_<>
 			const auto bit_mask {static_cast<word_t>(word_t{1u} << word_bit_i)};
 			if (word & bit_mask) {
 				if (set_bit_index == 0u) {
@@ -139,7 +139,7 @@ namespace okiidoku::mono {
 	template<Order O> requires(is_order_compiled(O))
 	std::strong_ordering
 	O2BitArr<O>::cmp_differences(const O2BitArr<O>& a, const O2BitArr<O>& b) noexcept {
-		for (word_i_t i {0u}; i < num_words; ++i) {
+		for (const auto i : num_words) {
 			const auto diffs {a.words_[i] ^ b.words_[i]};
 			if (const auto cmp {(a.words_[i]&diffs) <=> (b.words_[i]&diffs)}; std::is_neq(cmp)) [[likely]] { return cmp; }
 		}

@@ -7,18 +7,13 @@ include_guard(DIRECTORY)
 include(okiidoku/get_cpm)
 
 # Note: CPM does auto EXCLUDE_FROM_ALL and SYSTEM when using shorthand add
-# if("${CPM_SOURCE_CACHE}" PATH_EQUAL "${okiidoku_SOURCE_DIR}/external")
-# 	set(CUSTOM_CACHE_KEY CUSTOM_CACHE_KEY "_") # TODO this looks cleaner, but thwarts fetch when version changes (doesn't detect as dirty).
-# else()
-	set(CUSTOM_CACHE_KEY)
-# endif()
 
 # https://docs.github.com/en/repositories/working-with-files/using-files/downloading-source-code-archives#source-code-archive-urls
 
 CPMAddPackage(NAME range-v3
 	# https://github.com/ericniebler/range-v3/tags
 	URL [[https://github.com/ericniebler/range-v3/archive/refs/tags/0.12.0.tar.gz]]
-	DOWNLOAD_ONLY YES ${CUSTOM_CACHE_KEY}
+	DOWNLOAD_ONLY YES
 )
 if(range-v3_ADDED)
 	add_library(range-v3 INTERFACE IMPORTED)
@@ -30,11 +25,11 @@ endif()
 
 
 CPMAddPackage(NAME pcg
-	# https://github.com/imneme/pcg-cpp/tags
+	# https://github.com/imneme/pcg-cpp/commits/master
 	# https://github.com/imneme/pcg-cpp/issues/73 new release hasn't been made in a long time
 	# https://www.pcg-random.org/using-pcg-cpp.html
 	URL [[https://github.com/imneme/pcg-cpp/archive/428802d1a5634f96bcd0705fab379ff0113bcf13.tar.gz]] # take latest
-	DOWNLOAD_ONLY YES ${CUSTOM_CACHE_KEY}
+	DOWNLOAD_ONLY YES
 )
 if(pcg_ADDED)
 	add_library(pcg INTERFACE IMPORTED)
@@ -48,7 +43,7 @@ if(OKIIDOKU_BUILD_TESTING)
 	CPMAddPackage(NAME doctest
 		# https://github.com/doctest/doctest/blob/master/CHANGELOG.md
 		URL [[https://github.com/doctest/doctest/archive/refs/tags/v2.4.12.tar.gz]] # take latest
-		DOWNLOAD_ONLY YES ${CUSTOM_CACHE_KEY}
+		DOWNLOAD_ONLY YES
 	)
 	if(doctest_ADDED)
 		add_library(doctest INTERFACE IMPORTED)
@@ -67,13 +62,20 @@ if(OKIIDOKU_BUILD_BINDINGS_FOR_PYTHON)
 	find_package(Python COMPONENTS Interpreter Development.Module REQUIRED) # https://nanobind.readthedocs.io/en/latest/building.html#preliminaries
 	# https://github.com/wjakob/nanobind
 	# https://nanobind.readthedocs.io/en/latest/changelog.html
-	CPMAddPackage("gh:wjakob/nanobind@2.8.0") # TODO ${CUSTOM_CACHE_KEY}
+	CPMAddPackage("gh:wjakob/nanobind@2.9.2")
 		# git tag archive link doesn't work since submodule deps are required
 		# TODO https://github.com/wjakob/nanobind/issues/403 could run `git submodule status` to get robin_map commit and then fetch that tarball there.
-	foreach(lib "" "-abi3") # https://nanobind.readthedocs.io/en/latest/api_cmake.html#command:nanobind_build_library
-		nanobind_build_library("nanobind${lib}")
-		set_target_properties("nanobind${lib}" PROPERTIES SYSTEM YES)
-	endforeach()
+		#  https://nanobind.readthedocs.io/en/latest/api_cmake.html#submodule-dependencies https://github.com/wjakob/nanobind/blob/master/cmake/nanobind-config.cmake#L249
+	set(NB_STABLE_ABI "")
+	set(NB_CORE_LIBNAME nanobind)
+	if(NOT OKIIDOKU_BUILD_OPTIMIZE_LOCAL_NON_PORTABLE)
+		set(NB_STABLE_ABI STABLE_API) # stable across minor python versions. small perf cost.
+		string(APPEND NB_CORE_LIBNAME "-abi3")
+	endif()
+	# define libraries here, instead of in downstream subdirectories
+	# https://nanobind.readthedocs.io/en/latest/api_cmake.html#command:nanobind_build_library
+	nanobind_build_library("${NB_CORE_LIBNAME}" AS_SYSINCLUDE)
+	unset(NB_CORE_LIBNAME)
 endif()
 
 
@@ -81,7 +83,7 @@ if(OKIIDOKU_BUILD_DOCS)
 	CPMAddPackage(NAME doxygen-awesome-css
 		# https://github.com/jothepro/doxygen-awesome-css/releases
 		URL [[https://github.com/jothepro/doxygen-awesome-css/archive/refs/tags/v2.3.4.tar.gz]]
-		DOWNLOAD_ONLY YES ${CUSTOM_CACHE_KEY}
+		DOWNLOAD_ONLY YES
 	)
 	if(doxygen-awesome-css_ADDED)
 		list(APPEND DOXYGEN_HTML_EXTRA_STYLESHEET

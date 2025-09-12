@@ -10,6 +10,7 @@ find_package(Doxygen 1.9) # (minimum version)
 if(Doxygen_FOUND)
 	list(APPEND DOXYGEN_EXCLUDE "${okiidoku_SOURCE_DIR}/external/")
 	list(APPEND DOXYGEN_EXCLUDE_PATTERNS "*/node_modules/*" "*/extras/*/build/*" "*/out/build/*" "*/out/install/*")
+	set(DOXYGEN_OUTPUT_DIRECTORY "${okiidoku_BINARY_DIR}/docs")
 	# set(DOXYGEN_USE_MDFILE_AS_MAINPAGE "${okiidoku_SOURCE_DIR}/../README.md")
 	set(DOXYGEN_BUILTIN_STL_SUPPORT YES)
 	set(DOXYGEN_GENERATE_MAN YES)
@@ -33,8 +34,11 @@ if(Doxygen_FOUND)
 			ALL
 		)
 	endblock()
-	# TODO: wire up installation of manpages / html doc pages
-	# also look into separate installation components for lib user vs. cli user vs. internal dev docs.
-	#   (cli user docs maybe not needed through doxygen(?) look into various cli lib capabilities)
-	#   https://www.doxygen.nl/manual/config.html#cfg_output_directory may help
+	install(
+		DIRECTORY
+			"${okiidoku_BINARY_DIR}/docs/html"
+			"${okiidoku_BINARY_DIR}/docs/man"
+		TYPE DOC
+		COMPONENT okiidoku_development # or should this have a dedicated "docs" component?
+	)
 endif()

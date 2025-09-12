@@ -20,7 +20,7 @@ namespace okiidoku { namespace {
 		const auto O2 {static_cast<okiidoku::visitor::ints::o2i_t>(O*O)};
 		const auto& prefs {emoji::top_set_preferences};
 		std::vector<size_t> shuffled_sets(emoji::sets.size());
-		std::ranges::iota(shuffled_sets, size_t{0});
+		std::iota(shuffled_sets.begin(), shuffled_sets.end(), size_t{0});
 		{
 			using rng_t = std::minstd_rand; // other good LCG parameters: https://arxiv.org/pdf/2001.05304v3.pdf
 			rng_t rng {rng_seed};

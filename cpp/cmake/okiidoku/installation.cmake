@@ -8,7 +8,7 @@ install(FILES ../README.md ../LICENSE.txt TYPE DOC COMPONENT okiidoku_about)
 # install(FILES ../.reuse/dep5 TYPE DOC COMPONENT okiidoku_about RENAME copying) # hm probably not right. need to make a custom one for the installation
 install(DIRECTORY ../LICENSES TYPE DOC COMPONENT okiidoku_about)
 
-# TODO: install any tweaks header provided by user? but how to do that?... should we abandon tweak header and go for generating it from cmake option variables?
+# TODO: install any tweaks header provided by user? but how to do that?... should we abandon tweak header as an options format and go for generating it from cmake option variables?
 
 block()
 if(BUILD_SHARED_LIBS)

@@ -77,10 +77,10 @@ namespace okiidoku::mono {
 	/// \cond detail
 	namespace detail {
 
-		template<int W>
+		template<int W> requires(W <= 64)
 		/// fast unsigned integer type that can fit at least `N` bits.
 		using uint_fast_for_width_t = typename
-			std::conditional_t<(W <=  8), std::uint_fast8_t,
+			std::conditional_t<(W <=  8), std::uint_fast8_t ,
 			std::conditional_t<(W <= 16), std::uint_fast16_t,
 			std::conditional_t<(W <= 32), std::uint_fast32_t,
 			std::conditional_t<(W <= 64), std::uint_fast64_t,
@@ -88,10 +88,10 @@ namespace okiidoku::mono {
 			void
 		>>>>;
 
-		template<int W>
+		template<int W> requires(W <= 64)
 		/// smallest unsigned integer type that can fit at least `N` bits.
 		using uint_small_for_width_t = typename
-			std::conditional_t<(W <=  8), std::uint_least8_t,
+			std::conditional_t<(W <=  8), std::uint_least8_t ,
 			std::conditional_t<(W <= 16), std::uint_least16_t,
 			std::conditional_t<(W <= 32), std::uint_least32_t,
 			std::conditional_t<(W <= 64), std::uint_least64_t,
@@ -122,7 +122,7 @@ namespace okiidoku::mono {
 		template<int M>
 		/// fast signed integer type that can fit max value `M`.
 		using int_fast_for_max_t = typename
-			std::conditional_t<(M <= std::numeric_limits<std::int8_t >::max()), std::int_fast8_t,
+			std::conditional_t<(M <= std::numeric_limits<std::int8_t >::max()), std::int_fast8_t ,
 			std::conditional_t<(M <= std::numeric_limits<std::int16_t>::max()), std::int_fast16_t,
 			std::conditional_t<(M <= std::numeric_limits<std::int32_t>::max()), std::int_fast32_t,
 			std::conditional_t<(M <= std::numeric_limits<std::int64_t>::max()), std::int_fast64_t,
@@ -132,7 +132,7 @@ namespace okiidoku::mono {
 		template<int M>
 		/// smallest signed integer type that can fit max value `M`.
 		using int_small_for_max_t = typename
-			std::conditional_t<(M <= std::numeric_limits<std::int8_t >::max()), std::int_least8_t,
+			std::conditional_t<(M <= std::numeric_limits<std::int8_t >::max()), std::int_least8_t ,
 			std::conditional_t<(M <= std::numeric_limits<std::int16_t>::max()), std::int_least16_t,
 			std::conditional_t<(M <= std::numeric_limits<std::int32_t>::max()), std::int_least32_t,
 			std::conditional_t<(M <= std::numeric_limits<std::int64_t>::max()), std::int_least64_t,
@@ -198,7 +198,7 @@ namespace okiidoku::mono {
 			template<max_t M_from, IntKind K_from> requires(M_from <= max)
 			constexpr Int(const Int<M_from,K_from>& other) noexcept: Int{other.val_} { check(); }
 
-			template<IntKind K_from> // (leeway for range sentinel)
+			template<IntKind K_from> // (index from sentinel/bound capacity)
 			explicit constexpr Int(const Int<max+1u,K_from>& other) noexcept: Int{other.val_} { check(); }
 
 			template<max_t M_from, IntKind K_from>
@@ -207,7 +207,7 @@ namespace okiidoku::mono {
 				return Int{other.val_};
 			}
 
-			constexpr operator uint_fast_for_width_t<std::bit_width(max)>() const noexcept { check(); return static_cast<uint_small_for_width_t<std::bit_width(max)>>(val_); }
+			[[gnu::pure]] constexpr operator uint_fast_for_width_t<std::bit_width(max)>() const noexcept { check(); return static_cast<uint_small_for_width_t<std::bit_width(max)>>(val_); }
 			// template<class T> requires(std::unsigned_integral<T> && std::numeric_limits<T>::max() >= max)
 			// constexpr operator T() const noexcept { check(); return val_; }
 			// friend std::ostream& operator<<(std::ostream& os, const Int& obj) { return os << static_cast<max_t>(i.val_); }
@@ -222,7 +222,11 @@ namespace okiidoku::mono {
 			[[nodiscard, gnu::pure]] constexpr auto  begin() const noexcept { check(); return Int{0u}; }
 			[[nodiscard, gnu::pure]] constexpr auto  end()   const noexcept { check(); return *this; }
 			[[nodiscard, gnu::pure]] constexpr auto  next()  const noexcept { check(); return Int{val_+1u}; }
-			constexpr Int<max-1u,kind> operator*() const noexcept { check(); OKIIDOKU_CONTRACT_USE(val_ < max); return Int<max-1u,kind>{*this}; }
+			template<max_t M, IntKind K> requires(M > 0u) [[gnu::pure]] constexpr friend
+			Int<max-1u,kind> operator*(const Int<M,K>& it) noexcept {
+				it.check(); OKIIDOKU_CONTRACT_USE(it.val_ < M);
+				return Int<M-1u,K>{it};
+			}
 
 			/// \pre `val_ + other.val_ <= max`
 			template<max_t MR, IntKind kind_2>
@@ -247,7 +251,7 @@ namespace okiidoku::mono {
 			}
 
 			/// \pre `other.val_ != 0`
-			template<max_t MR, IntKind kind_2>
+			template<max_t MR, IntKind kind_2> requires(MR > 0u)
 			constexpr Int& operator/=(const Int<MR, kind_2>& other) & noexcept requires(MR <= max) {
 				check(); other.check();
 				OKIIDOKU_CONTRACT_USE(other.val_ != i_t{0});
@@ -266,7 +270,7 @@ namespace okiidoku::mono {
 			template<max_t ML, IntKind KL, max_t MR, IntKind KR> constexpr friend auto operator+ (const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept;
 			template<max_t ML, IntKind KL, max_t MR, IntKind KR> requires(ML >= MR) constexpr friend auto operator-(const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept;
 			template<max_t ML, IntKind KL, max_t MR, IntKind KR> constexpr friend auto operator* (const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept;
-			template<max_t ML, IntKind KL, max_t MR, IntKind KR> constexpr friend auto operator/ (const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept;
+			template<max_t ML, IntKind KL, max_t MR, IntKind KR> requires(MR >  0u) constexpr friend auto operator/ (const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept;
 			template<max_t ML, IntKind KL, max_t MR, IntKind KR> requires(MR >  0u) constexpr friend auto operator%(const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept;
 			template<max_t MR, IntKind KR> requires(MR > 0u) constexpr friend auto operator%(const std::unsigned_integral auto lhs, const Int<MR,KR>& rhs) noexcept;
 		};
@@ -308,7 +312,7 @@ namespace okiidoku::mono {
 		}
 
 		/// \pre `rhs` is its type's maximum value.
-		template<std::uintmax_t ML, IntKind KL, std::uintmax_t MR, IntKind KR>
+		template<std::uintmax_t ML, IntKind KL, std::uintmax_t MR, IntKind KR> requires(MR > 0u)
 		[[gnu::pure]] constexpr auto operator/(const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept {
 			lhs.check(); rhs.check();
 			OKIIDOKU_CONTRACT_USE(rhs.val_ == MR);
@@ -438,8 +442,7 @@ namespace okiidoku::mono {
 		const typename Ints<O>::o2x_t col
 	) noexcept {
 		using T = Ints<O>;
-		const auto box {((row / T::O1) * T::O1) + (col / T::O1)};
-		return box;
+		return ((row / T::O1) * T::O1) + (col / T::O1);
 	}
 
 	template<Order O> [[nodiscard, gnu::const]] constexpr
@@ -448,8 +451,7 @@ namespace okiidoku::mono {
 		const typename Ints<O>::o2x_t col
 	) noexcept {
 		using T = Ints<O>;
-		const typename T::o2x_t box_cell {((row % T::O1) * T::O1) + (col % O)};
-		return box_cell;
+		return ((row % T::O1) * T::O1) + (col % T::O1);
 	}
 
 	template<Order O> [[nodiscard, gnu::const]] constexpr
@@ -462,8 +464,7 @@ namespace okiidoku::mono {
 		using T = Ints<O>;
 		const auto boxrow {(rmi/T::O2) % T::O1};
 		const auto boxcol {rmi % T::O1};
-		const auto box_cell {((T::O1*boxrow)+boxcol)};
-		return box_cell;
+		return (T::O1*boxrow) + boxcol;
 	}
 
 	template<Order O> [[nodiscard, gnu::const]] constexpr

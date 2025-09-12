@@ -108,7 +108,29 @@ endblock()
 endif()
 
 
+# features (change emitted / possible-emitted code- not just emit diagnostics):
+if(MSVC)
+else()
+	if(OKIIDOKU_BUILD_DEBUG_WITH_SANITIZERS)
+		# AddressSanitizer doesn't play well with `_FORTIFY_SOURCE`.
+		# see https://github.com/google/sanitizers/wiki/AddressSanitizer#faq
+		#  and https://github.com/google/sanitizers/issues/247.
+		target_compile_options(okiidoku_compiler_warnings INTERFACE
+			"$<${debug_configs}:-U_FORTIFY_SOURCE;-D_FORTIFY_SOURCE=3>"
+		)
+	endif()
+	if((CMAKE_CXX_COMPILER_ID MATCHES [[Clang]]) OR EMSCRIPTEN)
+	elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+		target_compile_options(okiidoku_compiler_warnings INTERFACE
+			-fno-nonansi-builtins # Disable built-in declarations of functions that are not mandated by ANSI/ISO C. These include ffs, alloca, _exit, index, bzero, conjf, and other related functions.
+			# TODO.try -fno-implicit-templates # https://gcc.gnu.org/onlinedocs/gcc/C_002b_002b-Dialect-Options.html#index-fno-implicit-templates
+		)
+	endif()
+endif()
+
+
 # warnings:
+# (for diagnostics that don't change the emitted object files)
 if(MSVC)
 	target_compile_options(okiidoku_compiler_warnings INTERFACE
 		/W4 # highest warnings level
@@ -120,7 +142,6 @@ else()
 		"$<${debug_configs}:_GLIBCXX_ASSERTIONS>"
 	)
 	target_compile_options(okiidoku_compiler_warnings INTERFACE
-		"$<${debug_configs}:-U_FORTIFY_SOURCE;-D_FORTIFY_SOURCE=3>"
 		-Wfatal-errors # stop compilation on first error. I found it hard to read multiple.
 		# "@${flags_file}"
 		-Wall -Wextra -Wpedantic -pedantic-errors
@@ -146,11 +167,10 @@ else()
 	if((CMAKE_CXX_COMPILER_ID MATCHES [[Clang]]) OR EMSCRIPTEN)
 		target_compile_options(okiidoku_compiler_warnings INTERFACE
 			-Wimplicit-fallthrough
-			-Wno-unknown-attributes # I'd like to use these warnings, but they're just too annoying
+			-Wno-unknown-attributes # I'd like to use this, but it's just too annoying, flagging benign stuff.
 		)
 	elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 		target_compile_options(okiidoku_compiler_warnings INTERFACE
-			-fno-nonansi-builtins # Disable built-in declarations of functions that are not mandated by ANSI/ISO C. These include ffs, alloca, _exit, index, bzero, conjf, and other related functions.
 			-Wtrampolines
 			-Wimplicit-fallthrough=5
 
@@ -167,8 +187,6 @@ else()
 			-Wsuggest-attribute=const
 			-Wsuggest-attribute=noreturn
 			-Wnrvo
-			# TODO.try
-			# -fno-implicit-templates or -frepo # https://gcc.gnu.org/onlinedocs/gcc-4.7.2/gcc/Template-Instantiation.html#Template-Instantiation
 
 			# -Wunsafe-loop-optimizations # only meaningful with -funsafe-loop-optimizations
 
