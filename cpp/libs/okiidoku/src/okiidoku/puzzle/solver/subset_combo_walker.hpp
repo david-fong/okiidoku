@@ -17,7 +17,7 @@ namespace okiidoku::mono::detail::solver {
 		using o2xs_t = T::o2xs_t;
 		using o2x_t  = T::o2x_t;
 		using o2i_t  = T::o2i_t;
-		using combo_t = std::array<o2xs_t, T::O2-1>;
+		using combo_t = std::array<o2xs_t, T::O2-1u>;
 	public:
 
 		// \pre `end <= O2`
@@ -35,7 +35,7 @@ namespace okiidoku::mono::detail::solver {
 			OKIIDOKU_CONTRACT_USE(begin_ + naked_subset_size_ <= T::O2);
 			if (has_more()) [[likely]] {
 				for (const auto i : naked_subset_size_) {
-					combo_[i] = o2x_t{begin_.val() + i};
+					combo_[i] = o2x_t::unchecked_from(begin_ + i);
 			}	}
 			assert_is_state_valid_();
 		}
@@ -67,10 +67,10 @@ namespace okiidoku::mono::detail::solver {
 			OKIIDOKU_CONTRACT_USE(end_ <= T::O2);
 			OKIIDOKU_CONTRACT_USE(naked_subset_size_ > 0);
 			OKIIDOKU_CONTRACT_USE(naked_subset_size_ < T::O2);
-			o2x_t i {naked_subset_size_-1u};
+			o2x_t i {naked_subset_size_.prev()};
 			++combo_[i];
 			while (combo_[i] > end_ - naked_subset_size_ + i) [[likely]] {
-				if (i > 0) [[likely]] {
+				if (i > 0u) [[likely]] {
 					--i;
 					++combo_[i];
 				} else {
@@ -79,7 +79,7 @@ namespace okiidoku::mono::detail::solver {
 				}
 			}
 			for (++i; i < naked_subset_size_; ++i) {
-				combo_[i] = o2xs_t{combo_[i-1u] + 1u};
+				combo_[i] = combo_[i.prev()].next();
 			}
 			assert_is_state_valid_();
 		}

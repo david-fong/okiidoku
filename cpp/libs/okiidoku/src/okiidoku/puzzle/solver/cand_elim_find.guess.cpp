@@ -117,7 +117,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 		[[maybe_unused]] auto best_guess_grouping {get_guess_grouping(best_rmi)};
 
 		// TODO is there a same-or-better-perf way to write this search using std::transform_reduce or std::min?
-		for (o4i_t rmi {best_rmi+1u}; rmi < T::O4; ++rmi) {
+		for (o4i_t rmi {best_rmi.next()}; rmi < T::O4; ++rmi) {
 			const auto cand_count {cells_cands.at_rmi(*rmi).count()};
 			OKIIDOKU_CONTRACT_USE(cand_count != 0u);
 			if (cand_count <= 1u) [[unlikely]] { continue; } // no guessing for solved cell.

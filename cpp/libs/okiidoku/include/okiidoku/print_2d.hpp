@@ -36,7 +36,7 @@ namespace okiidoku {
 			static_assert(sizeof...(grids) > 0u);
 			const auto printers {std::to_array<print_2d_grid_view>({
 				[&](const visitor::ints::o4xs_t rmi) noexcept -> visitor::ints::o2is_t {
-					return grids.at_rmi(typename Ints<O>::o4x_t{rmi});
+					return grids.at_rmi(rmi);
 				}...,
 			})};
 			return print_2d_base(O, os, rng_seed, printers);

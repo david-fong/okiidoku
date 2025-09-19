@@ -95,7 +95,7 @@ namespace okiidoku::mono { namespace {
 				std::copy(row_sp.begin(), row_sp.end(), copy.begin());
 				for (const auto i : T::O1) {
 					std::copy(
-						std::next(copy.begin(), i*T::O1), std::next(copy.begin(), (i+1)*T::O1),
+						std::next(copy.begin(), i*T::O1), std::next(copy.begin(), (i.next())*T::O1),
 						std::next(row_sp.begin(), i*T::O1)
 					);
 				}

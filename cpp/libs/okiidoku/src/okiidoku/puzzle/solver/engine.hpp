@@ -128,26 +128,26 @@ namespace okiidoku::mono::detail::solver {
 		//
 		// Note: All candidate elimination techniques have a contract that this returns `false`.
 		// contract: All other non-const member functions require that this return `false`.
-		[[nodiscard, gnu::pure]]
+		[[nodiscard, gnu::pure]] constexpr
 		bool no_more_solns() const noexcept { return no_more_solns_; }
 
 		// the candidate elimination queue is processed in the order of insertion.
-		[[nodiscard, gnu::pure]]
+		[[nodiscard, gnu::pure]] constexpr
 		bool has_queued_cand_elims() const noexcept { return !found_queues_.is_empty(); }
 
 
-		[[nodiscard, gnu::pure]]
-		auto get_num_unsolved() const noexcept { return frame_.num_unsolved; }
+		[[nodiscard, gnu::pure]] constexpr
+		o4i_t get_num_unsolved() const noexcept { return frame_.num_unsolved; }
 
 		// contract: `val` is currently one of _multiple_ candidate-symbols at `rmi`.
 		// contract: only call when `has_queued_cand_elims` returns `false`. There
 		//  is _never_ a good reason to make a guess when you have a deduction ready.
 		void push_guess(Guess<O>) noexcept;
 
-		[[nodiscard, gnu::pure]]
+		[[nodiscard, gnu::pure]] constexpr
 		std::size_t get_guess_stack_depth() const noexcept { return guess_stack_.size(); }
 
-		[[nodiscard, gnu::pure]]
+		[[nodiscard, gnu::pure]] constexpr
 		std::uint_fast64_t get_total_guesses() const noexcept { return total_guesses_; }
 
 		// contract: `no_more_solns` returns `false`.

@@ -40,7 +40,7 @@ namespace okiidoku::util::str {
 	 * See https://cppreference.com/w/cpp/language/sizeof...#Example
 	 * for an example utility function I can make to avoid this problem.
 	 */
-	inline constexpr std::array<std::string_view, 4> box_chars {
+	inline constexpr std::array<std::string_view, 4uz> box_chars {
 		#if USE_ANSI_ESC
 		"\u2591", "\u2592", "\u2593", "\u2588",
 		#else
@@ -51,8 +51,8 @@ namespace okiidoku::util::str {
 	requires std::is_arithmetic_v<T>
 	constexpr std::string_view get_box_char(const T out_of, const T count) {
 		assert(count <= out_of);
-		return (count == 0) ? " " : util::str::box_chars[static_cast<std::size_t>(
-			(count) * util::str::box_chars.size() / (out_of + 1)
+		return (count == 0u) ? " " : util::str::box_chars[static_cast<std::size_t>(
+			(count) * util::str::box_chars.size() / (out_of + 1u)
 		)];
 	}
 }

@@ -117,6 +117,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 	};
 
 
+	// note the interleaving of max_subset_size values
 	template<Order O> requires(is_order_compiled(O))
 	std::optional<FoundSubsetInfo<O>> try_decompose_subset(
 		const CandsGrid<O>& cells_cands,
@@ -184,11 +185,11 @@ namespace okiidoku::mono::detail::solver { namespace {
 		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
 		OKIIDOKU_CONTRACT_USE(max_subset_size >= 2u);
 		OKIIDOKU_CONTRACT_USE(max_subset_size <= o2x_t{(T::O2+1u)/2u});
-		o2i_t sub_a {0};
-		o2i_t sub_z {0};
+		o2i_t sub_a {0u};
+		o2i_t sub_z {0u};
 		const auto get_next_sub_a {[&]{
 			OKIIDOKU_CONTRACT_USE(sub_a < T::O2);
-			o2i_t next {sub_a+1u};
+			o2i_t next {sub_a.next()};
 			while (next < T::O2 && !subs.is_begin[*next]) { ++next; }
 			OKIIDOKU_CONTRACT_USE(next <= T::O2);
 			OKIIDOKU_CONTRACT_USE(next >  sub_a);
@@ -201,8 +202,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 			auto non_first_members {O2BitArr_ones<O>};
 			non_first_members.remove(subs.is_begin);
 			const auto second_non_single_member {non_first_members.first_set_bit_require_exists()};
-			OKIIDOKU_CONTRACT_USE(second_non_single_member > 0);
-			sub_a = o2i_t{second_non_single_member-1u};
+			sub_a = second_non_single_member.prev();
 		}
 
 		while (sub_a < T::O2) [[likely]] {
@@ -210,7 +210,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 			OKIIDOKU_CONTRACT_USE(sub_z <= T::O2);
 			OKIIDOKU_CONTRACT_USE(sub_a <  sub_z);
 			OKIIDOKU_CONTRACT_ASSERT(subs.is_begin[*sub_a]);
-			for (o2i_t i {sub_a+1u}; i < sub_z; ++i) {
+			for (o2i_t i {sub_a.next()}; i < sub_z; ++i) {
 				OKIIDOKU_CONTRACT_ASSERT(!subs.is_begin[*i]);
 			}
 			if (prepare_try_decompose_subset_and_check_can_skip(engine.cells_cands(), subs, sub_a, sub_z)) {
@@ -237,9 +237,9 @@ namespace okiidoku::mono::detail::solver { namespace {
 				}
 				subs.is_begin.set(*sub_a);
 			} else {
-				for (o2x_t combo_at {0}; combo_at < naked_subset_size; ++combo_at) {
+				for (auto combo_at : naked_subset_size) {
 					auto& entry {subs.cell_tags[combo_walker.combo_at(o2x_t{naked_subset_size-1u-combo_at})]};
-					std::swap(subs.cell_tags[o2x_t{sub_z-1u}], entry);
+					std::swap(subs.cell_tags[sub_z.prev()], entry);
 					--sub_z;
 				}
 				subs.is_begin.set(*sub_z);

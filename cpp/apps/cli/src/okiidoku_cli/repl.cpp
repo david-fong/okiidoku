@@ -63,10 +63,10 @@ namespace okiidoku::cli {
 		const auto token_pos {cmd_line.find(' ')};
 		// Very simple parsing: Assumes no leading spaces, and does not
 		// trim leading or trailing spaces from the arguments substring.
-		const std::string_view cmd_name {cmd_line.substr(0, token_pos)};
+		const std::string_view cmd_name {cmd_line.substr(0u, token_pos)};
 		const std::string_view cmd_args {(token_pos == std::string_view::npos)
 			? ""
-			:  cmd_line.substr(token_pos + 1, std::string_view::npos)}
+			:  cmd_line.substr(token_pos + 1u, std::string_view::npos)}
 			;
 		const auto it {Command::enum_str_to_enum.find(cmd_name)};
 		if (it == Command::enum_str_to_enum.end()) {

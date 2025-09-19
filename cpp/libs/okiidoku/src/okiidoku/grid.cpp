@@ -152,9 +152,7 @@ namespace okiidoku::visitor {
 	Grid::val_t Grid::at_rmi(const ints::o4x_t rmi) const noexcept {
 		switch (this->get_order()) {
 		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-		case O_: return this->unchecked_get_mono_exact<O_>().at_rmi( \
-			mono::Ints<O_>::o4x_t{rmi} \
-		);
+		case O_: return this->unchecked_get_mono_exact<O_>().at_rmi(rmi);
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
 		default: OKIIDOKU_UNREACHABLE;
@@ -164,10 +162,7 @@ namespace okiidoku::visitor {
 	Grid::val_t Grid::at(const ints::o2x_t row, const ints::o2x_t col) const noexcept {
 		switch (this->get_order()) {
 		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-		case O_: return this->unchecked_get_mono_exact<O_>().at( \
-			mono::Ints<O_>::o2x_t{row}, \
-			mono::Ints<O_>::o2x_t{col} \
-		);
+		case O_: return this->unchecked_get_mono_exact<O_>().at(row, col);
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
 		default: OKIIDOKU_UNREACHABLE;

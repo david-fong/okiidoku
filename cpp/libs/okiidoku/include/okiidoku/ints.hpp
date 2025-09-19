@@ -232,7 +232,8 @@ namespace okiidoku::mono {
 		// TODO move this into dedicated iter_x class?
 		[[nodiscard, gnu::pure]] constexpr auto  begin() const noexcept { check(); return Int{0u}; }
 		[[nodiscard, gnu::pure]] constexpr auto  end()   const noexcept { check(); return *this; }
-		[[nodiscard, gnu::pure]] constexpr auto  next()  const noexcept { check(); return Int{val_+1u}; }
+		[[nodiscard, gnu::pure]] constexpr auto  next()  const noexcept { check(); OKIIDOKU_CONTRACT_USE(val_ <  max      ); return Int             {val_+1u}; }
+		[[nodiscard, gnu::pure]] constexpr auto  prev()  const noexcept { check(); OKIIDOKU_CONTRACT_USE(val_ >= val_t{0u}); return Int<max-1u,kind>{val_-1u}; }
 		template<max_t M, IntKind K> requires(M > 0u) [[gnu::pure]] constexpr
 		friend Int<max-1u,kind> operator*(const Int<M,K>& it) noexcept {
 			it.check(); OKIIDOKU_CONTRACT_USE(it.val_ < M);
@@ -366,8 +367,8 @@ namespace okiidoku::mono {
 		Ints() = delete;
 
 		#define DEFINE_OX_TYPES(P_, SUFFIX_, MAX_) \
-		using o##P_##SUFFIX_##_t  = Int<(MAX_), IntKind::fast >; \
-		using o##P_##SUFFIX_##s_t = Int<(MAX_), IntKind::small>; \
+		using o##P_##SUFFIX_##_t  = Int<std::uintmax_t{MAX_}, IntKind::fast >; \
+		using o##P_##SUFFIX_##s_t = Int<std::uintmax_t{MAX_}, IntKind::small>; \
 		\
 		static_assert(sizeof(o##P_##SUFFIX_## _t) == sizeof(typename o##P_##SUFFIX_## _t::val_t)); \
 		static_assert(sizeof(o##P_##SUFFIX_##s_t) == sizeof(typename o##P_##SUFFIX_##s_t::val_t)); \
@@ -375,16 +376,16 @@ namespace okiidoku::mono {
 		static_assert( std::is_trivially_copyable_v<o##P_##SUFFIX_##s_t>); \
 		static_assert( std::is_nothrow_convertible_v<o##P_##SUFFIX_## _t, o##P_##SUFFIX_##s_t>, "can convert fast to small"); \
 		static_assert( std::is_nothrow_convertible_v<o##P_##SUFFIX_##s_t, o##P_##SUFFIX_## _t>, "can convert small to fast"); \
-		static_assert( std::is_nothrow_convertible_v<Int<(MAX_)-1u>,o##P_##SUFFIX_## _t>, "can convert from narrower Int"); \
-		static_assert( std::is_nothrow_convertible_v<Int<(MAX_)-1u>,o##P_##SUFFIX_##s_t>, "can convert from narrower Int"); \
-		static_assert(!std::is_nothrow_convertible_v<Int<(MAX_)+1u>,o##P_##SUFFIX_## _t>, "no implicit conversion from sentinel type"); \
-		static_assert(!std::is_nothrow_convertible_v<Int<(MAX_)+1u>,o##P_##SUFFIX_##s_t>, "no implicit conversion from sentinel type"); \
-		static_assert(!std::is_nothrow_convertible_v<Int<(MAX_)+1u,IntKind::small>,o##P_##SUFFIX_## _t>, "no implicit conversion from sentinel type"); \
-		static_assert(!std::is_nothrow_convertible_v<Int<(MAX_)+1u,IntKind::small>,o##P_##SUFFIX_##s_t>, "no implicit conversion from sentinel type"); \
-		static_assert( std::is_nothrow_constructible_v<o##P_##SUFFIX_## _t,Int<(MAX_)+1u>>, "explicit conversion from sentinel type"); \
-		static_assert( std::is_nothrow_constructible_v<o##P_##SUFFIX_##s_t,Int<(MAX_)+1u>>, "explicit conversion from sentinel type"); \
-		static_assert( std::is_nothrow_constructible_v<o##P_##SUFFIX_## _t,Int<(MAX_)+1u,IntKind::small>>, "explicit conversion from sentinel type"); \
-		static_assert( std::is_nothrow_constructible_v<o##P_##SUFFIX_##s_t,Int<(MAX_)+1u,IntKind::small>>, "explicit conversion from sentinel type");
+		static_assert( std::is_nothrow_convertible_v<Int<std::uintmax_t{(MAX_)-1u}>,o##P_##SUFFIX_## _t>, "can convert from narrower Int"); \
+		static_assert( std::is_nothrow_convertible_v<Int<std::uintmax_t{(MAX_)-1u}>,o##P_##SUFFIX_##s_t>, "can convert from narrower Int"); \
+		static_assert(!std::is_nothrow_convertible_v<Int<std::uintmax_t{(MAX_)+1u}>,o##P_##SUFFIX_## _t>, "no implicit conversion from sentinel type"); \
+		static_assert(!std::is_nothrow_convertible_v<Int<std::uintmax_t{(MAX_)+1u}>,o##P_##SUFFIX_##s_t>, "no implicit conversion from sentinel type"); \
+		static_assert(!std::is_nothrow_convertible_v<Int<std::uintmax_t{(MAX_)+1u},IntKind::small>,o##P_##SUFFIX_## _t>, "no implicit conversion from sentinel type"); \
+		static_assert(!std::is_nothrow_convertible_v<Int<std::uintmax_t{(MAX_)+1u},IntKind::small>,o##P_##SUFFIX_##s_t>, "no implicit conversion from sentinel type"); \
+		static_assert( std::is_nothrow_constructible_v<o##P_##SUFFIX_## _t,Int<std::uintmax_t{(MAX_)+1u}>>, "explicit conversion from sentinel type"); \
+		static_assert( std::is_nothrow_constructible_v<o##P_##SUFFIX_##s_t,Int<std::uintmax_t{(MAX_)+1u}>>, "explicit conversion from sentinel type"); \
+		static_assert( std::is_nothrow_constructible_v<o##P_##SUFFIX_## _t,Int<std::uintmax_t{(MAX_)+1u},IntKind::small>>, "explicit conversion from sentinel type"); \
+		static_assert( std::is_nothrow_constructible_v<o##P_##SUFFIX_##s_t,Int<std::uintmax_t{(MAX_)+1u},IntKind::small>>, "explicit conversion from sentinel type");
 
 		DEFINE_OX_TYPES(1, i,  O)
 		DEFINE_OX_TYPES(2, i,  O*O)
@@ -394,11 +395,11 @@ namespace okiidoku::mono {
 		DEFINE_OX_TYPES(2, x,  (O*O) -1u)
 		DEFINE_OX_TYPES(3, x,  (O*O*O) -1u)
 		DEFINE_OX_TYPES(4, x,  (O*O*O*O) -1u)
-		DEFINE_OX_TYPES(2, x1 ,(O*O) -O)
-		DEFINE_OX_TYPES(3, x1 ,(O*O*O) -O)
-		DEFINE_OX_TYPES(4, x1 ,(O*O*O*O) -O)
-		DEFINE_OX_TYPES(3, x2 ,(O*O*O) -(O*O))
-		DEFINE_OX_TYPES(4, x2 ,(O*O*O*O) -(O*O))
+		DEFINE_OX_TYPES(2, x1 ,(O*O) - (O))
+		DEFINE_OX_TYPES(3, x1 ,(O*O*O) - (O))
+		DEFINE_OX_TYPES(4, x1 ,(O*O*O*O) - (O))
+		DEFINE_OX_TYPES(3, x2 ,(O*O*O) - (O*O))
+		DEFINE_OX_TYPES(4, x2 ,(O*O*O*O) - (O*O))
 		#undef DEFINE_OX_TYPES
 
 		static constexpr o1i_t O1 {o1i_t::max};

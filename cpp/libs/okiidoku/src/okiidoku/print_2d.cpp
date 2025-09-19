@@ -20,11 +20,11 @@ namespace okiidoku { namespace {
 		const auto O2 {static_cast<okiidoku::visitor::ints::o2i_t>(O*O)};
 		const auto& prefs {emoji::top_set_preferences};
 		std::vector<size_t> shuffled_sets(emoji::sets.size());
-		std::iota(shuffled_sets.begin(), shuffled_sets.end(), size_t{0});
+		std::iota(shuffled_sets.begin(), shuffled_sets.end(), 0uz);
 		{
 			using rng_t = std::minstd_rand; // other good LCG parameters: https://arxiv.org/pdf/2001.05304v3.pdf
 			rng_t rng {rng_seed};
-			for (size_t b {0}, e_i_ {0}; b != prefs.back(); ++e_i_) {
+			for (size_t b {0uz}, e_i_ {0uz}; b != prefs.back(); ++e_i_) {
 				const size_t e {prefs[e_i_]};
 				std::shuffle(
 					std::next(shuffled_sets.begin(), static_cast<long>(b)),
@@ -36,12 +36,12 @@ namespace okiidoku { namespace {
 		}
 		// first try to find a single set large enough:
 		// unlike before, don't use anything not in top prefs list here.
-		for (size_t b {0}, e_i_ {0}; e_i_ < prefs.size(); ++e_i_) {
+		for (size_t b {0uz}, e_i_ {0uz}; e_i_ < prefs.size(); ++e_i_) {
 			const size_t e {prefs[e_i_]};
 			for (size_t i {b}; i < e; ++i) {
 				if (emoji::sets.at(shuffled_sets.at(i)).entries.size() >= O2) {
-					shuffled_sets[0] = shuffled_sets[i];
-					shuffled_sets.resize(1);
+					shuffled_sets[0uz] = shuffled_sets[i];
+					shuffled_sets.resize(1uz);
 					return shuffled_sets;
 			}	}
 			b = e;
@@ -66,8 +66,8 @@ namespace okiidoku {
 		const auto print_box_row_sep_string_ {[&os, O](const Order border_i) -> void {
 			OKIIDOKU_CONTRACT_USE(border_i <= O);
 			#define M_NOOK(NOOK_T, NOOK_C, NOOK_B) \
-			if      (border_i == 0) [[unlikely]] { os << (NOOK_T); } \
-			else if (border_i == O) [[unlikely]] { os << (NOOK_B); } \
+			if      (border_i == 0u) [[unlikely]] { os << (NOOK_T); } \
+			else if (border_i == O ) [[unlikely]] { os << (NOOK_B); } \
 			else                    { os << (NOOK_C); }
 			M_NOOK(" ┌", " ├", " └")
 			for (auto box_col {0uL}; box_col < O; ++box_col) {
@@ -91,18 +91,18 @@ namespace okiidoku {
 		}};
 		const auto emoji_sets {make_random_emoji_set(O, rng_seed)};
 
-		for (o2i_t row {0}; row < O2; ++row) {
-			if (row % O == 0) [[unlikely]] {
+		for (o2i_t row {0u}; row < O2; ++row) {
+			if (row % O == 0u) [[unlikely]] {
 				print_box_row_sep_strings(row / O);
 			}
 			os << '\n';
-			for (std::size_t grid_i {0}; grid_i < grid_views.size(); ++grid_i) {
-				for (o2i_t col {0}; col < O2; ++col) {
-					if ((col % O) == 0) [[unlikely]] { os << " │"; }
+			for (std::size_t grid_i {0uz}; grid_i < grid_views.size(); ++grid_i) {
+				for (o2i_t col {0u}; col < O2; ++col) {
+					if ((col % O) == 0u) [[unlikely]] { os << " │"; }
 
-					auto val {o2i_t{grid_views[grid_i].operator()(
+					o2i_t val {grid_views[grid_i].operator()(
 						static_cast<visitor::ints::o4xs_t>((row * O2) + col)
-					)}};
+					)};
 					if (val == O2) {
 						os << "  ";
 						continue;
@@ -117,7 +117,7 @@ namespace okiidoku {
 					}
 				}
 				os << " │";
-				if (grid_i != grid_views.size() - 1) {
+				if (grid_i != grid_views.size() - 1u) {
 					os << "   ";
 				}
 			}

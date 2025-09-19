@@ -36,7 +36,7 @@ namespace okiidoku::mono::detail::solver {
 				cell_tag.count_cache = T::O2;
 			}
 			subs.is_begin.unset_all();
-			subs.is_begin.set(o2x_t{0u});
+			subs.is_begin.set(0u);
 		}}
 
 		found_queues_.clear();

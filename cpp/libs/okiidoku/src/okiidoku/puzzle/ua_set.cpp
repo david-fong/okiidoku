@@ -40,8 +40,8 @@ namespace okiidoku::mono { namespace {
 			}}
 			return map;
 		}()};
-		for (o1i_t chute_line_a {0u}; o1i_t{chute_line_a+1u} < T::O1; ++chute_line_a) {
-		for (o1i_t chute_line_b {chute_line_a+1u}; chute_line_b < T::O1; ++chute_line_b) {
+		for (o1i_t chute_line_a {0u}; chute_line_a.next() < T::O1; ++chute_line_a) {
+		for (o1i_t chute_line_b {chute_line_a.next()}; chute_line_b < T::O1; ++chute_line_b) {
 			for (const auto slice_c : T::O2) {
 				const auto c_a_rmi {chute_cell_to_rmi<O>(line_type, chute, (T::O2*(*chute_line_a))+slice_c)};
 				const auto c_b_rmi {chute_cell_to_rmi<O>(line_type, chute, (T::O2*(*chute_line_b))+slice_c)};

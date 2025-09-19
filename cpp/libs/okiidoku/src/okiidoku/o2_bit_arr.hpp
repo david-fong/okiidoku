@@ -48,6 +48,7 @@ namespace okiidoku::mono {
 		static_assert(  num_words > 0u);
 		static_assert(( num_words     * word_t_num_bits) >= T::O2, "enough words"   );
 		static_assert(((num_words-1u) * word_t_num_bits)  < T::O2, "no excess words");
+		static_assert(word_t_num_bits <= T::O2);
 
 		/** \pre `bit_i < T::O2`. */
 		[[nodiscard, gnu::const]]
@@ -211,7 +212,7 @@ namespace okiidoku::mono {
 					OKIIDOKU_CONTRACT_USE(arr_.words_[word_i] != 0);
 					auto& word {arr_.words_[word_i]};
 					OKIIDOKU_CONTRACT_USE(((word_i * word_t_num_bits) + std::countr_zero(word)) < T::O2);
-					i_ = o2i_t{(word_i * word_t_num_bits) + std::countr_zero(word)};
+					i_ = (word_i * word_t_num_bits) + std::countr_zero(word);
 					word &= static_cast<word_t>(word-word_t{1}); // unset lowest bit
 				} else {
 					i_ = T::O2;

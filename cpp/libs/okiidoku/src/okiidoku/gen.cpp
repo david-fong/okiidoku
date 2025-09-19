@@ -26,7 +26,7 @@ namespace okiidoku::mono { namespace {
 		using count_t = typename T::o1is_t;
 		// constexpr SymCountsForChuteHouses() noexcept { store_.fill(count_t{0u}); }
 		[[nodiscard, gnu::pure]] o3i_t count_num_missing_syms() const noexcept {
-			return o3i_t{stdr::count(store_, count_t{0u})};
+			return stdr::count(store_, count_t{0u});
 		}
 		template<class Self> [[nodiscard, gnu::pure]]
 		auto&& ch_count_sym(this Self&& self, const ch_t ch, const sym_t sym) noexcept {
