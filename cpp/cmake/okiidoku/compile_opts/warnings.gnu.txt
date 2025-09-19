@@ -1,0 +1,17 @@
+-Wall -Wextra -Wpedantic -pedantic-errors
+-Wold-style-cast
+-Wvla
+-Wconversion -Wsign-conversion
+-Wdouble-promotion
+
+-Wdisabled-optimization
+
+-Wformat=2 -Werror=format-security
+-Wcast-qual -Wcast-align
+-Wshadow -Woverloaded-virtual
+-Wnon-virtual-dtor
+-Wenum-compare -Wenum-conversion
+-Wmissing-declarations -Wunused-macros
+-Wsuggest-override
+-Wmismatched-tags -Wextra-semi
+-Wundef

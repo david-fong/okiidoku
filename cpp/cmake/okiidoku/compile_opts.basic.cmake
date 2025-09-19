@@ -136,57 +136,25 @@ if(MSVC)
 		/W4 # highest warnings level
 	)
 else()
-	# set(flags_file "${okiidoku_SOURCE_DIR}/cmake/okiidoku/compile_opts/warnings.gcc.txt")
+	set(flag_file_dir "${okiidoku_SOURCE_DIR}/cmake/okiidoku/compile_opts")
 	# set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${flags_file}")
 	target_compile_definitions(okiidoku_compiler_warnings INTERFACE
 		"$<${debug_configs}:_GLIBCXX_ASSERTIONS>"
 	)
 	target_compile_options(okiidoku_compiler_warnings INTERFACE
 		-Wfatal-errors # stop compilation on first error. I found it hard to read multiple.
-		# "@${flags_file}"
-		-Wall -Wextra -Wpedantic -pedantic-errors
-		-Wold-style-cast
-		-Wvla # maybe put this in the project-root cmake file
-		-Wconversion -Wsign-conversion #-Warith-conversion
-		-Wdouble-promotion
+		"@${flag_file_dir}/warnings.gnu.txt"
+		# -Warith-conversion
 		# -Wframe-larger-than=byte-size -Wstack-usage=byte-size
-
-		-Wdisabled-optimization # not an error. notification that function is too big. gcc gave up on optimizing.
-
-		-Wformat=2 -Werror=format-security
-		-Wcast-qual -Wcast-align
-		-Wshadow -Woverloaded-virtual
-		-Wnon-virtual-dtor
-		# -Wnoexcept
-		-Wenum-compare -Wenum-conversion
-		-Wmissing-declarations -Wunused-macros
-		-Wsuggest-override
-		-Wmismatched-tags -Wextra-semi
-		-Wundef # warn on undefined identifier used in `#if`
 	)
 	if((CMAKE_CXX_COMPILER_ID MATCHES [[Clang]]) OR EMSCRIPTEN)
 		target_compile_options(okiidoku_compiler_warnings INTERFACE
 			-Wimplicit-fallthrough
-			-Wno-unknown-attributes # I'd like to use this, but it's just too annoying, flagging benign stuff.
+			-Wno-unknown-attributes # (I'd like to use this, but it's just too annoying, flagging benign stuff).
 		)
 	elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 		target_compile_options(okiidoku_compiler_warnings INTERFACE
-			-Wtrampolines
-			-Wimplicit-fallthrough=5
-
-			-Wlogical-op
-			-Wduplicated-cond
-			-Walloc-zero
-			-Wuseless-cast
-
-			-Wredundant-tags
-
-			-Wsuggest-final-types
-			-Wsuggest-final-methods
-			-Wsuggest-attribute=pure
-			-Wsuggest-attribute=const
-			-Wsuggest-attribute=noreturn
-			-Wnrvo
+			"@${flag_file_dir}/warnings.gcc.txt"
 
 			# -Wunsafe-loop-optimizations # only meaningful with -funsafe-loop-optimizations
 

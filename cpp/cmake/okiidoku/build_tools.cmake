@@ -43,7 +43,7 @@ endif()
 
 
 # ninjatracing
-# TODO.wait this might be unnecessary in the future? I vaguely recall hearing something about builtin build perf tracing but can't remember where. might have been https://www.kitware.com/webinars/cmake-4-0-what-you-need-to-know/
+# TODO.wait https://www.kitware.com/new-cmake-instrumentation-feature-provides-detailed-timing-of-builds/  https://www.kitware.com/tag/cmake/
 if(CMAKE_GENERATOR MATCHES [[^Ninja]])
 install(CODE "
 file(MAKE_DIRECTORY \"${OKIIDOKU_DATA_OUTPUT_DIRECTORY}\")

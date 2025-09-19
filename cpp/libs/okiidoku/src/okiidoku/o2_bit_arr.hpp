@@ -38,10 +38,10 @@ namespace okiidoku::mono {
 		// >;
 	private:
 		// note: use of one byte is safe for grid orders < 128. that should be fine.
-		using word_bit_i_t  = detail::Int<std::min(T::O2.max, 8u * sizeof(word_t))>;
-		using word_bit_ix_t = detail::Int<word_bit_i_t::max-1u>;
-		using word_i_t  = detail::Int<(T::O2.max + word_bit_i_t::max-1u) / word_bit_i_t::max>;
-		using word_ix_t = detail::Int<word_i_t::max-1u>;
+		using word_bit_i_t  = Int<std::min(std::uintmax_t{T::O2}, std::uintmax_t{8u} * sizeof(word_t))>;
+		using word_bit_ix_t = Int<word_bit_i_t::max-1u>;
+		using word_i_t  = Int<(std::uintmax_t{T::O2} + word_bit_i_t::max-1u) / word_bit_i_t::max>;
+		using word_ix_t = Int<word_i_t::max-1u>;
 		static constexpr word_bit_i_t word_t_num_bits {word_bit_i_t::max};
 		static constexpr word_i_t     num_words       {word_i_t::max};
 		static constexpr word_bit_i_t num_excess_bits {(num_words * word_t_num_bits) - T::O2};

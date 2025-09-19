@@ -15,7 +15,10 @@ static_assert(__EMSCRIPTEN__); // https://emscripten.org/docs/compiling/Building
 #include <okiidoku/grid.hpp>
 
 #include <sstream>
-#include <random> // mt19937_64
+#include <string>
+#include <random>  // mt19937_64
+#include <cstdint>
+#include <type_traits>
 
 // https://github.com/emscripten-core/emscripten/issues/13902 unint64_t is passed through to JS as a signed value instead #13902
 
@@ -54,6 +57,43 @@ namespace okiidoku::visitor { namespace {
 	// TODO.low define wrappers that return undefined or throw on contract violations / out of bounds. https://emscripten.org/docs/porting/connecting_cpp_and_javascript/embind.html#non-member-functions-on-the-javascript-prototype
 }}
 
+namespace emscripten::internal {
+	template<template<std::uintmax_t M, okiidoku::mono::IntKind K> typename Int, std::uintmax_t M, okiidoku::mono::IntKind K>
+	requires(std::is_same_v<Int<M,K>, okiidoku::mono::Int<M,K>>)
+	struct BindingType<Int<M,K>> {
+		using ValBinding = BindingType<typename Int<M,K>::val_t>;
+		using WireType = ValBinding::WireType;
+		static WireType toWireType(const Int<M,K>& i, rvp::default_tag) { // C++ to JS
+			return ValBinding::toWireType(i.val(), rvp::default_tag{});
+		}
+		static Int<M,K> fromWireType(WireType value) { // JS to C++
+			return ValBinding::fromWireType(value);
+		}
+	};
+	#define DEFINE_OX_TYPE_TYPEIDS(O_, WHICH) \
+		template struct BindingType<okiidoku::mono::Ints<O_>::o##WHICH##_t>; \
+		template<typename T> requires(std::is_same_v<typename Canonicalized<T>::type, typename okiidoku::mono::Ints<O_>::o##WHICH##_t>) \
+		struct TypeID<T> { static constexpr TYPEID get() { return TypeID<typename okiidoku::mono::Ints<O_>::o##WHICH##_t::val_t>::get(); } };
+	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
+		DEFINE_OX_TYPE_TYPEIDS(O_, 1i ) \
+		DEFINE_OX_TYPE_TYPEIDS(O_, 1is) \
+		DEFINE_OX_TYPE_TYPEIDS(O_, 2x ) \
+		DEFINE_OX_TYPE_TYPEIDS(O_, 2i ) \
+		DEFINE_OX_TYPE_TYPEIDS(O_, 2xs) \
+		DEFINE_OX_TYPE_TYPEIDS(O_, 2is) \
+		DEFINE_OX_TYPE_TYPEIDS(O_, 3x ) \
+		DEFINE_OX_TYPE_TYPEIDS(O_, 3i ) \
+		DEFINE_OX_TYPE_TYPEIDS(O_, 3xs) \
+		DEFINE_OX_TYPE_TYPEIDS(O_, 3is) \
+		DEFINE_OX_TYPE_TYPEIDS(O_, 4x ) \
+		DEFINE_OX_TYPE_TYPEIDS(O_, 4i ) \
+		DEFINE_OX_TYPE_TYPEIDS(O_, 4xs) \
+		DEFINE_OX_TYPE_TYPEIDS(O_, 4is)
+	OKIIDOKU_FOREACH_O_DO_EMIT
+	#undef OKIIDOKU_FOREACH_O_EMIT
+	#undef DEFINE_OX_TYPE_TYPEIDS
+}
+
 // static constructor function:
 EMSCRIPTEN_BINDINGS(okiidoku) {
 	namespace em = ::emscripten;
@@ -63,6 +103,10 @@ EMSCRIPTEN_BINDINGS(okiidoku) {
 
 	em::function("isOrderCompiled", &oki::is_order_compiled);
 
+	em::enum_<oki_m::IntKind>("IntKind")
+		.value("FAST",  oki_m::IntKind::fast)
+		.value("SMALL", oki_m::IntKind::small)
+		;
 	em::class_<oki::em::Rng>("Rng")
 		.function("seed", &oki::em::Rng::seed)
 		.function("getRngSeed", &oki::em::Rng::get)
@@ -72,7 +116,7 @@ EMSCRIPTEN_BINDINGS(okiidoku) {
 	em::class_<oki_v::Grid>("Grid")
 		.constructor<oki::Order>()
 		// .function("getMonoOrder", &oki_v::Grid::get_order) // TODO need to define the base class to do this https://emscripten.org/docs/porting/connecting_cpp_and_javascript/embind.html#base-classes
-		.function("atRmi",       &oki_v::Grid::at_rmi)
+		.function("at",          &oki_v::Grid::at_rmi)
 		.function("at",          &oki_v::Grid::at)
 		.function("followsRule", &oki_v::grid_follows_rule)
 		.function("isFilled",    &oki_v::grid_is_filled)
@@ -84,6 +128,6 @@ EMSCRIPTEN_BINDINGS(okiidoku) {
 	// em::function("gridIsEmpty",     &oki_v::grid_is_empty);
 
 	em::function("initMostCanonicalGrid", &oki_v::init_most_canonical_grid);
-	em::function("generateShuffled", em::select_overload<void(oki_v::Grid&                 )>(&oki::em::generate_shuffled));
-	em::function("generateShuffled", em::select_overload<void(oki_v::Grid&, oki::rng_seed_t)>(&oki_v::generate_shuffled));
+	em::function("generateShuffled", em::select_overload<void (oki_v::Grid&, oki::rng_seed_t rng_seed)>(&oki_v::generate_shuffled));
+	// em::function("generateShuffled", em::select_overload<oki_v::Grid (oki::Order, oki::rng_seed_t)>(&oki_v::generate_shuffled), em::return_value_policy::take_ownership{});
 }

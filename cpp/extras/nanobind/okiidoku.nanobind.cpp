@@ -28,8 +28,9 @@ NB_MODULE(okiidoku_nb, m) { //
 	m.doc() = "nanobind build of okiidoku";
 
 	nb::class_<oki_v::Grid>(m, "Grid")
-		.def(nb::init<>())
-		.def(nb::init<oki_v::Grid&>());
+		// .def(nb::init<>())
+		// .def(nb::init<oki_v::Grid&>())
+		;
 
 	// m.def("generate_shuffled", static_cast<void(*)(oki_v::Grid&, oki_m::rng_seed_t)>(&oki_v::generate_shuffled), "generate a random filled sudoku grid");
 }

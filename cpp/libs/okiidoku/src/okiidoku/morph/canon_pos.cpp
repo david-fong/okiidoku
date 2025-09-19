@@ -35,8 +35,8 @@ namespace okiidoku::mono { namespace {
 
 		struct PolarState {
 			line_map_t<O> to_og {Transformation<O>::identity.row_map};
-			detail::Ties<O, 2> line_ties {};
-			detail::Ties<O, 1> chute_ties {};
+			detail::Ties<O,2> line_ties {};
+			detail::Ties<O,1> chute_ties {};
 
 			explicit PolarState() noexcept {
 				line_ties.update([](auto a, auto b)noexcept{
@@ -122,7 +122,7 @@ namespace okiidoku::mono { namespace {
 		}
 		const auto chute_tie_data {[&](o2i_t chute) {
 			namespace v = ::ranges::views;
-			return to_tied | v::drop((chute*T::O1).get_underlying()) | v::take(T::O1.get_underlying()) | v::transform([&](auto i){ return v::common(table.row_span_at(i)); }) | v::join;
+			return to_tied | v::drop((chute*T::O1).val()) | v::take(T::O1.val()) | v::transform([&](auto i){ return v::common(table.row_span_at(i)); }) | v::join;
 		}};
 		// try to resolve tied chute ranges:
 		for (const auto tie : chute_ties) {

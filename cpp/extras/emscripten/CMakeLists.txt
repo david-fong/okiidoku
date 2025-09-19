@@ -54,7 +54,6 @@ okiidoku_install_target(okiidoku_js)
 # TODO.wait https://gitlab.kitware.com/cmake/cmake/-/issues/20745
 include(GNUInstallDirs)
 set(src "$<TARGET_FILE_DIR:okiidoku_js>/$<TARGET_FILE_BASE_NAME:okiidoku_js>")
-set(dest "${CMAKE_CURRENT_SOURCE_DIR}/examples/node/build/$<CONFIG>")
 # intentional abuse of BIN type to get sibling destination
 install(FILES "${src}.d.ts" "$<${debug_configs}:${src}.wasm.map>" TYPE BIN COMPONENT okiidoku_development)
 install(FILES "${src}.wasm" TYPE BIN COMPONENT okiidoku_runtime)
@@ -66,13 +65,12 @@ install(DIRECTORY examples TYPE DOC COMPONENT okiidoku_development
 )
 # make a symlink so the examples can use prettier paths.
 # too bad can't use execute_process or file(CREATE_LINK) because there's a generator expression in CMAKE_LIBRARY_OUTPUT_DIRECTORY.
+set(dest "${CMAKE_CURRENT_SOURCE_DIR}/examples/node/build")
 set(c "${CMAKE_COMMAND};-E")
 add_custom_command(TARGET okiidoku_js POST_BUILD
 	COMMAND "${c};make_directory;${dest}"
-	COMMAND "${c};create_symlink;$<TARGET_FILE:okiidoku_js>;${dest}/$<TARGET_FILE_NAME:okiidoku_js>"
-	COMMAND "${c};create_symlink;${src}.d.ts;${dest}/okiidoku.d.ts"
-	COMMAND "${c};create_symlink;${src}.wasm;${dest}/okiidoku.wasm"
-	COMMAND "${c};create_symlink;${src}.wasm.map;${dest}/okiidoku.wasm.map"
-	COMMENT "Symlinking JS+WASM+TS target output files to examples directory for convenience"
+	COMMAND "${c};create_symlink;$<TARGET_FILE_DIR:okiidoku_js>;${dest}/$<CONFIG>"
+	BYPRODUCTS "${dest}/$<CONFIG>"
+	COMMENT "symlinking JS+WASM+TS target output files to examples directory for convenience"
 	VERBATIM COMMAND_EXPAND_LISTS
 )

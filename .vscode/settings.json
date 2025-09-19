@@ -46,6 +46,7 @@
 		".clang-tidy": "yaml",
 		"*.natvis": "xml",
 		"*.cmake.in": "cmake-documentation",
+		"**/cmake/**/compile_opts/**": "makefile",
 	},
 
 	"todo-tree.filtering.useBuiltInExcludes": "file excludes",
@@ -75,17 +76,12 @@
 	// 	"${workspaceFolder}/cpp/out/build/dev.gcc/compile_commands.json",
 	// 	// "${command:cmake.buildDirectory}/compile_commands.json",
 	// ],
-	"C_Cpp.default.defines": [
-		// intellisense chokes otherwise :/
-		"OKIIDOKU_EXPORT=",
-		"OKIIDOKU_KEEP_FOR_DEBUG=",
-		"OKIIDOKU_UNREACHABLE",
-	],
+	"C_Cpp.default.defines": [],
 	"C_Cpp.default.browse.limitSymbolsToIncludedHeaders": true,
 	// "C_Cpp.default.browse.path": ["${workspaceFolder}"],
 	"C_Cpp.default.browse.path": [],
 	"C_Cpp.commentContinuationPatterns": [
-		{ "begin": "/**", "continue": "" },
+		{ "begin": "/\\*\\*", "continue": "" },
 	],
 
 	// https://vector-of-bool.github.io/docs/vscode-cmake-tools/settings.html
@@ -106,6 +102,7 @@
 		},
 	},
 	"cmake.configureArgs": [
+		// "--warn-uninitialized",
 		"-D OKIIDOKU_BUILD_WITH_STATIC_ANALYZERS:BOOL=NO",
 	],
 }

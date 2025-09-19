@@ -15,6 +15,8 @@
 #include <compare>     //
 #include <cstdint>     // uint_...
 
+namespace emscripten::internal { template<typename T, typename> struct BindingType; }
+
 /** top-level namespace for the okiidoku project */
 namespace okiidoku {
 
@@ -150,197 +152,204 @@ namespace okiidoku::mono {
 		// 	// std::conditional_t<(N <= 128u), __uint128_t,
 		// 	void
 		// >>>>;
-
-		enum class IntKind : unsigned char {
-			small,
-			fast,
-		};
-		static constexpr IntKind pick_int_op_result_kind(const IntKind k1, const IntKind k2) noexcept {
-			return (k1 == IntKind::fast || k2 == IntKind::fast) ? IntKind::fast : IntKind::small;
-		}
-
-		template<std::uintmax_t max_, IntKind kind_ = IntKind::fast>
-		class Int {
-			template<std::uintmax_t M2, IntKind K2> friend class Int;
-			using max_t = std::uintmax_t;
-		public:
-			static constexpr max_t max {max_};
-			static constexpr IntKind kind {kind_};
-			using i_t = std::conditional_t<kind == IntKind::small,
-				uint_small_for_width_t<std::bit_width(max)>,
-				uint_fast_for_width_t<std::bit_width(max)>
-			>;
-			using difference_type = int_fast_for_max_t<max>;
-		private:
-			i_t val_ {0u};
-			static_assert(std::is_unsigned_v<i_t>);
-			static_assert(std::numeric_limits<i_t>::max() >= max, "has enough capacity");
-		public:
-			[[gnu::always_inline]] constexpr void check() const noexcept {
-				OKIIDOKU_CONTRACT_USE(val_ <= max);
-			}
-
-			constexpr Int() noexcept = default;
-			// constexpr Int(const Int& other) noexcept = default;
-
-			/** \pre `0 <= in <= max` */
-			template<class T_in> requires(std::integral<T_in> && std::numeric_limits<T_in>::max() <= std::numeric_limits<max_t>::max())
-			explicit constexpr Int(T_in in) noexcept: val_{static_cast<i_t>(in)} {
-				static_assert(!std::is_convertible_v<Int<max+1u,kind>,Int>); // see `Int<max+1u,>` constructor and `operator*()`.
-				static_assert(sizeof(T_in) <= sizeof(max_t));
-				if constexpr (std::is_signed_v<T_in>) {
-					OKIIDOKU_CONTRACT_USE(in >= 0);
-				}
-				OKIIDOKU_CONTRACT_USE(max_t(in) <= max);
-				check();
-			}
-
-			template<max_t M_from, IntKind K_from> requires(M_from <= max)
-			constexpr Int(const Int<M_from,K_from>& other) noexcept: Int{other.val_} { check(); }
-
-			template<IntKind K_from> // (index from sentinel/bound capacity)
-			explicit constexpr Int(const Int<max+1u,K_from>& other) noexcept: Int{other.val_} { check(); }
-
-			template<max_t M_from, IntKind K_from>
-			static constexpr Int unchecked_from(const Int<M_from,K_from>& other) noexcept {
-				OKIIDOKU_CONTRACT_USE(other.val_ <= max);
-				return Int{other.val_};
-			}
-
-			[[gnu::pure]] constexpr operator uint_fast_for_width_t<std::bit_width(max)>() const noexcept { check(); return static_cast<uint_small_for_width_t<std::bit_width(max)>>(val_); }
-			// template<class T> requires(std::unsigned_integral<T> && std::numeric_limits<T>::max() >= max)
-			// constexpr operator T() const noexcept { check(); return val_; }
-			// friend std::ostream& operator<<(std::ostream& os, const Int& obj) { return os << static_cast<max_t>(i.val_); }
-			[[nodiscard, gnu::pure]] constexpr i_t get_underlying() const noexcept { check(); return val_; }
-			[[nodiscard, gnu::pure]] constexpr Int<max, IntKind::fast>  as_fast()  const noexcept { return Int<max, IntKind::fast>{val_}; }
-			[[nodiscard, gnu::pure]] constexpr Int<max, IntKind::small> as_small() const noexcept { return Int<max, IntKind::small>{val_}; }
-			constexpr auto& operator++(   ) & noexcept { OKIIDOKU_CONTRACT_USE(val_ < max); ++val_; check(); return *this; }
-			constexpr auto  operator++(int) & noexcept { const auto old {*this}; operator++(); return old; }
-			constexpr auto& operator--(   ) & noexcept { OKIIDOKU_CONTRACT_USE(val_ > i_t{0u}); --val_; check(); return *this; }
-
-			// TODO move this into dedicated iter_x class?
-			[[nodiscard, gnu::pure]] constexpr auto  begin() const noexcept { check(); return Int{0u}; }
-			[[nodiscard, gnu::pure]] constexpr auto  end()   const noexcept { check(); return *this; }
-			[[nodiscard, gnu::pure]] constexpr auto  next()  const noexcept { check(); return Int{val_+1u}; }
-			template<max_t M, IntKind K> requires(M > 0u) [[gnu::pure]] constexpr friend
-			Int<max-1u,kind> operator*(const Int<M,K>& it) noexcept {
-				it.check(); OKIIDOKU_CONTRACT_USE(it.val_ < M);
-				return Int<M-1u,K>{it};
-			}
-
-			/// \pre `val_ + other.val_ <= max`
-			template<max_t MR, IntKind kind_2>
-			constexpr Int& operator+=(const Int<MR, kind_2>& other) & noexcept requires(MR <= max) {
-				check(); other.check();
-				OKIIDOKU_CONTRACT_USE(max_t{other.val_} <= max);
-				OKIIDOKU_CONTRACT_USE(max_t{val_} <= max_t{max - max_t{other.val_}}); // i.e. `val_ + other.val_ <= max`
-				OKIIDOKU_CONTRACT_USE(max_t{val_} + other.val_ <= max);
-				val_ += other.val_;
-				check();
-				return *this;
-			}
-
-			/// \pre `val_ - other.val_ >= 0`
-			template<max_t MR, IntKind kind_2>
-			constexpr Int& operator-=(const Int<MR, kind_2>& other) & noexcept requires(MR <= max) {
-				check(); other.check();
-				OKIIDOKU_CONTRACT_USE(other.val_ <= val_);
-				val_ -= other.val_;
-				check();
-				return *this;
-			}
-
-			/// \pre `other.val_ != 0`
-			template<max_t MR, IntKind kind_2> requires(MR > 0u)
-			constexpr Int& operator/=(const Int<MR, kind_2>& other) & noexcept requires(MR <= max) {
-				check(); other.check();
-				OKIIDOKU_CONTRACT_USE(other.val_ != i_t{0});
-				val_ /= other.val_;
-				check();
-				return *this;
-			}
-
-			template<max_t ML, IntKind KL, max_t MR, IntKind KR> constexpr friend std::strong_ordering operator<=>(const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept;
-			template<max_t ML, IntKind KL, max_t MR, IntKind KR> constexpr friend bool operator==(const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept;
-			template<max_t ML, IntKind KL, max_t MR, IntKind KR> constexpr friend bool operator!=(const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept;
-			template<max_t ML, IntKind KL, max_t MR, IntKind KR> constexpr friend bool operator<=(const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept;
-			template<max_t ML, IntKind KL, max_t MR, IntKind KR> constexpr friend bool operator< (const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept;
-			template<max_t ML, IntKind KL, max_t MR, IntKind KR> constexpr friend bool operator>=(const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept;
-			template<max_t ML, IntKind KL, max_t MR, IntKind KR> constexpr friend bool operator> (const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept;
-			template<max_t ML, IntKind KL, max_t MR, IntKind KR> constexpr friend auto operator+ (const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept;
-			template<max_t ML, IntKind KL, max_t MR, IntKind KR> requires(ML >= MR) constexpr friend auto operator-(const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept;
-			template<max_t ML, IntKind KL, max_t MR, IntKind KR> constexpr friend auto operator* (const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept;
-			template<max_t ML, IntKind KL, max_t MR, IntKind KR> requires(MR >  0u) constexpr friend auto operator/ (const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept;
-			template<max_t ML, IntKind KL, max_t MR, IntKind KR> requires(MR >  0u) constexpr friend auto operator%(const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept;
-			template<max_t MR, IntKind KR> requires(MR > 0u) constexpr friend auto operator%(const std::unsigned_integral auto lhs, const Int<MR,KR>& rhs) noexcept;
-		};
-
-
-		template<std::uintmax_t ML, IntKind KL, std::uintmax_t MR, IntKind KR> [[gnu::pure]] constexpr std::strong_ordering operator<=>(const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept { lhs.check(); rhs.check(); return lhs.val_ <=> rhs.val_; }
-		template<std::uintmax_t ML, IntKind KL, std::uintmax_t MR, IntKind KR> [[gnu::pure]] constexpr bool operator== (const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept { lhs.check(); rhs.check(); return lhs.val_ == rhs.val_; }
-		template<std::uintmax_t ML, IntKind KL, std::uintmax_t MR, IntKind KR> [[gnu::pure]] constexpr bool operator!= (const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept { lhs.check(); rhs.check(); return lhs.val_ != rhs.val_; }
-		template<std::uintmax_t ML, IntKind KL, std::uintmax_t MR, IntKind KR> [[gnu::pure]] constexpr bool operator<= (const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept { lhs.check(); rhs.check(); return lhs.val_ <= rhs.val_; }
-		template<std::uintmax_t ML, IntKind KL, std::uintmax_t MR, IntKind KR> [[gnu::pure]] constexpr bool operator<  (const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept { lhs.check(); rhs.check(); return lhs.val_ <  rhs.val_; }
-		template<std::uintmax_t ML, IntKind KL, std::uintmax_t MR, IntKind KR> [[gnu::pure]] constexpr bool operator>= (const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept { lhs.check(); rhs.check(); return lhs.val_ >= rhs.val_; }
-		template<std::uintmax_t ML, IntKind KL, std::uintmax_t MR, IntKind KR> [[gnu::pure]] constexpr bool operator>  (const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept { lhs.check(); rhs.check(); return lhs.val_ >  rhs.val_; }
-
-		template<std::uintmax_t ML, IntKind KL, std::uintmax_t MR, IntKind KR>
-		[[gnu::pure]] constexpr auto operator+(const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept {
-			lhs.check(); rhs.check();
-			constexpr auto m_out {ML + MR};
-			constexpr auto k_out {pick_int_op_result_kind(KL,KR)};
-			return Int<m_out,k_out>{lhs.val_ + rhs.val_};
-		}
-
-		/**
-		\pre `lhs >= rhs`
-		\note uses size of `lhs`. doesn't assume minimum value of `rhs`. */
-		template<std::uintmax_t ML, IntKind KL, std::uintmax_t MR, IntKind KR> requires(ML >= MR)
-		[[gnu::pure]] constexpr auto operator-(const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept {
-			lhs.check(); rhs.check();
-			constexpr auto m_out {ML};
-			constexpr auto k_out {pick_int_op_result_kind(KL,KR)};
-			return Int<m_out,k_out>{lhs.val_ - rhs.val_};
-		}
-
-		template<std::uintmax_t ML, IntKind KL, std::uintmax_t MR, IntKind KR>
-		[[gnu::pure]] constexpr auto operator*(const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept {
-			lhs.check(); rhs.check();
-			constexpr auto m_out {ML * MR};
-			constexpr auto k_out {pick_int_op_result_kind(KL,KR)};
-			return Int<m_out,k_out>{lhs.val_ * rhs.val_};
-		}
-
-		/// \pre `rhs` is its type's maximum value.
-		template<std::uintmax_t ML, IntKind KL, std::uintmax_t MR, IntKind KR> requires(MR > 0u)
-		[[gnu::pure]] constexpr auto operator/(const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept {
-			lhs.check(); rhs.check();
-			OKIIDOKU_CONTRACT_USE(rhs.val_ == MR);
-			constexpr auto m_out {ML / MR};
-			constexpr auto k_out {pick_int_op_result_kind(KL,KR)};
-			return Int<m_out,k_out>{lhs.val_ / rhs.val_};
-		}
-
-		template<std::uintmax_t ML, IntKind KL, std::uintmax_t MR, IntKind KR> requires(MR > 0u)
-		[[gnu::pure]] constexpr auto operator%(const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept {
-			lhs.check(); rhs.check();
-			constexpr auto m_out {MR - 1u};
-			constexpr auto k_out {pick_int_op_result_kind(KL,KR)};
-			const Int<m_out,k_out> ret {lhs.val_ % rhs.val_};
-			OKIIDOKU_CONTRACT_USE(ret.val_ < rhs.val_);
-			OKIIDOKU_CONTRACT_USE(ret < rhs);
-			return ret;
-		}
-		template<std::uintmax_t MR, IntKind KR> requires(MR > 0u)
-		[[gnu::pure]] constexpr auto operator%(const std::unsigned_integral auto lhs, const Int<MR,KR>& rhs) noexcept {
-			rhs.check();
-			const Int<MR-1,KR> ret {lhs % rhs.val_};
-			OKIIDOKU_CONTRACT_USE(ret.val_ < rhs.val_);
-			OKIIDOKU_CONTRACT_USE(ret < rhs);
-			return ret;
-		}
 	}
 	/// \endcond
+
+
+	enum class IntKind : unsigned char {
+		small,
+		fast,
+	};
+	static constexpr IntKind pick_int_op_result_kind(const IntKind k1, const IntKind k2) noexcept {
+		return (k1 == IntKind::fast || k2 == IntKind::fast) ? IntKind::fast : IntKind::small;
+	}
+
+	/** integer wrapper class with inclusive upper bound.
+	iterable with the upper bound as an excluded sentinel.
+	*/
+	template<std::uintmax_t max_, IntKind kind_ = IntKind::fast>
+	class Int {
+		template<std::uintmax_t M2, IntKind K2> friend class Int;
+		friend struct emscripten::internal::BindingType<Int, std::true_type>;
+		using max_t = std::uintmax_t;
+	public:
+		static constexpr max_t max {max_};
+		static constexpr IntKind kind {kind_};
+		using val_t = std::conditional_t<kind == IntKind::small,
+			detail::uint_small_for_width_t<std::bit_width(max)>,
+			detail::uint_fast_for_width_t<std::bit_width(max)>
+		>;
+		using difference_type = detail::int_fast_for_max_t<max>;
+	private:
+		val_t val_ {0u};
+		static_assert(std::is_unsigned_v<val_t>);
+		static_assert(std::numeric_limits<val_t>::max() >= max, "has enough capacity");
+	public:
+		[[gnu::always_inline]] constexpr void check() const noexcept {
+			OKIIDOKU_CONTRACT_USE(val_ <= max);
+		}
+
+		constexpr Int() noexcept = default;
+		// constexpr Int(const Int& other) noexcept = default;
+
+		/** \pre `0 <= in <= max` */
+		template<class T_in> requires(std::integral<T_in>)
+		constexpr Int(T_in in) noexcept: val_{static_cast<val_t>(in)} {
+			if constexpr (std::is_signed_v<T_in>) {
+				OKIIDOKU_CONTRACT_USE(in >= 0);
+			}
+			OKIIDOKU_CONTRACT_USE(static_cast<max_t>(in) <= max);
+			check();
+		}
+
+		// define implicit conversion from narrower `Int`.
+		template<max_t M_from, IntKind K_from> requires(M_from <= max)
+		constexpr Int(const Int<M_from,K_from>& other) noexcept: Int{other.val_} { check(); }
+
+		// define explicit conversion from `Int` "wider" by one,
+		// to allow cast to sentinel-exclusive-bound `Int` when iterating.
+		template<IntKind K_from>
+		explicit constexpr Int(const Int<max+1u,K_from>& other) noexcept: Int{other.val_} { check(); }
+
+		template<max_t M_from, IntKind K_from>
+		static constexpr Int unchecked_from(const Int<M_from,K_from>& other) noexcept {
+			OKIIDOKU_CONTRACT_USE(other.val_ <= max);
+			return Int{other.val_};
+		}
+
+		// define implicit conversion to a fast, builtin, unsigned integer type with enough capacity.
+		[[gnu::pure]] constexpr operator detail::uint_fast_for_width_t<std::bit_width(max)>() const noexcept { check(); return static_cast<detail::uint_small_for_width_t<std::bit_width(max)>>(val_); }
+		// template<class T> requires(std::unsigned_integral<T> && std::numeric_limits<T>::max() >= max)
+		// constexpr operator T() const noexcept { check(); return val_; }
+		// friend std::ostream& operator<<(std::ostream& os, const Int& obj) { return os << static_cast<max_t>(i.val_); }
+		[[nodiscard, gnu::pure]] constexpr val_t val() const noexcept { check(); return val_; }
+		[[nodiscard, gnu::pure]] constexpr Int<max, IntKind::fast>  as_fast()  const noexcept { return Int<max, IntKind::fast>{val_}; }
+		[[nodiscard, gnu::pure]] constexpr Int<max, IntKind::small> as_small() const noexcept { return Int<max, IntKind::small>{val_}; }
+		constexpr auto& operator++(   ) & noexcept { OKIIDOKU_CONTRACT_USE(val_ < max); ++val_; check(); return *this; }
+		constexpr auto  operator++(int) & noexcept { const auto old {*this}; operator++(); return old; }
+		constexpr auto& operator--(   ) & noexcept { OKIIDOKU_CONTRACT_USE(val_ > val_t{0u}); --val_; check(); return *this; }
+
+		// TODO move this into dedicated iter_x class?
+		[[nodiscard, gnu::pure]] constexpr auto  begin() const noexcept { check(); return Int{0u}; }
+		[[nodiscard, gnu::pure]] constexpr auto  end()   const noexcept { check(); return *this; }
+		[[nodiscard, gnu::pure]] constexpr auto  next()  const noexcept { check(); return Int{val_+1u}; }
+		template<max_t M, IntKind K> requires(M > 0u) [[gnu::pure]] constexpr
+		friend Int<max-1u,kind> operator*(const Int<M,K>& it) noexcept {
+			it.check(); OKIIDOKU_CONTRACT_USE(it.val_ < M);
+			return Int<M-1u,K>{it};
+		}
+
+		/// \pre `val_ + other.val_ <= max`
+		template<max_t MR, IntKind kind_2>
+		constexpr Int& operator+=(const Int<MR, kind_2>& other) & noexcept requires(MR <= max) {
+			check(); other.check();
+			OKIIDOKU_CONTRACT_USE(max_t{other.val_} <= max);
+			OKIIDOKU_CONTRACT_USE(max_t{val_} <= max_t{max - max_t{other.val_}}); // i.e. `val_ + other.val_ <= max`
+			OKIIDOKU_CONTRACT_USE(max_t{val_} + other.val_ <= max);
+			val_ += other.val_;
+			check();
+			return *this;
+		}
+
+		/// \pre `val_ - other.val_ >= 0`
+		template<max_t MR, IntKind kind_2>
+		constexpr Int& operator-=(const Int<MR, kind_2>& other) & noexcept requires(MR <= max) {
+			check(); other.check();
+			OKIIDOKU_CONTRACT_USE(other.val_ <= val_);
+			val_ -= other.val_;
+			check();
+			return *this;
+		}
+
+		/// \pre `other.val_ != 0`
+		template<max_t MR, IntKind kind_2> requires(MR > 0u)
+		constexpr Int& operator/=(const Int<MR, kind_2>& other) & noexcept requires(MR <= max) {
+			check(); other.check();
+			OKIIDOKU_CONTRACT_USE(other.val_ != val_t{0});
+			val_ /= other.val_;
+			check();
+			return *this;
+		}
+
+		template<max_t ML, IntKind KL, max_t MR, IntKind KR> constexpr friend std::strong_ordering operator<=>(const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept;
+		template<max_t ML, IntKind KL, max_t MR, IntKind KR> constexpr friend bool operator==(const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept;
+		template<max_t ML, IntKind KL, max_t MR, IntKind KR> constexpr friend bool operator!=(const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept;
+		template<max_t ML, IntKind KL, max_t MR, IntKind KR> constexpr friend bool operator<=(const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept;
+		template<max_t ML, IntKind KL, max_t MR, IntKind KR> constexpr friend bool operator< (const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept;
+		template<max_t ML, IntKind KL, max_t MR, IntKind KR> constexpr friend bool operator>=(const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept;
+		template<max_t ML, IntKind KL, max_t MR, IntKind KR> constexpr friend bool operator> (const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept;
+		template<max_t ML, IntKind KL, max_t MR, IntKind KR> constexpr friend auto operator+ (const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept;
+		template<max_t ML, IntKind KL, max_t MR, IntKind KR> requires(ML >= MR) constexpr friend auto operator-(const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept;
+		template<max_t ML, IntKind KL, max_t MR, IntKind KR> constexpr friend auto operator* (const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept;
+		template<max_t ML, IntKind KL, max_t MR, IntKind KR> requires(MR >  0u) constexpr friend auto operator/ (const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept;
+		template<max_t ML, IntKind KL, max_t MR, IntKind KR> requires(MR >  0u) constexpr friend auto operator%(const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept;
+		template<max_t MR, IntKind KR> requires(MR > 0u) constexpr friend auto operator%(const std::unsigned_integral auto lhs, const Int<MR,KR>& rhs) noexcept;
+	};
+
+
+	template<std::uintmax_t ML, IntKind KL, std::uintmax_t MR, IntKind KR> [[gnu::pure]] constexpr std::strong_ordering operator<=>(const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept { lhs.check(); rhs.check(); return lhs.val_ <=> rhs.val_; }
+	template<std::uintmax_t ML, IntKind KL, std::uintmax_t MR, IntKind KR> [[gnu::pure]] constexpr bool operator== (const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept { lhs.check(); rhs.check(); return lhs.val_ == rhs.val_; }
+	template<std::uintmax_t ML, IntKind KL, std::uintmax_t MR, IntKind KR> [[gnu::pure]] constexpr bool operator!= (const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept { lhs.check(); rhs.check(); return lhs.val_ != rhs.val_; }
+	template<std::uintmax_t ML, IntKind KL, std::uintmax_t MR, IntKind KR> [[gnu::pure]] constexpr bool operator<= (const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept { lhs.check(); rhs.check(); return lhs.val_ <= rhs.val_; }
+	template<std::uintmax_t ML, IntKind KL, std::uintmax_t MR, IntKind KR> [[gnu::pure]] constexpr bool operator<  (const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept { lhs.check(); rhs.check(); return lhs.val_ <  rhs.val_; }
+	template<std::uintmax_t ML, IntKind KL, std::uintmax_t MR, IntKind KR> [[gnu::pure]] constexpr bool operator>= (const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept { lhs.check(); rhs.check(); return lhs.val_ >= rhs.val_; }
+	template<std::uintmax_t ML, IntKind KL, std::uintmax_t MR, IntKind KR> [[gnu::pure]] constexpr bool operator>  (const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept { lhs.check(); rhs.check(); return lhs.val_ >  rhs.val_; }
+
+	template<std::uintmax_t ML, IntKind KL, std::uintmax_t MR, IntKind KR>
+	[[gnu::pure]] constexpr auto operator+(const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept {
+		lhs.check(); rhs.check();
+		constexpr auto m_out {ML + MR};
+		constexpr auto k_out {pick_int_op_result_kind(KL,KR)};
+		return Int<m_out,k_out>{lhs.val_ + rhs.val_};
+	}
+
+	/**
+	\pre `lhs >= rhs`
+	\note uses size of `lhs`. doesn't assume minimum value of `rhs`. */
+	template<std::uintmax_t ML, IntKind KL, std::uintmax_t MR, IntKind KR> requires(ML >= MR)
+	[[gnu::pure]] constexpr auto operator-(const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept {
+		lhs.check(); rhs.check();
+		constexpr auto m_out {ML};
+		constexpr auto k_out {pick_int_op_result_kind(KL,KR)};
+		return Int<m_out,k_out>{lhs.val_ - rhs.val_};
+	}
+
+	template<std::uintmax_t ML, IntKind KL, std::uintmax_t MR, IntKind KR>
+	[[gnu::pure]] constexpr auto operator*(const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept {
+		lhs.check(); rhs.check();
+		constexpr auto m_out {ML * MR};
+		constexpr auto k_out {pick_int_op_result_kind(KL,KR)};
+		return Int<m_out,k_out>{lhs.val_ * rhs.val_};
+	}
+
+	/// \pre `rhs` is its type's maximum value.
+	template<std::uintmax_t ML, IntKind KL, std::uintmax_t MR, IntKind KR> requires(MR > 0u)
+	[[gnu::pure]] constexpr auto operator/(const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept {
+		lhs.check(); rhs.check();
+		OKIIDOKU_CONTRACT_USE(rhs.val_ == MR);
+		constexpr auto m_out {ML / MR};
+		constexpr auto k_out {pick_int_op_result_kind(KL,KR)};
+		return Int<m_out,k_out>{lhs.val_ / rhs.val_};
+	}
+
+	template<std::uintmax_t ML, IntKind KL, std::uintmax_t MR, IntKind KR> requires(MR > 0u)
+	[[gnu::pure]] constexpr auto operator%(const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept {
+		lhs.check(); rhs.check();
+		constexpr auto m_out {MR - 1u};
+		constexpr auto k_out {pick_int_op_result_kind(KL,KR)};
+		const Int<m_out,k_out> ret {lhs.val_ % rhs.val_};
+		OKIIDOKU_CONTRACT_USE(ret.val_ < rhs.val_);
+		OKIIDOKU_CONTRACT_USE(ret < rhs);
+		return ret;
+	}
+	template<std::uintmax_t MR, IntKind KR> requires(MR > 0u)
+	[[gnu::pure]] constexpr auto operator%(const std::unsigned_integral auto lhs, const Int<MR,KR>& rhs) noexcept {
+		rhs.check();
+		const Int<MR-1,KR> ret {lhs % rhs.val_};
+		OKIIDOKU_CONTRACT_USE(ret.val_ < rhs.val_);
+		OKIIDOKU_CONTRACT_USE(ret < rhs);
+		return ret;
+	}
 
 
 	/** a class acting as a namespace of sized int types and constants.
@@ -357,15 +366,25 @@ namespace okiidoku::mono {
 		Ints() = delete;
 
 		#define DEFINE_OX_TYPES(P_, SUFFIX_, MAX_) \
-		using o##P_##SUFFIX_##_t  = detail::Int<uintmax_t{1u}*(MAX_), detail::IntKind::fast >; \
-		using o##P_##SUFFIX_##s_t = detail::Int<uintmax_t{1u}*(MAX_), detail::IntKind::small>; \
-		static_assert(sizeof(o##P_##SUFFIX_## _t) == sizeof(typename o##P_##SUFFIX_## _t::i_t)); \
-		static_assert(sizeof(o##P_##SUFFIX_##s_t) == sizeof(typename o##P_##SUFFIX_##s_t::i_t)); \
-		static_assert(std::is_trivially_copyable_v<o##P_##SUFFIX_## _t>); \
-		static_assert(std::is_trivially_copyable_v<o##P_##SUFFIX_##s_t>); \
-		static_assert(std::is_trivially_copyable_v<o##P_##SUFFIX_##s_t>); \
-		static_assert(std::is_nothrow_convertible_v<o##P_##SUFFIX_## _t, o##P_##SUFFIX_##s_t>, "can convert fast to small"); \
-		static_assert(std::is_nothrow_convertible_v<o##P_##SUFFIX_##s_t, o##P_##SUFFIX_## _t>, "can convert small to fast");
+		using o##P_##SUFFIX_##_t  = Int<(MAX_), IntKind::fast >; \
+		using o##P_##SUFFIX_##s_t = Int<(MAX_), IntKind::small>; \
+		\
+		static_assert(sizeof(o##P_##SUFFIX_## _t) == sizeof(typename o##P_##SUFFIX_## _t::val_t)); \
+		static_assert(sizeof(o##P_##SUFFIX_##s_t) == sizeof(typename o##P_##SUFFIX_##s_t::val_t)); \
+		static_assert( std::is_trivially_copyable_v<o##P_##SUFFIX_## _t>); \
+		static_assert( std::is_trivially_copyable_v<o##P_##SUFFIX_##s_t>); \
+		static_assert( std::is_nothrow_convertible_v<o##P_##SUFFIX_## _t, o##P_##SUFFIX_##s_t>, "can convert fast to small"); \
+		static_assert( std::is_nothrow_convertible_v<o##P_##SUFFIX_##s_t, o##P_##SUFFIX_## _t>, "can convert small to fast"); \
+		static_assert( std::is_nothrow_convertible_v<Int<(MAX_)-1u>,o##P_##SUFFIX_## _t>, "can convert from narrower Int"); \
+		static_assert( std::is_nothrow_convertible_v<Int<(MAX_)-1u>,o##P_##SUFFIX_##s_t>, "can convert from narrower Int"); \
+		static_assert(!std::is_nothrow_convertible_v<Int<(MAX_)+1u>,o##P_##SUFFIX_## _t>, "no implicit conversion from sentinel type"); \
+		static_assert(!std::is_nothrow_convertible_v<Int<(MAX_)+1u>,o##P_##SUFFIX_##s_t>, "no implicit conversion from sentinel type"); \
+		static_assert(!std::is_nothrow_convertible_v<Int<(MAX_)+1u,IntKind::small>,o##P_##SUFFIX_## _t>, "no implicit conversion from sentinel type"); \
+		static_assert(!std::is_nothrow_convertible_v<Int<(MAX_)+1u,IntKind::small>,o##P_##SUFFIX_##s_t>, "no implicit conversion from sentinel type"); \
+		static_assert( std::is_nothrow_constructible_v<o##P_##SUFFIX_## _t,Int<(MAX_)+1u>>, "explicit conversion from sentinel type"); \
+		static_assert( std::is_nothrow_constructible_v<o##P_##SUFFIX_##s_t,Int<(MAX_)+1u>>, "explicit conversion from sentinel type"); \
+		static_assert( std::is_nothrow_constructible_v<o##P_##SUFFIX_## _t,Int<(MAX_)+1u,IntKind::small>>, "explicit conversion from sentinel type"); \
+		static_assert( std::is_nothrow_constructible_v<o##P_##SUFFIX_##s_t,Int<(MAX_)+1u,IntKind::small>>, "explicit conversion from sentinel type");
 
 		DEFINE_OX_TYPES(1, i,  O)
 		DEFINE_OX_TYPES(2, i,  O*O)
@@ -547,16 +566,16 @@ namespace okiidoku::visitor {
 	// using Ints = mono::Ints<largest_compiled_order>;
 
 	namespace ints {
-		using o1x_t  = mono::Ints<largest_compiled_order>::o1x_t::i_t;
-		using o1i_t  = mono::Ints<largest_compiled_order>::o1i_t::i_t;
-		using o2x_t  = mono::Ints<largest_compiled_order>::o2x_t::i_t;
-		using o2i_t  = mono::Ints<largest_compiled_order>::o2i_t::i_t;
-		using o2xs_t = mono::Ints<largest_compiled_order>::o2xs_t::i_t;
-		using o2is_t = mono::Ints<largest_compiled_order>::o2is_t::i_t;
-		using o4x_t  = mono::Ints<largest_compiled_order>::o4x_t::i_t;
-		using o4i_t  = mono::Ints<largest_compiled_order>::o4i_t::i_t;
-		using o4xs_t = mono::Ints<largest_compiled_order>::o4xs_t::i_t;
-		using o4is_t = mono::Ints<largest_compiled_order>::o4is_t::i_t;
+		using o1x_t  = mono::Ints<largest_compiled_order>::o1x_t::val_t;
+		using o1i_t  = mono::Ints<largest_compiled_order>::o1i_t::val_t;
+		using o2x_t  = mono::Ints<largest_compiled_order>::o2x_t::val_t;
+		using o2i_t  = mono::Ints<largest_compiled_order>::o2i_t::val_t;
+		using o2xs_t = mono::Ints<largest_compiled_order>::o2xs_t::val_t;
+		using o2is_t = mono::Ints<largest_compiled_order>::o2is_t::val_t;
+		using o4x_t  = mono::Ints<largest_compiled_order>::o4x_t::val_t;
+		using o4i_t  = mono::Ints<largest_compiled_order>::o4i_t::val_t;
+		using o4xs_t = mono::Ints<largest_compiled_order>::o4xs_t::val_t;
+		using o4is_t = mono::Ints<largest_compiled_order>::o4is_t::val_t;
 	}
 	using grid_val_t = mono::grid_val_t<largest_compiled_order>;
 }

@@ -144,12 +144,12 @@ namespace okiidoku::visitor {
 
 
 	namespace detail {
-		class GridAdaptor {
-		public:
+		struct GridAdaptor {
 			static constexpr bool is_borrow_type = false;
 			template<Order O>
 			using type = mono::Grid<O>;
 		};
+		static_assert(MonoToVisitorAdaptor<GridAdaptor>);
 	}
 
 	/**
@@ -160,9 +160,9 @@ namespace okiidoku::visitor {
 	// TODO.mid make collection wrapper template that stores the mono version and returns variant version from accessors.
 	struct OKIIDOKU_EXPORT Grid : public detail::ContainerBase<detail::GridAdaptor> {
 	public:
-		using ContainerBase::ContainerBase;
+		using ContainerBase<detail::GridAdaptor>::ContainerBase;
 		using val_t = grid_val_t;
-		Grid() noexcept = default;
+		explicit Grid(const Order O) noexcept: ContainerBase{O} {}
 
 		// Note: the accessors here are readonly right now, meaning
 		// library users can only use mutators defined inside the library. That seems
@@ -171,11 +171,9 @@ namespace okiidoku::visitor {
 		// Or we could just take the easy route and make setter methods.
 
 		/// \pre `rmi` is in `[0, O4)`.
-		// [[nodiscard]] val_t& at_rmi(const ints::o4i_t rmi)       noexcept;
 		[[nodiscard, gnu::pure]] val_t at_rmi(const ints::o4x_t rmi) const noexcept;
 
 		/// \pre `row` and `col` are in `[0, O2)`.
-		// [[nodiscard]] val_t& at(const ints::o2i_t row, const ints::o2i_t col)       noexcept;
 		[[nodiscard, gnu::pure]] val_t at(const ints::o2x_t row, const ints::o2x_t col) const noexcept;
 	};
 }

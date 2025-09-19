@@ -38,7 +38,7 @@ node -i -e 'const oki = require(path.join(process.cwd(), "bin/okiidoku.js"))'
 
 See the [examples folder](./examples/).
 
-Friendly reminder to [call `.delete()` when you are done with an object](https://emscripten.org/docs/porting/connecting_cpp_and_javascript/embind.html#memory-management) living in the WASM memory (unless that object was bound using `emscripten::value_object`). Unfortunately there are these things you (and I) will have to deal with in using this library. It just takes some learning of how things work, and being careful.
+Friendly reminder to [call `.delete()` when you are done with an object](https://emscripten.org/docs/porting/connecting_cpp_and_javascript/embind.html#memory-management) or [use a `using` statement](https://emscripten.org/docs/porting/connecting_cpp_and_javascript/embind.html#automatic-memory-management) (if the object will not be used once its scope exits).
 
 - https://developer.chrome.com/blog/wasm-debugging-2020
 - https://developer.chrome.com/docs/devtools/wasm

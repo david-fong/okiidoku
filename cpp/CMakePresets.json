@@ -53,17 +53,16 @@
 				"CMAKE_PROJECT_TOP_LEVEL_INCLUDES": "${sourceDir}/tools/cmake_top_project_include.cmake",
 				"CMAKE_INTERPROCEDURAL_OPTIMIZATION_DEBUG": false,
 				"CMAKE_OPTIMIZE_DEPENDENCIES": true,
-				"CPM_SOURCE_CACHE": "${sourceDir}/external",
+				"CPM_SOURCE_CACHE": { "type":"PATH", "value":"${sourceDir}/external" },
 				"OKIIDOKU_BUILD_WITH_SUGGESTED_WARNINGS": true,
 				"OKIIDOKU_BUILD_TESTING": true,
 				"OKIIDOKU_BUILD_BINDINGS_FOR_PYTHON": true,
-				"CPACK_PACKAGE_DIRECTORY": "${sourceDir}/out/package/",
+				"CPACK_PACKAGE_DIRECTORY": { "type":"PATH", "value":"${sourceDir}/out/package/" },
 				"CPACK_INCLUDE_TOPLEVEL_DIRECTORY": false
 			},
 			"warnings": {
 				"dev": true,
-				"deprecated": true,
-				"uninitialized": true
+				"deprecated": true
 			}
 		},
 		{
@@ -83,9 +82,9 @@
 				"CMAKE_BUILD_TYPE": "Release",
 				"CMAKE_DEFAULT_BUILD_TYPE": "Release",
 				"CMAKE_BUILD_RPATH_USE_ORIGIN": true,
-				"CPM_SOURCE_CACHE": "${sourceDir}/external",
+				"CPM_SOURCE_CACHE": { "type":"PATH", "value":"${sourceDir}/external" },
 				"OKIIDOKU_BUILD_OPTIMIZE_LOCAL_NON_PORTABLE": false,
-				"CPACK_PACKAGE_DIRECTORY": "${sourceDir}/out/package/"
+				"CPACK_PACKAGE_DIRECTORY": { "type":"PATH", "value":"${sourceDir}/out/package/" }
 			}
 		},
 		{
@@ -142,6 +141,7 @@
 			"toolchainFile": "$env{EMSDK}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake",
 			"cacheVariables": {
 				"CMAKE_CONFIGURATION_TYPES": "MinSizeRel;Debug;Release",
+				"OKIIDOKU_BUILD_BINDINGS_FOR_PYTHON": false,
 				"OKIIDOKU_BUILD_DOCS": false
 			}
 		},

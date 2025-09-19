@@ -14,8 +14,7 @@
 - create a separate github repo for data. add as submodule?
 - emscripten build and website
 - puzzle creation experiments (see [research-questions.md](../writings/research-questions.md))
-- optional async and batch-threading wrappers for long-running things
-  - hm. less sure about how necessary this is now knowing about `std::async`.
+- write some example programs using `std::async`.
 - minlexing canonicalization
 - compare canonicalization methods (performance / time-complexity)
 - language bindings for other languages [see dedicated todo-file](./extras/todo.md)
@@ -23,25 +22,28 @@
 ## Periodic Checkups
 
 - `reuse lint` (check licensing)
-- if any `NOLINT` comments are no longer needed
-- if any `static_cast`s are no longer needed
+- Run static analyzers
 - Examine contents of exported symbols (`nm -nCD build/<config>/lib/libokiidoku.so | less`) and make sure nothing is exported that isn't intended to be.
 - Ensure dependencies that should be private to the library implementation aren't exposed in any way to the library interface.
-- Run static analyzers
+- Check if any `NOLINT` comments are no longer needed
+- Check if any `static_cast`s are no longer needed
 - Check which `#ifdef __EMSCRIPTEN__` / `__cpp_lib_...` blocks can be removed as emscripten updates its sysroot libc++.
 - https://en.cppreference.com/w/cpp/language/rule_of_three
 - Write comments for custom CMake commands and targets
+- toggle `--warn-uninitialized` CMake flag in settings.json and check warnings.
 - places to use `[[gnu::designated_init]]`
 
 Issues I'm watching:
 
-- `std::ranges::iota()` clang libc++ doesn't have it yet :( (which impacts emscripten build) https://github.com/llvm/llvm-project/issues/105184
+- https://github.com/emscripten-core/emscripten/discussions/25314 embind value types for C++ integer wrapper classes.
+  - related: https://github.com/emscripten-core/emscripten/discussions/18813. try out writing it myself?
+- JS `using` statements. [standardization](https://github.com/tc39/proposal-explicit-resource-management?tab=readme-ov-file#status) and [browser support](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/using#browser_compatibility).
 - https://github.com/doxygen/doxygen/issues/8159 copydoc with templated functions
 - https://gitlab.kitware.com/cmake/cmake/-/issues/26118 cmake non-config presets don't implicitly inherit their config preset condition.
 - [Use CMAKE_CROSSCOMPILING_EMULATOR to run cross compiled executables #554](https://github.com/microsoft/vscode-cmake-tools/issues/554)
 - https://gitlab.kitware.com/cmake/cmake/-/issues/15179 -Og default for debug build configuration
 - https://gitlab.kitware.com/cmake/cmake/-/issues/26092 cmake refer to build preset name in preset for installDir
-- https://github.com/cpm-cmake/CPM.cmake/issues/595 CPM default shallow clone
+- `std::ranges::iota()` clang libc++ doesn't have it yet :( (which impacts emscripten build) https://github.com/llvm/llvm-project/issues/105184
 
 ## Misc List
 
@@ -82,6 +84,7 @@ Issues I'm watching:
   - `project(COMPAT_VERSION)` (`CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_INFO`)
 - GCC 15:
   - try benchmarking with https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html#index-fipa-reorder-for-locality
+  - `import std` at least in source files? https://www.kitware.com/import-std-in-cmake-3-30/
 - C++23:
   - http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/p2214r0.html#does-adjacent-mean-2-or-n
   - `[[assume(expr)]]`. update `OKIIDOKU_CONTRACT_USE` to use it after assert in debug, and

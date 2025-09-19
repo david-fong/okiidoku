@@ -9,5 +9,8 @@
 		"checkJs": true,
 		"strict": true,
 		"skipDefaultLibCheck": true,
+		"paths": {
+			".": ["."],
+		},
 	},
 }

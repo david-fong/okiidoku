@@ -32,16 +32,16 @@ if(DEFINED CMAKE_LIBRARY_OUTPUT_DIRECTORY)
 endif()
 # https://nanobind.readthedocs.io/en/latest/api_cmake.html#stub-generation
 # https://nanobind.readthedocs.io/en/latest/typing.html#stubs
-nanobind_add_stub(okiidoku_nb_stub
-	MODULE okiidoku_nb
-	OUTPUT "${output}"
-	# OUTPUT "$<TARGET_FILE_DIR:okiidoku_nb>/okiidoku.pyi" # TODO.wait https://gitlab.kitware.com/cmake/cmake/-/issues/21364
-	PYTHON_PATH "$<TARGET_FILE_DIR:okiidoku_nb>" # supposed to be relative path?
-	DEPENDS
-		okiidoku_nb
-		okiidoku # for good measure
-		okiidoku_compiler_warnings # necessary for nanobind v2.7.0's very basic sanitizer detection. I attach sanitizer flags to this target.
-)
+# nanobind_add_stub(okiidoku_nb_stub
+# 	MODULE okiidoku_nb
+# 	OUTPUT "${output}"
+# 	# OUTPUT "$<TARGET_FILE_DIR:okiidoku_nb>/okiidoku.pyi" # TODO.wait https://gitlab.kitware.com/cmake/cmake/-/issues/21364
+# 	PYTHON_PATH "$<TARGET_FILE_DIR:okiidoku_nb>" # supposed to be relative path?
+# 	DEPENDS
+# 		okiidoku_nb
+# 		okiidoku # for good measure
+# 		okiidoku_compiler_warnings # necessary for nanobind v2.7.0's very basic sanitizer detection. I attach sanitizer flags to this target.
+# )
 endblock()
 
 

@@ -285,7 +285,7 @@ function(okiidoku_target_pgo
 		COMMAND "\$<IF:${if_use},${command},${CMAKE_COMMAND};-E;true>"
 		BYPRODUCTS "\$<IF:${if_use},${byproducts},>"
 		WORKING_DIRECTORY "${data_dir}"
-		COMMENT "\$<IF:${if_use},PGO: Checking if '${trainer}' needs to be re-run to train '${trainee}',>"
+		COMMENT "\$<IF:${if_use},PGO: checking if '${trainer}' needs to be re-run to train '${trainee}',>"
 		VERBATIM COMMAND_EXPAND_LISTS
 	)
 	endblock()

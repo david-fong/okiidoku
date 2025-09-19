@@ -26,8 +26,7 @@ namespace okiidoku::mono {
 			if (col == 0) [[unlikely]] { row_has = has_mask_t{}; }
 			if (row % T::O1 == 0) [[unlikely]] { h_chute_boxes_has.fill(has_mask_t{}); }
 
-			const auto val_ {grid.at(row,col)};
-			OKIIDOKU_CONTRACT_USE(val_ <= T::O2);
+			const auto val_ {grid.at(row,col)}; val_.check();
 			if (val_ == T::O2) { continue; }
 			const o2x_t val {val_};
 
@@ -66,7 +65,7 @@ namespace okiidoku::mono {
 			#endif
 			grid.get_underlying_array().cbegin(),
 			grid.get_underlying_array().cend(),
-			[](const auto val){ return val == T::O2; }
+			[](const auto val) noexcept { return val == T::O2; }
 		);
 	}
 

@@ -81,8 +81,8 @@ namespace okiidoku::mono { namespace {
 			OKIIDOKU_CONTRACT_USE(num_resolved <=  2);
 			OKIIDOKU_CONTRACT_USE(num_resolved >= -2);
 			if (num_resolved >= 0) [[unlikely]] { // TODO.low for fun: find out on average at what op_count it starts being unlikely
-				OKIIDOKU_CONTRACT_USE(num_missing_syms >= detail::Int<2>{num_resolved});
-				num_missing_syms -= detail::Int<2>{num_resolved};
+				OKIIDOKU_CONTRACT_USE(num_missing_syms >= Int<2u>{num_resolved});
+				num_missing_syms -= Int<2u>{num_resolved};
 				--boxes_has.ch_count_sym(a_box,*a_sym);
 				++boxes_has.ch_count_sym(b_box,*a_sym);
 				--boxes_has.ch_count_sym(b_box,*b_sym);
@@ -128,8 +128,8 @@ namespace okiidoku::mono { namespace {
 			OKIIDOKU_CONTRACT_USE(num_resolved <=  2);
 			OKIIDOKU_CONTRACT_USE(num_resolved >= -2);
 			if (num_resolved >= 0) [[unlikely]] {
-				OKIIDOKU_CONTRACT_USE(num_missing_syms >= detail::Int<2>{num_resolved});
-				num_missing_syms -= detail::Int<2>{num_resolved};
+				OKIIDOKU_CONTRACT_USE(num_missing_syms >= Int<2u>{num_resolved});
+				num_missing_syms -= Int<2u>{num_resolved};
 				--cols_has.ch_count_sym(a_col,*a_sym);
 				++cols_has.ch_count_sym(a_col,*b_sym);
 				--cols_has.ch_count_sym(b_col,*b_sym);

@@ -20,10 +20,16 @@
 	"readme": "README.md",
 	"scripts": {
 		"preinstall": "npx only-allow pnpm",
-		"postinstall": "cmake -S ../.. --preset dev.emscripten"
+		"emconfigure": "cmake -S ../.. --preset dev.emscripten",
+		"embuild.dbg": "cd ../.. && cmake --build --preset dev.emscripten.dbg",
+		"embuild.rel": "cd ../.. && cmake --build --preset dev.emscripten.rel",
+		"embuild.reldbg": "cd ../.. && cmake --build --preset dev.emscripten.reldbg",
+		"eminstall.dbg": "cd ../.. && cmake --install ./out/build/dev.emscripten/ --config Debug",
+		"eminstall.rel": "cd ../.. && cmake --install ./out/build/dev.emscripten/ --config Release",
+		"eminstall.reldbg": "cd ../.. && cmake --install ./out/build/dev.emscripten/ --config RelWithDebInfo"
 	},
 	"devDependencies": {
-		"typescript": "^5.8.2"
+		"typescript": "^5.9.2"
 	},
 	"engines": {
 		"node": ">=16.0.0"

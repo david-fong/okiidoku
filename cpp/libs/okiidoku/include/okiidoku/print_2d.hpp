@@ -35,7 +35,7 @@ namespace okiidoku {
 		void print_2d(std::ostream& os, rng_seed_t rng_seed, const Gs&... grids) noexcept {
 			static_assert(sizeof...(grids) > 0u);
 			const auto printers {std::to_array<print_2d_grid_view>({
-				[&](const visitor::ints::o4xs_t rmi) -> visitor::ints::o2is_t {
+				[&](const visitor::ints::o4xs_t rmi) noexcept -> visitor::ints::o2is_t {
 					return grids.at_rmi(typename Ints<O>::o4x_t{rmi});
 				}...,
 			})};

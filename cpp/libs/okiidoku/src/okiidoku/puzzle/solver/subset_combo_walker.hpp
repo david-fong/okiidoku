@@ -35,7 +35,7 @@ namespace okiidoku::mono::detail::solver {
 			OKIIDOKU_CONTRACT_USE(begin_ + naked_subset_size_ <= T::O2);
 			if (has_more()) [[likely]] {
 				for (const auto i : naked_subset_size_) {
-					combo_[i] = o2x_t{begin_.get_underlying() + i};
+					combo_[i] = o2x_t{begin_.val() + i};
 			}	}
 			assert_is_state_valid_();
 		}

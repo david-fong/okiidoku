@@ -6,6 +6,9 @@
     "example": "."
   },
   "devDependencies": {
-    "@types/node": "^22.13.1"
-  }
+    "@types/node": "^24.5.2"
+  },
+	"engines": {
+		"node": ">=24.0.0"
+	}
 }
