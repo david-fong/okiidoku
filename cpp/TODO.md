@@ -48,7 +48,6 @@ Issues I'm watching:
 
 ## Misc List
 
-- try making int functions take by value (not by reference) and declare them `gnu::const` and compare performance.
 - see if `iosfwd` is enough to define stream operators in ints.hpp to avoid callee/user needing to cast chars to ints. then simplify those call-sites.
 - see if helpful to add `/// \cond detail` wrapper to `detail` namespaces to suppress doxygen for them
 - make `scramble` just generate a random `Transformation`.

@@ -205,15 +205,15 @@ namespace okiidoku::mono {
 
 		/** implicit conversion from narrower `Int`. */
 		template<max_t M_from, IntKind K_from> requires(M_from <= max)
-		constexpr Int(const Int<M_from,K_from>& other) noexcept: Int{other.val_} { check(); }
+		constexpr Int(const Int<M_from,K_from> other) noexcept: Int{other.val_} { check(); }
 
 		/** explicit conversion from `Int` "wider" by one,
 		to allow cast to sentinel-exclusive-bound `Int` when iterating. */
 		template<IntKind K_from>
-		explicit constexpr Int(const Int<max+1u,K_from>& other) noexcept: Int{other.val_} { check(); }
+		explicit constexpr Int(const Int<max+1u,K_from> other) noexcept: Int{other.val_} { check(); }
 
-		template<max_t M_from, IntKind K_from> [[gnu::pure]]
-		static constexpr Int unchecked_from(const Int<M_from,K_from>& other) noexcept {
+		template<max_t M_from, IntKind K_from> [[gnu::const]]
+		static constexpr Int unchecked_from(const Int<M_from,K_from> other) noexcept {
 			OKIIDOKU_CONTRACT_USE(other.val_ <= max);
 			return Int{other.val_};
 		}
@@ -231,12 +231,12 @@ namespace okiidoku::mono {
 		constexpr auto& operator--(   ) & noexcept { OKIIDOKU_CONTRACT_USE(val_ > val_t{0u}); --val_; check(); return *this; }
 
 		// TODO move this into dedicated iter_x class?
-		[[nodiscard, gnu::pure]] constexpr auto  begin() const noexcept { check(); return Int{0u}; }
-		[[nodiscard, gnu::pure]] constexpr auto  end()   const noexcept { check(); return *this; }
-		[[nodiscard, gnu::pure]] constexpr auto  next()  const noexcept { check(); OKIIDOKU_CONTRACT_USE(val_ <  max      ); return Int             {val_+1u}; }
-		[[nodiscard, gnu::pure]] constexpr auto  prev()  const noexcept { check(); OKIIDOKU_CONTRACT_USE(val_ >= val_t{0u}); return Int<max-1u,kind>{val_-1u}; }
-		template<max_t M, IntKind K> requires(M > 0u) [[gnu::pure]] constexpr
-		friend Int<max-1u,kind> operator*(const Int<M,K>& it) noexcept {
+		[[nodiscard, gnu::pure]] constexpr auto begin() const noexcept { check(); return Int{0u}; }
+		[[nodiscard, gnu::pure]] constexpr auto end()   const noexcept { check(); return *this; }
+		[[nodiscard, gnu::pure]] constexpr auto next()  const noexcept { check(); OKIIDOKU_CONTRACT_USE(val_ < max); return Int {val_+1u}; }
+		[[nodiscard, gnu::pure]] constexpr auto prev()  const noexcept { check(); OKIIDOKU_CONTRACT_USE(val_ >= val_t{0u}); static_assert(max > 0u); return Int<max-1u,kind>{val_-1u}; }
+		template<max_t M, IntKind K> requires(M > 0u) [[gnu::const]] constexpr
+		friend Int<max-1u,kind> operator*(const Int<M,K> it) noexcept {
 			it.check(); OKIIDOKU_CONTRACT_USE(it.val_ < M);
 			return Int<M-1u,K>{it};
 		}
@@ -273,32 +273,32 @@ namespace okiidoku::mono {
 			return *this;
 		}
 
-		template<max_t ML, IntKind KL, max_t MR, IntKind KR> constexpr friend std::strong_ordering operator<=>(const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept;
-		template<max_t ML, IntKind KL, max_t MR, IntKind KR> constexpr friend bool operator==(const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept;
-		template<max_t ML, IntKind KL, max_t MR, IntKind KR> constexpr friend bool operator!=(const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept;
-		template<max_t ML, IntKind KL, max_t MR, IntKind KR> constexpr friend bool operator<=(const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept;
-		template<max_t ML, IntKind KL, max_t MR, IntKind KR> constexpr friend bool operator< (const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept;
-		template<max_t ML, IntKind KL, max_t MR, IntKind KR> constexpr friend bool operator>=(const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept;
-		template<max_t ML, IntKind KL, max_t MR, IntKind KR> constexpr friend bool operator> (const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept;
-		template<max_t ML, IntKind KL, max_t MR, IntKind KR> constexpr friend auto operator+ (const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept;
-		template<max_t ML, IntKind KL, max_t MR, IntKind KR> requires(ML >= MR) constexpr friend auto operator-(const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept;
-		template<max_t ML, IntKind KL, max_t MR, IntKind KR> constexpr friend auto operator* (const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept;
-		template<max_t ML, IntKind KL, max_t MR, IntKind KR> requires(MR >  0u) constexpr friend auto operator/ (const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept;
-		template<max_t ML, IntKind KL, max_t MR, IntKind KR> requires(MR >  0u) constexpr friend auto operator%(const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept;
-		template<max_t MR, IntKind KR> requires(MR > 0u) constexpr friend auto operator%(const std::unsigned_integral auto lhs, const Int<MR,KR>& rhs) noexcept;
+		template<max_t ML, IntKind KL, max_t MR, IntKind KR> constexpr friend std::strong_ordering operator<=>(const Int<ML,KL> lhs, const Int<MR,KR> rhs) noexcept;
+		template<max_t ML, IntKind KL, max_t MR, IntKind KR> constexpr friend bool operator==(const Int<ML,KL> lhs, const Int<MR,KR> rhs) noexcept;
+		template<max_t ML, IntKind KL, max_t MR, IntKind KR> constexpr friend bool operator!=(const Int<ML,KL> lhs, const Int<MR,KR> rhs) noexcept;
+		template<max_t ML, IntKind KL, max_t MR, IntKind KR> constexpr friend bool operator<=(const Int<ML,KL> lhs, const Int<MR,KR> rhs) noexcept;
+		template<max_t ML, IntKind KL, max_t MR, IntKind KR> constexpr friend bool operator< (const Int<ML,KL> lhs, const Int<MR,KR> rhs) noexcept;
+		template<max_t ML, IntKind KL, max_t MR, IntKind KR> constexpr friend bool operator>=(const Int<ML,KL> lhs, const Int<MR,KR> rhs) noexcept;
+		template<max_t ML, IntKind KL, max_t MR, IntKind KR> constexpr friend bool operator> (const Int<ML,KL> lhs, const Int<MR,KR> rhs) noexcept;
+		template<max_t ML, IntKind KL, max_t MR, IntKind KR> constexpr friend auto operator+ (const Int<ML,KL> lhs, const Int<MR,KR> rhs) noexcept;
+		template<max_t ML, IntKind KL, max_t MR, IntKind KR> requires(ML >= MR) constexpr friend auto operator-(const Int<ML,KL> lhs, const Int<MR,KR> rhs) noexcept;
+		template<max_t ML, IntKind KL, max_t MR, IntKind KR> constexpr friend auto operator* (const Int<ML,KL> lhs, const Int<MR,KR> rhs) noexcept;
+		template<max_t ML, IntKind KL, max_t MR, IntKind KR> requires(MR >  0u) constexpr friend auto operator/ (const Int<ML,KL> lhs, const Int<MR,KR> rhs) noexcept;
+		template<max_t ML, IntKind KL, max_t MR, IntKind KR> requires(MR >  0u) constexpr friend auto operator%(const Int<ML,KL> lhs, const Int<MR,KR> rhs) noexcept;
+		template<max_t MR, IntKind KR> requires(MR > 0u) constexpr friend auto operator%(const std::unsigned_integral auto lhs, const Int<MR,KR> rhs) noexcept;
 	};
 
 
-	template<std::uintmax_t ML, IntKind KL, std::uintmax_t MR, IntKind KR> [[gnu::pure]] constexpr std::strong_ordering operator<=>(const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept { lhs.check(); rhs.check(); return lhs.val_ <=> rhs.val_; }
-	template<std::uintmax_t ML, IntKind KL, std::uintmax_t MR, IntKind KR> [[gnu::pure]] constexpr bool operator== (const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept { lhs.check(); rhs.check(); return lhs.val_ == rhs.val_; }
-	template<std::uintmax_t ML, IntKind KL, std::uintmax_t MR, IntKind KR> [[gnu::pure]] constexpr bool operator!= (const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept { lhs.check(); rhs.check(); return lhs.val_ != rhs.val_; }
-	template<std::uintmax_t ML, IntKind KL, std::uintmax_t MR, IntKind KR> [[gnu::pure]] constexpr bool operator<= (const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept { lhs.check(); rhs.check(); return lhs.val_ <= rhs.val_; }
-	template<std::uintmax_t ML, IntKind KL, std::uintmax_t MR, IntKind KR> [[gnu::pure]] constexpr bool operator<  (const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept { lhs.check(); rhs.check(); return lhs.val_ <  rhs.val_; }
-	template<std::uintmax_t ML, IntKind KL, std::uintmax_t MR, IntKind KR> [[gnu::pure]] constexpr bool operator>= (const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept { lhs.check(); rhs.check(); return lhs.val_ >= rhs.val_; }
-	template<std::uintmax_t ML, IntKind KL, std::uintmax_t MR, IntKind KR> [[gnu::pure]] constexpr bool operator>  (const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept { lhs.check(); rhs.check(); return lhs.val_ >  rhs.val_; }
+	template<std::uintmax_t ML, IntKind KL, std::uintmax_t MR, IntKind KR> [[gnu::const]] constexpr std::strong_ordering operator<=>(const Int<ML,KL> lhs, const Int<MR,KR> rhs) noexcept { lhs.check(); rhs.check(); return lhs.val_ <=> rhs.val_; }
+	template<std::uintmax_t ML, IntKind KL, std::uintmax_t MR, IntKind KR> [[gnu::const]] constexpr bool operator== (const Int<ML,KL> lhs, const Int<MR,KR> rhs) noexcept { lhs.check(); rhs.check(); return lhs.val_ == rhs.val_; }
+	template<std::uintmax_t ML, IntKind KL, std::uintmax_t MR, IntKind KR> [[gnu::const]] constexpr bool operator!= (const Int<ML,KL> lhs, const Int<MR,KR> rhs) noexcept { lhs.check(); rhs.check(); return lhs.val_ != rhs.val_; }
+	template<std::uintmax_t ML, IntKind KL, std::uintmax_t MR, IntKind KR> [[gnu::const]] constexpr bool operator<= (const Int<ML,KL> lhs, const Int<MR,KR> rhs) noexcept { lhs.check(); rhs.check(); return lhs.val_ <= rhs.val_; }
+	template<std::uintmax_t ML, IntKind KL, std::uintmax_t MR, IntKind KR> [[gnu::const]] constexpr bool operator<  (const Int<ML,KL> lhs, const Int<MR,KR> rhs) noexcept { lhs.check(); rhs.check(); return lhs.val_ <  rhs.val_; }
+	template<std::uintmax_t ML, IntKind KL, std::uintmax_t MR, IntKind KR> [[gnu::const]] constexpr bool operator>= (const Int<ML,KL> lhs, const Int<MR,KR> rhs) noexcept { lhs.check(); rhs.check(); return lhs.val_ >= rhs.val_; }
+	template<std::uintmax_t ML, IntKind KL, std::uintmax_t MR, IntKind KR> [[gnu::const]] constexpr bool operator>  (const Int<ML,KL> lhs, const Int<MR,KR> rhs) noexcept { lhs.check(); rhs.check(); return lhs.val_ >  rhs.val_; }
 
 	template<std::uintmax_t ML, IntKind KL, std::uintmax_t MR, IntKind KR>
-	[[gnu::pure]] constexpr auto operator+(const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept {
+	[[gnu::const]] constexpr auto operator+(const Int<ML,KL> lhs, const Int<MR,KR> rhs) noexcept {
 		lhs.check(); rhs.check();
 		constexpr auto m_out {ML + MR};
 		constexpr auto k_out {pick_int_op_result_kind(KL,KR)};
@@ -309,7 +309,7 @@ namespace okiidoku::mono {
 	\pre `lhs >= rhs`
 	\note uses size of `lhs`. doesn't assume minimum value of `rhs`. */
 	template<std::uintmax_t ML, IntKind KL, std::uintmax_t MR, IntKind KR> requires(ML >= MR)
-	[[gnu::pure]] constexpr auto operator-(const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept {
+	[[gnu::const]] constexpr auto operator-(const Int<ML,KL> lhs, const Int<MR,KR> rhs) noexcept {
 		lhs.check(); rhs.check();
 		constexpr auto m_out {ML};
 		constexpr auto k_out {pick_int_op_result_kind(KL,KR)};
@@ -317,7 +317,7 @@ namespace okiidoku::mono {
 	}
 
 	template<std::uintmax_t ML, IntKind KL, std::uintmax_t MR, IntKind KR>
-	[[gnu::pure]] constexpr auto operator*(const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept {
+	[[gnu::const]] constexpr auto operator*(const Int<ML,KL> lhs, const Int<MR,KR> rhs) noexcept {
 		lhs.check(); rhs.check();
 		constexpr auto m_out {ML * MR};
 		constexpr auto k_out {pick_int_op_result_kind(KL,KR)};
@@ -326,7 +326,7 @@ namespace okiidoku::mono {
 
 	/// \pre `rhs` is its type's maximum value.
 	template<std::uintmax_t ML, IntKind KL, std::uintmax_t MR, IntKind KR> requires(MR > 0u)
-	[[gnu::pure]] constexpr auto operator/(const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept {
+	[[gnu::const]] constexpr auto operator/(const Int<ML,KL> lhs, const Int<MR,KR> rhs) noexcept {
 		lhs.check(); rhs.check();
 		OKIIDOKU_CONTRACT_USE(rhs.val_ == MR);
 		constexpr auto m_out {ML / MR};
@@ -335,7 +335,7 @@ namespace okiidoku::mono {
 	}
 
 	template<std::uintmax_t ML, IntKind KL, std::uintmax_t MR, IntKind KR> requires(MR > 0u)
-	[[gnu::pure]] constexpr auto operator%(const Int<ML,KL>& lhs, const Int<MR,KR>& rhs) noexcept {
+	[[gnu::const]] constexpr auto operator%(const Int<ML,KL> lhs, const Int<MR,KR> rhs) noexcept {
 		lhs.check(); rhs.check();
 		constexpr auto m_out {MR - 1u};
 		constexpr auto k_out {pick_int_op_result_kind(KL,KR)};
@@ -345,7 +345,7 @@ namespace okiidoku::mono {
 		return ret;
 	}
 	template<std::uintmax_t MR, IntKind KR> requires(MR > 0u)
-	[[gnu::pure]] constexpr auto operator%(const std::unsigned_integral auto lhs, const Int<MR,KR>& rhs) noexcept {
+	[[gnu::const]] constexpr auto operator%(const std::unsigned_integral auto lhs, const Int<MR,KR> rhs) noexcept {
 		rhs.check();
 		const Int<MR-1,KR> ret {lhs % rhs.val_};
 		OKIIDOKU_CONTRACT_USE(ret.val_ < rhs.val_);
