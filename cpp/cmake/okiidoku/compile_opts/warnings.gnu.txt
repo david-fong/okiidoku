@@ -3,6 +3,7 @@
 -Wvla
 -Wconversion -Wsign-conversion
 -Wdouble-promotion
+-Wsign-promo
 
 -Wdisabled-optimization
 

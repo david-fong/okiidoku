@@ -16,7 +16,7 @@
 				"LC_CTYPE": "C.UTF-8"
 			},
 			"cacheVariables": {
-				"CMAKE_CXX_STANDARD": "20",
+				"CMAKE_CXX_STANDARD": "23",
 				"CMAKE_CXX_STANDARD_REQUIRED": true,
 				"CMAKE_CXX_EXTENSIONS": false,
 				"CMAKE_CONFIGURATION_TYPES": "Debug;RelWithDebInfo;Release;MinSizeRel;PgoUse",

@@ -23,8 +23,8 @@ namespace okiidoku::mono {
 
 		for (const auto row : T::O2) {
 		for (const auto col : T::O2) {
-			if (col == 0) [[unlikely]] { row_has = has_mask_t{}; }
-			if (row % T::O1 == 0) [[unlikely]] { h_chute_boxes_has.fill(has_mask_t{}); }
+			if (col == 0u) [[unlikely]] { row_has = has_mask_t{}; }
+			if (row % T::O1 == 0u) [[unlikely]] { h_chute_boxes_has.fill(has_mask_t{}); }
 
 			const auto val_ {grid.at(row,col)}; val_.check();
 			if (val_ == T::O2) { continue; }

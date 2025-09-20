@@ -158,7 +158,6 @@ else()
 
 			# interesting but probably too overboard:
 			# -Wpadded
-			# -Wsign-promo # actually warns on overload selection behaviour mandated by the standard :O
 		)
 	endif()
 endif()

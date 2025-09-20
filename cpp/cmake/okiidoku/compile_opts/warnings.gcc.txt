@@ -5,6 +5,7 @@
 -Wduplicated-cond
 -Walloc-zero
 -Wuseless-cast
+-Wstrict-null-sentinel
 
 -Wredundant-tags
 

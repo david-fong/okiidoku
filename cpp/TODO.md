@@ -44,7 +44,7 @@ Issues I'm watching:
 - https://gitlab.kitware.com/cmake/cmake/-/issues/15179 -Og default for debug build configuration
 - https://gitlab.kitware.com/cmake/cmake/-/issues/26092 cmake refer to build preset name in preset for installDir
 - `std::ranges::iota()` clang libc++ doesn't have it yet :( (which impacts emscripten build) https://github.com/llvm/llvm-project/issues/105184
-- https://gitlab.kitware.com/cmake/cmake/-/issues/20256 CMake mechanism for split debug info.
+- https://gitlab.kitware.com/cmake/cmake/-/issues/20256 CMake mechanism for split debug info. see also https://sourceware.org/gdb/current/onlinedocs/gdb.html/Separate-Debug-Files.html
 
 ## Misc List
 
