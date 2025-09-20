@@ -123,7 +123,7 @@ namespace okiidoku::mono::detail::solver {
 		// for (const auto house_type : house_types) {
 		// 	const auto desc_house {rmi_to_house<O>(house_type, desc.rmi)};
 		// 	for (const auto nb_house_cell : T::O2) {
-		// 		const auto nb_rmi {static_cast<rmi_t>(house_cell_to_rmi<O>(house_type, desc_house, nb_house_cell))};
+		// 		const auto nb_rmi {house_cell_to_rmi<O>(house_type, desc_house, nb_house_cell)};
 		// 		OKIIDOKU_TRY_ELIM_NB_CAND
 		// 	}
 		// }

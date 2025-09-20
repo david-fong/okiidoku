@@ -88,8 +88,8 @@ namespace okiidoku::mono::detail::solver { namespace {
 		}
 		// sort to enable the `sub_sized_end` optimization and size-one-subset updates:
 		std::sort(
-			std::next(subs.cell_tags.begin(), static_cast<long>(sub_a)),
-			std::next(subs.cell_tags.begin(), static_cast<long>(sub_z)),
+			std::next(subs.cell_tags.begin(), sub_a),
+			std::next(subs.cell_tags.begin(), sub_z),
 			[&](const auto& tag_a, const auto& tag_b){
 				return tag_a.count_cache < tag_b.count_cache;
 			}

@@ -119,6 +119,14 @@ things I got wrong before which I couldn't understand based on gcc's error messa
 
 - Emscripten does not support the `-march=` flag. https://github.com/emscripten-core/emscripten/issues/20244#issuecomment-1722510550
 
+## reminders
+
+- for [`[[gnu::const]]`](https://gcc.gnu.org/onlinedocs/gcc/Common-Function-Attributes.html#index-const-function-attribute):
+  > Note that \[...\] In general, since a function cannot distinguish data that might change from data that cannot, **const functions should never take pointer or, in C++, reference arguments**. Likewise, a function that calls a non-const function usually must not be const itself.
+- for [`[[gnu::pure]]`](https://gcc.gnu.org/onlinedocs/gcc/Common-Function-Attributes.html#index-pure-function-attribute):
+  > `int hash (char *) __attribute__ ((pure));`
+  > tells GCC that subsequent calls to the function hash with the same string can be replaced by the result of the first call provided the state of the program observable by hash, including the contents of the array itself, does not change in between. **Even though hash takes a non-const pointer argument it must not modify the array it points to**, or any other object whose value the rest of the program may depend on. However, the caller may safely change the contents of the array between successive calls to the function (doing so disables the optimization). **The restriction also applies to member objects referenced by the this pointer** in C++ non-static member functions.
+
 ## more
 
 - [equality and ordering operators](https://brevzin.github.io/c++/2019/07/28/comparisons-cpp20/)

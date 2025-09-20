@@ -142,7 +142,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 			}
 		}
 		return Guess<O>{
-			.rmi{static_cast<rmi_t>(best_rmi)},
+			.rmi{best_rmi},
 			.val{find_good_guess_sym_for_cell(cells_cands, best_rmi)},
 		};
 	}

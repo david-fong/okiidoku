@@ -34,6 +34,8 @@ target_link_options(okiidoku_js PRIVATE
 
 	# https://emscripten.org/docs/porting/connecting_cpp_and_javascript/embind.html#typescript-definitions
 	--emit-tsd "$<TARGET_FILE_DIR:okiidoku_js>/okiidoku.d.ts"
+	# --emit-minification-map "$<TARGET_FILE_DIR:okiidoku_js>/okiidoku.minification_map.txt"
+	# --emit-symbol-map
 
 	"$<$<CONFIG:Release,MinSizeRel>:--closure=1>" # https://emscripten.org/docs/site/glossary.html#term-closure-compiler
 
@@ -54,9 +56,9 @@ okiidoku_install_target(okiidoku_js)
 # TODO.wait https://gitlab.kitware.com/cmake/cmake/-/issues/20745
 include(GNUInstallDirs)
 set(src "$<TARGET_FILE_DIR:okiidoku_js>/$<TARGET_FILE_BASE_NAME:okiidoku_js>")
-# intentional abuse of BIN type to get sibling destination
-install(FILES "${src}.d.ts" "$<${debug_configs}:${src}.wasm.map>" TYPE BIN COMPONENT okiidoku_development)
 install(FILES "${src}.wasm" TYPE BIN COMPONENT okiidoku_runtime)
+install(FILES "${src}.d.ts" TYPE BIN COMPONENT okiidoku_development)
+install(FILES "${src}.wasm.map" TYPE BIN COMPONENT okiidoku_development OPTIONAL)
 install(DIRECTORY examples TYPE DOC COMPONENT okiidoku_development
 	PATTERN "*.*js"        PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE
 	PATTERN "build"        EXCLUDE
@@ -71,6 +73,6 @@ add_custom_command(TARGET okiidoku_js POST_BUILD
 	COMMAND "${c};make_directory;${dest}"
 	COMMAND "${c};create_symlink;$<TARGET_FILE_DIR:okiidoku_js>;${dest}/$<CONFIG>"
 	BYPRODUCTS "${dest}/$<CONFIG>"
-	COMMENT "symlinking JS+WASM+TS target output files to examples directory for convenience"
+	COMMENT "symlinking outputs to examples dir for convenience"
 	VERBATIM COMMAND_EXPAND_LISTS
 )

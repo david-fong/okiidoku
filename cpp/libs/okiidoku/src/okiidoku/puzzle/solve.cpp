@@ -68,10 +68,10 @@ namespace okiidoku::mono {
 			}
 		}};
 		using finder_t = detail::solver::UnwindInfo (*)(detail::solver::Engine<O>&) noexcept;
-		static constexpr auto finders {std::to_array({
+		static constexpr auto finders {std::to_array<finder_t>({
 			std::cref(Find::sym_claim_cell),
-			std::cref(*static_cast<finder_t>(find_intersections)),
-			std::cref(*static_cast<finder_t>(find_subsets)),
+			std::cref(*find_intersections),
+			std::cref(*find_subsets),
 		})};
 		while (e.get_num_unsolved() > 0u) [[likely]] {
 			{

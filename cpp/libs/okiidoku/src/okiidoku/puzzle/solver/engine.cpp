@@ -32,7 +32,7 @@ namespace okiidoku::mono::detail::solver {
 			auto& subs {frame_.houses_subsets.at(house_type)[house]};
 			for (const auto house_cell : T::O2) {
 				auto& cell_tag {subs.cell_tags[house_cell]};
-				cell_tag.rmi = static_cast<rmi_t>(house_cell_to_rmi<O>(house_type, house, house_cell));
+				cell_tag.rmi = house_cell_to_rmi<O>(house_type, house, house_cell);
 				cell_tag.count_cache = T::O2;
 			}
 			subs.is_begin.unset_all();
@@ -47,9 +47,9 @@ namespace okiidoku::mono::detail::solver {
 
 		for (const auto rmi : T::O4) {
 			const auto& val {puzzle.at_rmi(rmi)};
-			OKIIDOKU_CONTRACT_USE(val <= T::O2);
+			val.check();
 			if (val < T::O2) [[likely]] {
-				register_new_given_(static_cast<rmi_t>(rmi), static_cast<val_t>(val));
+				register_new_given_(rmi, val_t{val});
 			}
 		}
 	}

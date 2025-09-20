@@ -10,10 +10,9 @@ if(_OKIIDOKU_BUILD_IS_PGO_GEN)
 		PRIVATE okiidoku_cli_utils
 		PRIVATE okiidoku
 	)
-	install(
-		TARGETS okiidoku_pgo_trainer_default
+	install(TARGETS okiidoku_pgo_trainer_default
 		EXPORT okiidoku_installation_targets
-		COMPONENT okiidoku_pgo_trainers
 		INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+		COMPONENT okiidoku_pgo_trainers
 	)
 endif()

@@ -19,14 +19,14 @@ namespace okiidoku::mono { namespace {
 	private:
 		using T = Ints<O>;
 		using cands_t = O2BitArr<O>;
-		using val_t = T::o2x_t;
+		using val_t = T::o2x_t; // TODO what about puzzles then? separate bitmap of populated/empty cells?
 		using o4x_t = T::o4x_t;
 		using o4i_t = T::o4i_t;
 		using o2i_t = T::o2i_t;
 
-		static constexpr unsigned num_buf_bytes {1};
+		static constexpr unsigned num_buf_bytes {1u};
 		using buf_t = detail::uint_small_for_width_t<2u*8u*num_buf_bytes>; // x2 to prevent overflow
-		static_assert((1u<<(2u*8u*num_buf_bytes)) > (2u*T::O2)); // requirement to handle overflow
+		static_assert((1uLL<<(2u*8u*num_buf_bytes)) > (2u*T::O2)); // requirement to handle overflow
 
 	public:
 		constexpr SerdesHelper() noexcept:
@@ -119,7 +119,7 @@ namespace okiidoku::mono { namespace {
 
 	template<Order O> requires(is_order_compiled(O))
 	void SerdesHelper<O>::print_remaining_buf(std::ostream& os) noexcept {
-		if (buf_pos_ > 1) {
+		if (buf_pos_ > 1u) {
 			os.put(static_cast<char>(buf_));
 		}
 		// TODO should there be some mechanism to disable further printing? or just write a contract?
@@ -181,11 +181,11 @@ namespace okiidoku::mono {
 		for (; !helper.done(); helper.advance()) {
 			const auto row {helper.get_cell_rmi() / T::O2};
 			const auto col {helper.get_cell_rmi() % T::O2};
-			if ((T::O1-1-row)/T::O1 == col/T::O1) {
+			if ((T::O1-1u-row)/T::O1 == col/T::O1) {
 				continue; // skip cells in the anti-diagonal boxes
 			}
 			const auto val {helper.parse_val(is)};
-			grid.at_rmi(helper.get_cell_rmi()) = static_cast<grid_val_t<O>>(val);
+			grid.at_rmi(helper.get_cell_rmi()) = val;
 		}
 		// TODO infer cells in anti-diagonal boxes.
 

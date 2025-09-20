@@ -10,4 +10,4 @@
 .asciz \"" script_name "\"\n\
 .popsection \n\
 ");
-DEFINE_GDB_PY_SCRIPT("share/okiidoku.gdb.py") // matches installation location
+DEFINE_GDB_PY_SCRIPT("share/okiidoku/okiidoku.gdb.py") // matches installation location

@@ -35,7 +35,7 @@ namespace okiidoku::mono::detail {
 			ix_t begin_;
 			i_t  end_;
 			TieRange(const ix_t begin, const i_t end) noexcept: begin_{begin}, end_{end} { check_invariants(); }
-			[[nodiscard, gnu::pure]] i_t  size()  const noexcept { check_invariants(); return static_cast<i_t>(end_ - begin_); }
+			[[nodiscard, gnu::pure]] i_t  size()  const noexcept { check_invariants(); return end_ - begin_; }
 			[[nodiscard, gnu::pure]] auto begin() const noexcept { check_invariants(); return std::views::iota(begin_, end_).begin(); }
 			[[nodiscard, gnu::pure]] auto end()   const noexcept { check_invariants(); return std::views::iota(begin_, end_).end(); }
 		private:

@@ -108,7 +108,6 @@ namespace okiidoku::mono { namespace {
 				*grid.at(row, v_chute + box_col)
 			)};
 			++count;
-			OKIIDOKU_CONTRACT_USE(count <= T::O1);
 		}}
 		o3i_t num_missing_syms {cols_has.count_num_missing_syms()};
 		while (num_missing_syms != 0) [[likely]] {
@@ -120,10 +119,10 @@ namespace okiidoku::mono { namespace {
 			auto& b_sym {grid.at(row, v_chute + b_col)}; // ↲ so need reference type
 			OKIIDOKU_CONTRACT_USE(a_sym != b_sym);
 			const auto num_resolved {static_cast<signed char>(
-				(cols_has.ch_count_sym(a_col,*a_sym) == 1 ? -1 : 0) + // regression
-				(cols_has.ch_count_sym(a_col,*b_sym) == 0 ?  1 : 0) + // improvement
-				(cols_has.ch_count_sym(b_col,*b_sym) == 1 ? -1 : 0) + // regression
-				(cols_has.ch_count_sym(b_col,*a_sym) == 0 ?  1 : 0)   // improvement
+				(cols_has.ch_count_sym(a_col,*a_sym) == 1u ? -1 : 0) + // regression
+				(cols_has.ch_count_sym(a_col,*b_sym) == 0u ?  1 : 0) + // improvement
+				(cols_has.ch_count_sym(b_col,*b_sym) == 1u ? -1 : 0) + // regression
+				(cols_has.ch_count_sym(b_col,*a_sym) == 0u ?  1 : 0)   // improvement
 			)};
 			OKIIDOKU_CONTRACT_USE(num_resolved <=  2);
 			OKIIDOKU_CONTRACT_USE(num_resolved >= -2);

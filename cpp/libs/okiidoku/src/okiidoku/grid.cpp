@@ -83,9 +83,7 @@ namespace okiidoku::mono {
 				const auto rmi {box_cell_to_rmi<O>(box, box_cell)};
 				const auto val_row {(boxrow+v_chute) % T::O1};
 				const auto val_col {(boxcol+h_chute) % T::O1};
-				const auto val {static_cast<grid_val_t<O>>(
-					(T::O1*val_row)+val_col
-				)};
+				const auto val {(T::O1 * val_row) + val_col};
 				OKIIDOKU_CONTRACT_USE(val < T::O2);
 				grid.at_rmi(rmi) = val;
 			}

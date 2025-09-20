@@ -192,7 +192,8 @@ namespace okiidoku::mono {
 		constexpr Int() noexcept = default;
 		// constexpr Int(const Int& other) noexcept = default;
 
-		/** \pre `0 <= in <= max` */
+		/** construct from builtin int type
+		\pre `0 <= in <= max` */
 		template<class T_in> requires(std::integral<T_in>)
 		constexpr Int(T_in in) noexcept: val_{static_cast<val_t>(in)} {
 			if constexpr (std::is_signed_v<T_in>) {
@@ -202,22 +203,22 @@ namespace okiidoku::mono {
 			check();
 		}
 
-		// define implicit conversion from narrower `Int`.
+		/** implicit conversion from narrower `Int`. */
 		template<max_t M_from, IntKind K_from> requires(M_from <= max)
 		constexpr Int(const Int<M_from,K_from>& other) noexcept: Int{other.val_} { check(); }
 
-		// define explicit conversion from `Int` "wider" by one,
-		// to allow cast to sentinel-exclusive-bound `Int` when iterating.
+		/** explicit conversion from `Int` "wider" by one,
+		to allow cast to sentinel-exclusive-bound `Int` when iterating. */
 		template<IntKind K_from>
 		explicit constexpr Int(const Int<max+1u,K_from>& other) noexcept: Int{other.val_} { check(); }
 
-		template<max_t M_from, IntKind K_from>
+		template<max_t M_from, IntKind K_from> [[gnu::pure]]
 		static constexpr Int unchecked_from(const Int<M_from,K_from>& other) noexcept {
 			OKIIDOKU_CONTRACT_USE(other.val_ <= max);
 			return Int{other.val_};
 		}
 
-		// define implicit conversion to a fast, builtin, unsigned integer type with enough capacity.
+		/** implicit conversion to a fast, builtin, unsigned integer type with enough capacity. */
 		[[gnu::pure]] constexpr operator detail::uint_fast_for_width_t<std::bit_width(max)>() const noexcept { check(); return static_cast<detail::uint_small_for_width_t<std::bit_width(max)>>(val_); }
 		// template<class T> requires(std::unsigned_integral<T> && std::numeric_limits<T>::max() >= max)
 		// constexpr operator T() const noexcept { check(); return val_; }
@@ -374,6 +375,10 @@ namespace okiidoku::mono {
 		static_assert(sizeof(o##P_##SUFFIX_##s_t) == sizeof(typename o##P_##SUFFIX_##s_t::val_t)); \
 		static_assert( std::is_trivially_copyable_v<o##P_##SUFFIX_## _t>); \
 		static_assert( std::is_trivially_copyable_v<o##P_##SUFFIX_##s_t>); \
+		static_assert( std::is_trivially_copy_assignable_v<o##P_##SUFFIX_## _t>); \
+		static_assert( std::is_trivially_copy_assignable_v<o##P_##SUFFIX_##s_t>); \
+		static_assert( std::is_trivially_move_assignable_v<o##P_##SUFFIX_## _t>); \
+		static_assert( std::is_trivially_move_assignable_v<o##P_##SUFFIX_##s_t>); \
 		static_assert( std::is_nothrow_convertible_v<o##P_##SUFFIX_## _t, o##P_##SUFFIX_##s_t>, "can convert fast to small"); \
 		static_assert( std::is_nothrow_convertible_v<o##P_##SUFFIX_##s_t, o##P_##SUFFIX_## _t>, "can convert small to fast"); \
 		static_assert( std::is_nothrow_convertible_v<Int<std::uintmax_t{(MAX_)-1u}>,o##P_##SUFFIX_## _t>, "can convert from narrower Int"); \
@@ -385,7 +390,16 @@ namespace okiidoku::mono {
 		static_assert( std::is_nothrow_constructible_v<o##P_##SUFFIX_## _t,Int<std::uintmax_t{(MAX_)+1u}>>, "explicit conversion from sentinel type"); \
 		static_assert( std::is_nothrow_constructible_v<o##P_##SUFFIX_##s_t,Int<std::uintmax_t{(MAX_)+1u}>>, "explicit conversion from sentinel type"); \
 		static_assert( std::is_nothrow_constructible_v<o##P_##SUFFIX_## _t,Int<std::uintmax_t{(MAX_)+1u},IntKind::small>>, "explicit conversion from sentinel type"); \
-		static_assert( std::is_nothrow_constructible_v<o##P_##SUFFIX_##s_t,Int<std::uintmax_t{(MAX_)+1u},IntKind::small>>, "explicit conversion from sentinel type");
+		static_assert( std::is_nothrow_constructible_v<o##P_##SUFFIX_##s_t,Int<std::uintmax_t{(MAX_)+1u},IntKind::small>>, "explicit conversion from sentinel type"); \
+		static_assert( std::is_nothrow_assignable_v<o##P_##SUFFIX_## _t,unsigned char>); \
+		static_assert( std::is_nothrow_assignable_v<o##P_##SUFFIX_## _t,unsigned short>); \
+		static_assert( std::is_nothrow_assignable_v<o##P_##SUFFIX_## _t,unsigned int>); \
+		static_assert( std::is_nothrow_assignable_v<o##P_##SUFFIX_## _t,unsigned long>); \
+		static_assert( std::is_nothrow_assignable_v<o##P_##SUFFIX_## _t,unsigned long long>); \
+		static_assert(!std::is_assignable_v<o##P_##SUFFIX_## _t,Int<std::uintmax_t{(MAX_)+1u},IntKind::fast >>, "no narrowing assignment"); \
+		static_assert(!std::is_assignable_v<o##P_##SUFFIX_## _t,Int<std::uintmax_t{(MAX_)+1u},IntKind::small>>, "no narrowing assignment"); \
+		static_assert(!std::is_assignable_v<o##P_##SUFFIX_##s_t,Int<std::uintmax_t{(MAX_)+1u},IntKind::fast >>, "no narrowing assignment"); \
+		static_assert(!std::is_assignable_v<o##P_##SUFFIX_##s_t,Int<std::uintmax_t{(MAX_)+1u},IntKind::small>>, "no narrowing assignment");
 
 		DEFINE_OX_TYPES(1, i,  O)
 		DEFINE_OX_TYPES(2, i,  O*O)
@@ -395,11 +409,11 @@ namespace okiidoku::mono {
 		DEFINE_OX_TYPES(2, x,  (O*O) -1u)
 		DEFINE_OX_TYPES(3, x,  (O*O*O) -1u)
 		DEFINE_OX_TYPES(4, x,  (O*O*O*O) -1u)
-		DEFINE_OX_TYPES(2, x1 ,(O*O) - (O))
-		DEFINE_OX_TYPES(3, x1 ,(O*O*O) - (O))
-		DEFINE_OX_TYPES(4, x1 ,(O*O*O*O) - (O))
-		DEFINE_OX_TYPES(3, x2 ,(O*O*O) - (O*O))
-		DEFINE_OX_TYPES(4, x2 ,(O*O*O*O) - (O*O))
+		DEFINE_OX_TYPES(2, x1, (O*O) - (O))
+		DEFINE_OX_TYPES(3, x1, (O*O*O) - (O))
+		DEFINE_OX_TYPES(4, x1, (O*O*O*O) - (O))
+		DEFINE_OX_TYPES(3, x2, (O*O*O) - (O*O))
+		DEFINE_OX_TYPES(4, x2, (O*O*O*O) - (O*O))
 		#undef DEFINE_OX_TYPES
 
 		static constexpr o1i_t O1 {o1i_t::max};

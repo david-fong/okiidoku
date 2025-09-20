@@ -14,7 +14,8 @@
 	"type": "module",
 	"files": [],
 	"directories": {
-		"example": "examples"
+		"example": "examples",
+		"doc": "doc"
 	},
 	"repository": "github:david-fong/okiidoku",
 	"readme": "README.md",

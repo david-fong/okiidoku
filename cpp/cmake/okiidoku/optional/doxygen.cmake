@@ -8,8 +8,11 @@ endif()
 # include(FindDoxygen)
 find_package(Doxygen 1.9) # (minimum version)
 if(Doxygen_FOUND)
-	list(APPEND DOXYGEN_EXCLUDE "${okiidoku_SOURCE_DIR}/external/")
-	list(APPEND DOXYGEN_EXCLUDE_PATTERNS "*/node_modules/*" "*/extras/*/build/*" "*/out/build/*" "*/out/install/*")
+	list(APPEND DOXYGEN_EXCLUDE "${okiidoku_SOURCE_DIR}/external")
+	list(APPEND DOXYGEN_EXCLUDE_PATTERNS
+		"*/node_modules" "*/node/build"
+		"*/out/build" "*/out/install"
+	)
 	set(DOXYGEN_OUTPUT_DIRECTORY "${okiidoku_BINARY_DIR}/docs")
 	# set(DOXYGEN_USE_MDFILE_AS_MAINPAGE "${okiidoku_SOURCE_DIR}/../README.md")
 	set(DOXYGEN_BUILTIN_STL_SUPPORT YES)
@@ -27,18 +30,14 @@ if(Doxygen_FOUND)
 		list(APPEND DOXYGEN_EXCLUDE_PATTERNS "*/src/*")
 		list(APPEND DOXYGEN_EXTRACT_ALL YES)
 		doxygen_add_docs(okiidoku_docs
-			"${okiidoku_SOURCE_DIR}"
-			# "${okiidoku_SOURCE_DIR}/.."
-			# "${okiidoku_SOURCE_DIR}/../writings"
-			# "${DOXYGEN_USE_MDFILE_AS_MAINPAGE}"
+				"${okiidoku_SOURCE_DIR}"
+				# "${okiidoku_SOURCE_DIR}/.."
+				# "${okiidoku_SOURCE_DIR}/../writings"
+				# "${DOXYGEN_USE_MDFILE_AS_MAINPAGE}"
 			ALL
+			COMMENT "doxygen: generating user docs to file://${DOXYGEN_OUTPUT_DIRECTORY}/html/index.html"
 		)
 	endblock()
-	install(
-		DIRECTORY
-			"${okiidoku_BINARY_DIR}/docs/html"
-			"${okiidoku_BINARY_DIR}/docs/man"
-		TYPE DOC
-		COMPONENT okiidoku_development # or should this have a dedicated "docs" component?
-	)
+	install(DIRECTORY "${DOXYGEN_OUTPUT_DIRECTORY}/man"  TYPE DATA COMPONENT okiidoku_development)
+	install(DIRECTORY "${DOXYGEN_OUTPUT_DIRECTORY}/html" TYPE DOC  COMPONENT okiidoku_development)
 endif()

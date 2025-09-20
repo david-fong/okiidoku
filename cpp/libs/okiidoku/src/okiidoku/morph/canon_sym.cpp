@@ -133,7 +133,7 @@ namespace okiidoku::mono { namespace {
 
 			OKIIDOKU_DEFER_INIT sym_map_t<O> map;
 			for (const auto canon_i : T::O2) {
-				map[s.to_og[canon_i]] = static_cast<to_t>(canon_i);
+				map[s.to_og[canon_i]] = canon_i;
 			}
 			return map;
 		}()};

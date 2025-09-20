@@ -67,6 +67,8 @@ namespace emscripten::internal {
 			return ValBinding::toWireType(i.val(), rvp::default_tag{});
 		}
 		static Int<M,K> fromWireType(WireType value) { // JS to C++
+			// val v {val::take_ownership(value)};
+			// return v.as<Int<M,K>>();
 			return ValBinding::fromWireType(value);
 		}
 	};

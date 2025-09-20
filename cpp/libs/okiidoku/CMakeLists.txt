@@ -18,8 +18,8 @@ add_library("${PROJECT_NAME}::okiidoku" ALIAS okiidoku)
 target_compile_features(okiidoku PUBLIC cxx_std_23)
 set_target_properties(okiidoku PROPERTIES
 	# https://www.youtube.com/watch?v=m0DwB4OvDXk&ab_channel=CppCon&t=17m13s
-	VERSION   ${okiidoku_VERSION}
-	SOVERSION ${okiidoku_VERSION_MAJOR}
+	VERSION   "${okiidoku_VERSION}"
+	SOVERSION "${okiidoku_VERSION_MAJOR}"
 	CXX_STANDARD_REQUIRED TRUE
 	CXX_EXTENSIONS OFF
 	CXX_VISIBILITY_PRESET hidden
@@ -47,7 +47,7 @@ target_include_directories(okiidoku
 )
 target_compile_options(okiidoku PUBLIC "${util_header_include_flag}")
 # Future Note: if switching back to FILE_SET, make sure headers get installed. not sure why they weren't when previously using FILE_SET. maybe each header file needs to be listed out explicitly?
-install(DIRECTORY
+install(DIRECTORY # includes
 	"${CMAKE_CURRENT_BINARY_DIR}/include/okiidoku"
 	"${CMAKE_CURRENT_SOURCE_DIR}/include/okiidoku"
 	TYPE INCLUDE
@@ -77,10 +77,10 @@ block()
 		COMMENT "symlinking debug-support files to data / build directory"
 		VERBATIM CODEGEN COMMAND_EXPAND_LISTS
 	)
-	install(FILES
-		"${src}/okiidoku.gdb.py"
-		"${src}/okiidoku.natvis"
-		TYPE DATA # see DEFINE_GDB_PY_SCRIPT in gdb_support.cpp
+	install(FILES # debug support files
+			"${src}/okiidoku.gdb.py"
+			"${src}/okiidoku.natvis"
+		DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/okiidoku" # see DEFINE_GDB_PY_SCRIPT in gdb_support.cpp
 		# also https://learn.microsoft.com/en-us/visualstudio/debugger/create-custom-views-of-native-objects#BKMK_natvis_location and https://learn.microsoft.com/en-us/cpp/build/reference/natvis-add-natvis-to-pdb so if a PDB is installed with embedded natvis, no need to install natvis separately?
 		COMPONENT okiidoku_development
 	)

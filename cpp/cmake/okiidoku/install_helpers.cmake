@@ -9,8 +9,7 @@ if(NOT DEFINED OKIIDOKU_INSTALL_CMAKEDIR)
 endif()
 
 function(okiidoku_install_target target)
-	install(
-		TARGETS ${target}
+	install(TARGETS ${target}
 		EXPORT okiidoku_installation_targets
 		# RUNTIME_DEPENDENCIES # currently there are none to bundle.
 		${ARGN}

@@ -38,13 +38,13 @@ namespace okiidoku::mono {
 	Transformation<O> Transformation<O>::inverted() const noexcept {
 		OKIIDOKU_DEFER_INIT Transformation<O> inv;
 		for (const auto i : T::O2) {
-			inv.sym_map[sym_map[i]] = static_cast<to_t>(i);
+			inv.sym_map[sym_map[i]] = i;
 		}
 		for (const auto i : T::O2) {
 			const auto row_inv {row_map[i/T::O1][i%T::O1]};
 			const auto col_inv {col_map[i/T::O1][i%T::O1]};
-			inv.row_map[row_inv/T::O1][row_inv%T::O1] = static_cast<to_t>(i);
-			inv.col_map[col_inv/T::O1][col_inv%T::O1] = static_cast<to_t>(i);
+			inv.row_map[row_inv/T::O1][row_inv%T::O1] = i;
+			inv.col_map[col_inv/T::O1][col_inv%T::O1] = i;
 		}
 		if (post_transpose) {
 			// do the equivalent of a pre_transpose
@@ -107,7 +107,7 @@ namespace okiidoku::visitor {
 	Transformation Transformation::inverted() const noexcept {
 		switch (this->get_order()) {
 		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-		case O_: return static_cast<Transformation>(this->unchecked_get_mono_exact<O_>().inverted());
+		case O_: return this->unchecked_get_mono_exact<O_>().inverted();
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
 		default: OKIIDOKU_UNREACHABLE;

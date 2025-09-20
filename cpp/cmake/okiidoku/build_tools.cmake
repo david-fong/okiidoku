@@ -8,6 +8,24 @@ endif()
 # see also tools/cmake_top_project_include.cmake
 # do not wrap these with `block()`
 
+if(UNIX AND NOT EMSCRIPTEN)
+	add_link_options(
+		-Wl,--package-metadata=JSON # https://systemd.io/PACKAGE_METADATA_FOR_EXECUTABLE_FILES/
+		-Wl,--build-id
+		-Wl,--compress-debug-sections=zstd
+	)
+endif()
+
+# link-time optimization things
+include(CheckIPOSupported)
+check_ipo_supported(RESULT okiidoku_is_ipo_supported)
+if((NOT DEFINED CMAKE_INTERPROCEDURAL_OPTIMIZATION) AND "${okiidoku_is_ipo_supported}")
+	set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
+	if(GCC AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER "15")
+		add_compile_options("-flto-incremental=${OKIIDOKU_LTO_CACHE_DIR}")
+	endif()
+endif()
+
 # linker section garbage collection
 if(NOT "${CMAKE_CXX_COMPILER_LINKER_FRONTEND_VARIANT}" STREQUAL "MSVC")
 	if(NOT "${CMAKE_CXX_COMPILER_FRONTEND_VARIANT}" STREQUAL "MSVC")
@@ -45,7 +63,7 @@ endif()
 # ninjatracing
 # TODO.wait https://www.kitware.com/new-cmake-instrumentation-feature-provides-detailed-timing-of-builds/  https://www.kitware.com/tag/cmake/
 if(CMAKE_GENERATOR MATCHES [[^Ninja]])
-install(CODE "
+install(CODE #[[build perf data]] "
 file(MAKE_DIRECTORY \"${OKIIDOKU_DATA_OUTPUT_DIRECTORY}\")
 execute_process(
 	# TODO.optional: finer-grained for clang https://crascit.com/2022/06/24/build-performance-insights/#:~:text=ninja_log%20%3E%20cmake_build_trace.json-,Clang%20Time%20Tracing,-If%20you%20are

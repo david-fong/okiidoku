@@ -146,16 +146,23 @@
 			}
 		},
 		{
+			"name": "tool:dev.gnu",
+			"hidden": true,
+			"cacheVariables": {
+				"CMAKE_CXX_FLAGS_DEBUG": "-Og -g3"
+			}
+		},
+		{
 			"name": "dev.clang",
-			"inherits": ["tool:clang", "base:dev"]
+			"inherits": ["tool:dev.gnu", "tool:clang", "base:dev"]
 		},
 		{
 			"name": "dev.clang-homebrew",
-			"inherits": ["tool:clang-homebrew", "base:dev"]
+			"inherits": ["tool:dev.gnu", "tool:clang-homebrew", "base:dev"]
 		},
 		{
 			"name": "dev.gcc",
-			"inherits": ["tool:gcc", "base:dev"]
+			"inherits": ["tool:dev.gnu", "tool:gcc", "base:dev"]
 		},
 		{
 			"name": "dev.msvc",
@@ -163,7 +170,7 @@
 		},
 		{
 			"name": "dev.emscripten",
-			"inherits": ["tool:emscripten", "base:dev"]
+			"inherits": ["tool:dev.gnu", "tool:emscripten", "base:dev"]
 		}
 	],
 	"buildPresets": [

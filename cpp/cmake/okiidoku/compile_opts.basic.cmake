@@ -43,15 +43,14 @@ if(MSVC)
 	)
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 block()
-	set(v12 "$<VERSION_GREATER_EQUAL:$<CXX_COMPILER_VERSION>,12>")
 	target_compile_options(okiidoku_compile_options_public INTERFACE
 	)
 	target_compile_options(okiidoku_compiler_warnings INTERFACE
 		-ftabstop=1
-		"$<${v12}:-Wbidi-chars=any>" # warn on any usage of bidi text
+		-Wbidi-chars=any # warn on any usage of bidi text
 		-Wnormalized # warn on identifiers that look the same but are not the same
 		-Wno-unknown-pragmas
-		"$<${v12}:-Wno-attributes=clang::>"
+		-Wno-attributes=clang::
 	)
 endblock()
 endif()
@@ -91,8 +90,6 @@ if(MSVC)
 	target_compile_options(okiidoku_compiler_warnings INTERFACE
 	)
 else()
-block()
-	set(v12 "$<VERSION_GREATER_EQUAL:$<CXX_COMPILER_VERSION>,12>")
 	target_compile_options(okiidoku_compiler_warnings INTERFACE
 		-Werror=date-time # error to use __TIME__, __DATE__ or __TIMESTAMP__
 		-fno-record-gcc-switches -gno-record-gcc-switches
@@ -104,11 +101,10 @@ block()
 		# TODO: why am I still getting absolute paths in debug builds for GCC?
 	)
 	# TODO clang -fno-record-command-line
-endblock()
 endif()
 
 
-# features (change emitted / possible-emitted code- not just emit diagnostics):
+# features (change emitted / possible-emitted code- not just diagnostics):
 if(MSVC)
 else()
 	if(OKIIDOKU_BUILD_DEBUG_WITH_SANITIZERS)
@@ -123,7 +119,7 @@ else()
 	elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 		target_compile_options(okiidoku_compiler_warnings INTERFACE
 			-fno-nonansi-builtins # Disable built-in declarations of functions that are not mandated by ANSI/ISO C. These include ffs, alloca, _exit, index, bzero, conjf, and other related functions.
-			# TODO.try -fno-implicit-templates # https://gcc.gnu.org/onlinedocs/gcc/C_002b_002b-Dialect-Options.html#index-fno-implicit-templates
+			# -fno-implicit-templates # https://gcc.gnu.org/onlinedocs/gcc/C_002b_002b-Dialect-Options.html#index-fno-implicit-templates
 		)
 	endif()
 endif()
@@ -131,6 +127,8 @@ endif()
 
 # warnings:
 # (for diagnostics that don't change the emitted object files)
+# note that usage of @file is not introspected by ccache or ninja's dirty checks,
+#  so avoid it for anything other than diagnostics-related flags.
 if(MSVC)
 	target_compile_options(okiidoku_compiler_warnings INTERFACE
 		/W4 # highest warnings level

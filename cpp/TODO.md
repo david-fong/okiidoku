@@ -44,10 +44,12 @@ Issues I'm watching:
 - https://gitlab.kitware.com/cmake/cmake/-/issues/15179 -Og default for debug build configuration
 - https://gitlab.kitware.com/cmake/cmake/-/issues/26092 cmake refer to build preset name in preset for installDir
 - `std::ranges::iota()` clang libc++ doesn't have it yet :( (which impacts emscripten build) https://github.com/llvm/llvm-project/issues/105184
+- https://gitlab.kitware.com/cmake/cmake/-/issues/20256 CMake mechanism for split debug info.
 
 ## Misc List
 
-- try using `Int<...>` for word and bit indices in `O2BitArr`.
+- try making int functions take by value (not by reference) and declare them `gnu::const` and compare performance.
+- see if `iosfwd` is enough to define stream operators in ints.hpp to avoid callee/user needing to cast chars to ints. then simplify those call-sites.
 - see if helpful to add `/// \cond detail` wrapper to `detail` namespaces to suppress doxygen for them
 - make `scramble` just generate a random `Transformation`.
 - rename `label` to `sym` and `val` to `sym`.

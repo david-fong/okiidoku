@@ -60,7 +60,7 @@ namespace okiidoku::mono {
 		std::array<rmi_t, T::O4> puzcell_cand_rmis; // non-candidates: either removed, or can't be removed.
 		for (const auto rmi : T::O4) {
 			if (grid.at_rmi(rmi) < T::O2) [[likely]] {
-				puzcell_cand_rmis[num_puzcell_cands] = static_cast<rmi_t>(rmi);
+				puzcell_cand_rmis[num_puzcell_cands] = rmi;
 				++num_puzcell_cands;
 		}	}
 
