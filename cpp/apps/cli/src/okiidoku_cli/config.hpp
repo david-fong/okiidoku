@@ -23,7 +23,7 @@ namespace okiidoku::cli {
 
 	private:
 		// invariant: `order_` is always a compiled order.
-		Order order_ {compiled_orders[0]};
+		Order order_ {compiled_orders[0uz]};
 		bool canonicalize_ {false};
 	};
 }

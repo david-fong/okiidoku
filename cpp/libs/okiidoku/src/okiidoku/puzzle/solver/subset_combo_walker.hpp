@@ -65,7 +65,7 @@ namespace okiidoku::mono::detail::solver {
 		void advance() noexcept {
 			OKIIDOKU_CONTRACT_USE(has_more());
 			OKIIDOKU_CONTRACT_USE(end_ <= T::O2);
-			OKIIDOKU_CONTRACT_USE(naked_subset_size_ > 0);
+			OKIIDOKU_CONTRACT_USE(naked_subset_size_ > 0u);
 			OKIIDOKU_CONTRACT_USE(naked_subset_size_ < T::O2);
 			o2x_t i {naked_subset_size_.prev()};
 			++combo_[i];
@@ -100,7 +100,7 @@ namespace okiidoku::mono::detail::solver {
 				OKIIDOKU_CONTRACT_ASSERT(!has_more_);
 				return;
 			}
-			OKIIDOKU_CONTRACT_ASSERT(combo_[0] >= begin_);
+			OKIIDOKU_CONTRACT_ASSERT(combo_[0uz] >= begin_);
 			OKIIDOKU_CONTRACT_ASSERT(combo_[naked_subset_size_-1u] < end_);
 			for (const auto i : naked_subset_size_) {
 				OKIIDOKU_CONTRACT_ASSERT(combo_[i-1u] < combo_[i]);

@@ -5,6 +5,7 @@
 #include <okiidoku/puzzle/solve.hpp>
 #include <okiidoku/puzzle/ua_set.hpp>
 #include <okiidoku/grid.hpp>
+#include <okiidoku/ints.hpp>
 #include <okiidoku/order.hpp>
 
 #include <algorithm>

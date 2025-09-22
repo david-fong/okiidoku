@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include <okiidoku/puzzle/solver/cand_elim_find.hpp>
 
+#include <okiidoku/puzzle/solver/engine.hpp>
 #include <okiidoku/puzzle/solver/found.hpp>
 #include <okiidoku/o2_bit_arr.hpp>
 #include <okiidoku/ints.hpp>

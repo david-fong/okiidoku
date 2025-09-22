@@ -22,7 +22,7 @@ void do_training(okiidoku::util::SharedRng& shared_rng, const unsigned num_round
 
 	// Grid<O> canon_grid;
 
-	for (unsigned round {0}; round < num_rounds; ++round) {
+	for (unsigned round {0u}; round < num_rounds; ++round) {
 		generate_shuffled(gen_grid, shared_rng.get());
 
 		/* const auto gen_canon_transform {canonicalize(gen_grid)};
@@ -41,10 +41,10 @@ ARGUMENTS
 int main(const int argc, char const *const argv[]) {
 	okiidoku::util::setup_console();
 
-	// NOLINTBEGIN(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays, cppcoreguidelines-pro-bounds-pointer-arithmetic)
+	// NOLINTBEGIN(*-avoid-c-arrays, cppcoreguidelines-pro-bounds-pointer-arithmetic)
 	const auto srand_key {[&]() -> std::uint_fast64_t {
 		if (argc > 1) {
-			const std::string_view arg {argv[1]};
+			const std::string_view arg {argv[1uz]};
 			std::uint_fast64_t parsed {};
 			if (std::from_chars(arg.data(), arg.data()+arg.size(), parsed, 16).ec == std::errc{}) {
 				return parsed;
@@ -53,7 +53,7 @@ int main(const int argc, char const *const argv[]) {
 		}
 		return std::random_device()();
 	}()};
-	// NOLINTEND(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays, cppcoreguidelines-pro-bounds-pointer-arithmetic)
+	// NOLINTEND(*-avoid-c-arrays, cppcoreguidelines-pro-bounds-pointer-arithmetic)
 
 	std::cout << "\nparsed arguments:"
 	<< "\n- arg 1 (srand key)  : " << std::hex << srand_key << std::dec // TODO.mid ugh. it's using my numpunct grouping.

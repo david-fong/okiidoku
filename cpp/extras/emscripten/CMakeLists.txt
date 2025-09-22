@@ -23,7 +23,7 @@ target_link_options(okiidoku_js PRIVATE
 	--no-entry # it's a "reactor" (ie. a library)
 	# --pre-js=
 	-sSTRICT=1
-	"$<${debug_configs}:-sASSERTIONS=1>"
+	"$<${debug_configs}:-sASSERTIONS=2>"
 	"$<${debug_configs}:-gsource-map>" # https://emscripten.org/docs/tools_reference/emcc.html#emcc-gsource-map
 
 	# https://emscripten.org/docs/api_reference/module.html#module

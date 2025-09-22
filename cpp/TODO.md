@@ -49,6 +49,7 @@ Issues I'm watching:
 ## Misc List
 
 - see if `iosfwd` is enough to define stream operators in ints.hpp to avoid callee/user needing to cast chars to ints. then simplify those call-sites.
+- go back commit history to find where debug build for emscripten broke(?)
 - see if helpful to add `/// \cond detail` wrapper to `detail` namespaces to suppress doxygen for them
 - make `scramble` just generate a random `Transformation`.
 - rename `label` to `sym` and `val` to `sym`.
@@ -97,6 +98,8 @@ Issues I'm watching:
 - C+26:
   - https://wg21.link/P2169R4 placeholder variables with no name
   - [postcondition assertions](https://en.cppreference.com/w/cpp/language/function.html#Postcondition_assertions)
+    - https://en.cppreference.com/w/cpp/language/contracts.html
+    - https://en.cppreference.com/w/cpp/language/contract_assert.html
   - with reflection, I might be able to do what I'm currently doing with macros like `OKIIDOKU_FOREACH_O_EMIT` and `OKIIDOKU_FOREACH_O_DO_EMIT`, and be in a better position to use C++ modules :O.
   - try using `pre` and `post()` on default and copy constructors of `Int<...>` to describe pre and postconditions
 

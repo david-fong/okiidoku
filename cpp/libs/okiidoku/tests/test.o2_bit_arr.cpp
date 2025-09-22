@@ -5,6 +5,7 @@
 
 #include <okiidoku/o2_bit_arr.hpp>
 #include <okiidoku/o2_bit_arr.cpp> // NOLINT(*include*) implementations aren't exported in libokiidoku.
+#include <okiidoku/ints_io.hpp>
 #include <okiidoku/ints.hpp>
 #include <okiidoku/order.hpp>
 

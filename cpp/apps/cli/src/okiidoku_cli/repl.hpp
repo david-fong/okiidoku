@@ -15,7 +15,7 @@
 namespace okiidoku::cli {
 
 	namespace Command {
-		enum class E {
+		enum class E : unsigned int {
 			help,
 			quit,
 			config_order,

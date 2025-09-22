@@ -10,9 +10,9 @@ endif()
 
 if(UNIX AND NOT EMSCRIPTEN)
 	add_link_options(
-		-Wl,--package-metadata=JSON # https://systemd.io/PACKAGE_METADATA_FOR_EXECUTABLE_FILES/
-		-Wl,--build-id
-		-Wl,--compress-debug-sections=zstd
+		LINKER:--package-metadata=JSON # https://systemd.io/PACKAGE_METADATA_FOR_EXECUTABLE_FILES/
+		LINKER:--build-id
+		LINKER:--compress-debug-sections=zstd
 	)
 endif()
 

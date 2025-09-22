@@ -4,6 +4,7 @@
 #include <doctest.h>
 
 #include <okiidoku/grid.hpp>
+#include <okiidoku/ints_io.hpp>
 #include <okiidoku/ints.hpp>
 #include <okiidoku/order.hpp>
 

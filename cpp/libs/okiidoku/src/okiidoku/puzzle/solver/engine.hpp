@@ -28,15 +28,15 @@ I don't expect the average person checking out this library to be interested
 namespace okiidoku::mono::detail::solver {
 
 	template<Order O> requires(is_order_compiled(O)) struct EngineImpl;
-	template<Order O> requires(is_order_compiled(O)) class Engine;
 
 	struct UnwindInfo;
 
-	// usage: must be called immediately when a cell's candidate-symbol count
-	//  changes to zero. call to prepare to find another solution.
-	// contract: `engine.no_more_solns` returns `false`.
+	/**
+	usage: must be called immediately when a cell's candidate-symbol count
+	changes to zero. call to prepare to find another solution.
+	\pre `engine.no_more_solns` returns `false`. */
 	template<Order O> requires(is_order_compiled(O))
-	UnwindInfo unwind_one_stack_frame_of_(EngineImpl<O>&) noexcept;
+	UnwindInfo unwind_one_stack_frame_of_(EngineImpl<O>& engine) noexcept;
 
 
 	struct [[nodiscard]] UnwindInfo {
@@ -97,7 +97,7 @@ namespace okiidoku::mono::detail::solver {
 			std::array<HouseSubsets, T::O2>
 		>;
 
-		struct Frame {
+		struct [[gnu::designated_init]] Frame {
 			o4i_t num_unsolved;
 			CandsGrid<O> cells_cands;
 			houses_subsets_t houses_subsets;
@@ -110,7 +110,7 @@ namespace okiidoku::mono::detail::solver {
 		struct GuessStackFrame {
 			Frame frame;
 			Guess<O> guess;
-			GuessStackFrame(const Frame& frame_, const Guess<O> guess_) noexcept:
+			constexpr GuessStackFrame(const Frame& frame_, const Guess<O> guess_) noexcept:
 				frame{frame_},
 				guess{guess_}
 			{}
@@ -120,14 +120,14 @@ namespace okiidoku::mono::detail::solver {
 	public:
 		EngineImpl() noexcept = default;
 
-		// contract: none. puzzle can even blatantly break the one rule.
+		/** \pre none. puzzle can even blatantly break the one rule. */
 		void reinit_with_puzzle(const Grid<O>& puzzle) noexcept;
 
-		// The user of the engine must respond to `get_next_solution` with `std::nullopt`
-		// if this returns `true`.
-		//
-		// Note: All candidate elimination techniques have a contract that this returns `false`.
-		// contract: All other non-const member functions require that this return `false`.
+		/**
+		The engine wrapper must respond to `get_next_solution` with `std::nullopt`
+		if this returns `true`.
+		\note all candidate elimination techniques have a contract that this returns `false`.
+			all other non-const member functions require that this return `false`. */
 		[[nodiscard, gnu::pure]] constexpr
 		bool no_more_solns() const noexcept { return no_more_solns_; }
 

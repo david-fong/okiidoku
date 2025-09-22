@@ -4,6 +4,7 @@
 
 #include <okiidoku_cli_utils/shared_rng.hpp>
 #include <okiidoku_cli_utils/console_setup.hpp>
+#include <okiidoku/ints_io.hpp>
 #include <okiidoku/order.hpp>
 #include <okiidoku/about.hpp>
 
@@ -24,14 +25,14 @@ ARGUMENTS
 int main(const int argc, char const *const argv[]) {
 	auto* numpunct {okiidoku::util::setup_console()};
 
-	// NOLINTBEGIN(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays, cppcoreguidelines-pro-bounds-pointer-arithmetic)
+	// NOLINTBEGIN(*-avoid-c-arrays, cppcoreguidelines-pro-bounds-pointer-arithmetic)
 	const auto user_order {(argc > 1)
-		? static_cast<okiidoku::Order>(std::stoi(argv[1]))
-		: okiidoku::compiled_orders[0]
+		? static_cast<okiidoku::Order>(std::stoi(argv[1uz]))
+		: okiidoku::compiled_orders[0uz]
 	};
 	const auto srand_key {[&]() -> std::uint_fast64_t {
 		if (argc > 2) {
-			const std::string_view arg {argv[2]};
+			const std::string_view arg {argv[2uz]};
 			std::uint_fast64_t parsed {};
 			if (std::from_chars(arg.data(), arg.data()+arg.size(), parsed, 16).ec == std::errc{}) {
 				return parsed;
@@ -40,7 +41,7 @@ int main(const int argc, char const *const argv[]) {
 		}
 		return std::random_device()();
 	}()};
-	// NOLINTEND(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays, cppcoreguidelines-pro-bounds-pointer-arithmetic)
+	// NOLINTEND(*-avoid-c-arrays, cppcoreguidelines-pro-bounds-pointer-arithmetic)
 
 	std::cout << "\nparsed arguments:"
 		<< "\n- arg 1 (grid order) : " << user_order

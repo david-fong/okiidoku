@@ -9,6 +9,7 @@
 #include <okiidoku/gen.hpp>
 #include <okiidoku/print_2d.hpp>
 #include <okiidoku/grid.hpp>
+#include <okiidoku/ints_io.hpp>
 
 #include <okiidoku_cli_utils/shared_rng.hpp>
 

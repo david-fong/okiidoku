@@ -30,7 +30,7 @@ namespace okiidoku::em { namespace {
 
 	class Rng {
 	public:
-		std::mt19937_64 rng_;
+		std::mt19937_64 rng_ {};
 		void seed(const std::uint_fast64_t seed) noexcept {
 			rng_.seed(seed);
 		}
@@ -57,53 +57,40 @@ namespace okiidoku::visitor { namespace {
 	// TODO.low define wrappers that return undefined or throw on contract violations / out of bounds. https://emscripten.org/docs/porting/connecting_cpp_and_javascript/embind.html#non-member-functions-on-the-javascript-prototype
 }}
 
+// specify custom marshalling for int wrappers.
+// see https://github.com/emscripten-core/emscripten/blob/main/test/embind/test_custom_marshal.cpp
 namespace emscripten::internal {
-	template<template<std::uintmax_t M, okiidoku::mono::IntKind K> typename Int, std::uintmax_t M, okiidoku::mono::IntKind K>
-	requires(std::is_same_v<Int<M,K>, okiidoku::mono::Int<M,K>>)
-	struct BindingType<Int<M,K>> {
-		using ValBinding = BindingType<typename Int<M,K>::val_t>;
-		using WireType = ValBinding::WireType;
-		static WireType toWireType(const Int<M,K>& i, rvp::default_tag) { // C++ to JS
-			return ValBinding::toWireType(i.val(), rvp::default_tag{});
+
+	template<okiidoku::mono::detail::is_int_wrapper T>
+	struct BindingType<T> {
+		using IntBinding = BindingType<typename T::val_t>;
+		using WireType = IntBinding::WireType;
+		// C++ -> JS:
+		constexpr static WireType toWireType(const T& i, rvp::default_tag) {
+			return IntBinding::toWireType(i.val(), rvp::default_tag{});
 		}
-		static Int<M,K> fromWireType(WireType value) { // JS to C++
-			// val v {val::take_ownership(value)};
-			// return v.as<Int<M,K>>();
-			return ValBinding::fromWireType(value);
+		// JS -> C++:
+		constexpr static T fromWireType(WireType value) {
+			// val v {val::take_ownership(value)}; return v.as<T>();
+			return T{IntBinding::fromWireType(value)};
 		}
 	};
-	#define DEFINE_OX_TYPE_TYPEIDS(O_, WHICH) \
-		template struct BindingType<okiidoku::mono::Ints<O_>::o##WHICH##_t>; \
-		template<typename T> requires(std::is_same_v<typename Canonicalized<T>::type, typename okiidoku::mono::Ints<O_>::o##WHICH##_t>) \
-		struct TypeID<T> { static constexpr TYPEID get() { return TypeID<typename okiidoku::mono::Ints<O_>::o##WHICH##_t::val_t>::get(); } };
-	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-		DEFINE_OX_TYPE_TYPEIDS(O_, 1i ) \
-		DEFINE_OX_TYPE_TYPEIDS(O_, 1is) \
-		DEFINE_OX_TYPE_TYPEIDS(O_, 2x ) \
-		DEFINE_OX_TYPE_TYPEIDS(O_, 2i ) \
-		DEFINE_OX_TYPE_TYPEIDS(O_, 2xs) \
-		DEFINE_OX_TYPE_TYPEIDS(O_, 2is) \
-		DEFINE_OX_TYPE_TYPEIDS(O_, 3x ) \
-		DEFINE_OX_TYPE_TYPEIDS(O_, 3i ) \
-		DEFINE_OX_TYPE_TYPEIDS(O_, 3xs) \
-		DEFINE_OX_TYPE_TYPEIDS(O_, 3is) \
-		DEFINE_OX_TYPE_TYPEIDS(O_, 4x ) \
-		DEFINE_OX_TYPE_TYPEIDS(O_, 4i ) \
-		DEFINE_OX_TYPE_TYPEIDS(O_, 4xs) \
-		DEFINE_OX_TYPE_TYPEIDS(O_, 4is)
-	OKIIDOKU_FOREACH_O_DO_EMIT
-	#undef OKIIDOKU_FOREACH_O_EMIT
-	#undef DEFINE_OX_TYPE_TYPEIDS
+	template<okiidoku::mono::detail::is_int_wrapper T>
+	struct TypeID<T> {
+		static constexpr TYPEID get() {
+			return TypeID<Canonicalized<typename T::val_t>>::get();
+		}
+	};
 }
 
-// static constructor function:
 EMSCRIPTEN_BINDINGS(okiidoku) {
+	// (note: ^this is a static constructor function)
 	namespace em = ::emscripten;
 	namespace oki = ::okiidoku;
 	namespace oki_m = ::okiidoku::mono;
 	namespace oki_v = ::okiidoku::visitor;
 
-	em::function("isOrderCompiled", &oki::is_order_compiled);
+	// em::function("isOrderCompiled", &oki::is_order_compiled);
 
 	em::enum_<oki_m::IntKind>("IntKind")
 		.value("FAST",  oki_m::IntKind::fast)

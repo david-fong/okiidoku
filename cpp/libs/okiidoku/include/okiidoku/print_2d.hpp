@@ -20,8 +20,9 @@ namespace okiidoku {
 		visitor::ints::o2is_t (visitor::ints::o4xs_t rmi)
 	>;
 
-	// contract: each grid view's domain is [0, O4), and range is [0, O2].
-	// Note: tradeoff: fewer template instantiations for slightly worse perf.
+	/**
+	\pre each grid view's domain is [0, O4), and range is [0, O2].
+	\note tradeoff: fewer template instantiations for slightly worse perf. */
 	OKIIDOKU_EXPORT void print_2d_base(
 		Order O,
 		std::ostream&,

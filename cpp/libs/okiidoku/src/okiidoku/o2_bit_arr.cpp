@@ -20,7 +20,7 @@ namespace okiidoku::mono {
 	typename O2BitArr<O>::o2i_t
 	O2BitArr<O>::count() const noexcept {
 		if constexpr (num_words == 1u) {
-			const o2i_t count {std::popcount(words_[0u])};
+			const o2i_t count {std::popcount(words_[0uz])};
 			OKIIDOKU_CONTRACT_USE(count <= T::O2);
 			return count;
 		} else {
@@ -44,7 +44,7 @@ namespace okiidoku::mono {
 		OKIIDOKU_CONTRACT_USE(end < T::O2);
 		if constexpr (num_words == 1u) {
 			return std::popcount(
-				words_[0u] & static_cast<word_t>(word_bit_mask_for_bit_i(end) - word_t{1u})
+				words_[0uz] & static_cast<word_t>(word_bit_mask_for_bit_i(end) - word_t{1u})
 			);
 		} else {
 			const auto end_at_int {bit_i_to_word_i(end)};
@@ -71,7 +71,7 @@ namespace okiidoku::mono {
 		//  handle discounting excess top zeros in the empty-mask case.
 		OKIIDOKU_CONTRACT_ASSERT(count() > 0u);
 		if constexpr (num_words == 1u) {
-			const o2xs_t count {std::countr_zero(words_[0u])};
+			const o2xs_t count {std::countr_zero(words_[0uz])};
 			OKIIDOKU_CONTRACT_USE(count < T::O2);
 			return count;
 		} else {

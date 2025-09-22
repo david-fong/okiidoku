@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include <okiidoku/puzzle/solver/cand_elim_find.hpp>
 
+#include <okiidoku/puzzle/solver/engine.hpp>
 #include <okiidoku/puzzle/solver/found.hpp>
 #include <okiidoku/ints.hpp>
 #include <okiidoku/order.hpp>
@@ -12,6 +13,7 @@
 #include <execution>
 #include <array>
 #include <tuple>      // tie (for comparisons)
+#include <cstdint>    // uintmax_t
 
 #include <okiidoku/puzzle/solver/cand_elim_find.macros.hpp>
 

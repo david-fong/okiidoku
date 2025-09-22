@@ -9,7 +9,7 @@
 namespace okiidoku::util {
 
 	class MyNumPunct : public std::numpunct<char> {
-	public: void set_grouping(char grouping) { grouping_[0] = grouping; }
+	public: void set_grouping(char grouping) { grouping_[0uz] = grouping; }
 	protected: std::string do_grouping() const override { return grouping_; }
 	private: std::string grouping_ {"\003"};
 	};
