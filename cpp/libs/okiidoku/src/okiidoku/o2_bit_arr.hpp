@@ -188,7 +188,7 @@ namespace okiidoku::mono {
 		class Iter {
 		public:
 			using iterator_category = std::input_iterator_tag;
-			using difference_type = detail::int_fast_for_max_t<T::O2>;
+			using difference_type = ::okiidoku::detail::int_fast_for_max_t<T::O2>;
 			using value_type = o2x_t;
 			using reference  = o2x_t;
 			using pointer    = o2x_t;

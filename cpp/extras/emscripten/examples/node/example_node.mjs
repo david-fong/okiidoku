@@ -6,7 +6,7 @@
  * For CommonJS, wrap with `(async() => {...})();`, or `require(".../okiidoku.js").then(oki => {...});`
  * Actual import path for you will be under your install and/or build directory. */
 // TODO also try installation directory layout relative path (../../../../bin/okiidoku.js) or relative path for installed example scripts.
-const oki = await (await import("./build/Release/okiidoku.js")).default({
+const oki = await (await import("./build/Debug/okiidoku.js")).default({
 	// https://emscripten.org/docs/api_reference/module.html#module
 });
 // console.log(oki);

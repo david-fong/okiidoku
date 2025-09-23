@@ -33,7 +33,7 @@ namespace okiidoku::mono {
 
 		struct [[gnu::designated_init]] CandSymToIgnore {
 			Ints<O>::o4xs_t rmi;
-			Ints<O>::o2x_t val;
+			Ints<O>::o2x_t sym;
 		};
 
 		/// \pre none. puzzle can even blatantly break the one rule.

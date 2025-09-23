@@ -25,7 +25,7 @@ namespace okiidoku::mono { namespace {
 		using o2i_t = T::o2i_t;
 
 		static constexpr unsigned num_buf_bytes {1u};
-		using buf_t = detail::uint_small_for_width_t<2u*8u*num_buf_bytes>; // x2 to prevent overflow
+		using buf_t = ::okiidoku::detail::uint_small_for_width_t<2u*8u*num_buf_bytes>; // x2 to prevent overflow
 		static_assert((1uLL<<(2u*8u*num_buf_bytes)) > (2u*T::O2)); // requirement to handle overflow
 
 	public:
@@ -41,11 +41,11 @@ namespace okiidoku::mono { namespace {
 		[[nodiscard, gnu::pure]] constexpr o4x_t get_cell_rmi() const noexcept { return *cell_rmi_; }
 		void advance() noexcept;
 
-		// automatically removes val as a candidate of future cells.
-		void print_val(std::ostream& os, val_t val) noexcept;
+		// automatically removes sym as a candidate of future cells.
+		void print_val(std::ostream& os, val_t sym) noexcept;
 		void print_remaining_buf(std::ostream& os) noexcept;
 
-		// automatically removes val as a candidate of future cells.
+		// automatically removes read sym as a candidate of future cells.
 		[[nodiscard]] val_t parse_val(std::istream& is) noexcept;
 
 	private:
@@ -84,8 +84,8 @@ namespace okiidoku::mono { namespace {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	void SerdesHelper<O>::print_val(std::ostream& os, const typename SerdesHelper<O>::val_t val) noexcept {
-		OKIIDOKU_CONTRACT_ASSERT(cell_cands_[val]);
+	void SerdesHelper<O>::print_val(std::ostream& os, const typename SerdesHelper<O>::val_t sym) noexcept {
+		OKIIDOKU_CONTRACT_ASSERT(cell_cands_[sym]);
 		// The number of possible different values that this cell could be
 		// based on the values that have already been encountered.
 		auto smol_val_buf_remaining {cell_cands_.count()};
@@ -94,7 +94,7 @@ namespace okiidoku::mono { namespace {
 		// Some slightly-weird-looking logic stems from the fact that it is
 		// a "null" action to try to print something that can only take on one
 		// value (as in- the buffer will be unchanged). Just keep that in mind.
-		auto smol_val_buf {cell_cands_.count_below(val)};
+		auto smol_val_buf {cell_cands_.count_below(sym)};
 		OKIIDOKU_CONTRACT_USE(smol_val_buf < smol_val_buf_remaining);
 		while (smol_val_buf_remaining > 1u) {
 			buf_ += static_cast<buf_t>(buf_pos_ * smol_val_buf); // should never overflow
@@ -113,7 +113,7 @@ namespace okiidoku::mono { namespace {
 				buf_pos_ = static_cast<buf_t>((buf_pos_ % buf_end) + 1u);
 			}
 		}
-		remove_cand_at_current_rmi_(val);
+		remove_cand_at_current_rmi_(sym);
 	}
 
 
@@ -138,9 +138,9 @@ namespace okiidoku::mono { namespace {
 		// TODO
 
 		OKIIDOKU_CONTRACT_USE(smol_val_buf < smol_val_buf_remaining);
-		const auto val {cell_cands_.get_index_of_nth_set_bit(smol_val_buf)};
-		remove_cand_at_current_rmi_(val);
-		return val;
+		const auto sym {cell_cands_.get_index_of_nth_set_bit(smol_val_buf)};
+		remove_cand_at_current_rmi_(sym);
+		return sym;
 	}
 
 
@@ -166,8 +166,8 @@ namespace okiidoku::mono {
 			if ((T::O1-1u-row)/T::O1 == col/T::O1) {
 				continue; // skip cells in the anti-diagonal boxes
 			}
-			const auto val {*grid.at_rmi(helper.get_cell_rmi())};
-			helper.print_val(os, val);
+			const auto sym {*grid.at_rmi(helper.get_cell_rmi())};
+			helper.print_val(os, sym);
 		}
 		helper.print_remaining_buf(os);
 	}
@@ -184,8 +184,8 @@ namespace okiidoku::mono {
 			if ((T::O1-1u-row)/T::O1 == col/T::O1) {
 				continue; // skip cells in the anti-diagonal boxes
 			}
-			const auto val {helper.parse_val(is)};
-			grid.at_rmi(helper.get_cell_rmi()) = val;
+			const auto sym {helper.parse_val(is)};
+			grid.at_rmi(helper.get_cell_rmi()) = sym;
 		}
 		// TODO infer cells in anti-diagonal boxes.
 

@@ -39,7 +39,7 @@ namespace okiidoku::mono::detail::solver2 {
 	template<Order O> requires(is_order_compiled(O))
 	struct Guess {
 		Ints<O>::o4xs_t rmi;
-		Ints<O>::o2xs_t val;
+		Ints<O>::o2xs_t sym;
 	};
 
 
@@ -91,7 +91,7 @@ namespace okiidoku::mono::detail::solver2 {
 		[[nodiscard, gnu::pure]]
 		auto get_num_unsolved() const noexcept { return frame_.cands_povs.num_unsolved(); }
 
-		// contract: `val` is currently one of _multiple_ candidate-symbols at `rmi`.
+		// contract: `sym` is currently one of _multiple_ candidate-symbols at `rmi`.
 		void push_guess(Guess<O>) noexcept;
 
 		[[nodiscard, gnu::pure]]
@@ -113,11 +113,12 @@ namespace okiidoku::mono::detail::solver2 {
 		[[nodiscard, gnu::pure]] const auto& get_guess_stack_() const noexcept { return guess_stack_; }
 
 
-		// contract: `val` is currently one of _multiple_ candidate-symbols at `rmi`.
-		// contract: no previous call in context of the current guess stack has been
-		//  made with the same value of `rmi`.
-		// post-condition: `val` is registered as the only candidate-symbol at `rmi`.
-		void register_new_given_(rmi_t rmi, val_t val) noexcept;
+		/**
+		\pre `sym` is currently one of _multiple_ candidate-symbols at `rmi`.
+		\pre no previous call in context of the current guess stack has been
+			made with the same value of `rmi`.
+		\pre `sym` is registered as the only candidate-symbol at `rmi`. */
+		void register_new_given_(rmi_t rmi, val_t sym) noexcept;
 
 		// The specified candidate-symbol is allowed to already be removed.
 		FindStat do_elim_remove_sym_(rmi_t rmi, val_t cand) noexcept;

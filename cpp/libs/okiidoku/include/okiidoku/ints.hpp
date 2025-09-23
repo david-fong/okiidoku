@@ -6,7 +6,6 @@
 #include <okiidoku/order.hpp> // Order, largest_compiled_order
 
 #include <array>
-#include <bit>         // bit_width
 #include <utility>     // forward, to_underlying
 #include <limits>      // numeric_limits<T>::max
 #include <type_traits> // conditional_t
@@ -73,7 +72,7 @@ expense of generating code for each grid order seleted by the user). to choose w
 grid orders to generate, create a [tweak header](https://vector-of-bool.github.io/2020/10/04/lib-configuration.html#providing-a-tweak-header)
 for [`./libs/okiidoku/include/okiidoku/config/defaults.hpp`](./libs/okiidoku/include/okiidoku/config/defaults.hpp).
 */
-namespace okiidoku::mono {
+namespace okiidoku {
 
 	/// \cond detail
 	namespace detail {
@@ -175,10 +174,10 @@ namespace okiidoku::mono {
 		static constexpr max_t max {max_}; ///< inclusive upper bound.
 		static constexpr IntKind kind {kind_};
 		using val_t = std::conditional_t<kind == IntKind::small,
-			detail::uint_small_for_width_t<std::bit_width(max)>,
-			detail::uint_fast_for_width_t<std::bit_width(max)>
+			detail::uint_small_for_max_t<max>,
+			detail::uint_fast_for_max_t<max>
 		>; ///< underlying value type.
-		using difference_type = detail::int_fast_for_max_t<max>;
+		using difference_type = detail::int_fast_for_max_t<static_cast<std::intmax_t>(max)>;
 	private:
 		val_t val_ {0u}; ///< underlying storage.
 		static_assert(std::is_unsigned_v<val_t>);
@@ -204,7 +203,7 @@ namespace okiidoku::mono {
 
 		/** implicit conversion from narrower `Int`. */
 		template<max_t M_from, IntKind K_from> requires(M_from <= max)
-		constexpr Int(const Int<M_from,K_from> other) noexcept: Int{other.val_} { check(); }
+		constexpr Int(const Int<M_from,K_from> other) noexcept: val_{static_cast<val_t>(other.val_)} { check(); }
 
 		/** explicit conversion from `Int` "wider" by one,
 		to allow cast to sentinel-exclusive-bound `Int` when iterating. */
@@ -371,14 +370,7 @@ namespace okiidoku::mono {
 
 namespace okiidoku::mono {
 	/** a class acting as a namespace of sized int types and constants.
-	\details do `using T = Ints<O>;`.
-	\note when printing things, make sure to cast to int, since byte-like types will be
-		interpreted as characters.
-	\internal the producer functions are a step in a good direction, but I'm guessing
-		it would be better to use user-defined integral types that enforce bounds in the
-		their constructors, define conversions to unsigned integer types, delete those to
-		signed integral types (if that's a thing), and define helpers for operations that
-		guarantee size of output like modulo. */
+	\details do `using T = Ints<O>;`. */
 	template<Order O> requires(is_order_compiled(O))
 	struct Ints {
 		Ints() = delete;

@@ -48,11 +48,8 @@ Issues I'm watching:
 
 ## Misc List
 
-- see if `iosfwd` is enough to define stream operators in ints.hpp to avoid callee/user needing to cast chars to ints. then simplify those call-sites.
-- go back commit history to find where debug build for emscripten broke(?)
+- change print\_2d to shuffle indices of sets, then take as many of the first sets as needed to fill a writable `span<string_view>` argument, discarding duplicate items.
 - see if helpful to add `/// \cond detail` wrapper to `detail` namespaces to suppress doxygen for them
-- make `scramble` just generate a random `Transformation`.
-- rename `label` to `sym` and `val` to `sym`.
 
 - https://www.pcg-random.org/using-pcg-cpp.html
   https://github.com/imneme/pcg-cpp/tags
@@ -95,13 +92,16 @@ Issues I'm watching:
     - could this be useful for `canon_pos`? I tried messing around with range-v3 on compiler explorer and had trouble with the whole action vs algorithm, container vs view thing. Didn't know what I was doing and could achieve what I wanted.
   - alternative to `std::chunk`, look into `mdspan` (multi-dimensional span). Seems like this is more of what I'm looking for.
   - multidimensional subscript operator
-- C+26:
+- C++26:
   - https://wg21.link/P2169R4 placeholder variables with no name
   - [postcondition assertions](https://en.cppreference.com/w/cpp/language/function.html#Postcondition_assertions)
     - https://en.cppreference.com/w/cpp/language/contracts.html
     - https://en.cppreference.com/w/cpp/language/contract_assert.html
+    - https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2025/p2900r14.pdf supported for defaulted special member functions! see section 3.3.3.
   - with reflection, I might be able to do what I'm currently doing with macros like `OKIIDOKU_FOREACH_O_EMIT` and `OKIIDOKU_FOREACH_O_DO_EMIT`, and be in a better position to use C++ modules :O.
   - try using `pre` and `post()` on default and copy constructors of `Int<...>` to describe pre and postconditions
+- C++29:
+  - class invariants?: https://youtu.be/gtFFTjQ4eFU?t=873
 
 - https://youtu.be/7QNtiH5wTAs?t=7003 -Wl,--gc-sections does this help? does it mess with my SO interface?
   - what about functions that I want defined only for debugging? see also

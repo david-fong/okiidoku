@@ -70,7 +70,7 @@ namespace okiidoku::mono::detail::solver {
 	template<Order O> requires(is_order_compiled(O))
 	struct [[gnu::designated_init]] Guess {
 		Ints<O>::o4xs_t rmi;
-		Ints<O>::o2xs_t val;
+		Ints<O>::o2xs_t sym;
 	};
 
 
@@ -139,7 +139,7 @@ namespace okiidoku::mono::detail::solver {
 		[[nodiscard, gnu::pure]] constexpr
 		o4i_t get_num_unsolved() const noexcept { return frame_.num_unsolved; }
 
-		// contract: `val` is currently one of _multiple_ candidate-symbols at `rmi`.
+		// contract: `sym` is currently one of _multiple_ candidate-symbols at `rmi`.
 		// contract: only call when `has_queued_cand_elims` returns `false`. There
 		//  is _never_ a good reason to make a guess when you have a deduction ready.
 		void push_guess(Guess<O>) noexcept;
@@ -163,11 +163,11 @@ namespace okiidoku::mono::detail::solver {
 		[[nodiscard, gnu::pure]] const auto& get_guess_stack_() const noexcept { return guess_stack_; }
 
 
-		// contract: `val` is currently one of _multiple_ candidate-symbols at `rmi`.
+		// contract: `sym` is currently one of _multiple_ candidate-symbols at `rmi`.
 		// contract: no previous call in context of the current guess stack has been
 		//  made with the same value of `rmi`.
-		// post-condition: `val` is registered as the only candidate-symbol at `rmi`.
-		void register_new_given_(rmi_t rmi, val_t val) noexcept;
+		// post-condition: `sym` is registered as the only candidate-symbol at `rmi`.
+		void register_new_given_(rmi_t rmi, val_t sym) noexcept;
 
 		// The specified candidate-symbol is allowed to already be removed.
 		UnwindInfo do_elim_remove_sym_(rmi_t rmi, val_t cand) noexcept;
@@ -184,11 +184,12 @@ namespace okiidoku::mono::detail::solver {
 		template<class F> requires(std::is_invocable_v<F, O2BitArr<O>&>)
 		UnwindInfo do_elim_generic_(rmi_t rmi, F elim_fn) noexcept;
 
-		// contract: must be called immediately when a cell's candidate-symbol count _changes_ to one.
-		// contract: (it follows that) no previous call in the context of the current
-		//  guess stack has been made with the same value of `rmi`.
-		// contract: (it follows that) the cell at `rmi` has exactly one candidate-symbol.
-		// post-condition: decrements `num_unsolved`.
+		/**
+		\pre must be called immediately when a cell's candidate-symbol count _changes_ to one.
+		\pre (it follows that) no previous call in the context of the current
+			guess stack has been made with the same value of `rmi`.
+		\pre (it follows that) the cell at `rmi` has exactly one candidate-symbol.
+		\post decrements `num_unsolved`. */
 		void enqueue_cand_elims_for_new_cell_claim_sym_(rmi_t rmi) noexcept;
 
 		void debug_print_cells_cands_() const noexcept;

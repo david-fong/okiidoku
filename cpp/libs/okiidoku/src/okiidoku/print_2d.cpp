@@ -100,20 +100,20 @@ namespace okiidoku {
 				for (o2i_t col {0u}; col < O2; ++col) {
 					if ((col % O) == 0u) [[unlikely]] { os << " │"; }
 
-					o2i_t val {grid_views[grid_i].operator()(
+					o2i_t sym {grid_views[grid_i].operator()(
 						static_cast<visitor::ints::o4xs_t>((row * O2) + col)
 					)};
-					if (val == O2) {
+					if (sym == O2) {
 						os << "  ";
 						continue;
 					}
 					for (const auto emoji_set_index : emoji_sets) {
 						const auto& set {emoji::sets.at(emoji_set_index).entries};
-						if (val < set.size()) {
-							os << set.at(val);
+						if (sym < set.size()) {
+							os << set.at(sym);
 							break;
 						}
-						val -= static_cast<o2i_t>(set.size());
+						sym -= static_cast<o2i_t>(set.size());
 					}
 				}
 				os << " │";

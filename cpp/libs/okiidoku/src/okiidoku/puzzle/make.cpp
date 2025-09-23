@@ -87,7 +87,7 @@ namespace okiidoku::mono {
 		while (num_puzcell_cands > 0) {
 			const auto puzcell_cand_i {(rng()-rng_t::min()) % num_puzcell_cands};
 			const auto rmi {puzcell_cand_rmis[puzcell_cand_i]};
-			const auto val {std::exchange(grid.at_rmi(rmi), T::O2)};
+			const auto sym {std::exchange(grid.at_rmi(rmi), T::O2)};
 
 			call_debug_log_fn([&]{
 				std::clog << "\n\n#puzcell cands: " << int(num_puzcell_cands) << ". try rm @ " << int(rmi) << std::flush;
@@ -111,13 +111,13 @@ namespace okiidoku::mono {
 			// 	std::clog << "\ncannot remove at " << int(rmi) << " since it is the last given for a ua_set_4.";
 			// }
 
-			solver.reinit_with_puzzle(grid, {{.rmi{rmi}, .val{*val}}});
+			solver.reinit_with_puzzle(grid, {{.rmi{rmi}, .sym{*sym}}});
 			if (const auto new_soln_opt {solver.get_next_solution()}; new_soln_opt) {
 				// multiple solutions now possible. removal would break properness. don't remove.
 				call_debug_log_fn([&]{
 					std::clog << "\nmultiple solutions possible! rm failed" << std::flush;
 				});
-				grid.at_rmi(rmi) = val;
+				grid.at_rmi(rmi) = sym;
 				++num_keepers;
 			}
 			remove_puzcell_cand_at(puzcell_cand_i);

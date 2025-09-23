@@ -47,7 +47,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 					if (cell_cands.count() > 1u) [[likely]] {
 						found_queues.push_back(found::SymClaimCell<O>{
 							.rmi{rmi},
-							.val{sym},
+							.sym{sym},
 						});
 						// TODO consider flagging house for re-scan?
 				}	}

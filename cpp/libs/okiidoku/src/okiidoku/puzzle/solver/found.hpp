@@ -15,13 +15,13 @@ namespace okiidoku::mono::detail::solver::found {
 	template<Order O> requires(is_order_compiled(O))
 	struct [[gnu::designated_init]] CellClaimSym {
 		Ints<O>::o4xs_t rmi;
-		Ints<O>::o2xs_t val;
+		Ints<O>::o2xs_t sym;
 	};
 
 	template<Order O> requires(is_order_compiled(O))
 	struct [[gnu::designated_init]] SymClaimCell {
 		Ints<O>::o4xs_t rmi;
-		Ints<O>::o2xs_t val;
+		Ints<O>::o2xs_t sym;
 	};
 
 	template<Order O> requires(is_order_compiled(O))

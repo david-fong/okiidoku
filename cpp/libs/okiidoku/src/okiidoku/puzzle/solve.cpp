@@ -32,7 +32,7 @@ namespace okiidoku::mono {
 		engine_->reinit_with_puzzle(puzzle);
 		if (cand_sym_to_ignore) {
 			const auto& ignore {*cand_sym_to_ignore};
-			const auto check {engine_->do_elim_remove_sym_(ignore.rmi, ignore.val)};
+			const auto check {engine_->do_elim_remove_sym_(ignore.rmi, ignore.sym)};
 			(void)check; // `no_more_solns` will be handled by `get_next_solution`.
 		}
 		num_solns_found_ = 0u;

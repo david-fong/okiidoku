@@ -46,10 +46,10 @@ namespace okiidoku::mono::detail::solver {
 		no_more_solns_ = false;
 
 		for (const auto rmi : T::O4) {
-			const auto& val {puzzle.at_rmi(rmi)};
-			val.check();
-			if (val < T::O2) [[likely]] {
-				register_new_given_(rmi, val_t{val});
+			const auto& sym {puzzle.at_rmi(rmi)};
+			sym.check();
+			if (sym < T::O2) [[likely]] {
+				register_new_given_(rmi, val_t{sym});
 			}
 		}
 	}
@@ -129,16 +129,16 @@ namespace okiidoku::mono::detail::solver {
 	template<Order O> requires(is_order_compiled(O))
 	void EngineImpl<O>::register_new_given_(
 		const EngineImpl<O>::rmi_t rmi,
-		const EngineImpl<O>::val_t val
+		const EngineImpl<O>::val_t sym
 	) noexcept {
 		OKIIDOKU_CONTRACT_ASSERT(!no_more_solns());
-		OKIIDOKU_CONTRACT_USE(val < T::O2);
+		OKIIDOKU_CONTRACT_USE(sym < T::O2);
 		auto& cell_cands {mut_cells_cands().at_rmi(rmi)};
-		OKIIDOKU_CONTRACT_ASSERT(cell_cands[val]);
+		OKIIDOKU_CONTRACT_ASSERT(cell_cands[sym]);
 		OKIIDOKU_CONTRACT_USE(cell_cands.count() > 1);
 		cell_cands.unset_all();
-		cell_cands.set(val);
-		OKIIDOKU_CONTRACT_ASSERT(cell_cands[val]);
+		cell_cands.set(sym);
+		OKIIDOKU_CONTRACT_ASSERT(cell_cands[sym]);
 		OKIIDOKU_CONTRACT_USE(cell_cands.count() == 1);
 		enqueue_cand_elims_for_new_cell_claim_sym_(rmi);
 	}
@@ -152,9 +152,9 @@ namespace okiidoku::mono::detail::solver {
 		OKIIDOKU_CONTRACT_USE(frame_.num_unsolved > 0);
 		const auto& cell_cands {cells_cands().at_rmi(rmi)};
 		OKIIDOKU_CONTRACT_USE(cell_cands.count() == 1);
-		const auto val {cell_cands.first_set_bit_require_exists()};
-		OKIIDOKU_CONTRACT_ASSERT(cell_cands[val]);
-		found_queues_.push_back(found::CellClaimSym<O>{.rmi{rmi},.val{val}});
+		const auto sym {cell_cands.first_set_bit_require_exists()};
+		OKIIDOKU_CONTRACT_ASSERT(cell_cands[sym]);
+		found_queues_.push_back(found::CellClaimSym<O>{.rmi{rmi},.sym{sym}});
 		--frame_.num_unsolved;
 		OKIIDOKU_CONTRACT_ASSERT(debug_check_correct_num_unsolved_());
 	}
@@ -166,14 +166,14 @@ namespace okiidoku::mono::detail::solver {
 	) noexcept {
 		OKIIDOKU_CONTRACT_ASSERT(!no_more_solns());
 		OKIIDOKU_CONTRACT_ASSERT(!has_queued_cand_elims());
-		OKIIDOKU_CONTRACT_ASSERT(cells_cands().at_rmi(guess.rmi)[guess.val]);
+		OKIIDOKU_CONTRACT_ASSERT(cells_cands().at_rmi(guess.rmi)[guess.sym]);
 		OKIIDOKU_CONTRACT_USE(cells_cands().at_rmi(guess.rmi).count() > 1);
 		guess_stack_.emplace_back(frame_, guess);
 
-		register_new_given_(guess.rmi, guess.val);
+		register_new_given_(guess.rmi, guess.sym);
 		++total_guesses_;
 		#ifndef NDEBUG
-		std::clog << "\nguess+(" << get_guess_stack_depth() << ") " << int(guess.rmi) << ":" << int(guess.val);
+		std::clog << "\nguess+(" << get_guess_stack_depth() << ") " << int(guess.rmi) << ":" << int(guess.sym);
 		#endif
 	}
 
@@ -192,16 +192,16 @@ namespace okiidoku::mono::detail::solver {
 
 		const auto guess {std::move(guess_frame.guess)};
 		auto& cell_cands {e.mut_cells_cands().at_rmi(guess.rmi)};
-		OKIIDOKU_CONTRACT_ASSERT(cell_cands[guess.val]);
+		OKIIDOKU_CONTRACT_ASSERT(cell_cands[guess.sym]);
 		OKIIDOKU_CONTRACT_USE(cell_cands.count() > 1);
-		cell_cands.unset(guess.val);
+		cell_cands.unset(guess.sym);
 		if (cell_cands.count() == 1) [[unlikely]] {
 			e.enqueue_cand_elims_for_new_cell_claim_sym_(guess.rmi);
 		}
 
 		e.guess_stack_.pop_back();
 		// #ifndef NDEBUG
-		// std::clog << "\nguess-(" << e.get_guess_stack_depth() << ") " << int(guess.rmi) << " " << int(guess.val);
+		// std::clog << "\nguess-(" << e.get_guess_stack_depth() << ") " << int(guess.rmi) << " " << int(guess.sym);
 		// #endif
 		return UnwindInfo::make_did_unwind_guess();
 	}

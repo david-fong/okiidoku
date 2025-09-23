@@ -80,7 +80,7 @@ namespace okiidoku::mono::detail::solver {
 		if (check.did_unwind_root()) [[unlikely]] { return check; }
 
 		using queues_t = typename FoundQueues<O>::queues_t;
-		using last_queue_t = std::tuple_element_t<std::tuple_size<queues_t>()-1, queues_t>;
+		using last_queue_t = std::tuple_element_t<std::tuple_size<queues_t>()-1u, queues_t>;
 		using passive_queue_t = typename FoundQueues<O>::template queue_t<found::CellClaimSym<O>>;
 		if constexpr (!std::is_same_v<last_queue_t, passive_queue_t>) {
 			logical_and_loop_body(std::get<passive_queue_t>(engine.get_found_queues_().tup_));
@@ -98,7 +98,7 @@ namespace okiidoku::mono::detail::solver {
 		// repetitive code. #undef-ed before end of function.
 		#define OKIIDOKU_TRY_ELIM_NB_CAND \
 			if (nb_rmi == desc.rmi) [[unlikely]] { continue; } \
-			const auto check {engine.do_elim_remove_sym_(nb_rmi, desc.val)}; \
+			const auto check {engine.do_elim_remove_sym_(nb_rmi, desc.sym)}; \
 			if (check.did_unwind()) [[unlikely]] { return check; }
 
 		// The "unrolled" version is ~3% faster for O=3 :/
@@ -138,11 +138,11 @@ namespace okiidoku::mono::detail::solver {
 		const found::SymClaimCell<O>& desc
 	) noexcept {
 		const auto& cell_cands {engine.cells_cands().at_rmi(desc.rmi)};
-		if (!cell_cands[desc.val]) [[unlikely]] {
+		if (!cell_cands[desc.sym]) [[unlikely]] {
 			return engine.unwind_one_stack_frame();
 		}
-		if (cell_cands.count() > 1) [[likely]] {
-			engine.register_new_given_(desc.rmi, desc.val);
+		if (cell_cands.count() > 1u) [[likely]] {
+			engine.register_new_given_(desc.rmi, desc.sym);
 		}
 		return UnwindInfo::make_no_unwind();
 	}

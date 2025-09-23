@@ -16,33 +16,33 @@ import gdb.printing
 
 
 class O2BitArrPrinter:
-	def __init__(self, order, val):
+	def __init__(self, order, sym):
 		# self.word_t_num_bits = gdb.parse_and_eval('okiidoku::mono::O2BitArr<'+str(order)+'>::word_t_num_bits')
 		# self.num_words = gdb.parse_and_eval('okiidoku::mono::O2BitArr<'+str(order)+'>::num_words')
 		self.order = order
-		self.val = val
+		self.sym = sym
 	def to_string(self):
 		# https://stackoverflow.com/a/22798055/11107541
-		eval_string = "(*("+str(self.val.type)+"*)("+str(self.val.address)+")).to_chars()"
+		eval_string = "(*("+str(self.sym.type)+"*)("+str(self.sym.address)+")).to_chars()"
 		return gdb.parse_and_eval(eval_string)["_M_elems"]
 
 
 class MonoGridPrinter:
-	def __init__(self, order, val):
+	def __init__(self, order, sym):
 		self.order = order
-		self.val = val
+		self.sym = sym
 	def to_string(self):
-		return gdb.parse_and_eval("okiidoku::mono::print_2d(std::cout, 0, "+self.val+")")
+		return gdb.parse_and_eval("okiidoku::mono::print_2d(std::cout, 0, "+self.sym+")")
 
 
-def pp_lookup_function(order, val):
-	lookup_tag = val.type.tag
+def pp_lookup_function(order, sym):
+	lookup_tag = sym.type.tag
 	if lookup_tag is None:
 		return None
 	if lookup_tag == "okiidoku::mono::O2BitArr<"+str(order)+">":
-		return O2BitArrPrinter(order, val)
+		return O2BitArrPrinter(order, sym)
 	if lookup_tag == "okiidoku::mono::Grid<"+str(order)+">":
-		return MonoGridPrinter(order, val)
+		return MonoGridPrinter(order, sym)
 	return None
 
 

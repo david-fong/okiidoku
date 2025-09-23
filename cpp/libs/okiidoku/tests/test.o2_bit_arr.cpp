@@ -44,9 +44,9 @@ void test_o2_bit_arr() {
 	}
 	std::cout << "3" << std::endl;
 	{
-		o2i_t count {0};
-		for (const auto val : O2BitArr_ones<O>.set_bits()) {
-			CHECK(val == count);
+		o2i_t count {0u};
+		for (const auto sym : O2BitArr_ones<O>.set_bits()) {
+			CHECK(sym == count);
 			++count;
 		}
 		CHECK(count == T::O2);

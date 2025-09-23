@@ -28,7 +28,6 @@ namespace okiidoku::mono {
 		using T = Ints<O>;
 		/// \note default initialize as an empty grid (to be safe).
 		Grid() noexcept: detail::Gridlike<O, grid_val_t<O>>{T::O2} { }
-		// TODO.high redefine accessors to assert invariants
 	};
 	// using Grid = detail::Gridlike<O, grid_val_t<O>>;
 	// Note: the above commented-out type alias results in large exported, mangled

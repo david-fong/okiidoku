@@ -61,7 +61,7 @@ namespace okiidoku::visitor { namespace {
 // see https://github.com/emscripten-core/emscripten/blob/main/test/embind/test_custom_marshal.cpp
 namespace emscripten::internal {
 
-	template<okiidoku::mono::detail::is_int_wrapper T>
+	template<okiidoku::detail::is_int_wrapper T>
 	struct BindingType<T> {
 		using IntBinding = BindingType<typename T::val_t>;
 		using WireType = IntBinding::WireType;
@@ -75,10 +75,10 @@ namespace emscripten::internal {
 			return T{IntBinding::fromWireType(value)};
 		}
 	};
-	template<okiidoku::mono::detail::is_int_wrapper T>
+	template<okiidoku::detail::is_int_wrapper T>
 	struct TypeID<T> {
 		static constexpr TYPEID get() {
-			return TypeID<Canonicalized<typename T::val_t>>::get();
+			return TypeID<typename T::val_t>::get();
 		}
 	};
 }
@@ -92,9 +92,9 @@ EMSCRIPTEN_BINDINGS(okiidoku) {
 
 	// em::function("isOrderCompiled", &oki::is_order_compiled);
 
-	em::enum_<oki_m::IntKind>("IntKind")
-		.value("FAST",  oki_m::IntKind::fast)
-		.value("SMALL", oki_m::IntKind::small)
+	em::enum_<oki::IntKind>("IntKind")
+		.value("FAST",  oki::IntKind::fast)
+		.value("SMALL", oki::IntKind::small)
 		;
 	em::class_<oki::em::Rng>("Rng")
 		.function("seed", &oki::em::Rng::seed)

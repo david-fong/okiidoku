@@ -26,17 +26,17 @@ namespace okiidoku::mono {
 			if (col == 0u) [[unlikely]] { row_has = has_mask_t{}; }
 			if (row % T::O1 == 0u) [[unlikely]] { h_chute_boxes_has.fill(has_mask_t{}); }
 
-			const auto val_ {grid.at(row,col)}; val_.check();
-			if (val_ == T::O2) { continue; }
-			const o2x_t val {val_};
+			const auto sym_ {grid.at(row,col)}; sym_.check();
+			if (sym_ == T::O2) { continue; }
+			const o2x_t sym {sym_};
 
 			auto& col_has {cols_has[col]};
 			auto& box_has {h_chute_boxes_has[col / T::O1]};
 
-			if (has_mask_t::test_any3(val, row_has, col_has, box_has)) [[unlikely]] {
+			if (has_mask_t::test_any3(sym, row_has, col_has, box_has)) [[unlikely]] {
 				return false;
 			}
-			has_mask_t::set3(val, row_has, col_has, box_has);
+			has_mask_t::set3(sym, row_has, col_has, box_has);
 		}}
 		return true;
 	}
@@ -51,7 +51,7 @@ namespace okiidoku::mono {
 			#endif
 			grid.get_underlying_array().cbegin(),
 			grid.get_underlying_array().cend(),
-			[](const auto& val){ return val == T::O2; }
+			[](const auto& sym){ return sym == T::O2; }
 		);
 	}
 
@@ -65,7 +65,7 @@ namespace okiidoku::mono {
 			#endif
 			grid.get_underlying_array().cbegin(),
 			grid.get_underlying_array().cend(),
-			[](const auto val) noexcept { return val == T::O2; }
+			[](const auto sym) noexcept { return sym == T::O2; }
 		);
 	}
 
@@ -81,11 +81,11 @@ namespace okiidoku::mono {
 				const auto boxrow {box_cell/T::O1};
 				const auto boxcol {box_cell%T::O1};
 				const auto rmi {box_cell_to_rmi<O>(box, box_cell)};
-				const auto val_row {(boxrow+v_chute) % T::O1};
-				const auto val_col {(boxcol+h_chute) % T::O1};
-				const auto val {(T::O1 * val_row) + val_col};
-				OKIIDOKU_CONTRACT_USE(val < T::O2);
-				grid.at_rmi(rmi) = val;
+				const auto sym_row {(boxrow+v_chute) % T::O1};
+				const auto sym_col {(boxcol+h_chute) % T::O1};
+				const auto sym {(T::O1 * sym_row) + sym_col};
+				OKIIDOKU_CONTRACT_USE(sym < T::O2);
+				grid.at_rmi(rmi) = sym;
 			}
 		}
 		OKIIDOKU_CONTRACT_ASSERT(grid_is_filled(grid));
