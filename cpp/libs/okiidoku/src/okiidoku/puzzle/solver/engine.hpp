@@ -82,7 +82,7 @@ namespace okiidoku::mono::detail::solver {
 		friend UnwindInfo unwind_one_stack_frame_of_<O>(EngineImpl<O>&) noexcept;
 	private:
 		OKIIDOKU_MONO_INT_TS_TYPEDEFS
-		using val_t = T::o2xs_t;
+		using sym_t = T::o2xs_t;
 		using rmi_t = T::o4xs_t;
 	public:
 		struct HouseSubsets {
@@ -167,10 +167,10 @@ namespace okiidoku::mono::detail::solver {
 		// contract: no previous call in context of the current guess stack has been
 		//  made with the same value of `rmi`.
 		// post-condition: `sym` is registered as the only candidate-symbol at `rmi`.
-		void register_new_given_(rmi_t rmi, val_t sym) noexcept;
+		void register_new_given_(rmi_t rmi, sym_t sym) noexcept;
 
 		// The specified candidate-symbol is allowed to already be removed.
-		UnwindInfo do_elim_remove_sym_(rmi_t rmi, val_t cand) noexcept;
+		UnwindInfo do_elim_remove_sym_(rmi_t rmi, sym_t cand) noexcept;
 
 		// The specified candidate-symbols are allowed to already be removed.
 		UnwindInfo do_elim_remove_syms_(rmi_t rmi, const O2BitArr<O>& to_remove) noexcept;
@@ -218,7 +218,7 @@ namespace okiidoku::mono::detail::solver {
 		friend class CandElimApplyImpl<O>;
 	private:
 		using T = Ints<O>;
-		using val_t = T::o2xs_t;
+		using sym_t = T::o2xs_t;
 		using rmi_t = T::o4xs_t;
 	public:
 		// Engine() noexcept = default; // TODO was this ever needed? why was it written?

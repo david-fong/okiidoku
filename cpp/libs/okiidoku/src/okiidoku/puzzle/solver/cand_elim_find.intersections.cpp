@@ -24,10 +24,10 @@ namespace okiidoku::mono::detail::solver { namespace {
 	public:
 		// inner dimension is for intersections in a line, outer dimension for intersections in a box.
 		template<class Self> [[nodiscard, gnu::pure]]
-		auto&& at_isec(this Self&& self, const o2i_t isec_i) noexcept { return std::forward<Self>(self).arr_[isec_i]; }
+		decltype(auto) at_isec(this Self&& self, const o2i_t isec_i) noexcept { return std::forward<Self>(self).arr_[isec_i]; }
 
 		template<class Self> [[nodiscard, gnu::pure]]
-		auto&& at_isec(this Self&& self, const o1x_t box_isec_i, const o1x_t line_isec_i) noexcept {
+		decltype(auto) at_isec(this Self&& self, const o1x_t box_isec_i, const o1x_t line_isec_i) noexcept {
 			return std::forward<Self>(self).arr_[((T::O1*box_isec_i)+line_isec_i)];
 		}
 	};
@@ -59,7 +59,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 		for (const auto isec_cell : T::O1) {
 			const auto chute_cell {(T::O1*chute_isec)+isec_cell};
 			const auto rmi {chute_cell_to_rmi<O>(line_type, chute, chute_cell)};
-			const auto& cell_cands {cells_cands.at_rmi(rmi)};
+			const auto& cell_cands {cells_cands[rmi]};
 			auto& seen_once {chute_isecs_syms.at_isec(chute_isec)};
 			auto& seen_twice {chute_isecs_syms_non_single.at_isec(chute_isec)};
 			seen_twice |= (seen_once & cell_cands);

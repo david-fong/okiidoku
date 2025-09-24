@@ -11,7 +11,7 @@
 
 namespace okiidoku::mono::detail::solver2 {
 
-	inline constexpr Order order_threshold_to_use_compact_cands {6}; // TODO experiment
+	inline constexpr Order order_threshold_to_use_compact_cands {6u}; // TODO experiment
 
 	// a `house_type_`-oriented PoV of which cells are solved, or what candidates remain.
 	// non-memory-concerned implementation.
@@ -26,9 +26,9 @@ namespace okiidoku::mono::detail::solver2 {
 		detail::Gridlike<O, O2BitArr<O>> cands_;
 		HouseType house_type_;
 	public:
-		[[nodiscard, gnu::pure]] auto is_unsolved (const o2i_t house, const o2i_t at) const noexcept -> bool { return cands_.at(house, at).count() == 1; }
-		[[nodiscard, gnu::pure]] auto at_unsolved (const o2i_t house, const o2i_t at) const noexcept -> const O2BitArr<O>& { OKIIDOKU_CONTRACT_ASSERT( is_unsolved(house, at)); return cands_.at(house, at); }
-		[[nodiscard, gnu::pure]] auto at_solved   (const o2i_t house, const o2i_t at) const noexcept -> o2xs_t             { OKIIDOKU_CONTRACT_ASSERT(!is_unsolved(house, at)); return cands_.at(house, at).first_set_bit_require_exists(); }
+		[[nodiscard, gnu::pure]] auto is_unsolved (const o2i_t house, const o2i_t at) const noexcept -> bool { return cands_[house, at].count() == 1u; }
+		[[nodiscard, gnu::pure]] auto at_unsolved (const o2i_t house, const o2i_t at) const noexcept -> const O2BitArr<O>& { OKIIDOKU_CONTRACT_ASSERT( is_unsolved(house, at)); return cands_[house, at]; }
+		[[nodiscard, gnu::pure]] auto at_solved   (const o2i_t house, const o2i_t at) const noexcept -> o2xs_t             { OKIIDOKU_CONTRACT_ASSERT(!is_unsolved(house, at)); return cands_[house, at].first_set_bit_require_exists(); }
 		void gc() const noexcept {/* noop */}
 	};
 

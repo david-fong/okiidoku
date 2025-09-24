@@ -60,7 +60,7 @@ namespace okiidoku::mono {
 		OKIIDOKU_DEFER_INIT // NOLINTNEXTLINE(*-init)
 		std::array<rmi_t, T::O4> puzcell_cand_rmis; // non-candidates: either removed, or can't be removed.
 		for (const auto rmi : T::O4) {
-			if (grid.at_rmi(rmi) < T::O2) [[likely]] {
+			if (grid[rmi] < T::O2) [[likely]] {
 				puzcell_cand_rmis[num_puzcell_cands] = rmi;
 				++num_puzcell_cands;
 		}	}
@@ -87,7 +87,7 @@ namespace okiidoku::mono {
 		while (num_puzcell_cands > 0) {
 			const auto puzcell_cand_i {(rng()-rng_t::min()) % num_puzcell_cands};
 			const auto rmi {puzcell_cand_rmis[puzcell_cand_i]};
-			const auto sym {std::exchange(grid.at_rmi(rmi), T::O2)};
+			const auto sym {std::exchange(grid[rmi], T::O2)};
 
 			call_debug_log_fn([&]{
 				std::clog << "\n\n#puzcell cands: " << int(num_puzcell_cands) << ". try rm @ " << int(rmi) << std::flush;
@@ -104,7 +104,7 @@ namespace okiidoku::mono {
 			// 			#endif
 			// 			ua_set_4.rmis.cbegin(),
 			// 			ua_set_4.rmis.cend(),
-			// 			[&](const auto& ua_set_rmi){ return (ua_set_rmi != rmi) && (grid.at_rmi(ua_set_rmi) != T::O2); }
+			// 			[&](const auto& ua_set_rmi){ return (ua_set_rmi != rmi) && (grid[ua_set_rmi] != T::O2); }
 			// 		) == 0;
 			// 	}
 			// )) {
@@ -117,7 +117,7 @@ namespace okiidoku::mono {
 				call_debug_log_fn([&]{
 					std::clog << "\nmultiple solutions possible! rm failed" << std::flush;
 				});
-				grid.at_rmi(rmi) = sym;
+				grid[rmi] = sym;
 				++num_keepers;
 			}
 			remove_puzcell_cand_at(puzcell_cand_i);

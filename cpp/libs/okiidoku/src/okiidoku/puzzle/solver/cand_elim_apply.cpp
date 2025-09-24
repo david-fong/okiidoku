@@ -137,7 +137,7 @@ namespace okiidoku::mono::detail::solver {
 		Engine<O>& engine,
 		const found::SymClaimCell<O>& desc
 	) noexcept {
-		const auto& cell_cands {engine.cells_cands().at_rmi(desc.rmi)};
+		const auto& cell_cands {engine.cells_cands()[desc.rmi]};
 		if (!cell_cands[desc.sym]) [[unlikely]] {
 			return engine.unwind_one_stack_frame();
 		}

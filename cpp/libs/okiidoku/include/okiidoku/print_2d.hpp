@@ -37,7 +37,7 @@ namespace okiidoku {
 			static_assert(sizeof...(grids) > 0u);
 			const auto printers {std::to_array<print_2d_grid_view>({
 				[&](const visitor::ints::o4xs_t rmi) noexcept -> visitor::ints::o2is_t {
-					return grids.at_rmi(rmi);
+					return grids[rmi];
 				}...,
 			})};
 			return print_2d_base(O, os, rng_seed, printers);
@@ -56,7 +56,7 @@ namespace okiidoku {
 			printers.reserve(grids.size());
 			for (const auto& grid : grids) {
 				printers.emplace_back([&](const visitor::ints::o4xs_t rmi){
-					return grid.get().at_rmi(rmi);
+					return grid.get()[rmi];
 				});
 			}
 			return okiidoku::print_2d(os, O, std::span<const print_2d_grid_view>(printers), rng_seed);

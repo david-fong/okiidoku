@@ -14,13 +14,13 @@
 
 /**
 The "engine" is a primitive for building a solver capable of finding all
- solutions to a puzzle. It supports simple solving techniques: subsets,
- fish, and intersections. To enable finding all solutions, the guess
- mechanism is a backtrack-able stack.
+solutions to a puzzle. It supports simple solving techniques: subsets,
+fish, and intersections. To enable finding all solutions, the guess
+mechanism is a backtrack-able stack.
 
 I don't expect the average person checking out this library to be interested
- in such tinkering, and there are more usage contracts to follow than there
- are in the rest of the library, so it is not part of the library interface.
+in such tinkering, and there are more usage contracts to follow than there
+are in the rest of the library, so it is not part of the library interface.
 */
 namespace okiidoku::mono::detail::solver2 {
 
@@ -47,10 +47,8 @@ namespace okiidoku::mono::detail::solver2 {
 	struct EngineImpl {
 		friend FindStat unwind_one_stack_frame_of_<O>(EngineImpl<O>&) noexcept;
 	private:
-		using T = Ints<O>;
-		using o2i_t = T::o2i_t;
-		using o4i_t = T::o4i_t;
-		using val_t = T::o2xs_t;
+		OKIIDOKU_MONO_INT_TS_TYPEDEFS
+		using sym_t = T::o2xs_t;
 		using rmi_t = T::o4xs_t;
 	public:
 
@@ -118,10 +116,10 @@ namespace okiidoku::mono::detail::solver2 {
 		\pre no previous call in context of the current guess stack has been
 			made with the same value of `rmi`.
 		\pre `sym` is registered as the only candidate-symbol at `rmi`. */
-		void register_new_given_(rmi_t rmi, val_t sym) noexcept;
+		void register_new_given_(rmi_t rmi, sym_t sym) noexcept;
 
 		// The specified candidate-symbol is allowed to already be removed.
-		FindStat do_elim_remove_sym_(rmi_t rmi, val_t cand) noexcept;
+		FindStat do_elim_remove_sym_(rmi_t rmi, sym_t cand) noexcept;
 
 		// The specified candidate-symbols are allowed to already be removed.
 		FindStat do_elim_remove_syms_(rmi_t rmi, const O2BitArr<O>& to_remove) noexcept;
@@ -146,7 +144,7 @@ namespace okiidoku::mono::detail::solver2 {
 		};
 
 		guess_stack_t guess_stack_ {};
-		std::uint_fast64_t total_guesses_ {0};
+		std::uint_fast64_t total_guesses_ {0u};
 		bool no_more_solns_ {true};
 	};
 

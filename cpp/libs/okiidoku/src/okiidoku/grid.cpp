@@ -26,7 +26,7 @@ namespace okiidoku::mono {
 			if (col == 0u) [[unlikely]] { row_has = has_mask_t{}; }
 			if (row % T::O1 == 0u) [[unlikely]] { h_chute_boxes_has.fill(has_mask_t{}); }
 
-			const auto sym_ {grid.at(row,col)}; sym_.check();
+			const auto sym_ {grid[row,col]}; sym_.check();
 			if (sym_ == T::O2) { continue; }
 			const o2x_t sym {sym_};
 
@@ -85,7 +85,7 @@ namespace okiidoku::mono {
 				const auto sym_col {(boxcol+h_chute) % T::O1};
 				const auto sym {(T::O1 * sym_row) + sym_col};
 				OKIIDOKU_CONTRACT_USE(sym < T::O2);
-				grid.at_rmi(rmi) = sym;
+				grid[rmi] = sym;
 			}
 		}
 		OKIIDOKU_CONTRACT_ASSERT(grid_is_filled(grid));
@@ -147,20 +147,20 @@ namespace okiidoku::visitor {
 	}
 
 
-	Grid::val_t Grid::at_rmi(const ints::o4x_t rmi) const noexcept {
+	Grid::sym_t Grid::operator[](const ints::o4x_t rmi) const noexcept {
 		switch (this->get_order()) {
 		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-		case O_: return this->unchecked_get_mono_exact<O_>().at_rmi(rmi);
+		case O_: return this->unchecked_get_mono_exact<O_>()[rmi];
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
 		default: OKIIDOKU_UNREACHABLE;
 		}
 	}
 
-	Grid::val_t Grid::at(const ints::o2x_t row, const ints::o2x_t col) const noexcept {
+	Grid::sym_t Grid::operator[](const ints::o2x_t row, const ints::o2x_t col) const noexcept {
 		switch (this->get_order()) {
 		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-		case O_: return this->unchecked_get_mono_exact<O_>().at(row, col);
+		case O_: return this->unchecked_get_mono_exact<O_>()[row, col];
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
 		default: OKIIDOKU_UNREACHABLE;

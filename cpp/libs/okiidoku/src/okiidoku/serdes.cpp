@@ -166,7 +166,7 @@ namespace okiidoku::mono {
 			if ((T::O1-1u-row)/T::O1 == col/T::O1) {
 				continue; // skip cells in the anti-diagonal boxes
 			}
-			const auto sym {*grid.at_rmi(helper.get_cell_rmi())};
+			const auto sym {*grid[helper.get_cell_rmi()]};
 			helper.print_val(os, sym);
 		}
 		helper.print_remaining_buf(os);
@@ -185,7 +185,7 @@ namespace okiidoku::mono {
 				continue; // skip cells in the anti-diagonal boxes
 			}
 			const auto sym {helper.parse_val(is)};
-			grid.at_rmi(helper.get_cell_rmi()) = sym;
+			grid[helper.get_cell_rmi()] = sym;
 		}
 		// TODO infer cells in anti-diagonal boxes.
 

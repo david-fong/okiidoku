@@ -19,10 +19,10 @@ namespace okiidoku::mono {
 			auto dest_row { row_map[src_row/T::O1][src_row%T::O1] };
 			auto dest_col { col_map[src_col/T::O1][src_col%T::O1] };
 			if (post_transpose) { std::swap(dest_row, dest_col); }
-			const auto src_sym {src_grid.at(src_row, src_col)};
-			dest_grid.at(dest_row, dest_col) = (src_sym == T::O2)
-				? grid_val_t<O>{T::O2}
-				: grid_val_t<O>{sym_map[src_sym]};
+			const auto src_sym {src_grid[src_row, src_col]};
+			dest_grid[dest_row, dest_col] = (src_sym == T::O2)
+				? grid_sym_t<O>{T::O2}
+				: grid_sym_t<O>{sym_map[src_sym]};
 		}}
 	}
 

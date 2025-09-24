@@ -31,9 +31,9 @@ namespace okiidoku {
 	template<typename V> requires(!std::is_reference_v<V>)
 	struct HouseTypeMap {
 		template<class Self> [[nodiscard, gnu::pure]]
-		auto&& at(this Self&& self, const HouseType key) noexcept { return std::forward<Self>(self).arr_[std::to_underlying(key)]; }
+		decltype(auto) operator[](this Self&& self, const HouseType key) noexcept { return std::forward<Self>(self).arr_[std::to_underlying(key)]; }
 		template<class Self> [[nodiscard, gnu::pure]]
-		auto&& get_underlying_arr(this Self&& self) noexcept { return std::forward<Self>(self).arr_; }
+		decltype(auto) get_underlying_arr(this Self&& self) noexcept { return std::forward<Self>(self).arr_; }
 	private:
 		std::array<V, house_types.size()> arr_;
 	};
@@ -48,9 +48,9 @@ namespace okiidoku {
 	template<typename V> requires(!std::is_reference_v<V>)
 	struct LineTypeMap {
 		template<class Self> [[nodiscard, gnu::pure]]
-		auto&& at(this Self&& self, const LineType key) noexcept { return std::forward<Self>(self).arr_[std::to_underlying(key)]; }
+		decltype(auto) operator[](this Self&& self, const LineType key) noexcept { return std::forward<Self>(self).arr_[std::to_underlying(key)]; }
 		template<class Self> [[nodiscard, gnu::pure]]
-		auto&& get_underlying_arr(this Self&& self) noexcept { return std::forward<Self>(self).arr_; }
+		decltype(auto) get_underlying_arr(this Self&& self) noexcept { return std::forward<Self>(self).arr_; }
 	private:
 		std::array<V, line_types.size()> arr_;
 	};
@@ -227,9 +227,10 @@ namespace okiidoku {
 		// see ints_io.hpp
 		// friend std::ostream& operator<<(std::ostream& os, const Int& i) noexcept;
 
-		constexpr auto& operator++(   ) & noexcept { OKIIDOKU_CONTRACT_USE(val_ < max); ++val_; check(); return *this; }
-		constexpr auto  operator++(int) & noexcept { auto old {*this}; operator++(); return old; }
+		constexpr auto& operator++(   ) & noexcept { OKIIDOKU_CONTRACT_USE(val_ < max);       ++val_; check(); return *this; }
 		constexpr auto& operator--(   ) & noexcept { OKIIDOKU_CONTRACT_USE(val_ > val_t{0u}); --val_; check(); return *this; }
+		constexpr auto  operator++(int) & noexcept { auto old {*this}; operator++(); return old; }
+		constexpr auto  operator--(int) & noexcept { auto old {*this}; operator--(); return old; }
 
 		// TODO move this into dedicated iter_x class?
 		[[nodiscard, gnu::pure]] constexpr auto begin() const noexcept { check(); return Int{0u}; }
@@ -464,8 +465,9 @@ namespace okiidoku::mono {
 		// using rmi_t [[maybe_unused]] = T::o4xs_t;
 
 
+	/** the value O2 (maximum value) represents an empty grid cell. */
 	template<Order O>
-	using grid_val_t = Ints<O>::o2is_t;
+	using grid_sym_t = Ints<O>::o2is_t;
 
 
 	template<Order O> [[nodiscard, gnu::const]] constexpr
@@ -602,6 +604,6 @@ namespace okiidoku::visitor {
 		using o4xs_t = mono::Ints<largest_compiled_order>::o4xs_t::val_t;
 		using o4is_t = mono::Ints<largest_compiled_order>::o4is_t::val_t;
 	}
-	using grid_val_t = mono::grid_val_t<largest_compiled_order>;
+	using grid_sym_t = mono::grid_sym_t<largest_compiled_order>;
 }
 #endif

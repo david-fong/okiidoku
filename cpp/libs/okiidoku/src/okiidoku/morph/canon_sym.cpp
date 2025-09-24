@@ -43,7 +43,6 @@ namespace okiidoku::mono { namespace {
 	class CanonLabel {
 	private:
 		OKIIDOKU_MONO_INT_TS_TYPEDEFS
-		using val_t = T::o2is_t;
 		using to_t = typename Transformation<O>::to_t;
 
 		struct State {
@@ -58,9 +57,9 @@ namespace okiidoku::mono { namespace {
 				for (const auto row : T::O2) {
 				for (const auto col : T::O2) {
 					const auto box {row_col_to_box<O>(row, col)};
-					const o2x_t sym {grid.at(row, col)};
+					const o2x_t sym {grid[row, col]};
 					const auto box_cell = row_col_to_box_cell<O>(row, col);
-					sym_box_to_boxcell_map.at(sym, box) = box_cell;
+					sym_box_to_boxcell_map[sym, box] = box_cell;
 				}}
 				std::iota(to_og.begin(), to_og.end(), to_t{0u});
 			}
@@ -79,8 +78,8 @@ namespace okiidoku::mono { namespace {
 		// 	O2BitArr<O> r_atom, col_atom;
 		// 	std::array<HouseType, T::O2> pic;
 		// 	for (const auto box : T::O2) {
-		// 		const auto boxcell_a {sym_box_to_boxcell_map.at(sym_a, box)};
-		// 		const auto boxcell_b {sym_box_to_boxcell_map.at(sym_b, box)};
+		// 		const auto boxcell_a {sym_box_to_boxcell_map[sym_a, box]};
+		// 		const auto boxcell_b {sym_box_to_boxcell_map[sym_b, box]};
 		// 	}
 		// }}
 		OKIIDOKU_DEFER_INIT sym_map_t<O> tiebreak_map;
@@ -139,7 +138,7 @@ namespace okiidoku::mono { namespace {
 		}()};
 
 		for (const auto i : T::O4) {
-			grid.at_rmi(i) = sym_og_to_canon[grid.at_rmi(i)];
+			grid[i] = sym_og_to_canon[grid[i]];
 		}
 		OKIIDOKU_CONTRACT_ASSERT(grid_follows_rule<O>(grid));
 		return sym_og_to_canon;

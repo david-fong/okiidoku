@@ -105,8 +105,8 @@ EMSCRIPTEN_BINDINGS(okiidoku) {
 	em::class_<oki_v::Grid>("Grid")
 		.constructor<oki::Order>()
 		// .function("getMonoOrder", &oki_v::Grid::get_order) // TODO need to define the base class to do this https://emscripten.org/docs/porting/connecting_cpp_and_javascript/embind.html#base-classes
-		.function("at",          &oki_v::Grid::at_rmi)
-		.function("at",          &oki_v::Grid::at)
+		.function("at",          em::select_overload<oki_v::Grid::sym_t (oki_v::ints::o4x_t rmi                        ) const noexcept>(&oki_v::Grid::operator[]))
+		.function("at",          em::select_overload<oki_v::Grid::sym_t (oki_v::ints::o2x_t row, oki_v::ints::o2x_t col) const noexcept>(&oki_v::Grid::operator[]))
 		.function("followsRule", &oki_v::grid_follows_rule)
 		.function("isFilled",    &oki_v::grid_is_filled)
 		.function("isEmpty",     &oki_v::grid_is_empty)
@@ -117,6 +117,6 @@ EMSCRIPTEN_BINDINGS(okiidoku) {
 	// em::function("gridIsEmpty",     &oki_v::grid_is_empty);
 
 	em::function("initMostCanonicalGrid", &oki_v::init_most_canonical_grid);
-	em::function("generateShuffled", em::select_overload<void (oki_v::Grid&, oki::rng_seed_t rng_seed)>(&oki_v::generate_shuffled));
-	// em::function("generateShuffled", em::select_overload<oki_v::Grid (oki::Order, oki::rng_seed_t)>(&oki_v::generate_shuffled), em::return_value_policy::take_ownership{});
+	em::function("generateShuffled", em::select_overload<void (oki_v::Grid&, oki::rng_seed_t rng_seed) noexcept>(&oki_v::generate_shuffled));
+	// em::function("generateShuffled", em::select_overload<oki_v::Grid (oki::Order, oki::rng_seed_t) noexcept>(&oki_v::generate_shuffled), em::return_value_policy::take_ownership{});
 }

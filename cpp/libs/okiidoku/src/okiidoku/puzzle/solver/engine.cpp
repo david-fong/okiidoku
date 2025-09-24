@@ -29,7 +29,7 @@ namespace okiidoku::mono::detail::solver {
 		mut_cells_cands().get_underlying_array().fill(O2BitArr_ones<O>);
 		for (const auto house_type : house_types) {
 		for (const auto house : T::O2) {
-			auto& subs {frame_.houses_subsets.at(house_type)[house]};
+			auto& subs {frame_.houses_subsets[house_type][house]};
 			for (const auto house_cell : T::O2) {
 				auto& cell_tag {subs.cell_tags[house_cell]};
 				cell_tag.rmi = house_cell_to_rmi<O>(house_type, house, house_cell);
@@ -42,14 +42,14 @@ namespace okiidoku::mono::detail::solver {
 		found_queues_.clear();
 		// while (!guess_stack_.empty()) { guess_stack_.pop(); }
 		guess_stack_.clear();
-		total_guesses_ = 0;
+		total_guesses_ = 0u;
 		no_more_solns_ = false;
 
 		for (const auto rmi : T::O4) {
-			const auto& sym {puzzle.at_rmi(rmi)};
+			const auto& sym {puzzle[rmi]};
 			sym.check();
 			if (sym < T::O2) [[likely]] {
-				register_new_given_(rmi, val_t{sym});
+				register_new_given_(rmi, sym_t{sym});
 			}
 		}
 	}
@@ -58,12 +58,12 @@ namespace okiidoku::mono::detail::solver {
 	template<Order O> requires(is_order_compiled(O))
 	Grid<O> EngineImpl<O>::build_solution_obj() const noexcept {
 		OKIIDOKU_CONTRACT_ASSERT(!no_more_solns());
-		OKIIDOKU_CONTRACT_ASSERT(get_num_unsolved() == 0);
+		OKIIDOKU_CONTRACT_ASSERT(get_num_unsolved() == 0u);
 		Grid<O> soln;
 		for (const auto rmi : T::O4) {
-			const auto& cell_cands {cells_cands().at_rmi(rmi)};
-			OKIIDOKU_CONTRACT_USE(cell_cands.count() == 1);
-			soln.at_rmi(rmi) = cell_cands.first_set_bit_require_exists();
+			const auto& cell_cands {cells_cands()[rmi]};
+			OKIIDOKU_CONTRACT_USE(cell_cands.count() == 1u);
+			soln[rmi] = cell_cands.first_set_bit_require_exists();
 		}
 		OKIIDOKU_CONTRACT_ASSERT(grid_is_filled(soln));
 		OKIIDOKU_CONTRACT_ASSERT(grid_follows_rule(soln));
@@ -78,7 +78,7 @@ namespace okiidoku::mono::detail::solver {
 		F elim_fn
 	) noexcept {
 		OKIIDOKU_CONTRACT_ASSERT(!no_more_solns());
-		auto& cell_cands {mut_cells_cands().at_rmi(rmi)};
+		auto& cell_cands {mut_cells_cands()[rmi]};
 		const auto old_cands_count {cell_cands.count()};
 
 		elim_fn(cell_cands);
@@ -86,10 +86,10 @@ namespace okiidoku::mono::detail::solver {
 		const auto new_cands_count {cell_cands.count()};
 		OKIIDOKU_CONTRACT_USE(new_cands_count <= old_cands_count);
 
-		if (new_cands_count == 0) [[unlikely]] {
+		if (new_cands_count == 0u) [[unlikely]] {
 			return unwind_one_stack_frame_of_(*this);
 		}
-		if ((new_cands_count < old_cands_count) && (new_cands_count == 1)) [[unlikely]] {
+		if ((new_cands_count < old_cands_count) && (new_cands_count == 1u)) [[unlikely]] {
 			enqueue_cand_elims_for_new_cell_claim_sym_(rmi);
 		}
 		return UnwindInfo::make_no_unwind();
@@ -98,10 +98,10 @@ namespace okiidoku::mono::detail::solver {
 	template<Order O> requires(is_order_compiled(O))
 	UnwindInfo EngineImpl<O>::do_elim_remove_sym_(
 		const EngineImpl<O>::rmi_t rmi,
-		const EngineImpl<O>::val_t cand_to_elim
+		const EngineImpl<O>::sym_t cand_to_elim
 	) noexcept {
 		OKIIDOKU_CONTRACT_ASSERT(!no_more_solns());
-		if (!cells_cands().at_rmi(rmi)[cand_to_elim]) [[unlikely]] {
+		if (!cells_cands()[rmi][cand_to_elim]) [[unlikely]] {
 			return UnwindInfo::make_no_unwind(); // perf optimization
 		}
 		return do_elim_generic_(rmi, [&](auto& cands){ cands.unset(cand_to_elim); });
@@ -129,17 +129,17 @@ namespace okiidoku::mono::detail::solver {
 	template<Order O> requires(is_order_compiled(O))
 	void EngineImpl<O>::register_new_given_(
 		const EngineImpl<O>::rmi_t rmi,
-		const EngineImpl<O>::val_t sym
+		const EngineImpl<O>::sym_t sym
 	) noexcept {
 		OKIIDOKU_CONTRACT_ASSERT(!no_more_solns());
 		OKIIDOKU_CONTRACT_USE(sym < T::O2);
-		auto& cell_cands {mut_cells_cands().at_rmi(rmi)};
+		auto& cell_cands {mut_cells_cands()[rmi]};
 		OKIIDOKU_CONTRACT_ASSERT(cell_cands[sym]);
-		OKIIDOKU_CONTRACT_USE(cell_cands.count() > 1);
+		OKIIDOKU_CONTRACT_USE(cell_cands.count() > 1u);
 		cell_cands.unset_all();
 		cell_cands.set(sym);
 		OKIIDOKU_CONTRACT_ASSERT(cell_cands[sym]);
-		OKIIDOKU_CONTRACT_USE(cell_cands.count() == 1);
+		OKIIDOKU_CONTRACT_USE(cell_cands.count() == 1u);
 		enqueue_cand_elims_for_new_cell_claim_sym_(rmi);
 	}
 
@@ -149,9 +149,9 @@ namespace okiidoku::mono::detail::solver {
 		const EngineImpl<O>::rmi_t rmi
 	) noexcept {
 		OKIIDOKU_CONTRACT_ASSERT(!no_more_solns());
-		OKIIDOKU_CONTRACT_USE(frame_.num_unsolved > 0);
-		const auto& cell_cands {cells_cands().at_rmi(rmi)};
-		OKIIDOKU_CONTRACT_USE(cell_cands.count() == 1);
+		OKIIDOKU_CONTRACT_USE(frame_.num_unsolved > 0u);
+		const auto& cell_cands {cells_cands()[rmi]};
+		OKIIDOKU_CONTRACT_USE(cell_cands.count() == 1u);
 		const auto sym {cell_cands.first_set_bit_require_exists()};
 		OKIIDOKU_CONTRACT_ASSERT(cell_cands[sym]);
 		found_queues_.push_back(found::CellClaimSym<O>{.rmi{rmi},.sym{sym}});
@@ -166,8 +166,8 @@ namespace okiidoku::mono::detail::solver {
 	) noexcept {
 		OKIIDOKU_CONTRACT_ASSERT(!no_more_solns());
 		OKIIDOKU_CONTRACT_ASSERT(!has_queued_cand_elims());
-		OKIIDOKU_CONTRACT_ASSERT(cells_cands().at_rmi(guess.rmi)[guess.sym]);
-		OKIIDOKU_CONTRACT_USE(cells_cands().at_rmi(guess.rmi).count() > 1);
+		OKIIDOKU_CONTRACT_ASSERT(cells_cands()[guess.rmi][guess.sym]);
+		OKIIDOKU_CONTRACT_USE(cells_cands()[guess.rmi].count() > 1u);
 		guess_stack_.emplace_back(frame_, guess);
 
 		register_new_given_(guess.rmi, guess.sym);
@@ -191,11 +191,11 @@ namespace okiidoku::mono::detail::solver {
 		OKIIDOKU_CONTRACT_ASSERT(e.debug_check_correct_num_unsolved_());
 
 		const auto guess {std::move(guess_frame.guess)};
-		auto& cell_cands {e.mut_cells_cands().at_rmi(guess.rmi)};
+		auto& cell_cands {e.mut_cells_cands()[guess.rmi]};
 		OKIIDOKU_CONTRACT_ASSERT(cell_cands[guess.sym]);
-		OKIIDOKU_CONTRACT_USE(cell_cands.count() > 1);
+		OKIIDOKU_CONTRACT_USE(cell_cands.count() > 1u);
 		cell_cands.unset(guess.sym);
-		if (cell_cands.count() == 1) [[unlikely]] {
+		if (cell_cands.count() == 1u) [[unlikely]] {
 			e.enqueue_cand_elims_for_new_cell_claim_sym_(guess.rmi);
 		}
 
@@ -233,8 +233,8 @@ namespace okiidoku::mono::detail::solver {
 	template<Order O> requires(is_order_compiled(O))
 	void EngineImpl<O>::debug_print_cells_cands_() const noexcept {
 		for (const auto rmi : T::O4) {
-			if (rmi % T::O2 == 0) { std::clog << '\n'; }
-			const auto& mask {cells_cands().at_rmi(rmi)};
+			if (rmi % T::O2 == 0u) { std::clog << '\n'; }
+			const auto& mask {cells_cands()[rmi]};
 			const auto chars {mask.to_chars()};
 			std::clog.write(chars.data(), chars.size());
 			std::clog << "  " << std::flush;
@@ -249,7 +249,7 @@ namespace okiidoku::mono::detail::solver {
 			#endif
 			cells_cands().get_underlying_array().cbegin(),
 			cells_cands().get_underlying_array().cend(),
-			[](const auto& c){ return c.count() == 1; }
+			[](const auto& c){ return c.count() == 1u; }
 		)};
 	}
 

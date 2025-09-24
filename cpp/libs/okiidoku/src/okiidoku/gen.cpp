@@ -29,7 +29,7 @@ namespace okiidoku::mono { namespace {
 			return stdr::count(store_, count_t{0u});
 		}
 		template<class Self> [[nodiscard, gnu::pure]]
-		auto&& ch_count_sym(this Self&& self, const ch_t ch, const sym_t sym) noexcept {
+		decltype(auto) ch_count_sym(this Self&& self, const ch_t ch, const sym_t sym) noexcept {
 			ch.check(); sym.check();
 			return std::forward<Self>(self).store_[(T::O1*sym) + ch];
 		}
@@ -55,7 +55,7 @@ namespace okiidoku::mono { namespace {
 		for (const auto col : T::O2) {
 			auto& count {boxes_has.ch_count_sym(
 				col/T::O1,
-				*grid.at(h_chute+chute_row, col)
+				*grid[h_chute+chute_row, col]
 			)};
 			++count;
 			OKIIDOKU_CONTRACT_USE(count <= T::O1);
@@ -69,8 +69,8 @@ namespace okiidoku::mono { namespace {
 			if (a_box == b_box) [[unlikely]] { continue; }
 			OKIIDOKU_CONTRACT_USE(a_col != b_col);
 			const auto row {h_chute + ((rng() - rng_t::min()) % T::O1)};
-			auto& a_sym {grid.at(row,a_col)}; // ↰ will swap these later
-			auto& b_sym {grid.at(row,b_col)}; // ↲ so need reference type
+			auto& a_sym {grid[row,a_col]}; // ↰ will swap these later
+			auto& b_sym {grid[row,b_col]}; // ↲ so need reference type
 			OKIIDOKU_CONTRACT_USE(a_sym != b_sym);
 			const auto num_resolved {static_cast<signed char>(
 				(boxes_has.ch_count_sym(a_box,*a_sym) == 1 ? -1 : 0) + // regression
@@ -105,7 +105,7 @@ namespace okiidoku::mono { namespace {
 		for (const auto box_col : T::O1) {
 			auto& count {cols_has.ch_count_sym(
 				box_col,
-				*grid.at(row, v_chute + box_col)
+				*grid[row, v_chute + box_col]
 			)};
 			++count;
 		}}
@@ -115,8 +115,8 @@ namespace okiidoku::mono { namespace {
 			const auto b_col {(rng() - rng_t::min()) % T::O1};
 			if (a_col == b_col) [[unlikely]] { continue; }
 			const auto row {(rng() - rng_t::min()) % T::O2};
-			auto& a_sym {grid.at(row, v_chute + a_col)}; // ↰ will swap these later
-			auto& b_sym {grid.at(row, v_chute + b_col)}; // ↲ so need reference type
+			auto& a_sym {grid[row, v_chute + a_col]}; // ↰ will swap these later
+			auto& b_sym {grid[row, v_chute + b_col]}; // ↲ so need reference type
 			OKIIDOKU_CONTRACT_USE(a_sym != b_sym);
 			const auto num_resolved {static_cast<signed char>(
 				(cols_has.ch_count_sym(a_col,*a_sym) == 1u ? -1 : 0) + // regression
@@ -176,7 +176,7 @@ namespace okiidoku::mono {
 		OKIIDOKU_DEFER_INIT Grid<O> grid;
 		for (const auto row : T::O2) {
 		for (const auto col : T::O2) {
-			grid.at(row, col) = col;
+			grid[row, col] = col;
 		}}
 		generate_shuffled<O>(grid, rng_seed);
 		return grid;

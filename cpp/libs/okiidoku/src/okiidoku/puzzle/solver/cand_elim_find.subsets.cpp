@@ -29,7 +29,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 			O2BitArr<O> syms_claiming_a_cell {O2BitArr_ones<O>}; {
 				O2BitArr<O> syms_seen {};
 				for (const auto house_cell : T::O2) {
-					const auto& cell_cands {cells_cands.at_rmi(house_cell_to_rmi<O>(house_type, house, house_cell))};
+					const auto& cell_cands {cells_cands[house_cell_to_rmi<O>(house_type, house, house_cell)]};
 					syms_claiming_a_cell.remove(syms_seen & cell_cands);
 					syms_seen |= cell_cands;
 				}
@@ -39,7 +39,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 			}
 			for (const auto house_cell : T::O2) {
 				const auto rmi {house_cell_to_rmi<O>(house_type, house, house_cell)};
-				const auto& cell_cands {cells_cands.at_rmi(rmi)};
+				const auto& cell_cands {cells_cands[rmi]};
 				const auto match_cands {cell_cands & syms_claiming_a_cell};
 				if (match_cands.count() > 0u) [[unlikely]] {
 					if (match_cands.count() > 1u) [[unlikely]] { return true; } // multiple syms want same cell.
@@ -73,7 +73,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 			bool no_change {true};
 			for (o2i_t i {sub_a}; i < sub_z; ++i) {
 				auto& cell_tag {subs.cell_tags[i]};
-				const auto updated_count {cells_cands.at_rmi(cell_tag.rmi).count()};
+				const auto updated_count {cells_cands[cell_tag.rmi].count()};
 				OKIIDOKU_CONTRACT_USE(cell_tag.count_cache <= T::O2);
 				OKIIDOKU_CONTRACT_USE(cell_tag.count_cache >= updated_count);
 				if (cell_tag.count_cache > updated_count) {
@@ -163,7 +163,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 					combo_walker.at_it(),
 					std::next(combo_walker.at_it(), naked_subset_size),
 					O2BitArr<O>{}, std::bit_or{}, [&][[gnu::pure]](const auto i) -> const auto& {
-						return cells_cands.at_rmi(subs.cell_tags[i].rmi);
+						return cells_cands[subs.cell_tags[i].rmi];
 					}
 				);
 				if (combo_syms.count() <= naked_subset_size) [[unlikely]] {
@@ -267,7 +267,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 			return UnwindInfo::make_no_unwind();
 		}
 		for (const auto house_type : house_types) {
-			auto& houses_subsets {engine.houses_subsets().at(house_type)};
+			auto& houses_subsets {engine.houses_subsets()[house_type]};
 			// std::array<o2i_t, T::O2> houses;
 			// std::iota(houses.begin(), houses.end(), o2i_t{0});
 			// std::sort(houses.begin(), houses.end(), [&](const auto& a, const auto& b){

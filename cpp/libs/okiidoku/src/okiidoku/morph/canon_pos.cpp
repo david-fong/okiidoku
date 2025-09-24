@@ -30,7 +30,7 @@ namespace okiidoku::mono { namespace {
 	class CanonPlace {
 	private:
 		OKIIDOKU_MONO_INT_TS_TYPEDEFS
-		using val_t = T::o2is_t;
+		using sym_t = T::o2is_t;
 		using to_t = typename Transformation<O>::to_t;
 
 		struct PolarState {
@@ -91,7 +91,7 @@ namespace okiidoku::mono { namespace {
 						}
 					);
 				}
-				OKIIDOKU_DEFER_INIT std::array<val_t, T::O2> copy; // NOLINT(*-init)
+				OKIIDOKU_DEFER_INIT std::array<sym_t, T::O2> copy; // NOLINT(*-init)
 				std::copy(row_sp.begin(), row_sp.end(), copy.begin());
 				for (const auto i : T::O1) {
 					std::copy(

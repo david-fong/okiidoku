@@ -36,7 +36,7 @@ namespace okiidoku::mono::detail::solver2 {
 	public:
 		// TODO an initialization function. maybe a reinit
 		template<class Self> [[nodiscard, gnu::pure]]
-		auto&& operator[](this Self&& self, const o2i_t set) noexcept { return std::forward<Self>(self).sets_[set]; }
+		decltype(auto) operator[](this Self&& self, const o2i_t set) noexcept { return std::forward<Self>(self).sets_[set]; }
 
 		void learn_complementary_partition(const O2BitArr<O>&) noexcept;
 	};
@@ -50,7 +50,7 @@ namespace okiidoku::mono::detail::solver2 {
 		HouseTypeMap<CandPartitions> types_;
 	public:
 		[[nodiscard, gnu::pure]]
-		auto& house(const HouseType type, const o2i_t house) noexcept { return types_.at(type)[house]; }
+		auto& house(const HouseType type, const o2i_t house) noexcept { return types_[type][house]; }
 	};
 	// TODO wait... note: if we have separate for each CellOrSym major POV, need to design a way to quickly sync them.
 
@@ -63,7 +63,7 @@ namespace okiidoku::mono::detail::solver2 {
 		LineTypeMap<CandPartitions> types_;
 	public:
 		[[nodiscard, gnu::pure]]
-		auto& sym(const LineType type, const o2i_t sym) noexcept { return types_.at(type)[sym]; }
+		auto& sym(const LineType type, const o2i_t sym) noexcept { return types_[type][sym]; }
 	};
 }
 #endif

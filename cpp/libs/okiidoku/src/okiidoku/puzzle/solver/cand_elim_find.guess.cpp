@@ -31,13 +31,13 @@ namespace okiidoku::mono::detail::solver { namespace {
 		const typename Ints<O>::o4x_t rmi
 	) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
-		const auto best_cell_cands {cells_cands.at_rmi(rmi)};
+		const auto best_cell_cands {cells_cands[rmi]};
 		const auto get_sym_num_other_cand_cells {[&](const o2x_t sym){
 			o3i_t num_other_cand_cells {0};
 			for (const auto house_type : house_types) {
 				const auto house {rmi_to_house<O>(house_type, rmi)};
 				for (const auto house_cell : T::O2) {
-					const auto& other_cell {cells_cands.at_rmi(house_cell_to_rmi<O>(house_type, house, house_cell))};
+					const auto& other_cell {cells_cands[house_cell_to_rmi<O>(house_type, house, house_cell)]};
 					if (other_cell[sym]) { ++num_other_cand_cells; }
 				}
 			}
@@ -69,23 +69,23 @@ namespace okiidoku::mono::detail::solver { namespace {
 		// TODO consider a way of caching this information in the engine data? I can't guess whether it will be better or worse. This isn't like the guess network, I think bookkeeping for this may require one copy of the info for each stack frame to make sense from a POV of avoiding re-computation.
 		std::array<house_solved_counts_t, T::O2> houses_solved_counts {};
 		for (const auto rmi : T::O4) {
-			if (cells_cands.at_rmi(rmi).count() == 1u) [[unlikely]] {
+			if (cells_cands[rmi].count() == 1u) [[unlikely]] {
 				for (const auto house_type : house_types) {
-					++(houses_solved_counts[rmi_to_house<O>(house_type, rmi)].at(house_type));
+					++(houses_solved_counts[rmi_to_house<O>(house_type, rmi)][house_type]);
 		}	}	}
 		const auto get_house_solved_counts {[&](const o4x_t rmi){
 			if constexpr (O < 5) { // NOLINT(readability-magic-numbers)
-				o3i_t _ {0};
+				o3i_t _ {0u};
 				for (const auto house_type : house_types) {
 					const auto house {rmi_to_house<O>(house_type, rmi)};
-					_ += houses_solved_counts[house].at(house_type);
+					_ += houses_solved_counts[house][house_type];
 				}
 				return _;
 			} else {
 				house_solved_counts_t _;
 				for (const auto house_type : house_types) {
 					const auto house {rmi_to_house<O>(house_type, rmi)};
-					_.at(house_type) = houses_solved_counts[house].at(house_type);
+					_[house_type] = houses_solved_counts[house][house_type];
 				}
 				std::sort(_.get_underlying_arr().begin(), _.get_underlying_arr().end(), std::greater{});
 				return _.get_underlying_arr();
@@ -109,18 +109,18 @@ namespace okiidoku::mono::detail::solver { namespace {
 		}};
 		o4x_t best_rmi {[&](){
 			for (const auto rmi : T::O4) {
-				if (cells_cands.at_rmi(rmi).count() > 1u) [[likely]] {
+				if (cells_cands[rmi].count() > 1u) [[likely]] {
 					return rmi;
 			}	}
 			OKIIDOKU_UNREACHABLE;
 		}()};
-		auto best_cand_count {cells_cands.at_rmi(best_rmi).count()};
+		auto best_cand_count {cells_cands[best_rmi].count()};
 		auto best_house_solved_counts {get_house_solved_counts(best_rmi)};
 		[[maybe_unused]] auto best_guess_grouping {get_guess_grouping(best_rmi)};
 
 		// TODO is there a same-or-better-perf way to write this search using std::transform_reduce or std::min?
 		for (o4i_t rmi {best_rmi.next()}; rmi < T::O4; ++rmi) {
-			const auto cand_count {cells_cands.at_rmi(*rmi).count()};
+			const auto cand_count {cells_cands[*rmi].count()};
 			OKIIDOKU_CONTRACT_USE(cand_count != 0u);
 			if (cand_count <= 1u) [[unlikely]] { continue; } // no guessing for solved cell.
 			[[maybe_unused]] const auto guess_grouping {get_guess_grouping(*rmi)};

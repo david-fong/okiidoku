@@ -2,11 +2,11 @@
 // SPDX-FileCopyrightText: 2020 David Fong
 // SPDX-License-Identifier: AGPL-3.0-or-later
 /**
- * Pass --repl to this script to start a REPL.
- * For CommonJS, wrap with `(async() => {...})();`, or `require(".../okiidoku.js").then(oki => {...});`
- * Actual import path for you will be under your install and/or build directory. */
+Pass --repl to this script to start a REPL.
+For CommonJS, wrap with `(async() => {...})();`, or `require(".../okiidoku.js").then(oki => {...});`
+Actual import path for you will be under your install and/or build directory. */
 // TODO also try installation directory layout relative path (../../../../bin/okiidoku.js) or relative path for installed example scripts.
-const oki = await (await import("./build/Debug/okiidoku.js")).default({
+const oki = await (await import("./build/Release/okiidoku.js")).default({
 	// https://emscripten.org/docs/api_reference/module.html#module
 });
 // console.log(oki);
