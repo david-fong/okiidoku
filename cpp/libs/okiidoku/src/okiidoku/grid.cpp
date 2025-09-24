@@ -6,9 +6,9 @@
 #include <okiidoku/ints.hpp>
 #include <okiidoku/order.hpp>
 
-#include <algorithm> // all_of
+#include <algorithm> // none_of, all_of
 #include <array>
-#include <execution>
+#include <execution> // execution::unseq
 
 namespace okiidoku::mono {
 
@@ -46,9 +46,7 @@ namespace okiidoku::mono {
 	bool grid_is_filled(const Grid<O>& grid) noexcept {
 		using T = Ints<O>;
 		return std::none_of(
-			#ifdef __cpp_lib_execution
-			std::execution::unseq,
-			#endif
+			OKIIDOKU_UNSEQ
 			grid.get_underlying_array().cbegin(),
 			grid.get_underlying_array().cend(),
 			[](const auto& sym){ return sym == T::O2; }
@@ -60,9 +58,7 @@ namespace okiidoku::mono {
 	bool grid_is_empty(const Grid<O>& grid) noexcept {
 		using T = Ints<O>;
 		return std::all_of(
-			#ifdef __cpp_lib_execution
-			std::execution::unseq,
-			#endif
+			OKIIDOKU_UNSEQ
 			grid.get_underlying_array().cbegin(),
 			grid.get_underlying_array().cend(),
 			[](const auto sym) noexcept { return sym == T::O2; }

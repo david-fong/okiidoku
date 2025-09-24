@@ -25,9 +25,7 @@ namespace okiidoku::mono {
 			return count;
 		} else {
 			const o2i_t count {std::transform_reduce(
-				#ifdef __cpp_lib_execution
-				std::execution::unseq,
-				#endif
+				OKIIDOKU_UNSEQ
 				words_.cbegin(), words_.cend(), o2i_t{0u}, std::plus<o2i_t>{},
 				[](const auto& word){ return o2i_t{std::popcount(word)}; }
 			)};
@@ -50,9 +48,7 @@ namespace okiidoku::mono {
 			const auto end_at_int {bit_i_to_word_i(end)};
 			OKIIDOKU_CONTRACT_USE(end_at_int < num_words);
 			return std::transform_reduce(
-				#ifdef __cpp_lib_execution
-				std::execution::unseq,
-				#endif
+				OKIIDOKU_UNSEQ
 				words_.cbegin(), std::next(words_.cbegin(), end_at_int),
 				/* init value: */o2x_t{std::popcount(
 					words_[end_at_int] & static_cast<word_t>(word_bit_mask_for_bit_i(end) - word_t{1u})
@@ -76,9 +72,7 @@ namespace okiidoku::mono {
 			return count;
 		} else {
 			const auto word {std::find_if(
-				#ifdef __cpp_lib_execution
-				std::execution::unseq,
-				#endif
+				OKIIDOKU_UNSEQ
 				words_.cbegin(), words_.cend(), [](const auto& w){ return w != 0u; }
 			)};
 			const o2xs_t count {

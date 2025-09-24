@@ -48,7 +48,6 @@ Issues I'm watching:
 
 ## Misc List
 
-- change print\_2d to shuffle indices of sets, then take as many of the first sets as needed to fill a writable `span<string_view>` argument, discarding duplicate items.
 - see if helpful to add `/// \cond detail` wrapper to `detail` namespaces to suppress doxygen for them
 
 - https://www.pcg-random.org/using-pcg-cpp.html

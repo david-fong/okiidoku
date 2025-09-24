@@ -44,18 +44,18 @@ namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
 	[[nodiscard, gnu::pure]] OKIIDOKU_EXPORT
-	/// \return `true` if _none_ of the cells are empty (equal to `O2`).
-	/// \note does not check if the grid follows the one rule.
+	/** \return `true` if _none_ of the cells are empty (equal to `O2`).
+	\note does not check if the grid follows the one rule. */
 	bool grid_is_filled(const Grid<O>&) noexcept;
 
 	template<Order O> requires(is_order_compiled(O))
 	[[nodiscard, gnu::pure]] OKIIDOKU_EXPORT
-	/// \return `true` if _all_ of the cells are empty (equal to `O2`).
+	/** \return `true` if _all_ of the cells are empty (equal to `O2`). */
 	bool grid_is_empty(const Grid<O>&) noexcept;
 
 	template<Order O> requires(is_order_compiled(O))
 	OKIIDOKU_EXPORT
-	/// populates a grid with the contents of the Most Canonical Grid.
+	/** populates a grid with the contents of the Most Canonical Grid. */
 	void init_most_canonical_grid(Grid<O>&) noexcept;
 
 
@@ -68,7 +68,7 @@ namespace okiidoku::mono {
 		using cell_t = CellType;
 		using array_t = std::array<CellType, T::O4>;
 
-		/// lexicographical comparison over row-major-order traversal of cells.
+		/** lexicographical comparison over row-major-order traversal of cells. */
 		[[nodiscard, gnu::pure]] friend std::strong_ordering operator<=>(const Gridlike& a, const Gridlike& b) noexcept = default;
 
 		// Note: Making this constexpr results in a 1% speed gain, but 45% program
@@ -101,8 +101,11 @@ namespace okiidoku::mono {
 		}
 
 		/// \pre `row` is in [0, O2).
-		[[nodiscard]] std::span<      CellType, T::O2> row_span_at(const T::o2x_t i)       noexcept { return static_cast<std::span<      CellType, T::O2>>(std::span(arr_).subspan(T::O2*i, T::O2)); }
-		[[nodiscard]] std::span<const CellType, T::O2> row_span_at(const T::o2x_t i) const noexcept { return static_cast<std::span<const CellType, T::O2>>(std::span(arr_).subspan(T::O2*i, T::O2)); }
+		template<class Self>
+		[[nodiscard]] constexpr decltype(auto) row_span_at(this Self&& self, const T::o2x_t i) noexcept {
+			using ret_t = std::remove_reference_t<decltype(self.arr_[0uz])>;
+			return static_cast<std::span<ret_t, T::O2>>(std::span{std::forward<Self>(self).arr_}.subspan(T::O2*i, T::O2));
+		}
 
 		// [[nodiscard]] auto row_spans() noexcept { namespace v = ::ranges::views; return v::iota(o2i_t{0u}, o2i_t{T::O2}) | v::transform([&](auto r){ return row_span_at(r); }); }
 		// [[nodiscard]] auto row_spans() const noexcept { namespace v = ::ranges::views; return v::iota(o2i_t{0u}, T::O2) | v::transform([&](auto r){ return row_span_at(r); }); }

@@ -94,9 +94,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 		// TODO.try doing bookkeeping in the engine to avoid re-computation. (keep a guess-count for each house). slightly more relevant now that large fields of guess stack frames aren't heap-allocated (ie. the guess field of each stack entry are farther apart).
 		[[maybe_unused]] const auto get_guess_grouping {[&](const o4x_t rmi) -> std::uintmax_t {
 			return std::transform_reduce(
-				#ifdef __cpp_lib_execution
-				std::execution::unseq,
-				#endif
+				OKIIDOKU_UNSEQ
 				guess_stack.cbegin(), guess_stack.cend(), std::uintmax_t{0u}, std::plus<std::uintmax_t>{},
 				[rmi](const auto& frame) -> auto {
 					const auto other_rmi {frame.guess.rmi};

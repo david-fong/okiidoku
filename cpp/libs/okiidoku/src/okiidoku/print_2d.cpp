@@ -7,47 +7,39 @@
 
 #include <iostream>
 #include <random>      // minstd_rand
-#include <vector>
+#include <tuple>       // apply
+#include <array>
 #include <string_view> // operator<<
+#include <span>
 #include <algorithm>
 #include <numeric>     // ranges::iota
 #include <iterator>    // next, operator+
+#include <execution>   // execution::unseq
 
 namespace okiidoku { namespace {
 
 	// current implementation is pretty simple (dumb?)
-	std::vector<size_t> make_random_emoji_set(const Order O, const rng_seed_t rng_seed) noexcept {
-		const auto O2 {static_cast<okiidoku::visitor::ints::o2i_t>(O*O)};
-		const auto& prefs {emoji::top_set_preferences};
-		std::vector<size_t> shuffled_sets(emoji::sets.size());
-		std::iota(shuffled_sets.begin(), shuffled_sets.end(), 0uz);
-		{
-			using rng_t = std::minstd_rand; // other good LCG parameters: https://arxiv.org/pdf/2001.05304v3.pdf
-			rng_t rng {rng_seed};
-			for (size_t b {0uz}, e_i_ {0uz}; b != prefs.back(); ++e_i_) {
-				const size_t e {prefs[e_i_]};
-				std::shuffle(
-					std::next(shuffled_sets.begin(), static_cast<long>(b)),
-					std::next(shuffled_sets.begin(), static_cast<long>(e)),
-					rng
-				);
-				b = e;
-			}
+	void make_random_emoji_set(const rng_seed_t rng_seed, const std::span<std::string_view> sink) noexcept {
+		thread_local auto sets_ {emoji::sets};
+		thread_local auto sets {std::apply([](auto& ...args)noexcept{
+			return std::to_array({(std::span<std::string_view>{args.entries})...});
+		}, sets_)};
+		std::minstd_rand rng {rng_seed};
+		std::shuffle(sets.begin(), sets.end(), rng);
+		auto sink_it {sink.begin()};
+		for (const auto set : sets) {
+			std::shuffle(set.begin(), set.end(), rng);
+			sink_it = std::copy(
+				OKIIDOKU_UNSEQ
+				set.begin(), // `set.end()` (or fewer, if it would overflow the sink):
+				std::next(set.begin(), std::min(std::distance(set.begin(), set.end()), std::distance(sink_it, sink.end()))), // I wish the standard library just handled this or provided a `out.end()` parameter :(
+				sink_it
+			);
+			std::sort(sink.begin(), sink_it); // need to sort before `std::unique`.
+			sink_it = std::unique(sink.begin(), sink_it);
+			if (sink_it == sink.end()) { break; }
 		}
-		// first try to find a single set large enough:
-		// unlike before, don't use anything not in top prefs list here.
-		for (size_t b {0uz}, e_i_ {0uz}; e_i_ < prefs.size(); ++e_i_) {
-			const size_t e {prefs[e_i_]};
-			for (size_t i {b}; i < e; ++i) {
-				if (emoji::sets.at(shuffled_sets.at(i)).entries.size() >= O2) {
-					shuffled_sets[0uz] = shuffled_sets[i];
-					shuffled_sets.resize(1uz);
-					return shuffled_sets;
-			}	}
-			b = e;
-		}
-		// otherwise just return everything:
-		return shuffled_sets;
+		std::shuffle(sink.begin(), sink.end(), rng);
 	}
 }}
 namespace okiidoku {
@@ -89,7 +81,9 @@ namespace okiidoku {
 				print_box_row_sep_string_(border_i);
 			}
 		}};
-		const auto emoji_sets {make_random_emoji_set(O, rng_seed)};
+		std::vector<std::string_view> emoji_set {O2}; // TODO.low consider making thread_local?
+		OKIIDOKU_CONTRACT_USE(emoji_set.size() == O2);
+		make_random_emoji_set(rng_seed, emoji_set);
 
 		for (o2i_t row {0u}; row < O2; ++row) {
 			if (row % O == 0u) [[unlikely]] {
@@ -105,15 +99,8 @@ namespace okiidoku {
 					)};
 					if (sym == O2) {
 						os << "  ";
-						continue;
-					}
-					for (const auto emoji_set_index : emoji_sets) {
-						const auto& set {emoji::sets.at(emoji_set_index).entries};
-						if (sym < set.size()) {
-							os << set.at(sym);
-							break;
-						}
-						sym -= static_cast<o2i_t>(set.size());
+					} else {
+						os << emoji_set.at(sym);
 					}
 				}
 				os << " │";

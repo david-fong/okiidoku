@@ -99,9 +99,7 @@ namespace okiidoku::mono {
 			// 	ua_sets.ua_set_4s.cend(),
 			// 	[&](const auto& ua_set_4){
 			// 		return std::count_if(
-			// 			#ifdef __cpp_lib_execution
-			// 			std::execution::unseq,
-			// 			#endif
+			// 			OKIIDOKU_UNSEQ
 			// 			ua_set_4.rmis.cbegin(),
 			// 			ua_set_4.rmis.cend(),
 			// 			[&](const auto& ua_set_rmi){ return (ua_set_rmi != rmi) && (grid[ua_set_rmi] != T::O2); }

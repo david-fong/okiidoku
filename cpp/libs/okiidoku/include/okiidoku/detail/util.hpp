@@ -70,4 +70,11 @@ alias of standard `assert` */
 #endif
 
 
+#ifdef __cpp_lib_execution
+#define OKIIDOKU_UNSEQ std::execution::unseq,
+#else
+#define OKIIDOKU_UNSEQ
+#endif
+
+
 #endif
