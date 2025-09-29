@@ -37,6 +37,7 @@ function(okiidoku_test_add name #[[ ARGN are dependencies ]])
 endfunction()
 
 
+okiidoku_test_add(mixed_radix_int_serdes #[[ DEPS ]])
 okiidoku_test_add(o2_bit_arr #[[ DEPS ]])
 
 okiidoku_test_add(grid #[[ DEPS ]] o2_bit_arr)

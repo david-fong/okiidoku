@@ -34,14 +34,14 @@ int main([[maybe_unused]] const int argc, [[maybe_unused]] char const *const arg
 
 	oki::Grid<O> gen_grid;
 	oki::init_most_canonical_grid(gen_grid);
-	oki::generate_shuffled(gen_grid, shared_rng.get());
+	oki::generate_shuffled(gen_grid, shared_rng());
 	oki::Grid<O> puz_grid;
 	// TODO.wait oki::make_minimal_puzzle(gen_grid, puz_of_gen_grid);
 	auto canon_gen_grid_xform {oki::canonicalize(gen_grid)};
 	canon_gen_grid_xform.apply_in_place(puz_grid);
 
 	oki::Transformation<O> scramble_xform {};
-	oki::scramble(scramble_xform, shared_rng.get());
+	oki::scramble(scramble_xform, shared_rng());
 	oki::Grid<O> canon_grid;
 	scramble_xform.apply_from_to(gen_grid, canon_grid);
 	oki::canonicalize(canon_grid);
@@ -52,7 +52,7 @@ int main([[maybe_unused]] const int argc, [[maybe_unused]] char const *const arg
 		std::abort();
 	}
 
-	oki::print_2d<O>(std::clog, shared_rng.get(), gen_grid, canon_grid);
+	oki::print_2d<O>(std::clog, shared_rng(), gen_grid, canon_grid);
 
 	return 0;
 }

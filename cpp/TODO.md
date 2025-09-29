@@ -9,7 +9,7 @@
 - draft archive
 - refactor and improve canonicalization
 - compare backtracking and stochastic search statistics
-- implement grid-serdes translator tool
+- implement an extras module for serdes of different string formats of grids that other people use
 - refine archive
 - create a separate github repo for data. add as submodule?
 - emscripten build and website
@@ -49,7 +49,6 @@ Issues I'm watching:
 ## Misc List
 
 - make canon functions pure producers of a canonicalizing transformation. take grid by const reference. name `canon_sym` -> `get_sym_canon_map`.
-- change `SharedRng::get` to be `operator()`.
 - see if helpful to add `/// \cond detail` wrapper to `detail` namespaces to suppress doxygen for them
 
 - https://www.pcg-random.org/using-pcg-cpp.html

@@ -19,6 +19,7 @@ namespace okiidoku::mono { namespace {
 	class SerdesHelper {
 	private:
 		OKIIDOKU_MONO_INT_TS_TYPEDEFS
+		// using int_writer_t = ::okiidoku::detail::MixedRadixUintWriter<T::o2is_t>;
 		using cands_t = O2BitArr<O>;
 		using sym_t = T::o2x_t; // TODO what about puzzles then? separate bitmap of populated/empty cells?
 
