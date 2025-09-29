@@ -34,7 +34,7 @@ namespace okiidoku::mono { namespace {
 		using to_t = typename Transformation<O>::to_t;
 
 		struct PolarState {
-			line_map_t<O> to_og {Transformation<O>::identity.row_map};
+			line_map_t<O> to_og {Transformation<O>{}.row_map};
 			detail::Ties<O,2> line_ties {};
 			detail::Ties<O,1> chute_ties {};
 
@@ -63,7 +63,6 @@ namespace okiidoku::mono { namespace {
 	) noexcept {
 		OKIIDOKU_DEFER_INIT Grid<O> table; {
 			const Transformation<O> t {
-				// .sym_map {Transformation<O>::identity_sym_map},
 				.row_map {row_state.to_og},
 				.col_map {col_state.to_og},
 				.post_transpose {is_post_transpose},
@@ -181,7 +180,6 @@ namespace okiidoku::mono { namespace {
 		}
 
 		Transformation<O> transformation {
-			// .sym_map {Transformation<O>::identity_sym_map},
 			.row_map {row_state.to_og},
 			.col_map {col_state.to_og},
 			.post_transpose {false},

@@ -51,7 +51,7 @@
 
 - "smarter"/greedier backtracking: backtracking may be occurring frequently at a coord because of values much earlier in the genpath progress. (wikipedia "backskipping")
   - (no longer needed because stochastic search generator is much faster than backtracking. Would be better to keep backtracking's basic implementation's quality of never skipping possible outcomes)
-  - https://en.wikipedia.org/wiki/Backjumping
+  - https://wikipedia.org/wiki/Backjumping
   - backtracking is less likely to occur when other coords in the same house as the stuck coord that have different house types have the same value (overlapping has_mask). Can make an array like a count version of has_mask counting the times a value is taken in each house seen by the stuck coord.
     - Indicators of "bad packing" (lack of overlap): how many more bits are in the coord's has_mask than the has_mask of the house with the most bits in its has_mask?
     - Each coord has a level of prone-ness to bad packing: To get it, walk the gen path, and at each cell, accumulate that cell's coord to a pool, then walk the pool and count how many coords are seen by the current coord. Take `max(count_seen - O2, 0)`.

@@ -33,7 +33,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
 		const auto best_cell_cands {cells_cands[rmi]};
 		const auto get_sym_num_other_cand_cells {[&](const o2x_t sym){
-			o3i_t num_other_cand_cells {0};
+			o3i_t num_other_cand_cells {0u};
 			for (const auto house_type : house_types) {
 				const auto house {rmi_to_house<O>(house_type, rmi)};
 				for (const auto house_cell : T::O2) {
@@ -44,7 +44,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 			return num_other_cand_cells;
 		}};
 		auto best_sym {best_cell_cands.first_set_bit_require_exists()};
-		o3i_t best_sym_num_other_cand_cells {0};
+		o3i_t best_sym_num_other_cand_cells {0u};
 		for (const auto sym : best_cell_cands.set_bits()) {
 			const auto sym_num_other_cand_cells {get_sym_num_other_cand_cells(sym)};
 			if (sym_num_other_cand_cells > best_sym_num_other_cand_cells) [[unlikely]] {
@@ -73,7 +73,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 				for (const auto house_type : house_types) {
 					++(houses_solved_counts[rmi_to_house<O>(house_type, rmi)][house_type]);
 		}	}	}
-		const auto get_house_solved_counts {[&](const o4x_t rmi){
+		const auto get_house_solved_counts {[&](const o4x_t rmi)noexcept{
 			if constexpr (O < 5) { // NOLINT(readability-magic-numbers)
 				o3i_t _ {0u};
 				for (const auto house_type : house_types) {
@@ -87,16 +87,17 @@ namespace okiidoku::mono::detail::solver { namespace {
 					const auto house {rmi_to_house<O>(house_type, rmi)};
 					_[house_type] = houses_solved_counts[house][house_type];
 				}
-				std::sort(_.get_underlying_arr().begin(), _.get_underlying_arr().end(), std::greater{});
+				std::ranges::sort(_.get_underlying_arr(), std::greater{});
 				return _.get_underlying_arr();
 			}
 		}};
 		// TODO.try doing bookkeeping in the engine to avoid re-computation. (keep a guess-count for each house). slightly more relevant now that large fields of guess stack frames aren't heap-allocated (ie. the guess field of each stack entry are farther apart).
-		[[maybe_unused]] const auto get_guess_grouping {[&](const o4x_t rmi) -> std::uintmax_t {
+		/** get the number of houses shared between the given `rmi` and those occupied by guesses in the stack. */
+		[[maybe_unused]] const auto get_guess_grouping {[&][[gnu::pure]](const o4x_t rmi) noexcept -> std::uintmax_t {
 			return std::transform_reduce(
 				OKIIDOKU_UNSEQ
 				guess_stack.cbegin(), guess_stack.cend(), std::uintmax_t{0u}, std::plus<std::uintmax_t>{},
-				[rmi](const auto& frame) -> auto {
+				[rmi][[gnu::pure]](const auto& frame) noexcept -> auto {
 					const auto other_rmi {frame.guess.rmi};
 					return (// TODO consider using gcc's __builtin_expect to annotate as unlikely. standard attribute cannot be used for ternary.
 					  (rmi_to_row<O>(rmi) == rmi_to_row<O>(other_rmi) ? 1u : 0u) // consider extracting this into a `count_shared_houses` function that returns Int<3>
@@ -105,7 +106,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 				}
 			);
 		}};
-		o4x_t best_rmi {[&](){
+		o4x_t best_rmi {[&]()noexcept{
 			for (const auto rmi : T::O4) {
 				if (cells_cands[rmi].count() > 1u) [[likely]] {
 					return rmi;
@@ -157,7 +158,7 @@ namespace okiidoku::mono::detail::solver {
 	template<Order O> requires(is_order_compiled(O))
 	Guess<O> CandElimFind<O>::good_guess_candidate(const Engine<O>& engine) noexcept {
 		OKIIDOKU_CONTRACT_ASSERT(!engine.no_more_solns());
-		OKIIDOKU_CONTRACT_ASSERT(engine.get_num_unsolved() > 0); // cannot guess when already solved
+		OKIIDOKU_CONTRACT_ASSERT(engine.get_num_unsolved() > 0u); // cannot guess when already solved
 		return find_good_guess_candidate_for_fast_solver<O>(engine.cells_cands(), engine.get_guess_stack_());
 	}
 

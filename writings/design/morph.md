@@ -5,7 +5,7 @@
 ## Background
 
 - [sudopedia.enjoysudoku.com](http://sudopedia.enjoysudoku.com/Canonical_Form.html)
-- [wikipedia.org](https://en.wikipedia.org/wiki/Mathematics_of_Sudoku#Essentially_different_solutions)
+- [wikipedia.org](https://wikipedia.org/wiki/Mathematics_of_Sudoku#Essentially_different_solutions)
 - [pi.math.cornell.edu](https://pi.math.cornell.edu/~mec/Summer2009/Mahmood/Symmetry.html).
 - [handwiki.org](https://handwiki.org/wiki/Mathematics_of_Sudoku#Sudokus_of_other_sizes)
 
@@ -86,11 +86,11 @@ This was originally more of a "things that I tried and didn't work" section, but
   - Graph Bandwidth Problem.
     - Is NP
 
-1. Come up with a weight mapping for each edge in rel_counts and then do a [Floyd-Warshall](https://en.wikipedia.org/wiki/Floyd%E2%80%93Warshall_algorithm), and then map each row of the result to either its max or its sum, and then sort. For mapping meanings, see [Closeness Centrality](https://en.wikipedia.org/wiki/Closeness_centrality)- also the section on disconnected graphs.
+1. Come up with a weight mapping for each edge in rel_counts and then do a [Floyd-Warshall](https://wikipedia.org/wiki/Floyd%E2%80%93Warshall_algorithm), and then map each row of the result to either its max or its sum, and then sort. For mapping meanings, see [Closeness Centrality](https://wikipedia.org/wiki/Closeness_centrality)- also the section on disconnected graphs.
     - The weight mapping can be: (recall that `(rel_counts[i][j])/O2` represents the probability in this sudoku grid's markov chain of transitioning from label i to label j.)
       - `O2 - rel_counts[i][j]`
       - `rel_counts[i][j]` interesting? what's would this mean / represent?
       - `p_binom(rel_counts[i][j])` what would this mean / represent?
       - If further differentiation is needed, look into factoring in more scramble-invariant properties.
     - Would this work against the Most Canonical Grid? I don't have high hopes. Will need to test or reason it out.
-    - Note that there are other definitions of centrality, such as [Betweenness Centrality](https://en.wikipedia.org/wiki/Betweenness_centrality), but it uses information that isn't retained in the basic Floyd-Warshall algorithm.
+    - Note that there are other definitions of centrality, such as [Betweenness Centrality](https://wikipedia.org/wiki/Betweenness_centrality), but it uses information that isn't retained in the basic Floyd-Warshall algorithm.

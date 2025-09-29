@@ -14,19 +14,21 @@
 #include <random>    // random_device,
 #include <array>
 
-// Strong recommendation: do NOT do `using namespace okiidoku;` anywhere.
-// Strong recommendation: do NOT use C++'s ADL mechanism to call non-operator
-// functions defined in the okiidoku namespace in an unqualified manner.
-// You will probably not have a good time if you do any of those things.
+/**
+strong recommendation: do NOT do `using namespace okiidoku;` anywhere.
+strong recommendation: do NOT use C++'s ADL mechanism to call non-operator
+	functions defined in the okiidoku namespace in an unqualified manner.
+you will probably not have a good time if you do any of those things.
+*/
 
 // "copy" names under `okiidoku::mono` to okiidoku:
-// Recommendation: do NOT do this in header files (only in .cpp files)
+// recommendation: don't do this in header files (only in .cpp files)
 namespace okiidoku { using namespace ::okiidoku::mono; }
 
 int main([[maybe_unused]] const int argc, [[maybe_unused]] char const *const argv[]) {
 	namespace oki = ::okiidoku;
 	oki::util::setup_console();
-	oki::util::SharedRng shared_rng {std::random_device()()};
+	oki::util::SharedRng shared_rng {std::random_device{}()};
 
 	constexpr oki::Order O {3};
 
@@ -35,11 +37,13 @@ int main([[maybe_unused]] const int argc, [[maybe_unused]] char const *const arg
 	oki::generate_shuffled(gen_grid, shared_rng.get());
 	oki::Grid<O> puz_grid;
 	// TODO.wait oki::make_minimal_puzzle(gen_grid, puz_of_gen_grid);
-	auto canon_transform_for_gen_grid {oki::canonicalize(gen_grid)};
-	canon_transform_for_gen_grid.apply_in_place(puz_grid);
+	auto canon_gen_grid_xform {oki::canonicalize(gen_grid)};
+	canon_gen_grid_xform.apply_in_place(puz_grid);
 
-	oki::Grid<O> canon_grid {gen_grid};
-	oki::scramble(canon_grid, shared_rng.get());
+	oki::Transformation<O> scramble_xform {};
+	oki::scramble(scramble_xform, shared_rng.get());
+	oki::Grid<O> canon_grid;
+	scramble_xform.apply_from_to(gen_grid, canon_grid);
 	oki::canonicalize(canon_grid);
 
 	if (gen_grid != canon_grid) {

@@ -41,8 +41,9 @@ namespace okiidoku::mono {
 	OKIIDOKU_EXPORT
 	/**
 	\pre grid is filled or a proper puzzle (see `okiidoku::mono::grid_is_proper_puzzle`).
-	\post grid is a minimal puzzle whose solution canonicalizes to the same grid
-		as the original input.
+	\post grid is a minimal puzzle whose solution canonicalizes to the same grid as
+		the original input, and where every non-empty cell holds the same value as the
+		same cell in the original input.
 	\relates okiidoku::mono::Grid */
 	void make_minimal_puzzle(Grid<O>&, rng_seed_t rng_seed) noexcept;
 }

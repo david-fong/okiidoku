@@ -20,8 +20,8 @@ namespace okiidoku { namespace {
 
 	// current implementation is pretty simple (dumb?)
 	void make_random_emoji_set(const rng_seed_t rng_seed, const std::span<std::string_view> sink) noexcept {
-		thread_local auto sets_ {emoji::sets};
-		thread_local auto sets {std::apply([](auto& ...args)noexcept{
+		thread_local static auto sets_ {emoji::sets};
+		thread_local static auto sets {std::apply([](auto& ...args)noexcept{
 			return std::to_array({(std::span<std::string_view>{args.entries})...});
 		}, sets_)};
 		std::minstd_rand rng {rng_seed};

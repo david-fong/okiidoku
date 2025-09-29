@@ -51,7 +51,7 @@ int main(const int argc, char const *const argv[]) {
 			}
 			std::cerr << "\nfailed to parse rng seed argument (hex u64). using random_device instead.";
 		}
-		return std::random_device()();
+		return std::random_device{}();
 	}()};
 	// NOLINTEND(*-avoid-c-arrays, cppcoreguidelines-pro-bounds-pointer-arithmetic)
 

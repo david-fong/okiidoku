@@ -28,19 +28,20 @@ namespace okiidoku::mono {
 	OKIIDOKU_EXPORT void write_solution_grid_to_stream(const Grid<O>&, std::ostream& sink) noexcept;
 
 	/**
-	\pre the stream's next bytes contain the result of a call to write_solution_grid_to_stream. */
+	\pre the stream's next bytes contain the result of a call to `write_solution_grid_to_stream`.
+	\post parsed grid is filled and follows the one rule. */
 	template<Order O> requires(is_order_compiled(O))
 	OKIIDOKU_EXPORT void parse_solution_grid_from_stream(Grid<O>&, std::istream& src) noexcept;
 
 	/**
 	best used with sparse (close to minimal) puzzles.
-	\pre the grid is a puzzle with at least one solution. */
+	\pre the grid follows the one rule. */
 	template<Order O> requires(is_order_compiled(O))
 	OKIIDOKU_EXPORT void print_puzzle_grid_to_stream(const Grid<O>&, std::ostream& sink) noexcept;
 
 	/**
-	\pre the stream's next bytes contain the result of a call to print_puzzle_grid_to_stream.
-	\post the grid is a puzzle with at least one solution. */
+	\pre the stream's next bytes contain the result of a call to `print_puzzle_grid_to_stream`.
+	\post the grid follows the one rule.. */
 	template<Order O> requires(is_order_compiled(O))
 	OKIIDOKU_EXPORT void parse_puzzle_grid_from_stream(Grid<O>&, std::istream& src) noexcept;
 }

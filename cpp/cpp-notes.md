@@ -189,7 +189,7 @@ things I got wrong before which I couldn't understand based on gcc's error messa
   - [standardization proposal](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p1774r4.pdf)
   - [interesting clang thing](https://github.com/microsoft/GSL/pull/608)
 
-- [floats in `(0.0,1.0]` can be slower to process](https://en.wikipedia.org/wiki/Subnormal_number#Performance_issues) (apparently?)
+- [floats in `(0.0,1.0]` can be slower to process](https://wikipedia.org/wiki/Subnormal_number#Performance_issues) (apparently?)
 
 - unsigned integers. sigh.
   - https://en.cppreference.com/w/cpp/language/operator_arithmetic.html

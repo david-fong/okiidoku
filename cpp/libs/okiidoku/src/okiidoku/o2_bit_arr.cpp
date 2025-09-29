@@ -17,14 +17,13 @@
 namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
-	typename O2BitArr<O>::o2i_t
-	O2BitArr<O>::count() const noexcept {
+	auto O2BitArr<O>::count() const noexcept -> typename O2BitArr<O>::o2i_t {
 		if constexpr (num_words == 1u) {
-			const o2i_t count {std::popcount(words_[0uz])};
+			/*RVO*/o2i_t count {std::popcount(words_[0uz])};
 			OKIIDOKU_CONTRACT_USE(count <= T::O2);
 			return count;
 		} else {
-			const o2i_t count {std::transform_reduce(
+			/*RVO*/o2i_t count {std::transform_reduce(
 				OKIIDOKU_UNSEQ
 				words_.cbegin(), words_.cend(), o2i_t{0u}, std::plus<o2i_t>{},
 				[](const auto& word){ return o2i_t{std::popcount(word)}; }
@@ -37,17 +36,16 @@ namespace okiidoku::mono {
 
 	// TODO compiler having trouble inferring ability to use bzhi instruction for O=3,4 when they use u16 instead of u32.
 	template<Order O> requires(is_order_compiled(O))
-	typename Ints<O>::o2x_t
-	O2BitArr<O>::count_below(const typename Ints<O>::o2x_t end) const noexcept {
+	auto O2BitArr<O>::count_below(const typename Ints<O>::o2x_t end) const noexcept -> typename Ints<O>::o2x_t {
 		OKIIDOKU_CONTRACT_USE(end < T::O2);
 		if constexpr (num_words == 1u) {
-			return std::popcount(
+			return o2x_t{std::popcount(
 				words_[0uz] & static_cast<word_t>(word_bit_mask_for_bit_i(end) - word_t{1u})
-			);
+			)};
 		} else {
 			const auto end_at_int {bit_i_to_word_i(end)};
 			OKIIDOKU_CONTRACT_USE(end_at_int < num_words);
-			return std::transform_reduce(
+			return o2x_t{std::transform_reduce(
 				OKIIDOKU_UNSEQ
 				words_.cbegin(), std::next(words_.cbegin(), end_at_int),
 				/* init value: */o2x_t{std::popcount(
@@ -55,14 +53,13 @@ namespace okiidoku::mono {
 				)},
 				std::plus<o2x_t>{},
 				[](const auto& word){ return o2x_t{std::popcount(word)}; }
-			);
+			)};
 		}
 	}
 
 
 	template<Order O> requires(is_order_compiled(O))
-	typename O2BitArr<O>::o2xs_t
-	O2BitArr<O>::first_set_bit_require_exists() const noexcept {
+	auto O2BitArr<O>::first_set_bit_require_exists() const noexcept -> typename O2BitArr<O>::o2xs_t {
 		// Note: without the non-empty-mask assumption, we'd have to
 		//  handle discounting excess top zeros in the empty-mask case.
 		OKIIDOKU_CONTRACT_ASSERT(count() > 0u);
@@ -75,8 +72,8 @@ namespace okiidoku::mono {
 				OKIIDOKU_UNSEQ
 				words_.cbegin(), words_.cend(), [](const auto& w){ return w != 0u; }
 			)};
-			const o2xs_t count {
-				/* T::o2x */(word_t_num_bits * std::distance(words_.cbegin(), word))
+			/*RVO*/o2xs_t count {
+				(word_t_num_bits * std::distance(words_.cbegin(), word))
 				+ std::countr_zero(*word)
 			};
 			OKIIDOKU_CONTRACT_USE(count < T::O2);
@@ -86,8 +83,7 @@ namespace okiidoku::mono {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	typename O2BitArr<O>::o2x_t
-	O2BitArr<O>::get_index_of_nth_set_bit(O2BitArr::o2x_t set_bit_index) const noexcept {
+	auto O2BitArr<O>::get_index_of_nth_set_bit(O2BitArr::o2x_t set_bit_index) const noexcept -> typename O2BitArr<O>::o2x_t {
 		set_bit_index.check();
 		OKIIDOKU_CONTRACT_ASSERT(count() > set_bit_index);
 		const word_ix_t word_i {[&](){
@@ -131,8 +127,7 @@ namespace okiidoku::mono {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	std::strong_ordering
-	O2BitArr<O>::cmp_differences(const O2BitArr<O>& a, const O2BitArr<O>& b) noexcept {
+	auto O2BitArr<O>::cmp_differences(const O2BitArr<O>& a, const O2BitArr<O>& b) noexcept -> std::strong_ordering {
 		for (const auto i : num_words) {
 			const auto diffs {a.words_[i] ^ b.words_[i]};
 			if (const auto cmp {(a.words_[i]&diffs) <=> (b.words_[i]&diffs)}; std::is_neq(cmp)) [[likely]] { return cmp; }
@@ -142,12 +137,11 @@ namespace okiidoku::mono {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	std::array<char, Ints<O>::O2>
-	O2BitArr<O>::to_chars() const noexcept {
+	auto O2BitArr<O>::to_chars() const noexcept -> std::array<char, Ints<O>::O2> {
 		OKIIDOKU_DEFER_INIT std::array<char, T::O2> _; // NOLINT(*-init)
 		_.fill('.');
-		for (const auto i : T::O2) {
-			if (operator[](i)) { _[i] = '1'; }
+		for (const auto i : set_bits()) {
+			_[i] = '1';
 		}
 		return _;
 	}

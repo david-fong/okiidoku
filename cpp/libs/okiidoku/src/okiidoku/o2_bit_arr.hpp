@@ -11,6 +11,7 @@
 #include <iterator>    // input_iterator_tag, default_sentinel
 #include <bit>         // countr_zero
 #include <cstdint>     // uint..._t
+#include <climits>     // CHAR_BIT
 #include <compare>     // strong_ordering
 #include <type_traits> // conditional_t, is_aggregate_v
 
@@ -33,12 +34,12 @@ namespace okiidoku::mono {
 		// since last measured for clang, the above is slightly faster for O=3, with
 		// slightly better codegen and slightly bigger code size.
 		// using word_t =
-		// 	std::conditional_t<(O <= 8), detail::uint_small_for_width_t<T::O2>,
+		// 	std::conditional_t<(O <= CHAR_BIT), detail::uint_small_for_width_t<T::O2>,
 		// 	std::uint_least64_t
 		// >;
 	private:
 		// note: use of one byte is safe for grid orders < 128. that should be fine.
-		using word_bit_i_t  = Int<std::min(std::uintmax_t{T::O2}, std::uintmax_t{8u} * sizeof(word_t))>;
+		using word_bit_i_t  = Int<std::min(std::uintmax_t{T::O2}, std::uintmax_t{CHAR_BIT} * sizeof(word_t))>;
 		using word_bit_ix_t = Int<word_bit_i_t::max-1u>;
 		using word_i_t  = Int<(std::uintmax_t{T::O2} + word_bit_i_t::max-1u) / word_bit_i_t::max>;
 		using word_ix_t = Int<word_i_t::max-1u>;
@@ -93,8 +94,8 @@ namespace okiidoku::mono {
 		/** count the number of set bits. */
 		[[nodiscard, gnu::pure]] o2i_t count() const noexcept;
 
-		/** count the number of set bits below the specified bit index. */
-		/** \pre `end < O2`. */
+		/** count the number of set bits below the specified bit index.
+		\pre `end < O2`. */
 		[[nodiscard, gnu::pure]] o2x_t count_below(const o2x_t end) const noexcept;
 
 		/** \pre `at < O2`. */
@@ -176,11 +177,20 @@ namespace okiidoku::mono {
 			lhs &= rhs; return lhs;
 		}
 
+		[[nodiscard, gnu::pure]] O2BitArr operator~() const noexcept {
+			OKIIDOKU_DEFER_INIT O2BitArr inv; // NOLINT(*-init)
+			for (const auto i : num_words) { inv.words_[i] = ~words_[i]; };
+			inv.words_.back() &= ~word_t{0u} >> O2BitArr<O>::num_excess_bits;
+			return *this;
+		}
+
 		/** \pre this mask has at least one set bit.
 		\note an ugly name for a "sharp knife". */
 		[[nodiscard, gnu::pure]] o2xs_t first_set_bit_require_exists() const noexcept;
 
-		/** \pre `set_bit_i < O2` and there are at least `set_bit_i+1` set bits. */
+		/**
+		\pre `set_bit_i < O2` and there are at least `set_bit_i+1` set bits.
+		\post `count_below(get_index_of_nth_set_bit(set_bit_i)) == set_bit_i`. */
 		[[nodiscard, gnu::pure]] o2x_t get_index_of_nth_set_bit(o2x_t set_bit_i) const noexcept;
 
 

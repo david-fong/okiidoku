@@ -12,7 +12,7 @@ namespace okiidoku::mono {
 
 	/**
 	\pre the grid is filled and follows the one rule.
-	to canonicalize a puzzle, first solve it, then canonicalize
+	\note to canonicalize a puzzle, first solve it, then canonicalize
 	the solution, and then apply the returned transformation to the puzzle.
 	\todo consider whether it's possible to implement support for puzzles without requiring caller to first solve.
 	*/

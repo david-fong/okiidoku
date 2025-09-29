@@ -40,7 +40,7 @@ namespace okiidoku::mono { namespace {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	class CanonLabel {
+	class CanonSym {
 	private:
 		OKIIDOKU_MONO_INT_TS_TYPEDEFS
 		using to_t = typename Transformation<O>::to_t;
@@ -72,7 +72,7 @@ namespace okiidoku::mono { namespace {
 	};
 
 	template<Order O> requires(is_order_compiled(O))
-	void CanonLabel<O>::do_a_pass_(CanonLabel<O>::State& s) noexcept {
+	void CanonSym<O>::do_a_pass_(CanonSym<O>::State& s) noexcept {
 		// for (const auto sym_a : T::O2) {
 		// for (const auto sym_b : T::O2) {
 		// 	O2BitArr<O> r_atom, col_atom;
@@ -114,7 +114,7 @@ namespace okiidoku::mono { namespace {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	sym_map_t<O> CanonLabel<O>::do_it(Grid<O>& grid) noexcept {
+	sym_map_t<O> CanonSym<O>::do_it(Grid<O>& grid) noexcept {
 		const sym_map_t<O> sym_og_to_canon {[&](){
 			OKIIDOKU_DEFER_INIT State s(grid);
 			while (s.has_ties()) {
@@ -148,7 +148,7 @@ namespace okiidoku::mono::detail {
 
 	template<Order O> requires(is_order_compiled(O))
 	sym_map_t<O> canon_sym(Grid<O>& grid) noexcept {
-		return CanonLabel<O>::do_it(grid);
+		return CanonSym<O>::do_it(grid);
 	}
 
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \

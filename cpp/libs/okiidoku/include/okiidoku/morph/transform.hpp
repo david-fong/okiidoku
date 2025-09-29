@@ -33,15 +33,13 @@ namespace okiidoku::mono {
 		or of an inner layer (but not between inner layers) */
 		using line_map_t = std::array<std::array<to_t, T::O1>, T::O1>;
 
-		static const Transformation identity;
-
 	public:
-		sym_map_t sym_map {identity.sym_map}; //!< `map[sym_orig] -> sym_new`.
-		line_map_t row_map {identity.row_map}; //!< `map[chute_orig][chute_cell_orig] -> line_new`.
-		line_map_t col_map {identity.col_map}; ///< `map[chute_orig][chute_cell_orig] -> line_new`.
-		bool post_transpose {identity.post_transpose}; ///< whether to transpose after line remapping
+		sym_map_t  sym_map {[]noexcept{ sym_map_t  _; for (const auto i : T::O2) { _[i] = i; } return _; }()}; //!< `map[sym_orig] -> sym_new`.
+		line_map_t row_map {[]noexcept{ line_map_t _; for (const auto i : T::O2) { _[i/T::O1][i%T::O1] = i; } return _; }()}; //!< `map[chute_orig][chute_cell_orig] -> line_new`.
+		line_map_t col_map {[]noexcept{ line_map_t _; for (const auto i : T::O2) { _[i/T::O1][i%T::O1] = i; } return _; }()}; ///< `map[chute_orig][chute_cell_orig] -> line_new`.
+		bool post_transpose {false}; ///< whether to transpose after line remapping
 
-		[[nodiscard, gnu::pure]] friend bool operator==(const Transformation&, const Transformation&) noexcept = default;
+		[[nodiscard, gnu::pure]] friend constexpr bool operator==(const Transformation&, const Transformation&) noexcept = default;
 		// [[nodiscard, gnu::pure]] friend std::strong_ordering operator<=>(const Transformation&, const Transformation&) noexcept = default;
 
 		/**
@@ -65,14 +63,6 @@ namespace okiidoku::mono {
 		static_assert(std::is_aggregate_v<Transformation<O_>>);
 	OKIIDOKU_FOREACH_O_DO_EMIT
 	#undef OKIIDOKU_FOREACH_O_EMIT
-
-	template<Order O> requires(is_order_compiled(O))
-	constexpr Transformation<O> Transformation<O>::identity {
-		.sym_map {[]{ sym_map_t  _; for (const auto i : T::O2) { _[i] = i; } return _; }()},
-		.row_map {[]{ line_map_t _; for (const auto i : T::O2) { _[i/T::O1][i%T::O1] = i; } return _; }()},
-		.col_map {[]{ line_map_t _; for (const auto i : T::O2) { _[i/T::O1][i%T::O1] = i; } return _; }()},
-		.post_transpose {false},
-	};
 }
 
 

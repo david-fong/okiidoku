@@ -14,18 +14,14 @@ namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
 	void scramble(Transformation<O>& it, const rng_seed_t rng_seed) noexcept {
-		using T = Ints<O>;
+		// using T = Ints<O>;
 		namespace stdr = std::ranges;
 		{
 			using rng_t = std::minstd_rand;
 			rng_t rng {rng_seed};
 			stdr::shuffle(it.sym_map, rng);
-			stdr::shuffle(it.row_map, rng);
-			stdr::shuffle(it.col_map, rng);
-			for (const auto chute : T::O1) {
-				stdr::shuffle(it.row_map[chute], rng);
-				stdr::shuffle(it.col_map[chute], rng);
-			}
+			stdr::shuffle(it.row_map, rng); for (auto& boxline_map : it.row_map) { stdr::shuffle(boxline_map, rng); }
+			stdr::shuffle(it.col_map, rng); for (auto& boxline_map : it.col_map) { stdr::shuffle(boxline_map, rng); }
 			it.post_transpose = static_cast<bool>((rng()-rng_t::min()) % 2u);
 		}
 	}

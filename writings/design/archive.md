@@ -64,7 +64,7 @@ The data can start with a bitset of size O4 where bits are set if that cell has 
 ## Bit Manipulation
 
 - [how to get nth set bit using PDEP](https://stackoverflow.com/questions/7669057/find-nth-set-bit-in-an-int)
-- [wikipedia for Intel x86's BMI2 instruction set](https://en.wikipedia.org/wiki/X86_Bit_manipulation_instruction_set#Parallel_bit_deposit_and_extract)
+- [wikipedia for Intel x86's BMI2 instruction set](https://wikipedia.org/wiki/X86_Bit_manipulation_instruction_set#Parallel_bit_deposit_and_extract)
 - [An SO post](https://stackoverflow.com/a/59591250/11107541) about using BMI2 with various compilers and targets
 - how to use:
   - [GCC builtin for PDEP](https://gcc.gnu.org/onlinedocs/gcc/x86-Built-in-Functions.html#x86-Built-in-Functions)

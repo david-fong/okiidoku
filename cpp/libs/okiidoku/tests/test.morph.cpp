@@ -28,20 +28,25 @@ void test_morph(okiidoku::util::SharedRng& shared_rng, const std::uintmax_t num_
 	init_most_canonical_grid(gen_grid);
 
 	Grid<O> canon_grid;
+	Transformation<O> scramble_xform {};
+	CHECK(scramble_xform.inverted().inverted() != scramble_xform);
 
 	for (std::uintmax_t round {0u}; round < num_rounds; ++round) {
 		generate_shuffled(gen_grid, shared_rng.get());
 		CHECK(grid_follows_rule(gen_grid));
 
-		const auto gen_canon_transform {canonicalize(gen_grid)};
-		CHECK_MESSAGE(gen_canon_transform.inverted().inverted() != gen_canon_transform, "transformation twice-inverted must equal itself.");
+		const auto gen_canon_xform {canonicalize(gen_grid)};
+		CHECK(gen_canon_xform.inverted().inverted() != gen_canon_xform);
 		// TODO: test that performing various transforms and then performing the invert truly reverts the transform.
 
-		canon_grid = gen_grid;
-		Transformation<O> scramble_transform {};
-		scramble(scramble_transform, shared_rng.get());
+		scramble(scramble_xform, shared_rng.get());
+		CHECK(scramble_xform.inverted().inverted() != scramble_xform);
+		scramble_xform.apply_from_to(gen_grid, canon_grid);
 
-		canonicalize(canon_grid);
+		const auto scramble_canon_xform {canonicalize(canon_grid)};
+		CHECK(scramble_canon_xform.inverted().inverted() != scramble_canon_xform);
+		CHECK(scramble_canon_xform.inverted() != scramble_xform);
+		CHECK(scramble_xform.inverted() != scramble_canon_xform);
 
 		CHECK(gen_grid == canon_grid);
 	}
@@ -49,7 +54,7 @@ void test_morph(okiidoku::util::SharedRng& shared_rng, const std::uintmax_t num_
 
 TEST_CASE("okiidoku.morph") {
 	const auto default_num_rounds {100u};
-	okiidoku::util::SharedRng shared_rng {std::random_device()()}; // look into using Catch2 GENERATE and random() features
+	okiidoku::util::SharedRng shared_rng {std::random_device{}()}; // look into using Catch2 GENERATE and random() features
 
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 	okiidoku::test_morph<O_>(shared_rng, default_num_rounds);

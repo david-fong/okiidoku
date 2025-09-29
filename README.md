@@ -66,7 +66,7 @@ If you do something cool with it, that's great! I'd love to hear about it.
 
 ## The Meaning of the Name
 
-In Japanese, "ookii" (大きい) means "big". I chose the name because one of my priorities for this project is to support variable grid sizes, and to find and engineer (ie. cache and memory efficiency) algorithms that scale well with large grids. Also, I thought the name had a nice ring- like "okey-dokey". I decided not to call the project "ookiidoku" (despite that being the proper romanization) out of fear of english speakers like myself mispronouncing it like [this](https://en.wikipedia.org/wiki/Close_back_rounded_vowel) instead of like [this](https://en.wikipedia.org/wiki/Mid_back_rounded_vowel).
+In Japanese, "ookii" (大きい) means "big". I chose the name because one of my priorities for this project is to support variable grid sizes, and to find and engineer (ie. cache and memory efficiency) algorithms that scale well with large grids. Also, I thought the name had a nice ring- like "okey-dokey". I decided not to call the project "ookiidoku" (despite that being the proper romanization) out of fear of english speakers like myself mispronouncing it like [this](https://wikipedia.org/wiki/Close_back_rounded_vowel) instead of like [this](https://wikipedia.org/wiki/Mid_back_rounded_vowel).
 
 ## Personal Motivation
 

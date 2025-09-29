@@ -48,6 +48,8 @@ Issues I'm watching:
 
 ## Misc List
 
+- make canon functions pure producers of a canonicalizing transformation. take grid by const reference. name `canon_sym` -> `get_sym_canon_map`.
+- change `SharedRng::get` to be `operator()`.
 - see if helpful to add `/// \cond detail` wrapper to `detail` namespaces to suppress doxygen for them
 
 - https://www.pcg-random.org/using-pcg-cpp.html
@@ -99,6 +101,7 @@ Issues I'm watching:
     - https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2025/p2900r14.pdf supported for defaulted special member functions! see section 3.3.3.
   - with reflection, I might be able to do what I'm currently doing with macros like `OKIIDOKU_FOREACH_O_EMIT` and `OKIIDOKU_FOREACH_O_DO_EMIT`, and be in a better position to use C++ modules :O.
   - try using `pre` and `post()` on default and copy constructors of `Int<...>` to describe pre and postconditions
+  - https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2025/p2786r13.html#introduction relocatability
 - C++29:
   - class invariants?: https://youtu.be/gtFFTjQ4eFU?t=873
 
@@ -155,7 +158,7 @@ consider making cand masks have two lanes: one storing full O2BitArr, one storin
   - Leave it as a user responsibility to know and follow contracts.
   - Throw exception on the other language side.
 
-- think about [this](https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle#Pseudorandom_generators)
+- think about [this](https://wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle#Pseudorandom_generators)
 
 - Collect some statistics on how much overlap there usually is between the size-4 UA sets found. A very narrow, simple way to do this is just count how many unique cells are covered, and compare to the number of non-unique cells covered.
   - links to UA set discussions:

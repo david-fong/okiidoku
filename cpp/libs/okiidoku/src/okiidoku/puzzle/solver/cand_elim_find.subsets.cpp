@@ -268,7 +268,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 			auto& houses_subsets {engine.houses_subsets()[house_type]};
 			// std::array<o2i_t, T::O2> houses;
 			// std::iota(houses.begin(), houses.end(), o2i_t{0});
-			// std::sort(houses.begin(), houses.end(), [&](const auto& a, const auto& b){
+			// std::ranges::sort(houses, [&](const auto& a, const auto& b)noexcept{
 			// 	return houses_subsets[a].is_begin.count() < houses_subsets[b].is_begin.count();
 			// });
 			// for (const auto house : houses) {

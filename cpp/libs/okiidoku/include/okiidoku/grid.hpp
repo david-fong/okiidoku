@@ -82,7 +82,7 @@ namespace okiidoku::mono {
 		/// \pre `rmi` is in `[0, O4)`.
 		template<class Self> [[nodiscard, gnu::pure]] constexpr
 		decltype(auto) operator[](this Self&& self, const T::o4x_t rmi) noexcept {
-			OKIIDOKU_CONTRACT_USE(rmi < T::O4);
+			rmi.check();
 			return std::forward<Self>(self).arr_[rmi];
 		}
 
