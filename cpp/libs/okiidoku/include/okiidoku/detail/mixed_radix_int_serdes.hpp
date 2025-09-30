@@ -28,7 +28,8 @@ namespace okiidoku::detail {
 		otherwise, the implementation here could try to optimize layout/grouping of int
 		for better packing. */
 	template<radix RadixType_, std::unsigned_integral BufType_ = std::uintmax_t>
-		requires(std::numeric_limits<RadixType_>::max()-1u <= std::numeric_limits<BufType_>::max()) // simplifies implementation
+		requires(std::numeric_limits<RadixType_>::max()-1u <= std::numeric_limits<BufType_>::max())
+		// ^this greatly simplifies implementation. if this restriction is changed, overflow handling and int casts will need to change.
 	class MixedRadixUintWriter {
 	public:
 		using radix_t = RadixType_;
@@ -48,6 +49,7 @@ namespace okiidoku::detail {
 		std::uint_fast8_t queue_end_ {0u};
 		bool did_overflow_ {false};
 		buf_t buf_meter_ {0u};
+		std::size_t digits_written_ {0uz};
 		std::size_t bytes_written_ {0uz};
 		// buf = q[0].d + q[1].d*q[0].r + q[2].d*q[1].r*q[0].r + q[3].d*q[2].r*q[1].r*q[0].r
 		// buf += q[3].d; buf *= q[2].r; buf += q[2].d; buf *= q[1].r; buf += q[1].d; buf *= q[0].r; buf += q[0].d;
@@ -64,32 +66,42 @@ namespace okiidoku::detail {
 		[[nodiscard]] bool accept(radix_t radix, radix_t digit) noexcept {
 			OKIIDOKU_CONTRACT_USE(!did_overflow_);
 			OKIIDOKU_CONTRACT_USE(queue_end_ <= queue_.size());
+			OKIIDOKU_CONTRACT_USE(radix <= radix_t_max);
 			OKIIDOKU_CONTRACT_USE(radix > 0u);
 			OKIIDOKU_CONTRACT_USE(digit < radix);
-			if (radix < 2u) [[unlikely]] { return true; }
-			if ((buf_meter_ > buf_t_max/radix) || ((radix-1u) > buf_t_max-(buf_meter_*radix))) [[unlikely]] {
-				// handle overflow
+			++digits_written_;
+			if (radix < 2u) [[unlikely]] { OKIIDOKU_CONTRACT_ASSERT(digit == 0u); return true; }
+			if ((buf_meter_ > buf_t{buf_t_max/radix}) || (buf_t{radix-1u} > buf_t_max-buf_t{buf_meter_*radix})) [[unlikely]] {
+				// handle overflow of `flush` buffer
 				OKIIDOKU_CONTRACT_USE(buf_meter_ != 0u);
 				// try to use remaining space in buf:
 				const auto radix_0 {static_cast<radix_t>(buf_t_max / buf_meter_)};
-				if (radix_0 <= 2u) {
-					OKIIDOKU_CONTRACT_USE(radix_0 < radix);
+				OKIIDOKU_CONTRACT_USE(radix_0 <= radix_t_max);
+				OKIIDOKU_CONTRACT_USE(radix_0 < radix);
+				if (radix_0 >= 2u) [[likely]] {
 					buf_meter_ = (buf_meter_*radix_0)+(radix_0-1u);
+					OKIIDOKU_CONTRACT_USE(queue_end_ < queue_.size()-1uz);
 					auto& qi {queue_[queue_end_]};
 					qi.radix = radix_0;
-					qi.digit = digit % radix_0;
+					qi.digit = std::min(digit, static_cast<radix_t>(radix_0 - radix_t{1u}));
 					++queue_end_;
-					radix /= radix_0;
-					digit /= radix_0;
+					radix = static_cast<radix_t>((radix-radix_0)+1u);
+					digit -= qi.digit;
 				}
-				// save overflow:
+				OKIIDOKU_CONTRACT_USE(radix >= 2u);
+				OKIIDOKU_CONTRACT_USE(digit < radix);
+				// save overflow and return:
+				/* don't touch `buf_meter_`. `flush` uses non-overflowed value to determine
+				number of bytes to write and otherwise doesn't care about it, and will
+				reset it if overflow happened. */
+				OKIIDOKU_CONTRACT_USE(queue_end_ < queue_.size());
 				auto& qi {queue_[queue_end_]};
 				qi.radix = radix;
 				qi.digit = digit;
 				did_overflow_ = true;
 				return false;
 			}
-			buf_meter_ = (buf_meter_*radix)+(radix-1u);
+			buf_meter_ = buf_t{buf_meter_*radix}+buf_t{radix-1u};
 			auto& qi {queue_[queue_end_]}; // TODO try to rewrite these 4 lines and similar above with post-increment and copy-assignment with designated init-list.
 			qi.radix = radix;
 			qi.digit = digit;
@@ -102,46 +114,55 @@ namespace okiidoku::detail {
 		or there is no more data to `accept`.
 		\pre the previous call to `accept` indicated a need to flush, or there is no more data. */
 		void flush(std::ostream& os) {
-			if (queue_end_ == 0u) [[unlikely]] { return; } // short-circuit. technically unnecessary.
+			OKIIDOKU_CONTRACT_USE(queue_end_ > 0u);
+
+			// prepare the real write buffer:
 			buf_t buf {0u};
 			for (auto i {0uz}; i < queue_end_; ++i) {
 				const auto& qi {queue_[queue_end_-1uz-i]};
+				OKIIDOKU_CONTRACT_USE(qi.radix > 0u);
+				OKIIDOKU_CONTRACT_USE(qi.digit < qi.radix);
 				buf *= qi.radix;
 				buf += qi.digit;
 			}
-			const auto num_bytes {static_cast<std::uint_fast8_t>(std::bit_width(buf_meter_) / CHAR_BIT)};
+			OKIIDOKU_CONTRACT_USE(buf <= buf_meter_);
+
+			// write `buf` to the stream:
+			const auto num_bytes {static_cast<std::uint_fast8_t>((std::bit_width(buf_meter_)+(CHAR_BIT-1)) / CHAR_BIT)};
 			OKIIDOKU_CONTRACT_USE(num_bytes <= num_buf_bytes);
-			if (num_bytes < num_buf_bytes) [[unlikely]] {
-				bytes_written_ += num_bytes;
+			OKIIDOKU_CONTRACT_USE(num_bytes > 0u);
+			bytes_written_ += num_bytes;
+			if constexpr (std::endian::native == std::endian::little) {
+				os.write(reinterpret_cast<char*>(&buf), num_bytes);
+			} else {
 				for (auto i {0uz}; i < num_bytes; ++i) {
 					os.put(static_cast<char>(buf));
 					buf >>= CHAR_BIT;
 				}
-			} else {
-				bytes_written_ += num_buf_bytes;
-				if constexpr (std::endian::native == std::endian::little) {
-					os.write(reinterpret_cast<char*>(&buf), num_buf_bytes);
-				} else {
-					for (auto i {0uz}; i < num_buf_bytes; ++i) {
-						os.put(static_cast<char>(buf));
-						buf >>= CHAR_BIT;
-					}
-				}
 			}
+
 			if (did_overflow_) [[likely]] {
 				did_overflow_ = false;
 				queue_[0uz] = queue_[queue_end_];
 				queue_end_ = 1u;
+				const auto& qi {queue_[0uz]};
+				OKIIDOKU_CONTRACT_USE(qi.radix > 0u);
+				OKIIDOKU_CONTRACT_USE(qi.digit < qi.radix);
+				buf_meter_ = qi.radix-1u;
 			}
 		}
 
-		[[nodiscard, gnu::pure]] std::size_t bytes_written() noexcept {
+		[[nodiscard, gnu::pure]] std::size_t digits_written() const noexcept {
+			return digits_written_;
+		}
+		[[nodiscard, gnu::pure]] std::size_t bytes_written() const noexcept {
 			return bytes_written_;
 		}
 	};
 
 
-	/** for reading a [mixed-radix](https://wikipedia.org/wiki/Mixed_radix) unsigned integer from a stream. */
+	/** for reading a [mixed-radix](https://wikipedia.org/wiki/Mixed_radix) unsigned
+	integer from a data stream written by a writer with the same type parameters. */
 	template<radix RadixType_, std::unsigned_integral BufType_ = std::uintmax_t>
 	class MixedRadixUintReader {
 	public:
@@ -153,24 +174,33 @@ namespace okiidoku::detail {
 		static constexpr std::uint_fast8_t num_buf_bits {num_buf_bytes*CHAR_BIT};
 		buf_t buf_ {0u};
 		buf_t buf_meter_ {0u};
+		std::size_t digits_read_ {0uz};
 		std::size_t bytes_read_ {0uz};
 
+		/** read `num_buf_bytes` bytes from `is`.
+		\post `buf_meter_ == buf_t_max`. */
 		void read_buf(std::istream& is) {
 			buf_meter_ = buf_t_max;
-			bytes_read_ += num_buf_bytes;
+			std::uint_fast8_t bytes_read {0u};
+			buf_ = 0u;
 			if constexpr (std::endian::native == std::endian::little) {
 				is.read(reinterpret_cast<char*>(&buf_), num_buf_bytes);
-			} else if constexpr (std::endian::native == std::endian::little) {
+				bytes_read = static_cast<std::uint_fast8_t>(is.gcount());
+			} else if constexpr (std::endian::native == std::endian::big) {
 				is.read(reinterpret_cast<char*>(&buf_), num_buf_bytes);
 				std::byteswap(buf_);
+				bytes_read = static_cast<std::uint_fast8_t>(is.gcount());
 			} else {
-				buf_ = 0u;
 				for (auto i {0uz}; i < num_buf_bytes; ++i) {
-					char c;
-					is.get(c);
-					buf_ |= buf_t{c} << (i*CHAR_BIT);
+					char c; is.get(c); if (is) {
+						buf_ |= buf_t{c} << (i*CHAR_BIT);
+						++bytes_read;
+					} else { break; }
 				}
 			}
+			OKIIDOKU_CONTRACT_USE(bytes_read <= num_buf_bytes);
+			bytes_read_ += bytes_read;
+			buf_meter_ >>= CHAR_BIT * (num_buf_bytes - bytes_read);
 		}
 
 	public:
@@ -181,30 +211,41 @@ namespace okiidoku::detail {
 		\pre `is` opened with same text/binary mode used when writing this data.
 		\pre `radix > 0`.
 		*/
-		[[nodiscard]] radix_t read(std::istream& is, buf_t radix, const bool is_last) {
+		[[nodiscard]] radix_t read(std::istream& is, buf_t radix) {
+			OKIIDOKU_CONTRACT_USE(buf_ <= buf_meter_);
 			OKIIDOKU_CONTRACT_USE(radix > 0u);
+			++digits_read_;
 			if (radix < 2u) [[unlikely]] { return 0u; }
 			if (buf_meter_ == 0u) [[unlikely]] {
 				read_buf(is);
 			}
+			OKIIDOKU_CONTRACT_USE(buf_meter_ > 0u);
+			OKIIDOKU_CONTRACT_USE(buf_ <= buf_meter_);
 			radix_t digit {0u};
-			if (buf_meter_ < radix-1u) [[unlikely]] {
-				digit = static_cast<radix_t>(buf_);
-				radix /= static_cast<radix_t>(buf_meter_)+1u;
+			if (buf_meter_ < buf_t{radix-1u}) [[unlikely]]/*(but more likely than `buf_meter_ == 0u` (?))*/ { // TODO what if change to <= instead of < ?
+				digit += static_cast<radix_t>(buf_);
+				radix = static_cast<radix_t>(radix - buf_meter_ + 1u);
 				read_buf(is);
 			}
 			OKIIDOKU_CONTRACT_USE(buf_meter_ >= radix-1u);
-			digit = static_cast<radix_t>(buf_ % radix);
+			digit += static_cast<radix_t>(buf_ % radix);
 			buf_ /= radix;
 			buf_meter_ /= radix;
-			if (is_last) [[unlikely]] {
-				is.seekg(-(std::bit_width(buf_meter_) / CHAR_BIT), std::ios_base::cur);
-			}
 			return digit;
 		}
 
-		/** \pre there is no more data to read. */
-		[[nodiscard, gnu::pure]] std::size_t bytes_read() noexcept {
+		/** call this once there are no more digits to be read. */
+		void finish(std::istream& is) {
+			const auto unused_buf_bytes {static_cast<std::uint_fast8_t>(std::bit_width(buf_meter_) / CHAR_BIT)};
+			is.seekg(-std::stringstream::off_type{unused_buf_bytes}, std::ios_base::cur);
+			bytes_read_ -= unused_buf_bytes;
+		}
+
+		[[nodiscard, gnu::pure]] std::size_t digits_read() const noexcept {
+			return digits_read_;
+		}
+		/** \pre this reader has been `finish()`ed. */
+		[[nodiscard, gnu::pure]] std::size_t bytes_read() const noexcept {
 			return bytes_read_;
 		}
 	};

@@ -23,10 +23,8 @@ namespace okiidoku::util::str {
 	#else
 	#define SGR(NAME, ON_STR, OFF_STR) inline constexpr SgrPair NAME { .on {""}, .off {""} };
 	#endif
-
 	SGR(dim, "\033[2m",  "\033[22m")
 	SGR(red, "\033[31m", "\033[39m")
-
 	#undef SGR
 
 

@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # cspell:dictionaries cpp-refined
 # cspell:words objfile _M_elems
+import dataclasses as dc
 import gdb.printing
 # https://sourceware.org/gdb/onlinedocs/gdb/Writing-a-Pretty_002dPrinter.html
 # https://sourceware.org/gdb/onlinedocs/gdb/gdb_002eprinting.html
@@ -15,6 +16,17 @@ import gdb.printing
 # https://sourceware.org/gdb/onlinedocs/gdb/Python-Commands.html
 
 
+@dc.dataclass(slots=True)
+class IntPrinter:
+	def __init__(self, order, sym):
+		self.order = order
+		self.sym = sym
+	def to_string(self):
+		# https://stackoverflow.com/a/22798055/11107541
+		eval_string = f"(*({self.sym.type}*)({self.sym.address})).val()"
+		return gdb.parse_and_eval(eval_string)["_M_elems"]
+
+
 class O2BitArrPrinter:
 	def __init__(self, order, sym):
 		# self.word_t_num_bits = gdb.parse_and_eval('okiidoku::mono::O2BitArr<'+str(order)+'>::word_t_num_bits')
@@ -23,7 +35,8 @@ class O2BitArrPrinter:
 		self.sym = sym
 	def to_string(self):
 		# https://stackoverflow.com/a/22798055/11107541
-		eval_string = "(*("+str(self.sym.type)+"*)("+str(self.sym.address)+")).to_chars()"
+		eval_string = f"(*({self.sym.type}*)({self.sym.address})).to_chars()"
+		# eval_string = "(*("+str(self.sym.type)+"*)("+str(self.sym.address)+")).to_chars()"
 		return gdb.parse_and_eval(eval_string)["_M_elems"]
 
 
@@ -32,7 +45,7 @@ class MonoGridPrinter:
 		self.order = order
 		self.sym = sym
 	def to_string(self):
-		return gdb.parse_and_eval("okiidoku::mono::print_2d(std::cout, 0, "+self.sym+")")
+		return gdb.parse_and_eval(f"okiidoku::mono::print_2d(std::cout, 0, {self.sym})")
 
 
 def pp_lookup_function(order, sym):

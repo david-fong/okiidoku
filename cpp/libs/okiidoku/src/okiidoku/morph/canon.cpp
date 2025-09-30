@@ -27,7 +27,6 @@ namespace okiidoku::mono {
 		OKIIDOKU_CONTRACT_ASSERT(grid_follows_rule(grid));
 		const auto sym_map {detail::canon_sym<O>(grid)};
 		auto place_map {detail::canon_pos<O>(grid)};
-		// Transformation<O> place_map{}; // TODO.high delete when done canon_pos
 		place_map.sym_map = sym_map;
 		return place_map;
 	}

@@ -29,6 +29,7 @@
 - Check if any `static_cast`s are no longer needed
 - Check which `#ifdef __EMSCRIPTEN__` / `__cpp_lib_...` blocks can be removed as emscripten updates its sysroot libc++.
 - https://en.cppreference.com/w/cpp/language/rule_of_three
+- Make sure global `constexpr` variables in headers are declared `inline`.
 - Write comments for custom CMake commands and targets
 - toggle `--warn-uninitialized` CMake flag in settings.json and check warnings.
 - places to use `[[gnu::designated_init]]`
@@ -48,6 +49,7 @@ Issues I'm watching:
 
 ## Misc List
 
+- find places `<O>` is used, and see if deduction guides can help. Ex. `template<typename _Type, size_t _ArrayExtent> span(array<_Type, _ArrayExtent>&) -> span<_Type, _ArrayExtent>;`
 - make canon functions pure producers of a canonicalizing transformation. take grid by const reference. name `canon_sym` -> `get_sym_canon_map`.
 - see if helpful to add `/// \cond detail` wrapper to `detail` namespaces to suppress doxygen for them
 

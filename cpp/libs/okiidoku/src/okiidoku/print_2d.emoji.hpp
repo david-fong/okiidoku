@@ -19,7 +19,7 @@ namespace okiidoku::emoji {
 	// TODO.low annoyingly, when printing on various terminal emulators, some
 	// emojis vary in width. I've added spaces where required on gnome terminal,
 	// but windows terminal is different.
-	constexpr std::tuple sets {
+	inline constexpr std::tuple sets {
 		#define E std::to_array<std::string_view>
 		Set{"fruit",       E({"🍉","🍄","🍓","🍅","🌶 ","🍎","🍑","🍊","🥕","🥭","🍍","🍋","🍌","🌽","🥑","🍐","🥝","🍏","🥬","🍈","🫐","🧄","🍆","🍇","🌰"}) },
 		Set{"reptile",     E({"🐸","🦎","🐍","🐢","🐊","🐉","🐲","🦕","🦖"}) },

@@ -93,8 +93,7 @@
 			"condition": {"type": "notEquals", "lhs": "${hostSystemName}", "rhs": "Darwin"},
 			"cacheVariables": {
 				"CMAKE_C_COMPILER": "clang",
-				"CMAKE_CXX_COMPILER": "clang++",
-				"CMAKE_CXX_FLAGS_DEBUG": "-Og -g"
+				"CMAKE_CXX_COMPILER": "clang++"
 			}
 		},
 		{
@@ -104,8 +103,7 @@
 			"description": "use with `env LLVM_HOME=$(brew --prefix llvm) cmake --preset ...`. Note: may also need to set CMAKE_FIND_FRAMEWORK and CMAKE_FIND_APPBUNDLE to NEVER or LAST",
 			"cacheVariables": {
 				"CMAKE_C_COMPILER": "$env{LLVM_HOME}/bin/clang",
-				"CMAKE_CXX_COMPILER": "$env{LLVM_HOME}/bin/clang++",
-				"CMAKE_CXX_FLAGS_DEBUG": "-Og -g"
+				"CMAKE_CXX_COMPILER": "$env{LLVM_HOME}/bin/clang++"
 			},
 			"environment": {
 				"LDFLAGS": "-L$env{LLVM_HOME}/lib;-Wl,-rpath,$env{LLVM_HOME}/lib",
@@ -117,8 +115,7 @@
 			"hidden": true,
 			"cacheVariables": {
 				"CMAKE_C_COMPILER": "gcc",
-				"CMAKE_CXX_COMPILER": "g++",
-				"CMAKE_CXX_FLAGS_DEBUG": "-Og -g"
+				"CMAKE_CXX_COMPILER": "g++"
 			}
 		},
 		{
@@ -149,7 +146,8 @@
 			"name": "tool:dev.gnu",
 			"hidden": true,
 			"cacheVariables": {
-				"CMAKE_CXX_FLAGS_DEBUG": "-Og -g3"
+				"CMAKE_CXX_FLAGS_DEBUG": "-O0 -g3",
+				"CMAKE_CXX_FLAGS_RELWITHDEBINFO": "-Og -g3"
 			}
 		},
 		{

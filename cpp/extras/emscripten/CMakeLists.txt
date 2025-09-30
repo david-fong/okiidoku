@@ -6,7 +6,10 @@
 if(NOT EMSCRIPTEN)
 	message(FATAL_ERROR "missing emscripten toolchain file. see `emcmake`")
 endif()
-# TODO.high add an assertion/warning about compatible/tested emsdk version
+if ("${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "${OKIIDOKU_EMSCRIPTEN_MIN_VERSION}")
+	message(WARNING "the author of okiidoku doesn't test with versions of Emscripten below ${OKIIDOKU_EMSCRIPTEN_MIN_VERSION}")
+	# \internal remove this check if Emscripten is switched to a find_package/FetchContent dependency
+endif()
 
 # https://emscripten.org/docs/compiling/Building-Projects.html#using-libraries
 # https://emscripten.org/docs/porting/connecting_cpp_and_javascript/embind.html#binding-libraries

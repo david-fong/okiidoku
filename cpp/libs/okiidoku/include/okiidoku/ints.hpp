@@ -80,10 +80,10 @@ namespace okiidoku {
 		template<int W> requires(W <= 64)
 		/// fast unsigned integer type that can fit at least `N` bits.
 		using uint_fast_for_width_t = typename
-			std::conditional_t<(W <= UINT8_WIDTH ), std::uint_fast8_t ,
-			std::conditional_t<(W <= UINT16_WIDTH), std::uint_fast16_t,
-			std::conditional_t<(W <= UINT32_WIDTH), std::uint_fast32_t,
-			std::conditional_t<(W <= UINT64_WIDTH), std::uint_fast64_t,
+			std::conditional_t<(W <= 8 ), std::uint_fast8_t ,
+			std::conditional_t<(W <= 16), std::uint_fast16_t,
+			std::conditional_t<(W <= 32), std::uint_fast32_t,
+			std::conditional_t<(W <= 64), std::uint_fast64_t,
 			// std::conditional_t<(W <= 128u), __uint128_t, // currently unused. Note: won't work with MSVC
 			void
 		>>>>;
@@ -91,10 +91,10 @@ namespace okiidoku {
 		template<int W> requires(W <= 64)
 		/// smallest unsigned integer type that can fit at least `N` bits.
 		using uint_small_for_width_t = typename
-			std::conditional_t<(W <= UINT_LEAST8_WIDTH ), std::uint_least8_t ,
-			std::conditional_t<(W <= UINT_LEAST16_WIDTH), std::uint_least16_t,
-			std::conditional_t<(W <= UINT_LEAST32_WIDTH), std::uint_least32_t,
-			std::conditional_t<(W <= UINT_LEAST64_WIDTH), std::uint_least64_t,
+			std::conditional_t<(W <= 8 ), std::uint_least8_t ,
+			std::conditional_t<(W <= 16), std::uint_least16_t,
+			std::conditional_t<(W <= 32), std::uint_least32_t,
+			std::conditional_t<(W <= 64), std::uint_least64_t,
 			// std::conditional_t<(W <= 128u), __uint128_t,
 			void
 		>>>>;
@@ -102,40 +102,40 @@ namespace okiidoku {
 		template<std::uintmax_t M>
 		/// fast unsigned integer type that can fit max value `M`.
 		using uint_fast_for_max_t = typename
-			std::conditional_t<(M <= UINT8_MAX ), std::uint_fast8_t ,
-			std::conditional_t<(M <= UINT16_MAX), std::uint_fast16_t,
-			std::conditional_t<(M <= UINT32_MAX), std::uint_fast32_t,
-			std::conditional_t<(M <= UINT64_MAX), std::uint_fast64_t,
+			std::conditional_t<(M <= UINT_LEAST8_MAX ), std::uint_fast8_t ,
+			std::conditional_t<(M <= UINT_LEAST16_MAX), std::uint_fast16_t,
+			std::conditional_t<(M <= UINT_LEAST32_MAX), std::uint_fast32_t,
+			std::conditional_t<(M <= UINT_LEAST64_MAX), std::uint_fast64_t,
 			void
 		>>>>;
 
 		template<std::uintmax_t M>
 		/// smallest unsigned integer type that can fit max value `M`.
 		using uint_small_for_max_t = typename
-			std::conditional_t<(M <= UINT8_MAX ), std::uint_least8_t ,
-			std::conditional_t<(M <= UINT16_MAX), std::uint_least16_t,
-			std::conditional_t<(M <= UINT32_MAX), std::uint_least32_t,
-			std::conditional_t<(M <= UINT64_MAX), std::uint_least64_t,
+			std::conditional_t<(M <= UINT_LEAST8_MAX ), std::uint_least8_t ,
+			std::conditional_t<(M <= UINT_LEAST16_MAX), std::uint_least16_t,
+			std::conditional_t<(M <= UINT_LEAST32_MAX), std::uint_least32_t,
+			std::conditional_t<(M <= UINT_LEAST64_MAX), std::uint_least64_t,
 			void
 		>>>>;
 
 		template<std::intmax_t M>
 		/// fast signed integer type that can fit max value `M`.
 		using int_fast_for_max_t = typename
-			std::conditional_t<(M <= INT8_MAX ), std::int_fast8_t ,
-			std::conditional_t<(M <= INT16_MAX), std::int_fast16_t,
-			std::conditional_t<(M <= INT32_MAX), std::int_fast32_t,
-			std::conditional_t<(M <= INT64_MAX), std::int_fast64_t,
+			std::conditional_t<(M <= INT_LEAST8_MAX ), std::int_fast8_t ,
+			std::conditional_t<(M <= INT_LEAST16_MAX), std::int_fast16_t,
+			std::conditional_t<(M <= INT_LEAST32_MAX), std::int_fast32_t,
+			std::conditional_t<(M <= INT_LEAST64_MAX), std::int_fast64_t,
 			void
 		>>>>;
 
 		template<std::intmax_t M>
 		/// smallest signed integer type that can fit max value `M`.
 		using int_small_for_max_t = typename
-			std::conditional_t<(M <= INT8_MAX ), std::int_least8_t ,
-			std::conditional_t<(M <= INT16_MAX), std::int_least16_t,
-			std::conditional_t<(M <= INT32_MAX), std::int_least32_t,
-			std::conditional_t<(M <= INT64_MAX), std::int_least64_t,
+			std::conditional_t<(M <= INT_LEAST8_MAX ), std::int_least8_t ,
+			std::conditional_t<(M <= INT_LEAST16_MAX), std::int_least16_t,
+			std::conditional_t<(M <= INT_LEAST32_MAX), std::int_least32_t,
+			std::conditional_t<(M <= INT_LEAST64_MAX), std::int_least64_t,
 			void
 		>>>>;
 
@@ -158,7 +158,7 @@ namespace okiidoku {
 		small,
 		fast,
 	};
-	static constexpr IntKind pick_int_op_result_kind(const IntKind k1, const IntKind k2) noexcept {
+	constexpr IntKind pick_int_op_result_kind(const IntKind k1, const IntKind k2) noexcept {
 		return (k1 == IntKind::fast || k2 == IntKind::fast) ? IntKind::fast : IntKind::small;
 	}
 
@@ -299,7 +299,7 @@ namespace okiidoku {
 	template<std::uintmax_t ML, IntKind KL, std::uintmax_t MR, IntKind KR>
 	[[gnu::const]] constexpr auto operator+(const Int<ML,KL> lhs, const Int<MR,KR> rhs) noexcept {
 		lhs.check(); rhs.check();
-		constexpr auto KO {pick_int_op_result_kind(KL,KR)};
+		static constexpr auto KO {pick_int_op_result_kind(KL,KR)};
 		return Int<ML+MR,KO>{lhs.val_ + rhs.val_};
 	}
 
@@ -310,14 +310,14 @@ namespace okiidoku {
 	[[gnu::const]] constexpr auto operator-(const Int<ML,KL> lhs, const Int<MR,KR> rhs) noexcept {
 		lhs.check(); rhs.check();
 		OKIIDOKU_CONTRACT_USE(lhs.val_ >= rhs.val_);
-		constexpr auto KO {pick_int_op_result_kind(KL,KR)};
+		static constexpr auto KO {pick_int_op_result_kind(KL,KR)};
 		return Int<ML,KO>{lhs.val_ - rhs.val_};
 	}
 
 	template<std::uintmax_t ML, IntKind KL, std::uintmax_t MR, IntKind KR>
 	[[gnu::const]] constexpr auto operator*(const Int<ML,KL> lhs, const Int<MR,KR> rhs) noexcept {
 		lhs.check(); rhs.check();
-		constexpr auto KO {pick_int_op_result_kind(KL,KR)};
+		static constexpr auto KO {pick_int_op_result_kind(KL,KR)};
 		Int<ML*MR,KO> ret {lhs.val_ * rhs.val_};
 		OKIIDOKU_CONTRACT_USE((lhs.val_ == 0u || rhs.val_ == 0u) == (ret.val_ == 0u));
 		OKIIDOKU_CONTRACT_USE((lhs.val_ == 1u || rhs.val_ == 0u) == (ret.val_ == rhs.val_));
@@ -333,7 +333,7 @@ namespace okiidoku {
 		lhs.check(); rhs.check();
 		OKIIDOKU_CONTRACT_USE(rhs.val_ == MR);
 		OKIIDOKU_CONTRACT_USE(rhs.val_ > 0u);
-		constexpr auto KO {pick_int_op_result_kind(KL,KR)};
+		static constexpr auto KO {pick_int_op_result_kind(KL,KR)};
 		return Int<ML/MR,KO>{lhs.val_ / rhs.val_};
 	}
 
@@ -341,7 +341,7 @@ namespace okiidoku {
 	template<std::uintmax_t ML, IntKind KL, std::uintmax_t MR, IntKind KR> requires(MR > 0u)
 	[[gnu::const]] constexpr auto operator%(const Int<ML,KL> lhs, const Int<MR,KR> rhs) noexcept {
 		lhs.check(); rhs.check(); OKIIDOKU_CONTRACT_USE(rhs.val_ > 0u);
-		constexpr auto KO {pick_int_op_result_kind(KL,KR)};
+		static constexpr auto KO {pick_int_op_result_kind(KL,KR)};
 		Int<std::min(ML,MR-1u),KO> ret {lhs.val_ % rhs.val_};
 		OKIIDOKU_CONTRACT_USE(ret.val_ < rhs.val_);
 		OKIIDOKU_CONTRACT_USE(ret < rhs);

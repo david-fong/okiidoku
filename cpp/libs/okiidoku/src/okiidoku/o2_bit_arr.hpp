@@ -256,7 +256,7 @@ namespace okiidoku::mono {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	static constexpr O2BitArr<O> O2BitArr_ones {O2BitArr<O>::create_ones_()};
+	inline constexpr O2BitArr<O> O2BitArr_ones {O2BitArr<O>::create_ones_()};
 
 
 	template<Order O>

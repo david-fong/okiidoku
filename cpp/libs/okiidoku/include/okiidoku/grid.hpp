@@ -101,8 +101,8 @@ namespace okiidoku::mono {
 		}
 
 		/// \pre `row` is in [0, O2).
-		template<class Self>
-		[[nodiscard]] constexpr decltype(auto) row_span_at(this Self&& self, const T::o2x_t i) noexcept {
+		template<class Self> [[nodiscard, gnu::pure]] constexpr
+		decltype(auto) row_span_at(this Self&& self, const T::o2x_t i) noexcept {
 			using ret_t = std::remove_reference_t<decltype(self.arr_[0uz])>;
 			return static_cast<std::span<ret_t, T::O2>>(std::span{std::forward<Self>(self).arr_}.subspan(T::O2*i, T::O2));
 		}
@@ -114,8 +114,8 @@ namespace okiidoku::mono {
 	};
 
 
-	template<Order O> [[nodiscard, gnu::const]]
-	constexpr bool cells_share_house(typename Ints<O>::o4i_t c1_rmi, typename Ints<O>::o4i_t c2_rmi) noexcept {
+	template<Order O> [[nodiscard, gnu::const]] constexpr
+	bool cells_share_house(typename Ints<O>::o4i_t c1_rmi, typename Ints<O>::o4i_t c2_rmi) noexcept {
 		return (rmi_to_row<O>(c1_rmi) == rmi_to_row<O>(c2_rmi))
 			||  (rmi_to_col<O>(c1_rmi) == rmi_to_col<O>(c2_rmi))
 			||  (rmi_to_box<O>(c1_rmi) == rmi_to_box<O>(c2_rmi));
