@@ -49,6 +49,8 @@ Issues I'm watching:
 
 ## Misc List
 
+- add `signed` to `char` types if they are meant to be used like integers (for GDB display).
+- config gdb to not show `DOCTEST_CAPTURE_N` in variables view?
 - find places `<O>` is used, and see if deduction guides can help. Ex. `template<typename _Type, size_t _ArrayExtent> span(array<_Type, _ArrayExtent>&) -> span<_Type, _ArrayExtent>;`
 - make canon functions pure producers of a canonicalizing transformation. take grid by const reference. name `canon_sym` -> `get_sym_canon_map`.
 - see if helpful to add `/// \cond detail` wrapper to `detail` namespaces to suppress doxygen for them

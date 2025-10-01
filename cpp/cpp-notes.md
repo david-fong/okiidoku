@@ -139,6 +139,8 @@ things I got wrong before which I couldn't understand based on gcc's error messa
   - https://gcc.gnu.org/onlinedocs/gcc/Template-Instantiation.html
   - https://arne-mertz.de/2019/02/extern-template-reduce-compile-times/
 
+- https://sourceware.org/gdb/current/onlinedocs/gdb.html/Reverse-Execution.html
+
 - [nodiscard in the standard library](https://stackoverflow.com/a/63204963/11107541)
   - this can inform where I should use nodiscard in my library interfaces.
 
