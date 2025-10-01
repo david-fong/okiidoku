@@ -248,8 +248,8 @@ namespace okiidoku {
 		constexpr Int& operator+=(const Int<MR,KR>& other) & noexcept requires(MR <= max) {
 			check(); other.check();
 			OKIIDOKU_CONTRACT_USE(max_t{other.val_} <= max);
-			OKIIDOKU_CONTRACT_USE(max_t{val_} <= max_t{max - max_t{other.val_}}); // i.e. `val_ + other.val_ <= max`
-			OKIIDOKU_CONTRACT_USE(max_t{val_} + other.val_ <= max);
+			OKIIDOKU_CONTRACT_USE(max_t{val_} <= max_t{max - max_t{other.val_}}); // (no) overflow check. i.e. `val_ + other.val_ <= max`
+			OKIIDOKU_CONTRACT_USE(max_t{val_} + other.val_ <= max); // (no) overflow check
 			val_ += other.val_;
 			check();
 			return *this;

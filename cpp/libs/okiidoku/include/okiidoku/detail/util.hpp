@@ -5,6 +5,7 @@
 
 #include <cassert> // assert
 
+// TODO.low would it be legal ODR-wise to define the contract stuff as doctest CHECK/REQUIRE if a doctest header include macro is present here?
 
 // Note: C++23 has std::unreachable in <utility>, but it might be good to keep this header slim
 #ifdef NDEBUG

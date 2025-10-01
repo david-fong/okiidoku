@@ -23,10 +23,9 @@ namespace okiidoku::detail {
 
 	/** for writing a [mixed-radix](https://wikipedia.org/wiki/Mixed_radix) unsigned integer to a stream.
 	\note this is not a generalized interface for mixed-radix integers. the reader
-		interface is greedy to allow more-significant radices to be determined based on
-		less-significant digit values- a property the Grid serdes facilities rely upon.
-		otherwise, the implementation here could try to optimize layout/grouping of int
-		for better packing. */
+		interface is greedy to allow later radices to be determined based on preceding
+		digit values- a property the Grid serdes facilities rely upon. otherwise, the
+		implementation here could try to optimize layout/grouping for better packing. */
 	template<radix RadixType_, std::unsigned_integral BufType_ = std::uintmax_t>
 		requires(std::numeric_limits<RadixType_>::max()-1u <= std::numeric_limits<BufType_>::max())
 		// ^this greatly simplifies implementation. if this restriction is changed, overflow handling and int casts will need to change.
@@ -45,7 +44,7 @@ namespace okiidoku::detail {
 		static constexpr std::uint_fast8_t num_buf_bytes {sizeof(buf_t)};
 		static constexpr std::uint_fast8_t num_buf_bits  {num_buf_bytes*CHAR_BIT};
 
-		std::array<Item, num_buf_bits+1uz> queue_; // lower indices are for less-significant radix/digit positions
+		std::array<Item, num_buf_bits+1uz> queue_; // lower indices are for earlier-passed items
 		std::uint_fast8_t queue_end_ {0u};
 		bool did_overflow_ {false};
 		buf_t buf_meter_ {0u};
@@ -55,10 +54,10 @@ namespace okiidoku::detail {
 		// buf += q[3].d; buf *= q[2].r; buf += q[2].d; buf *= q[1].r; buf += q[1].d; buf *= q[0].r; buf += q[0].d;
 
 	public:
-		/** accept a digit for writing.
-		call this once for each digit of the integer, from least to most significant.
+		/** accept a digit for writing. call this once for each digit of the integer.
+		digit visitation order is up to the caller to determine and keep consistent between read/write.
 		\return `true` if a `flush` isn't needed yet; `false` if a `flush` is now needed.
-		\pre if this is the `n`th call, it is for the `n`th least-significant digit.
+		\pre if this is the `n`th call, it is for the `n`th digit.
 		\pre `digit < radix`.
 		\pre `radix > 0`.
 		\pre the previous call didn't indicate a need for a `flush`. */
@@ -71,7 +70,7 @@ namespace okiidoku::detail {
 			OKIIDOKU_CONTRACT_USE(digit < radix);
 			++digits_written_;
 			if (radix < 2u) [[unlikely]] { OKIIDOKU_CONTRACT_ASSERT(digit == 0u); return true; }
-			if ((buf_meter_ > buf_t{buf_t_max/radix}) || (buf_t{radix-1u} > buf_t_max-buf_t{buf_meter_*radix})) [[unlikely]] {
+			if ((buf_meter_ > buf_t_max/radix) || (radix-1u > static_cast<buf_t>(buf_t_max-(buf_meter_*radix)))) [[unlikely]] {
 				// handle overflow of `flush` buffer
 				OKIIDOKU_CONTRACT_USE(buf_meter_ != 0u);
 				// try to use remaining space in buf:
@@ -79,7 +78,7 @@ namespace okiidoku::detail {
 				OKIIDOKU_CONTRACT_USE(radix_0 <= radix_t_max);
 				OKIIDOKU_CONTRACT_USE(radix_0 < radix);
 				if (radix_0 >= 2u) [[likely]] {
-					buf_meter_ = (buf_meter_*radix_0)+(radix_0-1u);
+					buf_meter_ = static_cast<buf_t>((buf_meter_*radix_0)+(radix_0-1u));
 					OKIIDOKU_CONTRACT_USE(queue_end_ < queue_.size()-1uz);
 					auto& qi {queue_[queue_end_]};
 					qi.radix = radix_0;
@@ -101,7 +100,7 @@ namespace okiidoku::detail {
 				did_overflow_ = true;
 				return false;
 			}
-			buf_meter_ = buf_t{buf_meter_*radix}+buf_t{radix-1u};
+			buf_meter_ = static_cast<buf_t>((buf_meter_*radix)+(radix-1u));
 			auto& qi {queue_[queue_end_]}; // TODO try to rewrite these 4 lines and similar above with post-increment and copy-assignment with designated init-list.
 			qi.radix = radix;
 			qi.digit = digit;
@@ -110,12 +109,14 @@ namespace okiidoku::detail {
 		}
 
 		/**
-		call this exactly once when the previous call to `accept` indicated a need to flush,
-		or there is no more data to `accept`.
+		call this exactly once when the previous call to `accept` indicated a need to flush.
+		separately, call this exactly once after `accept()`ing the final digit.
 		\pre the previous call to `accept` indicated a need to flush, or there is no more data. */
 		void flush(std::ostream& os) {
-			OKIIDOKU_CONTRACT_USE(queue_end_ > 0u);
-
+			if (queue_end_ == 0u) [[unlikely]] {
+				OKIIDOKU_CONTRACT_ASSERT(digits_written_ == 0u);
+				return;
+			}
 			// prepare the real write buffer:
 			buf_t buf {0u};
 			for (auto i {0uz}; i < queue_end_; ++i) {
@@ -148,7 +149,7 @@ namespace okiidoku::detail {
 				const auto& qi {queue_[0uz]};
 				OKIIDOKU_CONTRACT_USE(qi.radix > 0u);
 				OKIIDOKU_CONTRACT_USE(qi.digit < qi.radix);
-				buf_meter_ = qi.radix-1u;
+				buf_meter_ = static_cast<buf_t>(qi.radix-1u);
 			}
 		}
 
@@ -192,8 +193,8 @@ namespace okiidoku::detail {
 				bytes_read = static_cast<std::uint_fast8_t>(is.gcount());
 			} else {
 				for (auto i {0uz}; i < num_buf_bytes; ++i) {
-					char c; is.get(c); if (is) {
-						buf_ |= buf_t{c} << (i*CHAR_BIT);
+					char c; is.get(c); if (is) [[likely]] {
+						buf_ |= (buf_t{c} << (i*CHAR_BIT));
 						++bytes_read;
 					} else { break; }
 				}
@@ -205,12 +206,13 @@ namespace okiidoku::detail {
 
 	public:
 		/**
+		\returns the previously written `n`th digit.
+		digit visitation order is up to the caller to determine and keep consistent between read/write.
 		\pre the data being read was written by a writer with the same type parameters.
-		\pre if this is the `n`th call, it is for the `n`th least-significant digit, and
-			`radix` is the same value that was passed to write this digit.
+		\pre if this is the `n`th call, it is for the `n`th digit, and `radix` is the
+			same value that was passed to write this digit.
 		\pre `is` opened with same text/binary mode used when writing this data.
-		\pre `radix > 0`.
-		*/
+		\pre `radix > 0`. */
 		[[nodiscard]] radix_t read(std::istream& is, buf_t radix) {
 			OKIIDOKU_CONTRACT_USE(buf_ <= buf_meter_);
 			OKIIDOKU_CONTRACT_USE(radix > 0u);
@@ -222,7 +224,8 @@ namespace okiidoku::detail {
 			OKIIDOKU_CONTRACT_USE(buf_meter_ > 0u);
 			OKIIDOKU_CONTRACT_USE(buf_ <= buf_meter_);
 			radix_t digit {0u};
-			if (buf_meter_ < buf_t{radix-1u}) [[unlikely]]/*(but more likely than `buf_meter_ == 0u` (?))*/ { // TODO what if change to <= instead of < ?
+			if (buf_meter_ <= radix-1u) [[unlikely]]/*(but more likely than `buf_meter_ == 0u` (?))*/ {
+				// ^hm. I thought it should be `<` instead of `<=`, but `<=` advances farther in testing...
 				digit += static_cast<radix_t>(buf_);
 				radix = static_cast<radix_t>(radix - buf_meter_ + 1u);
 				read_buf(is);
@@ -236,7 +239,10 @@ namespace okiidoku::detail {
 
 		/** call this once there are no more digits to be read. */
 		void finish(std::istream& is) {
-			const auto unused_buf_bytes {static_cast<std::uint_fast8_t>(std::bit_width(buf_meter_) / CHAR_BIT)};
+			const auto unused_buf_bytes {static_cast<std::uint_fast8_t>(
+				std::bit_width(static_cast<buf_t>(buf_meter_>>1u))
+				/ CHAR_BIT
+			)};
 			is.seekg(-std::stringstream::off_type{unused_buf_bytes}, std::ios_base::cur);
 			bytes_read_ -= unused_buf_bytes;
 		}

@@ -13,7 +13,7 @@ namespace okiidoku::util {
 
 	class SharedRng {
 	public:
-		// Internal Notes:
+		// \internal
 		// - consider not using this for any hot-loop operations.
 		// - this is not thread-safe. guard with mutex where necessary.
 		using rng_t = std::mt19937_64;

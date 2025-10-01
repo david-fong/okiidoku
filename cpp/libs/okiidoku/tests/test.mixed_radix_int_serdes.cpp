@@ -4,65 +4,76 @@
 #include <doctest.h>
 
 #include <okiidoku/detail/mixed_radix_int_serdes.hpp>
-#include <okiidoku_cli_utils/shared_rng.hpp>
 
 #include <random>  // random_device,
 #include <iostream>
 #include <sstream>
-#include <array>
+#include <random>
 #include <algorithm>
+#include <array>
 #include <limits>
-#include <cstdint>
 #include <cstdint>
 
 namespace okiidoku { namespace {
+template<class T> using uidist_t = std::uniform_int_distribution<T>;
+
 OKIIDOKU_KEEP_FOR_DEBUG // NOLINTNEXTLINE(*-internal-linkage)
-void test_mixed_radix_int_serdes(okiidoku::util::SharedRng& shared_rng, const std::uintmax_t num_rounds) {
-	using namespace ::okiidoku::detail;
+void test_mixed_radix_int_serdes(
+	const std::uintmax_t rng_seed,
+	[[maybe_unused]] const std::uintmax_t round // for conditional breakpoints
+) {
 	using radix_t = std::uint_least8_t;
-	using writer_t = MixedRadixUintWriter<std::uint_least8_t>;
-	using reader_t = MixedRadixUintReader<std::uint_least8_t>;
+	using writer_t = detail::MixedRadixUintWriter<radix_t>; // TODO test with BufType other than default (currently failing)
+	using reader_t = detail::MixedRadixUintReader<radix_t>;
 
-	static constexpr std::size_t max_int_places {1024u};
-	std::array<writer_t::Item, max_int_places> places_buf;
+	std::minstd_rand rng {static_cast<std::uint_fast32_t>(rng_seed)};
 
-	for (std::uintmax_t round {0u}; round < num_rounds; ++round) {
-		const size_t num_places {shared_rng() % max_int_places};
-		std::size_t bytes_written {0uz};
-		const auto written_data {[&,round]noexcept{
-			// serialize data to `std::string`:
-			writer_t writer;
-			std::ostringstream os;
-			for (auto i {0uz}; i < num_places; ++i) {
-				auto& p {places_buf[i]};
-				p.radix = std::max(radix_t{1u}, static_cast<radix_t>(shared_rng() % std::numeric_limits<radix_t>::max()));
-				p.digit = static_cast<radix_t>(shared_rng() % p.radix);
-				if (!writer.accept(p.radix, p.digit) || i+1uz == num_places) [[unlikely]] {
-					writer.flush(os);
-				}
+	// TODO write and read multiple ints to the same stringstream per round.
+
+	std::array<writer_t::Item, 1024uz> places_buf;
+	const size_t num_places {[&]{
+		uidist_t<std::uintmax_t> num_places_dist {0u, places_buf.size()-1u};
+		return num_places_dist(rng);
+	}()}; CAPTURE(num_places);
+
+	std::size_t bytes_written {0uz};
+	const auto written_data {[&,round]noexcept{
+		// serialize data to `std::string`:
+		writer_t writer;
+		std::ostringstream os;
+		uidist_t<radix_t> radix_dist {1u};
+		for (auto i {0uz}; i < num_places; ++i) { CAPTURE(i);
+			auto& p {places_buf[i]};
+			p.radix = radix_dist(rng);
+			p.digit = uidist_t<radix_t>{0u,static_cast<radix_t>(p.radix-1u)}(rng);
+			if (!writer.accept(p.radix, p.digit)) [[unlikely]] {
 				REQUIRE(writer.digits_written() == i+1uz);
-			}
-			bytes_written = writer.bytes_written();
-			return os.str();
-		}()};
-		{
-			// de-serialize data and check correctness:
-			std::istringstream is {written_data};
-			reader_t reader;
-			for (auto i {0uz}; i < num_places; ++i) {
-				const auto& p {places_buf[i]};
-				const auto digit {reader.read(is, p.radix)};
-				REQUIRE(reader.digits_read() == i+1uz);
-				REQUIRE(digit == p.digit);
-			}
-			reader.finish(is);
-			REQUIRE(reader.bytes_read() == bytes_written);
+				writer.flush(os);
+		}	}
+		writer.flush(os);
+		bytes_written = writer.bytes_written();
+		return os.str();
+	}()};
+	{
+		// de-serialize data and check correctness:
+		std::istringstream is {written_data};
+		reader_t reader;
+		for (auto i {0uz}; i < num_places; ++i) {
+			const auto& p {places_buf[i]};
+			const auto digit {reader.read(is, p.radix)};
+			REQUIRE(reader.digits_read() == i+1uz);
+			REQUIRE(digit == p.digit);
 		}
+		reader.finish(is);
+		REQUIRE(reader.bytes_read() == bytes_written);
 	}
 }}}
 
 TEST_CASE("okiidoku.mixed_radix_int_serdes") {
-	okiidoku::util::SharedRng shared_rng {0u}; // TODO.high change this back to random device
-	// okiidoku::util::SharedRng shared_rng {std::random_device{}()};
-	okiidoku::test_mixed_radix_int_serdes(shared_rng, 1024u);
+	static constexpr std::uintmax_t num_rounds {1024u};
+	std::mt19937_64 rng {std::random_device{}()};
+	for (std::uintmax_t round {0u}; round < num_rounds; ++round) {
+		CAPTURE(round);
+		okiidoku::test_mixed_radix_int_serdes(rng(), round);
+	}
 }
