@@ -65,17 +65,15 @@ block()
 	set(c "${CMAKE_COMMAND};-E")
 	set(src "${okiidoku_SOURCE_DIR}/tools")
 	add_custom_command(
+		COMMENT "symlinking debug-support files to data / build directory"
+		DEPENDS "${src}/okiidoku.gdb.py" "${src}/okiidoku.natvis"
 		OUTPUT
 			"${OKIIDOKU_DATA_OUTPUT_DIRECTORY}/okiidoku.gdb.py"
 			"${OKIIDOKU_DATA_OUTPUT_DIRECTORY}/okiidoku.natvis"
-			"${okiidoku_BINARY_DIR}/ninjatracing.py"
-		COMMAND "${c};make_directory;${OKIIDOKU_DATA_OUTPUT_DIRECTORY}"
-		COMMAND "${c};create_symlink;${src}/okiidoku.gdb.py;${OKIIDOKU_DATA_OUTPUT_DIRECTORY}/okiidoku.gdb.py"
-		COMMAND "${c};create_symlink;${src}/okiidoku.natvis;${OKIIDOKU_DATA_OUTPUT_DIRECTORY}/okiidoku.natvis"
-		COMMAND "${c};create_symlink;${src}/ninjatracing.py;${okiidoku_BINARY_DIR}/ninjatracing.py" # sigh. I want to automate generating the ninja trace, and I'm hacking install(CODE) to run it after the whole build finishes. with install(CODE|SCRIPT), there's no robust, generalized way to get the project's source directory.
-		DEPENDS "${src}/okiidoku.gdb.py" "${src}/okiidoku.natvis" "${src}/ninjatracing.py"
-		COMMENT "symlinking debug-support files to data / build directory"
-		VERBATIM CODEGEN COMMAND_EXPAND_LISTS
+		COMMAND "${c};make_directory;${OKIIDOKU_DATA_OUTPUT_DIRECTORY}/okiidoku"
+		COMMAND "${c};create_symlink;${src}/okiidoku.gdb.py;${OKIIDOKU_DATA_OUTPUT_DIRECTORY}/okiidoku/okiidoku.gdb.py"
+		COMMAND "${c};create_symlink;${src}/okiidoku.natvis;${OKIIDOKU_DATA_OUTPUT_DIRECTORY}/okiidoku/okiidoku.natvis"
+		VERBATIM COMMAND_EXPAND_LISTS
 	)
 	install(FILES # debug support files
 			"${src}/okiidoku.gdb.py"
@@ -92,7 +90,7 @@ target_link_libraries(okiidoku
 )
 
 # MARK: examples, tests, pgo
-if(OKIIDOKU_BUILD_TESTING AND NOT EMSCRIPTEN)
+if(OKIIDOKU_BUILD_TESTING)
 	add_subdirectory(examples EXCLUDE_FROM_ALL)
 	add_subdirectory(tests)
 endif()

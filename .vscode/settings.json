@@ -105,4 +105,7 @@
 		// "--warn-uninitialized",
 		"-D OKIIDOKU_BUILD_WITH_STATIC_ANALYZERS:BOOL=NO",
 	],
+	"python.analysis.extraPaths": [
+		"/usr/share/gdb/python"
+	]
 }

@@ -7,8 +7,8 @@
 
 - CMake 4.1 or higher
 - [A C++ build system](https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html). Recommended: Ninja
-- [Emscripten](https://emscripten.org/docs/getting_started/downloads.html) 4.0.7 or higher (which comes with [compiler, and NodeJS for _building_](https://emscripten.org/docs/building_from_source/toolchain_what_is_needed.html))
-- For running the output JS, Node 16 or higher.
+- A recent version of [Emscripten](https://emscripten.org/docs/getting_started/downloads.html) (which comes with [compiler, and NodeJS for _building_](https://emscripten.org/docs/building_from_source/toolchain_what_is_needed.html))
+- For running the output JS, Node 16 or higher (or whatever is required by your choice of the `MIN_NODE_VERSION` Emscripten flag, or your Emscripten version's default value).
   <!-- maintainer note: From `rg '^var MIN_NODE_VERSION\s?=\s\d+;' ${EMSDK}/upstream/emscripten/src/settings.js`. Reflect in package.json::engines -->
 
 I have no intention to support versions of Emscripten older than the latest at the time of my last pull.

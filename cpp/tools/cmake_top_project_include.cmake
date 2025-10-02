@@ -6,6 +6,7 @@ include_guard(DIRECTORY)
 # note: can't use CMAKE_CXX_COMPILER_ID because this is pre-language-activation
 
 if(NOT EMSCRIPTEN)
+
 # lld. works with most platforms+toolchains.
 if(NOT DEFINED CMAKE_LINKER_TYPE)
 	find_program(LLD_EXE NAMES lld DOC "Path of lld executable")
@@ -33,4 +34,5 @@ endif()
 # 		set(CMAKE_LINKER_TYPE GOLD CACHE STRING [[https://cmake.org/cmake/help/latest/variable/CMAKE_LINKER_TYPE.html]])
 # 	endif()
 # endif()
-endif()
+
+endif() # if(NOT EMSCRIPTEN)

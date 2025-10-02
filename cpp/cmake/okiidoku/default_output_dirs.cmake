@@ -42,6 +42,7 @@ if(EMSCRIPTEN)
 endif()
 
 # if user hasn't set anything, set defaults for everything
+include(GNUInstallDirs)
 if(
 	(NOT DEFINED CMAKE_RUNTIME_OUTPUT_DIRECTORY) AND
 	(NOT DEFINED CMAKE_LIBRARY_OUTPUT_DIRECTORY) AND
@@ -49,7 +50,6 @@ if(
 	(NOT DEFINED CMAKE_COMPILE_PDB_OUTPUT_DIRECTORY) AND
 	(NOT DEFINED CMAKE_PDB_OUTPUT_DIRECTORY)
 )
-	include(GNUInstallDirs)
 	if("${WIN32}")
 		set(CMAKE_INSTALL_LIBDIR2 "${CMAKE_INSTALL_BINDIR}") # put DLLs in bin dir
 	else()

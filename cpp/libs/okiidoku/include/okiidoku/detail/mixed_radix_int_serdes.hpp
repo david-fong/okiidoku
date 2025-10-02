@@ -45,7 +45,7 @@ namespace okiidoku::detail {
 		std::array<Item, (sizeof(buf_t)*CHAR_BIT)+1uz> queue_; // lower indices are for earlier-passed items
 		std::uint_fast8_t queue_end_ {0u};
 		bool did_overflow_ {false};
-		buf_t buf_meter_ {0u};
+		buf_t buf_meter_ {0u}; /** \internal note: the sole runtime variable this depends on at any moment is the sequence of input radices thus far. */
 		std::size_t digits_written_ {0uz};
 		std::size_t bytes_written_ {0uz};
 		// buf = q[0].d + q[1].d*q[0].r + q[2].d*q[1].r*q[0].r + q[3].d*q[2].r*q[1].r*q[0].r
@@ -62,7 +62,7 @@ namespace okiidoku::detail {
 		[[nodiscard]] bool accept(Item in) noexcept {
 			OKIIDOKU_CONTRACT_USE(buf_meter_ < buf_t_max); // callee should have `flush`ed otherwise (see non-overflow return path)
 			OKIIDOKU_CONTRACT_USE(!did_overflow_);         // callee should have `flush`ed otherwise (see overflow return path)
-			OKIIDOKU_CONTRACT_USE(queue_end_ <= queue_.size());
+			OKIIDOKU_CONTRACT_USE(queue_end_+1uz <= queue_.size());
 			OKIIDOKU_CONTRACT_USE(in.radix <= radix_t_max);
 			OKIIDOKU_CONTRACT_USE(in.radix > 0u);
 			OKIIDOKU_CONTRACT_USE(in.digit < in.radix);
@@ -80,8 +80,8 @@ namespace okiidoku::detail {
 					OKIIDOKU_CONTRACT_USE(queue_end_ < queue_.size()-1uz);
 					auto& qi {queue_[queue_end_++]};
 					qi.radix = radix_0;
-					qi.digit = std::min(in.digit, static_cast<radix_t>(radix_0 - radix_t{1u}));
-					in.radix = static_cast<radix_t>((in.radix-radix_0)+1u);
+					qi.digit = std::min(in.digit, static_cast<radix_t>(radix_0 - radix_t{2u}));
+					in.radix = static_cast<radix_t>((in.radix-radix_0) + 2u);
 					in.digit -= qi.digit;
 				}
 				OKIIDOKU_CONTRACT_USE(in.radix >= 2u);
@@ -95,7 +95,7 @@ namespace okiidoku::detail {
 			}
 			buf_meter_ = static_cast<buf_t>((buf_meter_*in.radix)+(in.radix-1u));
 			queue_[queue_end_++] = in;
-			return buf_meter_ < buf_t_max; // or more efficiently(?), false if buf_t_max/buf_meter_ >= 2
+			return buf_meter_ < buf_t_max; // TODO.high or more efficiently, buf_meter_ <= buf_t_max/2u (equivalent to testing whether most-significant bit is zero)
 		}
 
 		/**
@@ -103,10 +103,8 @@ namespace okiidoku::detail {
 		separately, call this exactly once after `accept()`ing the final digit.
 		\pre the previous call to `accept` indicated a need to flush, or there is no more data. */
 		void flush(std::ostream& os) {
-			if (queue_end_ == 0u) [[unlikely]] {
-				OKIIDOKU_CONTRACT_ASSERT(digits_written_ == 0u);
-				return;
-			}
+			if (queue_end_ == 0u) [[unlikely]] { return; }
+
 			// prepare the real write buffer:
 			buf_t buf {0u};
 			for (auto i {0uz}; i < queue_end_; ++i) {
@@ -164,7 +162,7 @@ namespace okiidoku::detail {
 	private:
 		static constexpr buf_t buf_t_max {};
 		buf_t buf_ {0u};
-		buf_t buf_meter_ {0u};
+		buf_t buf_meter_ {0u}; // TODO.high instead of going downwards, why not mirror writer and go upwards? might be more accurate. I think I'm having accuracy/correctness issues due to this seemingly arbitrary difference of direction
 		std::size_t digits_read_ {0uz};
 		std::size_t bytes_read_ {0uz};
 
@@ -213,9 +211,9 @@ namespace okiidoku::detail {
 			OKIIDOKU_CONTRACT_USE(buf_meter_ > 0u);
 			OKIIDOKU_CONTRACT_USE(buf_ <= buf_meter_);
 			radix_t digit {0u};
-			if (buf_meter_ < radix /*&& buf_ < buf_meter_*/) [[unlikely]]/*(but more likely than `buf_meter_ == 0u` (?))*/ {
+			if (buf_meter_ < radix-1u || (buf_meter_ == radix-1u && buf_ < buf_meter_)) [[unlikely]]/*(but more likely than `buf_meter_ == 0u` (?))*/ {
 				digit += static_cast<radix_t>(buf_);
-				radix  = static_cast<radix_t>(radix - buf_meter_ + 1u);
+				radix  = static_cast<radix_t>(radix - buf_meter_ + 2u);
 				read_buf(is);
 			}
 			OKIIDOKU_CONTRACT_USE(radix >= 2u);

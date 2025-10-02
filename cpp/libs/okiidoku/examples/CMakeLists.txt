@@ -15,7 +15,7 @@ target_link_libraries(okiidoku_example_mono
 )
 
 # TODO.low consider making an example using std::async.
-# find_package(Threads REQUIRED)
+# find_package(Threads REQUIRED) # TODO is this needed for std::async?
 # okiidoku_add_compiler_options(okiidoku_example_threads)
 # target_link_libraries(okiidoku_example_threads
 	# PRIVATE okiidoku_cli_utils

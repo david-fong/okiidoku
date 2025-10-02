@@ -25,7 +25,7 @@ target_compile_options(okiidoku_js PRIVATE -sSTRICT=1)
 target_link_options(okiidoku_js PRIVATE
 	--no-entry # it's a "reactor" (ie. a library)
 	# --pre-js=
-	-sSTRICT=1
+	-sSTRICT=1 # TODO move this to affect all targets. maybe via CMake Preset? (tool:emscripten)
 	"$<${debug_configs}:-sASSERTIONS=2>"
 	"$<${debug_configs}:-gsource-map>" # https://emscripten.org/docs/tools_reference/emcc.html#emcc-gsource-map
 
@@ -42,7 +42,7 @@ target_link_options(okiidoku_js PRIVATE
 
 	"$<$<CONFIG:Release,MinSizeRel>:--closure=1>" # https://emscripten.org/docs/site/glossary.html#term-closure-compiler
 
-	-sALLOW_UNIMPLEMENTED_SYSCALLS=1 # TODO.wait workaround. why needed?
+	# -sALLOW_UNIMPLEMENTED_SYSCALLS=1 # TODO this was a workaround for something in the past (can't remember what). remove this
 	# -sSTANDALONE_WASM=1
 	# TODO.investigate what is -sMEMORY64 ? (associated with -sWASM_BIGINT=1, which is enabled by default)
 	# -sENVIRONMENT=web # use to exclude commonJS/Node glue-code
@@ -73,9 +73,9 @@ install(DIRECTORY examples TYPE DOC COMPONENT okiidoku_development
 set(dest "${CMAKE_CURRENT_SOURCE_DIR}/examples/node/build")
 set(c "${CMAKE_COMMAND};-E")
 add_custom_command(TARGET okiidoku_js POST_BUILD
+	COMMENT "symlinking outputs to examples dir for convenience"
+	BYPRODUCTS "${dest}/$<CONFIG>"
 	COMMAND "${c};make_directory;${dest}"
 	COMMAND "${c};create_symlink;$<TARGET_FILE_DIR:okiidoku_js>;${dest}/$<CONFIG>"
-	BYPRODUCTS "${dest}/$<CONFIG>"
-	COMMENT "symlinking outputs to examples dir for convenience"
 	VERBATIM COMMAND_EXPAND_LISTS
 )

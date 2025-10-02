@@ -3,6 +3,7 @@
 #include <okiidoku_cli_utils/shared_rng.hpp>
 #include <okiidoku_cli_utils/console_setup.hpp>
 #include <okiidoku/gen.hpp>
+#include <okiidoku/grid.hpp>
 
 #include <iostream>  // cout
 #include <iomanip>   // hex

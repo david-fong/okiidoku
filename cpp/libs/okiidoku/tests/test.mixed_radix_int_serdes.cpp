@@ -25,6 +25,7 @@ void test_mixed_radix_int_serdes(
 	const std::uintmax_t rng_seed,
 	[[maybe_unused]] const std::uintmax_t round // for conditional breakpoints
 ) {
+	CAPTURE(rng_seed);
 	INFO("sizeof(radix_t) := ", sizeof(radix_t));
 	INFO("sizeof(buf_t)   := ", sizeof(buf_t));
 	using writer_t = detail::MixedRadixUintWriter<radix_t,buf_t>;
@@ -33,19 +34,20 @@ void test_mixed_radix_int_serdes(
 
 	// TODO write and read multiple ints to the same stringstream per round.
 
-	static constexpr std::uintmax_t max_num_places {1024u};
+	static constexpr std::size_t max_num_places {1024u};
 	std::array<typename writer_t::Item, max_num_places> places_buf;
-	const size_t num_places {uidist_t<std::uintmax_t>{0u, max_num_places}(rng)}; CAPTURE(num_places);
+	const size_t num_places {uidist_t<std::size_t>{0u, max_num_places}(rng)}; CAPTURE(num_places);
 
 	std::size_t num_bytes_written {0uz};
 	const auto written_data {[&,round]noexcept{
 		// serialize data to `std::string`:
 		writer_t writer;
 		std::ostringstream os;
-		uidist_t<radix_t> radix_dist {1u};
+		std::geometric_distribution<radix_t> radix_dist {1.0/(CHAR_BIT*sizeof(buf_t))};
+		std::bernoulli_distribution brnli_dist {0.5};
 		for (auto place {0uz}; place < num_places; ++place) { CAPTURE(place);
 			auto& p {places_buf[place]};
-				p.radix = radix_dist(rng);
+				p.radix = 0u; do { p.radix = radix_dist(rng); } while (p.radix == 0u);
 				p.digit = uidist_t<radix_t>{0u,static_cast<radix_t>(p.radix-1u)}(rng);
 			if (!writer.accept(p)) [[unlikely]] {
 				writer.flush(os);
@@ -73,6 +75,7 @@ void test_mixed_radix_int_serdes(
 }}}
 
 TEST_CASE("okiidoku.mixed_radix_int_serdes") {
+	okiidoku::test_mixed_radix_int_serdes<std::uint_least8_t, std::uint_least16_t>(15457352654905208821uLL, 174u);
 	static constexpr std::uintmax_t num_rounds {1024u};
 	std::mt19937_64 rng {0u};
 	// std::mt19937_64 rng {std::random_device{}()};

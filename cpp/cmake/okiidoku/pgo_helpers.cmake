@@ -16,6 +16,11 @@ include_guard(DIRECTORY)
 #  does each component need to have a different profile-data path? I'm guessing yes?
 # I don't really care about PGO for anything but the core library
 
+# TODO look into Ninja Multi-Config "Cross-Config" and see if it can help?
+# https://cmake.org/cmake/help/latest/generator/Ninja%20Multi-Config.html
+# https://cmake.org/cmake/help/latest/command/add_custom_target.html#ninja-multi-config
+# https://cmake.org/cmake/help/latest/command/add_custom_command.html#ninja-multi-config
+
 # MARK: input validation and context query
 set(_config_types "${CMAKE_CONFIGURATION_TYPES}")
 if(DEFINED CMAKE_BUILD_TYPE AND _config_types STREQUAL "")
@@ -204,10 +209,12 @@ function(okiidoku_target_pgo
 			set(objects_dir "${trainee_binary_dir}/CMakeFiles/${trainee}.dir/${int_dir}")
 		endblock()
 
-		# reproducible generated name for things with internal linkage
+		# reproducible(-enough) generated name for things with internal linkage
+		# https://gcc.gnu.org/onlinedocs/gcc/Developer-Options.html#index-frandom-seed "The string should be different for every file you compile"
 		get_target_property(trainee_sources ${trainee} SOURCES)
 		foreach(_file ${trainee_sources})
-			file(SHA256 "${_file}" hash)
+			string(SHA256 hash "${_file}") # hash absolute path
+			# file(SHA256 "${_file}" hash) # alternatively, hash file contents (at configure-time). I'm hesitant about this. seems flaky.
 			# string(SUBSTRING "${hash}" 0 8 hash)
 			set_property(
 				SOURCE "${_file}" TARGET_DIRECTORY ${trainee}

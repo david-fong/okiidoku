@@ -49,6 +49,7 @@ Issues I'm watching:
 
 ## Misc List
 
+- why isn't emscripten build adding shebang? em++ -> em++.py -> emcc.py -> import link.py, which has a thing that's supposed to add it. try to make an MRE.
 - add `signed` to `char` types if they are meant to be used like integers (for GDB display).
 - config gdb to not show `DOCTEST_CAPTURE_N` in variables view?
 - find places `<O>` is used, and see if deduction guides can help. Ex. `template<typename _Type, size_t _ArrayExtent> span(array<_Type, _ArrayExtent>&) -> span<_Type, _ArrayExtent>;`
@@ -206,8 +207,7 @@ consider making cand masks have two lanes: one storing full O2BitArr, one storin
 - try writing custom GDB python pretty-printer for `O2BitArr`?
   - [how to write a gdb pretty-printer](https://sourceware.org/gdb/onlinedocs/gdb/Writing-a-Pretty_002dPrinter.html#Writing-a-Pretty_002dPrinter)
   - also look into [visual studio `.natvis` files](https://docs.microsoft.com/en-us/visualstudio/debugger/create-custom-views-of-native-objects)
-  - interesting: https://github.com/asarium/gdb-natvis
-  - <https://sourceware.org/gdb/onlinedocs/gdb/dotdebug_005fgdb_005fscripts-section.html>
+  - interesting: https://github.com/asarium/gdb-natvis adapter for GDB that searches for natvis files for types
 
 - move the emoji definitions out of the program binary and externalize as a configurable data read in at runtime?
 
