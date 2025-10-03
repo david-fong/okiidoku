@@ -5,6 +5,7 @@
 #include "okiidoku/puzzle/solver/engine.hpp"      // UnwindInfo, Engine...
 #include "okiidoku/puzzle/solver/found_queue.hpp" // FoundQueues
 #include "okiidoku/puzzle/solver/found.hpp"       // CellClaimSym, Lock...
+#include <okiidoku/ints.hpp>
 #include <okiidoku/order.hpp>
 
 #include <algorithm>

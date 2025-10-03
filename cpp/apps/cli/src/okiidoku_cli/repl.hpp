@@ -4,8 +4,8 @@
 #define HPP_OKIIDOKU_CLI__REPL
 
 #include <okiidoku_cli/config.hpp>
-#include <okiidoku_cli_utils/shared_rng.hpp>
 #include <okiidoku/order.hpp>
+namespace okiidoku::util { class SharedRng; }
 
 #include <map>
 #include <string_view>

@@ -49,6 +49,7 @@ Issues I'm watching:
 
 ## Misc List
 
+- change `[0]` / `[0uz]` to `.front()`.
 - why isn't emscripten build adding shebang? em++ -> em++.py -> emcc.py -> import link.py, which has a thing that's supposed to add it. try to make an MRE.
 - add `signed` to `char` types if they are meant to be used like integers (for GDB display).
 - config gdb to not show `DOCTEST_CAPTURE_N` in variables view?

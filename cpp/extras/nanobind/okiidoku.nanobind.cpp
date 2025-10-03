@@ -20,7 +20,7 @@ using namespace nb::literals;
 // function called upon python import
 // https://nanobind.readthedocs.io/en/latest/api_core.html#c.NB_MODULE
 // https://nanobind.readthedocs.io/en/latest/basics.html
-NB_MODULE(okiidoku_nb, m) { //
+NB_MODULE(okiidoku_nb, m) { // NOLINT(performance-unnecessary-value-param) https://github.com/wjakob/nanobind/blob/master/docs/faq.rst#policy-on-clang-tidy--wpedantic-etc
 	namespace oki = ::okiidoku;
 	namespace oki_m = ::okiidoku::mono;
 	namespace oki_v = ::okiidoku::visitor;

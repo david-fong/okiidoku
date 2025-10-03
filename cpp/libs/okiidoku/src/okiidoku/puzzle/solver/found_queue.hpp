@@ -56,7 +56,7 @@ namespace okiidoku::mono::detail::solver {
 
 
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-		extern template struct FoundQueues<O_>; // currently instantiated in engine.cpp
+		extern template struct FoundQueues<O_>; // instantiated in engine.cpp
 	OKIIDOKU_FOREACH_O_DO_EMIT
 	#undef OKIIDOKU_FOREACH_O_EMIT
 }

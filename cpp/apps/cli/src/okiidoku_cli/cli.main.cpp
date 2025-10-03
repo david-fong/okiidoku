@@ -13,6 +13,7 @@
 #include <charconv>
 #include <string>       // stoi
 #include <string_view>
+#include <array>
 #include <random>       // random_device
 #include <cstdint>      // uint..._t
 #include <system_error> // errc
@@ -28,7 +29,7 @@ int main(const int argc, char const *const argv[]) {
 	// NOLINTBEGIN(*-avoid-c-arrays, cppcoreguidelines-pro-bounds-pointer-arithmetic)
 	const auto user_order {(argc > 1)
 		? static_cast<okiidoku::Order>(std::stoi(argv[1uz]))
-		: okiidoku::compiled_orders[0uz]
+		: okiidoku::compiled_orders.front()
 	};
 	const auto srand_key {[&]() -> std::uint_fast64_t {
 		if (argc > 2) {

@@ -2,22 +2,11 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include <okiidoku/morph/canon.hpp>
 
+#include <okiidoku/detail/canon_stages.hpp>
 #include <okiidoku/morph/transform.hpp>
 #include <okiidoku/grid.hpp>
 #include <okiidoku/order.hpp>
 
-namespace okiidoku::mono::detail {
-
-	/** implemented in canon_sym.cpp.
-	\pre the grid is filled and follows the one rule. */
-	template<Order O> requires(is_order_compiled(O))
-	typename Transformation<O>::sym_map_t canon_sym(Grid<O>&) noexcept;
-
-	/** implemented in canon_pos.cpp.
-	\pre the grid is filled and follows the one rule. */
-	template<Order O> requires(is_order_compiled(O))
-	Transformation<O> canon_pos(Grid<O>&) noexcept;
-}
 namespace okiidoku::mono {
 
 	// contract: `grid` is filled and follows the one rule.

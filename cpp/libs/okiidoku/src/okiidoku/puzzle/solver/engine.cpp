@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include <okiidoku/puzzle/solver/engine.hpp>
 
+#include "okiidoku/puzzle/solver/found_queue.hpp"
+#include "okiidoku/puzzle/solver/found.hpp" // CellClaimSym
 #include <okiidoku/grid.hpp>
 #include <okiidoku/o2_bit_arr.hpp>
 #include <okiidoku/ints.hpp>
@@ -12,7 +14,7 @@
 #include <execution>
 // #endif
 
-#include <iostream>  // TODO delete
+#include <iostream>  // TODO delete. make the debug print functions take an ostream& param instead?
 #include <utility>   // move
 
 // TODO.low go through and see where it makes sense to add [[likely/unlikely]].
@@ -247,7 +249,7 @@ namespace okiidoku::mono::detail::solver {
 			OKIIDOKU_UNSEQ
 			cells_cands().get_underlying_array().cbegin(),
 			cells_cands().get_underlying_array().cend(),
-			[](const auto& c){ return c.count() == 1u; }
+			[][[gnu::pure]](const auto& c)noexcept{ return c.count() == 1u; }
 		)};
 	}
 

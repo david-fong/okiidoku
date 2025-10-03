@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include <okiidoku/puzzle/solver/cand_elim_find.hpp>
 
+#include "okiidoku/puzzle/solver/engine.hpp" // CandsGrid
 #include <okiidoku/puzzle/solver/found.hpp>
 #include <okiidoku/o2_bit_arr.hpp>
 #include <okiidoku/order.hpp>
@@ -10,6 +11,7 @@
 // #include <array>
 
 #include <okiidoku/puzzle/solver/cand_elim_find.macros.hpp>
+namespace okiidoku::mono::detail::solver { template <Order O> requires (is_order_compiled(O)) struct FoundQueues; }
 
 namespace okiidoku::mono::detail::solver { namespace {
 

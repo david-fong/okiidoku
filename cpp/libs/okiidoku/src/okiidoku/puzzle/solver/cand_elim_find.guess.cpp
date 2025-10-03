@@ -3,7 +3,6 @@
 #include <okiidoku/puzzle/solver/cand_elim_find.hpp>
 
 #include <okiidoku/puzzle/solver/engine.hpp>
-#include <okiidoku/puzzle/solver/found.hpp>
 #include <okiidoku/ints.hpp>
 #include <okiidoku/order.hpp>
 
@@ -97,7 +96,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 			return std::transform_reduce(
 				OKIIDOKU_UNSEQ
 				guess_stack.cbegin(), guess_stack.cend(), std::uintmax_t{0u}, std::plus<std::uintmax_t>{},
-				[rmi][[gnu::pure]](const auto& frame) noexcept -> auto {
+				[rmi][[gnu::pure]](const auto& frame) noexcept -> std::uintmax_t {
 					const auto other_rmi {frame.guess.rmi};
 					return (// TODO consider using gcc's __builtin_expect to annotate as unlikely. standard attribute cannot be used for ternary.
 					  (rmi_to_row<O>(rmi) == rmi_to_row<O>(other_rmi) ? 1u : 0u) // consider extracting this into a `count_shared_houses` function that returns Int<3>

@@ -5,16 +5,16 @@
 
 #include <okiidoku/detail/mixed_radix_int_serdes.hpp>
 
-#include <random>  // random_device,
 #include <fstream>
-#include <iostream>
 #include <sstream>
 #include <random>
-#include <algorithm>
+#include <algorithm> // min
 #include <string>
 #include <array>
-#include <limits>
 #include <cstdint>
+#include <climits>   // CHAR_BIT
+#include <cstddef>   // size_t
+#include <concepts>  // unsigned_integral
 
 namespace okiidoku { namespace {
 template<class T> using uidist_t = std::uniform_int_distribution<T>;
@@ -35,16 +35,16 @@ void test_mixed_radix_int_serdes(
 	// TODO write and read multiple ints to the same stringstream per round.
 
 	static constexpr std::size_t max_num_places {1024u};
-	std::array<typename writer_t::Item, max_num_places> places_buf;
-	const size_t num_places {uidist_t<std::size_t>{0u, max_num_places}(rng)}; CAPTURE(num_places);
+	OKIIDOKU_DEFER_INIT std::array<typename writer_t::Item, max_num_places> places_buf; // NOLINT(*-init)
+	const std::size_t num_places {uidist_t<std::size_t>{0u, max_num_places}(rng)}; CAPTURE(num_places);
 
-	std::size_t num_bytes_written {0uz};
-	const auto written_data {[&,round]noexcept{
+	std::size_t num_byte_count {0uz};
+	const auto written_data {[&,round]{
+		(void)round; // for conditional breakpoint
 		// serialize data to `std::string`:
 		writer_t writer;
 		std::ostringstream os;
 		std::geometric_distribution<radix_t> radix_dist {1.0/(CHAR_BIT*sizeof(buf_t))};
-		std::bernoulli_distribution brnli_dist {0.5};
 		for (auto place {0uz}; place < num_places; ++place) { CAPTURE(place);
 			auto& p {places_buf[place]};
 				p.radix = 0u; do { p.radix = radix_dist(rng); } while (p.radix == 0u);
@@ -52,13 +52,13 @@ void test_mixed_radix_int_serdes(
 			if (!writer.accept(p)) [[unlikely]] {
 				writer.flush(os);
 			}
-			REQUIRE(writer.digits_written() == place+1uz);
+			REQUIRE(writer.item_count() == place+1uz);
 		}
 		writer.flush(os);
-		num_bytes_written += writer.bytes_written();
+		num_byte_count += writer.byte_count();
 		return os.str();
 	}()};
-	REQUIRE(written_data.size() == num_bytes_written);
+	REQUIRE(written_data.size() == num_byte_count);
 	{
 		// de-serialize data and check correctness:
 		std::istringstream is {written_data};
@@ -66,19 +66,19 @@ void test_mixed_radix_int_serdes(
 		for (auto place {0uz}; place < num_places; ++place) { CAPTURE(place);
 			const auto& expected {places_buf[place]};
 			const auto digit {reader.read(is, expected.radix)};
-			REQUIRE(reader.digits_read() == place+1uz);
+			REQUIRE(reader.item_count() == place+1uz);
 			REQUIRE(digit == expected.digit);
 		}
 		reader.finish(is);
-		REQUIRE(reader.bytes_read() == num_bytes_written);
+		REQUIRE(reader.byte_count() == num_byte_count);
 	}
 }}}
 
 TEST_CASE("okiidoku.mixed_radix_int_serdes") {
-	okiidoku::test_mixed_radix_int_serdes<std::uint_least8_t, std::uint_least16_t>(15457352654905208821uLL, 174u);
+	// okiidoku::test_mixed_radix_int_serdes<std::uint_least8_t, std::uint_least16_t>(3316611681754028984uLL, 10u);
 	static constexpr std::uintmax_t num_rounds {1024u};
-	std::mt19937_64 rng {0u};
-	// std::mt19937_64 rng {std::random_device{}()};
+	// std::mt19937_64 rng {0u};
+	std::mt19937_64 rng {std::random_device{}()};
 	// TODO write logic to restore from failure_checkpoint file? but how to delete it afterward?... does doctest have a way to hook into a TEST_CASE passing?
 	//   also... isn't there an easier way given that I'm only using the mersenne twister to generate seeds? if a round fails, write the seed that was passed to the round. :P way simpler.
 	for (std::uintmax_t round {0u}; round < num_rounds; ++round) { CAPTURE(round);
@@ -91,7 +91,7 @@ TEST_CASE("okiidoku.mixed_radix_int_serdes") {
 			of << rng_bak;
 			return file_path;
 		}());
-		// okiidoku::test_mixed_radix_int_serdes<std::uint_least8_t, std::uint_least8_t >(rng(), round); // TODO unwrap these to each their own TEST_CASE
+		okiidoku::test_mixed_radix_int_serdes<std::uint_least8_t, std::uint_least8_t >(rng(), round); // TODO unwrap these to each their own TEST_CASE
 		okiidoku::test_mixed_radix_int_serdes<std::uint_least8_t, std::uint_least16_t>(rng(), round);
 		okiidoku::test_mixed_radix_int_serdes<std::uint_least8_t, std::uint_least32_t>(rng(), round);
 		okiidoku::test_mixed_radix_int_serdes<std::uint_least8_t, std::uint_least64_t>(rng(), round);

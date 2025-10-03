@@ -5,11 +5,12 @@
 
 #include <okiidoku/morph/canon.hpp>
 #include <okiidoku/morph/scramble.hpp>
+#include "okiidoku/morph/transform.hpp"
 #include <okiidoku/gen.hpp>
 #include <okiidoku/print_2d.hpp>
 #include <okiidoku/grid.hpp>
-#include <okiidoku/o2_bit_arr.hpp>
 #include <okiidoku/ints_io.hpp>
+#include <okiidoku/order.hpp>
 
 #include <okiidoku_cli_utils/shared_rng.hpp>
 
@@ -31,7 +32,7 @@ void test_morph(okiidoku::util::SharedRng& shared_rng, const std::uintmax_t num_
 	Transformation<O> scramble_xform {};
 	CHECK(scramble_xform.inverted().inverted() != scramble_xform);
 
-	for (std::uintmax_t round {0u}; round < num_rounds; ++round) {
+	for (std::uintmax_t round {0u}; round < num_rounds; ++round) { CAPTURE(round);
 		generate_shuffled(gen_grid, shared_rng());
 		CHECK(grid_follows_rule(gen_grid));
 

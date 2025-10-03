@@ -186,6 +186,7 @@ namespace okiidoku::mono {
 
 		/** \pre this mask has at least one set bit.
 		\note an ugly name for a "sharp knife". */
+		// TODO I don't like the ugly name or "sharp knife"-ness. make this return O2 if not-exists, relax(remove) that precondition, and leave it to the caller to use operator* if they know it exists.
 		[[nodiscard, gnu::pure]] o2xs_t first_set_bit_require_exists() const noexcept;
 
 		/**

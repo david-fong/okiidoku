@@ -10,6 +10,7 @@ namespace okiidoku::mono { template <Order O> requires (is_order_compiled(O)) st
 namespace okiidoku::visitor { struct Grid; }
 
 #include <array>
+#include <type_traits> // is_aggregate_v
 
 namespace okiidoku::mono {
 

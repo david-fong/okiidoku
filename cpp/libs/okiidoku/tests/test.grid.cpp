@@ -14,21 +14,23 @@ void test_grid() {
 	using namespace ::okiidoku::mono;
 	OKIIDOKU_MONO_INT_TS_TYPEDEFS
 
-	for (const auto i : T::O2) {
-	for (const auto j : T::O2) {
-		const auto box_cell_rmi {box_cell_to_rmi<O>(i,j)};
-		CHECK(rmi_to_box<O>(box_cell_rmi) == i);
-		CHECK(rmi_to_box_cell<O>(box_cell_rmi) == j);
-
-		const auto chute {i / T::O1};
-		const typename T::o3x_t chute_cell {((i%T::O1)*T::O2)+j};
-		const auto h_chute_cell_rmi {chute_cell_to_rmi<O>(LineType::row, chute, chute_cell)};
-		const auto v_chute_cell_rmi {chute_cell_to_rmi<O>(LineType::col, chute, chute_cell)};
-		CHECK(h_chute_cell_rmi == row_col_to_rmi<O>(i,j));
-		CHECK(v_chute_cell_rmi == row_col_to_rmi<O>(j,i));
+	for (const auto i : T::O2) { CAPTURE(i);
+	for (const auto j : T::O2) { CAPTURE(j);
+		{
+			const auto box_cell_rmi {box_cell_to_rmi<O>(i,j)}; CAPTURE(box_cell_rmi);
+			CHECK(rmi_to_box<O>(box_cell_rmi) == i);
+			CHECK(rmi_to_box_cell<O>(box_cell_rmi) == j);
+		}{
+			const auto chute {i / T::O1}; CAPTURE(chute);
+			const typename T::o3x_t chute_cell {((i%T::O1)*T::O2)+j}; CAPTURE(chute_cell);
+			const auto h_chute_cell_rmi {chute_cell_to_rmi<O>(LineType::row, chute, chute_cell)};
+			const auto v_chute_cell_rmi {chute_cell_to_rmi<O>(LineType::col, chute, chute_cell)};
+			CHECK(h_chute_cell_rmi == row_col_to_rmi<O>(i,j));
+			CHECK(v_chute_cell_rmi == row_col_to_rmi<O>(j,i));
+		}
 	}}
 
-	Grid<O> gen_grid;
+	Grid<O> gen_grid; CAPTURE(gen_grid);
 	CHECK(grid_is_empty(gen_grid)); // expected default ctor behaviour
 
 	init_most_canonical_grid(gen_grid);

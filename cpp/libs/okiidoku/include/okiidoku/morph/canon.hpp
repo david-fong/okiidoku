@@ -9,13 +9,11 @@ namespace okiidoku::mono { template <Order O> requires (is_order_compiled(O)) st
 namespace okiidoku::visitor { struct Grid; }
 
 namespace okiidoku::mono {
-
 	/**
 	\pre the grid is filled and follows the one rule.
 	\note to canonicalize a puzzle, first solve it, then canonicalize
 	the solution, and then apply the returned transformation to the puzzle.
-	\todo consider whether it's possible to implement support for puzzles without requiring caller to first solve.
-	*/
+	\todo consider whether it's possible to implement support for puzzles without requiring caller to first solve. */
 	template<Order O> requires(is_order_compiled(O))
 	OKIIDOKU_EXPORT Transformation<O> canonicalize(Grid<O>&) noexcept;
 }

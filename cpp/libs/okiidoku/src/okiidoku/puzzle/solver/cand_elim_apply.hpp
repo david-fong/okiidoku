@@ -6,7 +6,6 @@
 #include <okiidoku/puzzle/solver/engine.hpp>
 #include <okiidoku/puzzle/solver/found.hpp>
 #include <okiidoku/puzzle/solver/cand_elim_find.macros.hpp>
-#include <okiidoku/ints.hpp>
 #include <okiidoku/order.hpp>
 
 namespace okiidoku::mono::detail::solver {
@@ -14,7 +13,8 @@ namespace okiidoku::mono::detail::solver {
 	template<Order O> requires(is_order_compiled(O))
 	class CandElimApply {
 	public:
-		// contract: `engine.has_queued_cand_elims` returns `true`.
+		/**
+		\pre `engine.has_queued_cand_elims` returns `true`. */
 		static UnwindInfo apply_first_queued(Engine<O>&) noexcept;
 
 		static UnwindInfo apply_all_queued(Engine<O>&) noexcept;
@@ -31,14 +31,16 @@ namespace okiidoku::mono::detail::solver {
 		// be done- the `apply` must immediately short-circuit.
 
 	public:
-		// Note: takes desc by-value instead of by-reference since unlike the rest of
-		// the queues, the CellClaimSym queue can be passively updated while applying
-		// an element of the queue. If using by-reference, such an update could invalidate
-		// the referred-to desc (ex. by memcpy during resize)
+		/**
+		\note takes desc by-value instead of by-reference since unlike the rest of
+		the queues, the `CellClaimSym` queue can be passively updated while applying
+		an element of the queue. if using by-reference, such an update could invalidate
+		the referred-to desc (ex. by memcpy during resize) */
 		static UnwindInfo apply(Engine<O>&, const found::CellClaimSym<O>) noexcept;
 
-		// contract: the specified symbol is a candidate-symbol at the specified rmi.
-		//  this contract is respected by the corresponding `find` function.
+		/**
+		\pre the specified symbol is a candidate-symbol at the specified rmi.
+			this contract is respected by the corresponding `find` function. */
 		static UnwindInfo apply(Engine<O>&, const found::SymClaimCell<O>&) noexcept;
 
 		// AKA "naked subsets"

@@ -61,7 +61,7 @@ alias of standard `assert` */
 /// \todo gnu::noinit for global data. linker for ELF will put in .noinit section
 
 
-#ifdef NDEBUG
+#ifndef NDEBUG
 	/** \def OKIIDOKU_KEEP_FOR_DEBUG
 	- `gnu::retain`: marks for retention during linker section garbage collection
 	- `gnu::used`:   I'm actually not sure if this is needed */

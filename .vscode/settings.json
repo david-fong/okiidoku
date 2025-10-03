@@ -103,7 +103,7 @@
 	},
 	"cmake.configureArgs": [
 		// "--warn-uninitialized",
-		"-D OKIIDOKU_BUILD_WITH_STATIC_ANALYZERS:BOOL=NO",
+		"-D OKIIDOKU_BUILD_WITH_STATIC_ANALYZERS:BOOL=YES",
 	],
 	"python.analysis.extraPaths": [
 		"/usr/share/gdb/python"

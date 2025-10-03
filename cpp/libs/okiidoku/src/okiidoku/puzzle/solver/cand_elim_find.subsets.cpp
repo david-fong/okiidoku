@@ -2,18 +2,23 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include <okiidoku/puzzle/solver/cand_elim_find.hpp>
 
+#include "okiidoku/puzzle/solver/engine.hpp" // UnwindInfo
 #include <okiidoku/puzzle/solver/subset_combo_walker.hpp>
 #include <okiidoku/puzzle/solver/found.hpp>
 #include <okiidoku/o2_bit_arr.hpp>
+#include <okiidoku/order.hpp>
+#include <okiidoku/ints.hpp>
 
 #include <functional> // bit_or
-#include <numeric> // transform_reduce
-#include <algorithm> // sort
+#include <numeric>    // transform_reduce
+#include <algorithm>  // sort
+#include <iterator>   // next
 #include <execution>
 #include <array>
 #include <optional>
 
 #include <okiidoku/puzzle/solver/cand_elim_find.macros.hpp>
+namespace okiidoku::mono::detail::solver { template <Order O> requires (is_order_compiled(O)) struct FoundQueues; }
 
 namespace okiidoku::mono::detail::solver { namespace {
 

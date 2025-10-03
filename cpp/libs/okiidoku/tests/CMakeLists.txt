@@ -37,6 +37,7 @@ function(okiidoku_test_add name #[[ ARGN are dependencies ]])
 endfunction()
 
 
+# TODO these two don't need to link to libokiidoku. maybe extract base stuff from okiidoku_test_add and make a wrapper that adds that link dependency?
 okiidoku_test_add(mixed_radix_int_serdes #[[ DEPS ]])
 okiidoku_test_add(o2_bit_arr #[[ DEPS ]])
 

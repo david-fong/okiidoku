@@ -62,6 +62,7 @@ namespace okiidoku::mono::detail::solver {
 
 
 	template<Order O> requires(is_order_compiled(O)) class CandElimFind;
+	template<Order O> requires(is_order_compiled(O)) class CandElimApply;
 	template<Order O> requires(is_order_compiled(O)) class CandElimApplyImpl;
 
 	template<Order O> requires(is_order_compiled(O))
@@ -192,8 +193,8 @@ namespace okiidoku::mono::detail::solver {
 		\post decrements `num_unsolved`. */
 		void enqueue_cand_elims_for_new_cell_claim_sym_(rmi_t rmi) noexcept;
 
-		void debug_print_cells_cands_() const noexcept;
-		[[nodiscard, gnu::pure]] bool debug_check_correct_num_unsolved_() const noexcept;
+		OKIIDOKU_KEEP_FOR_DEBUG void debug_print_cells_cands_() const noexcept;
+		OKIIDOKU_KEEP_FOR_DEBUG [[nodiscard, gnu::pure]] bool debug_check_correct_num_unsolved_() const noexcept;
 
 
 		Frame frame_ {

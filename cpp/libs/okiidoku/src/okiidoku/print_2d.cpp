@@ -7,13 +7,13 @@
 
 #include <iostream>
 #include <random>      // minstd_rand
-#include <tuple>       // apply
+#include <vector>
+#include <tuple>       // apply, tuple
 #include <array>
-#include <string_view> // operator<<
+#include <string_view>
 #include <span>
-#include <algorithm>
-#include <numeric>     // ranges::iota
-#include <iterator>    // next, operator+
+#include <algorithm>   // shuffle, copy, min, sort, unique
+#include <iterator>    // distance, next
 #include <execution>   // execution::unseq
 
 namespace okiidoku { namespace {
@@ -95,7 +95,7 @@ namespace okiidoku {
 				for (o2i_t col {0u}; col < O2; ++col) {
 					if ((col % O) == 0u) [[unlikely]] { os << " │"; }
 
-					o2i_t sym {grid_views[grid_i].operator()(
+					const o2i_t sym {grid_views[grid_i].operator()(
 						static_cast<visitor::ints::o4xs_t>((row * O2) + col)
 					)};
 					if (sym == O2) {

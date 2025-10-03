@@ -10,6 +10,7 @@
 #include <okiidoku/print_2d.hpp>
 #include <okiidoku/grid.hpp>
 #include <okiidoku/ints_io.hpp>
+#include <okiidoku/order.hpp>
 
 #include <okiidoku_cli_utils/shared_rng.hpp>
 
@@ -30,7 +31,7 @@ void test_puzzle(okiidoku::util::SharedRng& shared_rng, const std::uintmax_t num
 	// Grid<O> canon_grid;
 
 	FastSolver<O> solver;
-	for (std::uintmax_t round {0u}; round < num_rounds; ++round) {
+	for (std::uintmax_t round {0u}; round < num_rounds; ++round) { CAPTURE(round);
 		generate_shuffled(gen_grid, shared_rng());
 		CHECK(grid_follows_rule(gen_grid));
 
