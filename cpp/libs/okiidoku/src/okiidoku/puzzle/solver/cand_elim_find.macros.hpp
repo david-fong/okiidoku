@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2020 David Fong
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#ifndef HPP_OKIIDOKU__PUZZLE__SOLVER__CAND_ELIM_FIND__MACROS
-#define HPP_OKIIDOKU__PUZZLE__SOLVER__CAND_ELIM_FIND__MACROS
+#ifndef HPP_OKIIDOKU_PUZZLE_SOLVER_CAND_ELIM_FIND_MACROS
+#define HPP_OKIIDOKU_PUZZLE_SOLVER_CAND_ELIM_FIND_MACROS
 
 #include <okiidoku/ints.hpp>
 #include <okiidoku/order.hpp>
@@ -27,7 +27,7 @@ namespace okiidoku::mono::detail::solver {
 	template<Order O> requires(is_order_compiled(O)) \
 	UnwindInfo CandElimFind<O>::TECHNIQUE_NAME(Engine<O>& engine) noexcept { \
 		OKIIDOKU_CONTRACT_ASSERT(!engine.no_more_solns()); \
-		if (engine.get_num_unsolved() == 0) [[unlikely]] { return UnwindInfo::make_no_unwind(); } \
+		if (engine.get_num_unsolved() == 0u) [[unlikely]] { return UnwindInfo::make_no_unwind(); } \
 		const auto needs_unwind {find_ ## TECHNIQUE_NAME ## _and_check_needs_unwind(engine.cells_cands(), engine.get_found_queues_())}; \
 		if (needs_unwind) { return engine.unwind_one_stack_frame(); } \
 		return UnwindInfo::make_no_unwind(); \

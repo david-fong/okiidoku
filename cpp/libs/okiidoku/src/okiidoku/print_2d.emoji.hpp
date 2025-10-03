@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2020 David Fong
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#ifndef HPP_OKIIDOKU__PRINT_2D__EMOJI
-#define HPP_OKIIDOKU__PRINT_2D__EMOJI
+#ifndef HPP_OKIIDOKU_PRINT_2D_EMOJI
+#define HPP_OKIIDOKU_PRINT_2D_EMOJI
 
 #include <tuple>
 #include <array>
@@ -21,6 +21,7 @@ namespace okiidoku::emoji {
 	// but windows terminal is different.
 	inline constexpr std::tuple sets {
 		#define E std::to_array<std::string_view>
+		// NOLINTBEGIN(*-designated-initializers)
 		Set{"fruit",       E({"🍉","🍄","🍓","🍅","🌶 ","🍎","🍑","🍊","🥕","🥭","🍍","🍋","🍌","🌽","🥑","🍐","🥝","🍏","🥬","🍈","🫐","🧄","🍆","🍇","🌰"}) },
 		Set{"reptile",     E({"🐸","🦎","🐍","🐢","🐊","🐉","🐲","🦕","🦖"}) },
 		Set{"marine",      E({"🦦","🦭","🦈","🐬","🐋","🐟","🐠","🦑","🐙","🦀","🦞","🐚"}) },
@@ -46,6 +47,7 @@ namespace okiidoku::emoji {
 		Set{"media",       E({"🎬","🎵","🎷","🎺","🎻","🎸","🎹","🥁"}) },
 		Set{"office",      E({"⏳","🩺","🩹","🧲","🧭","💰","💡","🔐","🔑","🔔","📢","📌","📎","📂","🗑️ ","💾","💽","💻","📺","📷","📼","📨","📬","📦"}) },
 		Set{"circle",      E({"🔮","🗿","🚬","🔴","🟠️","🟡️","🟢️","🔵","🟣️","🟤️","⚫️","⚪️"}) },
+		// NOLINTEND(*-designated-initializers)
 		#undef E
 	};
 }

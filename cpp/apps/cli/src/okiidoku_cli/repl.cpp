@@ -68,8 +68,8 @@ namespace okiidoku::cli {
 			? ""
 			:  cmd_line.substr(token_pos + 1u, std::string_view::npos)}
 			;
-		const auto it {Command::enum_str_to_enum.find(cmd_name)};
-		if (it == Command::enum_str_to_enum.end()) {
+		const auto it {Command::command_str_to_enum_map.find(cmd_name)};
+		if (it == Command::command_str_to_enum_map.end()) {
 			// No command name was matched.
 			std::cout << str::red.on << "command \"" << cmd_line << "\" not found."
 				" enter \"help\" for the help menu." << str::red.off << std::endl;
@@ -132,7 +132,7 @@ namespace okiidoku::cli {
 			// }
 			Grid grid(config_.order());
 			init_most_canonical_grid(grid);
-			for (std::uintmax_t prog {0}; prog < how_many; ++prog) {
+			for (std::uintmax_t prog {0u}; prog < how_many; ++prog) {
 				generate_shuffled(grid, shared_rng_());
 				if (config_.canonicalize()) {
 					canonicalize(grid);
@@ -164,7 +164,7 @@ namespace okiidoku::cli {
 			how_many_str.data(), how_many_str.data()+how_many_str.size(), how_many
 		)};
 		if (parse_result.ec == std::errc{}) {
-			if (how_many <= 0) {
+			if (how_many <= 0u) {
 				std::cout << str::red.on
 					<< "please provide a non-zero, positive integer."
 					<< str::red.off << std::endl;

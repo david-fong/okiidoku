@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2020 David Fong
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#ifndef HPP_OKIIDOKU_CLI_UTILS__CONSOLE_SETUP
-#define HPP_OKIIDOKU_CLI_UTILS__CONSOLE_SETUP
+#ifndef HPP_OKIIDOKU_CLI_UTILS_CONSOLE_SETUP
+#define HPP_OKIIDOKU_CLI_UTILS_CONSOLE_SETUP
 
 #include <string>
 #include <locale> // numpunct
@@ -9,8 +9,8 @@
 namespace okiidoku::util {
 
 	class MyNumPunct : public std::numpunct<char> {
-	public: void set_grouping(char grouping) { grouping_[0uz] = grouping; }
-	protected: std::string do_grouping() const override { return grouping_; }
+	public: void set_grouping(char grouping) noexcept { grouping_.front() = grouping; }
+	protected: [[nodiscard, gnu::pure]] std::string do_grouping() const noexcept override { return grouping_; }
 	private: std::string grouping_ {"\003"};
 	};
 

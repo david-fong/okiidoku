@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2020 David Fong
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#ifndef HPP_OKIIDOKU__GEN
-#define HPP_OKIIDOKU__GEN
+#ifndef HPP_OKIIDOKU_GEN
+#define HPP_OKIIDOKU_GEN
 
 #include <okiidoku/ints.hpp> // for rng_seed_t
 #include <okiidoku/order.hpp>

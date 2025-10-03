@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2020 David Fong
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#ifndef HPP_OKIIDOKU_CLI__REPL
-#define HPP_OKIIDOKU_CLI__REPL
+#ifndef HPP_OKIIDOKU_CLI_REPL
+#define HPP_OKIIDOKU_CLI_REPL
 
 #include <okiidoku_cli/config.hpp>
 #include <okiidoku/order.hpp>
@@ -15,7 +15,7 @@ namespace okiidoku::util { class SharedRng; }
 namespace okiidoku::cli {
 
 	namespace Command {
-		enum class E : unsigned int {
+		enum class E : unsigned char {
 			help,
 			quit,
 			config_order,
@@ -23,7 +23,7 @@ namespace okiidoku::cli {
 			gen_single,
 			gen_multiple,
 		};
-		const std::map<std::string_view, Command::E> enum_str_to_enum {
+		inline const std::map<std::string_view, Command::E> command_str_to_enum_map {
 			{ "help",         E::help },
 			{ "quit",         E::quit },
 			{ "order",        E::config_order },
@@ -53,6 +53,7 @@ namespace okiidoku::cli {
 		Repl(const Repl&) = delete;
 		Repl& operator=(const Repl&) = delete;
 		// Note to self: move operations are not implicitly declared if copy operations are user-declared.
+		// TODO pretty sure I only did this because rng is a reference. would wrapping cref or non-owning smart pointer type help? or just switching to a PRNG with good characteristics and small state size... (PCG?)
 
 		void start();
 		bool run_command(std::string_view cmd_line);

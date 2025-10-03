@@ -200,6 +200,8 @@ things I got wrong before which I couldn't understand based on gcc's error messa
     > In particular, arithmetic operators do not accept types smaller than int as arguments, and integral promotions are automatically applied after lvalue-to-rvalue conversion, if applicable.
   - https://en.cppreference.com/w/cpp/language/usual_arithmetic_conversions.html#Integer_conversion_rank
 
+- add `signed` to `char` types if they are meant to be used like integers (for GDB display).
+
 ## misc VS Code regexes
 
 filter source code: `*.hpp,*.cpp`

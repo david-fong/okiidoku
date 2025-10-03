@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2020 David Fong
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#ifndef HPP_OKIIDOKU__DETAIL__ORDER_TEMPLATES__MACROS
-#define HPP_OKIIDOKU__DETAIL__ORDER_TEMPLATES__MACROS
+#ifndef HPP_OKIIDOKU_DETAIL_ORDER_TEMPLATES_MACROS
+#define HPP_OKIIDOKU_DETAIL_ORDER_TEMPLATES_MACROS
 
 #include <okiidoku/config/defaults.hpp>
 

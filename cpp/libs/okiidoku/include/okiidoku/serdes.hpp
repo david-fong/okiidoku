@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2020 David Fong
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#ifndef HPP_OKIIDOKU__SERDES
-#define HPP_OKIIDOKU__SERDES
+#ifndef HPP_OKIIDOKU_SERDES
+#define HPP_OKIIDOKU_SERDES
 
 #include <okiidoku/order.hpp>
 namespace okiidoku::mono { template <Order O> requires (is_order_compiled(O)) struct Grid; }

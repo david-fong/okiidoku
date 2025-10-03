@@ -40,7 +40,7 @@ void test_grid() {
 
 TEST_CASE("okiidoku.grid") {
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-	okiidoku::test_grid<O_>();
+	okiidoku::test_grid<(O_)>();
 	OKIIDOKU_FOREACH_O_DO_EMIT
 	#undef OKIIDOKU_FOREACH_O_EMIT
 }

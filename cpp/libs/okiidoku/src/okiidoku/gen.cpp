@@ -48,7 +48,7 @@ namespace okiidoku::mono { namespace {
 	template<Order O> requires(is_order_compiled(O))
 	void make_boxes_valid(Grid<O>& grid, const typename Ints<O>::o2x1_t h_chute, rng_t& rng) noexcept {
 		OKIIDOKU_MONO_INT_TS_TYPEDEFS
-		// std::uintmax_t op_count {0};
+		// std::uintmax_t op_count {0u};
 		SymCountsForChuteHouses<O> boxes_has {};
 		#pragma clang loop unroll(disable)
 		for (const auto chute_row : T::O1) {
@@ -61,7 +61,7 @@ namespace okiidoku::mono { namespace {
 			OKIIDOKU_CONTRACT_USE(count <= T::O1);
 		}}
 		o3i_t num_missing_syms {boxes_has.count_num_missing_syms()};
-		while (num_missing_syms != 0) [[likely]] {
+		while (num_missing_syms != 0u) [[likely]] {
 			const auto a_col {(rng() - rng_t::min()) % T::O2};
 			const auto b_col {(rng() - rng_t::min()) % T::O2};
 			const auto a_box {a_col/T::O1};
@@ -184,7 +184,7 @@ namespace okiidoku::mono {
 
 
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-		template void generate_shuffled<O_>(Grid<O_>&, rng_seed_t) noexcept;
+		template void generate_shuffled<(O_)>(Grid<(O_)>&, rng_seed_t) noexcept;
 	OKIIDOKU_FOREACH_O_DO_EMIT
 	#undef OKIIDOKU_FOREACH_O_EMIT
 }
@@ -195,7 +195,7 @@ namespace okiidoku::visitor {
 	void generate_shuffled(Grid& vis_sink, const rng_seed_t rng_seed) noexcept {
 		switch (vis_sink.get_order()) {
 		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-		case O_: return mono::generate_shuffled(vis_sink.unchecked_get_mono_exact<O_>(), rng_seed);
+		case (O_): return mono::generate_shuffled(vis_sink.unchecked_get_mono_exact<(O_)>(), rng_seed);
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
 		default: OKIIDOKU_UNREACHABLE;
@@ -205,7 +205,7 @@ namespace okiidoku::visitor {
 	Grid generate_shuffled(const Order O, const rng_seed_t rng_seed) noexcept {
 		switch (O) {
 		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-		case O_: return mono::generate_shuffled<O_>(rng_seed);
+		case (O_): return mono::generate_shuffled<(O_)>(rng_seed);
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
 		default: OKIIDOKU_UNREACHABLE;

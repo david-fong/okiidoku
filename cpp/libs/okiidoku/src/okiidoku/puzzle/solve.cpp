@@ -98,7 +98,7 @@ namespace okiidoku::mono {
 
 
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-		template class FastSolver<O_>;
+		template class FastSolver<(O_)>;
 	OKIIDOKU_FOREACH_O_DO_EMIT
 	#undef OKIIDOKU_FOREACH_O_EMIT
 }

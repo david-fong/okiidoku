@@ -62,7 +62,7 @@ int main(const int argc, char const *const argv[]) {
 
 	okiidoku::util::SharedRng shared_rng(srand_key);
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-	do_training<O_>(shared_rng, 1000);
+	do_training<(O_)>(shared_rng, 1000);
 	OKIIDOKU_FOREACH_O_DO_EMIT
 	#undef OKIIDOKU_FOREACH_O_EMIT
 	return 0;

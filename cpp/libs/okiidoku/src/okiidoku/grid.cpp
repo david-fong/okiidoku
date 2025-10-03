@@ -91,10 +91,10 @@ namespace okiidoku::mono {
 
 
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-		template bool grid_follows_rule<O_>(const Grid<O_>&) noexcept; \
-		template bool grid_is_filled<O_>(const Grid<O_>&) noexcept; \
-		template bool grid_is_empty<O_>(const Grid<O_>&) noexcept; \
-		template void init_most_canonical_grid<O_>(Grid<O_>&) noexcept;
+		template bool grid_follows_rule<(O_)>(const Grid<(O_)>&) noexcept; \
+		template bool grid_is_filled<(O_)>(const Grid<(O_)>&) noexcept; \
+		template bool grid_is_empty<(O_)>(const Grid<(O_)>&) noexcept; \
+		template void init_most_canonical_grid<(O_)>(Grid<(O_)>&) noexcept;
 	OKIIDOKU_FOREACH_O_DO_EMIT
 	#undef OKIIDOKU_FOREACH_O_EMIT
 }
@@ -105,7 +105,7 @@ namespace okiidoku::visitor {
 	bool grid_follows_rule(const Grid& vis_grid) noexcept {
 		switch (vis_grid.get_order()) {
 		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-		case O_: return mono::grid_follows_rule(vis_grid.unchecked_get_mono_exact<O_>());
+		case (O_): return mono::grid_follows_rule(vis_grid.unchecked_get_mono_exact<(O_)>());
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
 		default: OKIIDOKU_UNREACHABLE;
@@ -115,7 +115,7 @@ namespace okiidoku::visitor {
 	bool grid_is_filled(const Grid& vis_grid) noexcept {
 		switch (vis_grid.get_order()) {
 		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-		case O_: return mono::grid_is_filled(vis_grid.unchecked_get_mono_exact<O_>());
+		case (O_): return mono::grid_is_filled(vis_grid.unchecked_get_mono_exact<(O_)>());
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
 		default: OKIIDOKU_UNREACHABLE;
@@ -125,7 +125,7 @@ namespace okiidoku::visitor {
 	bool grid_is_empty(const Grid& vis_grid) noexcept {
 		switch (vis_grid.get_order()) {
 		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-		case O_: return mono::grid_is_empty(vis_grid.unchecked_get_mono_exact<O_>());
+		case (O_): return mono::grid_is_empty(vis_grid.unchecked_get_mono_exact<(O_)>());
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
 		default: OKIIDOKU_UNREACHABLE;
@@ -135,7 +135,7 @@ namespace okiidoku::visitor {
 	void init_most_canonical_grid(Grid& vis_grid) noexcept {
 		switch (vis_grid.get_order()) {
 		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-		case O_: return mono::init_most_canonical_grid(vis_grid.unchecked_get_mono_exact<O_>());
+		case (O_): return mono::init_most_canonical_grid(vis_grid.unchecked_get_mono_exact<(O_)>());
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
 		default: OKIIDOKU_UNREACHABLE;
@@ -146,7 +146,7 @@ namespace okiidoku::visitor {
 	Grid::sym_t Grid::operator[](const ints::o4x_t rmi) const noexcept {
 		switch (this->get_order()) {
 		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-		case O_: return this->unchecked_get_mono_exact<O_>()[rmi];
+		case (O_): return this->unchecked_get_mono_exact<(O_)>()[rmi];
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
 		default: OKIIDOKU_UNREACHABLE;
@@ -156,7 +156,7 @@ namespace okiidoku::visitor {
 	Grid::sym_t Grid::operator[](const ints::o2x_t row, const ints::o2x_t col) const noexcept {
 		switch (this->get_order()) {
 		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-		case O_: return this->unchecked_get_mono_exact<O_>()[row, col];
+		case (O_): return this->unchecked_get_mono_exact<(O_)>()[row, col];
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
 		default: OKIIDOKU_UNREACHABLE;

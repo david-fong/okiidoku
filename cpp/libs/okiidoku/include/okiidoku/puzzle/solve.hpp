@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2020 David Fong
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#ifndef HPP_OKIIDOKU__PUZZLE__SOLVE
-#define HPP_OKIIDOKU__PUZZLE__SOLVE
+#ifndef HPP_OKIIDOKU_PUZZLE_SOLVE
+#define HPP_OKIIDOKU_PUZZLE_SOLVE
 
 #include <okiidoku/grid.hpp>
 #include <okiidoku/ints.hpp>
@@ -37,7 +37,7 @@ namespace okiidoku::mono {
 		};
 
 		/// \pre none. puzzle can even blatantly break the one rule.
-		void reinit_with_puzzle(const Grid<O>& puzzle, const std::optional<CandSymToIgnore> = {}) noexcept;
+		void reinit_with_puzzle(const Grid<O>& puzzle, std::optional<CandSymToIgnore> = {}) noexcept;
 
 		// return of `std::nullopt` means no more solutions exist for the puzzle.
 		// example usage: `while (const auto solution {solution_walker.get_next_solution()}; solution) {...}`
@@ -61,7 +61,7 @@ namespace okiidoku::mono {
 		std::unique_ptr<engine_t> engine_;
 		#endif
 
-		num_solns_found_t num_solns_found_ {0};
+		num_solns_found_t num_solns_found_ {0u};
 	};
 }
 

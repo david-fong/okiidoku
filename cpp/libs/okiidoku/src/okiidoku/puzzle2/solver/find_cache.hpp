@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2020 David Fong
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#ifndef HPP_OKIIDOKU__PUZZLE__SOLVER2__FIND_CACHE
-#define HPP_OKIIDOKU__PUZZLE__SOLVER2__FIND_CACHE
+#ifndef HPP_OKIIDOKU_PUZZLE_SOLVER2_FIND_CACHE
+#define HPP_OKIIDOKU_PUZZLE_SOLVER2_FIND_CACHE
 
 #include <okiidoku/o2_bit_arr.hpp>
 

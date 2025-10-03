@@ -58,31 +58,66 @@ install(DIRECTORY # includes
 # TODO clang doesn't support -fkeep-inline-functions, need to use something else... maybe -fno-inline-functions... :(
 add_compile_options("$<${debug_configs}:$<$<CXX_COMPILER_ID:GNU>:-fkeep-inline-functions>>")
 
+
 # MARK: debug support
 # too bad can't use execute_process or file(CREATE_LINK) because there's a generator expression in OKIIDOKU_DATA_OUTPUT_DIRECTORY.
 include(GNUInstallDirs)
 block()
 	set(c "${CMAKE_COMMAND};-E")
-	set(src "${okiidoku_SOURCE_DIR}/tools")
-	add_custom_command(
+	set(tools "${okiidoku_SOURCE_DIR}/tools")
+
+	# gdb python extension
+	# https://sourceware.org/gdb/current/onlinedocs/gdb.html/Which-flavor-to-choose_003f.html
+	if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+		target_sources(okiidoku PRIVATE
+			# add `.debug_gdb_scripts` to cover for build as a static lib:
+			"$<${debug_configs}:${CMAKE_CURRENT_SOURCE_DIR}/src/okiidoku/debug/gdb_support.cpp>"
+			# note: alternatively to the `debug_configs` generator expression, could probably use `NDEBUG` in the cpp file.
+		)
+	endif()
+	if(BUILD_SHARED_LIBS)
+		# https://sourceware.org/gdb/current/onlinedocs/gdb.html/objfile_002dgdbdotext-file.html
+		add_custom_command(TARGET okiidoku POST_BUILD
+			COMMENT "symlinking okiidoku-gdb.py to build directory"
+			COMMAND "${c};make_directory;${OKIIDOKU_DATA_OUTPUT_DIRECTORY}/gdb/auto-load"
+			COMMAND "${c};create_symlink;${tools}/okiidoku-gdb.py;$<TARGET_SONAME_FILE:okiidoku>-gdb.py"
+			VERBATIM COMMAND_EXPAND_LISTS
+		)
+		install(FILES "${tools}/okiidoku-gdb.py"
+			RENAME "$<TARGET_SONAME_FILE_NAME:okiidoku>-gdb.py"
+			DESTINATION "${CMAKE_INSTALL_DATADIR}/gdb/auto-load/${CMAKE_INSTALL_PREFIX}"
+			COMPONENT okiidoku_development
+		)
+	endif()
+
+	# natvis search: https://learn.microsoft.com/en-us/visualstudio/debugger/create-custom-views-of-native-objects#BKMK_natvis_location
+	add_custom_command(TARGET okiidoku POST_BUILD
 		COMMENT "symlinking debug-support files to data / build directory"
-		DEPENDS "${src}/okiidoku.gdb.py" "${src}/okiidoku.natvis"
-		OUTPUT
-			"${OKIIDOKU_DATA_OUTPUT_DIRECTORY}/okiidoku.gdb.py"
-			"${OKIIDOKU_DATA_OUTPUT_DIRECTORY}/okiidoku.natvis"
+		# DEPENDS "${tools}/okiidoku.natvis" "${tools}/.gdbinit"
+		# OUTPUT
+		# 	"${OKIIDOKU_DATA_OUTPUT_DIRECTORY}/okiidoku.natvis"
+		# 	"${OKIIDOKU_TEST_WORKING_DIRECTORY}/.gdbinit"
 		COMMAND "${c};make_directory;${OKIIDOKU_DATA_OUTPUT_DIRECTORY}/okiidoku"
-		COMMAND "${c};create_symlink;${src}/okiidoku.gdb.py;${OKIIDOKU_DATA_OUTPUT_DIRECTORY}/okiidoku/okiidoku.gdb.py"
-		COMMAND "${c};create_symlink;${src}/okiidoku.natvis;${OKIIDOKU_DATA_OUTPUT_DIRECTORY}/okiidoku/okiidoku.natvis"
+		COMMAND "${c};create_symlink;${tools}/okiidoku.natvis;${OKIIDOKU_DATA_OUTPUT_DIRECTORY}/okiidoku/okiidoku.natvis"
+		COMMAND "${c};create_symlink;${tools}/.gdbinit;${OKIIDOKU_TEST_WORKING_DIRECTORY}/.gdbinit" # local init file (https://sourceware.org/gdb/current/onlinedocs/gdb.html/Initialization-Files.html)
 		VERBATIM COMMAND_EXPAND_LISTS
 	)
-	install(FILES # debug support files
-			"${src}/okiidoku.gdb.py"
-			"${src}/okiidoku.natvis"
-		DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/okiidoku" # see DEFINE_GDB_PY_SCRIPT in gdb_support.cpp
-		# also https://learn.microsoft.com/en-us/visualstudio/debugger/create-custom-views-of-native-objects#BKMK_natvis_location and https://learn.microsoft.com/en-us/cpp/build/reference/natvis-add-natvis-to-pdb so if a PDB is installed with embedded natvis, no need to install natvis separately?
-		COMPONENT okiidoku_development
-	)
+	# tell Visual Studio IDE that the PDB exists (https://discourse.cmake.org/t/7316/2):
+	target_sources(okiidoku PRIVATE "${tools}/okiidoku.natvis") # TODO.low is this needed, given the below link option?
+	if(MSVC) # cl or clang-cl
+		# embed natvis in PDB https://gitlab.kitware.com/cmake/cmake/-/issues/16874
+		# https://learn.microsoft.com/en-us/cpp/build/reference/natvis-add-natvis-to-pdb
+		target_link_options(okiidoku PRIVATE "/NATVIS:${tools}/okiidoku.natvis")
+		# TODO verify whether ^this even works or not. see https://gitlab.kitware.com/cmake/cmake/-/issues/23215
+		# https://gitlab.kitware.com/cmake/cmake/-/issues/26278#note_1586578
+
+		install(FILES "$<TARGET_PDB_FILE:okiidoku>"
+			DESTINATION "${CMAKE_INSTALL_LIBDIR2}"
+			COMPONENT okiidoku_development OPTIONAL
+		)
+	endif()
 endblock()
+
 
 # MARK: dependencies
 target_link_libraries(okiidoku

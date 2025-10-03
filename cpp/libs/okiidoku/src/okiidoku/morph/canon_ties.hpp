@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2020 David Fong
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#ifndef HPP_OKIIDOKU__MORPH__TIES
-#define HPP_OKIIDOKU__MORPH__TIES
+#ifndef HPP_OKIIDOKU_MORPH_TIES
+#define HPP_OKIIDOKU_MORPH_TIES
 
 #include <okiidoku/o2_bit_arr.hpp>
 #include <okiidoku/ints.hpp>
@@ -58,7 +58,7 @@ namespace okiidoku::mono::detail {
 			O2BitArr<O>::Iter it_;
 			i_t begin_;
 		public:
-			Iter(const O2BitArr<O>& links) noexcept: it_{links.set_bits()}, begin_{ix_t::unchecked_from(*it_)} { ++it_; }
+			explicit Iter(const O2BitArr<O>& links) noexcept: it_{links.set_bits()}, begin_{ix_t::unchecked_from(*it_)} { ++it_; }
 
 			TieRange operator*() const noexcept { return TieRange{ix_t{begin_}, i_t::unchecked_from(*it_)}; }
 			Iter& operator++()    noexcept { ++it_; begin_ = ix_t::unchecked_from(*it_); ++it_; return *this; }

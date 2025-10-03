@@ -221,7 +221,7 @@ namespace okiidoku::mono::detail::solver {
 		OKIIDOKU_CONTRACT_ASSERT(e.debug_check_correct_num_unsolved_());
 
 		e.found_queues_.clear();
-		e.total_guesses_ = 0;
+		e.total_guesses_ = 0u;
 		return UnwindInfo::make_did_unwind_guess();
 	} */
 
@@ -255,9 +255,9 @@ namespace okiidoku::mono::detail::solver {
 
 
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-		template struct FoundQueues<O_>; \
-		template struct EngineImpl<O_>; \
-		template class Engine<O_>;
+		template struct FoundQueues<(O_)>; \
+		template struct EngineImpl<(O_)>; \
+		template class Engine<(O_)>;
 	OKIIDOKU_FOREACH_O_DO_EMIT
 	#undef OKIIDOKU_FOREACH_O_EMIT
 }

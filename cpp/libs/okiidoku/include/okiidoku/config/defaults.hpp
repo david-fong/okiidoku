@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2020 David Fong
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#ifndef HPP_OKIIDOKU__CONFIG__DEFAULTS
-#define HPP_OKIIDOKU__CONFIG__DEFAULTS
+#ifndef HPP_OKIIDOKU_CONFIG_DEFAULTS
+#define HPP_OKIIDOKU_CONFIG_DEFAULTS
 
 // https://vector-of-bool.github.io/2020/10/04/lib-configuration.html
 #if __has_include(<okiidoku_compiled_orders.tweaks.h>)

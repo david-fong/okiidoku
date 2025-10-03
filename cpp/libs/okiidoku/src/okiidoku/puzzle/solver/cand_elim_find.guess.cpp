@@ -162,7 +162,7 @@ namespace okiidoku::mono::detail::solver {
 	}
 
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-		template Guess<O_> CandElimFind<O_>::good_guess_candidate(const Engine<O_>&) noexcept;
+		template Guess<(O_)> CandElimFind<(O_)>::good_guess_candidate(const Engine<(O_)>&) noexcept;
 	OKIIDOKU_FOREACH_O_DO_EMIT
 	#undef OKIIDOKU_FOREACH_O_EMIT
 }

@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2020 David Fong
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#ifndef HPP_OKIIDOKU__MORPH__TRANSFORM
-#define HPP_OKIIDOKU__MORPH__TRANSFORM
+#ifndef HPP_OKIIDOKU_MORPH_TRANSFORM
+#define HPP_OKIIDOKU_MORPH_TRANSFORM
 
 #include <okiidoku/ints.hpp>
 #include <okiidoku/detail/visitor.hpp>
@@ -61,7 +61,7 @@ namespace okiidoku::mono {
 		// [[nodiscard, gnu::pure]] Transformation<O> chain(const Transformation<O>&) const noexcept;
 	};
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-		static_assert(std::is_aggregate_v<Transformation<O_>>);
+		static_assert(std::is_aggregate_v<Transformation<(O_)>>);
 	OKIIDOKU_FOREACH_O_DO_EMIT
 	#undef OKIIDOKU_FOREACH_O_EMIT
 }

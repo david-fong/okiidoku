@@ -9,7 +9,6 @@
 
 namespace okiidoku::mono {
 
-	// contract: `grid` is filled and follows the one rule.
 	template<Order O> requires(is_order_compiled(O))
 	Transformation<O> canonicalize(Grid<O>& grid) noexcept {
 		OKIIDOKU_CONTRACT_ASSERT(grid_is_filled(grid));
@@ -21,7 +20,7 @@ namespace okiidoku::mono {
 	}
 
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-		template Transformation<O_> canonicalize<O_>(Grid<O_>&) noexcept;
+		template Transformation<(O_)> canonicalize<(O_)>(Grid<(O_)>&) noexcept;
 	OKIIDOKU_FOREACH_O_DO_EMIT
 	#undef OKIIDOKU_FOREACH_O_EMIT
 }
@@ -29,11 +28,10 @@ namespace okiidoku::mono {
 
 namespace okiidoku::visitor {
 
-	// contract: `vis_grid` is filled and follows the one rule.
 	Transformation canonicalize(Grid& vis_grid) noexcept {
 		switch (vis_grid.get_order()) {
 		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-		case O_: return static_cast<Transformation>(mono::canonicalize(vis_grid.unchecked_get_mono_exact<O_>()));
+		case (O_): return static_cast<Transformation>(mono::canonicalize(vis_grid.unchecked_get_mono_exact<(O_)>()));
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
 		default: OKIIDOKU_UNREACHABLE;

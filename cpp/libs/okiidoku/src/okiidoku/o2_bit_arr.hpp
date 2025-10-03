@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2020 David Fong
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#ifndef HPP_OKIIDOKU__O2_BIT_ARR
-#define HPP_OKIIDOKU__O2_BIT_ARR
+#ifndef HPP_OKIIDOKU_O2_BIT_ARR
+#define HPP_OKIIDOKU_O2_BIT_ARR
 
 #include <okiidoku/ints.hpp>
 #include <okiidoku/order.hpp>
@@ -76,7 +76,7 @@ namespace okiidoku::mono {
 	private:
 		/** \internal If user follows contracts, excess top bits are always zero. */
 		using words_t = std::array<word_t, num_words>;
-		words_t words_ {word_t{0}}; ///< \copydoc words_t
+		words_t words_ {word_t{0u}}; ///< \copydoc words_t
 
 	public:
 		constexpr O2BitArr() noexcept = default;
@@ -96,7 +96,7 @@ namespace okiidoku::mono {
 
 		/** count the number of set bits below the specified bit index.
 		\pre `end < O2`. */
-		[[nodiscard, gnu::pure]] o2x_t count_below(const o2x_t end) const noexcept;
+		[[nodiscard, gnu::pure]] o2x_t count_below(o2x_t end) const noexcept;
 
 		/** \pre `at < O2`. */
 		[[nodiscard, gnu::pure]] constexpr bool operator[](const typename Ints<O>::o2x_t at) const noexcept {
@@ -132,7 +132,7 @@ namespace okiidoku::mono {
 		}
 
 		void unset_all() noexcept {
-			words_.fill(0);
+			words_.fill(0u);
 		}
 
 		/** \pre `at < O2`. */
@@ -141,7 +141,7 @@ namespace okiidoku::mono {
 			const auto word_i {bit_i_to_word_i(at)};
 			const word_t word_bit_mask {word_bit_mask_for_bit_i(at)};
 			// TODO consider rewriting to just logical-or testing each one separately
-			return ((a.words_[word_i] | b.words_[word_i] | c.words_[word_i]) & word_bit_mask) != word_t{0};
+			return ((a.words_[word_i] | b.words_[word_i] | c.words_[word_i]) & word_bit_mask) != word_t{0u};
 		}
 		/** \pre `at < O2`. */
 		static void set3(const o2x_t at, O2BitArr& a, O2BitArr& b, O2BitArr& c) noexcept {
@@ -218,13 +218,13 @@ namespace okiidoku::mono {
 				OKIIDOKU_CONTRACT_USE(i_ < T::O2);
 				word_i_t word_i = i_ / word_t_num_bits;
 				OKIIDOKU_CONTRACT_USE(word_i < num_words); // should be obvious, but MSVC is struggling :/
-				while (word_i < num_words && arr_.words_[word_i] == 0) /*[[unlikely]]*/ { ++word_i; }
+				while (word_i < num_words && arr_.words_[word_i] == 0u) /*[[unlikely]]*/ { ++word_i; }
 				if (word_i < num_words) [[likely]] {
-					OKIIDOKU_CONTRACT_USE(arr_.words_[word_i] != 0);
+					OKIIDOKU_CONTRACT_USE(arr_.words_[word_i] != 0u);
 					auto& word {arr_.words_[word_i]};
 					OKIIDOKU_CONTRACT_USE(((word_i * word_t_num_bits) + std::countr_zero(word)) < T::O2);
 					i_ = (word_i * word_t_num_bits) + std::countr_zero(word);
-					word &= static_cast<word_t>(word-word_t{1}); // unset lowest bit
+					word &= static_cast<word_t>(word-word_t{1u}); // unset lowest bit
 				} else {
 					i_ = T::O2;
 				}
@@ -251,7 +251,7 @@ namespace okiidoku::mono {
 		[[nodiscard, gnu::pure]] OKIIDOKU_KEEP_FOR_DEBUG std::array<char, T::O2> to_chars() const noexcept;
 	};
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-		static_assert(!std::is_aggregate_v<O2BitArr<O_>>);
+		static_assert(!std::is_aggregate_v<O2BitArr<(O_)>>);
 	OKIIDOKU_FOREACH_O_DO_EMIT
 	#undef OKIIDOKU_FOREACH_O_EMIT
 

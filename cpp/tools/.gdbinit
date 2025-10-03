@@ -4,5 +4,8 @@
 # https://sourceware.org/gdb/current/onlinedocs/gdb.html/Init-File-in-the-Current-Directory.html#Init-File-in-the-Current-Directory
 # https://sourceware.org/gdb/current/onlinedocs/gdb.html/Auto_002dloading-safe-path.html#Auto_002dloading-safe-path
 
+# set auto-load python-scripts on # on by default
+# info auto-load python-scripts
+
 # set substitute-path /okiidoku # TODO
 b __sanitizer::Die # https://github.com/google/sanitizers/wiki/AddressSanitizerAndDebugger#gdb

@@ -32,7 +32,7 @@ namespace okiidoku::mono::detail::solver {
 	#undef OKIIDOKU_CAND_ELIM_FINDER_DEF
 
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-		template UnwindInfo CandElimFind<O_>::fish(Engine<O_>&) noexcept;
+		template UnwindInfo CandElimFind<(O_)>::fish(Engine<(O_)>&) noexcept;
 	OKIIDOKU_FOREACH_O_DO_EMIT
 	#undef OKIIDOKU_FOREACH_O_EMIT
 }

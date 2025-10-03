@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2020 David Fong
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#ifndef HPP_OKIIDOKU__PUZZLE__SOLVER2__CANDS
-#define HPP_OKIIDOKU__PUZZLE__SOLVER2__CANDS
+#ifndef HPP_OKIIDOKU_PUZZLE_SOLVER2_CANDS
+#define HPP_OKIIDOKU_PUZZLE_SOLVER2_CANDS
 
 #include <okiidoku/grid.hpp>
 #include <okiidoku/o2_bit_arr.hpp>
@@ -68,7 +68,7 @@ namespace okiidoku::mono::detail::solver2 {
 
 	struct [[nodiscard]] FindStat {
 		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-		friend FindStat unwind_one_stack_frame_of_<O_>(EngineImpl<O_>&) noexcept;
+		friend FindStat unwind_one_stack_frame_of_<(O_)>(EngineImpl<(O_)>&) noexcept;
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
 	private:

@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2020 David Fong
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#ifndef HPP_OKIIDOKU__PUZZLE__SOLVER__FOUND_QUEUE
-#define HPP_OKIIDOKU__PUZZLE__SOLVER__FOUND_QUEUE
+#ifndef HPP_OKIIDOKU_PUZZLE_SOLVER_FOUND_QUEUE
+#define HPP_OKIIDOKU_PUZZLE_SOLVER_FOUND_QUEUE
 
 #include <okiidoku/puzzle/solver/found.hpp>
 #include <okiidoku/order.hpp>
@@ -56,7 +56,7 @@ namespace okiidoku::mono::detail::solver {
 
 
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-		extern template struct FoundQueues<O_>; // instantiated in engine.cpp
+		extern template struct FoundQueues<(O_)>; // instantiated in engine.cpp
 	OKIIDOKU_FOREACH_O_DO_EMIT
 	#undef OKIIDOKU_FOREACH_O_EMIT
 }

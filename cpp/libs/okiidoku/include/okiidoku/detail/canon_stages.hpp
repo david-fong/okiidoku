@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2020 David Fong
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#ifndef HPP_OKIIDOKU__DETAIL__CANON_STAGES
-#define HPP_OKIIDOKU__DETAIL__CANON_STAGES
+#ifndef HPP_OKIIDOKU_DETAIL_CANON_STAGES
+#define HPP_OKIIDOKU_DETAIL_CANON_STAGES
 
 #include <okiidoku/morph/transform.hpp>
 #include <okiidoku/order.hpp>

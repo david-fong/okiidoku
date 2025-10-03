@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2020 David Fong
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#ifndef HPP_OKIIDOKU__PUZZLE__SOLVER2__ENGINE
-#define HPP_OKIIDOKU__PUZZLE__SOLVER2__ENGINE
+#ifndef HPP_OKIIDOKU_PUZZLE_SOLVER2_ENGINE
+#define HPP_OKIIDOKU_PUZZLE_SOLVER2_ENGINE
 
 #include <okiidoku/puzzle2/solver/cands.hpp>
 #include <okiidoku/puzzle2/solver/find_cache.hpp>
@@ -26,9 +26,10 @@ namespace okiidoku::mono::detail::solver2 {
 
 	template<Order O> requires(is_order_compiled(O)) struct EngineImpl;
 
-	// usage: must be called immediately when a cell's candidate-symbol count
-	//  changes to zero. call to prepare to find another solution.
-	// contract: `engine.no_more_solns` returns `false`.
+	/**
+	usage: must be called immediately when a cell's candidate-symbol count
+		changes to zero. call to prepare to find another solution.
+	\pre `engine.no_more_solns` returns `false`. */
 	template<Order O> requires(is_order_compiled(O))
 	FindStat unwind_one_stack_frame_of_(EngineImpl<O>&) noexcept;
 
@@ -58,10 +59,11 @@ namespace okiidoku::mono::detail::solver2 {
 			FindCacheForFish<O> find_cache_fish;
 		};
 
-		// TODO consider a different design: cands_povs_ and num_unsolved_ are just the top
-		// entry of the guess_stack_. no_more_solns_ is implied when the guess stack size is zero.
-		//  This would make the EngineImpl struct size small enough to probably justify no longer wrapping
-		//   Engine with unique_ptr in the Solver classes.
+		/**
+		\todo consider a different design: cands_povs_ and num_unsolved_ are just the top
+			entry of the guess_stack_. no_more_solns_ is implied when the guess stack size is zero.
+			this would make the EngineImpl struct size small enough to probably justify no longer wrapping */
+		Engine with unique_ptr in the Solver classes.
 		struct GuessStackFrame {
 			Frame frame;
 			Guess<O> guess;
@@ -75,21 +77,22 @@ namespace okiidoku::mono::detail::solver2 {
 	public:
 		EngineImpl() noexcept = default;
 
-		// contract: none. puzzle can even blatantly break the one rule.
+		/** \pre none. puzzle can even blatantly break the one rule. */
 		void reinit_with_puzzle(const Grid<O>& puzzle) noexcept;
 
-		// The user of the engine must respond to `get_next_solution` with `std::nullopt`
-		// if this returns `true`.
-		//
-		// Note: All candidate elimination techniques have a contract that this returns `false`.
-		// contract: All other non-const member functions require that this return `false`.
+		/**
+		the user of the engine must respond to `get_next_solution` with `std::nullopt`
+		if this returns `true`.
+
+		\note all candidate elimination techniques have a contract that this returns `false`.
+		\pre all other non-const member functions require that this return `false`. */
 		[[nodiscard, gnu::pure]]
 		auto no_more_solns() const noexcept { return no_more_solns_; }
 
 		[[nodiscard, gnu::pure]]
 		auto get_num_unsolved() const noexcept { return frame_.cands_povs.num_unsolved(); }
 
-		// contract: `sym` is currently one of _multiple_ candidate-symbols at `rmi`.
+		/** \pre `sym` is currently one of _multiple_ candidate-symbols at `rmi`. */
 		void push_guess(Guess<O>) noexcept;
 
 		[[nodiscard, gnu::pure]]
@@ -98,9 +101,10 @@ namespace okiidoku::mono::detail::solver2 {
 		[[nodiscard, gnu::pure]]
 		std::uint_fast64_t get_total_guesses() const noexcept { return total_guesses_; };
 
-		// contract: `no_more_solns` returns `false`.
-		// contract: `get_num_unsolved` returns zero.
-		// returns a filled grid that follows the one rule and contains all the puzzle's givens.
+		/**
+		\pre `no_more_solns` returns `false`.
+		\pre `get_num_unsolved` returns zero.
+		\returns a filled grid that follows the one rule and contains all the puzzle's givens. */
 		[[nodiscard, gnu::pure]]
 		Grid<O> build_solution_obj() const noexcept;
 
@@ -118,22 +122,23 @@ namespace okiidoku::mono::detail::solver2 {
 		\pre `sym` is registered as the only candidate-symbol at `rmi`. */
 		void register_new_given_(rmi_t rmi, sym_t sym) noexcept;
 
-		// The specified candidate-symbol is allowed to already be removed.
+		// the specified candidate-symbol is allowed to already be removed.
 		FindStat do_elim_remove_sym_(rmi_t rmi, sym_t cand) noexcept;
 
-		// The specified candidate-symbols are allowed to already be removed.
+		// the specified candidate-symbols are allowed to already be removed.
 		FindStat do_elim_remove_syms_(rmi_t rmi, const O2BitArr<O>& to_remove) noexcept;
 
 	private:
-		// The specified candidate-symbol is allowed to already be removed.
+		// the specified candidate-symbol is allowed to already be removed.
 		template<class F> requires(std::is_invocable_v<F, O2BitArr<O>&>)
 		FindStat do_elim_generic_(rmi_t rmi, F elim_fn) noexcept;
 
-		// contract: must be called immediately when a cell's candidate-symbol count _changes_ to one.
-		// contract: (it follows that) no previous call in the context of the current
-		//  guess stack has been made with the same value of `rmi`.
-		// contract: (it follows that) the cell at `rmi` has exactly one candidate-symbol.
-		// post-condition: decrements `num_unsolved`.
+		/**
+		\pre must be called immediately when a cell's candidate-symbol count _changes_ to one.
+		\pre (it follows that) no previous call in the context of the current
+			guess stack has been made with the same value of `rmi`.
+		\pre (it follows that) the cell at `rmi` has exactly one candidate-symbol.
+		\post decrements `num_unsolved`. */
 		void enqueue_cand_elims_for_new_cell_claim_sym_(rmi_t rmi) noexcept;
 
 
@@ -167,14 +172,14 @@ namespace okiidoku::mono::detail::solver2 {
 		using EngineImpl<O>::get_total_guesses;
 		using EngineImpl<O>::build_solution_obj;
 
-		// contract: `no_more_solns` returns `false`.
+		/** \pre `no_more_solns` returns `false`. */
 		FindStat unwind_one_stack_frame() noexcept;
 	};
 
 
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-		extern template struct EngineImpl<O_>; \
-		extern template class Engine<O_>;
+		extern template struct EngineImpl<(O_)>; \
+		extern template class Engine<(O_)>;
 	OKIIDOKU_FOREACH_O_DO_EMIT
 	#undef OKIIDOKU_FOREACH_O_EMIT
 }

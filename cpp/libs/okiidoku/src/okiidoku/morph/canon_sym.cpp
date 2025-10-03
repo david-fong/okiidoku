@@ -12,7 +12,6 @@
 #include <algorithm>  // swap, sort, ranges::next_permutation
 #include <functional> // greater
 #include <numeric>    // iota
-#include <cstdlib>    // abs
 #include <compare>    // is_eq
 
 /** for each pair of symbols, given something like this (each item place is for a box,
@@ -154,7 +153,7 @@ namespace okiidoku::mono::detail {
 	}
 
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-		template sym_map_t<O_> canon_sym<O_>(Grid<O_>&) noexcept;
+		template sym_map_t<(O_)> canon_sym<(O_)>(Grid<(O_)>&) noexcept;
 	OKIIDOKU_FOREACH_O_DO_EMIT
 	#undef OKIIDOKU_FOREACH_O_EMIT
 }

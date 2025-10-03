@@ -28,7 +28,7 @@ namespace okiidoku::mono {
 
 
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-		template void scramble<O_>(Transformation<O_>&, const rng_seed_t) noexcept;
+		template void scramble<(O_)>(Transformation<(O_)>&, const rng_seed_t) noexcept;
 	OKIIDOKU_FOREACH_O_DO_EMIT
 	#undef OKIIDOKU_FOREACH_O_EMIT
 }
@@ -39,7 +39,7 @@ namespace okiidoku::visitor {
 	void scramble(Transformation& it, const rng_seed_t rng_seed) noexcept {
 		switch (it.get_order()) {
 		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-		case O_: return mono::scramble(it.unchecked_get_mono_exact<O_>(), rng_seed);
+		case (O_): return mono::scramble(it.unchecked_get_mono_exact<(O_)>(), rng_seed);
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
 		default: OKIIDOKU_UNREACHABLE;

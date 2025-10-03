@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2020 David Fong
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#ifndef HPP_OKIIDOKU_CLI__CONFIG
-#define HPP_OKIIDOKU_CLI__CONFIG
+#ifndef HPP_OKIIDOKU_CLI_CONFIG
+#define HPP_OKIIDOKU_CLI_CONFIG
 
 #include <okiidoku/order.hpp>
 

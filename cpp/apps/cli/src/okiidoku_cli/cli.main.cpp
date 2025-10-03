@@ -34,7 +34,7 @@ int main(const int argc, char const *const argv[]) {
 	const auto srand_key {[&]() -> std::uint_fast64_t {
 		if (argc > 2) {
 			const std::string_view arg {argv[2uz]};
-			std::uint_fast64_t parsed {};
+			std::uint_fast64_t parsed {}; // NOLINT(misc-const-correctness) seems like a clang-tidy bug :/
 			if (std::from_chars(arg.data(), arg.data()+arg.size(), parsed, 16).ec == std::errc{}) {
 				return parsed;
 			}

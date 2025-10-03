@@ -32,10 +32,11 @@ if(EMSCRIPTEN)
 	set(CMAKE_INSTALL_LIBDIR .)
 	set(CMAKE_INSTALL_DATAROOTDIR .)
 	set(CMAKE_INSTALL_DOCDIR "doc")
-	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${base}")
-	set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${base}")
-	set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${base}")
-	set(OKIIDOKU_DATA_OUTPUT_DIRECTORY "${base}")
+	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY  "${base}")
+	set(CMAKE_LIBRARY_OUTPUT_DIRECTORY  "${base}")
+	set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY  "${base}")
+	set(OKIIDOKU_DATA_OUTPUT_DIRECTORY  "${base}")
+	set(OKIIDOKU_TEST_WORKING_DIRECTORY "${base}")
 	unset(base)
 	unset(is_multi_config)
 	return()
@@ -58,8 +59,11 @@ if(
 	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY     "${base}/${CMAKE_INSTALL_BINDIR}")
 	set(CMAKE_LIBRARY_OUTPUT_DIRECTORY     "${base}/${CMAKE_INSTALL_LIBDIR2}")
 	set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY     "${base}/${CMAKE_INSTALL_LIBDIR}")
-	set(CMAKE_COMPILE_PDB_OUTPUT_DIRECTORY "${base}/${CMAKE_INSTALL_BINDIR}")
-	set(CMAKE_PDB_OUTPUT_DIRECTORY         "${base}/${CMAKE_INSTALL_BINDIR}")
+
+	# how pdb search works: https://learn.microsoft.com/en-us/visualstudio/debugger/specify-symbol-dot-pdb-and-source-files-in-the-visual-studio-debugger#where-the-debugger-looks-for-symbols
+	set(CMAKE_PDB_OUTPUT_DIRECTORY         "${base}/${CMAKE_INSTALL_BINDIR}") # https://cmake.org/cmake/help/latest/prop_tgt/PDB_OUTPUT_DIRECTORY.html doesn't cover STATIC libs.
+	set(CMAKE_COMPILE_PDB_OUTPUT_DIRECTORY "${base}/${CMAKE_INSTALL_LIBDIR}") # TODO does this make sense?...
+
 	set(OKIIDOKU_TEST_WORKING_DIRECTORY    "${base}")
 else()
 	set(OKIIDOKU_TEST_WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
@@ -69,6 +73,6 @@ if(NOT DEFINED OKIIDOKU_DATA_OUTPUT_DIRECTORY)
 	set(OKIIDOKU_DATA_OUTPUT_DIRECTORY "${base}/${CMAKE_INSTALL_DATAROOTDIR}")
 endif()
 
-unset(CMAKE_INSTALL_LIBDIR2)
+# unset(CMAKE_INSTALL_LIBDIR2) # 🐕 let it escape :)
 unset(base)
 unset(is_multi_config)

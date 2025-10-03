@@ -200,8 +200,8 @@ namespace okiidoku::mono::detail::solver {
 
 
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-		template class CandElimApply<O_>; \
-		template class CandElimApplyImpl<O_>;
+		template class CandElimApply<(O_)>; \
+		template class CandElimApplyImpl<(O_)>;
 	OKIIDOKU_FOREACH_O_DO_EMIT
 	#undef OKIIDOKU_FOREACH_O_EMIT
 }

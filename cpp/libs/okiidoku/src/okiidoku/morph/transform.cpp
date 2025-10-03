@@ -56,7 +56,7 @@ namespace okiidoku::mono {
 
 
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-		template struct Transformation<O_>;
+		template struct Transformation<(O_)>;
 	OKIIDOKU_FOREACH_O_DO_EMIT
 	#undef OKIIDOKU_FOREACH_O_EMIT
 }
@@ -78,8 +78,8 @@ namespace okiidoku::visitor {
 		220kB. Not a big difference, but we might as well. */
 		switch (this->get_order()) {
 		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-		case O_: return this->unchecked_get_mono_exact<O_>().apply_from_to( \
-			vis_src.unchecked_get_mono_exact<O_>(), vis_dest.unchecked_get_mono_exact<O_>() \
+		case (O_): return this->unchecked_get_mono_exact<(O_)>().apply_from_to( \
+			vis_src.unchecked_get_mono_exact<(O_)>(), vis_dest.unchecked_get_mono_exact<(O_)>() \
 		);
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
@@ -94,8 +94,8 @@ namespace okiidoku::visitor {
 		}
 		switch (this->get_order()) {
 		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-		case O_: return this->unchecked_get_mono_exact<O_>().apply_in_place( \
-			vis_grid.unchecked_get_mono_exact<O_>() \
+		case (O_): return this->unchecked_get_mono_exact<(O_)>().apply_in_place( \
+			vis_grid.unchecked_get_mono_exact<(O_)>() \
 		);
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
@@ -107,7 +107,7 @@ namespace okiidoku::visitor {
 	Transformation Transformation::inverted() const noexcept {
 		switch (this->get_order()) {
 		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-		case O_: return this->unchecked_get_mono_exact<O_>().inverted();
+		case (O_): return this->unchecked_get_mono_exact<(O_)>().inverted();
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
 		default: OKIIDOKU_UNREACHABLE;

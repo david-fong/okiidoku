@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2020 David Fong
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#ifndef HPP_OKIIDOKU__PRINT_2D
-#define HPP_OKIIDOKU__PRINT_2D
+#ifndef HPP_OKIIDOKU_PRINT_2D
+#define HPP_OKIIDOKU_PRINT_2D
 
 #include <okiidoku/grid.hpp>
 #include <okiidoku/ints.hpp>
@@ -33,7 +33,7 @@ namespace okiidoku {
 
 	namespace mono {
 		template<Order O, std::same_as<Grid<O>>... Gs> requires(is_order_compiled(O) && sizeof...(Gs) > 0u)
-		void print_2d(std::ostream& os, rng_seed_t rng_seed, const Gs&... grids) noexcept {
+		inline void print_2d(std::ostream& os, rng_seed_t rng_seed, const Gs&... grids) noexcept {
 			static_assert(sizeof...(grids) > 0u);
 			const auto printers {std::to_array<print_2d_grid_view>({
 				[&](const visitor::ints::o4xs_t rmi) noexcept -> visitor::ints::o2is_t {
@@ -42,6 +42,12 @@ namespace okiidoku {
 			})};
 			return print_2d_base(O, os, rng_seed, printers);
 		}
+		/*#ifndef NDEBUG
+		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
+			template OKIIDOKU_KEEP_FOR_DEBUG void print_2d<(O_)>(std::ostream& os, rng_seed_t rng_seed, const Grid<(O_)>& grid) noexcept;
+		OKIIDOKU_FOREACH_O_DO_EMIT
+		#undef OKIIDOKU_FOREACH_O_EMIT
+		#endif*/ // arggggghhhhh
 
 		// Note: I like how the initializer list param doesn't have to be the last
 		// one to get partial template argument deduction, but I don't know how to
@@ -68,14 +74,14 @@ namespace okiidoku {
 		// does nothing if not all the grids have the same grid-order.
 		template<std::same_as<Grid>... Gs>
 		void print_2d(std::ostream& os, const rng_seed_t rng_seed, const Gs&... grids) noexcept {
-			static_assert(sizeof...(grids) > 0);
+			static_assert(sizeof...(grids) > 0uz);
 			// if (sizeof...(grids) == 0) [[unlikely]] { return; }
 			const auto tup {std::forward_as_tuple(grids...)};
 			if (!(... && (std::get<0>(tup).get_order() == grids.get_order()))) [[unlikely]] { return; }
 
 			switch (std::get<0>(tup).get_order()) {
 			#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-			case O_: return mono::print_2d<O_>(os, rng_seed, (grids.template unchecked_get_mono_exact<O_>())...);
+			case (O_): return mono::print_2d<(O_)>(os, rng_seed, (grids.template unchecked_get_mono_exact<(O_)>())...);
 			OKIIDOKU_FOREACH_O_DO_EMIT
 			#undef OKIIDOKU_FOREACH_O_EMIT
 			}

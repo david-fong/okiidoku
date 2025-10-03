@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2020 David Fong
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#ifndef HPP_OKIIDOKU__DETAIL__MIXED_RADIX_INT_SERDES
-#define HPP_OKIIDOKU__DETAIL__MIXED_RADIX_INT_SERDES
+#ifndef HPP_OKIIDOKU_DETAIL_MIXED_RADIX_INT_SERDES
+#define HPP_OKIIDOKU_DETAIL_MIXED_RADIX_INT_SERDES
 
 #include <iosfwd>
 #include <concepts>
@@ -36,7 +36,7 @@ namespace okiidoku::detail {
 	template<Radix RadixType_, std::unsigned_integral BufType_ = std::uintmax_t>
 		requires(std::numeric_limits<RadixType_>::max()-1u <= std::numeric_limits<BufType_>::max())
 		// ^this greatly simplifies implementation. if this restriction is changed, overflow handling and int casts will need to change.
-	class MixedRadixUintWriter {
+	class MixedRadixUintWriter { // NOLINT(*-member-init) `queue_`
 	public:
 		using radix_t = RadixType_;
 		using buf_t = BufType_;
@@ -133,7 +133,7 @@ namespace okiidoku::detail {
 			OKIIDOKU_CONTRACT_USE(num_bytes > 0u);
 			byte_count_ += num_bytes;
 			if constexpr (std::endian::native == std::endian::little) {
-				os.write(reinterpret_cast<char*>(&buf), num_bytes);
+				os.write(reinterpret_cast<char*>(&buf), num_bytes); // NOLINT(*-cast)
 			} else {
 				for (auto i {0uz}; i < num_bytes; ++i) {
 					os.put(TO<char>(buf));
@@ -143,9 +143,9 @@ namespace okiidoku::detail {
 
 			if (did_overflow_) [[likely]] {
 				did_overflow_ = false;
-				queue_[0uz] = queue_[queue_end_];
+				queue_.front() = queue_[queue_end_];
 				queue_end_ = 1u;
-				const auto& qi {queue_[0uz]};
+				const auto& qi {queue_.front()};
 				OKIIDOKU_CONTRACT_USE(qi.radix > 0u);
 				OKIIDOKU_CONTRACT_USE(qi.digit < qi.radix);
 				buf_radixx_ = TO<buf_t>(qi.radix-1u);
@@ -191,15 +191,16 @@ namespace okiidoku::detail {
 			std::size_t byte_count {0uz};
 			buf_ = 0u;
 			if constexpr (std::endian::native == std::endian::little) {
-				is.read(reinterpret_cast<char*>(&buf_), sizeof(buf_t));
+				is.read(reinterpret_cast<char*>(&buf_), sizeof(buf_t)); // NOLINT(*-cast)
 				byte_count = TO<std::size_t>(is.gcount());
 			} else if constexpr (std::endian::native == std::endian::big) {
-				is.read(reinterpret_cast<char*>(&buf_), sizeof(buf_t));
+				is.read(reinterpret_cast<char*>(&buf_), sizeof(buf_t)); // NOLINT(*-cast)
 				std::byteswap(buf_);
 				byte_count = TO<std::size_t>(is.gcount());
 			} else {
 				for (auto i {0uz}; i < sizeof(buf_t); ++i) {
-					char c; is.get(c); if (is) [[likely]] {
+					OKIIDOKU_DEFER_INIT char c; // NOLINT(*init*)
+					is.get(c); if (is) [[likely]] {
 						buf_ |= (buf_t{c} << (i*CHAR_BIT));
 						++byte_count;
 					} else { break; }

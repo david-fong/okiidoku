@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2020 David Fong
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#ifndef HPP_OKIIDOKU_CLI_UTILS__STR
-#define HPP_OKIIDOKU_CLI_UTILS__STR
+#ifndef HPP_OKIIDOKU_CLI_UTILS_STR
+#define HPP_OKIIDOKU_CLI_UTILS_STR
 
 // Whether or not ansi-escape sequences should be emitted within _CLI_
 // output to dim out harsh, non-essential text, etc.

@@ -1,7 +1,12 @@
 // SPDX-FileCopyrightText: 2020 David Fong
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// https://sourceware.org/gdb/onlinedocs/gdb/dotdebug_005fgdb_005fscripts-section.html
-// if not this, then https://sourceware.org/gdb/current/onlinedocs/gdb.html/Python-Auto_002dloading.html#Python-Auto_002dloading
+/**
+https://sourceware.org/gdb/onlinedocs/gdb/dotdebug_005fgdb_005fscripts-section.html
+
+https://sourceware.org/gdb/current/onlinedocs/gdb.html/Which-flavor-to-choose_003f.html
+.debug_gdb_scripts covers the case if okiidoku is built as a static library
+
+if not this, then https://sourceware.org/gdb/current/onlinedocs/gdb.html/Python-Auto_002dloading.html#Python-Auto_002dloading
 /* Note: The "MS" section flags are to remove duplicates. */
 #define DEFINE_GDB_PY_SCRIPT(script_name) \
 asm("\
@@ -10,4 +15,8 @@ asm("\
 .asciz \"" script_name "\"\n\
 .popsection \n\
 ");
-DEFINE_GDB_PY_SCRIPT("share/okiidoku/okiidoku.gdb.py") // matches installation location
+// path resolution: https://sourceware.org/gdb/current/onlinedocs/gdb.html/Source-Path.html
+DEFINE_GDB_PY_SCRIPT("tools/okiidoku-gdb.py") // add gdb setup command: `directory <path/to/repo/clone>/cpp`
+// TODO don't add the above if building for packaging. probably need to add a compile definition "OKIIDOKU_BUILD_PACKAGING" or something. could add the definition just for this source file.
+// DEFINE_GDB_PY_SCRIPT("../share/auto-load/okiidoku-gdb.py")
+// DEFINE_GDB_PY_SCRIPT("../share/auto-load/${CMAKE_INSTALL_FULL_LIBDIR}/okiidoku-gdb.py")

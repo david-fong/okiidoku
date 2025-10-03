@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2020 David Fong
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#ifndef HPP_OKIIDOKU__PUZZLE__UNAVOIDABLE_SET
-#define HPP_OKIIDOKU__PUZZLE__UNAVOIDABLE_SET
+#ifndef HPP_OKIIDOKU_PUZZLE_UNAVOIDABLE_SET
+#define HPP_OKIIDOKU_PUZZLE_UNAVOIDABLE_SET
 
 #include <okiidoku/ints.hpp>
 #include <okiidoku/order.hpp>
@@ -22,8 +22,9 @@ namespace okiidoku::mono {
 		std::vector<UaSet4<O>> ua_set_4s;
 	};
 
-	// https://www.sudopedia.org/wiki/Deadly_Pattern
-	// contract: grid is filled and follows the one rule.
+	/**
+	https://www.sudopedia.org/wiki/Deadly_Pattern
+	\pre grid is filled and follows the one rule. */
 	template<Order O> requires(is_order_compiled(O))
 	[[nodiscard, gnu::pure]] OKIIDOKU_EXPORT
 	MinimalUnavoidableSets<O> find_size_4_minimal_unavoidable_sets(const Grid<O>&) noexcept;

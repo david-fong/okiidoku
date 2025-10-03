@@ -93,19 +93,25 @@
 	"cmake.debugConfig": {
 		"environment": [],
 		"args": [],
-		"setupCommands": [],
+		"setupCommands": [
+			{"text": "add-auto-load-safe-path ${workspaceFolder}/cpp/tools"},
+			{"text": "add-auto-load-safe-path ${command:cmake.getLaunchTargetDirectory}/.."}, // doing in one line means working with OS-specific list separators
+			// {"text": "set auto-load script-path ${command:cmake.getLaunchTargetDirectory}/../share"},
+			{"text": "directory ${workspaceFolder}/cpp"}, // add to source search path
+		],
 		"stopAtEntry": true,
 		// "visualizerFile": "${workspaceFolder}/tools/okiidoku.natvis", // TODO.try is this needed if already specified in CMake?
 		// "showDisplayString": true, // https://code.visualstudio.com/docs/cpp/launch-json-reference#_showdisplaystring
 		"sourceFileMap": { // https://code.visualstudio.com/docs/cpp/launch-json-reference#_sourcefilemap
 			"/okiidoku": "${workspaceFolder}/cpp" // -ffile-prefix-map=${okiidoku_SOURCE_DIR}=/okiidoku
 		},
+		"cwd": "${command:cmake.getLaunchTargetDirectory}/.." // see OKIIDOKU_TEST_WORKING_DIRECTORY. sets gdb pwd. "inferior" (debuggee) program inherits.
 	},
 	"cmake.configureArgs": [
 		// "--warn-uninitialized",
-		"-D OKIIDOKU_BUILD_WITH_STATIC_ANALYZERS:BOOL=YES",
+		"-D OKIIDOKU_BUILD_WITH_STATIC_ANALYZERS:BOOL=NO",
 	],
-	"python.analysis.extraPaths": [
-		"/usr/share/gdb/python"
-	]
+
+	"python.analysis.typeCheckingMode": "standard",
+	"python.analysis.autoSearchPaths": false,
 }

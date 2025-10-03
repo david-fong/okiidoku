@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2020 David Fong
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#ifndef HPP_OKIIDOKU__RNG
-#define HPP_OKIIDOKU__RNG
+#ifndef HPP_OKIIDOKU_RNG
+#define HPP_OKIIDOKU_RNG
 
 //#include <pcg_random.hpp>
 
@@ -21,7 +21,7 @@ namespace okiidoku::util {
 		explicit SharedRng(rng_t::result_type seed) noexcept: rng{seed} {}
 
 		[[nodiscard]] std::uint_fast32_t operator()() noexcept {
-			std::scoped_lock scoped_lock {mutex};
+			const std::scoped_lock scoped_lock {mutex};
 			#ifndef __clang__
 			#pragma GCC diagnostic push
 			#pragma GCC diagnostic ignored "-Wuseless-cast" // not useless on MSVC
@@ -33,7 +33,7 @@ namespace okiidoku::util {
 		}
 	private:
 		rng_t rng;
-		mutable std::mutex mutex {};
+		mutable std::mutex mutex;
 	};
 }
 #endif

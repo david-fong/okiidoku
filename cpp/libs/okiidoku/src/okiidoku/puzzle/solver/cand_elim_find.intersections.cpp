@@ -92,7 +92,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 				+ (T::O1*box_isec)
 				+ line_isec
 			};
-			if (line_match.count() > 0) [[unlikely]] {
+			if (line_match.count() > 0u) [[unlikely]] {
 				found_queues.push_back(found::LockedCands<O>{
 					.syms {line_match},
 					.isec {isec},
@@ -101,7 +101,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 				});
 			}
 			// Note: not an else-if: may be for different syms.
-			if (box_match.count() > 0) [[unlikely]] {
+			if (box_match.count() > 0u) [[unlikely]] {
 				found_queues.push_back(found::LockedCands<O>{
 					.syms {box_match},
 					.isec {isec},
@@ -135,7 +135,7 @@ namespace okiidoku::mono::detail::solver {
 	#undef OKIIDOKU_CAND_ELIM_FINDER_DEF
 
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-		template UnwindInfo CandElimFind<O_>::locked_cands(Engine<O_>&) noexcept;
+		template UnwindInfo CandElimFind<(O_)>::locked_cands(Engine<(O_)>&) noexcept;
 	OKIIDOKU_FOREACH_O_DO_EMIT
 	#undef OKIIDOKU_FOREACH_O_EMIT
 }

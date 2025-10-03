@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2020 David Fong
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#ifndef HPP_OKIIDOKU__PUZZLE__SOLVER__SUBSET_COMBO_WALKER
-#define HPP_OKIIDOKU__PUZZLE__SOLVER__SUBSET_COMBO_WALKER
+#ifndef HPP_OKIIDOKU_PUZZLE_SOLVER_SUBSET_COMBO_WALKER
+#define HPP_OKIIDOKU_PUZZLE_SOLVER_SUBSET_COMBO_WALKER
 
 #include <okiidoku/ints.hpp>
 #include <okiidoku/puzzle/solver/cand_elim_find.macros.hpp>
@@ -50,18 +50,18 @@ namespace okiidoku::mono::detail::solver {
 			return has_more_;
 		}
 
-		// contract: `i < naked_subset_size`
+		/** \pre `i < naked_subset_size` */
 		[[nodiscard, gnu::pure]] o2xs_t combo_at(const o2x_t i) const noexcept {
 			OKIIDOKU_CONTRACT_USE(i < naked_subset_size_);
 			return combo_[i];
 		}
-		// contract: `has_more` returns `true`.
+		/** \pre `has_more` returns `true`. */
 		[[nodiscard, gnu::pure]] auto at_it() const noexcept {
 			OKIIDOKU_CONTRACT_ASSERT(has_more());
 			return combo_.cbegin();
 		}
 
-		// contract: `has_more` returns `true`.
+		/** \pre `has_more` returns `true`. */
 		void advance() noexcept {
 			OKIIDOKU_CONTRACT_USE(has_more());
 			OKIIDOKU_CONTRACT_USE(end_ <= T::O2);
@@ -100,7 +100,7 @@ namespace okiidoku::mono::detail::solver {
 				OKIIDOKU_CONTRACT_ASSERT(!has_more_);
 				return;
 			}
-			OKIIDOKU_CONTRACT_ASSERT(combo_[0uz] >= begin_);
+			OKIIDOKU_CONTRACT_ASSERT(combo_.front() >= begin_);
 			OKIIDOKU_CONTRACT_ASSERT(combo_[naked_subset_size_-1u] < end_);
 			for (const auto i : naked_subset_size_) {
 				OKIIDOKU_CONTRACT_ASSERT(combo_[i-1u] < combo_[i]);

@@ -201,7 +201,7 @@ namespace okiidoku::mono::detail {
 	}
 
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-		template Transformation<O_> canon_pos<O_>(Grid<O_>&) noexcept;
+		template Transformation<(O_)> canon_pos<(O_)>(Grid<(O_)>&) noexcept;
 	OKIIDOKU_FOREACH_O_DO_EMIT
 	#undef OKIIDOKU_FOREACH_O_EMIT
 }

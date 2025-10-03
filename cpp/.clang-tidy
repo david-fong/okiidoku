@@ -4,10 +4,13 @@
 # https://clang.llvm.org/extra/clang-tidy/checks/list.html
 Checks: "
   bugprone-*,
+    -bugprone-use-after-move,
   concurrency-*,
   portability-*,
   readability-*,
     -readability-identifier-length,
+    -readability-named-parameter,
+    -readability-redundant-access-specifiers,
   performance-*,
     -performance-avoid-endl,
   modernize-*,
@@ -39,9 +42,11 @@ Checks: "
 # to write inline ignore-comments for both a rule and its alias.
 # turned off include-cleaner since we have include-what-you-use.
 
+# bugprone-use-after-move has false positives(?) for deducing this
+
 CheckOptions:
   readability-magic-numbers.IgnorePowersOf2IntegerValues: true
-  readability-magic-numbers.IgnoredFloatingPointValues: "0.5,1.0;10.0;100.0"
+  readability-magic-numbers.IgnoredFloatingPointValues: "0.5;1.0;10.0;100.0;1000.0;1000000.0"
   readability-function-cognitive-complexity.IgnoreMacros: true
   readability-uppercase-literal-suffix.NewSuffixes: "L;LL;uL;uLL;z;uz"
 

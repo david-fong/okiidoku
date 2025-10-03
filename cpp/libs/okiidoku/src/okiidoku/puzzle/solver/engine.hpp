@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2020 David Fong
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#ifndef HPP_OKIIDOKU__PUZZLE__SOLVER__ENGINE
-#define HPP_OKIIDOKU__PUZZLE__SOLVER__ENGINE
+#ifndef HPP_OKIIDOKU_PUZZLE_SOLVER_ENGINE
+#define HPP_OKIIDOKU_PUZZLE_SOLVER_ENGINE
 
 #include <okiidoku/puzzle/solver/found_queue.hpp>
 #include <okiidoku/grid.hpp>
@@ -41,7 +41,7 @@ namespace okiidoku::mono::detail::solver {
 
 	struct [[nodiscard]] UnwindInfo {
 		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-		friend UnwindInfo unwind_one_stack_frame_of_<O_>(EngineImpl<O_>&) noexcept;
+		friend UnwindInfo unwind_one_stack_frame_of_<(O_)>(EngineImpl<(O_)>&) noexcept;
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
 	private:
@@ -140,9 +140,10 @@ namespace okiidoku::mono::detail::solver {
 		[[nodiscard, gnu::pure]] constexpr
 		o4i_t get_num_unsolved() const noexcept { return frame_.num_unsolved; }
 
-		// contract: `sym` is currently one of _multiple_ candidate-symbols at `rmi`.
-		// contract: only call when `has_queued_cand_elims` returns `false`. There
-		//  is _never_ a good reason to make a guess when you have a deduction ready.
+		/**
+		\pre `sym` is currently one of _multiple_ candidate-symbols at `rmi`.
+		\pre only call when `has_queued_cand_elims` returns `false`. There
+			is _never_ a good reason to make a guess when you have a deduction ready. */
 		void push_guess(Guess<O>) noexcept;
 
 		[[nodiscard, gnu::pure]] constexpr
@@ -151,9 +152,10 @@ namespace okiidoku::mono::detail::solver {
 		[[nodiscard, gnu::pure]] constexpr
 		std::uint_fast64_t get_total_guesses() const noexcept { return total_guesses_; }
 
-		// contract: `no_more_solns` returns `false`.
-		// contract: `get_num_unsolved` returns zero.
-		// returns a filled grid that follows the one rule and contains all the puzzle's givens.
+		/**
+		\pre `no_more_solns` returns `false`.
+		\pre `get_num_unsolved` returns zero.
+		\returns a filled grid that follows the one rule and contains all the puzzle's givens. */
 		[[nodiscard, gnu::pure]]
 		Grid<O> build_solution_obj() const noexcept;
 
@@ -164,10 +166,11 @@ namespace okiidoku::mono::detail::solver {
 		[[nodiscard, gnu::pure]] const auto& get_guess_stack_() const noexcept { return guess_stack_; }
 
 
-		// contract: `sym` is currently one of _multiple_ candidate-symbols at `rmi`.
-		// contract: no previous call in context of the current guess stack has been
-		//  made with the same value of `rmi`.
-		// post-condition: `sym` is registered as the only candidate-symbol at `rmi`.
+		/**
+		\pre `sym` is currently one of _multiple_ candidate-symbols at `rmi`.
+		\pre no previous call in context of the current guess stack has been
+			made with the same value of `rmi`.
+		\post `sym` is registered as the only candidate-symbol at `rmi`. */
 		void register_new_given_(rmi_t rmi, sym_t sym) noexcept;
 
 		// The specified candidate-symbol is allowed to already be removed.
@@ -204,8 +207,8 @@ namespace okiidoku::mono::detail::solver {
 		};
 
 		FoundQueues<O> found_queues_ {};
-		guess_stack_t guess_stack_ {};
-		std::uint_fast64_t total_guesses_ {0};
+		guess_stack_t guess_stack_;
+		std::uint_fast64_t total_guesses_ {0u};
 		bool no_more_solns_ {true};
 	};
 
@@ -235,14 +238,14 @@ namespace okiidoku::mono::detail::solver {
 		using EngineImpl<O>::get_total_guesses;
 		using EngineImpl<O>::build_solution_obj;
 
-		// contract: `no_more_solns` returns `false`.
+		/** \pre `no_more_solns` returns `false`. */
 		UnwindInfo unwind_one_stack_frame() noexcept;
 	};
 
 
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-		extern template struct EngineImpl<O_>; \
-		extern template class Engine<O_>;
+		extern template struct EngineImpl<(O_)>; \
+		extern template class Engine<(O_)>;
 	OKIIDOKU_FOREACH_O_DO_EMIT
 	#undef OKIIDOKU_FOREACH_O_EMIT
 }

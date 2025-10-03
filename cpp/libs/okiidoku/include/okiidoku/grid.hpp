@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2020 David Fong
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#ifndef HPP_OKIIDOKU__GRID
-#define HPP_OKIIDOKU__GRID
+#ifndef HPP_OKIIDOKU_GRID
+#define HPP_OKIIDOKU_GRID
 
 #include <okiidoku/ints.hpp>
 #include <okiidoku/detail/visitor.hpp>
@@ -73,7 +73,7 @@ namespace okiidoku::mono {
 
 		// Note: Making this constexpr results in a 1% speed gain, but 45% program
 		// size increase with GCC. That speed doesn't seem worth it.
-		Gridlike(CellType fill_value) noexcept { arr_.fill(fill_value); }
+		explicit Gridlike(CellType fill_value) noexcept { arr_.fill(fill_value); }
 		Gridlike() noexcept = default;
 
 		template<class Self> [[nodiscard, gnu::pure]]
@@ -103,7 +103,7 @@ namespace okiidoku::mono {
 		/// \pre `row` is in [0, O2).
 		template<class Self> [[nodiscard, gnu::pure]] constexpr
 		decltype(auto) row_span_at(this Self&& self, const T::o2x_t i) noexcept {
-			using ret_t = std::remove_reference_t<decltype(self.arr_[0uz])>;
+			using ret_t = std::remove_reference_t<decltype(self.arr_.front())>;
 			return static_cast<std::span<ret_t, T::O2>>(std::span{std::forward<Self>(self).arr_}.subspan(T::O2*i, T::O2));
 		}
 

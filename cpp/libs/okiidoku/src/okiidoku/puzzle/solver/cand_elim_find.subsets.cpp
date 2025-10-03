@@ -233,7 +233,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 				return unwind_one_stack_frame_of_(engine);
 			}
 			if (naked_or_hidden == NakedOrHidden::naked) {
-				for (o2x_t combo_at {0}; combo_at < naked_subset_size; ++combo_at) {
+				for (o2x_t combo_at {0u}; combo_at < naked_subset_size; ++combo_at) {
 					auto& entry {subs.cell_tags[combo_walker.combo_at(combo_at)]};
 					std::swap(subs.cell_tags[sub_a], entry);
 					++sub_a;
@@ -272,7 +272,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 		for (const auto house_type : house_types) {
 			auto& houses_subsets {engine.houses_subsets()[house_type]};
 			// std::array<o2i_t, T::O2> houses;
-			// std::iota(houses.begin(), houses.end(), o2i_t{0});
+			// std::iota(houses.begin(), houses.end(), o2i_t{0u});
 			// std::ranges::sort(houses, [&](const auto& a, const auto& b)noexcept{
 			// 	return houses_subsets[a].is_begin.count() < houses_subsets[b].is_begin.count();
 			// });
@@ -295,13 +295,13 @@ namespace okiidoku::mono::detail::solver {
 	template<Order O> requires(is_order_compiled(O)) \
 	UnwindInfo CandElimFind<O>::subsets(Engine<O>& engine, const typename Ints<O>::o2x_t max_subset_size) noexcept {
 		OKIIDOKU_CONTRACT_ASSERT(!engine.no_more_solns());
-		if (engine.get_num_unsolved() == 0) [[unlikely]] { return UnwindInfo::make_no_unwind(); }
+		if (engine.get_num_unsolved() == 0u) [[unlikely]] { return UnwindInfo::make_no_unwind(); }
 		return find_subsets_and_check_needs_unwind(engine, max_subset_size);
 	}
 
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-		template UnwindInfo CandElimFind<O_>::sym_claim_cell(Engine<O_>&) noexcept; \
-		template UnwindInfo CandElimFind<O_>::subsets(Engine<O_>&, typename Ints<O_>::o2x_t max_subset_size) noexcept;
+		template UnwindInfo CandElimFind<(O_)>::sym_claim_cell(Engine<(O_)>&) noexcept; \
+		template UnwindInfo CandElimFind<(O_)>::subsets(Engine<(O_)>&, typename Ints<(O_)>::o2x_t max_subset_size) noexcept;
 	OKIIDOKU_FOREACH_O_DO_EMIT
 	#undef OKIIDOKU_FOREACH_O_EMIT
 }

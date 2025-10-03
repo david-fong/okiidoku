@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2020 David Fong
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#ifndef HPP_OKIIDOKU__DETAIL__VISITOR
-#define HPP_OKIIDOKU__DETAIL__VISITOR
+#ifndef HPP_OKIIDOKU_DETAIL_VISITOR
+#define HPP_OKIIDOKU_DETAIL_VISITOR
 
 #include <okiidoku/detail/order_templates.macros.hpp>
 #include <okiidoku/order.hpp>
@@ -20,7 +20,7 @@ namespace okiidoku::visitor::detail {
 		//  `use_dynamic_allocation` template function, or a use_dynamic_allocation constant.
 		//  the bool constant is the simplest. (I assume I wrote this b/c stack size warnings)
 
-		#define OKIIDOKU_FOREACH_O_EMIT(O_) typename T::template type<O_>;
+		#define OKIIDOKU_FOREACH_O_EMIT(O_) typename T::template type<(O_)>;
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
 	};
@@ -34,7 +34,7 @@ namespace okiidoku::visitor::detail {
 	template<MonoToVisitorAdaptor Adaptor>
 	using OrderVariantFor = VariantSkipFirstHelper<
 		/* ignored: */void
-		#define OKIIDOKU_FOREACH_O_EMIT(O_) , typename Adaptor::template type<O_>
+		#define OKIIDOKU_FOREACH_O_EMIT(O_) , typename Adaptor::template type<(O_)>
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
 	>;
@@ -50,20 +50,21 @@ namespace okiidoku::visitor::detail {
 
 		// move-from-mono constructor
 		template<Order O>
-		ContainerBase(typename Adaptor::template type<O>&& mono_obj) noexcept: variant_{std::move(mono_obj)} {}
+		ContainerBase(typename Adaptor::template type<O>&& mono_obj) noexcept: // NOLINT(*-explicit-constructor)
+			variant_{std::move(mono_obj)} {}
 
 		/// default-for-order constructor.
 		/// If the provided order is not compiled, defaults to the lowest compiled order.
 		explicit ContainerBase(const Order O) noexcept requires(
 			!Adaptor::is_borrow_type
 			#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-			&& std::is_nothrow_default_constructible_v<typename Adaptor::template type<O_>>
+			&& std::is_nothrow_default_constructible_v<typename Adaptor::template type<(O_)>>
 			OKIIDOKU_FOREACH_O_DO_EMIT
 			#undef OKIIDOKU_FOREACH_O_EMIT
 		): variant_([O]{
 			switch (O) {
 			#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-			case O_: return variant_t{std::in_place_type<typename Adaptor::template type<O_>>};
+			case (O_): return variant_t{std::in_place_type<typename Adaptor::template type<(O_)>>};
 			OKIIDOKU_FOREACH_O_DO_EMIT
 			#undef OKIIDOKU_FOREACH_O_EMIT
 			default: return variant_t{}; // default to the lowest compiled order.
@@ -108,8 +109,8 @@ namespace okiidoku::visitor::detail {
 		OKIIDOKU_CONTRACT_USE(vis_a.get_order() == vis_b.get_order());
 		switch (vis_a.get_order()) {
 		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-		case O_: { \
-			return vis_a.template unchecked_get_mono_exact<O_>() <=> vis_b.template unchecked_get_mono_exact<O_>(); \
+		case (O_): { \
+			return vis_a.template unchecked_get_mono_exact<(O_)>() <=> vis_b.template unchecked_get_mono_exact<(O_)>(); \
 		}
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
