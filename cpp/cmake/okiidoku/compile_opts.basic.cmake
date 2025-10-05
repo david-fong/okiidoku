@@ -156,6 +156,7 @@ else()
 		target_compile_options(okiidoku_compiler_warnings INTERFACE
 			-Wimplicit-fallthrough
 			-Wno-unknown-attributes # (I'd like to use this, but it's just too annoying, flagging benign stuff).
+			-Wunsafe-buffer-usage
 		)
 	elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 		target_compile_options(okiidoku_compiler_warnings INTERFACE

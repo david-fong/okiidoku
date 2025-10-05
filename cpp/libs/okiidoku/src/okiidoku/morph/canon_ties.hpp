@@ -17,7 +17,7 @@
 namespace okiidoku::mono::detail {
 
 	template<Order O, unsigned O1_OR_O2>
-	requires (is_order_compiled(O) && ((O1_OR_O2 == 1) || (O1_OR_O2 == 2)))
+		requires (is_order_compiled(O) && ((O1_OR_O2 == 1) || (O1_OR_O2 == 2)))
 	/**
 	an externally-driven cache of subranges of an external array which are tied with
 	each other by some externally-defined ordering (see `Ties::update`). assumes
@@ -91,8 +91,8 @@ namespace okiidoku::mono::detail {
 		pass a function that compares consecutive values in a range to update
 		the record of which ranges' values are still tied. */
 		template<class IsEq>
-		requires (std::regular_invocable<IsEq, i_t, i_t>)
-		void update(const IsEq is_eq) noexcept {
+			requires (std::regular_invocable<IsEq, i_t, i_t>)
+		void update(const IsEq&& is_eq) noexcept { // TODO test that && is okay here.
 			for (const auto&& cached_tie : *this) {
 				for (auto i {cached_tie.begin_}; i.next() < cached_tie.end_; ++i) {
 					OKIIDOKU_CONTRACT(i.next() < size_);

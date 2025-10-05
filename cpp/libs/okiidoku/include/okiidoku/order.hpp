@@ -35,7 +35,7 @@ namespace okiidoku {
 	}
 	/// \internal exists because my template instantiation macro has no delimiter
 	/// argument, so I hack this to ignore a leading comma at a usage site.
-	inline constexpr auto compiled_orders {::okiidoku::detail::CompiledOrdersHelper_make_array<
+	inline constexpr auto compiled_orders {detail::CompiledOrdersHelper_make_array<
 		/* ignored: */Order{0u}
 		#define OKIIDOKU_FOREACH_O_EMIT(O_) , (O_)
 		OKIIDOKU_FOREACH_O_DO_EMIT

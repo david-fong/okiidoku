@@ -46,13 +46,13 @@ namespace okiidoku::cli {
 			std::cout << "\n[" << std::dec << uint_fast32_t{config_.order()} << "]: ";
 			std::string command;
 			std::getline(std::cin, command);
-			if (!std::cin) {
+			if (!std::cin) [[unlikely]] {
 				break; // input error or unrecoverable stream error.
 			}
-			if (std::cin.eof()) {
+			if (std::cin.eof()) [[unlikely]] {
 				break; // Ex. console <CTRL+D>
 			}
-			if (!run_command(command)) {
+			if (!run_command(command)) [[unlikely]] {
 				break;
 			}
 		}
@@ -69,7 +69,7 @@ namespace okiidoku::cli {
 			:  cmd_line.substr(token_pos + 1u, std::string_view::npos)}
 			;
 		const auto it {Command::command_str_to_enum_map.find(cmd_name)};
-		if (it == Command::command_str_to_enum_map.end()) {
+		if (it == Command::command_str_to_enum_map.end()) [[unlikely]] {
 			// No command name was matched.
 			std::cout << str::red.on << "command \"" << cmd_line << "\" not found."
 				" enter \"help\" for the help menu." << str::red.off << std::endl;
@@ -77,18 +77,18 @@ namespace okiidoku::cli {
 		}
 		switch (it->second) {
 			using Command::E;
-			case E::help: {
+			case E::help: [[unlikely]] {
 				std::cout
 				<< Command::helpMessage /* << str::dim.on
 				important subcommand help messages can go here if needed
 				<< str::dim.off */ << std::endl;
 				break;
 			}
-			case E::quit: {
+			case E::quit: [[unlikely]] {
 				return false;
 			}
-			case E::config_order: { config_.order(cmd_args); break; }
-			case E::config_auto_canonicalize: { config_.canonicalize(cmd_args); break; }
+			case E::config_order: [[unlikely]] { config_.order(cmd_args); break; }
+			case E::config_auto_canonicalize: [[unlikely]] { config_.canonicalize(cmd_args); break; }
 			case E::gen_single: { gen_single(); break; }
 			case E::gen_multiple: { gen_multiple(cmd_args); break; }
 		}
@@ -130,7 +130,7 @@ namespace okiidoku::cli {
 			// } catch (const std::ios_base::failure& fail) {
 			// 	std::cout << str::red.on << fail.what() << str::red.off << std::endl;
 			// }
-			Grid grid(config_.order());
+			Grid grid {config_.order()};
 			init_most_canonical_grid(grid);
 			for (std::uintmax_t prog {0u}; prog < how_many; ++prog) {
 				generate_shuffled(grid, shared_rng_());
@@ -150,7 +150,7 @@ namespace okiidoku::cli {
 			<< "\nwall-clock time (s): " << elapsed.wall_seconds
 			;
 
-		if (elapsed.wall_seconds > 10.0) {
+		if (elapsed.wall_seconds > 10.0) [[unlikely]] {
 			// Emit a beep sound if the trials took longer than ten processor seconds:
 			std::cout << '\a' << std::flush;
 		}
@@ -160,10 +160,7 @@ namespace okiidoku::cli {
 
 	void Repl::gen_multiple(const std::string_view how_many_str) {
 		std::uintmax_t how_many {};
-		const auto parse_result {std::from_chars(
-			how_many_str.data(), how_many_str.data()+how_many_str.size(), how_many
-		)};
-		if (parse_result.ec == std::errc{}) {
+		if (util::str::from_chars(how_many_str, how_many).ec == std::errc{}) [[likely]] {
 			if (how_many <= 0u) {
 				std::cout << str::red.on
 					<< "please provide a non-zero, positive integer."

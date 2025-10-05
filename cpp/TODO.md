@@ -107,6 +107,7 @@ Issues I'm watching:
   - with reflection, I might be able to do what I'm currently doing with macros like `OKIIDOKU_FOREACH_O_EMIT` and `OKIIDOKU_FOREACH_O_DO_EMIT`, and be in a better position to use C++ modules :O.
   - try using `pre` and `post()` on default and copy constructors of `Int<...>` to describe pre and postconditions
   - https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2025/p2786r13.html#introduction relocatability
+  - https://en.cppreference.com/w/cpp/utility/from_chars_result.html `operator bool`
 - C++29:
   - class invariants?: https://youtu.be/gtFFTjQ4eFU?t=873
 

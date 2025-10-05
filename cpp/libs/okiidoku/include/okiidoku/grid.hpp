@@ -60,7 +60,7 @@ namespace okiidoku::mono {
 
 
 	template<Order O, class CellType>
-	requires(is_order_compiled(O) && !std::is_reference_v<CellType>)
+		requires(is_order_compiled(O) && !std::is_reference_v<CellType>)
 	struct detail::Gridlike {
 	private:
 		using T = Ints<O>;
@@ -104,22 +104,26 @@ namespace okiidoku::mono {
 
 		/// \pre `row` is in [0, O2).
 		[[nodiscard, gnu::pure]] constexpr
-		decltype(auto) row_span_at(this auto& self, const T::o2x_t i) noexcept {
+		decltype(auto) row_span_at(this auto& self [[clang::lifetimebound]], const T::o2x_t i) noexcept {
 			i.check();
 			using ret_t = std::remove_reference_t<decltype(self.arr_.front())>;
 			// TODO test this. is there dangling?
 			return static_cast<std::span<ret_t, T::O2>>(std::span{std::forward_like<decltype(self)>(self).arr_}.subspan(T::O2*i, T::O2));
 		}
 
-		// [[nodiscard]] auto row_spans() noexcept { namespace v = ::ranges::views; return v::iota(o2i_t{0u}, o2i_t{T::O2}) | v::transform([&](auto r){ return row_span_at(r); }); }
-		// [[nodiscard]] auto row_spans() const noexcept { namespace v = ::ranges::views; return v::iota(o2i_t{0u}, T::O2) | v::transform([&](auto r){ return row_span_at(r); }); }
+		// [[nodiscard]] auto row_spans() noexcept [[clang::lifetimebound]] { namespace v = ::ranges::views; return v::iota(o2i_t{0u}, o2i_t{T::O2}) | v::transform([&](auto r){ return row_span_at(r); }); }
+		// [[nodiscard]] auto row_spans() const noexcept [[clang::lifetimebound]] { namespace v = ::ranges::views; return v::iota(o2i_t{0u}, T::O2) | v::transform([&](auto r){ return row_span_at(r); }); }
 	private:
 		array_t arr_;
 	};
 
 
 	template<Order O> [[nodiscard, gnu::const]] constexpr
-	bool cells_share_house(typename Ints<O>::o4i_t c1_rmi, typename Ints<O>::o4i_t c2_rmi) noexcept {
+	bool cells_share_house(
+		const typename Ints<O>::o4x_t c1_rmi,
+		const typename Ints<O>::o4x_t c2_rmi
+	) noexcept {
+		c1_rmi.check(); c2_rmi.check();
 		return (rmi_to_row<O>(c1_rmi) == rmi_to_row<O>(c2_rmi))
 			||  (rmi_to_col<O>(c1_rmi) == rmi_to_col<O>(c2_rmi))
 			||  (rmi_to_box<O>(c1_rmi) == rmi_to_box<O>(c2_rmi));
@@ -152,8 +156,7 @@ namespace okiidoku::visitor {
 	namespace detail {
 		struct GridAdaptor {
 			static constexpr bool is_borrow_type = false;
-			template<Order O>
-			using type = mono::Grid<O>;
+			template<Order O> using type = mono::Grid<O>;
 		};
 		static_assert(MonoToVisitorAdaptor<GridAdaptor>);
 	}

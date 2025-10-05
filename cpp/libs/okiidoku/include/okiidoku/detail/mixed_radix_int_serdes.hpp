@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #ifndef HPP_OKIIDOKU_DETAIL_MIXED_RADIX_INT_SERDES
 #define HPP_OKIIDOKU_DETAIL_MIXED_RADIX_INT_SERDES
+#include <okiidoku/detail/util.hpp>
 
 #include <iosfwd>
 #include <concepts>

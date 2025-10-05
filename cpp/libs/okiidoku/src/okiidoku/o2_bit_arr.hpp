@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #ifndef HPP_OKIIDOKU_O2_BIT_ARR
 #define HPP_OKIIDOKU_O2_BIT_ARR
+#include <okiidoku/detail/util.hpp>
 
 #include <okiidoku/ints.hpp>
 #include <okiidoku/order.hpp>

@@ -7,10 +7,9 @@
 // output to dim out harsh, non-essential text, etc.
 #define USE_ANSI_ESC true
 
-#include <array>
+#include <charconv>
 #include <string_view>
-#include <type_traits>
-#include <cassert>
+#include <concepts>
 
 namespace okiidoku::util::str {
 
@@ -28,30 +27,32 @@ namespace okiidoku::util::str {
 	#undef SGR
 
 
-	/**
-	 * Do not attempt to fill-initialize strings using entries from this
-	 * array. The result will not be as expected, which may have to do
-	 * with the use of utf-8 strings...
-	 *
-	 * NOTE: Make sure that the initializer list size matches that
-	 * of the corresponding template argument. Compilers won't warn.
-	 * See https://cppreference.com/w/cpp/language/sizeof...#Example
-	 * for an example utility function I can make to avoid this problem.
-	 */
-	inline constexpr std::array<std::string_view, 4uz> box_chars {
-		#if USE_ANSI_ESC
-		"\u2591", "\u2592", "\u2593", "\u2588",
-		#else
-		"-", "*", "X", "#",
+	template<std::integral T>
+	std::from_chars_result from_chars(const std::string_view in_str, T& out_num, const unsigned char base = 10u) noexcept {
+		// https://en.cppreference.com/w/cpp/utility/from_chars.html
+		#if defined(__clang__) or defined(__EMSCRIPTEN__)
+		#pragma GCC diagnostic push
+		#pragma GCC diagnostic ignored "-Wunsafe-buffer-usage"
 		#endif
-	};
-	template<class T>
-	requires std::is_arithmetic_v<T>
-	constexpr std::string_view get_box_char(const T out_of, const T count) {
-		assert(count <= out_of);
-		return (count == 0u) ? " " : util::str::box_chars[static_cast<std::size_t>(
-			(count) * util::str::box_chars.size() / (out_of + 1u)
-		)];
+		return std::from_chars(in_str.data(), in_str.data()+in_str.size(), out_num, base);
+		#if defined(__clang__) or defined(__EMSCRIPTEN__)
+		#pragma GCC diagnostic pop
+		#endif
 	}
+
+
+	// constexpr std::string_view get_box_char(const std::size_t out_of, const std::size_t count) {
+	// 	assert(count <= out_of);
+	// 	static constexpr auto box_chars {std::to_array<std::string_view>({
+	// 		#if USE_ANSI_ESC
+	// 		"\u2591", "\u2592", "\u2593", "\u2588",
+	// 		#else
+	// 		"-", "*", "X", "#",
+	// 		#endif
+	// 	})};
+	// 	return (count == 0u) ? " " : box_chars[static_cast<std::size_t>(
+	// 		(count) * box_chars.size() / (out_of + 1uz)
+	// 	)];
+	// }
 }
 #endif

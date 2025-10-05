@@ -16,24 +16,22 @@ namespace okiidoku::cli {
 
 
 	void Config::order(const Order new_order) noexcept {
-		if (is_order_compiled(new_order)) {
+		if (is_order_compiled(new_order)) [[likely]] {
 			order_ = new_order;
 		}
 	}
 
 	void Config::order(const std::string_view arg) {
-		if (arg.empty()) {
+		if (arg.empty()) { // get/print
 			std::cout << "is: " << std::uint_fast32_t{order()} << std::endl;
 			return;
 		}
 		Order new_order {};
-		const auto parse_result {std::from_chars(
-			arg.data(), arg.data()+arg.size(), new_order
-		)};
-		if (parse_result.ec == std::errc{} && is_order_compiled(new_order)) {
+		if (util::str::from_chars(arg, new_order).ec == std::errc{} && is_order_compiled(new_order)) {
 			order(new_order);
 			return;
 		}
+		[[unlikely]]
 		std::cout
 			<< str::red.on << '"' << arg << "\" is not a valid order.\n" << str::red.off
 			<< "ORDER OPTIONS: ";
@@ -50,13 +48,13 @@ namespace okiidoku::cli {
 	}
 
 	void Config::canonicalize(const std::string_view new_canonicalize_str) {
-		if (new_canonicalize_str.empty()) {
+		if (new_canonicalize_str.empty()) { // get/print
 			std::cout << "is: " << (canonicalize() ? "y" : "n") << std::endl;
 			return;
 		}
 		if (new_canonicalize_str == "y" || new_canonicalize_str == "n") {
 			canonicalize(new_canonicalize_str == "y");
-		} else {
+		} else [[unlikely]] {
 			std::cout << "is: " << canonicalize() << " (unchanged).\n"
 				<< str::red.on << '"' << new_canonicalize_str << "\" does not match `y` or `n`.\n" << str::red.off
 				<< std::endl;
