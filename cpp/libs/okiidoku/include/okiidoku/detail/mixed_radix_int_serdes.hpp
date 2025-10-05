@@ -65,42 +65,42 @@ namespace okiidoku::detail {
 		\pre `radix > 0`.
 		\pre the previous call didn't indicate a need for a `flush`. */
 		[[nodiscard]] bool accept(Item in) noexcept {
-			OKIIDOKU_CONTRACT_USE(!did_overflow_);              // caller `flush`ed as needed.
-			OKIIDOKU_CONTRACT_USE(buf_radixx_ <= buf_t_max/2u); // caller `flush`ed as needed.
-			OKIIDOKU_CONTRACT_USE(queue_end_ < queue_.size());
-			OKIIDOKU_CONTRACT_USE(in.radix <= radix_t_max);
-			OKIIDOKU_CONTRACT_USE(in.radix > 0u);
-			OKIIDOKU_CONTRACT_USE(in.digit < in.radix);
+			OKIIDOKU_CONTRACT(!did_overflow_);              // caller `flush`ed as needed.
+			OKIIDOKU_CONTRACT(buf_radixx_ <= buf_t_max/2u); // caller `flush`ed as needed.
+			OKIIDOKU_CONTRACT2(queue_end_ < queue_.size());
+			OKIIDOKU_CONTRACT(in.radix <= radix_t_max);
+			OKIIDOKU_CONTRACT(in.radix > 0u);
+			OKIIDOKU_CONTRACT(in.digit < in.radix);
 			++item_count_;
-			if (in.radix < 2u) [[unlikely]] { OKIIDOKU_CONTRACT_ASSERT(in.digit == 0u); return true; }
+			if (in.radix < 2u) [[unlikely]] { OKIIDOKU_ASSERT(in.digit == 0u); return true; }
 			if ((buf_radixx_ > buf_t_max/in.radix) || (in.radix-1u > TO<buf_t>(buf_t_max-(buf_radixx_*in.radix)))) [[unlikely]] {
 				// handle overflow of `flush` buffer...
-				OKIIDOKU_CONTRACT_USE(buf_radixx_ != 0u); // (see template params constraint)
+				OKIIDOKU_CONTRACT(buf_radixx_ != 0u); // (see template params constraint)
 				// try to use remaining space in buf:
 				const auto radix_0 {TO<radix_t>(buf_t_max / (buf_radixx_+1u))}; // TODO should divisor have +1?
-				OKIIDOKU_CONTRACT_USE(radix_0 <= radix_t_max);
-				OKIIDOKU_CONTRACT_USE(radix_0 < in.radix);
+				OKIIDOKU_CONTRACT(radix_0 <= radix_t_max);
+				OKIIDOKU_CONTRACT(radix_0 < in.radix);
 				if (radix_0 >= 2u) [[likely]] {
 					buf_radixx_ = TO<buf_t>((buf_radixx_*radix_0)+(radix_0-1u));
-					OKIIDOKU_CONTRACT_USE(queue_end_ < queue_.size()-1uz);
+					OKIIDOKU_CONTRACT2(queue_end_ < queue_.size()-1uz);
 					auto& qi {queue_[queue_end_++]};
 					qi.radix = radix_0;
 					qi.digit = std::min(in.digit, TO<radix_t>(radix_0 - radix_t{1u}));
 					in.radix = TO<radix_t>((in.radix-radix_0)+radix_t{1u});
 					in.digit -= qi.digit;
 				}
-				OKIIDOKU_CONTRACT_USE(in.radix >= 2u);
-				OKIIDOKU_CONTRACT_USE(in.digit < in.radix);
+				OKIIDOKU_CONTRACT(in.radix >= 2u);
+				OKIIDOKU_CONTRACT(in.digit < in.radix);
 				// save overflow and return:
 				// buf_radixx_ = // <- don't! see `flush` uses and resets it.
-				OKIIDOKU_CONTRACT_USE(queue_end_ < queue_.size());
+				OKIIDOKU_CONTRACT2(queue_end_ < queue_.size());
 				queue_[queue_end_] = in;
 				did_overflow_ = true;
 				return false;
 			}
 			buf_radixx_ = TO<buf_t>((buf_radixx_*in.radix)+(in.radix-1u));
 			queue_[queue_end_++] = in;
-			OKIIDOKU_CONTRACT_USE(
+			OKIIDOKU_CONTRACT(
 				(buf_radixx_ <= buf_t_max/2u)
 				== ((buf_radixx_ & buf_t{buf_t{1u}<<(sizeof(buf_t)*CHAR_BIT-1u)}) == 0u)
 			);
@@ -120,17 +120,17 @@ namespace okiidoku::detail {
 			buf_t buf {0u};
 			for (auto i {0uz}; i < queue_end_; ++i) {
 				const auto& qi {queue_[queue_end_-1uz-i]};
-				OKIIDOKU_CONTRACT_USE(qi.radix > 0u);
-				OKIIDOKU_CONTRACT_USE(qi.digit < qi.radix);
+				OKIIDOKU_CONTRACT(qi.radix > 0u);
+				OKIIDOKU_CONTRACT(qi.digit < qi.radix);
 				buf *= qi.radix;
 				buf += qi.digit;
 			}
-			OKIIDOKU_CONTRACT_USE(buf <= buf_radixx_);
+			OKIIDOKU_CONTRACT(buf <= buf_radixx_);
 
 			// write `buf` to the stream:
 			const auto num_bytes {TO<std::uint_fast8_t>((std::bit_width(buf_radixx_)+(CHAR_BIT-1)) / CHAR_BIT)};
-			OKIIDOKU_CONTRACT_USE(num_bytes <= sizeof(buf_t));
-			OKIIDOKU_CONTRACT_USE(num_bytes > 0u);
+			OKIIDOKU_CONTRACT(num_bytes <= sizeof(buf_t));
+			OKIIDOKU_CONTRACT(num_bytes > 0u);
 			byte_count_ += num_bytes;
 			if constexpr (std::endian::native == std::endian::little) {
 				os.write(reinterpret_cast<char*>(&buf), num_bytes); // NOLINT(*-cast)
@@ -146,8 +146,8 @@ namespace okiidoku::detail {
 				queue_.front() = queue_[queue_end_];
 				queue_end_ = 1u;
 				const auto& qi {queue_.front()};
-				OKIIDOKU_CONTRACT_USE(qi.radix > 0u);
-				OKIIDOKU_CONTRACT_USE(qi.digit < qi.radix);
+				OKIIDOKU_CONTRACT(qi.radix > 0u);
+				OKIIDOKU_CONTRACT(qi.digit < qi.radix);
 				buf_radixx_ = TO<buf_t>(qi.radix-1u);
 			} else {
 				queue_end_ = 0u;
@@ -206,7 +206,7 @@ namespace okiidoku::detail {
 					} else { break; }
 				}
 			}
-			OKIIDOKU_CONTRACT_USE(byte_count <= sizeof(buf_t));
+			OKIIDOKU_CONTRACT(byte_count <= sizeof(buf_t));
 			byte_count_ += byte_count; // TODO.high what if bytes read is 0? return error val here? make `read()` return `std::expected`?
 		}
 
@@ -220,30 +220,30 @@ namespace okiidoku::detail {
 		\pre `is` opened with same text/binary mode used when writing this data.
 		\pre `radix > 0`. */
 		[[nodiscard]] radix_t read(std::istream& is, radix_t radix) {
-			OKIIDOKU_CONTRACT_USE(buf_t_max-buf_radixx_ >= buf_);
-			OKIIDOKU_CONTRACT_USE(radix <= radix_t_max);
-			OKIIDOKU_CONTRACT_USE(radix > 0u);
+			OKIIDOKU_CONTRACT(buf_t_max-buf_radixx_ >= buf_);
+			OKIIDOKU_CONTRACT(radix <= radix_t_max);
+			OKIIDOKU_CONTRACT(radix > 0u);
 			++item_count_;
 			if (radix < 2u) [[unlikely]] { return 0u; }
 			if (buf_radixx_ & buf_t{buf_t{1u}<<(sizeof(buf_t)*CHAR_BIT-1u)}) [[unlikely]] {
 				read_buf(is);
 			}
-			OKIIDOKU_CONTRACT_USE(buf_radixx_ <= buf_t_max/2u);
-			OKIIDOKU_CONTRACT_USE(buf_t_max-buf_radixx_ >= buf_);
-			OKIIDOKU_CONTRACT_USE(buf_t_max-buf_radixx_ >= TO<buf_t>(radix-1u));
+			OKIIDOKU_CONTRACT(buf_radixx_ <= buf_t_max/2u);
+			OKIIDOKU_CONTRACT(buf_t_max-buf_radixx_ >= buf_);
+			OKIIDOKU_CONTRACT(buf_t_max-buf_radixx_ >= TO<buf_t>(radix-1u));
 			radix_t digit {0u};
 			if ((buf_radixx_ > buf_t_max/radix) || (radix-1u > TO<buf_t>(buf_t_max-(buf_radixx_*radix)))) [[unlikely]] {
-				OKIIDOKU_CONTRACT_USE(buf_radixx_ != 0u); // (see template params constraint)
+				OKIIDOKU_CONTRACT(buf_radixx_ != 0u); // (see template params constraint)
 				const auto radix_0 {TO<radix_t>(buf_t_max / (buf_radixx_+1u))}; // should divisor be +1? must follow writer
-				OKIIDOKU_CONTRACT_USE(radix_0 <= radix_t_max);
-				OKIIDOKU_CONTRACT_USE(radix_0 <  radix);
+				OKIIDOKU_CONTRACT(radix_0 <= radix_t_max);
+				OKIIDOKU_CONTRACT(radix_0 <  radix);
 				radix  = TO<radix_t>((radix-radix_0)+radix_t{1u});
 				digit += TO<radix_t>(buf_);
 				read_buf(is);
 			}
-			OKIIDOKU_CONTRACT_USE(radix >= 2u);
-			OKIIDOKU_CONTRACT_USE(buf_t_max-buf_radixx_ >= buf_);
-			OKIIDOKU_CONTRACT_USE(buf_t_max-buf_radixx_ >= TO<buf_t>(radix-1u));
+			OKIIDOKU_CONTRACT(radix >= 2u);
+			OKIIDOKU_CONTRACT(buf_t_max-buf_radixx_ >= buf_);
+			OKIIDOKU_CONTRACT(buf_t_max-buf_radixx_ >= TO<buf_t>(radix-1u));
 			digit += TO<radix_t>(buf_ % radix);
 			buf_  /= radix;
 			buf_radixx_ = TO<buf_t>((buf_radixx_*radix)+(radix-1u));
@@ -260,18 +260,18 @@ namespace okiidoku::detail {
 				if (v == 0u) [[likely]] { v = sizeof(buf_t); }
 				return v;
 			}()};
-			OKIIDOKU_CONTRACT_USE(bytes_last_read >  0u);
-			OKIIDOKU_CONTRACT_USE(bytes_last_read <= sizeof(buf_t));
+			OKIIDOKU_CONTRACT(bytes_last_read >  0u);
+			OKIIDOKU_CONTRACT(bytes_last_read <= sizeof(buf_t));
 
 			const auto buf_bytes_used {[&]{
 				const auto unused_buf_bytes {TO<u8_t>(std::countl_zero(buf_radixx_) / CHAR_BIT)};
-				OKIIDOKU_CONTRACT_USE(unused_buf_bytes < sizeof(buf_t));
+				OKIIDOKU_CONTRACT(unused_buf_bytes < sizeof(buf_t));
 				return TO<u8_t>(sizeof(buf_t) - unused_buf_bytes);
 			}()};
-			OKIIDOKU_CONTRACT_USE(buf_bytes_used > 0u);
+			OKIIDOKU_CONTRACT(buf_bytes_used > 0u);
 
 			const auto unused_read_bytes {TO<u8_t>(bytes_last_read - buf_bytes_used)};
-			OKIIDOKU_CONTRACT_USE(unused_read_bytes < sizeof(buf_t));
+			OKIIDOKU_CONTRACT(unused_read_bytes < sizeof(buf_t));
 
 			is.seekg(-unused_read_bytes, std::ios_base::cur);
 			byte_count_ -= unused_read_bytes;

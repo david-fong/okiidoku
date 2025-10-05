@@ -3,10 +3,17 @@
 # cspell:ignoreRegExp -[W][a-z-]+\b
 include_guard(DIRECTORY)
 
+if(EMSCRIPTEN)
+	add_compile_options(-sSTRICT=1)
+	add_link_options(-sSTRICT=1)
+endif()
+
 add_library(okiidoku_compile_options_public INTERFACE)
 add_library(okiidoku_compiler_warnings INTERFACE IMPORTED) # Note: "IMPORTED" used to prevent auto installation
 okiidoku_install_target(okiidoku_compile_options_public)
 
+# \param file - what you would want to write in `#include <...>`.
+#  it's up to you to set up any supporting include path flags.
 function(okiidoku_make_include_flag file return_var_name)
 	# intentionally leaves target_compile_options and target_sources up to the caller.
 	# things like wrapping with generator expression(s) is hard to do in a CMake function.
@@ -30,7 +37,7 @@ endfunction()
 set_target_properties(okiidoku_compile_options_public PROPERTIES EXPORT_NAME _compile_options)
 
 # source file and compiler option parsing rules:
-# Note: the pragma flags can currently be private since I currently
+# note: the pragma flags can currently be private since I currently
 #  don't use any compiler-specific pragmas in any public header files.
 if(MSVC)
 	target_compile_options(okiidoku_compile_options_public INTERFACE

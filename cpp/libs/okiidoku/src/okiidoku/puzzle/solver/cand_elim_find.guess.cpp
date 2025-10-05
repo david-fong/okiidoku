@@ -24,14 +24,14 @@ namespace okiidoku::mono::detail::solver { namespace {
 	guessing at a cell which sees many keepers.
 	*/
 
-	template<Order O> requires(is_order_compiled(O))
+	template<Order O> requires(is_order_compiled(O)) [[nodiscard, gnu::pure]]
 	Ints<O>::o2xs_t find_good_guess_sym_for_cell(
 		const CandsGrid<O>& cells_cands,
 		const typename Ints<O>::o4x_t rmi
 	) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
 		const auto best_cell_cands {cells_cands[rmi]};
-		const auto get_sym_num_other_cand_cells {[&](const o2x_t sym){
+		const auto get_sym_num_other_cand_cells {[&][[gnu::pure]](const o2x_t sym){
 			o3i_t num_other_cand_cells {0u};
 			for (const auto house_type : house_types) {
 				const auto house {rmi_to_house<O>(house_type, rmi)};
@@ -56,7 +56,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 
 
 	/** \pre a guess candidate exists. */
-	template<Order O> requires(is_order_compiled(O))
+	template<Order O> requires(is_order_compiled(O)) [[nodiscard, gnu::pure]]
 	// NOLINTNEXTLINE(*-cognitive-complexity)
 	Guess<O> find_good_guess_candidate_for_fast_solver(
 		const CandsGrid<O>& cells_cands,
@@ -72,7 +72,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 				for (const auto house_type : house_types) {
 					++(houses_solved_counts[rmi_to_house<O>(house_type, rmi)][house_type]);
 		}	}	}
-		const auto get_house_solved_counts {[&](const o4x_t rmi)noexcept{
+		const auto get_house_solved_counts {[&][[gnu::pure]](const o4x_t rmi)noexcept{
 			if constexpr (O < 5) { // NOLINT(readability-magic-numbers)
 				o3i_t _ {0u};
 				for (const auto house_type : house_types) {
@@ -105,7 +105,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 				}
 			);
 		}};
-		o4x_t best_rmi {[&]()noexcept{
+		o4x_t best_rmi {[&][[gnu::pure]]()noexcept{
 			for (const auto rmi : T::O4) {
 				if (cells_cands[rmi].count() > 1u) [[likely]] {
 					return rmi;
@@ -119,11 +119,11 @@ namespace okiidoku::mono::detail::solver { namespace {
 		// TODO is there a same-or-better-perf way to write this search using std::transform_reduce or std::min?
 		for (o4i_t rmi {best_rmi.next()}; rmi < T::O4; ++rmi) {
 			const auto cand_count {cells_cands[*rmi].count()};
-			OKIIDOKU_CONTRACT_USE(cand_count != 0u);
+			OKIIDOKU_CONTRACT(cand_count != 0u);
 			if (cand_count <= 1u) [[unlikely]] { continue; } // no guessing for solved cell.
 			[[maybe_unused]] const auto guess_grouping {get_guess_grouping(*rmi)};
 			[[maybe_unused]] const auto house_solved_counts {get_house_solved_counts(*rmi)};
-			if ([&]{
+			if ([&][[gnu::pure]]{
 				if constexpr (O <= 3u) {
 					return std::tie(     cand_count)
 			  		     < std::tie(best_cand_count);
@@ -156,8 +156,8 @@ namespace okiidoku::mono::detail::solver {
 
 	template<Order O> requires(is_order_compiled(O))
 	Guess<O> CandElimFind<O>::good_guess_candidate(const Engine<O>& engine) noexcept {
-		OKIIDOKU_CONTRACT_ASSERT(!engine.no_more_solns());
-		OKIIDOKU_CONTRACT_ASSERT(engine.get_num_unsolved() > 0u); // cannot guess when already solved
+		OKIIDOKU_ASSERT(!engine.no_more_solns());
+		OKIIDOKU_ASSERT(engine.get_num_unsolved() > 0u); // cannot guess when already solved
 		return find_good_guess_candidate_for_fast_solver<O>(engine.cells_cands(), engine.get_guess_stack_());
 	}
 

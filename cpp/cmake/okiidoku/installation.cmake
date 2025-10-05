@@ -37,6 +37,12 @@ export(
 # https://cmake.org/cmake/help/latest/module/CMakePackageConfigHelpers.html#example-generating-package-files
 # https://cmake.org/cmake/help/latest/guide/importing-exporting/index.html#creating-a-package-configuration-file
 # https://cmake.org/cmake/help/latest/guide/importing-exporting/index.html#creating-relocatable-packages
+
+# TODO replace this with CPS usage.
+#  https://www.kitware.com/a-year-closer-to-standard-c-dependency-management/
+#  https://youtu.be/Hk4fv4dD0UQ?t=2899
+#  https://cmake.org/cmake/help/latest/command/install.html#package-info
+#  https://www.kitware.com/navigating-cmake-dependencies-with-cps/
 include(CMakePackageConfigHelpers)
 configure_package_config_file(
 	"${okiidoku_SOURCE_DIR}/cmake/okiidoku/okiidoku-config.cmake.in"

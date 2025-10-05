@@ -46,7 +46,7 @@ namespace okiidoku::mono {
 		}
 		engine_t& e {*engine_};
 		if (num_solns_found() > 0u) {
-			OKIIDOKU_CONTRACT_ASSERT(e.get_num_unsolved() == 0u);
+			OKIIDOKU_ASSERT(e.get_num_unsolved() == 0u);
 			const auto check {e.unwind_one_stack_frame()};
 			if (check.did_unwind_root()) { return std::nullopt; }
 		}

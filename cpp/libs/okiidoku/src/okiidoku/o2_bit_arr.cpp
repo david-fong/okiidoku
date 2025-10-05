@@ -20,7 +20,7 @@ namespace okiidoku::mono {
 	auto O2BitArr<O>::count() const noexcept -> typename O2BitArr<O>::o2i_t {
 		if constexpr (num_words == 1u) {
 			/*RVO*/o2i_t count {std::popcount(words_.front())};
-			OKIIDOKU_CONTRACT_USE(count <= T::O2);
+			OKIIDOKU_CONTRACT(count <= T::O2);
 			return count;
 		} else {
 			/*RVO*/o2i_t count {std::transform_reduce(
@@ -28,7 +28,7 @@ namespace okiidoku::mono {
 				words_.cbegin(), words_.cend(), o2i_t{0u}, std::plus<o2i_t>{},
 				[][[gnu::const]](const auto word)noexcept{ return o2i_t{std::popcount(word)}; }
 			)};
-			OKIIDOKU_CONTRACT_USE(count <= T::O2);
+			OKIIDOKU_CONTRACT(count <= T::O2);
 			return count;
 		}
 	}
@@ -37,14 +37,14 @@ namespace okiidoku::mono {
 	// TODO compiler having trouble inferring ability to use bzhi instruction for O=3,4 when they use u16 instead of u32.
 	template<Order O> requires(is_order_compiled(O))
 	auto O2BitArr<O>::count_below(const typename Ints<O>::o2x_t end) const noexcept -> typename Ints<O>::o2x_t {
-		OKIIDOKU_CONTRACT_USE(end < T::O2);
+		OKIIDOKU_CONTRACT(end < T::O2);
 		if constexpr (num_words == 1u) {
 			return o2x_t{std::popcount(
 				words_.front() & static_cast<word_t>(word_bit_mask_for_bit_i(end) - word_t{1u})
 			)};
 		} else {
 			const auto end_at_int {bit_i_to_word_i(end)};
-			OKIIDOKU_CONTRACT_USE(end_at_int < num_words);
+			OKIIDOKU_CONTRACT(end_at_int < num_words);
 			return o2x_t{std::transform_reduce(
 				OKIIDOKU_UNSEQ
 				words_.cbegin(), std::next(words_.cbegin(), end_at_int),
@@ -62,10 +62,10 @@ namespace okiidoku::mono {
 	auto O2BitArr<O>::first_set_bit_require_exists() const noexcept -> typename O2BitArr<O>::o2xs_t {
 		// Note: without the non-empty-mask assumption, we'd have to
 		//  handle discounting excess top zeros in the empty-mask case.
-		OKIIDOKU_CONTRACT_ASSERT(count() > 0u);
+		OKIIDOKU_ASSERT(count() > 0u);
 		if constexpr (num_words == 1u) {
 			const o2xs_t count {std::countr_zero(words_.front())};
-			OKIIDOKU_CONTRACT_USE(count < T::O2);
+			OKIIDOKU_CONTRACT(count < T::O2);
 			return count;
 		} else {
 			const auto word {std::find_if(
@@ -76,7 +76,7 @@ namespace okiidoku::mono {
 				(word_t_num_bits * std::distance(words_.cbegin(), word))
 				+ std::countr_zero(*word)
 			};
-			OKIIDOKU_CONTRACT_USE(count < T::O2);
+			OKIIDOKU_CONTRACT(count < T::O2);
 			return count;
 		}
 	}
@@ -85,7 +85,7 @@ namespace okiidoku::mono {
 	template<Order O> requires(is_order_compiled(O))
 	auto O2BitArr<O>::get_index_of_nth_set_bit(O2BitArr::o2x_t set_bit_index) const noexcept -> typename O2BitArr<O>::o2x_t {
 		set_bit_index.check();
-		OKIIDOKU_CONTRACT_ASSERT(count() > set_bit_index);
+		OKIIDOKU_ASSERT(count() > set_bit_index);
 		const word_ix_t word_i {[&](){
 			if constexpr (num_words == 1u) { return word_ix_t{0u}; }
 			else {

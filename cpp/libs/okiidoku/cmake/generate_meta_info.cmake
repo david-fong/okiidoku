@@ -32,7 +32,7 @@ block()
 			OUTPUT_VARIABLE GIT_TOP_LEVEL
 			OUTPUT_STRIP_TRAILING_WHITESPACE
 		)
-		# Note: need to use add_custom_command instead of configure_file to execute at build-time.
+		# note: need to use add_custom_command instead of configure_file to execute at build-time.
 		add_custom_command(
 			COMMENT "generating git info source file"
 			OUTPUT  "${output}"

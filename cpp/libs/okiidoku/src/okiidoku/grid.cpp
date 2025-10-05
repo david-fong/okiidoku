@@ -45,11 +45,11 @@ namespace okiidoku::mono {
 	template<Order O> requires(is_order_compiled(O))
 	bool grid_is_filled(const Grid<O>& grid) noexcept {
 		using T = Ints<O>;
-		return std::none_of(
+		return std::all_of(
 			OKIIDOKU_UNSEQ
 			grid.get_underlying_array().cbegin(),
 			grid.get_underlying_array().cend(),
-			[](const auto& sym){ return sym == T::O2; }
+			[][[gnu::const]](const auto sym)noexcept{ sym.check(); return sym < T::O2; }
 		);
 	}
 
@@ -59,9 +59,9 @@ namespace okiidoku::mono {
 		using T = Ints<O>;
 		return std::all_of(
 			OKIIDOKU_UNSEQ
-			grid.get_underlying_array().cbegin(),
-			grid.get_underlying_array().cend(),
-			[](const auto sym) noexcept { return sym == T::O2; }
+			grid.get_underlying_array().begin(),
+			grid.get_underlying_array().end(),
+			[][[gnu::const]](const auto sym)noexcept{ sym.check(); return sym == T::O2; }
 		);
 	}
 
@@ -80,12 +80,12 @@ namespace okiidoku::mono {
 				const auto sym_row {(boxrow+v_chute) % T::O1};
 				const auto sym_col {(boxcol+h_chute) % T::O1};
 				const auto sym {(T::O1 * sym_row) + sym_col};
-				OKIIDOKU_CONTRACT_USE(sym < T::O2);
+				OKIIDOKU_CONTRACT(sym < T::O2);
 				grid[rmi] = sym;
 			}
 		}
-		OKIIDOKU_CONTRACT_ASSERT(grid_is_filled(grid));
-		OKIIDOKU_CONTRACT_ASSERT(grid_follows_rule(grid));
+		OKIIDOKU_ASSERT(grid_is_filled(grid));
+		OKIIDOKU_ASSERT(grid_follows_rule(grid));
 	}
 
 

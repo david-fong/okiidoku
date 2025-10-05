@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # cspell:dictionaries cpp-refined
 # cspell:words objfile _M_elems
-import dataclasses as dc
+import re
 import gdb, gdb.printing
 # https://sourceware.org/gdb/onlinedocs/gdb/Writing-a-Pretty_002dPrinter.html
 # https://sourceware.org/gdb/onlinedocs/gdb/gdb_002eprinting.html
@@ -19,8 +19,8 @@ import gdb, gdb.printing
 # - https://sourceware.org/gdb/current/onlinedocs/gdb.html/Writing-a-Pretty_002dPrinter.html
 
 
-# @dc.dataclass(slots=True)
 class IntPrinter:
+	__name_pattern = re.compile(r"^okiidoku::Int<[^>]+?>$")
 	def __init__(self, val: gdb.Value):
 		self.__max: gdb.Value = val.type.template_argument(0) # type:ignore
 		self.__kind = val.type.template_argument(1)
@@ -31,8 +31,8 @@ class IntPrinter:
 		return str(self.__val["val_"])
 
 
-# @dc.dataclass(slots=True)
 class O2BitArrPrinter:
+	__name_pattern = re.compile(r"^okiidoku::mono::O2BitArr<(?<order>\d+?)>$")
 	def __init__(self, val: gdb.Value):
 		# self.word_t_num_bits = gdb.parse_and_eval('okiidoku::mono::O2BitArr<'+str(order)+'>::word_t_num_bits')
 		# self.num_words = gdb.parse_and_eval('okiidoku::mono::O2BitArr<'+str(order)+'>::num_words')
@@ -45,8 +45,8 @@ class O2BitArrPrinter:
 		return str(gdb.parse_and_eval(eval_string)["_M_elems"])
 
 
-# @dc.dataclass(slots=True)
 class MonoGridPrinter:
+	__name_pattern = re.compile(r"^okiidoku::mono::Grid<(?<order>\d+?)>$")
 	def __init__(self, val: gdb.Value):
 		# self.__order: gdb.Value = val.type.template_argument(0) # type:ignore (my typeshed doesn't have the right signature)
 		self.__val = val
@@ -55,17 +55,12 @@ class MonoGridPrinter:
 
 
 def pp_lookup_function(val: gdb.Value):
-	# TODO instead of taking order as an argument, get it from val.type.template_argument (https://sourceware.org/gdb/current/onlinedocs/gdb.html/Types-In-Python.html#Types-In-Python)
 	type_name = val.type.name
-	# template_arg0 = val.type.template_argument(0)
 	if type_name is None:
 		return None
-	if type_name.startswith("okiidoku::Int<"):
-		return IntPrinter(val)
-	if type_name.startswith("okiidoku::mono::O2BitArr<"):
-		return O2BitArrPrinter(val)
-	if type_name.startswith("okiidoku::mono::Grid<"):
-		return MonoGridPrinter(val)
+	for printer in (IntPrinter, O2BitArrPrinter, MonoGridPrinter):
+		if printer.__name_pattern.match(type_name):
+			return printer(val)
 	return None
 
 

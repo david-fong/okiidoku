@@ -44,7 +44,7 @@ namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
 	void make_minimal_puzzle(Grid<O>& grid, const rng_seed_t rng_seed) noexcept {
-		OKIIDOKU_CONTRACT_ASSERT(grid_is_proper_puzzle(grid));
+		OKIIDOKU_ASSERT(grid_is_proper_puzzle(grid));
 
 		const auto ua_sets {find_size_4_minimal_unavoidable_sets(grid)};
 
@@ -66,7 +66,7 @@ namespace okiidoku::mono {
 		}	}
 
 		const auto remove_puzcell_cand_at {[&](const o4i_t cand_i){
-			OKIIDOKU_CONTRACT_USE(cand_i < num_puzcell_cands);
+			OKIIDOKU_CONTRACT(cand_i < num_puzcell_cands);
 			--num_puzcell_cands;
 			std::swap(puzcell_cand_rmis[cand_i], puzcell_cand_rmis[num_puzcell_cands]);
 		}};
@@ -119,9 +119,9 @@ namespace okiidoku::mono {
 				++num_keepers;
 			}
 			remove_puzcell_cand_at(puzcell_cand_i);
-			// OKIIDOKU_CONTRACT_ASSERT(grid_follows_rule(grid)); // a bit gratuitous
+			// OKIIDOKU_ASSERT(grid_follows_rule(grid)); // a bit gratuitous
 		}
-		OKIIDOKU_CONTRACT_ASSERT(grid_is_proper_puzzle(grid));
+		OKIIDOKU_ASSERT(grid_is_proper_puzzle(grid));
 	}
 
 

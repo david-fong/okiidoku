@@ -70,8 +70,8 @@ namespace okiidoku::mono::detail::solver { namespace {
 		const typename Ints<O>::o2i_t sub_z
 	) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
-		OKIIDOKU_CONTRACT_USE(sub_z <= T::O2);
-		OKIIDOKU_CONTRACT_USE(sub_a < sub_z);
+		OKIIDOKU_CONTRACT(sub_z <= T::O2);
+		OKIIDOKU_CONTRACT(sub_a < sub_z);
 		// update candidate-symbol count cache fields for the subset:
 		{
 			// TODO profile and add likelihood attributes
@@ -79,8 +79,8 @@ namespace okiidoku::mono::detail::solver { namespace {
 			for (o2i_t i {sub_a}; i < sub_z; ++i) {
 				auto& cell_tag {subs.cell_tags[i]};
 				const auto updated_count {cells_cands[cell_tag.rmi].count()};
-				OKIIDOKU_CONTRACT_USE(cell_tag.count_cache <= T::O2);
-				OKIIDOKU_CONTRACT_USE(cell_tag.count_cache >= updated_count);
+				OKIIDOKU_CONTRACT(cell_tag.count_cache <= T::O2);
+				OKIIDOKU_CONTRACT(cell_tag.count_cache >= updated_count);
 				if (cell_tag.count_cache > updated_count) {
 					no_change = false;
 					cell_tag.count_cache = updated_count;
@@ -95,7 +95,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 		std::sort(
 			std::next(subs.cell_tags.begin(), sub_a),
 			std::next(subs.cell_tags.begin(), sub_z),
-			[&](const auto& tag_a, const auto& tag_b){
+			[&][[gnu::pure]](const auto& tag_a, const auto& tag_b){
 				return tag_a.count_cache < tag_b.count_cache;
 			}
 		);
@@ -123,7 +123,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 
 
 	// note the interleaving of max_subset_size values
-	template<Order O> requires(is_order_compiled(O))
+	template<Order O> requires(is_order_compiled(O)) [[nodiscard, gnu::pure]]
 	std::optional<FoundSubsetInfo<O>> try_decompose_subset(
 		const CandsGrid<O>& cells_cands,
 		const typename EngineImpl<O>::HouseSubsets& subs,
@@ -132,24 +132,24 @@ namespace okiidoku::mono::detail::solver { namespace {
 		const typename Ints<O>::o2x_t max_subset_size // try up-to-and-including this size
 	) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
-		OKIIDOKU_CONTRACT_USE(sub_z <= T::O2);
-		OKIIDOKU_CONTRACT_USE(sub_a < sub_z);
-		OKIIDOKU_CONTRACT_USE(max_subset_size >= 2u);
-		OKIIDOKU_CONTRACT_USE(max_subset_size <= o2x_t{(T::O2+1u)/2u});
+		OKIIDOKU_CONTRACT(sub_z <= T::O2);
+		OKIIDOKU_CONTRACT(sub_a < sub_z);
+		OKIIDOKU_CONTRACT(max_subset_size >= 2u);
+		OKIIDOKU_CONTRACT2(max_subset_size <= o2x_t{(T::O2+1u)/2u});
 		for (o2x_t subset_i {0u}; subset_i < (sub_z-sub_a-3) && subset_i+2u < 2u*max_subset_size; ++subset_i) {
 			const auto naked_or_hidden {(subset_i % 2u == 0u) ? NakedOrHidden::naked : NakedOrHidden::hidden};
-			const auto naked_subset_size {[&]() -> o2x_t {
+			const auto naked_subset_size {[&][[gnu::pure]]() noexcept -> o2x_t {
 				if (naked_or_hidden == NakedOrHidden::naked) {
 					return o2x_t{2u+(subset_i/2u)};
 				}
 				return o2x_t{(sub_z-sub_a)-2u-(subset_i/2u)};
 			}()};
-			OKIIDOKU_CONTRACT_USE(sub_a+naked_subset_size+1u < sub_z);
+			OKIIDOKU_CONTRACT(sub_a+naked_subset_size+1u < sub_z);
 			// ^plus one to skip finding hidden singles. // TODO or also try to find them?
 			std::optional<FoundSubsetInfo<O>> found {{ // Note: wrap with optional to allow NRVO
 				.combo_walker {
 					*sub_a,
-					[&]{
+					[&][[gnu::pure]]{
 						o2i_t sized_z {sub_a};
 						while (sized_z < T::O2 && subs.cell_tags[sized_z].count_cache <= naked_subset_size) { ++sized_z; }
 						return sized_z;
@@ -186,16 +186,16 @@ namespace okiidoku::mono::detail::solver { namespace {
 		const typename Ints<O>::o2x_t max_subset_size // try up-to-and-including this size
 	) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
-		OKIIDOKU_CONTRACT_USE(max_subset_size >= 2u);
-		OKIIDOKU_CONTRACT_USE(max_subset_size <= o2x_t{(T::O2+1u)/2u});
+		OKIIDOKU_CONTRACT(max_subset_size >= 2u);
+		OKIIDOKU_CONTRACT2(max_subset_size <= o2x_t{(T::O2+1u)/2u});
 		o2i_t sub_a {0u};
 		o2i_t sub_z {0u};
-		const auto get_next_sub_a {[&]{
-			OKIIDOKU_CONTRACT_USE(sub_a < T::O2);
+		const auto get_next_sub_a {[&][[gnu::pure]]{
+			OKIIDOKU_CONTRACT(sub_a < T::O2);
 			o2i_t next {sub_a.next()};
 			while (next < T::O2 && !subs.is_begin[*next]) { ++next; }
-			OKIIDOKU_CONTRACT_USE(next <= T::O2);
-			OKIIDOKU_CONTRACT_USE(next >  sub_a);
+			OKIIDOKU_CONTRACT(next <= T::O2);
+			OKIIDOKU_CONTRACT(next >  sub_a);
 			return next;
 		}};
 		// optional speed optimization to skip leading already-found singles:
@@ -210,11 +210,11 @@ namespace okiidoku::mono::detail::solver { namespace {
 
 		while (sub_a < T::O2) [[likely]] {
 			sub_z = get_next_sub_a();
-			OKIIDOKU_CONTRACT_USE(sub_z <= T::O2);
-			OKIIDOKU_CONTRACT_USE(sub_a <  sub_z);
-			OKIIDOKU_CONTRACT_ASSERT(subs.is_begin[*sub_a]);
+			OKIIDOKU_CONTRACT(sub_z <= T::O2);
+			OKIIDOKU_CONTRACT(sub_a <  sub_z);
+			OKIIDOKU_ASSERT(subs.is_begin[*sub_a]);
 			for (o2i_t i {sub_a.next()}; i < sub_z; ++i) {
-				OKIIDOKU_CONTRACT_ASSERT(!subs.is_begin[*i]);
+				OKIIDOKU_ASSERT(!subs.is_begin[*i]);
 			}
 			if (prepare_try_decompose_subset_and_check_can_skip(engine.cells_cands(), subs, sub_a, sub_z)) {
 				continue;
@@ -228,7 +228,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 			}
 			const auto& [combo_walker, combo_syms, naked_or_hidden] {*found};
 			const auto naked_subset_size {combo_walker.get_naked_subset_size()};
-			OKIIDOKU_CONTRACT_USE(combo_syms.count() <= naked_subset_size);
+			OKIIDOKU_CONTRACT(combo_syms.count() <= naked_subset_size);
 			if (combo_syms.count() < naked_subset_size) [[unlikely]] {
 				return unwind_one_stack_frame_of_(engine);
 			}
@@ -294,7 +294,7 @@ namespace okiidoku::mono::detail::solver {
 
 	template<Order O> requires(is_order_compiled(O)) \
 	UnwindInfo CandElimFind<O>::subsets(Engine<O>& engine, const typename Ints<O>::o2x_t max_subset_size) noexcept {
-		OKIIDOKU_CONTRACT_ASSERT(!engine.no_more_solns());
+		OKIIDOKU_ASSERT(!engine.no_more_solns());
 		if (engine.get_num_unsolved() == 0u) [[unlikely]] { return UnwindInfo::make_no_unwind(); }
 		return find_subsets_and_check_needs_unwind(engine, max_subset_size);
 	}

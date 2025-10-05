@@ -12,7 +12,7 @@ namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
 	void Transformation<O>::apply_from_to(const Grid<O>& src_grid, Grid<O>& dest_grid) const noexcept {
-		OKIIDOKU_CONTRACT_USE(&src_grid != &dest_grid);
+		OKIIDOKU_CONTRACT(&src_grid != &dest_grid);
 		// TODO experimental optimization: linearize row_map and col_map, and copy sym_map to an extended version with map[O2] = O2
 		for (const auto src_row : T::O2) {
 		for (const auto src_col : T::O2) {

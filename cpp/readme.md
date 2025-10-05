@@ -21,10 +21,8 @@ reuse g++ clang ninja-build cmake
 - Requirements to build from source:
   - If you are new to C++, you will need an attitude to learn proactively about C++ and CMake.
   - [CMake](https://cmake.org/install/) 4.1 or higher
-  - a C++ compiler [supporting C++20/23](https://en.cppreference.com/w/cpp/compiler_support).
-    - I test on Clang 20, GCC 14, and Visual Studio 17 2022.
-    - I currently have no interest in committing to support other compilers (ex. apple-clang) or lower versions of the above compilers.
-    - Older versions _may_ work, but don't expect them to.
+  - a recent C++ compiler [supporting C++20/23](https://en.cppreference.com/w/cpp/compiler_support).
+    - I test on Clang 20, GCC 14, and Visual Studio 17 2022, but won't guarantee things will work.
   - [a C++ build system](https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html) (ex. Ninja, Visual Studio)
   - Note: My general policy on tooling version support is to try to support the lowest common denominator of versions that are easily installable on homebrew, apt, and chocolatey, and wait a bit for regressions in new major releases to get fixed.
     - For apt, I try to support the repository for the latest Ubuntu version supported with WSL2.
@@ -32,10 +30,12 @@ reuse g++ clang ninja-build cmake
 - The library uses templates for each compiled grid size for optimization purposes. The templates are accessible under the `okiidoku::mono` namespace, and a visitor-pattern interface is exposed under the `okiidoku::visitor` namespace. The visitor pattern is intended to make it more convenient to write code that uses an order selected at runtime.
   - To change the supported grid sizes that get compiled, create a [tweak header](https://vector-of-bool.github.io/2020/10/04/lib-configuration.html#providing-a-tweak-header) for [`./libs/okiidoku/include/okiidoku/config/defaults.hpp`](./libs/okiidoku/include/okiidoku/config/defaults.hpp).
 
-- Make sure to read and follow the API contracts documented in the headers. Exceptions are intentionally not thrown for precondition violations (if you would like to run against a build of libokiidoku with assertions for debugging purposes, use a debug build of libokiidoku). None of the current okiidoku APIs throw exceptions.
+- Make sure to read and follow the API contracts documented in the headers. Exceptions are intentionally not thrown for precondition violations (if you would like to run against a build of libokiidoku with assertions for debugging purposes, use a debug build of libokiidoku). None of the current okiidoku APIs throw exceptions directly.
   - As a result, for MSVC, any [exception handling policy](https://docs.microsoft.com/en-us/cpp/build/reference/eh-exception-handling-model#standard-c-exception-handling) should be ok. Note that [CMake currently defaults to `/EHsc`](https://gitlab.kitware.com/cmake/cmake/-/issues/20610) if unspecified.
 
 - Usage examples can be found in [the examples folder](./libs/okiidoku/examples/).
+
+I make no particular commitment to guarantee any degree of ABI stability, or support for a particular toolchain. But if you know how to improve usability of this library with minimal disruption, you're welcome to open a pull request making a case for suggested improvements.
 
 ## CMake Setup Options
 

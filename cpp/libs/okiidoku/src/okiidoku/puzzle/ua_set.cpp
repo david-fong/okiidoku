@@ -27,15 +27,15 @@ namespace okiidoku::mono { namespace {
 		const typename Ints<O>::o1x_t chute
 	) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
-		OKIIDOKU_CONTRACT_USE(chute < T::O1);
-		const auto chute_lines_sym_to_cell {[&](){
+		OKIIDOKU_CONTRACT(chute < T::O1);
+		const auto chute_lines_sym_to_cell {[&][[gnu::pure]](){
 			OKIIDOKU_DEFER_INIT chute_lines_sym_to_cell_t<O> map;
 			for (const auto chute_line : T::O1) {
 			for (const auto house_cell : T::O2) {
 				const auto chute_cell_i {(T::O2*chute_line)+house_cell};
 				const auto rmi {chute_cell_to_rmi<O>(line_type, chute, chute_cell_i)};
 				const auto& sym {soln_grid[rmi]};
-				OKIIDOKU_CONTRACT_USE(sym < T::O2);
+				OKIIDOKU_CONTRACT(sym < T::O2);
 				map[chute_line][sym] = house_cell;
 			}}
 			return map;
@@ -45,8 +45,8 @@ namespace okiidoku::mono { namespace {
 			for (const auto slice_c : T::O2) {
 				const auto c_a_rmi {chute_cell_to_rmi<O>(line_type, chute, (T::O2*(*chute_line_a))+slice_c)};
 				const auto c_b_rmi {chute_cell_to_rmi<O>(line_type, chute, (T::O2*(*chute_line_b))+slice_c)};
-				const auto& c_a_sym {soln_grid[c_a_rmi]}; OKIIDOKU_CONTRACT_USE(c_a_sym < T::O2);
-				const auto& c_b_sym {soln_grid[c_b_rmi]}; OKIIDOKU_CONTRACT_USE(c_b_sym < T::O2);
+				const auto& c_a_sym {soln_grid[c_a_rmi]}; OKIIDOKU_CONTRACT(c_a_sym < T::O2);
+				const auto& c_b_sym {soln_grid[c_b_rmi]}; OKIIDOKU_CONTRACT(c_b_sym < T::O2);
 				const auto& d_a_cell {chute_lines_sym_to_cell[chute_line_a][c_b_sym]};
 				const auto& d_b_cell {chute_lines_sym_to_cell[chute_line_b][c_a_sym]};
 				if ((d_a_cell == d_b_cell) && (d_a_cell > slice_c)) [[unlikely]] {

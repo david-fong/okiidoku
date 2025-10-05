@@ -8,11 +8,24 @@
 #include <okiidoku/ints.hpp>
 #include <okiidoku/order.hpp>
 
+#include <array>
+#include <utility>     // declval
+#include <typeinfo>
+#include <type_traits>
+
+namespace okiidoku::mono {
+	static_assert(std::is_same_v<decltype(std::declval<      Grid<3>  >().get_underlying_array()),       std::array<Int<9,IntKind::small>,81uz>&&>);
+	static_assert(std::is_same_v<decltype(std::declval<      Grid<3>&&>().get_underlying_array()),       std::array<Int<9,IntKind::small>,81uz>&&>);
+	static_assert(std::is_same_v<decltype(std::declval<      Grid<3>& >().get_underlying_array()),       std::array<Int<9,IntKind::small>,81uz>& >);
+	static_assert(std::is_same_v<decltype(std::declval<const Grid<3>& >().get_underlying_array()), const std::array<Int<9,IntKind::small>,81uz>& >);
+}
+
 namespace okiidoku {
 template<okiidoku::Order O> OKIIDOKU_KEEP_FOR_DEBUG // NOLINTNEXTLINE(*-internal-linkage)
 void test_grid() {
 	using namespace ::okiidoku::mono;
 	OKIIDOKU_MONO_INT_TS_TYPEDEFS
+	// std::cout<<(typeid(decltype(std::declval<Grid<3>>().get_underlying_array())).name())<<'\n';
 
 	for (const auto i : T::O2) { CAPTURE(i);
 	for (const auto j : T::O2) { CAPTURE(j);

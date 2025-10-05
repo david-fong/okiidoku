@@ -22,7 +22,7 @@ namespace okiidoku {
 
 	[[nodiscard, gnu::const]] constexpr
 	bool is_order_compiled(const Order O) noexcept {
-		OKIIDOKU_CONTRACT_USE(O <= largest_compiled_order);
+		OKIIDOKU_CONTRACT(O <= largest_compiled_order);
 		#define OKIIDOKU_FOREACH_O_EMIT(O_) if (O == (O_)) { return true; }
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT

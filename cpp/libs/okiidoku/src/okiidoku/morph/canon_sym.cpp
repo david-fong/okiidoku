@@ -64,7 +64,7 @@ namespace okiidoku::mono { namespace {
 				}}
 				std::iota(to_og.begin(), to_og.end(), to_t{0u});
 			}
-			[[nodiscard]] bool has_ties() const noexcept { return ties.has_unresolved(); }
+			[[nodiscard, gnu::pure]] bool has_ties() const noexcept { return ties.has_unresolved(); }
 		};
 		static void do_a_pass_(State& s) noexcept;
 
@@ -141,7 +141,7 @@ namespace okiidoku::mono { namespace {
 		for (const auto i : T::O4) {
 			grid[i] = sym_og_to_canon[grid[i]];
 		}
-		OKIIDOKU_CONTRACT_ASSERT(grid_follows_rule<O>(grid));
+		OKIIDOKU_ASSERT(grid_follows_rule<O>(grid));
 		return sym_og_to_canon;
 	}
 }}

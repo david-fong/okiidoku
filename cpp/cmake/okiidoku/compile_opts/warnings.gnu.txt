@@ -6,6 +6,7 @@
 -Wsign-promo
 
 -Wdisabled-optimization
+-Winline
 
 -Wformat=2 -Werror=format-security
 -Wcast-qual -Wcast-align

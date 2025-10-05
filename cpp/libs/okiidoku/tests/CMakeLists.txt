@@ -14,6 +14,9 @@ function(okiidoku_test_add name #[[ ARGN are dependencies ]])
 		PRIVATE okiidoku_cli_utils
 		PRIVATE doctest::doctest
 	)
+	if(EMSCRIPTEN)
+		target_link_options("${target}" PRIVATE --executable)
+	endif()
 	target_include_directories("${target}" PRIVATE
 		"${CMAKE_CURRENT_LIST_DIR}/../src"
 	)

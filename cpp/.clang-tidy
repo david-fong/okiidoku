@@ -4,7 +4,6 @@
 # https://clang.llvm.org/extra/clang-tidy/checks/list.html
 Checks: "
   bugprone-*,
-    -bugprone-use-after-move,
   concurrency-*,
   portability-*,
   readability-*,
@@ -42,7 +41,7 @@ Checks: "
 # to write inline ignore-comments for both a rule and its alias.
 # turned off include-cleaner since we have include-what-you-use.
 
-# bugprone-use-after-move has false positives(?) for deducing this
+# bugprone-use-after-move has false positives(?) for deducing this... or not? I had a bug and wouldn't have made it if I'd listened I think...
 
 CheckOptions:
   readability-magic-numbers.IgnorePowersOf2IntegerValues: true

@@ -40,10 +40,11 @@ namespace okiidoku::mono::detail {
 			[[nodiscard, gnu::pure]] auto end()   const noexcept { check_invariants(); return std::views::iota(begin_, end_).end(); }
 		private:
 			void check_invariants() const noexcept {
-				OKIIDOKU_CONTRACT_USE(begin_ < size_);
-				OKIIDOKU_CONTRACT_USE(begin_+i_t{1u} < end_);
-				OKIIDOKU_CONTRACT_USE(end_ <= size_);
-				OKIIDOKU_CONTRACT_USE(end_ > i_t{0u});
+				OKIIDOKU_CONTRACT(begin_ < size_);
+				OKIIDOKU_CONTRACT(begin_ < end_);
+				OKIIDOKU_CONTRACT(begin_.next() < end_);
+				OKIIDOKU_CONTRACT(end_ <= size_);
+				OKIIDOKU_CONTRACT(end_ > 0u);
 			}
 		};
 
@@ -60,7 +61,7 @@ namespace okiidoku::mono::detail {
 		public:
 			explicit Iter(const O2BitArr<O>& links) noexcept: it_{links.set_bits()}, begin_{ix_t::unchecked_from(*it_)} { ++it_; }
 
-			TieRange operator*() const noexcept { return TieRange{ix_t{begin_}, i_t::unchecked_from(*it_)}; }
+			[[nodiscard, gnu::pure]] TieRange operator*() const noexcept { return TieRange{ix_t{begin_}, i_t::unchecked_from(*it_)}; }
 			Iter& operator++()    noexcept { ++it_; begin_ = ix_t::unchecked_from(*it_); ++it_; return *this; }
 			Iter  operator++(int) noexcept { Iter tmp {*this}; operator++(); return tmp; }
 			[[nodiscard, gnu::pure]] constexpr friend bool operator!=(const Iter& i, [[maybe_unused]] const std::default_sentinel_t s) noexcept { return  i.it_.not_end(); }
@@ -74,8 +75,8 @@ namespace okiidoku::mono::detail {
 		Ties() noexcept {
 			bookends_.set(ix_t{0u});
 			bookends_.set(ix_t{size_-1u});
-			OKIIDOKU_CONTRACT_ASSERT(has_unresolved());
-			OKIIDOKU_CONTRACT_ASSERT(none_resolved());
+			OKIIDOKU_ASSERT(has_unresolved());
+			OKIIDOKU_ASSERT(none_resolved());
 		}
 
 		[[nodiscard, gnu::pure]] friend bool operator==(const Ties&, const Ties&) noexcept = default;
@@ -94,7 +95,7 @@ namespace okiidoku::mono::detail {
 		void update(const IsEq is_eq) noexcept {
 			for (const auto&& cached_tie : *this) {
 				for (auto i {cached_tie.begin_}; i.next() < cached_tie.end_; ++i) {
-					OKIIDOKU_CONTRACT_USE(i.next() < size_);
+					OKIIDOKU_CONTRACT(i.next() < size_);
 					if (!std::invoke(is_eq, i, i.next())) [[likely]] {
 						bookends_.flip(i);
 						bookends_.flip(i.next());

@@ -100,7 +100,7 @@
 			"name": "tool:clang-homebrew",
 			"hidden": true,
 			"condition": {"type": "equals", "lhs": "${hostSystemName}", "rhs": "Darwin"},
-			"description": "use with `env LLVM_HOME=$(brew --prefix llvm) cmake --preset ...`. Note: may also need to set CMAKE_FIND_FRAMEWORK and CMAKE_FIND_APPBUNDLE to NEVER or LAST",
+			"description": "use with `env LLVM_HOME=$(brew --prefix llvm) cmake --preset ...`. note: may also need to set CMAKE_FIND_FRAMEWORK and CMAKE_FIND_APPBUNDLE to NEVER or LAST",
 			"cacheVariables": {
 				"CMAKE_C_COMPILER": "$env{LLVM_HOME}/bin/clang",
 				"CMAKE_CXX_COMPILER": "$env{LLVM_HOME}/bin/clang++"

@@ -44,7 +44,7 @@ namespace okiidoku::mono::detail::solver {
 		// Note: only used when unwinding the engine's guess stack.
 		void clear() noexcept {
 			std::apply([](auto& ...dq)noexcept{ (... , dq.clear()); }, tup_);
-			OKIIDOKU_CONTRACT_ASSERT(is_empty());
+			OKIIDOKU_ASSERT(is_empty());
 			// TODO.low consider whether resizing down is a good idea here?
 		}
 

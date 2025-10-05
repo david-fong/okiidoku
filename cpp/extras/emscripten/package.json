@@ -1,5 +1,6 @@
 {
 	"$schema": "https://json.schemastore.org/package.json",
+	"private": true,
 	"name": "okiidoku",
 	"version": "0.1.0",
 	"description": "david fong's variable-grid-size sudoku toolkit",
@@ -9,8 +10,8 @@
 	"homepage": "https://github.com/david-fong/okiidoku",
 	"license": "AGPL-3.0-or-later",
 	"author": "David Fong (https://github.com/david-fong)",
-	"main": "okiidoku.js",
-	"types": "okiidoku.d.ts",
+	"main": "okiidoku.mjs",
+	"types": "okiidoku.d.mts",
 	"type": "module",
 	"files": [],
 	"directories": {

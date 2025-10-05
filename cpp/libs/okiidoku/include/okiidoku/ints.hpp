@@ -6,14 +6,18 @@
 #include <okiidoku/order.hpp> // Order, largest_compiled_order
 
 #include <array>
-#include <utility>     // forward, to_underlying
+#include <utility>     // forward_like, to_underlying
 #include <limits>      // numeric_limits<T>::max
 #include <type_traits> // conditional_t
 #include <concepts>    // unsigned_integral
 #include <compare>     //
 #include <cstdint>     // uint_...
 
+// TODO.low would it be useful to add `gnu::artificial` for some of these functions? https://stackoverflow.com/a/21936099/11107541
+
+/// \cond detail
 namespace emscripten::internal { template<typename T, typename> struct BindingType; }
+/// \endcond detail
 
 /** top-level namespace for the okiidoku project */
 namespace okiidoku {
@@ -30,10 +34,10 @@ namespace okiidoku {
 	})};
 	template<typename V> requires(!std::is_reference_v<V>)
 	struct HouseTypeMap {
-		template<class Self> [[nodiscard, gnu::pure]]
-		decltype(auto) operator[](this Self&& self, const HouseType key) noexcept { return std::forward<Self>(self).arr_[std::to_underlying(key)]; }
-		template<class Self> [[nodiscard, gnu::pure]]
-		decltype(auto) get_underlying_arr(this Self&& self) noexcept { return std::forward<Self>(self).arr_; }
+		[[nodiscard, gnu::pure]]
+		decltype(auto) operator[](this auto&& self, const HouseType key) noexcept { return std::forward_like<decltype(self)>(self.arr_[std::to_underlying(key)]); }
+		[[nodiscard, gnu::pure]] // TODO frame challenge- why not make this public?
+		decltype(auto) get_underlying_arr(this auto&& self) noexcept { return std::forward_like<decltype(self)>(self.arr_); }
 	private:
 		std::array<V, house_types.size()> arr_ {};
 	};
@@ -47,10 +51,10 @@ namespace okiidoku {
 	})};
 	template<typename V> requires(!std::is_reference_v<V>)
 	struct LineTypeMap {
-		template<class Self> [[nodiscard, gnu::pure]]
-		decltype(auto) operator[](this Self&& self, const LineType key) noexcept { return std::forward<Self>(self).arr_[std::to_underlying(key)]; }
-		template<class Self> [[nodiscard, gnu::pure]]
-		decltype(auto) get_underlying_arr(this Self&& self) noexcept { return std::forward<Self>(self).arr_; }
+		[[nodiscard, gnu::pure]]
+		decltype(auto) operator[](this auto&& self, const LineType key) noexcept { return std::forward_like<decltype(self)>(self.arr_[std::to_underlying(key)]); }
+		[[nodiscard, gnu::pure]] // TODO frame challenge- why not make this public?
+		decltype(auto) get_underlying_arr(this auto&& self) noexcept { return std::forward_like<decltype(self)>(self.arr_); }
 	private:
 		std::array<V, line_types.size()> arr_ {};
 	};
@@ -171,7 +175,7 @@ namespace okiidoku {
 		friend struct emscripten::internal::BindingType<Int, std::true_type>;
 		using max_t = std::uintmax_t;
 	public:
-		static constexpr max_t max {max_}; ///< inclusive upper bound.
+		static constexpr max_t   max  {max_}; ///< inclusive upper bound.
 		static constexpr IntKind kind {kind_};
 		using val_t = std::conditional_t<kind == IntKind::small,
 			detail::uint_small_for_max_t<max>,
@@ -184,7 +188,8 @@ namespace okiidoku {
 		static_assert(std::numeric_limits<val_t>::max() >= max, "has enough capacity");
 	public:
 		[[gnu::always_inline]] constexpr void check() const noexcept {
-			OKIIDOKU_CONTRACT_USE(val_ <= max);
+			OKIIDOKU_CONTRACT(val_ <= static_cast<val_t>(max));
+			OKIIDOKU_CONTRACT(val_ <= max);
 		}
 
 		constexpr Int() noexcept = default;
@@ -192,12 +197,12 @@ namespace okiidoku {
 
 		/** construct from builtin int type
 		\pre `0 <= in <= max` */
-		template<class T_in> requires(std::integral<T_in>)
-		constexpr Int(T_in in) noexcept: val_{static_cast<val_t>(in)} { // NOLINT(*-explicit-constructor)
+		template<std::integral T_in>
+		constexpr Int(const T_in in) noexcept: val_{static_cast<val_t>(in)} { // NOLINT(*-explicit-constructor)
 			if constexpr (std::is_signed_v<T_in>) {
-				OKIIDOKU_CONTRACT_USE(in >= 0);
+				OKIIDOKU_CONTRACT(in >= 0);
 			}
-			OKIIDOKU_CONTRACT_USE(static_cast<max_t>(in) <= max);
+			OKIIDOKU_CONTRACT(static_cast<max_t>(in) <= max);
 			check();
 		}
 
@@ -213,12 +218,12 @@ namespace okiidoku {
 
 		template<max_t M_from, IntKind K_from> [[gnu::const]]
 		static constexpr Int unchecked_from(const Int<M_from,K_from> other) noexcept {
-			OKIIDOKU_CONTRACT_USE(other.val_ <= max);
+			OKIIDOKU_CONTRACT(other.val_ <= max);
 			return Int{other.val_};
 		}
 
 		/** implicit conversion to a fast, builtin, unsigned integer type with enough capacity. */
-		[[gnu::const]] constexpr operator detail::uint_fast_for_max_t<max>(this Int self) noexcept { // NOLINT(*-explicit-constructor)
+		[[gnu::const]] constexpr operator detail::uint_fast_for_max_t<max>(this const Int self) noexcept { // NOLINT(*-explicit-constructor)
 			self.check(); return detail::uint_fast_for_max_t<max>{self.val_};
 		}
 		// template<class T> requires(std::unsigned_integral<T> && std::numeric_limits<T>::max() >= max)
@@ -230,19 +235,26 @@ namespace okiidoku {
 		// see ints_io.hpp
 		// friend std::ostream& operator<<(std::ostream& os, const Int& i) noexcept;
 
-		constexpr auto& operator++(   ) & noexcept { OKIIDOKU_CONTRACT_USE(val_ < max);       ++val_; check(); return *this; }
-		constexpr auto& operator--(   ) & noexcept { OKIIDOKU_CONTRACT_USE(val_ > val_t{0u}); --val_; check(); return *this; }
+		/** \pre value is less than the maximum value. */
+		constexpr auto& operator++(   ) & noexcept { OKIIDOKU_CONTRACT(val_ < max);       ++val_; check(); return *this; }
+		/** \pre value is greater than zero. */
+		constexpr auto& operator--(   ) & noexcept { OKIIDOKU_CONTRACT(val_ > val_t{0u}); --val_; check(); return *this; }
+		/** \pre value is less than the maximum value. */
 		constexpr auto  operator++(int) & noexcept { auto old {*this}; operator++(); return old; }
+		/** \pre value is greater than zero. */
 		constexpr auto  operator--(int) & noexcept { auto old {*this}; operator--(); return old; }
 
 		// TODO move this into dedicated iter_x class?
 		[[nodiscard, gnu::const]] constexpr auto begin(this const Int self) noexcept { self.check(); return Int{0u}; }
 		[[nodiscard, gnu::const]] constexpr auto end  (this const Int self) noexcept { self.check(); return self; }
-		[[nodiscard, gnu::const]] constexpr auto next (this const Int self) noexcept { self.check(); OKIIDOKU_CONTRACT_USE(self.val_ < max); return Int{self.val_+1u}; }
-		[[nodiscard, gnu::const]] constexpr auto prev (this const Int self) noexcept { self.check(); OKIIDOKU_CONTRACT_USE(self.val_ >= val_t{0u}); static_assert(max > 0u); return Int<max-1u,kind>{self.val_-1u}; }
+		/** \pre value is less than the maximum value. */
+		[[nodiscard, gnu::const]] constexpr auto next (this const Int self) noexcept { self.check(); OKIIDOKU_CONTRACT(self.val_ < max); return Int{self.val_+1u}; }
+		/** \pre value is greater than zero. */
+		[[nodiscard, gnu::const]] constexpr auto prev (this const Int self) noexcept { self.check(); OKIIDOKU_CONTRACT(self.val_ >= val_t{0u}); static_assert(max > 0u); return Int<max-1u,kind>{self.val_-1u}; }
+		/** \pre value is less than the maximum value. */
 		[[nodiscard, gnu::const]] constexpr Int<max-1u,kind> operator*(this const Int self) noexcept {
 			static_assert(max > 0u);
-			self.check(); OKIIDOKU_CONTRACT_USE(self.val_ < max);
+			self.check(); OKIIDOKU_CONTRACT(self.val_ < max);
 			return Int<max-1u,kind>{self};
 		}
 
@@ -250,9 +262,9 @@ namespace okiidoku {
 		template<max_t MR, IntKind KR>
 		constexpr Int& operator+=(const Int<MR,KR>& other) & noexcept requires(MR <= max) {
 			check(); other.check();
-			OKIIDOKU_CONTRACT_USE(max_t{other.val_} <= max);
-			OKIIDOKU_CONTRACT_USE(max_t{val_} <= max_t{max - max_t{other.val_}}); // (no) overflow check. i.e. `val_ + other.val_ <= max`
-			OKIIDOKU_CONTRACT_USE(max_t{val_} + other.val_ <= max); // (no) overflow check
+			OKIIDOKU_CONTRACT(max_t{other.val_} <= max);
+			OKIIDOKU_CONTRACT(max_t{val_} <= max_t{max - max_t{other.val_}}); // (no) overflow check. i.e. `val_ + other.val_ <= max`
+			OKIIDOKU_CONTRACT(max_t{val_} + other.val_ <= max); // (no) overflow check
 			val_ += other.val_;
 			check();
 			return *this;
@@ -261,7 +273,7 @@ namespace okiidoku {
 		/** \pre `val_ - other.val_ >= 0` */
 		template<max_t MR, IntKind KR>
 		constexpr Int& operator-=(const Int<MR,KR>& other) & noexcept requires(MR <= max) {
-			check(); other.check(); OKIIDOKU_CONTRACT_USE(other.val_ <= val_);
+			check(); other.check(); OKIIDOKU_CONTRACT(other.val_ <= val_);
 			val_ -= other.val_;
 			check();
 			return *this;
@@ -270,7 +282,7 @@ namespace okiidoku {
 		/** \pre `other.val_ != 0` */
 		template<max_t MR, IntKind KR> requires(MR > 0u)
 		constexpr Int& operator/=(const Int<MR,KR>& other) & noexcept requires(MR <= max) {
-			check(); other.check(); OKIIDOKU_CONTRACT_USE(other.val_ != val_t{0u});
+			check(); other.check(); OKIIDOKU_CONTRACT(other.val_ != val_t{0u});
 			val_ /= other.val_;
 			check();
 			return *this;
@@ -312,7 +324,7 @@ namespace okiidoku {
 	template<std::uintmax_t ML, IntKind KL, std::uintmax_t MR, IntKind KR> requires(ML >= MR)
 	[[gnu::const]] constexpr auto operator-(const Int<ML,KL> lhs, const Int<MR,KR> rhs) noexcept {
 		lhs.check(); rhs.check();
-		OKIIDOKU_CONTRACT_USE(lhs.val_ >= rhs.val_);
+		OKIIDOKU_CONTRACT(lhs.val_ >= rhs.val_);
 		static constexpr auto KO {pick_int_op_result_kind(KL,KR)};
 		return Int<ML,KO>{lhs.val_ - rhs.val_};
 	}
@@ -322,20 +334,24 @@ namespace okiidoku {
 		lhs.check(); rhs.check();
 		static constexpr auto KO {pick_int_op_result_kind(KL,KR)};
 		Int<ML*MR,KO> ret {lhs.val_ * rhs.val_};
-		OKIIDOKU_CONTRACT_USE((lhs.val_ == 0u || rhs.val_ == 0u) == (ret.val_ == 0u));
-		OKIIDOKU_CONTRACT_USE((lhs.val_ == 1u || rhs.val_ == 0u) == (ret.val_ == rhs.val_));
-		OKIIDOKU_CONTRACT_USE((rhs.val_ == 1u || lhs.val_ == 0u) == (ret.val_ == lhs.val_));
-		OKIIDOKU_CONTRACT_USE((lhs.val_ >  1u && rhs.val_ >  0u) == (ret.val_ >  rhs.val_));
-		OKIIDOKU_CONTRACT_USE((rhs.val_ >  1u && lhs.val_ >  0u) == (ret.val_ >  lhs.val_));
+		OKIIDOKU_CONTRACT((lhs.val_ == 0u || rhs.val_ == 0u) == (ret.val_ == 0u));
+		OKIIDOKU_CONTRACT((lhs.val_ == 1u || rhs.val_ == 0u) == (ret.val_ == rhs.val_));
+		OKIIDOKU_CONTRACT((rhs.val_ == 1u || lhs.val_ == 0u) == (ret.val_ == lhs.val_));
+		OKIIDOKU_CONTRACT((lhs.val_ >  1u && rhs.val_ >  0u) == (ret.val_ >  rhs.val_));
+		OKIIDOKU_CONTRACT((rhs.val_ >  1u && lhs.val_ >  0u) == (ret.val_ >  lhs.val_));
 		return ret;
 	}
 
 	/** \pre `rhs` is its type's maximum value. */
+	// TODO.high. I don't like that this rhs condition isn't statically checked.
+	//  How about a different type `INT` that has no fields and a template param for its compile-time value?
+	//  make it implicitly convert to Int.
+	//  and as a further stretch later, see what would be needed to remove Int's implicit constructor from builtin int type
 	template<std::uintmax_t ML, IntKind KL, std::uintmax_t MR, IntKind KR> requires(MR > 0u)
 	[[gnu::const]] constexpr auto operator/(const Int<ML,KL> lhs, const Int<MR,KR> rhs) noexcept {
 		lhs.check(); rhs.check();
-		OKIIDOKU_CONTRACT_USE(rhs.val_ == MR);
-		OKIIDOKU_CONTRACT_USE(rhs.val_ > 0u);
+		OKIIDOKU_CONTRACT(rhs.val_ == MR);
+		OKIIDOKU_CONTRACT(rhs.val_ > 0u);
 		static constexpr auto KO {pick_int_op_result_kind(KL,KR)};
 		return Int<ML/MR,KO>{lhs.val_ / rhs.val_};
 	}
@@ -343,21 +359,21 @@ namespace okiidoku {
 	/** \pre `rhs > 0` */
 	template<std::uintmax_t ML, IntKind KL, std::uintmax_t MR, IntKind KR> requires(MR > 0u)
 	[[gnu::const]] constexpr auto operator%(const Int<ML,KL> lhs, const Int<MR,KR> rhs) noexcept {
-		lhs.check(); rhs.check(); OKIIDOKU_CONTRACT_USE(rhs.val_ > 0u);
+		lhs.check(); rhs.check(); OKIIDOKU_CONTRACT(rhs.val_ > 0u);
 		static constexpr auto KO {pick_int_op_result_kind(KL,KR)};
 		Int<std::min(ML,MR-1u),KO> ret {lhs.val_ % rhs.val_};
-		OKIIDOKU_CONTRACT_USE(ret.val_ < rhs.val_);
-		OKIIDOKU_CONTRACT_USE(ret < rhs);
+		OKIIDOKU_CONTRACT(ret.val_ < rhs.val_);
+		OKIIDOKU_CONTRACT(ret < rhs);
 		return ret;
 	}
 	/** \pre `rhs > 0` */
 	template<std::uintmax_t MR, IntKind KR> requires(MR > 0u)
 	[[gnu::const]] constexpr auto operator%(const std::unsigned_integral auto lhs, const Int<MR,KR> rhs) noexcept {
 		rhs.check();
-		OKIIDOKU_CONTRACT_USE(rhs.val_ > 0u);
+		OKIIDOKU_CONTRACT(rhs.val_ > 0u);
 		Int<MR-1u,KR> ret {lhs % rhs.val_};
-		OKIIDOKU_CONTRACT_USE(ret.val_ < rhs.val_);
-		OKIIDOKU_CONTRACT_USE(ret < rhs);
+		OKIIDOKU_CONTRACT(ret.val_ < rhs.val_);
+		OKIIDOKU_CONTRACT(ret < rhs);
 		return ret;
 	}
 
@@ -537,7 +553,7 @@ namespace okiidoku::mono {
 	template<Order O> [[nodiscard, gnu::const]] constexpr
 	Ints<O>::o2x_t rmi_to_house(const HouseType house_type, const typename Ints<O>::o4x_t rmi) noexcept {
 		using T = Ints<O>;
-		OKIIDOKU_CONTRACT_USE(rmi < T::O4);
+		OKIIDOKU_CONTRACT(rmi < T::O4);
 		switch (house_type) {
 			using enum HouseType;
 			case row: return rmi_to_row<O>(rmi);

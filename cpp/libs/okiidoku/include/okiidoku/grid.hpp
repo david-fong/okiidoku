@@ -10,7 +10,7 @@
 #include <array>
 #include <span>
 #include <compare>
-#include <utility>     // forward
+#include <utility>     // forward_like
 #include <type_traits> // conditional, is_reference_v
 
 namespace okiidoku::mono {
@@ -30,10 +30,10 @@ namespace okiidoku::mono {
 		Grid() noexcept: detail::Gridlike<O, grid_sym_t<O>>{T::O2} {}
 	};
 	// using Grid = detail::Gridlike<O, grid_sym_t<O>>;
-	// Note: the above commented-out type alias results in large exported, mangled
-	//  symbol names from `ints`'s heavy usage of `std::conditional_t` (but why?).
-	//  Using inheritance gains nice mangled symbol names. Speed seems to suffer a
-	//  negligible drop (~1%?) or maybe it doesn't. I am happy with this outcome.
+	/* \internal the above commented-out type alias results in large exported, mangled
+	symbol names from `ints`'s heavy usage of `std::conditional_t` (but why?).
+	Using inheritance gains nice mangled symbol names. Speed seems to suffer a
+	negligible drop (~1%?) or maybe it doesn't. I am happy with this outcome. */
 
 
 	template<Order O> requires(is_order_compiled(O))
@@ -71,40 +71,44 @@ namespace okiidoku::mono {
 		/** lexicographical comparison over row-major-order traversal of cells. */
 		[[nodiscard, gnu::pure]] friend std::strong_ordering operator<=>(const Gridlike& a, const Gridlike& b) noexcept = default;
 
-		// Note: Making this constexpr results in a 1% speed gain, but 45% program
-		// size increase with GCC. That speed doesn't seem worth it.
+		// note: making this constexpr results in a 1% speed gain, but 45% program
+		// size increase with GCC. that speed doesn't seem worth it.
 		explicit Gridlike(CellType fill_value) noexcept { arr_.fill(fill_value); }
 		Gridlike() noexcept = default;
 
-		template<class Self> [[nodiscard, gnu::pure]]
-		decltype(auto) get_underlying_array(this Self&& self) noexcept { return std::forward<Self>(self).arr_; }
+		[[nodiscard, gnu::pure]]
+		decltype(auto) get_underlying_array(this auto&& self) noexcept { return std::forward_like<decltype(self)>(self.arr_); }
 
 		/// \pre `rmi` is in `[0, O4)`.
-		template<class Self> [[nodiscard, gnu::pure]] constexpr
-		decltype(auto) operator[](this Self&& self, const T::o4x_t rmi) noexcept {
+		[[nodiscard, gnu::pure]] constexpr
+		decltype(auto) operator[](this auto&& self, const T::o4x_t rmi) noexcept {
 			rmi.check();
-			return std::forward<Self>(self).arr_[rmi];
+			return std::forward_like<decltype(self)>(self.arr_[rmi]);
 		}
 
 		/// \pre `row` and `col` are in `[0, O2)`.
-		template<class Self> [[nodiscard, gnu::pure]] constexpr
-		decltype(auto) operator[](this Self&& self, const T::o2x_t row, const T::o2x_t col) noexcept {
-			return std::forward<Self>(self).arr_[row_col_to_rmi<O>(row, col)];
+		[[nodiscard, gnu::pure]] constexpr
+		decltype(auto) operator[](this auto&& self, const T::o2x_t row, const T::o2x_t col) noexcept {
+			row.check(); col.check();
+			return std::forward_like<decltype(self)>(self.arr_[row_col_to_rmi<O>(row, col)]);
 		}
 
 		/**
 		see `okiidoku::mono::box_cell_to_rmi`.
 		\pre `box` and `box_cell` are in `[0, O2)`. */
-		template<class Self> [[nodiscard, gnu::pure]] constexpr
-		decltype(auto) at_box_cell(this Self&& self, const T::o2x_t box, const T::o2x_t box_cell) noexcept {
-			return std::forward<Self>(self).arr_[box_cell_to_rmi<O>(box, box_cell)];
+		[[nodiscard, gnu::pure]] constexpr
+		decltype(auto) at_box_cell(this auto&& self, const T::o2x_t box, const T::o2x_t box_cell) noexcept {
+			box.check(); box_cell.check();
+			return std::forward_like<decltype(self)>(self.arr_[box_cell_to_rmi<O>(box, box_cell)]);
 		}
 
 		/// \pre `row` is in [0, O2).
-		template<class Self> [[nodiscard, gnu::pure]] constexpr
-		decltype(auto) row_span_at(this Self&& self, const T::o2x_t i) noexcept {
+		[[nodiscard, gnu::pure]] constexpr
+		decltype(auto) row_span_at(this auto& self, const T::o2x_t i) noexcept {
+			i.check();
 			using ret_t = std::remove_reference_t<decltype(self.arr_.front())>;
-			return static_cast<std::span<ret_t, T::O2>>(std::span{std::forward<Self>(self).arr_}.subspan(T::O2*i, T::O2));
+			// TODO test this. is there dangling?
+			return static_cast<std::span<ret_t, T::O2>>(std::span{std::forward_like<decltype(self)>(self).arr_}.subspan(T::O2*i, T::O2));
 		}
 
 		// [[nodiscard]] auto row_spans() noexcept { namespace v = ::ranges::views; return v::iota(o2i_t{0u}, o2i_t{T::O2}) | v::transform([&](auto r){ return row_span_at(r); }); }

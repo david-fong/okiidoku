@@ -8,7 +8,7 @@
 
 #include <variant>
 #include <compare>
-#include <utility> // forward
+#include <utility> // forward_like
 
 namespace okiidoku::visitor::detail {
 	// exists so that `OrderVariantFor` can use container templates that have other
@@ -61,7 +61,7 @@ namespace okiidoku::visitor::detail {
 			&& std::is_nothrow_default_constructible_v<typename Adaptor::template type<(O_)>>
 			OKIIDOKU_FOREACH_O_DO_EMIT
 			#undef OKIIDOKU_FOREACH_O_EMIT
-		): variant_([O]{
+		): variant_([O][[gnu::pure]]{
 			switch (O) {
 			#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 			case (O_): return variant_t{std::in_place_type<typename Adaptor::template type<(O_)>>};
@@ -82,17 +82,18 @@ namespace okiidoku::visitor::detail {
 
 		/** Though public, you shouldn't need to use this. The rest of the visitor
 		interface of the library should wrap around it with nicer syntax. */
-		template<class Self> [[nodiscard, gnu::pure]]
-		decltype(auto) get_underlying_variant(this Self&& self) noexcept { return std::forward<Self>(self).variant_; }
+		[[nodiscard, gnu::pure]]
+		decltype(auto) get_underlying_variant(this auto&& self) noexcept { return std::forward_like<decltype(self)>(self.variant_); }
 
 		// Sugar wrapper around an unchecked dereference of `std::get_if` for the underlying variant.
 		// Note: not using `std::get` since it could throw and we're going all in with the unchecked thing here.
-		template<Order O, class Self> [[nodiscard, gnu::pure]]
-		decltype(auto) unchecked_get_mono_exact(this Self&& self) noexcept {
+		template<Order O> [[nodiscard, gnu::pure]]
+		decltype(auto) unchecked_get_mono_exact(this auto&& self) noexcept {
 			using T_var = typename Adaptor::template type<O>;
-			OKIIDOKU_CONTRACT_USE(std::holds_alternative<T_var>(std::forward<Self>(self).variant_));
-			OKIIDOKU_CONTRACT_USE(std::get_if<T_var>(&std::forward<Self>(self).variant_) != nullptr);
-			return *std::get_if<T_var>(&std::forward<Self>(self).variant_);
+			OKIIDOKU_CONTRACT2(std::holds_alternative<T_var>(self.variant_));
+			decltype(auto) var {std::get_if<T_var>(&std::forward_like<decltype(self)>(self.variant_))};
+			OKIIDOKU_CONTRACT(var != nullptr);
+			return std::forward_like<decltype(self)>(*var);
 		}
 	private:
 		variant_t variant_;
@@ -106,7 +107,7 @@ namespace okiidoku::visitor::detail {
 		if (const auto cmp {vis_a.get_order() <=> vis_b.get_order()}; std::is_neq(cmp)) {
 			return cmp;
 		}
-		OKIIDOKU_CONTRACT_USE(vis_a.get_order() == vis_b.get_order());
+		OKIIDOKU_CONTRACT(vis_a.get_order() == vis_b.get_order());
 		switch (vis_a.get_order()) {
 		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 		case (O_): { \

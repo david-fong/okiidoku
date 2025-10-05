@@ -12,7 +12,7 @@ include_guard(DIRECTORY)
 
 # https://gitlab.kitware.com/cmake/cmake/-/issues/19273
 
-# Note/question: when instrumenting a program with dynamically linked components,
+# note/question: when instrumenting a program with dynamically linked components,
 #  does each component need to have a different profile-data path? I'm guessing yes?
 # I don't really care about PGO for anything but the core library
 
@@ -260,7 +260,7 @@ function(okiidoku_target_pgo
 	# target_sources(${trainee} PRIVATE "$<${if_use}:${training_stamp_file}>") # TODO why is this done? just to show up in some IDEs?
 
 	block()
-	# Note: annoyingly, commands cannot be the empty string. use `cmake -E true` as a no-op instead.
+	# note: annoyingly, commands cannot be the empty string. use `cmake -E true` as a no-op instead.
 	list(APPEND command
 		"${CMAKE_COMMAND}"
 		"-D _OKIIDOKU_PGO_DIR=${_OKIIDOKU_PGO_DIR}"

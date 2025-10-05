@@ -5,7 +5,7 @@
 
 #include <okiidoku/o2_bit_arr.hpp>
 
-#include <utility> // forward
+#include <utility> // forward_like
 
 namespace okiidoku::mono::detail::solver2 {
 
@@ -35,8 +35,8 @@ namespace okiidoku::mono::detail::solver2 {
 		std::array<Set, T::O2> sets_;
 	public:
 		// TODO an initialization function. maybe a reinit
-		template<class Self> [[nodiscard, gnu::pure]]
-		decltype(auto) operator[](this Self&& self, const o2i_t set) noexcept { return std::forward<Self>(self).sets_[set]; }
+		[[nodiscard, gnu::pure]]
+		decltype(auto) operator[](this auto&& self, const o2i_t set) noexcept { set.check(); return std::forward<decltype(self)>(self.sets_[set]); }
 
 		void learn_complementary_partition(const O2BitArr<O>&) noexcept;
 	};

@@ -84,7 +84,7 @@ endif()
 if(OKIIDOKU_BUILD_DOCS)
 	CPMAddPackage(NAME doxygen-awesome-css
 		# https://github.com/jothepro/doxygen-awesome-css/releases
-		URL [[https://github.com/jothepro/doxygen-awesome-css/archive/refs/tags/v2.3.4.tar.gz]]
+		URL [[https://github.com/jothepro/doxygen-awesome-css/archive/refs/tags/v2.4.0.tar.gz]]
 		DOWNLOAD_ONLY YES
 	)
 	if(doxygen-awesome-css_ADDED)

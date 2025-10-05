@@ -21,22 +21,20 @@ namespace okiidoku::mono::detail::solver {
 
 		template<Order O, class QueueT> requires(is_order_compiled(O))
 		void queue_apply_one(Engine<O>& engine, QueueT& queue, UnwindInfo& check) noexcept {
-			OKIIDOKU_CONTRACT_USE(!queue.empty());
+			OKIIDOKU_CONTRACT2(!queue.empty());
 			if constexpr (std::is_same_v<std::decay_t<decltype(queue)>, typename FoundQueues<O>::template queue_t<found::CellClaimSym<O>>>) {
 				auto desc {std::move(queue.front())}; // handle passive find during apply
 				queue.pop_front();
 				check = CandElimApplyImpl<O>::apply(engine, std::move(desc));
 			} else {
-				#ifndef NDEBUG
 				const auto old_front_addr {&queue.front()};
-				#endif
 				check = CandElimApplyImpl<O>::apply(engine, queue.front());
 				if (!check.did_unwind()) [[likely]] {
-					OKIIDOKU_CONTRACT_ASSERT(old_front_addr == &queue.front()); // no passive find during apply
-					OKIIDOKU_CONTRACT_USE(!queue.empty());
+					OKIIDOKU_ASSERT(old_front_addr == &queue.front()); // no passive find during apply
+					OKIIDOKU_CONTRACT2(!queue.empty());
 					queue.pop_front();
 				} else {
-					OKIIDOKU_CONTRACT_ASSERT(queue.empty());
+					OKIIDOKU_ASSERT(queue.empty());
 				}
 			}
 		}
@@ -45,7 +43,7 @@ namespace okiidoku::mono::detail::solver {
 
 	template<Order O> requires(is_order_compiled(O))
 	UnwindInfo CandElimApply<O>::apply_first_queued(Engine<O>& engine) noexcept {
-		OKIIDOKU_CONTRACT_ASSERT(engine.has_queued_cand_elims());
+		OKIIDOKU_ASSERT(engine.has_queued_cand_elims());
 		auto check {UnwindInfo::make_no_unwind()};
 		// Note: I had to choose between easier-to-understand code, or making it
 		// impossible to forget to update this "boilerplate" if I implement more
@@ -86,7 +84,7 @@ namespace okiidoku::mono::detail::solver {
 		if constexpr (!std::is_same_v<last_queue_t, passive_queue_t>) {
 			logical_and_loop_body(std::get<passive_queue_t>(engine.get_found_queues_().tup_));
 		}
-		OKIIDOKU_CONTRACT_ASSERT(!engine.has_queued_cand_elims());
+		OKIIDOKU_ASSERT(!engine.has_queued_cand_elims());
 		return check;
 	}
 
@@ -165,7 +163,7 @@ namespace okiidoku::mono::detail::solver {
 		const found::LockedCands<O>& desc
 	) noexcept {
 		/** first isec-rmi of first isec in target house */
-		const o3x1_t isec_base {[&]{
+		const o3x1_t isec_base {[&][[gnu::pure]]{
 			switch (desc.remove_from_rest_of) {
 				using enum BoxOrLine;
 				case box:  return o3x1_t{((desc.isec/T::O2)*T::O2)+(desc.isec%T::O1)};
@@ -186,7 +184,7 @@ namespace okiidoku::mono::detail::solver {
 			if (isec == desc.isec) [[unlikely]] { continue; }
 			for (const auto isec_cell_i : T::O1) {
 				const auto chute {isec / T::O2};
-				OKIIDOKU_CONTRACT_ASSERT(chute == desc.isec/T::O2);
+				OKIIDOKU_ASSERT(chute == desc.isec/T::O2);
 				const auto chute_cell {((isec%T::O2)*T::O1) + isec_cell_i};
 				const auto rmi {chute_cell_to_rmi<O>(desc.line_type, chute, chute_cell)};
 				const auto check {engine.do_elim_remove_syms_(rmi, desc.syms)};

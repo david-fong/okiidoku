@@ -29,10 +29,10 @@ namespace okiidoku::mono::detail::solver {
 			begin_{begin}, end_{end}, naked_subset_size_{naked_subset_size},
 			has_more_{(begin + naked_subset_size) <= end}
 		{
-			OKIIDOKU_CONTRACT_USE(end_ <= T::O2);
-			OKIIDOKU_CONTRACT_USE(naked_subset_size_ > 0u);
-			OKIIDOKU_CONTRACT_USE(naked_subset_size_ < T::O2);
-			OKIIDOKU_CONTRACT_USE(begin_ + naked_subset_size_ <= T::O2);
+			OKIIDOKU_CONTRACT(end_ <= T::O2);
+			OKIIDOKU_CONTRACT(naked_subset_size_ > 0u);
+			OKIIDOKU_CONTRACT(naked_subset_size_ < T::O2);
+			OKIIDOKU_CONTRACT(begin_ + naked_subset_size_ <= T::O2);
 			if (has_more()) [[likely]] {
 				for (const auto i : naked_subset_size_) {
 					combo_[i] = o2x_t::unchecked_from(begin_ + i);
@@ -41,8 +41,8 @@ namespace okiidoku::mono::detail::solver {
 		}
 
 		[[nodiscard, gnu::pure]] o2x_t get_naked_subset_size() const noexcept {
-			OKIIDOKU_CONTRACT_USE(naked_subset_size_ > 0u);
-			OKIIDOKU_CONTRACT_USE(naked_subset_size_ < T::O2);
+			OKIIDOKU_CONTRACT(naked_subset_size_ > 0u);
+			OKIIDOKU_CONTRACT(naked_subset_size_ < T::O2);
 			return naked_subset_size_;
 		}
 
@@ -52,21 +52,21 @@ namespace okiidoku::mono::detail::solver {
 
 		/** \pre `i < naked_subset_size` */
 		[[nodiscard, gnu::pure]] o2xs_t combo_at(const o2x_t i) const noexcept {
-			OKIIDOKU_CONTRACT_USE(i < naked_subset_size_);
+			OKIIDOKU_CONTRACT(i < naked_subset_size_);
 			return combo_[i];
 		}
 		/** \pre `has_more` returns `true`. */
 		[[nodiscard, gnu::pure]] auto at_it() const noexcept {
-			OKIIDOKU_CONTRACT_ASSERT(has_more());
+			OKIIDOKU_ASSERT(has_more());
 			return combo_.cbegin();
 		}
 
 		/** \pre `has_more` returns `true`. */
 		void advance() noexcept {
-			OKIIDOKU_CONTRACT_USE(has_more());
-			OKIIDOKU_CONTRACT_USE(end_ <= T::O2);
-			OKIIDOKU_CONTRACT_USE(naked_subset_size_ > 0u);
-			OKIIDOKU_CONTRACT_USE(naked_subset_size_ < T::O2);
+			OKIIDOKU_CONTRACT(has_more());
+			OKIIDOKU_CONTRACT(end_ <= T::O2);
+			OKIIDOKU_CONTRACT(naked_subset_size_ > 0u);
+			OKIIDOKU_CONTRACT(naked_subset_size_ < T::O2);
 			o2x_t i {naked_subset_size_.prev()};
 			++combo_[i];
 			while (combo_[i] > end_ - naked_subset_size_ + i) [[likely]] {
@@ -97,13 +97,13 @@ namespace okiidoku::mono::detail::solver {
 		void assert_is_state_valid_() const noexcept {
 			#ifndef NDEBUG
 			if ((begin_ + naked_subset_size_) > end_) {
-				OKIIDOKU_CONTRACT_ASSERT(!has_more_);
+				OKIIDOKU_ASSERT(!has_more_);
 				return;
 			}
-			OKIIDOKU_CONTRACT_ASSERT(combo_.front() >= begin_);
-			OKIIDOKU_CONTRACT_ASSERT(combo_[naked_subset_size_-1u] < end_);
+			OKIIDOKU_ASSERT(combo_.front() >= begin_);
+			OKIIDOKU_ASSERT(combo_[naked_subset_size_-1u] < end_);
 			for (const auto i : naked_subset_size_) {
-				OKIIDOKU_CONTRACT_ASSERT(combo_[i-1u] < combo_[i]);
+				OKIIDOKU_ASSERT(combo_[i-1u] < combo_[i]);
 			}
 			#endif
 		}

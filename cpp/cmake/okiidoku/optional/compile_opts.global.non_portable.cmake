@@ -26,7 +26,7 @@ if(NOT MSVC)
 endif()
 
 
-# Note: wrapping with functions to scope changes to `CMAKE_CXX_FLAGS`
+# note: wrapping with functions to scope changes to `CMAKE_CXX_FLAGS`
 # cspell:dictionaries cpp-refined
 block()
 	get_directory_property(directory_compile_options COMPILE_OPTIONS)

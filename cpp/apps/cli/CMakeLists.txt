@@ -8,12 +8,11 @@ add_executable(okiidoku_cli
 set_target_properties(okiidoku_cli PROPERTIES
 	EXPORT_NAME cli
 )
-okiidoku_install_target(okiidoku_cli OPTIONAL)
-
-target_include_directories(okiidoku_cli PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
-
+target_compile_features(okiidoku PUBLIC cxx_std_23)
 okiidoku_add_compiler_options(okiidoku_cli)
+target_include_directories(okiidoku_cli PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
 target_link_libraries(okiidoku_cli
 	PRIVATE okiidoku_cli_utils
 	PRIVATE okiidoku
 )
+okiidoku_install_target(okiidoku_cli OPTIONAL)

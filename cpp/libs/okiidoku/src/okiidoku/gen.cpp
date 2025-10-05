@@ -9,7 +9,7 @@
 #include <random>    // minstd_rand
 #include <algorithm> // ranges::count, shuffle
 #include <array>
-#include <utility>   // swap, forward
+#include <utility>   // swap, forward_like
 
 namespace okiidoku::mono { namespace {
 
@@ -28,10 +28,10 @@ namespace okiidoku::mono { namespace {
 		[[nodiscard, gnu::pure]] o3i_t count_num_missing_syms() const noexcept {
 			return stdr::count(store_, count_t{0u});
 		}
-		template<class Self> [[nodiscard, gnu::pure]]
-		decltype(auto) ch_count_sym(this Self&& self, const ch_t ch, const sym_t sym) noexcept {
+		[[nodiscard, gnu::pure]]
+		decltype(auto) ch_count_sym(this auto&& self, const ch_t ch, const sym_t sym) noexcept {
 			ch.check(); sym.check();
-			return std::forward<Self>(self).store_[(T::O1*sym) + ch];
+			return std::forward_like<decltype(self)>(self.store_[(T::O1*sym) + ch]);
 		}
 	private:
 		/**
@@ -47,6 +47,7 @@ namespace okiidoku::mono { namespace {
 
 	template<Order O> requires(is_order_compiled(O))
 	void make_boxes_valid(Grid<O>& grid, const typename Ints<O>::o2x1_t h_chute, rng_t& rng) noexcept {
+		h_chute.check();
 		OKIIDOKU_MONO_INT_TS_TYPEDEFS
 		// std::uintmax_t op_count {0u};
 		SymCountsForChuteHouses<O> boxes_has {};
@@ -58,7 +59,7 @@ namespace okiidoku::mono { namespace {
 				*grid[h_chute+chute_row, col]
 			)};
 			++count;
-			OKIIDOKU_CONTRACT_USE(count <= T::O1);
+			OKIIDOKU_CONTRACT(count <= T::O1);
 		}}
 		o3i_t num_missing_syms {boxes_has.count_num_missing_syms()};
 		while (num_missing_syms != 0u) [[likely]] {
@@ -67,21 +68,21 @@ namespace okiidoku::mono { namespace {
 			const auto a_box {a_col/T::O1};
 			const auto b_box {b_col/T::O1};
 			if (a_box == b_box) [[unlikely]] { continue; }
-			OKIIDOKU_CONTRACT_USE(a_col != b_col);
+			OKIIDOKU_CONTRACT(a_col != b_col);
 			const auto row {h_chute + ((rng() - rng_t::min()) % T::O1)};
-			auto& a_sym {grid[row,a_col]}; // ↰ will swap these later
+			auto& a_sym {grid[row,a_col]}; // ↰ will swap these later,
 			auto& b_sym {grid[row,b_col]}; // ↲ so need reference type
-			OKIIDOKU_CONTRACT_USE(a_sym != b_sym);
+			OKIIDOKU_CONTRACT(a_sym != b_sym);
 			const auto num_resolved {static_cast<signed char>(
 				(boxes_has.ch_count_sym(a_box,*a_sym) == 1 ? -1 : 0) + // regression
 				(boxes_has.ch_count_sym(a_box,*b_sym) == 0 ?  1 : 0) + // improvement
 				(boxes_has.ch_count_sym(b_box,*b_sym) == 1 ? -1 : 0) + // regression
 				(boxes_has.ch_count_sym(b_box,*a_sym) == 0 ?  1 : 0)   // improvement
 			)};
-			OKIIDOKU_CONTRACT_USE(num_resolved <=  2);
-			OKIIDOKU_CONTRACT_USE(num_resolved >= -2);
+			OKIIDOKU_CONTRACT(num_resolved <=  2);
+			OKIIDOKU_CONTRACT(num_resolved >= -2);
 			if (num_resolved >= 0) [[unlikely]] { // TODO.low for fun: find out on average at what op_count it starts being unlikely
-				OKIIDOKU_CONTRACT_USE(num_missing_syms >= Int<2u>{num_resolved});
+				OKIIDOKU_CONTRACT2(num_missing_syms >= Int<2u>{num_resolved});
 				num_missing_syms -= Int<2u>{num_resolved};
 				--boxes_has.ch_count_sym(a_box,*a_sym);
 				++boxes_has.ch_count_sym(b_box,*a_sym);
@@ -97,6 +98,7 @@ namespace okiidoku::mono { namespace {
 
 	template<Order O> requires(is_order_compiled(O))
 	void make_cols_valid(Grid<O>& grid, const typename Ints<O>::o2x1_t v_chute, rng_t& rng) noexcept {
+		v_chute.check();
 		OKIIDOKU_MONO_INT_TS_TYPEDEFS
 		// std::uintmax_t op_count {0};
 		SymCountsForChuteHouses<O> cols_has {};
@@ -117,17 +119,17 @@ namespace okiidoku::mono { namespace {
 			const auto row {(rng() - rng_t::min()) % T::O2};
 			auto& a_sym {grid[row, v_chute + a_col]}; // ↰ will swap these later
 			auto& b_sym {grid[row, v_chute + b_col]}; // ↲ so need reference type
-			OKIIDOKU_CONTRACT_USE(a_sym != b_sym);
+			OKIIDOKU_CONTRACT(a_sym != b_sym);
 			const auto num_resolved {static_cast<signed char>(
 				(cols_has.ch_count_sym(a_col,*a_sym) == 1u ? -1 : 0) + // regression
 				(cols_has.ch_count_sym(a_col,*b_sym) == 0u ?  1 : 0) + // improvement
 				(cols_has.ch_count_sym(b_col,*b_sym) == 1u ? -1 : 0) + // regression
 				(cols_has.ch_count_sym(b_col,*a_sym) == 0u ?  1 : 0)   // improvement
 			)};
-			OKIIDOKU_CONTRACT_USE(num_resolved <=  2);
-			OKIIDOKU_CONTRACT_USE(num_resolved >= -2);
+			OKIIDOKU_CONTRACT(num_resolved <=  2);
+			OKIIDOKU_CONTRACT(num_resolved >= -2);
 			if (num_resolved >= 0) [[unlikely]] {
-				OKIIDOKU_CONTRACT_USE(num_missing_syms >= Int<2u>{num_resolved});
+				OKIIDOKU_CONTRACT2(num_missing_syms >= Int<2u>{num_resolved});
 				num_missing_syms -= Int<2u>{num_resolved};
 				--cols_has.ch_count_sym(a_col,*a_sym);
 				++cols_has.ch_count_sym(a_col,*b_sym);
@@ -145,7 +147,7 @@ namespace okiidoku::mono {
 	template<Order O> requires(is_order_compiled(O))
 	void generate_shuffled(Grid<O>& grid, const rng_seed_t rng_seed) noexcept {
 		using T = Ints<O>;
-		OKIIDOKU_CONTRACT_ASSERT(grid_is_filled(grid));
+		OKIIDOKU_ASSERT(grid_is_filled(grid));
 		// TODO.low assert that rows follow the rule.
 
 		rng_t rng {rng_seed};
@@ -166,12 +168,12 @@ namespace okiidoku::mono {
 		for (const auto v_chute : T::O1) {
 			make_cols_valid(grid, v_chute * T::O1, rng);
 		}
-		OKIIDOKU_CONTRACT_ASSERT(grid_is_filled(grid));
-		OKIIDOKU_CONTRACT_ASSERT(grid_follows_rule<O>(grid));
+		OKIIDOKU_ASSERT(grid_is_filled(grid));
+		OKIIDOKU_ASSERT(grid_follows_rule<O>(grid));
 	}
 
 	template<Order O> requires(is_order_compiled(O))
-	Grid<O> generate_shuffled(rng_seed_t rng_seed) noexcept {
+	Grid<O> generate_shuffled(const rng_seed_t rng_seed) noexcept {
 		using T = Ints<O>;
 		OKIIDOKU_DEFER_INIT Grid<O> grid;
 		for (const auto row : T::O2) {

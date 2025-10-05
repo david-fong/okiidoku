@@ -10,7 +10,7 @@
 
 // #include <algorithm>
 #include <array>
-#include <utility> // forward
+#include <utility> // forward_like
 
 #include <okiidoku/puzzle/solver/cand_elim_find.macros.hpp>
 
@@ -23,12 +23,16 @@ namespace okiidoku::mono::detail::solver { namespace {
 		std::array<O2BitArr<O>, T::O2> arr_ {};
 	public:
 		// inner dimension is for intersections in a line, outer dimension for intersections in a box.
-		template<class Self> [[nodiscard, gnu::pure]]
-		decltype(auto) at_isec(this Self&& self, const o2i_t isec_i) noexcept { return std::forward<Self>(self).arr_[isec_i]; }
+		[[nodiscard, gnu::pure]]
+		decltype(auto) at_isec(this auto&& self, const o2i_t isec_i) noexcept {
+			isec_i.check();
+			return std::forward_like<decltype(self)>(self.arr_[isec_i]);
+		}
 
-		template<class Self> [[nodiscard, gnu::pure]]
-		decltype(auto) at_isec(this Self&& self, const o1x_t box_isec_i, const o1x_t line_isec_i) noexcept {
-			return std::forward<Self>(self).arr_[((T::O1*box_isec_i)+line_isec_i)];
+		[[nodiscard, gnu::pure]]
+		decltype(auto) at_isec(this auto&& self, const o1x_t box_isec_i, const o1x_t line_isec_i) noexcept {
+			box_isec_i.check(); line_isec_i.check();
+			return std::forward_like<decltype(self)>(self.arr_[((T::O1*box_isec_i)+line_isec_i)]);
 		}
 	};
 

@@ -5,14 +5,6 @@
 # https://www.reddit.com/r/cpp/comments/m0rt7v/building_a_dual_shared_and_static_library_with/
 # TODO.low try Alex's tutorial things for installation utilities.
 
-okiidoku_make_include_flag("okiidoku/detail/export.h" export_header_include_flag)
-okiidoku_make_include_flag("okiidoku/detail/util.hpp" util_header_include_flag)
-# if(NOT "${IWYU_EXE}" STREQUAL "IWYU_EXE-NOTFOUND")
-# 	list(APPEND CMAKE_CXX_INCLUDE_WHAT_YOU_USE
-# 		"${export_header_include_flag}" "${util_header_include_flag}"
-# 	)
-# endif()
-
 add_library(okiidoku #[[ uses BUILD_SHARED_LIBS ]] "")
 add_library("${PROJECT_NAME}::okiidoku" ALIAS okiidoku)
 target_compile_features(okiidoku PUBLIC cxx_std_23)
@@ -32,6 +24,7 @@ okiidoku_install_target(okiidoku)
 
 include(GenerateExportHeader)
 generate_export_header(okiidoku EXPORT_FILE_NAME include/okiidoku/detail/export.h)
+okiidoku_make_include_flag("okiidoku/detail/export.h" export_header_include_flag)
 target_compile_options(okiidoku PUBLIC "${export_header_include_flag}")
 if(NOT (DEFINED BUILD_SHARED_LIBS AND BUILD_SHARED_LIBS))
 	target_compile_definitions(okiidoku PUBLIC "OKIIDOKU_STATIC_DEFINE")
@@ -45,8 +38,9 @@ target_include_directories(okiidoku
 	PUBLIC  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
 	PRIVATE "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>"
 )
+okiidoku_make_include_flag("okiidoku/detail/util.hpp" util_header_include_flag)
 target_compile_options(okiidoku PUBLIC "${util_header_include_flag}")
-# Future Note: if switching back to FILE_SET, make sure headers get installed. not sure why they weren't when previously using FILE_SET. maybe each header file needs to be listed out explicitly?
+# future note: if switching back to FILE_SET, make sure headers get installed. not sure why they weren't when previously using FILE_SET. maybe each header file needs to be listed out explicitly?
 install(DIRECTORY # includes
 	"${CMAKE_CURRENT_BINARY_DIR}/include/okiidoku"
 	"${CMAKE_CURRENT_SOURCE_DIR}/include/okiidoku"
@@ -56,6 +50,7 @@ install(DIRECTORY # includes
 
 # keep inline functions for debugging purposes:
 # TODO clang doesn't support -fkeep-inline-functions, need to use something else... maybe -fno-inline-functions... :(
+# TODO do we even want to keep doing this now that we have `OKIIDOKU_KEEP_FOR_DEBUG`?
 add_compile_options("$<${debug_configs}:$<$<CXX_COMPILER_ID:GNU>:-fkeep-inline-functions>>")
 
 
@@ -79,7 +74,7 @@ block()
 		# https://sourceware.org/gdb/current/onlinedocs/gdb.html/objfile_002dgdbdotext-file.html
 		add_custom_command(TARGET okiidoku POST_BUILD
 			COMMENT "symlinking okiidoku-gdb.py to build directory"
-			COMMAND "${c};make_directory;${OKIIDOKU_DATA_OUTPUT_DIRECTORY}/gdb/auto-load"
+			# COMMAND "${c};make_directory;${OKIIDOKU_DATA_OUTPUT_DIRECTORY}/gdb/auto-load"
 			COMMAND "${c};create_symlink;${tools}/okiidoku-gdb.py;$<TARGET_SONAME_FILE:okiidoku>-gdb.py"
 			VERBATIM COMMAND_EXPAND_LISTS
 		)
@@ -93,10 +88,9 @@ block()
 	# natvis search: https://learn.microsoft.com/en-us/visualstudio/debugger/create-custom-views-of-native-objects#BKMK_natvis_location
 	add_custom_command(TARGET okiidoku POST_BUILD
 		COMMENT "symlinking debug-support files to data / build directory"
-		# DEPENDS "${tools}/okiidoku.natvis" "${tools}/.gdbinit"
-		# OUTPUT
-		# 	"${OKIIDOKU_DATA_OUTPUT_DIRECTORY}/okiidoku.natvis"
-		# 	"${OKIIDOKU_TEST_WORKING_DIRECTORY}/.gdbinit"
+		BYPRODUCTS
+			"${OKIIDOKU_DATA_OUTPUT_DIRECTORY}/okiidoku.natvis"
+			"${OKIIDOKU_TEST_WORKING_DIRECTORY}/.gdbinit"
 		COMMAND "${c};make_directory;${OKIIDOKU_DATA_OUTPUT_DIRECTORY}/okiidoku"
 		COMMAND "${c};create_symlink;${tools}/okiidoku.natvis;${OKIIDOKU_DATA_OUTPUT_DIRECTORY}/okiidoku/okiidoku.natvis"
 		COMMAND "${c};create_symlink;${tools}/.gdbinit;${OKIIDOKU_TEST_WORKING_DIRECTORY}/.gdbinit" # local init file (https://sourceware.org/gdb/current/onlinedocs/gdb.html/Initialization-Files.html)

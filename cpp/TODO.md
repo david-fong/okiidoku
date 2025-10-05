@@ -46,11 +46,12 @@ Issues I'm watching:
 - https://gitlab.kitware.com/cmake/cmake/-/issues/26092 cmake refer to build preset name in preset for installDir
 - `std::ranges::iota()` clang libc++ doesn't have it yet :( (which impacts emscripten build) https://github.com/llvm/llvm-project/issues/105184
 - https://gitlab.kitware.com/cmake/cmake/-/issues/20256 CMake mechanism for split debug info. see also https://sourceware.org/gdb/current/onlinedocs/gdb.html/Separate-Debug-Files.html
+- https://github.com/emscripten-core/emscripten/issues/25490 emscripten emcc link `make_js_executable`.
 
 ## Misc List
 
+- do some `static_assert` tests for types of deducing this member functions. just discovered that I was having a bug with one because I was using something after `std::forward`? maybe I _shouldn't_ have disabled that clang-tidy check... but then why did I see people doing this thing in example code? I guess because you need to be careful about copies with iterators?
 - use mixed-radix uint serdes helper to implement grid serdes.
-- why isn't emscripten build adding shebang? em++ -> em++.py -> emcc.py -> import link.py, which has a thing that's supposed to add it. try to make an MRE.
 - find places `<O>` is used, and see if deduction guides can help. Ex. `template<typename _Type, size_t _ArrayExtent> span(array<_Type, _ArrayExtent>&) -> span<_Type, _ArrayExtent>;`
 - make canon functions pure producers of a canonicalizing transformation. take grid by const reference. name `canon_sym` -> `get_sym_canon_map`.
 - see if helpful to add `/// \cond detail` wrapper to `detail` namespaces to suppress doxygen for them
@@ -92,7 +93,6 @@ Issues I'm watching:
   - `import std` at least in source files? https://www.kitware.com/import-std-in-cmake-3-30/
 - C++23:
   - http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/p2214r0.html#does-adjacent-mean-2-or-n
-  - `[[assume(expr)]]`. update `OKIIDOKU_CONTRACT_USE` to use it after assert in debug, and
   - `std::ranges::iota()` see above note in issues watching
   - `std::views::chunk()`
     - could this be useful for `canon_pos`? I tried messing around with range-v3 on compiler explorer and had trouble with the whole action vs algorithm, container vs view thing. Didn't know what I was doing and could achieve what I wanted.

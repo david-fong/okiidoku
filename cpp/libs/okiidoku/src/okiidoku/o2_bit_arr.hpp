@@ -27,8 +27,8 @@ namespace okiidoku::mono {
 	public:
 		// TODO.low investigate ways to store small but expand to a fast(er) int type
 		// when doing bit-twiddling operations and whether the tradeoff is good pareto-wise.
-		using word_t =
-			std::conditional_t<(O*O <= 32), std::uint32_t,
+		using word_t = std::conditional_t<(O*O <= 32),
+			std::uint32_t,
 			std::uint64_t
 		>;
 		// since last measured for clang, the above is slightly faster for O=3, with
@@ -54,18 +54,19 @@ namespace okiidoku::mono {
 		/** \pre `bit_i < T::O2`. */
 		[[nodiscard, gnu::const]]
 		static constexpr word_ix_t bit_i_to_word_i(const typename Ints<O>::o2x_t bit_i) noexcept {
-			OKIIDOKU_CONTRACT_USE(bit_i < T::O2);
+			OKIIDOKU_CONTRACT(bit_i < T::O2);
 			if constexpr (num_words == 1u) { return word_ix_t{0u}; }
 			else {
 				const word_ix_t word_i {bit_i / word_t_num_bits};
-				OKIIDOKU_CONTRACT_USE(word_i < num_words);
+				OKIIDOKU_CONTRACT(word_i < num_words);
+				OKIIDOKU_CONTRACT(word_i * word_t_num_bits < num_words);
 				return word_i;
 			}
 		}
 		/** \pre `bit_i < T::O2`. */
 		[[nodiscard, gnu::const]]
 		static constexpr word_t word_bit_mask_for_bit_i(const typename Ints<O>::o2x_t bit_i) noexcept {
-			OKIIDOKU_CONTRACT_USE(bit_i < T::O2);
+			OKIIDOKU_CONTRACT(bit_i < T::O2);
 			if constexpr (num_words == 1u) {
 				return static_cast<word_t>(word_t{1u} << bit_i);
 			} else {
@@ -100,23 +101,23 @@ namespace okiidoku::mono {
 
 		/** \pre `at < O2`. */
 		[[nodiscard, gnu::pure]] constexpr bool operator[](const typename Ints<O>::o2x_t at) const noexcept {
-			OKIIDOKU_CONTRACT_USE(at < T::O2);
+			OKIIDOKU_CONTRACT(at < T::O2);
 			const word_t word_bit_mask {word_bit_mask_for_bit_i(at)};
 			return (words_[bit_i_to_word_i(at)] & word_bit_mask) != word_t{0u};
 		}
 		/** \pre `at < O2`. */
 		constexpr void set(const typename Ints<O>::o2x_t at) noexcept {
-			OKIIDOKU_CONTRACT_USE(at < T::O2);
+			OKIIDOKU_CONTRACT(at < T::O2);
 			words_[bit_i_to_word_i(at)] |= word_bit_mask_for_bit_i(at);
 		}
 		/** \pre `at < O2`. */
 		constexpr void unset(const typename Ints<O>::o2x_t at) noexcept {
-			OKIIDOKU_CONTRACT_USE(at < T::O2);
+			OKIIDOKU_CONTRACT(at < T::O2);
 			words_[bit_i_to_word_i(at)] &= static_cast<word_t>(~word_bit_mask_for_bit_i(at));
 		}
 		/** \pre `at < O2`. */
 		constexpr void flip(const typename Ints<O>::o2x_t at) noexcept {
-			OKIIDOKU_CONTRACT_USE(at < T::O2);
+			OKIIDOKU_CONTRACT(at < T::O2);
 			words_[bit_i_to_word_i(at)] ^= word_bit_mask_for_bit_i(at);
 		}
 
@@ -137,7 +138,7 @@ namespace okiidoku::mono {
 
 		/** \pre `at < O2`. */
 		[[nodiscard, gnu::pure]] static bool test_any3(const o2x_t at, const O2BitArr& a, const O2BitArr& b, const O2BitArr& c) noexcept {
-			OKIIDOKU_CONTRACT_USE(at < T::O2);
+			OKIIDOKU_CONTRACT(at < T::O2);
 			const auto word_i {bit_i_to_word_i(at)};
 			const word_t word_bit_mask {word_bit_mask_for_bit_i(at)};
 			// TODO consider rewriting to just logical-or testing each one separately
@@ -145,7 +146,7 @@ namespace okiidoku::mono {
 		}
 		/** \pre `at < O2`. */
 		static void set3(const o2x_t at, O2BitArr& a, O2BitArr& b, O2BitArr& c) noexcept {
-			OKIIDOKU_CONTRACT_USE(at < T::O2);
+			OKIIDOKU_CONTRACT(at < T::O2);
 			const auto word_i {bit_i_to_word_i(at)};
 			const word_t word_bit_mask {word_bit_mask_for_bit_i(at)};
 			a.words_[word_i] |= word_bit_mask;
@@ -154,7 +155,7 @@ namespace okiidoku::mono {
 		}
 		/** \pre `at < O2`. */
 		static void unset3(const o2x_t at, O2BitArr& a, O2BitArr& b, O2BitArr& c) noexcept {
-			OKIIDOKU_CONTRACT_USE(at < T::O2);
+			OKIIDOKU_CONTRACT(at < T::O2);
 			const auto word_i {bit_i_to_word_i(at)};
 			const word_t word_bit_mask {word_bit_mask_for_bit_i(at)};
 			a.words_[word_i] &= static_cast<word_t>(~word_bit_mask);
@@ -213,24 +214,30 @@ namespace okiidoku::mono {
 			[[nodiscard, gnu::pure]] constexpr o2x_t value() const noexcept {
 				return *i_;
 			}
-			/** \pre `not_end()` */
+			/**
+			\pre `not_end()`
+			\post has advanced to the bit index of the next set bit. */
 			void advance() noexcept {
-				OKIIDOKU_CONTRACT_USE(i_ < T::O2);
-				word_i_t word_i = i_ / word_t_num_bits;
-				OKIIDOKU_CONTRACT_USE(word_i < num_words); // should be obvious, but MSVC is struggling :/
-				while (word_i < num_words && arr_.words_[word_i] == 0u) /*[[unlikely]]*/ { ++word_i; }
+				OKIIDOKU_CONTRACT(i_ < T::O2);
+				const word_i_t word_i {[&]{
+					if constexpr (num_words == 1u) { return word_ix_t{0u}; }
+					else {
+						word_i_t w_i {bit_i_to_word_i(i_)};
+						while (w_i < num_words && arr_.words_[w_i] == 0u) /*[[unlikely]]*/ { ++w_i; }
+						return w_i;
+					}
+				}()};
 				if (word_i < num_words) [[likely]] {
-					OKIIDOKU_CONTRACT_USE(arr_.words_[word_i] != 0u);
 					auto& word {arr_.words_[word_i]};
-					OKIIDOKU_CONTRACT_USE(((word_i * word_t_num_bits) + std::countr_zero(word)) < T::O2);
+					OKIIDOKU_CONTRACT(word != 0u);
 					i_ = (word_i * word_t_num_bits) + std::countr_zero(word);
 					word &= static_cast<word_t>(word-word_t{1u}); // unset lowest bit
 				} else {
 					i_ = T::O2;
 				}
 			}
-			reference operator* () const noexcept { return value(); }
-			pointer   operator->() const noexcept { return value(); }
+			[[gnu::pure]] reference operator* () const noexcept { return value(); }
+			[[gnu::pure]] pointer   operator->() const noexcept { return value(); }
 			Iter& operator++()    noexcept { advance(); return *this; }
 			Iter  operator++(int) noexcept { Iter tmp = *this; ++(*this); return tmp; }
 			// [[nodiscard, gnu::pure]] friend bool operator==(const Iter& a, const Iter& b) noexcept { return (a.arr_ == b.arr_); }

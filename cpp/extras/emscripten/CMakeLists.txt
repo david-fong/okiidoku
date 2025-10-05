@@ -16,27 +16,25 @@ endif()
 add_executable(okiidoku_js okiidoku.embind.cpp)
 set_target_properties(okiidoku_js PROPERTIES
 	OUTPUT_NAME "okiidoku"
-	SUFFIX ".js" # not explicitly needed. defaulted CMAKE_EXECUTABLE_SUFFIX in toolchain file
+	SUFFIX ".mjs" # https://emscripten.org/docs/tools_reference/settings_reference.html#export-es6. EMSDK toolchain defaults to ".js"
 )
 # https://emsettings.surma.technology/
-# https://github.com/emscripten-core/emscripten/blob/main/src/settings.js
+# https://raw.githubusercontent.com/emscripten-core/emscripten/refs/heads/main/src/settings.js
+# https://raw.githubusercontent.com/emscripten-core/emscripten/refs/heads/main/docs/emcc.txt
 # https://developer.chrome.com/blog/faster-wasm-debugging/
-target_compile_options(okiidoku_js PRIVATE -sSTRICT=1)
 target_link_options(okiidoku_js PRIVATE
 	--no-entry # it's a "reactor" (ie. a library)
 	# --pre-js=
-	-sSTRICT=1 # TODO move this to affect all targets. maybe via CMake Preset? (tool:emscripten)
 	"$<${debug_configs}:-sASSERTIONS=2>"
 	"$<${debug_configs}:-gsource-map>" # https://emscripten.org/docs/tools_reference/emcc.html#emcc-gsource-map
 
 	# https://emscripten.org/docs/api_reference/module.html#module
-	-sMODULARIZE=1
 	-sEXPORT_NAME=OKIIDOKU_CREATE_MODULE
 	# -sWASM_ASYNC_COMPILATION=1 this is the default
 	# -sINCOMING_MODULE_JS_API=[onRuntimeInitialized]
 
 	# https://emscripten.org/docs/porting/connecting_cpp_and_javascript/embind.html#typescript-definitions
-	--emit-tsd "$<TARGET_FILE_DIR:okiidoku_js>/okiidoku.d.ts"
+	--emit-tsd "$<TARGET_FILE_DIR:okiidoku_js>/okiidoku.d.mts" # https://www.typescriptlang.org/docs/handbook/modules/reference.html#file-extension-substitution
 	# --emit-minification-map "$<TARGET_FILE_DIR:okiidoku_js>/okiidoku.minification_map.txt"
 	# --emit-symbol-map
 
@@ -59,8 +57,8 @@ okiidoku_install_target(okiidoku_js)
 # TODO.wait https://gitlab.kitware.com/cmake/cmake/-/issues/20745
 include(GNUInstallDirs)
 set(src "$<TARGET_FILE_DIR:okiidoku_js>/$<TARGET_FILE_BASE_NAME:okiidoku_js>")
-install(FILES "${src}.wasm" TYPE BIN COMPONENT okiidoku_runtime)
-install(FILES "${src}.d.ts" TYPE BIN COMPONENT okiidoku_development)
+install(FILES "${src}.wasm"     TYPE BIN COMPONENT okiidoku_runtime)
+install(FILES "${src}.d.mts"    TYPE BIN COMPONENT okiidoku_development)
 install(FILES "${src}.wasm.map" TYPE BIN COMPONENT okiidoku_development OPTIONAL)
 install(DIRECTORY examples TYPE DOC COMPONENT okiidoku_development
 	PATTERN "*.*js"        PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE

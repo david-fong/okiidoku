@@ -41,11 +41,13 @@ namespace okiidoku::mono { namespace {
 			detail::Ties<O,1> chute_ties {};
 
 			explicit PolarState() noexcept {
-				line_ties.update([](auto a, auto b)noexcept{
+				line_ties.update([][[gnu::const]](auto a, auto b)noexcept{
 					return (a%T::O1) == (b%T::O1);
 				});
 			}
-			[[nodiscard]] bool has_ties() const noexcept { return line_ties.has_unresolved() || chute_ties.has_unresolved(); }
+			[[nodiscard, gnu::pure]] bool has_ties() const noexcept {
+				return line_ties.has_unresolved() || chute_ties.has_unresolved();
+			}
 
 			void do_a_pass(const Grid<O>& table) noexcept;
 		};
@@ -118,12 +120,15 @@ namespace okiidoku::mono { namespace {
 			std::sort(
 				std::next(to_tied.begin(), tie.begin_),
 				std::next(to_tied.begin(), tie.end_),
-				[&](auto a, auto b){ return ranges::lexicographical_compare(table.row_span_at(a), table.row_span_at(b)); }
+				[&][[gnu::pure]](auto a, auto b){ return ranges::lexicographical_compare(table.row_span_at(a), table.row_span_at(b)); }
 			);
 		}
-		const auto chute_tie_data {[&](o2i_t chute) {
+		const auto chute_tie_data {[&][[gnu::pure]](o2i_t chute) {
 			namespace v = ::ranges::views;
-			return to_tied | v::drop((chute*T::O1).val()) | v::take(T::O1.val()) | v::transform([&](auto i){ return v::common(table.row_span_at(i)); }) | v::join;
+			return to_tied
+				| v::drop((chute*T::O1).val())
+				| v::take(T::O1.val())
+				| v::transform([&][[gnu::pure]](auto i){ return v::common(table.row_span_at(i)); }) | v::join;
 		}};
 		// try to resolve tied chute ranges:
 		for (const auto tie : chute_ties) {
@@ -137,10 +142,10 @@ namespace okiidoku::mono { namespace {
 			);
 		}
 
-		line_ties.update([&](o2is_t a, o2is_t b){
+		line_ties.update([&][[gnu::pure]](o2is_t a, o2is_t b){
 			return ranges::equal(table.row_span_at(to_tied[a]), table.row_span_at(to_tied[b]));
 		});
-		chute_ties.update([&](o1i_t a, o1i_t b){
+		chute_ties.update([&][[gnu::pure]](o1i_t a, o1i_t b){
 			return ranges::equal(chute_tie_data(a), chute_tie_data(b));
 		});
 		// TODO.high tie data for lines in chute currently are not updated after updates to chute ordering...
@@ -189,7 +194,7 @@ namespace okiidoku::mono { namespace {
 		transformation = transformation.inverted();
 		// TODO.high use two iota views mapped one to src_grid and one to post_transposed view and lexicographical compare. if post_transposed less, edit transformation and apply a post_transpose_only transformation to src_grid in place.
 		transformation.apply_in_place(src_grid);
-		OKIIDOKU_CONTRACT_ASSERT(grid_follows_rule<O>(src_grid));
+		OKIIDOKU_ASSERT(grid_follows_rule<O>(src_grid));
 		return transformation;
 	}
 }}

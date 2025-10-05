@@ -46,7 +46,7 @@ namespace okiidoku::mono { namespace {
 		\pre `!done()` */
 		[[nodiscard, gnu::pure]]
 		auto cands() const noexcept {
-			OKIIDOKU_CONTRACT_USE(cell_rmi_ < T::O4); OKIIDOKU_CONTRACT_USE(!done());
+			OKIIDOKU_CONTRACT(cell_rmi_ < T::O4); OKIIDOKU_CONTRACT(!done());
 			auto& box_cands {h_chute_box_cands_[rmi() / T::O1]};
 			auto& col_cands {cols_cands_[rmi_to_col<O>(rmi())]};
 			return row_cands_ & col_cands & box_cands;
@@ -54,7 +54,7 @@ namespace okiidoku::mono { namespace {
 
 		/** \pre `!done()` */
 		void advance() noexcept {
-			OKIIDOKU_CONTRACT_USE(cell_rmi_ < T::O4); OKIIDOKU_CONTRACT_USE(!done());
+			OKIIDOKU_CONTRACT(cell_rmi_ < T::O4); OKIIDOKU_CONTRACT(!done());
 			++cell_rmi_;
 			if (done()) { return; }
 			if (cell_rmi_ % T::O2 == 0u) [[unlikely]] { row_cands_ = O2BitArr_ones<O>; }
@@ -64,7 +64,7 @@ namespace okiidoku::mono { namespace {
 	private:
 		/** \pre `!done()` */
 		void remove_cand_at_current_rmi(const sym_t cand) noexcept {
-			OKIIDOKU_CONTRACT_USE(cell_rmi_ < T::O4); OKIIDOKU_CONTRACT_USE(!done());
+			OKIIDOKU_CONTRACT(cell_rmi_ < T::O4); OKIIDOKU_CONTRACT(!done());
 			auto& box_cands {h_chute_box_cands_[cell_rmi_ / T::O3]};
 			auto& col_cands {cols_cands_[cell_rmi_ / T::O2]};
 			cands_t::unset3(cand, row_cands_, box_cands, col_cands);
@@ -87,21 +87,21 @@ namespace okiidoku::mono { namespace {
 		// automatically removes printed `sym` as a candidate of future cells.
 		void print_sym(std::ostream& os, sym_t sym) noexcept {
 			const auto ctx_cands {cands()};
-			OKIIDOKU_CONTRACT_ASSERT(ctx_cands[sym]); // consistency with precondition that grid follows the one rule.
+			OKIIDOKU_ASSERT(ctx_cands[sym]); // consistency with precondition that grid follows the one rule.
 			auto smol_sym_buf_remaining {ctx_cands.count()}; // num possible remaining symbols here
-			OKIIDOKU_CONTRACT_USE(smol_sym_buf_remaining > 0u); // implied by contract (grid_follows_rule)
+			OKIIDOKU_CONTRACT(smol_sym_buf_remaining > 0u); // implied by contract (grid_follows_rule)
 
 			// Some slightly-weird-looking logic stems from the fact that it is
 			// a "null" action to try to print something that can only take on one
 			// value (as in- the buffer will be unchanged). Just keep that in mind.
 			auto smol_sym_buf {ctx_cands.count_below(sym)};
-			OKIIDOKU_CONTRACT_USE(smol_sym_buf < smol_sym_buf_remaining);
+			OKIIDOKU_CONTRACT(smol_sym_buf < smol_sym_buf_remaining);
 			while (smol_sym_buf_remaining > 1u) {
 				buf_ += static_cast<buf_t>(buf_pos_ * smol_sym_buf); // should never overflow
 				// const auto buf_remaining {(buf_pos_ == 1) ? buf_end : static_cast<buf_t>(buf_end - buf_pos_)};
 				{
 					const auto use_factor {static_cast<buf_t>(smol_sym_buf_remaining)};
-					OKIIDOKU_CONTRACT_USE(buf_pos_ != 0u && buf_pos_ < buf_end);
+					OKIIDOKU_CONTRACT(buf_pos_ != 0u && buf_pos_ < buf_end);
 					buf_pos_ *= use_factor;
 					smol_sym_buf /= static_cast<sym_t>(use_factor);
 					smol_sym_buf_remaining /= o2i_t{use_factor};
@@ -128,13 +128,13 @@ namespace okiidoku::mono { namespace {
 			// The number of possible different values that this cell could be
 			// based on the values that have already been encountered.
 			auto smol_sym_buf_remaining {ctx_cands.count()};
-			OKIIDOKU_CONTRACT_USE(smol_sym_buf_remaining > 0u); // implied by contract (grid_follows_rule)
+			OKIIDOKU_CONTRACT(smol_sym_buf_remaining > 0u); // implied by contract (grid_follows_rule)
 			(void)smol_sym_buf_remaining; (void)is;
 
 			sym_t smol_sym_buf {0u};
 			// TODO
 
-			OKIIDOKU_CONTRACT_USE(smol_sym_buf < smol_sym_buf_remaining);
+			OKIIDOKU_CONTRACT(smol_sym_buf < smol_sym_buf_remaining);
 			const auto sym {ctx_cands.get_index_of_nth_set_bit(smol_sym_buf)};
 			remove_cand_at_current_rmi(sym);
 			return sym;
@@ -145,8 +145,8 @@ namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
 	void write_solution_grid_to_stream(const Grid<O>& grid, std::ostream& os) noexcept {
-		OKIIDOKU_CONTRACT_ASSERT(grid_is_filled<O>(grid));
-		OKIIDOKU_CONTRACT_ASSERT(grid_follows_rule(grid));
+		OKIIDOKU_ASSERT(grid_is_filled<O>(grid));
+		OKIIDOKU_ASSERT(grid_follows_rule(grid));
 		using T = Ints<O>;
 
 		SerdesHelper<O> helper {};
@@ -198,19 +198,19 @@ namespace okiidoku::mono {
 			for (const auto box_row : T::O1) {
 			for (const auto box_col : T::O1) {
 				const auto taken {~main_diag_box_cands[box][box_row][box_col]};
-				OKIIDOKU_CONTRACT_ASSERT(taken.count() == T::O1.prev());
+				OKIIDOKU_ASSERT(taken.count() == T::O1.prev());
 				const auto sym {taken.get_index_of_nth_set_bit(0u)};
 				grid[box_cell_to_rmi<O>(box, (T::O1*box_row)+box_col)] = sym;
 			}}}
 		}
-		OKIIDOKU_CONTRACT_ASSERT(grid_is_filled(grid));
-		OKIIDOKU_CONTRACT_ASSERT(grid_follows_rule(grid));
+		OKIIDOKU_ASSERT(grid_is_filled(grid));
+		OKIIDOKU_ASSERT(grid_follows_rule(grid));
 	}
 
 
 	template<Order O> requires(is_order_compiled(O))
 	void print_puzzle_grid_to_stream(const Grid<O>& grid, std::ostream& os) noexcept {
-		OKIIDOKU_CONTRACT_ASSERT(grid_follows_rule(grid));
+		OKIIDOKU_ASSERT(grid_follows_rule(grid));
 		// using T = Ints<O>;
 		(void)os; (void)grid;
 	}
@@ -221,7 +221,7 @@ namespace okiidoku::mono {
 		// using T = Ints<O>;
 		(void)is; (void)grid;
 
-		OKIIDOKU_CONTRACT_ASSERT(grid_follows_rule(grid));
+		OKIIDOKU_ASSERT(grid_follows_rule(grid));
 	}
 
 
