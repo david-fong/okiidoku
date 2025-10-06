@@ -3,10 +3,6 @@
 #ifndef HPP_OKIIDOKU_DETAIL_UTIL
 #define HPP_OKIIDOKU_DETAIL_UTIL
 
-#include <cassert> // assert
-
-// TODO.low would it be legal ODR-wise to define the contract stuff as doctest CHECK/REQUIRE if a doctest header include macro is present here?
-
 /**
 	\def OKIIDOKU_CONTRACT(expr)
 	translates to assertion for debug builds, and assumption for release builds.
@@ -20,7 +16,20 @@
 	happen anyway, this could backfire for performance, so avoid using this in such
 	cases, or benchmark carefully, or check codegen. see `OKIIDOKU_ASSERT`.
 
-	note: C++23 has `std::unreachable` in `<utility>`, but it might be good to keep this header slim */
+	note: C++23 has `std::unreachable` in `<utility>`, but it might be good to keep this header slim
+
+	TODO.low would it be legal ODR-wise to define the contract stuff as
+	doctest CHECK/REQUIRE `#ifdef DOCTEST_VERSION`? maybe at least for OKIIDOKU_ASSERT?
+	https://github.com/doctest/doctest/blob/master/doc/markdown/assertions.md#using-asserts-out-of-a-testing-context
+	*/
+
+#ifndef NDEBUG
+	#include <cassert> // assert
+	#define OKIIDOKU_ASSERT_(expr) assert(expr)
+#else
+	#define OKIIDOKU_ASSERT_(expr)
+#endif
+
 #ifdef _MSC_VER
 	#define OKIIDOKU_DETAIL_CONTRACT_(expr ) __assume(expr) // TODO.wait msvc to support [[assume]]
 	#define OKIIDOKU_DETAIL_CONTRACT2_(expr) __assume(expr)
@@ -35,20 +44,22 @@
 	#define OKIIDOKU_DETAIL_CONTRACT2_(expr) static_cast<void>(0)
 	#define OKIIDOKU_DETAIL_UNREACHABLE_     static_cast<void>(0)
 #endif
+
 #ifdef NDEBUG
 	#define OKIIDOKU_CONTRACT( expr) OKIIDOKU_DETAIL_CONTRACT_(expr)
 	#define OKIIDOKU_CONTRACT2(expr) OKIIDOKU_DETAIL_CONTRACT2_(expr)
 	#define OKIIDOKU_UNREACHABLE     OKIIDOKU_DETAIL_UNREACHABLE_
 #else
 	// NOLINTBEGIN(cert-dcl03-c,misc-static-assert) runtime abort desirable here.
-	#define OKIIDOKU_CONTRACT( expr) assert(expr);  OKIIDOKU_DETAIL_CONTRACT_(expr)
-	#define OKIIDOKU_CONTRACT2(expr) assert(expr);  OKIIDOKU_DETAIL_CONTRACT2_(expr)
-	#define OKIIDOKU_UNREACHABLE     assert(false); OKIIDOKU_DETAIL_UNREACHABLE_
+	#define OKIIDOKU_CONTRACT( expr) OKIIDOKU_ASSERT_(expr);  OKIIDOKU_DETAIL_CONTRACT_(expr)
+	#define OKIIDOKU_CONTRACT2(expr) OKIIDOKU_ASSERT_(expr);  OKIIDOKU_DETAIL_CONTRACT2_(expr)
+	#define OKIIDOKU_UNREACHABLE     OKIIDOKU_ASSERT_(false); OKIIDOKU_DETAIL_UNREACHABLE_
 	// NOLINTEND(cert-dcl03-c,misc-static-assert)
 #endif
+
 /** \def OKIIDOKU_ASSERT(expr)
 alias of standard `assert` */
-#define OKIIDOKU_ASSERT(expr) assert(expr); OKIIDOKU_DETAIL_CONTRACT2_(expr)
+#define OKIIDOKU_ASSERT(expr) OKIIDOKU_ASSERT_(expr)
 
 
 /// \todo enable only for release builds? or does that thwart ubsan?

@@ -145,7 +145,7 @@ namespace okiidoku::mono { namespace {
 namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
-	void generate_shuffled(Grid<O>& grid, const rng_seed_t rng_seed) noexcept {
+	void shuffle(Grid<O>& grid, const rng_seed_t rng_seed) noexcept {
 		using T = Ints<O>;
 		OKIIDOKU_ASSERT(grid_is_filled(grid));
 		// TODO.low assert that rows follow the rule.
@@ -169,24 +169,12 @@ namespace okiidoku::mono {
 			make_cols_valid(grid, v_chute * T::O1, rng);
 		}
 		OKIIDOKU_ASSERT(grid_is_filled(grid));
-		OKIIDOKU_ASSERT(grid_follows_rule<O>(grid));
-	}
-
-	template<Order O> requires(is_order_compiled(O))
-	Grid<O> generate_shuffled(const rng_seed_t rng_seed) noexcept {
-		using T = Ints<O>;
-		OKIIDOKU_DEFER_INIT Grid<O> grid;
-		for (const auto row : T::O2) {
-		for (const auto col : T::O2) {
-			grid[row, col] = col;
-		}}
-		generate_shuffled<O>(grid, rng_seed);
-		return grid;
+		OKIIDOKU_ASSERT(grid_follows_rule(grid));
 	}
 
 
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-		template void generate_shuffled<(O_)>(Grid<(O_)>&, rng_seed_t) noexcept;
+		template void shuffle<(O_)>(Grid<(O_)>&, rng_seed_t) noexcept;
 	OKIIDOKU_FOREACH_O_DO_EMIT
 	#undef OKIIDOKU_FOREACH_O_EMIT
 }
@@ -194,10 +182,10 @@ namespace okiidoku::mono {
 
 namespace okiidoku::visitor {
 
-	void generate_shuffled(Grid& vis_sink, const rng_seed_t rng_seed) noexcept {
+	void shuffle(Grid& vis_sink, const rng_seed_t rng_seed) noexcept {
 		switch (vis_sink.get_order()) {
 		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-		case (O_): return mono::generate_shuffled(vis_sink.unchecked_get_mono_exact<(O_)>(), rng_seed);
+		case (O_): return mono::shuffle(vis_sink.unchecked_get_mono_exact<(O_)>(), rng_seed);
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
 		default: OKIIDOKU_UNREACHABLE;

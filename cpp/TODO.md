@@ -50,9 +50,9 @@ Issues I'm watching:
 
 ## Misc List
 
+- see note on `first_set_bit_require_exists`
 - do some `static_assert` tests for types of deducing this member functions. just discovered that I was having a bug with one because I was using something after `std::forward`? maybe I _shouldn't_ have disabled that clang-tidy check... but then why did I see people doing this thing in example code? I guess because you need to be careful about copies with iterators?
-- use mixed-radix uint serdes helper to implement grid serdes.
-- find places `<O>` is used, and see if deduction guides can help. Ex. `template<typename _Type, size_t _ArrayExtent> span(array<_Type, _ArrayExtent>&) -> span<_Type, _ArrayExtent>;`
+- find places `<O>(` is used, and see if deduction guides can help. Ex. `template<typename _Type, size_t _ArrayExtent> span(array<_Type, _ArrayExtent>&) -> span<_Type, _ArrayExtent>;`
 - make canon functions pure producers of a canonicalizing transformation. take grid by const reference. name `canon_sym` -> `get_sym_canon_map`.
 - see if helpful to add `/// \cond detail` wrapper to `detail` namespaces to suppress doxygen for them
 

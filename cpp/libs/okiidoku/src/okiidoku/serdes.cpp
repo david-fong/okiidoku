@@ -45,8 +45,8 @@ namespace okiidoku::mono { namespace {
 		/** \pre `!done()` */
 		void remove_cand_at_current_rmi(const sym_t cand) noexcept {
 			OKIIDOKU_CONTRACT(cell_rmi_ < T::O4); OKIIDOKU_CONTRACT(!done()); cand.check();
-			auto& box_cands {h_chute_box_cands_[cell_rmi_ / T::O3]};
-			auto& col_cands {cols_cands_[cell_rmi_ / T::O2]};
+			auto& box_cands {h_chute_box_cands_[(rmi()%T::O2) / T::O1]};
+			auto& col_cands {cols_cands_[rmi_to_col<O>(rmi())]};
 			cands_t::unset3(cand, row_cands_, box_cands, col_cands);
 		}
 
@@ -69,7 +69,7 @@ namespace okiidoku::mono { namespace {
 		[[nodiscard, gnu::pure]]
 		auto cands() const noexcept {
 			OKIIDOKU_CONTRACT(cell_rmi_ < T::O4); OKIIDOKU_CONTRACT(!done());
-			auto& box_cands {h_chute_box_cands_[rmi() / T::O1]};
+			auto& box_cands {h_chute_box_cands_[(rmi()%T::O2) / T::O1]};
 			auto& col_cands {cols_cands_[rmi_to_col<O>(rmi())]};
 			return row_cands_ & col_cands & box_cands;
 		}
@@ -96,7 +96,8 @@ namespace okiidoku::mono { namespace {
 				OKIIDOKU_ASSERT(ctx_cands[sym]); // consistency with precondition that grid follows the one rule.
 			const auto cands_count {ctx_cands.count()};
 				OKIIDOKU_CONTRACT(cands_count > 0u); // implied by contract (grid_follows_rule)
-			if (!this->serdes().accept({.radix{cands_count}, .digit{sym}})) [[unlikely]] {
+			const auto compressed_sym {ctx_cands.count_below(sym)};
+			if (!this->serdes().accept({.radix{cands_count}, .digit{compressed_sym}})) [[unlikely]] {
 				this->serdes().flush(os);
 			}
 			this->remove_cand_at_current_rmi(sym);
@@ -143,7 +144,7 @@ namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
 	std::size_t write_solved(const Grid<O>& grid, std::ostream& os) noexcept {
-		OKIIDOKU_ASSERT(grid_is_filled<O>(grid));
+		OKIIDOKU_ASSERT(grid_is_filled(grid));
 		OKIIDOKU_ASSERT(grid_follows_rule(grid));
 		using T = Ints<O>;
 
@@ -189,6 +190,7 @@ namespace okiidoku::mono {
 					continue; // skip cells that need reconstructing
 				}
 				for (const auto atom_cell : T::O1) {
+					// every cell outside the ones needing constructing can see two of those boxes
 					(main_diag_box_cands [row/T::O1] [row%T::O1] [atom_cell]).set(*grid[row,col]);
 					(main_diag_box_cands [col/T::O1] [atom_cell] [col%T::O1]).set(*grid[row,col]);
 				}
@@ -196,10 +198,10 @@ namespace okiidoku::mono {
 			for (const auto box     : T::O1) {
 			for (const auto box_row : T::O1) {
 			for (const auto box_col : T::O1) {
-				const auto taken {~main_diag_box_cands[box][box_row][box_col]};
-				OKIIDOKU_ASSERT(taken.count() == T::O1.prev());
-				const auto sym {taken.get_index_of_nth_set_bit(0u)};
-				grid[box_cell_to_rmi<O>(box, (T::O1*box_row)+box_col)] = sym;
+				const auto cands {~main_diag_box_cands[box][box_row][box_col]};
+				OKIIDOKU_ASSERT(cands.count() == 1u);
+				const auto sym {cands.first_set_bit_require_exists()};
+				grid[box_cell_to_rmi<O>((box*T::O1)+box, (T::O1*box_row)+box_col)] = sym;
 			}}}
 		}
 		OKIIDOKU_ASSERT(grid_is_filled(grid));

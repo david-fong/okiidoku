@@ -47,8 +47,8 @@ namespace okiidoku::em { namespace {
 		return ss.str();
 	}
 
-	void generate_shuffled(Grid& grid) noexcept {
-		generate_shuffled(grid, rng.get());
+	void shuffle(Grid& grid) noexcept {
+		shuffle(grid, rng.get());
 	}
 }}
 namespace okiidoku::mono {
@@ -117,6 +117,7 @@ EMSCRIPTEN_BINDINGS(okiidoku) {
 	// em::function("gridIsEmpty",     &oki_v::grid_is_empty);
 
 	em::function("initMostCanonicalGrid", &oki_v::init_most_canonical_grid);
-	em::function("generateShuffled", em::select_overload<void (oki_v::Grid&, oki::rng_seed_t rng_seed) noexcept>(&oki_v::generate_shuffled));
+	// TODO change this into an instance method:
+	em::function("shuffle", em::select_overload<void (oki_v::Grid&, oki::rng_seed_t rng_seed) noexcept>(&oki_v::generate_shuffled));
 	// em::function("generateShuffled", em::select_overload<oki_v::Grid (oki::Order, oki::rng_seed_t) noexcept>(&oki_v::generate_shuffled), em::return_value_policy::take_ownership{});
 }

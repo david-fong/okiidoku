@@ -141,7 +141,7 @@ namespace okiidoku::mono { namespace {
 		for (const auto i : T::O4) {
 			grid[i] = sym_og_to_canon[grid[i]];
 		}
-		OKIIDOKU_ASSERT(grid_follows_rule<O>(grid));
+		OKIIDOKU_ASSERT(grid_follows_rule(grid));
 		return sym_og_to_canon;
 	}
 }}

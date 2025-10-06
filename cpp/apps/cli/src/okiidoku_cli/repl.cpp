@@ -101,7 +101,7 @@ namespace okiidoku::cli {
 		const clock_t clock_start {std::clock()};
 		Grid grid(config_.order());
 		init_most_canonical_grid(grid);
-		generate_shuffled(grid, shared_rng_());
+		shuffle(grid, shared_rng_());
 		const double processor_time {(static_cast<double>(std::clock() - clock_start)) / CLOCKS_PER_SEC};
 		{
 			if (config_.canonicalize()) {
@@ -133,7 +133,7 @@ namespace okiidoku::cli {
 			Grid grid {config_.order()};
 			init_most_canonical_grid(grid);
 			for (std::uintmax_t prog {0u}; prog < how_many; ++prog) {
-				generate_shuffled(grid, shared_rng_());
+				shuffle(grid, shared_rng_());
 				if (config_.canonicalize()) {
 					canonicalize(grid);
 				}

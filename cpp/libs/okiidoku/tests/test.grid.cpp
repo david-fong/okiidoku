@@ -31,24 +31,24 @@ void test_grid() {
 	for (const auto j : T::O2) { CAPTURE(j);
 		{
 			const auto box_cell_rmi {box_cell_to_rmi<O>(i,j)}; CAPTURE(box_cell_rmi);
-			CHECK(rmi_to_box<O>(box_cell_rmi) == i);
-			CHECK(rmi_to_box_cell<O>(box_cell_rmi) == j);
+			REQUIRE_EQ(rmi_to_box<O>(box_cell_rmi), i);
+			REQUIRE_EQ(rmi_to_box_cell<O>(box_cell_rmi), j);
 		}{
 			const auto chute {i / T::O1}; CAPTURE(chute);
 			const typename T::o3x_t chute_cell {((i%T::O1)*T::O2)+j}; CAPTURE(chute_cell);
 			const auto h_chute_cell_rmi {chute_cell_to_rmi<O>(LineType::row, chute, chute_cell)};
 			const auto v_chute_cell_rmi {chute_cell_to_rmi<O>(LineType::col, chute, chute_cell)};
-			CHECK(h_chute_cell_rmi == row_col_to_rmi<O>(i,j));
-			CHECK(v_chute_cell_rmi == row_col_to_rmi<O>(j,i));
+			REQUIRE_EQ(h_chute_cell_rmi, row_col_to_rmi<O>(i,j));
+			REQUIRE_EQ(v_chute_cell_rmi, row_col_to_rmi<O>(j,i));
 		}
 	}}
 
 	Grid<O> gen_grid; CAPTURE(gen_grid);
-	CHECK(grid_is_empty(gen_grid)); // expected default ctor behaviour
+	CHECK_UNARY(grid_is_empty(gen_grid)); // expected default ctor behaviour
 
 	init_most_canonical_grid(gen_grid);
-	CHECK(grid_is_filled(gen_grid));
-	CHECK(grid_follows_rule(gen_grid));
+	CHECK_UNARY(grid_is_filled(gen_grid));
+	CHECK_UNARY(grid_follows_rule(gen_grid));
 }}
 
 TEST_CASE("okiidoku.grid") {

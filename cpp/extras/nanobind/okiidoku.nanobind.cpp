@@ -32,5 +32,5 @@ NB_MODULE(okiidoku_nb, m) { // NOLINT(performance-unnecessary-value-param) https
 		// .def(nb::init<oki_v::Grid&>())
 		;
 
-	// m.def("generate_shuffled", static_cast<void(*)(oki_v::Grid&, oki_m::rng_seed_t)>(&oki_v::generate_shuffled), "generate a random filled sudoku grid");
+	// m.def("shuffle", static_cast<void(*)(oki_v::Grid&, oki_m::rng_seed_t)>(&oki_v::shuffle), "generate a random filled sudoku grid");
 }

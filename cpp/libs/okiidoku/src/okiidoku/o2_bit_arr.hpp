@@ -53,19 +53,19 @@ namespace okiidoku::mono {
 
 		/** \pre `bit_i < T::O2`. */
 		[[nodiscard, gnu::const]]
-		static constexpr word_ix_t bit_i_to_word_i(const typename Ints<O>::o2x_t bit_i) noexcept {
+		static constexpr word_ix_t bit_i_to_word_i(const o2x_t bit_i) noexcept {
 			bit_i.check();
 			if constexpr (num_words == 1u) { return word_ix_t{0u}; }
 			else {
 				const word_ix_t word_i {bit_i / word_t_num_bits};
-				OKIIDOKU_CONTRACT(word_i < num_words);
-				OKIIDOKU_CONTRACT(word_i * word_t_num_bits < num_words);
+				word_i.check();
+				OKIIDOKU_CONTRACT(word_i * word_t_num_bits < T::O2);
 				return word_i;
 			}
 		}
 		/** \pre `bit_i < T::O2`. */
 		[[nodiscard, gnu::const]]
-		static constexpr word_t word_bit_mask_for_bit_i(const typename Ints<O>::o2x_t bit_i) noexcept {
+		static constexpr word_t word_bit_mask_for_bit_i(const o2x_t bit_i) noexcept {
 			bit_i.check();
 			if constexpr (num_words == 1u) {
 				return static_cast<word_t>(word_t{1u} << bit_i);
@@ -88,27 +88,28 @@ namespace okiidoku::mono {
 		[[nodiscard, gnu::pure]] o2i_t count() const noexcept;
 
 		/** count the number of set bits below the specified bit index.
-		\pre `end < O2`. */
+		\pre `end < O2`.
+		\post `get_index_of_nth_set_bit(count_below(end)) == end`. */
 		[[nodiscard, gnu::pure]] o2x_t count_below(o2x_t end) const noexcept;
 
 		/** \pre `at < O2`. */
-		[[nodiscard, gnu::pure]] constexpr bool operator[](const typename Ints<O>::o2x_t at) const noexcept {
-			OKIIDOKU_CONTRACT(at < T::O2);
+		[[nodiscard, gnu::pure]] constexpr bool operator[](const o2x_t at) const noexcept {
+			at.check();
 			const word_t word_bit_mask {word_bit_mask_for_bit_i(at)};
 			return (words_[bit_i_to_word_i(at)] & word_bit_mask) != word_t{0u};
 		}
 		/** \pre `at < O2`. */
-		constexpr void set(const typename Ints<O>::o2x_t at) noexcept {
+		constexpr void set(const o2x_t at) noexcept {
 			at.check();
 			words_[bit_i_to_word_i(at)] |= word_bit_mask_for_bit_i(at);
 		}
 		/** \pre `at < O2`. */
-		constexpr void unset(const typename Ints<O>::o2x_t at) noexcept {
+		constexpr void unset(const o2x_t at) noexcept {
 			at.check();
 			words_[bit_i_to_word_i(at)] &= static_cast<word_t>(~word_bit_mask_for_bit_i(at));
 		}
 		/** \pre `at < O2`. */
-		constexpr void flip(const typename Ints<O>::o2x_t at) noexcept {
+		constexpr void flip(const o2x_t at) noexcept {
 			at.check();
 			words_[bit_i_to_word_i(at)] ^= word_bit_mask_for_bit_i(at);
 		}

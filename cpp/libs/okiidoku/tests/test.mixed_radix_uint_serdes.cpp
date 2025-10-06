@@ -51,13 +51,13 @@ namespace okiidoku::test {
 				if (!writer.accept(p)) [[unlikely]] {
 					writer.flush(os);
 				}
-				REQUIRE(writer.item_count() == place+1uz);
+				REQUIRE_EQ(writer.item_count(), place+1uz);
 			}
 			writer.flush(os);
 			byte_count += writer.byte_count();
 			return os.str();
 		}()};
-		REQUIRE(written_data.size() == byte_count);
+		REQUIRE_EQ(written_data.size(), byte_count);
 		{
 			// de-serialize data and check correctness:
 			std::istringstream is {written_data, std::ios_base::binary}; // TODO.high do I need to add ios_base::in here?
@@ -65,11 +65,11 @@ namespace okiidoku::test {
 			for (auto place {0uz}; place < num_places; ++place) { CAPTURE(place);
 				const auto& expected {places_buf[place]};
 				const auto digit {reader.read(is, expected.radix)};
-				REQUIRE(reader.item_count() == place+1uz);
-				REQUIRE(digit == expected.digit);
+				REQUIRE_EQ(reader.item_count(), place+1uz);
+				REQUIRE_EQ(digit, expected.digit);
 			}
 			reader.finish(is);
-			REQUIRE(reader.byte_count() == byte_count);
+			REQUIRE_EQ(reader.byte_count(), byte_count);
 		}
 	}
 

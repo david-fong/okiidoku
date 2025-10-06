@@ -15,16 +15,25 @@ namespace okiidoku::mono {
 	\pre `sink` is filled and rows follow the one rule.
 	\post `sink` is filled and follows the one rule. */
 	template<Order O> requires(is_order_compiled(O))
-	[[gnu::hot]] OKIIDOKU_EXPORT void generate_shuffled(Grid<O>& sink, rng_seed_t rng_seed) noexcept;
+	[[gnu::hot]] OKIIDOKU_EXPORT void shuffle(Grid<O>& sink, rng_seed_t rng_seed) noexcept;
 
 	/** \return a random filled grid that follows the one rule. */
 	template<Order O> requires(is_order_compiled(O))
-	[[gnu::hot]] OKIIDOKU_EXPORT Grid<O> generate_shuffled(rng_seed_t rng_seed) noexcept;
+	inline Grid<O> generate_shuffled(const rng_seed_t rng_seed) noexcept {
+		using T = Ints<O>;
+		OKIIDOKU_DEFER_INIT Grid<O> grid;
+		for (const auto row : T::O2) {
+		for (const auto col : T::O2) {
+			grid[row, col] = col;
+		}}
+		shuffle(grid, rng_seed);
+		return grid;
+	}
 }
 
 namespace okiidoku::visitor {
 
-	OKIIDOKU_EXPORT void generate_shuffled(Grid& sink, rng_seed_t rng_seed) noexcept;
+	OKIIDOKU_EXPORT void shuffle(Grid& sink, rng_seed_t rng_seed) noexcept;
 	OKIIDOKU_EXPORT Grid generate_shuffled(Order O, rng_seed_t rng_seed) noexcept;
 }
 #endif

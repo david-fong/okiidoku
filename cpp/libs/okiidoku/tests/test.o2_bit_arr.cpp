@@ -20,27 +20,27 @@ void test_o2_bit_arr() {
 	OKIIDOKU_MONO_INT_TS_TYPEDEFS
 
 	INFO("part 0");
-	CHECK(O2BitArr_ones<O>.count() == T::O2);
+	REQUIRE_EQ(O2BitArr_ones<O>.count(), T::O2);
 	for (const auto i : T::O2) { CAPTURE(i);
-		CHECK(O2BitArr_ones<O>.count_below(i) == i);
-		CHECK(O2BitArr_ones<O>.get_index_of_nth_set_bit(i) == i);
+		REQUIRE_EQ(O2BitArr_ones<O>.count_below(i), i);
+		REQUIRE_EQ(O2BitArr_ones<O>.get_index_of_nth_set_bit(i), i);
 	}
 	INFO("part 1");
 	{
 		O2BitArr<O> arr {}; CAPTURE(arr);
 		for (const auto i : T::O2) { CAPTURE(i);
-			CHECK(!arr[i]);
+			REQUIRE_UNARY(!arr[i]);
 			arr.set(i);
-			CHECK(arr[i]);
+			REQUIRE_UNARY(arr[i]);
 		}
 	}
 	INFO("part 2");
 	{
 		auto ones {O2BitArr_ones<O>};
 		for (const auto i : T::O2) { CAPTURE(i);
-			CHECK(ones.count_below(i) == 0u);
-			CHECK(ones.get_index_of_nth_set_bit(0u) == i);
-			CHECK(ones[ones.first_set_bit_require_exists()]);
+			REQUIRE_EQ(ones.count_below(i), 0u);
+			REQUIRE_EQ(ones.get_index_of_nth_set_bit(0u), i);
+			REQUIRE_UNARY(ones[ones.first_set_bit_require_exists()]);
 			ones.unset(ones.first_set_bit_require_exists());
 		}
 	}
@@ -48,12 +48,13 @@ void test_o2_bit_arr() {
 	{
 		o2i_t count {0u};
 		for (const auto sym : O2BitArr_ones<O>.set_bits()) { CAPTURE(sym);
-			CHECK(sym == count);
+			REQUIRE_EQ(sym, count);
 			++count;
 		}
-		CHECK(count == T::O2);
+		REQUIRE_EQ(count, T::O2);
 	}
 	INFO("part 4");
+	// TODO test consistency between `first_set_bit_require_exists` and `count_below`. generate some random `O2BitArr`s. to naively get a random number of set bits, start by getting a number of bits to try to set in [0,O2).
 }}
 
 TEST_CASE("okiidoku.o2_bit_arr") {

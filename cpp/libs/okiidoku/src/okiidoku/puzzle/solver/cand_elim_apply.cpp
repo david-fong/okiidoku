@@ -27,7 +27,9 @@ namespace okiidoku::mono::detail::solver {
 				queue.pop_front();
 				check = CandElimApplyImpl<O>::apply(engine, std::move(desc));
 			} else {
+				#ifndef NDEBUG
 				const auto old_front_addr {&queue.front()};
+				#endif
 				check = CandElimApplyImpl<O>::apply(engine, queue.front());
 				if (!check.did_unwind()) [[likely]] {
 					OKIIDOKU_ASSERT(old_front_addr == &queue.front()); // no passive find during apply

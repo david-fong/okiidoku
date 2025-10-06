@@ -32,8 +32,8 @@ void test_puzzle(okiidoku::util::SharedRng& shared_rng, const std::uintmax_t num
 
 	FastSolver<O> solver;
 	for (std::uintmax_t round {0u}; round < num_rounds; ++round) { CAPTURE(round);
-		generate_shuffled(gen_grid, shared_rng());
-		CHECK(grid_follows_rule(gen_grid));
+		shuffle(gen_grid, shared_rng());
+		REQUIRE_UNARY(grid_follows_rule(gen_grid));
 
 		INFO("making puzzle #" << int(round));
 		Grid<O> puz_grid {gen_grid};
@@ -42,13 +42,13 @@ void test_puzzle(okiidoku::util::SharedRng& shared_rng, const std::uintmax_t num
 		make_minimal_puzzle(puz_grid, shared_rng());
 		solver.reinit_with_puzzle(puz_grid);
 		auto soln {solver.get_next_solution()};
-		CHECK(soln.has_value());
+		CHECK_UNARY(soln.has_value());
 		if (soln.has_value()) {
-			CHECK(soln.value() == gen_grid);
+			CHECK_EQ(soln.value(), gen_grid);
 		}
-		CHECK(!solver.get_next_solution().has_value());
+		CHECK_UNARY(!solver.get_next_solution().has_value());
 		// #ifndef OKIIDOKU_NO_LOGGING
-		// print_2d<O>(std::clog, shared_rng(), gen_grid, puz_grid);
+		// print_2d(std::clog, shared_rng(), gen_grid, puz_grid);
 		// #endif
 	}
 }}

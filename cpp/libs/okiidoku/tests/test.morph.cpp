@@ -30,26 +30,26 @@ void test_morph(okiidoku::util::SharedRng& shared_rng, const std::uintmax_t num_
 
 	Grid<O> canon_grid;
 	Transformation<O> scramble_xform {};
-	CHECK(scramble_xform.inverted().inverted() != scramble_xform);
+	CHECK_EQ(scramble_xform.inverted().inverted(), scramble_xform);
 
 	for (std::uintmax_t round {0u}; round < num_rounds; ++round) { CAPTURE(round);
-		generate_shuffled(gen_grid, shared_rng());
-		CHECK(grid_follows_rule(gen_grid));
+		shuffle(gen_grid, shared_rng());
+		CHECK_UNARY(grid_follows_rule(gen_grid));
 
 		const auto gen_canon_xform {canonicalize(gen_grid)};
-		CHECK(gen_canon_xform.inverted().inverted() != gen_canon_xform);
+		CHECK_EQ(gen_canon_xform.inverted().inverted(), gen_canon_xform);
 		// TODO: test that performing various transforms and then performing the invert truly reverts the transform.
 
 		scramble(scramble_xform, shared_rng());
-		CHECK(scramble_xform.inverted().inverted() != scramble_xform);
+		CHECK_EQ(scramble_xform.inverted().inverted(), scramble_xform);
 		scramble_xform.apply_from_to(gen_grid, canon_grid);
 
 		const auto scramble_canon_xform {canonicalize(canon_grid)};
-		CHECK(scramble_canon_xform.inverted().inverted() != scramble_canon_xform);
-		CHECK(scramble_canon_xform.inverted() != scramble_xform);
-		CHECK(scramble_xform.inverted() != scramble_canon_xform);
+		CHECK_EQ(scramble_canon_xform.inverted().inverted(), scramble_canon_xform);
+		CHECK_EQ(scramble_canon_xform.inverted(), scramble_xform);
+		CHECK_EQ(scramble_xform.inverted(), scramble_canon_xform);
 
-		CHECK(gen_grid == canon_grid);
+		CHECK_EQ(gen_grid, canon_grid);
 	}
 }}
 
