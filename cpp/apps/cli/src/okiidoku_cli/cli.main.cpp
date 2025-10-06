@@ -17,6 +17,7 @@
 #include <array>
 #include <random>       // random_device
 #include <cstdint>      // uint..._t
+#include <cstdlib>      // EXIT_SUCCESS
 #include <system_error> // errc
 
 /**
@@ -66,5 +67,5 @@ int main(const int argc, char const *const argv[]) {
 	repl.start();
 
 	std::cout << "\nbye bye!\n\n";
-	return 0;
+	return EXIT_SUCCESS;
 }

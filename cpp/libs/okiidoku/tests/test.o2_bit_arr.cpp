@@ -13,8 +13,8 @@
 #include <immintrin.h>
 #endif
 
-namespace okiidoku {
-template<okiidoku::Order O> OKIIDOKU_KEEP_FOR_DEBUG // NOLINTNEXTLINE(*-internal-linkage)
+namespace okiidoku::test {
+template<Order O> OKIIDOKU_KEEP_FOR_DEBUG // NOLINTNEXTLINE(*-internal-linkage)
 void test_o2_bit_arr() {
 	using namespace ::okiidoku::mono;
 	OKIIDOKU_MONO_INT_TS_TYPEDEFS
@@ -58,7 +58,7 @@ void test_o2_bit_arr() {
 
 TEST_CASE("okiidoku.o2_bit_arr") {
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-	okiidoku::test_o2_bit_arr<(O_)>();
+	okiidoku::test::test_o2_bit_arr<(O_)>();
 	OKIIDOKU_FOREACH_O_DO_EMIT
 	#undef OKIIDOKU_FOREACH_O_EMIT
 }

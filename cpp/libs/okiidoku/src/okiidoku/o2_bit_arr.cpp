@@ -20,7 +20,7 @@ namespace okiidoku::mono {
 	auto O2BitArr<O>::count() const noexcept -> typename O2BitArr<O>::o2i_t {
 		if constexpr (num_words == 1u) {
 			/*RVO*/o2i_t count {std::popcount(words_.front())};
-			OKIIDOKU_CONTRACT(count <= T::O2);
+			count.check();
 			return count;
 		} else {
 			/*RVO*/o2i_t count {std::transform_reduce(
@@ -28,7 +28,7 @@ namespace okiidoku::mono {
 				words_.cbegin(), words_.cend(), o2i_t{0u}, std::plus<o2i_t>{},
 				[][[gnu::const]](const auto word)noexcept{ return o2i_t{std::popcount(word)}; }
 			)};
-			OKIIDOKU_CONTRACT(count <= T::O2);
+			count.check();
 			return count;
 		}
 	}

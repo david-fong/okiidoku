@@ -6,10 +6,11 @@
 #include <okiidoku/grid.hpp>
 
 #include <iostream>  // cout
-#include <iomanip>   // hex
+#include <ios>       // hex
+#include <random>    // random_device
 #include <charconv>
 #include <string_view>
-#include <random>    // random_device
+#include <cstdlib>   // EXIT_SUCCESS
 
 template<okiidoku::Order O>
 void do_training(okiidoku::util::SharedRng& shared_rng, const unsigned num_rounds) {
@@ -65,5 +66,5 @@ int main(const int argc, char const *const argv[]) {
 	do_training<(O_)>(shared_rng, 1000);
 	OKIIDOKU_FOREACH_O_DO_EMIT
 	#undef OKIIDOKU_FOREACH_O_EMIT
-	return 0;
+	return EXIT_SUCCESS;
 }

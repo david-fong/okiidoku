@@ -45,15 +45,17 @@ function(okiidoku_test_add name #[[ ARGN are correctness_deps ]])
 endfunction()
 
 
-# TODO these two don't need to link to libokiidoku. maybe extract base stuff from okiidoku_test_add and make a wrapper that adds that link dependency?
-okiidoku_test_add(mixed_radix_int_serdes #[[ DEPS ]])
+okiidoku_test_add(mixed_radix_uint_serdes #[[ DEPS ]])
 okiidoku_test_add(o2_bit_arr #[[ DEPS ]])
 
 okiidoku_test_add(grid #[[ DEPS ]] o2_bit_arr)
 target_link_libraries(okiidoku_test.grid PRIVATE okiidoku)
 
+okiidoku_test_add(serdes #[[ DEPS ]] mixed_radix_uint_serdes o2_bit_arr grid)
+target_link_libraries(okiidoku_test.serdes PRIVATE okiidoku)
+
 okiidoku_test_add(morph #[[ DEPS ]] o2_bit_arr grid)
 target_link_libraries(okiidoku_test.morph PRIVATE okiidoku)
 
-okiidoku_test_add(puzzle #[[ DEPS ]] o2_bit_arr grid) # TODO does this depend logically on morph?
+okiidoku_test_add(puzzle #[[ DEPS ]] o2_bit_arr grid) # TODO does this depend logically on correctness of morph facilities?
 target_link_libraries(okiidoku_test.puzzle PRIVATE okiidoku)

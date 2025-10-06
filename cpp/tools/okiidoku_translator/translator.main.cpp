@@ -6,11 +6,11 @@
 
 #include <string>    // stoi
 #include <iostream>  // cout
+#include <cstdlib>   // EXIT_SUCCESS
 
 /**
 ARGUMENTS
 1: grid order
-2: RNG seed (default: get from device)
 */
 int main(const int argc, char const *const argv[]) {
 	okiidoku::util::setup_console();
@@ -24,5 +24,5 @@ int main(const int argc, char const *const argv[]) {
 
 	(void)argc; (void)argv; // TODO
 
-	return 0;
+	return EXIT_SUCCESS;
 }

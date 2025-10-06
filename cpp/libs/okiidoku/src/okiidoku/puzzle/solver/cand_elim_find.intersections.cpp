@@ -17,7 +17,7 @@
 namespace okiidoku::mono::detail::solver { namespace {
 
 	template<Order O> requires(is_order_compiled(O))
-	struct ChuteIsecsSyms {
+	struct ChuteIsecsSyms final {
 	private:
 		OKIIDOKU_MONO_INT_TS_TYPEDEFS
 		std::array<O2BitArr<O>, T::O2> arr_ {};
@@ -42,7 +42,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 	// TODO.low consider using this to clean up the variable scoping in the finder.
 	//  ex. lines_syms and boxes_syms are only used intermediately to create lines_syms_claiming_an_isec and boxes_syms_claiming_an_isec.
 	// template<Order O> requires(is_order_compiled(O))
-	// struct HouseIsecClaims {
+	// struct HouseIsecClaims final {
 	// 	chute_house_syms_t<O> in_line;
 	// 	chute_house_syms_t<O> in_box;
 	// };

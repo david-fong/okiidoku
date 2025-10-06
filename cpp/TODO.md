@@ -56,6 +56,8 @@ Issues I'm watching:
 - make canon functions pure producers of a canonicalizing transformation. take grid by const reference. name `canon_sym` -> `get_sym_canon_map`.
 - see if helpful to add `/// \cond detail` wrapper to `detail` namespaces to suppress doxygen for them
 
+- reconsider trying to follow c++coreguideline https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#c139-use-final-on-classes-sparingly. see https://www.foonathan.net/2016/05/final2/ "narrow contract". I don't think the C++coreguideline even applies to most cases where I tried to follow it, since my classes mostly don't have any virtual stuff.
+
 - https://www.pcg-random.org/using-pcg-cpp.html
   https://github.com/imneme/pcg-cpp/tags
   - https://github.com/apache/arrow/pull/35597/files vendor to get rid of the static_arbitrary_seed

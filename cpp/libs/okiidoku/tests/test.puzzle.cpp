@@ -17,8 +17,8 @@
 #include <random>  // random_device,
 #include <cstdint>
 
-namespace okiidoku {
-template<okiidoku::Order O> OKIIDOKU_KEEP_FOR_DEBUG // NOLINTNEXTLINE(*-internal-linkage)
+namespace okiidoku::test {
+template<Order O> OKIIDOKU_KEEP_FOR_DEBUG // NOLINTNEXTLINE(*-internal-linkage)
 void test_puzzle(okiidoku::util::SharedRng& shared_rng, const std::uintmax_t num_rounds) {
 	if constexpr (O >= 4) { return; } // TODO.mid enable when solver for order=5 is faster?
 	using namespace ::okiidoku::mono;
@@ -58,7 +58,7 @@ TEST_CASE("okiidoku.puzzle") {
 	okiidoku::util::SharedRng shared_rng {std::random_device{}()}; // look into using Catch2 GENERATE and random() features
 
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-	okiidoku::test_puzzle<(O_)>(shared_rng, default_num_rounds);
+	okiidoku::test::test_puzzle<(O_)>(shared_rng, default_num_rounds);
 	OKIIDOKU_FOREACH_O_DO_EMIT
 	#undef OKIIDOKU_FOREACH_O_EMIT
 }

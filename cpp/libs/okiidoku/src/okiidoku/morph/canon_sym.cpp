@@ -41,12 +41,12 @@ namespace okiidoku::mono { namespace {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	class CanonSym {
+	class CanonSym final {
 	private:
 		OKIIDOKU_MONO_INT_TS_TYPEDEFS
 		using to_t = typename Transformation<O>::to_t;
 
-		struct State {
+		struct State final {
 			/** for a given grid, sym (AKA "label"), and box, what boxcell is the sym in?
 			\internal alternatively:
 			O^2 * O^2 * [2*log2(O)] foreach sym, foreach box, which boxatoms is it in?

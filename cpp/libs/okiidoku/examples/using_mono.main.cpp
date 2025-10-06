@@ -13,6 +13,7 @@
 #include <iostream>  // cout,
 #include <random>    // random_device,
 #include <array>
+#include <cstdlib>   // EXIT_SUCCESS
 
 /**
 strong recommendation: do NOT do `using namespace okiidoku;` anywhere.
@@ -54,5 +55,5 @@ int main([[maybe_unused]] const int argc, [[maybe_unused]] char const *const arg
 
 	oki::print_2d<O>(std::clog, shared_rng(), gen_grid, canon_grid);
 
-	return 0;
+	return EXIT_SUCCESS;
 }

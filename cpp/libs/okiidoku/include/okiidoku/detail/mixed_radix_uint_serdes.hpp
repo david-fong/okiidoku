@@ -17,7 +17,11 @@
 /** \todo.low I pondered moving some stuff into a base class, like item_count_, byte_count, buf_radixx_
 and some of the logic like overflow anticipation calculation, and calculation of radix_0, but then I
 think I wouldn't have control over member layout w.r.t. the inheritence boundary... am I just being too
-picky? */
+picky?
+
+\internal the binary stream requirement is because the C++ standard has tight requirements for written
+data to get reproducible read. see https://en.cppreference.com/w/cpp/io/c/FILE.html#Binary_and_text_modes.
+*/
 
 namespace okiidoku::detail {
 
@@ -87,7 +91,7 @@ namespace okiidoku::detail {
 					auto& qi {queue_[queue_end_++]};
 					qi.radix = radix_0;
 					qi.digit = std::min(in.digit, TO<radix_t>(radix_0 - radix_t{1u}));
-					in.radix = TO<radix_t>((in.radix-radix_0)+radix_t{1u});
+					in.radix = TO<radix_t>((in.radix-radix_0)+1u);
 					in.digit -= qi.digit;
 				}
 				OKIIDOKU_CONTRACT(in.radix >= 2u);
@@ -113,6 +117,7 @@ namespace okiidoku::detail {
 		/**
 		call this exactly once when the previous call to `accept` indicated a need to flush.
 		separately, call this exactly once after `accept()`ing the final digit.
+		\pre `os` is a binary stream- not a text stream.
 		\pre the previous call to `accept` indicated a need to flush, or there is no more data. */
 		void flush(std::ostream& os) {
 			if (queue_end_ == 0u) [[unlikely]] { return; }
@@ -188,6 +193,7 @@ namespace okiidoku::detail {
 		\internal conditions to call this correspond to conditions where writer `accept`
 			indicates need for caller to `flush`. */
 		void read_buf(std::istream& is) {
+			// TODO do we need to do anything to handle failbit/eofbit? like unset it and maybe set it back in `finish`?
 			buf_radixx_ = 0u;
 			std::size_t byte_count {0uz};
 			buf_ = 0u;
@@ -218,12 +224,14 @@ namespace okiidoku::detail {
 		\pre the data being read was written by a writer with the same type parameters.
 		\pre if this is the `n`th call, it is for the `n`th digit, and `radix` is the
 			same value that was passed to write this digit.
-		\pre `is` opened with same text/binary mode used when writing this data.
-		\pre `radix > 0`. */
+		\pre `is` is a binary stream- not a text stream.
+		\pre `radix > 0`.
+		\post return value is less than `radix`. */
 		[[nodiscard]] radix_t read(std::istream& is, radix_t radix) {
 			OKIIDOKU_CONTRACT(buf_t_max-buf_radixx_ >= buf_);
 			OKIIDOKU_CONTRACT(radix <= radix_t_max);
 			OKIIDOKU_CONTRACT(radix > 0u);
+			[[maybe_unused]] const auto radix_orig {radix};
 			++item_count_;
 			if (radix < 2u) [[unlikely]] { return 0u; }
 			if (buf_radixx_ & buf_t{buf_t{1u}<<(sizeof(buf_t)*CHAR_BIT-1u)}) [[unlikely]] {
@@ -238,16 +246,19 @@ namespace okiidoku::detail {
 				const auto radix_0 {TO<radix_t>(buf_t_max / (buf_radixx_+1u))}; // should divisor be +1? must follow writer
 				OKIIDOKU_CONTRACT(radix_0 <= radix_t_max);
 				OKIIDOKU_CONTRACT(radix_0 <  radix);
-				radix  = TO<radix_t>((radix-radix_0)+radix_t{1u});
+				// buf_radixx_ = ; // no point. `read_buf` will overwrite it and doesn't use it.
+				radix  = TO<radix_t>((radix-radix_0)+1u);
 				digit += TO<radix_t>(buf_);
+				OKIIDOKU_CONTRACT(digit < radix_orig);
 				read_buf(is);
 			}
 			OKIIDOKU_CONTRACT(radix >= 2u);
 			OKIIDOKU_CONTRACT(buf_t_max-buf_radixx_ >= buf_);
 			OKIIDOKU_CONTRACT(buf_t_max-buf_radixx_ >= TO<buf_t>(radix-1u));
+			buf_radixx_ = TO<buf_t>((buf_radixx_*radix)+(radix-1u));
 			digit += TO<radix_t>(buf_ % radix);
 			buf_  /= radix;
-			buf_radixx_ = TO<buf_t>((buf_radixx_*radix)+(radix-1u));
+			OKIIDOKU_CONTRACT(digit < radix_orig);
 			return digit;
 		}
 

@@ -18,7 +18,7 @@ namespace okiidoku::mono { namespace {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	struct SymCountsForChuteHouses {
+	struct SymCountsForChuteHouses final {
 		using T = Ints<O>;
 		using o3i_t = T::o3i_t;
 		using ch_t  = T::o1x_t;

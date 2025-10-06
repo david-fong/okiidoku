@@ -137,7 +137,7 @@ namespace okiidoku::cli {
 				if (config_.canonicalize()) {
 					canonicalize(grid);
 				}
-				// write_solution_grid_to_stream(grid, of); // TODO this is currently crashing with floating point error :/
+				// write_solved(grid, of); // TODO this is currently crashing with floating point error :/
 				// TODO.mid print a progress bar
 			}
 		}

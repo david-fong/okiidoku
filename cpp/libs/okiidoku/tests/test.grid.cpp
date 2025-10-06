@@ -20,8 +20,8 @@ namespace okiidoku::mono {
 	static_assert(std::is_same_v<decltype(std::declval<const Grid<3>& >().get_underlying_array()), const std::array<Int<9,IntKind::small>,81uz>& >);
 }
 
-namespace okiidoku {
-template<okiidoku::Order O> OKIIDOKU_KEEP_FOR_DEBUG // NOLINTNEXTLINE(*-internal-linkage)
+namespace okiidoku::test {
+template<Order O> OKIIDOKU_KEEP_FOR_DEBUG // NOLINTNEXTLINE(*-internal-linkage)
 void test_grid() {
 	using namespace ::okiidoku::mono;
 	OKIIDOKU_MONO_INT_TS_TYPEDEFS
@@ -53,7 +53,7 @@ void test_grid() {
 
 TEST_CASE("okiidoku.grid") {
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-	okiidoku::test_grid<(O_)>();
+	okiidoku::test::test_grid<(O_)>();
 	OKIIDOKU_FOREACH_O_DO_EMIT
 	#undef OKIIDOKU_FOREACH_O_EMIT
 }

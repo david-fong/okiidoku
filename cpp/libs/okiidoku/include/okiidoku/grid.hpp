@@ -35,6 +35,7 @@ namespace okiidoku::mono {
 	Using inheritance gains nice mangled symbol names. Speed seems to suffer a
 	negligible drop (~1%?) or maybe it doesn't. I am happy with this outcome. */
 
+	// TODO make these bool-returning functions member functions. I can't see why I didn't do that in the first place. it may have been an artifact of trying to define Grid as a type alias instead of its own type?
 
 	template<Order O> requires(is_order_compiled(O))
 	[[nodiscard, gnu::pure]] OKIIDOKU_EXPORT

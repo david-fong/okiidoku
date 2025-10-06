@@ -28,7 +28,7 @@ namespace okiidoku::em { namespace {
 
 	using namespace ::okiidoku::visitor;
 
-	class Rng {
+	class Rng final {
 	public:
 		std::mt19937_64 rng_ {};
 		void seed(const std::uint_fast64_t seed) noexcept {

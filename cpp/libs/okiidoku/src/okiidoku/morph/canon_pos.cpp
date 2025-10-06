@@ -29,13 +29,13 @@ namespace okiidoku::mono { namespace {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	class CanonPlace {
+	class CanonPlace final {
 	private:
 		OKIIDOKU_MONO_INT_TS_TYPEDEFS
 		using sym_t = T::o2is_t;
 		using to_t = typename Transformation<O>::to_t;
 
-		struct PolarState {
+		struct PolarState final {
 			line_map_t<O> to_og {Transformation<O>{}.row_map};
 			detail::Ties<O,2> line_ties {};
 			detail::Ties<O,1> chute_ties {};

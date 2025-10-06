@@ -115,7 +115,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 	enum class NakedOrHidden : unsigned char { naked, hidden };
 
 	template<Order O> requires(is_order_compiled(O))
-	struct FoundSubsetInfo {
+	struct FoundSubsetInfo final {
 		SubsetComboWalker<O> combo_walker;
 		O2BitArr<O> combo_syms;
 		NakedOrHidden naked_or_hidden;
