@@ -53,7 +53,7 @@ namespace okiidoku::mono::detail::solver2 {
 		using rmi_t = T::o4xs_t;
 	public:
 
-		struct Frame {
+		struct [[gnu::designated_init]] Frame {
 			CandsPovs<O> cands_povs;
 			FindCacheForSubsets<O> find_cache_subsets;
 			FindCacheForFish<O> find_cache_fish;

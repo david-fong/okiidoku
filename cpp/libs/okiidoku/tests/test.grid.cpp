@@ -25,7 +25,7 @@ template<Order O> OKIIDOKU_KEEP_FOR_DEBUG // NOLINTNEXTLINE(*-internal-linkage)
 void test_grid() {
 	using namespace ::okiidoku::mono;
 	OKIIDOKU_MONO_INT_TS_TYPEDEFS
-	// std::cout<<(typeid(decltype(std::declval<Grid<3>>().arr())).name())<<'\n';
+	// std::cout<<(typeid(decltype(std::declval<Grid<3>>().arr).name())<<'\n';
 
 	for (const auto i : T::O2) { CAPTURE(i);
 	for (const auto j : T::O2) { CAPTURE(j);
@@ -46,9 +46,9 @@ void test_grid() {
 	Grid<O> gen_grid; CAPTURE(gen_grid);
 	CHECK_UNARY(gen_grid.is_empty()); // expected default ctor behaviour
 
-	init_most_canonical_grid(gen_grid);
-	CHECK_UNARY(grid_is_filled(gen_grid));
-	CHECK_UNARY(grid_follows_rule(gen_grid));
+	gen_grid.init_most_canonical();
+	CHECK_UNARY(gen_grid.is_filled());
+	CHECK_UNARY(gen_grid.follows_rule());
 }}
 
 TEST_CASE("okiidoku.grid") {

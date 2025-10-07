@@ -95,7 +95,7 @@ namespace okiidoku::mono { namespace {
 			const auto ctx_cands {this->cands()};
 				OKIIDOKU_ASSERT(ctx_cands[sym]); // consistency with precondition that grid follows the one rule.
 			const auto cands_count {ctx_cands.count()};
-				OKIIDOKU_CONTRACT(cands_count > 0u); // implied by contract (grid_follows_rule)
+				OKIIDOKU_CONTRACT(cands_count > 0u); // implied by contract (follows_rule)
 			const auto compressed_sym {ctx_cands.count_below(sym)};
 			if (!this->serdes().accept({.radix{cands_count}, .digit{compressed_sym}})) [[unlikely]] {
 				this->serdes().flush(os);
@@ -123,7 +123,7 @@ namespace okiidoku::mono { namespace {
 			// The number of possible different values that this cell could be
 			// based on the values that have already been encountered.
 			const auto cands_count {ctx_cands.count()};
-				OKIIDOKU_CONTRACT(cands_count > 0u); // implied by contract (grid_follows_rule)
+				OKIIDOKU_CONTRACT(cands_count > 0u); // implied by contract (follows_rule)
 
 			const auto compressed_sym {*this->serdes().read(is, cands_count)};
 			const auto sym {ctx_cands.get_index_of_nth_set_bit(compressed_sym)};
@@ -144,8 +144,8 @@ namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
 	std::size_t write_solved(const Grid<O>& grid, std::ostream& os) {
-		OKIIDOKU_ASSERT(grid_is_filled(grid));
-		OKIIDOKU_ASSERT(grid_follows_rule(grid));
+		OKIIDOKU_ASSERT(grid.is_filled());
+		OKIIDOKU_ASSERT(grid.follows_rule());
 		using T = Ints<O>;
 
 		Writer<O> writer {};
@@ -204,15 +204,15 @@ namespace okiidoku::mono {
 				grid[box_cell_to_rmi<O>((box*T::O1)+box, (T::O1*box_row)+box_col)] = sym;
 			}}}
 		}
-		OKIIDOKU_ASSERT(grid_is_filled(grid));
-		OKIIDOKU_ASSERT(grid_follows_rule(grid));
+		OKIIDOKU_ASSERT(grid.is_filled());
+		OKIIDOKU_ASSERT(grid.follows_rule());
 		return bytes_read;
 	}
 
 
 	template<Order O> requires(is_order_compiled(O))
 	std::size_t write_puzzle(const Grid<O>& grid, std::ostream& os) {
-		OKIIDOKU_ASSERT(grid_follows_rule(grid));
+		OKIIDOKU_ASSERT(grid.follows_rule());
 		// using T = Ints<O>;
 		(void)os; (void)grid; return 0uz; // TODO
 	}
@@ -223,7 +223,7 @@ namespace okiidoku::mono {
 		// using T = Ints<O>;
 		(void)is; (void)grid;
 
-		OKIIDOKU_ASSERT(grid_follows_rule(grid));
+		OKIIDOKU_ASSERT(grid.follows_rule());
 		return 0uz; // TODO
 	}
 

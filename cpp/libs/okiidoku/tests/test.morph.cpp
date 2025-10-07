@@ -26,7 +26,7 @@ void test_morph(okiidoku::util::SharedRng& shared_rng, const std::uintmax_t num_
 	INFO("testing for order " << O);
 
 	Grid<O> gen_grid;
-	init_most_canonical_grid(gen_grid);
+	gen_grid.init_most_canonical();
 
 	Grid<O> canon_grid;
 	Transformation<O> scramble_xform {};
@@ -34,7 +34,7 @@ void test_morph(okiidoku::util::SharedRng& shared_rng, const std::uintmax_t num_
 
 	for (std::uintmax_t round {0u}; round < num_rounds; ++round) { CAPTURE(round);
 		shuffle(gen_grid, shared_rng());
-		CHECK_UNARY(grid_follows_rule(gen_grid));
+		CHECK_UNARY(gen_grid.follows_rule());
 
 		const auto gen_canon_xform {canonicalize(gen_grid)};
 		CHECK_EQ(gen_canon_xform.inverted().inverted(), gen_canon_xform);

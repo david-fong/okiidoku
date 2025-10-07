@@ -26,14 +26,14 @@ void test_puzzle(okiidoku::util::SharedRng& shared_rng, const std::uintmax_t num
 	INFO("testing for order " << O);
 
 	Grid<O> gen_grid;
-	init_most_canonical_grid(gen_grid);
+	gen_grid.init_most_canonical();
 
 	// Grid<O> canon_grid;
 
 	FastSolver<O> solver;
 	for (std::uintmax_t round {0u}; round < num_rounds; ++round) { CAPTURE(round);
 		shuffle(gen_grid, shared_rng());
-		REQUIRE_UNARY(grid_follows_rule(gen_grid));
+		REQUIRE_UNARY(gen_grid.follows_rule());
 
 		INFO("making puzzle #" << int(round));
 		Grid<O> puz_grid {gen_grid};

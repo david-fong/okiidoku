@@ -18,7 +18,6 @@
 
 namespace okiidoku { namespace {
 
-	// current implementation is pretty simple (dumb?)
 	void make_random_emoji_set(const rng_seed_t rng_seed, const std::span<std::string_view> sink) noexcept {
 		thread_local constinit auto sets_ {emoji::sets};
 		thread_local static auto sets {std::apply([](auto& ...args)noexcept{
@@ -30,8 +29,7 @@ namespace okiidoku { namespace {
 		auto sink_it {sink.begin()};
 		for (const auto set : sets) {
 			std::shuffle(set.begin(), set.end(), rng);
-			sink_it = std::copy(
-				OKIIDOKU_UNSEQ
+			sink_it = std::copy(OKIIDOKU_UNSEQ
 				set.begin(), // `set.end()` (or fewer, if it would overflow the sink):
 				std::next(set.begin(), std::min(std::distance(set.begin(), set.end()), std::distance(sink_it, sink.end()))), // I wish the standard library just handled this or provided a `out.end()` parameter :(
 				sink_it

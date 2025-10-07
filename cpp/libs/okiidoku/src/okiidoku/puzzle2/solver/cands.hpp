@@ -72,8 +72,8 @@ namespace okiidoku::mono::detail::solver2 {
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
 	private:
-		explicit consteval FindStat(bool did_unwind, bool did_unwind_root) noexcept:
-			did_unwind_{did_unwind}, did_unwind_root_{did_unwind_root} {}
+		explicit consteval FindStat(bool did_unwind, bool did_unwind_root, bool found_any) noexcept:
+			did_unwind_{did_unwind}, did_unwind_root_{did_unwind_root}, found_any_{found_any} {}
 	public:
 		[[nodiscard, gnu::pure]] bool did_unwind()      const noexcept { return did_unwind_; }
 		[[nodiscard, gnu::pure]] bool did_unwind_root() const noexcept { return did_unwind_root_; }

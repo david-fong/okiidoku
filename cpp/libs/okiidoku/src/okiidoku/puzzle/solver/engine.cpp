@@ -28,7 +28,7 @@ namespace okiidoku::mono::detail::solver {
 	template<Order O> requires(is_order_compiled(O))
 	void EngineImpl<O>::reinit_with_puzzle(const Grid<O>& puzzle) noexcept {
 		frame_.num_unsolved = T::O4;
-		mut_cells_cands().arr().fill(O2BitArr_ones<O>);
+		mut_cells_cands().arr.fill(O2BitArr_ones<O>);
 		for (const auto house_type : house_types) {
 		for (const auto house : T::O2) {
 			auto& subs {frame_.houses_subsets[house_type][house]};
@@ -67,8 +67,8 @@ namespace okiidoku::mono::detail::solver {
 			OKIIDOKU_CONTRACT(cell_cands.count() == 1u);
 			soln[rmi] = cell_cands.first_set_bit_require_exists();
 		}
-		OKIIDOKU_ASSERT(grid_is_filled(soln));
-		OKIIDOKU_ASSERT(grid_follows_rule(soln));
+		OKIIDOKU_ASSERT(soln.is_filled());
+		OKIIDOKU_ASSERT(soln.follows_rule());
 		return soln;
 	}
 
@@ -245,10 +245,9 @@ namespace okiidoku::mono::detail::solver {
 
 	template<Order O> requires(is_order_compiled(O))
 	bool EngineImpl<O>::debug_check_correct_num_unsolved_() const noexcept {
-		return get_num_unsolved() == T::O4 - o4i_t{std::count_if(
-			OKIIDOKU_UNSEQ
-			cells_cands().arr().cbegin(),
-			cells_cands().arr().cend(),
+		return get_num_unsolved() == T::O4 - o4i_t{std::count_if(OKIIDOKU_UNSEQ
+			cells_cands().arr.cbegin(),
+			cells_cands().arr.cend(),
 			[][[gnu::pure]](const auto& c)noexcept{ return c.count() == 1u; }
 		)};
 	}

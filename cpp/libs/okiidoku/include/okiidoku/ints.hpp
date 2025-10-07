@@ -34,10 +34,10 @@ namespace okiidoku {
 	})};
 	template<typename V> requires(!std::is_reference_v<V>)
 	struct HouseTypeMap {
-		std::array<V, house_types.size()> arr_ {};
+		std::array<V, house_types.size()> arr {};
 		[[nodiscard, gnu::pure]]
 		decltype(auto) operator[](this auto&& self, const HouseType key) noexcept {
-			return std::forward_like<decltype(self)>(self.arr_[std::to_underlying(key)]);
+			return std::forward_like<decltype(self)>(self.arr[std::to_underlying(key)]);
 		}
 	};
 
@@ -50,10 +50,10 @@ namespace okiidoku {
 	})};
 	template<typename V> requires(!std::is_reference_v<V>)
 	struct LineTypeMap {
-		std::array<V, line_types.size()> arr_ {};
+		std::array<V, line_types.size()> arr {};
 		[[nodiscard, gnu::pure]]
 		decltype(auto) operator[](this auto&& self, const LineType key) noexcept {
-			return std::forward_like<decltype(self)>(self.arr_[std::to_underlying(key)]);
+			return std::forward_like<decltype(self)>(self.arr[std::to_underlying(key)]);
 		}
 	};
 

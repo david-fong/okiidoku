@@ -100,7 +100,7 @@ namespace okiidoku::cli {
 		using namespace ::okiidoku::visitor;
 		const clock_t clock_start {std::clock()};
 		Grid grid(config_.order());
-		init_most_canonical_grid(grid);
+		grid.init_most_canonical();
 		shuffle(grid, shared_rng_());
 		const double processor_time {(static_cast<double>(std::clock() - clock_start)) / CLOCKS_PER_SEC};
 		{
@@ -131,7 +131,7 @@ namespace okiidoku::cli {
 			// 	std::cout << str::red.on << fail.what() << str::red.off << std::endl;
 			// }
 			Grid grid {config_.order()};
-			init_most_canonical_grid(grid);
+			grid.init_most_canonical();
 			for (std::uintmax_t prog {0u}; prog < how_many; ++prog) {
 				shuffle(grid, shared_rng_());
 				if (config_.canonicalize()) {

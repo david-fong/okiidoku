@@ -43,27 +43,11 @@ namespace okiidoku::mono::detail::solver2 {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	struct FindCacheForSubsets {
-	private:
-		using T = Ints<O>;
-		using o2i_t = T::o2i_t;
-		HouseTypeMap<CandPartitions> types_;
-	public:
-		[[nodiscard, gnu::pure]]
-		auto& house(const HouseType type, const o2i_t house) noexcept { return types_[type][house]; }
-	};
+	using FindCacheForSubsets = HouseTypeMap<CandPartitions>;
 	// TODO wait... note: if we have separate for each CellOrSym major POV, need to design a way to quickly sync them.
 
 
 	template<Order O> requires(is_order_compiled(O))
-	struct FindCacheForFish {
-	private:
-		using T = Ints<O>;
-		using o2i_t = T::o2i_t;
-		LineTypeMap<CandPartitions> types_;
-	public:
-		[[nodiscard, gnu::pure]]
-		auto& sym(const LineType type, const o2i_t sym) noexcept { return types_[type][sym]; }
-	};
+	using FindCacheForFish = LineTypeMap<CandPartitions>;
 }
 #endif

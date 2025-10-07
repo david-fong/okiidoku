@@ -147,7 +147,7 @@ namespace okiidoku::mono {
 	template<Order O> requires(is_order_compiled(O))
 	void shuffle(Grid<O>& grid, const rng_seed_t rng_seed) noexcept {
 		using T = Ints<O>;
-		OKIIDOKU_ASSERT(grid_is_filled(grid));
+		OKIIDOKU_ASSERT(grid.is_filled());
 		// TODO.low assert that rows follow the rule.
 
 		rng_t rng {rng_seed};
@@ -168,8 +168,8 @@ namespace okiidoku::mono {
 		for (const auto v_chute : T::O1) {
 			make_cols_valid(grid, v_chute * T::O1, rng);
 		}
-		OKIIDOKU_ASSERT(grid_is_filled(grid));
-		OKIIDOKU_ASSERT(grid_follows_rule(grid));
+		OKIIDOKU_ASSERT(grid.is_filled());
+		OKIIDOKU_ASSERT(grid.follows_rule());
 	}
 
 

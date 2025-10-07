@@ -20,7 +20,7 @@ void do_training(okiidoku::util::SharedRng& shared_rng, const unsigned num_round
 	// OKIIDOKU_MONO_INT_TS_TYPEDEFS
 
 	Grid<O> gen_grid;
-	init_most_canonical_grid(gen_grid);
+	gen_grid.init_most_canonical();
 
 	// Grid<O> canon_grid;
 

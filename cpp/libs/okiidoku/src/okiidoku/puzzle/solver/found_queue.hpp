@@ -8,7 +8,7 @@
 
 #include <deque>
 #include <tuple>
-#include <type_traits>
+#include <type_traits> // TODO is this needed?
 
 namespace okiidoku::mono::detail::solver {
 
@@ -50,7 +50,7 @@ namespace okiidoku::mono::detail::solver {
 
 		void push_back(found::CellClaimSym  <O>&& desc) noexcept { std::get<queue_t<found::CellClaimSym  <O>>>(tup_).emplace_back(std::move(desc)); }
 		void push_back(found::SymClaimCell  <O>&& desc) noexcept { std::get<queue_t<found::SymClaimCell  <O>>>(tup_).emplace_back(std::move(desc)); }
-		void push_back(found::Subset<O>&& desc) noexcept { std::get<queue_t<found::Subset<O>>>(tup_).emplace_back(std::move(desc)); }
+		void push_back(found::Subset        <O>&& desc) noexcept { std::get<queue_t<found::Subset        <O>>>(tup_).emplace_back(std::move(desc)); }
 		void push_back(found::LockedCands   <O>&& desc) noexcept { std::get<queue_t<found::LockedCands   <O>>>(tup_).emplace_back(std::move(desc)); }
 	};
 

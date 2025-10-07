@@ -213,6 +213,7 @@ filter source code: `*.hpp,*.cpp`
 static_cast<(ints|o[1-5])
 const [^{]*&
 [>=]= \S+::O2
+[^ <]\b(struct|class)[ ]
 (?<!\+)\+(?!\+)           # addition operator?
 (?<![\*\/])\/(?![\/\*])   # division operator?
 ```

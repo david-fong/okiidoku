@@ -10,11 +10,13 @@ const oki = await (await import("./build/Release/okiidoku.mjs")).default({
 	// https://emscripten.org/docs/api_reference/module.html#module
 });
 // console.log(oki);
-oki.rng.seed(BigInt(Date.now()));
+using rng = new oki.Rng();
+rng.seed(BigInt(Date.now()));
+// oki.rng.seed(BigInt(Date.now()));
 {
 	using grid = new oki.Grid(3);
-	oki.initMostCanonicalGrid(grid);
-	oki.generateShuffled(grid, oki.rng.getRngSeed());
+	grid.initMostCanonical();
+	oki.shuffle(grid, rng.get());
 	// console.log(grid); // node's default console logging doesn't call toString
 	console.log(""+grid); // or use grid.toString() or `${grid}`
 	console.log(`value at rmi=0: ${grid.at(0)}`); // or use grid.toString() or `${grid}`

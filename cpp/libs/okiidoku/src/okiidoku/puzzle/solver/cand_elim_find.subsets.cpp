@@ -161,8 +161,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 			}};
 			auto& [combo_walker, combo_syms, ignore_] {*found};
 			for (; combo_walker.has_more(); combo_walker.advance()) {
-				combo_syms = std::transform_reduce(
-					OKIIDOKU_UNSEQ
+				combo_syms = std::transform_reduce(OKIIDOKU_UNSEQ
 					combo_walker.at_it(),
 					std::next(combo_walker.at_it(), naked_subset_size),
 					O2BitArr<O>{}, std::bit_or{}, [&][[gnu::pure]](const auto i) noexcept -> const auto& {

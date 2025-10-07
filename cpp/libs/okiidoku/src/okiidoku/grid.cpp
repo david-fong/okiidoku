@@ -13,8 +13,7 @@
 namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
-	bool grid_follows_rule(const Grid<O>& grid) noexcept {
-		OKIIDOKU_MONO_INT_TS_TYPEDEFS
+	bool Grid<O>::follows_rule() const noexcept {
 		using has_mask_t = O2BitArr<O>;
 
 		has_mask_t row_has;
@@ -26,7 +25,7 @@ namespace okiidoku::mono {
 			if (col == 0u) [[unlikely]] { row_has = has_mask_t{}; }
 			if (row % T::O1 == 0u) [[unlikely]] { h_chute_boxes_has.fill(has_mask_t{}); }
 
-			const auto sym_ {grid[row,col]}; sym_.check();
+			const auto sym_ {operator[](row,col)}; sym_.check();
 			if (sym_ == T::O2) { continue; }
 			const o2x_t sym {sym_};
 
@@ -43,12 +42,9 @@ namespace okiidoku::mono {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	bool grid_is_filled(const Grid<O>& grid) noexcept {
-		using T = Ints<O>;
-		return std::all_of(
-			OKIIDOKU_UNSEQ
-			grid.arr().cbegin(),
-			grid.arr().cend(),
+	bool Grid<O>::is_filled() const noexcept {
+		return std::all_of(OKIIDOKU_UNSEQ
+			B::arr.cbegin(), B::arr.cend(),
 			[][[gnu::const]](const auto sym)noexcept{ sym.check(); return sym < T::O2; }
 		);
 	}
@@ -57,7 +53,7 @@ namespace okiidoku::mono {
 	template<Order O> requires(is_order_compiled(O))
 	bool Grid<O>::is_empty() const noexcept {
 		return std::all_of(OKIIDOKU_UNSEQ
-			arr().begin(), arr().end(),
+			B::arr.begin(), B::arr.end(),
 			[][[gnu::const]](const auto sym)noexcept{ sym.check(); return sym == T::O2; }
 		);
 	}
@@ -65,8 +61,7 @@ namespace okiidoku::mono {
 
 	// TODO.low compare binary size and speed if this is changed to initialize from a constexpr variable
 	template<Order O> requires(is_order_compiled(O))
-	void init_most_canonical_grid(Grid<O>& grid) noexcept {
-		OKIIDOKU_MONO_INT_TS_TYPEDEFS
+	void Grid<O>::init_most_canonical() noexcept {
 		for (const auto box : T::O2) {
 			const auto h_chute {box/T::O1};
 			const auto v_chute {box%T::O1};
@@ -78,20 +73,17 @@ namespace okiidoku::mono {
 				const auto sym_col {(boxcol+h_chute) % T::O1};
 				const auto sym {(T::O1 * sym_row) + sym_col};
 				OKIIDOKU_CONTRACT(sym < T::O2);
-				grid[rmi] = sym;
+				operator[](rmi) = sym;
 			}
 		}
-		OKIIDOKU_ASSERT(grid_is_filled(grid));
-		OKIIDOKU_ASSERT(grid_follows_rule(grid));
+		OKIIDOKU_ASSERT(is_filled());
+		OKIIDOKU_ASSERT(follows_rule());
 	}
 
 
 
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-		template struct Grid<(O_)>; \
-		template bool grid_follows_rule<(O_)>(const Grid<(O_)>&) noexcept; \
-		template bool grid_is_filled<(O_)>(const Grid<(O_)>&) noexcept; \
-		template void init_most_canonical_grid<(O_)>(Grid<(O_)>&) noexcept;
+		template struct Grid<(O_)>;
 	OKIIDOKU_FOREACH_O_DO_EMIT
 	#undef OKIIDOKU_FOREACH_O_EMIT
 }
@@ -99,40 +91,40 @@ namespace okiidoku::mono {
 
 namespace okiidoku::visitor {
 
-	bool grid_follows_rule(const Grid& vis_grid) noexcept {
-		switch (vis_grid.get_order()) {
+	bool Grid::follows_rule() const noexcept {
+		switch (this->get_order()) {
 		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-		case (O_): return mono::grid_follows_rule(vis_grid.unchecked_get_mono_exact<(O_)>());
+		case (O_): return this->unchecked_get_mono_exact<(O_)>().follows_rule();
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
 		default: OKIIDOKU_UNREACHABLE;
 		}
 	}
 
-	bool grid_is_filled(const Grid& vis_grid) noexcept {
-		switch (vis_grid.get_order()) {
+	bool Grid::is_filled() const noexcept {
+		switch (this->get_order()) {
 		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-		case (O_): return mono::grid_is_filled(vis_grid.unchecked_get_mono_exact<(O_)>());
+		case (O_): return this->unchecked_get_mono_exact<(O_)>().is_filled();
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
 		default: OKIIDOKU_UNREACHABLE;
 		}
 	}
 
-	bool Grid::is_empty(const Grid& vis_grid) noexcept {
-		switch (vis_grid.get_order()) {
+	bool Grid::is_empty() const noexcept {
+		switch (this->get_order()) {
 		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-		case (O_): return vis_grid.unchecked_get_mono_exact<(O_)>().is_empty();
+		case (O_): return this->unchecked_get_mono_exact<(O_)>().is_empty();
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
 		default: OKIIDOKU_UNREACHABLE;
 		}
 	}
 
-	void init_most_canonical_grid(Grid& vis_grid) noexcept {
-		switch (vis_grid.get_order()) {
+	void Grid::init_most_canonical() noexcept {
+		switch (this->get_order()) {
 		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-		case (O_): return mono::init_most_canonical_grid(vis_grid.unchecked_get_mono_exact<(O_)>());
+		case (O_): return this->unchecked_get_mono_exact<(O_)>().init_most_canonical();
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
 		default: OKIIDOKU_UNREACHABLE;

@@ -22,8 +22,8 @@ namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
 	bool grid_is_proper_puzzle(const Grid<O>& puzzle) noexcept {
-		if (grid_is_filled(puzzle)) [[unlikely]] {
-			return grid_follows_rule(puzzle);
+		if (puzzle.is_filled()) [[unlikely]] {
+			return puzzle.follows_rule();
 		}
 		// a quick check for obvious big mistake (empty grid):
 		if (puzzle.is_empty()) [[unlikely]] { return false; }
@@ -98,8 +98,7 @@ namespace okiidoku::mono {
 			// 	ua_sets.ua_set_4s.cbegin(),
 			// 	ua_sets.ua_set_4s.cend(),
 			// 	[&](const auto& ua_set_4){
-			// 		return std::count_if(
-			// 			OKIIDOKU_UNSEQ
+			// 		return std::count_if(OKIIDOKU_UNSEQ
 			// 			ua_set_4.rmis.cbegin(),
 			// 			ua_set_4.rmis.cend(),
 			// 			[&](const auto& ua_set_rmi){ return (ua_set_rmi != rmi) && (grid[ua_set_rmi] != T::O2); }
@@ -119,7 +118,7 @@ namespace okiidoku::mono {
 				++num_keepers;
 			}
 			remove_puzcell_cand_at(puzcell_cand_i);
-			// OKIIDOKU_ASSERT(grid_follows_rule(grid)); // a bit gratuitous
+			// OKIIDOKU_ASSERT(grid.follows_rule()); // a bit gratuitous
 		}
 		OKIIDOKU_ASSERT(grid_is_proper_puzzle(grid));
 	}

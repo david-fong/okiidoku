@@ -194,7 +194,7 @@ namespace okiidoku::mono { namespace {
 		transformation = transformation.inverted();
 		// TODO.high use two iota views mapped one to src_grid and one to post_transposed view and lexicographical compare. if post_transposed less, edit transformation and apply a post_transpose_only transformation to src_grid in place.
 		transformation.apply_in_place(src_grid);
-		OKIIDOKU_ASSERT(grid_follows_rule(src_grid));
+		OKIIDOKU_ASSERT(src_grid.follows_rule());
 		return transformation;
 	}
 }}

@@ -97,26 +97,28 @@ EMSCRIPTEN_BINDINGS(okiidoku) {
 		.value("SMALL", oki::IntKind::small)
 		;
 	em::class_<oki::em::Rng>("Rng")
+		.constructor<>()
 		.function("seed", &oki::em::Rng::seed)
-		.function("getRngSeed", &oki::em::Rng::get)
+		.function("get",  &oki::em::Rng::get)
 		;
-	em::constant("rng", oki::em::rng);
+	em::constant("rng", oki::em::rng); // TODO figure out why this isn't working
 
 	em::class_<oki_v::Grid>("Grid")
 		.constructor<oki::Order>()
 		// .function("getMonoOrder", &oki_v::Grid::get_order) // TODO need to define the base class to do this https://emscripten.org/docs/porting/connecting_cpp_and_javascript/embind.html#base-classes
 		.function("at",          em::select_overload<oki_v::Grid::sym_t (oki_v::ints::o4x_t rmi                        ) const noexcept>(&oki_v::Grid::operator[]))
 		.function("at",          em::select_overload<oki_v::Grid::sym_t (oki_v::ints::o2x_t row, oki_v::ints::o2x_t col) const noexcept>(&oki_v::Grid::operator[]))
-		.function("followsRule", &oki_v::grid_follows_rule)
-		.function("isFilled",    &oki_v::grid_is_filled)
+		.function("followsRule", &oki_v::Grid::follows_rule)
+		.function("isFilled",    &oki_v::Grid::is_filled)
 		.function("isEmpty",     &oki_v::Grid::is_empty)
 		.function("toString",    &oki::em::grid_to_emoji_string)
+		.function("initMostCanonical", &oki_v::Grid::init_most_canonical);
 		;
-	// em::function("gridFollowsRule", &oki_v::grid_follows_rule);
-	// em::function("gridIsFilled",    &oki_v::grid_is_filled);
+	// em::function("gridFollowsRule", &oki_v::Grid::follows_rule);
+	// em::function("gridIsFilled",    &oki_v::Grid::is_filled);
 
-	em::function("initMostCanonicalGrid", &oki_v::init_most_canonical_grid);
 	// TODO change this into an instance method:
-	em::function("shuffle", em::select_overload<void (oki_v::Grid&, oki::rng_seed_t rng_seed) noexcept>(&oki_v::generate_shuffled));
+	em::function("shuffle", oki::em::shuffle);
+	em::function("shuffle", oki_v::shuffle);
 	// em::function("generateShuffled", em::select_overload<oki_v::Grid (oki::Order, oki::rng_seed_t) noexcept>(&oki_v::generate_shuffled), em::return_value_policy::take_ownership{});
 }

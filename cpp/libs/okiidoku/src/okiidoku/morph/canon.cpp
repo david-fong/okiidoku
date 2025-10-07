@@ -11,8 +11,8 @@ namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
 	Transformation<O> canonicalize(Grid<O>& grid) noexcept {
-		OKIIDOKU_ASSERT(grid_is_filled(grid));
-		OKIIDOKU_ASSERT(grid_follows_rule(grid));
+		OKIIDOKU_ASSERT(grid.is_filled());
+		OKIIDOKU_ASSERT(grid.follows_rule());
 		const auto sym_map {detail::canon_sym(grid)};
 		auto place_map {detail::canon_pos(grid)};
 		place_map.sym_map = sym_map;
