@@ -18,7 +18,7 @@ namespace okiidoku::mono {
 	[[gnu::hot]] OKIIDOKU_EXPORT void shuffle(Grid<O>& sink, rng_seed_t rng_seed) noexcept;
 
 	/** \return a random filled grid that follows the one rule. */
-	template<Order O> requires(is_order_compiled(O))
+	template<Order O> requires(is_order_compiled(O)) [[nodiscard]]
 	inline Grid<O> generate_shuffled(const rng_seed_t rng_seed) noexcept {
 		using T = Ints<O>;
 		OKIIDOKU_DEFER_INIT Grid<O> grid;

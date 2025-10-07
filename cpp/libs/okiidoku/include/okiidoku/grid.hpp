@@ -15,9 +15,68 @@
 
 namespace okiidoku::mono {
 
+	template<Order O> requires(is_order_compiled(O))
+	struct Grid;
+
 	namespace detail {
-		template<Order O, class V> requires(is_order_compiled(O) && !std::is_reference_v<V>) struct Gridlike;
-	}
+	template<Order O, class CellType>
+		requires(is_order_compiled(O) && !std::is_reference_v<CellType>)
+	struct Gridlike {
+		friend struct Grid<O>;
+	private:
+		using T = Ints<O>;
+	public:
+		using cell_t = CellType;
+		using array_t = std::array<CellType, T::O4>;
+
+		/** lexicographical comparison over row-major-order traversal of cells. */
+		[[nodiscard, gnu::pure]] friend std::strong_ordering operator<=>(const Gridlike& a, const Gridlike& b) noexcept = default;
+
+		// note: making this constexpr results in a 1% speed gain, but 45% program
+		// size increase with GCC. that speed doesn't seem worth it.
+		explicit Gridlike(CellType fill_value) noexcept { arr_.fill(fill_value); }
+		Gridlike() noexcept = default;
+
+		[[nodiscard, gnu::pure]]
+		decltype(auto) arr(this auto&& self) noexcept { return std::forward_like<decltype(self)>(self.arr_); }
+
+		/** \pre `rmi` is in `[0, O4)`. */
+		[[nodiscard, gnu::pure]] constexpr
+		decltype(auto) operator[](this auto&& self, const T::o4x_t rmi) noexcept {
+			rmi.check();
+			return std::forward_like<decltype(self)>(self.arr_[rmi]);
+		}
+		/** \pre `row` and `col` are in `[0, O2)`. */
+		[[nodiscard, gnu::pure]] constexpr
+		decltype(auto) operator[](this auto&& self, const T::o2x_t row, const T::o2x_t col) noexcept {
+			row.check(); col.check();
+			return std::forward_like<decltype(self)>(self.arr_[row_col_to_rmi<O>(row, col)]);
+		}
+		/**
+		see `okiidoku::mono::box_cell_to_rmi`.
+		\pre `box` and `box_cell` are in `[0, O2)`. */
+		[[nodiscard, gnu::pure]] constexpr
+		decltype(auto) at_box_cell(this auto&& self, const T::o2x_t box, const T::o2x_t box_cell) noexcept {
+			box.check(); box_cell.check();
+			return std::forward_like<decltype(self)>(self.arr_[box_cell_to_rmi<O>(box, box_cell)]);
+		}
+		/** \pre `row` is in [0, O2). */
+		[[nodiscard, gnu::pure]] constexpr
+		decltype(auto) row_span_at(this auto& self [[clang::lifetimebound]], const T::o2x_t i) noexcept {
+			i.check();
+			using ret_t = std::remove_reference_t<decltype(self.arr_.front())>;
+			// TODO test this. is there dangling?
+			return static_cast<std::span<ret_t, T::O2>>(std::span{std::forward_like<decltype(self)>(self).arr_}.subspan(T::O2*i, T::O2));
+		}
+
+		// [[nodiscard]] auto row_spans() noexcept [[clang::lifetimebound]] { namespace v = ::ranges::views; return v::iota(o2i_t{0u}, o2i_t{T::O2}) | v::transform([&](auto r){ return row_span_at(r); }); }
+		// [[nodiscard]] auto row_spans() const noexcept [[clang::lifetimebound]] { namespace v = ::ranges::views; return v::iota(o2i_t{0u}, T::O2) | v::transform([&](auto r){ return row_span_at(r); }); }
+	private:
+		array_t arr_;
+	};
+	} // namespace detail
+
+
 	/**
 	a structure for a generic sudoku grid.
 	\pre all entry values (contents) are in the range [0, O2].
@@ -25,9 +84,27 @@ namespace okiidoku::mono {
 	\note not exported. all public members are defined inline in this header. */
 	template<Order O> requires(is_order_compiled(O))
 	struct Grid : public detail::Gridlike<O, grid_sym_t<O>> {
+	private:
 		using T = Ints<O>;
+		using base_t = detail::Gridlike<O, grid_sym_t<O>>;
+		// using detail::Gridlike<O, grid_sym_t<O>>::arr_;
+	public:
+		// [[nodiscard, gnu::pure]] friend std::strong_ordering operator<=>(const Gridlike& a, const Gridlike& b) noexcept = default;
+		using typename base_t::cell_t;
+		using typename base_t::array_t;
+		using base_t::arr;
+		using base_t::operator[];
+		using base_t::at_box_cell;
+		using base_t::row_span_at;
+
 		/** \note default initialize as an empty grid (to be safe). */
 		Grid() noexcept: detail::Gridlike<O, grid_sym_t<O>>{T::O2} {}
+
+		void clear() noexcept { this->arr_.fill(T::O1); }
+
+		[[nodiscard, gnu::pure]] OKIIDOKU_EXPORT
+		/** \return `true` if _all_ of the cells are empty (equal to `O2`). */
+		bool is_empty() const noexcept;
 	};
 	// using Grid = detail::Gridlike<O, grid_sym_t<O>>;
 	/* \internal the above commented-out type alias results in large exported, mangled
@@ -50,73 +127,9 @@ namespace okiidoku::mono {
 	bool grid_is_filled(const Grid<O>&) noexcept;
 
 	template<Order O> requires(is_order_compiled(O))
-	[[nodiscard, gnu::pure]] OKIIDOKU_EXPORT
-	/** \return `true` if _all_ of the cells are empty (equal to `O2`). */
-	bool grid_is_empty(const Grid<O>&) noexcept;
-
-	template<Order O> requires(is_order_compiled(O))
 	OKIIDOKU_EXPORT
 	/** populates a grid with the contents of the Most Canonical Grid. */
 	void init_most_canonical_grid(Grid<O>&) noexcept;
-
-
-	template<Order O, class CellType>
-		requires(is_order_compiled(O) && !std::is_reference_v<CellType>)
-	struct detail::Gridlike {
-	private:
-		using T = Ints<O>;
-	public:
-		using cell_t = CellType;
-		using array_t = std::array<CellType, T::O4>;
-
-		/** lexicographical comparison over row-major-order traversal of cells. */
-		[[nodiscard, gnu::pure]] friend std::strong_ordering operator<=>(const Gridlike& a, const Gridlike& b) noexcept = default;
-
-		// note: making this constexpr results in a 1% speed gain, but 45% program
-		// size increase with GCC. that speed doesn't seem worth it.
-		explicit Gridlike(CellType fill_value) noexcept { arr_.fill(fill_value); }
-		Gridlike() noexcept = default;
-
-		[[nodiscard, gnu::pure]]
-		decltype(auto) get_underlying_array(this auto&& self) noexcept { return std::forward_like<decltype(self)>(self.arr_); }
-
-		/// \pre `rmi` is in `[0, O4)`.
-		[[nodiscard, gnu::pure]] constexpr
-		decltype(auto) operator[](this auto&& self, const T::o4x_t rmi) noexcept {
-			rmi.check();
-			return std::forward_like<decltype(self)>(self.arr_[rmi]);
-		}
-
-		/// \pre `row` and `col` are in `[0, O2)`.
-		[[nodiscard, gnu::pure]] constexpr
-		decltype(auto) operator[](this auto&& self, const T::o2x_t row, const T::o2x_t col) noexcept {
-			row.check(); col.check();
-			return std::forward_like<decltype(self)>(self.arr_[row_col_to_rmi<O>(row, col)]);
-		}
-
-		/**
-		see `okiidoku::mono::box_cell_to_rmi`.
-		\pre `box` and `box_cell` are in `[0, O2)`. */
-		[[nodiscard, gnu::pure]] constexpr
-		decltype(auto) at_box_cell(this auto&& self, const T::o2x_t box, const T::o2x_t box_cell) noexcept {
-			box.check(); box_cell.check();
-			return std::forward_like<decltype(self)>(self.arr_[box_cell_to_rmi<O>(box, box_cell)]);
-		}
-
-		/// \pre `row` is in [0, O2).
-		[[nodiscard, gnu::pure]] constexpr
-		decltype(auto) row_span_at(this auto& self [[clang::lifetimebound]], const T::o2x_t i) noexcept {
-			i.check();
-			using ret_t = std::remove_reference_t<decltype(self.arr_.front())>;
-			// TODO test this. is there dangling?
-			return static_cast<std::span<ret_t, T::O2>>(std::span{std::forward_like<decltype(self)>(self).arr_}.subspan(T::O2*i, T::O2));
-		}
-
-		// [[nodiscard]] auto row_spans() noexcept [[clang::lifetimebound]] { namespace v = ::ranges::views; return v::iota(o2i_t{0u}, o2i_t{T::O2}) | v::transform([&](auto r){ return row_span_at(r); }); }
-		// [[nodiscard]] auto row_spans() const noexcept [[clang::lifetimebound]] { namespace v = ::ranges::views; return v::iota(o2i_t{0u}, T::O2) | v::transform([&](auto r){ return row_span_at(r); }); }
-	private:
-		array_t arr_;
-	};
 
 
 	template<Order O> [[nodiscard, gnu::const]] constexpr
@@ -144,10 +157,6 @@ namespace okiidoku::visitor {
 	[[nodiscard, gnu::pure]] OKIIDOKU_EXPORT
 	/// \copydoc okiidoku::mono::grid_is_filled
 	bool grid_is_filled(const Grid&) noexcept;
-
-	[[nodiscard, gnu::pure]] OKIIDOKU_EXPORT
-	/// \copydoc okiidoku::mono::grid_is_empty
-	bool grid_is_empty(const Grid&) noexcept;
 
 	OKIIDOKU_EXPORT
 	/// \copydoc okiidoku::mono::init_most_canonical_grid
@@ -185,6 +194,10 @@ namespace okiidoku::visitor {
 
 		/// \pre `row` and `col` are in `[0, O2)`.
 		[[nodiscard, gnu::pure]] sym_t operator[](ints::o2x_t row, ints::o2x_t col) const noexcept;
+
+		[[nodiscard, gnu::pure]]
+		/** see `okiidoku::mono::Grid<O>::is_empty`. */
+		bool is_empty(const Grid&) noexcept;
 	};
 }
 #endif

@@ -47,20 +47,17 @@ namespace okiidoku::mono {
 		using T = Ints<O>;
 		return std::all_of(
 			OKIIDOKU_UNSEQ
-			grid.get_underlying_array().cbegin(),
-			grid.get_underlying_array().cend(),
+			grid.arr().cbegin(),
+			grid.arr().cend(),
 			[][[gnu::const]](const auto sym)noexcept{ sym.check(); return sym < T::O2; }
 		);
 	}
 
 
 	template<Order O> requires(is_order_compiled(O))
-	bool grid_is_empty(const Grid<O>& grid) noexcept {
-		using T = Ints<O>;
-		return std::all_of(
-			OKIIDOKU_UNSEQ
-			grid.get_underlying_array().begin(),
-			grid.get_underlying_array().end(),
+	bool Grid<O>::is_empty() const noexcept {
+		return std::all_of(OKIIDOKU_UNSEQ
+			arr().begin(), arr().end(),
 			[][[gnu::const]](const auto sym)noexcept{ sym.check(); return sym == T::O2; }
 		);
 	}
@@ -91,9 +88,9 @@ namespace okiidoku::mono {
 
 
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
+		template struct Grid<(O_)>; \
 		template bool grid_follows_rule<(O_)>(const Grid<(O_)>&) noexcept; \
 		template bool grid_is_filled<(O_)>(const Grid<(O_)>&) noexcept; \
-		template bool grid_is_empty<(O_)>(const Grid<(O_)>&) noexcept; \
 		template void init_most_canonical_grid<(O_)>(Grid<(O_)>&) noexcept;
 	OKIIDOKU_FOREACH_O_DO_EMIT
 	#undef OKIIDOKU_FOREACH_O_EMIT
@@ -122,10 +119,10 @@ namespace okiidoku::visitor {
 		}
 	}
 
-	bool grid_is_empty(const Grid& vis_grid) noexcept {
+	bool Grid::is_empty(const Grid& vis_grid) noexcept {
 		switch (vis_grid.get_order()) {
 		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-		case (O_): return mono::grid_is_empty(vis_grid.unchecked_get_mono_exact<(O_)>());
+		case (O_): return vis_grid.unchecked_get_mono_exact<(O_)>().is_empty();
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
 		default: OKIIDOKU_UNREACHABLE;

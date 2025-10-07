@@ -143,42 +143,42 @@ namespace okiidoku::mono { namespace {
 namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
-	std::size_t write_solved(const Grid<O>& grid, std::ostream& os) noexcept {
+	std::size_t write_solved(const Grid<O>& grid, std::ostream& os) {
 		OKIIDOKU_ASSERT(grid_is_filled(grid));
 		OKIIDOKU_ASSERT(grid_follows_rule(grid));
 		using T = Ints<O>;
 
-		Writer<O> helper {};
-		for (; !helper.done(); helper.advance()) {
-			const auto row {helper.rmi() / T::O2};
-			const auto col {helper.rmi() % T::O2};
+		Writer<O> writer {};
+		for (; !writer.done(); writer.advance()) {
+			const auto row {writer.rmi() / T::O2};
+			const auto col {writer.rmi() % T::O2};
 			if ((row/T::O1) == (col/T::O1)) {
 				// skip cells in main-diagonal boxes. they can be losslessly reconstructed.
 				continue;
 			}
-			const auto sym {*grid[helper.rmi()]};
-			helper(os, sym);
+			const auto sym {*grid[writer.rmi()]};
+			writer(os, sym);
 		}
-		return helper.finish(os);
+		return writer.finish(os);
 	}
 
 
 	template<Order O> requires(is_order_compiled(O))
-	std::size_t read_solved(Grid<O>& grid, std::istream& is) noexcept {
+	std::size_t read_solved(Grid<O>& grid, std::istream& is) {
 		using T = Ints<O>;
 		std::size_t bytes_read {[&]{
 			// parse out bulk of content (skip what can be reconstructed later):
-			Reader<O> helper {};
-			for (; !helper.done(); helper.advance()) {
-				const auto row {helper.rmi() / T::O2};
-				const auto col {helper.rmi() % T::O2};
-				if ((row/T::O1) == col/T::O1) {
+			Reader<O> reader {};
+			for (; !reader.done(); reader.advance()) {
+				const auto row {reader.rmi() / T::O2};
+				const auto col {reader.rmi() % T::O2};
+				if ((row/T::O1) == col/T::O1) [[unlikely]] {
 					continue; // skip cells in the main-diagonal boxes
 				}
-				const auto sym {helper(is)};
-				grid[helper.rmi()] = sym;
+				const auto sym {reader(is)};
+				grid[reader.rmi()] = sym;
 			}
-			return helper.finish(is);
+			return reader.finish(is);
 		}()};{
 			// reconstruct cells in main-diagonal boxes:
 			std::array<std::array<std::array<O2BitArr<O>, T::O1>, T::O1>, T::O1> main_diag_box_cands {};
@@ -186,7 +186,7 @@ namespace okiidoku::mono {
 				// get the data needed to losslessly reconstruct:
 				const auto row {rmi / T::O2};
 				const auto col {rmi % T::O2};
-				if ((row/T::O1) == col/T::O1) {
+				if ((row/T::O1) == col/T::O1) [[unlikely]] {
 					continue; // skip cells that need reconstructing
 				}
 				for (const auto atom_cell : T::O1) {
@@ -211,7 +211,7 @@ namespace okiidoku::mono {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	std::size_t write_puzzle(const Grid<O>& grid, std::ostream& os) noexcept {
+	std::size_t write_puzzle(const Grid<O>& grid, std::ostream& os) {
 		OKIIDOKU_ASSERT(grid_follows_rule(grid));
 		// using T = Ints<O>;
 		(void)os; (void)grid; return 0uz; // TODO
@@ -219,7 +219,7 @@ namespace okiidoku::mono {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	std::size_t read_puzzle(Grid<O>& grid, std::istream& is) noexcept {
+	std::size_t read_puzzle(Grid<O>& grid, std::istream& is) {
 		// using T = Ints<O>;
 		(void)is; (void)grid;
 
@@ -229,10 +229,10 @@ namespace okiidoku::mono {
 
 
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-		template std::size_t write_solved<(O_)>(const Grid<(O_)>&, std::ostream&) noexcept; \
-		template std::size_t read_solved <(O_)>(      Grid<(O_)>&, std::istream&) noexcept; \
-		template std::size_t write_puzzle<(O_)>(const Grid<(O_)>&, std::ostream&) noexcept; \
-		template std::size_t read_puzzle <(O_)>(      Grid<(O_)>&, std::istream&) noexcept;
+		template std::size_t write_solved<(O_)>(const Grid<(O_)>&, std::ostream&); \
+		template std::size_t read_solved <(O_)>(      Grid<(O_)>&, std::istream&); \
+		template std::size_t write_puzzle<(O_)>(const Grid<(O_)>&, std::ostream&); \
+		template std::size_t read_puzzle <(O_)>(      Grid<(O_)>&, std::istream&);
 	OKIIDOKU_FOREACH_O_DO_EMIT
 	#undef OKIIDOKU_FOREACH_O_EMIT
 }
@@ -240,7 +240,7 @@ namespace okiidoku::mono {
 
 namespace okiidoku::visitor {
 
-	std::size_t write_solved(const Grid& vis_src, std::ostream& os) noexcept {
+	std::size_t write_solved(const Grid& vis_src, std::ostream& os) {
 		switch (vis_src.get_order()) {
 		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 		case (O_): return mono::write_solved(vis_src.unchecked_get_mono_exact<(O_)>(), os);
@@ -250,7 +250,7 @@ namespace okiidoku::visitor {
 		}
 	}
 
-	std::size_t read_solved(Grid& vis_sink, std::istream& is) noexcept {
+	std::size_t read_solved(Grid& vis_sink, std::istream& is) {
 		switch (vis_sink.get_order()) {
 		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 		case (O_): return mono::read_solved(vis_sink.unchecked_get_mono_exact<(O_)>(), is);
@@ -260,7 +260,7 @@ namespace okiidoku::visitor {
 		}
 	}
 
-	std::size_t write_puzzle(const Grid& vis_src, std::ostream& os) noexcept {
+	std::size_t write_puzzle(const Grid& vis_src, std::ostream& os) {
 		switch (vis_src.get_order()) {
 		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 		case (O_): return mono::write_puzzle(vis_src.unchecked_get_mono_exact<(O_)>(), os);
@@ -270,7 +270,7 @@ namespace okiidoku::visitor {
 		}
 	}
 
-	std::size_t read_puzzle(Grid& vis_sink, std::istream& is) noexcept {
+	std::size_t read_puzzle(Grid& vis_sink, std::istream& is) {
 		switch (vis_sink.get_order()) {
 		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 		case (O_): return mono::read_puzzle(vis_sink.unchecked_get_mono_exact<(O_)>(), is);

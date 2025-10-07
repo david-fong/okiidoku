@@ -7,7 +7,8 @@
 
 namespace okiidoku::cli {
 
-	struct Timer {
+	class Timer {
+	public:
 		using time_point = std::chrono::steady_clock::time_point;
 
 		struct [[gnu::designated_init]] Elapsed {

@@ -50,6 +50,9 @@ Issues I'm watching:
 
 ## Misc List
 
+- https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Rc-struct
+  > Use `class` if the class has an invariant; use `struct` if the data members can vary independently
+
 - see note on `first_set_bit_require_exists`
 - do some `static_assert` tests for types of deducing this member functions. just discovered that I was having a bug with one because I was using something after `std::forward`? maybe I _shouldn't_ have disabled that clang-tidy check... but then why did I see people doing this thing in example code? I guess because you need to be careful about copies with iterators?
 - find places `<O>(` is used, and see if deduction guides can help. Ex. `template<typename _Type, size_t _ArrayExtent> span(array<_Type, _ArrayExtent>&) -> span<_Type, _ArrayExtent>;`
@@ -79,7 +82,7 @@ Issues I'm watching:
 
 - pgo external project check cache args defined or not to mirror
 
-- config gdb to not show `DOCTEST_CAPTURE_N` in variables view?
+- figure out if it's possible to config gdb to not show `DOCTEST_CAPTURE_N` things in variables view?
 
 - https://youtu.be/zCzD9uSDI8c?t=620
 

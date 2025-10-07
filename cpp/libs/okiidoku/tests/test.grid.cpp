@@ -14,10 +14,10 @@
 #include <type_traits>
 
 namespace okiidoku::mono {
-	static_assert(std::is_same_v<decltype(std::declval<      Grid<3>  >().get_underlying_array()),       std::array<Int<9,IntKind::small>,81uz>&&>);
-	static_assert(std::is_same_v<decltype(std::declval<      Grid<3>&&>().get_underlying_array()),       std::array<Int<9,IntKind::small>,81uz>&&>);
-	static_assert(std::is_same_v<decltype(std::declval<      Grid<3>& >().get_underlying_array()),       std::array<Int<9,IntKind::small>,81uz>& >);
-	static_assert(std::is_same_v<decltype(std::declval<const Grid<3>& >().get_underlying_array()), const std::array<Int<9,IntKind::small>,81uz>& >);
+	static_assert(std::is_same_v<decltype(std::declval<      Grid<3>  >().arr()),       std::array<Int<9,IntKind::small>,81uz>&&>);
+	static_assert(std::is_same_v<decltype(std::declval<      Grid<3>&&>().arr()),       std::array<Int<9,IntKind::small>,81uz>&&>);
+	static_assert(std::is_same_v<decltype(std::declval<      Grid<3>& >().arr()),       std::array<Int<9,IntKind::small>,81uz>& >);
+	static_assert(std::is_same_v<decltype(std::declval<const Grid<3>& >().arr()), const std::array<Int<9,IntKind::small>,81uz>& >);
 }
 
 namespace okiidoku::test {
@@ -25,7 +25,7 @@ template<Order O> OKIIDOKU_KEEP_FOR_DEBUG // NOLINTNEXTLINE(*-internal-linkage)
 void test_grid() {
 	using namespace ::okiidoku::mono;
 	OKIIDOKU_MONO_INT_TS_TYPEDEFS
-	// std::cout<<(typeid(decltype(std::declval<Grid<3>>().get_underlying_array())).name())<<'\n';
+	// std::cout<<(typeid(decltype(std::declval<Grid<3>>().arr())).name())<<'\n';
 
 	for (const auto i : T::O2) { CAPTURE(i);
 	for (const auto j : T::O2) { CAPTURE(j);
@@ -44,7 +44,7 @@ void test_grid() {
 	}}
 
 	Grid<O> gen_grid; CAPTURE(gen_grid);
-	CHECK_UNARY(grid_is_empty(gen_grid)); // expected default ctor behaviour
+	CHECK_UNARY(gen_grid.is_empty()); // expected default ctor behaviour
 
 	init_most_canonical_grid(gen_grid);
 	CHECK_UNARY(grid_is_filled(gen_grid));

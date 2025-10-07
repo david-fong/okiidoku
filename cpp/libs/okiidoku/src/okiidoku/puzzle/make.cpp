@@ -26,7 +26,7 @@ namespace okiidoku::mono {
 			return grid_follows_rule(puzzle);
 		}
 		// a quick check for obvious big mistake (empty grid):
-		if (grid_is_empty(puzzle)) [[unlikely]] { return false; }
+		if (puzzle.is_empty()) [[unlikely]] { return false; }
 
 		FastSolver<O> solver {};
 		solver.reinit_with_puzzle(puzzle);

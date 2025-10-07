@@ -29,7 +29,7 @@ namespace okiidoku::mono {
 	\pre the grid is filled and follows the one rule.
 	\returns the number of bytes written. */
 	template<Order O> requires(is_order_compiled(O))
-	OKIIDOKU_EXPORT std::size_t write_solved(const Grid<O>&, std::ostream& sink) noexcept;
+	OKIIDOKU_EXPORT std::size_t write_solved(const Grid<O>&, std::ostream& sink);
 
 	/**
 	\pre the stream is a binary stream- not a text stream.
@@ -37,7 +37,7 @@ namespace okiidoku::mono {
 	\post parsed grid is filled and follows the one rule.
 	\returns the number of bytes read. */
 	template<Order O> requires(is_order_compiled(O))
-	OKIIDOKU_EXPORT std::size_t read_solved(Grid<O>&, std::istream& src) noexcept;
+	OKIIDOKU_EXPORT std::size_t read_solved(Grid<O>&, std::istream& src);
 
 	/**
 	best used with sparse (close to minimal) puzzles.
@@ -45,7 +45,7 @@ namespace okiidoku::mono {
 	\pre the grid follows the one rule.
 	\returns the number of bytes written. */
 	template<Order O> requires(is_order_compiled(O))
-	OKIIDOKU_EXPORT std::size_t write_puzzle(const Grid<O>&, std::ostream& sink) noexcept;
+	OKIIDOKU_EXPORT std::size_t write_puzzle(const Grid<O>&, std::ostream& sink);
 
 	/**
 	\pre the stream is a binary stream- not a text stream.
@@ -53,22 +53,22 @@ namespace okiidoku::mono {
 	\post the grid follows the one rule.
 	\returns the number of bytes read. */
 	template<Order O> requires(is_order_compiled(O))
-	OKIIDOKU_EXPORT std::size_t read_puzzle(Grid<O>&, std::istream& src) noexcept;
+	OKIIDOKU_EXPORT std::size_t read_puzzle(Grid<O>&, std::istream& src);
 }
 
 
 namespace okiidoku::visitor {
 
 	/** see `write_solved`. */
-	OKIIDOKU_EXPORT std::size_t write_solved(const Grid&, std::ostream& sink) noexcept;
+	OKIIDOKU_EXPORT std::size_t write_solved(const Grid&, std::ostream& sink);
 
 	/** see `read_solved`. */
-	OKIIDOKU_EXPORT std::size_t read_solved(Grid&, std::istream& src) noexcept;
+	OKIIDOKU_EXPORT std::size_t read_solved(Grid&, std::istream& src);
 
 	/** see `write_puzzle`. */
-	OKIIDOKU_EXPORT std::size_t write_puzzle(const Grid&, std::ostream& sink) noexcept;
+	OKIIDOKU_EXPORT std::size_t write_puzzle(const Grid&, std::ostream& sink);
 
 	/** see `read_puzzle`. */
-	OKIIDOKU_EXPORT std::size_t read_puzzle(Grid&, std::istream& src) noexcept;
+	OKIIDOKU_EXPORT std::size_t read_puzzle(Grid&, std::istream& src);
 }
 #endif

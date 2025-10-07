@@ -18,22 +18,22 @@ namespace okiidoku::util {
 		// - this is not thread-safe. guard with mutex where necessary.
 		using rng_t = std::mt19937_64;
 
-		explicit SharedRng(rng_t::result_type seed) noexcept: rng{seed} {}
+		explicit SharedRng(rng_t::result_type seed) noexcept: rng_{seed} {}
 
 		[[nodiscard]] std::uint_fast32_t operator()() noexcept {
-			const std::scoped_lock scoped_lock {mutex};
+			const std::scoped_lock scoped_lock {mutex_};
 			#ifndef __clang__
 			#pragma GCC diagnostic push
 			#pragma GCC diagnostic ignored "-Wuseless-cast" // not useless on MSVC
 			#endif
-			return static_cast<std::uint_fast32_t>(rng() - decltype(rng)::min());
+			return static_cast<std::uint_fast32_t>(rng_() - decltype(rng_)::min());
 			#ifndef __clang__
 			#pragma GCC diagnostic pop
 			#endif
 		}
 	private:
-		rng_t rng;
-		mutable std::mutex mutex;
+		rng_t rng_;
+		mutable std::mutex mutex_;
 	};
 }
 #endif

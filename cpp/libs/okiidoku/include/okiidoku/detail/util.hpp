@@ -86,7 +86,7 @@ alias of standard `assert` */
 #ifndef NDEBUG
 	/** \def OKIIDOKU_KEEP_FOR_DEBUG
 	- `gnu::retain`: marks for retention during linker section garbage collection
-	- `gnu::used`:   I'm actually not sure if this is needed
+	- `gnu::used`: for functions -> emit code even if function appears to not be used.
 	- `gnu::externally_visible`: "nullifies the effect of the `-fwhole-program`
 		command-line option, so the object remains visible outside the current compilation unit." */
 	#define OKIIDOKU_KEEP_FOR_DEBUG [[maybe_unused, gnu::retain, gnu::used, gnu::noinline, gnu::externally_visible]]

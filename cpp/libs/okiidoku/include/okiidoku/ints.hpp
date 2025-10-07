@@ -34,12 +34,11 @@ namespace okiidoku {
 	})};
 	template<typename V> requires(!std::is_reference_v<V>)
 	struct HouseTypeMap {
-		[[nodiscard, gnu::pure]]
-		decltype(auto) operator[](this auto&& self, const HouseType key) noexcept { return std::forward_like<decltype(self)>(self.arr_[std::to_underlying(key)]); }
-		[[nodiscard, gnu::pure]] // TODO frame challenge- why not make this public?
-		decltype(auto) get_underlying_arr(this auto&& self) noexcept { return std::forward_like<decltype(self)>(self.arr_); }
-	private:
 		std::array<V, house_types.size()> arr_ {};
+		[[nodiscard, gnu::pure]]
+		decltype(auto) operator[](this auto&& self, const HouseType key) noexcept {
+			return std::forward_like<decltype(self)>(self.arr_[std::to_underlying(key)]);
+		}
 	};
 
 	enum class LineType : unsigned char {
@@ -51,12 +50,11 @@ namespace okiidoku {
 	})};
 	template<typename V> requires(!std::is_reference_v<V>)
 	struct LineTypeMap {
-		[[nodiscard, gnu::pure]]
-		decltype(auto) operator[](this auto&& self, const LineType key) noexcept { return std::forward_like<decltype(self)>(self.arr_[std::to_underlying(key)]); }
-		[[nodiscard, gnu::pure]] // TODO frame challenge- why not make this public?
-		decltype(auto) get_underlying_arr(this auto&& self) noexcept { return std::forward_like<decltype(self)>(self.arr_); }
-	private:
 		std::array<V, line_types.size()> arr_ {};
+		[[nodiscard, gnu::pure]]
+		decltype(auto) operator[](this auto&& self, const LineType key) noexcept {
+			return std::forward_like<decltype(self)>(self.arr_[std::to_underlying(key)]);
+		}
 	};
 
 	enum class BoxOrLine : unsigned char {

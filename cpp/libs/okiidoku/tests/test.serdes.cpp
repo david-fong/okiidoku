@@ -12,7 +12,9 @@
 
 #include <sstream>
 #include <random>
+#include <array>
 #include <cstdint>
+#include <cstddef> // size_t
 
 namespace okiidoku::test {
 template<Order O> OKIIDOKU_KEEP_FOR_DEBUG // NOLINTNEXTLINE(*-internal-linkage)
@@ -25,27 +27,33 @@ void test_serdes(
 	OKIIDOKU_MONO_INT_TS_TYPEDEFS
 	std::minstd_rand rng {static_cast<std::uint_fast32_t>(rng_seed)};
 
-	const auto grid {generate_shuffled<O>(rng())}; CAPTURE(grid);
-
-	// TODO test serdes of multiple grids to the same stream
+	OKIIDOKU_DEFER_INIT std::array<Grid<O>, 8uz> grid_buf; // NOLINT(*init*)
+	const std::size_t num_grids {std::uniform_int_distribution{1uz, grid_buf.size()}(rng)};
+	// const std::size_t num_grids {1uz};
 
 	std::size_t byte_count {0uz};
 	const auto written_data {[&,round]{
 		(void)round; // for conditional breakpoint
 		// serialize data to `std::string`:
 		std::ostringstream os;
-		byte_count += write_solved(grid, os);
+		for (auto i {0uz}; i < num_grids; ++i) {
+			auto& grid {grid_buf[i]};
+			grid = generate_shuffled<O>(rng());
+			byte_count += write_solved(grid, os);
+		}
 		return os.str();
 	}()};
 	REQUIRE_EQ(written_data.size(), byte_count);
-	{
-		// de-serialize data and check correctness:
+	std::istringstream is {written_data};
+	// de-serialize data and check correctness:
+	for (auto i {0uz}; i < num_grids; ++i) {
 		Grid<O> parsed_grid;
-		std::istringstream is {written_data};
 		const auto bytes_read {read_solved(parsed_grid, is)};
-		REQUIRE_EQ(bytes_read, byte_count);
-		REQUIRE_EQ(parsed_grid, grid);
+		REQUIRE_GE(byte_count, bytes_read);
+		byte_count -= bytes_read;
+		REQUIRE_EQ(parsed_grid, grid_buf[i]);
 	}
+	REQUIRE_EQ(byte_count, 0uz);
 }}
 
 TEST_CASE("okiidoku.serdes") {

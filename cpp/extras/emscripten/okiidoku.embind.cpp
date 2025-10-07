@@ -109,12 +109,11 @@ EMSCRIPTEN_BINDINGS(okiidoku) {
 		.function("at",          em::select_overload<oki_v::Grid::sym_t (oki_v::ints::o2x_t row, oki_v::ints::o2x_t col) const noexcept>(&oki_v::Grid::operator[]))
 		.function("followsRule", &oki_v::grid_follows_rule)
 		.function("isFilled",    &oki_v::grid_is_filled)
-		.function("isEmpty",     &oki_v::grid_is_empty)
+		.function("isEmpty",     &oki_v::Grid::is_empty)
 		.function("toString",    &oki::em::grid_to_emoji_string)
 		;
 	// em::function("gridFollowsRule", &oki_v::grid_follows_rule);
 	// em::function("gridIsFilled",    &oki_v::grid_is_filled);
-	// em::function("gridIsEmpty",     &oki_v::grid_is_empty);
 
 	em::function("initMostCanonicalGrid", &oki_v::init_most_canonical_grid);
 	// TODO change this into an instance method:

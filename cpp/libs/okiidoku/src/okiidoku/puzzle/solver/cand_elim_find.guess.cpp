@@ -86,8 +86,8 @@ namespace okiidoku::mono::detail::solver { namespace {
 					const auto house {rmi_to_house<O>(house_type, rmi)};
 					_[house_type] = houses_solved_counts[house][house_type];
 				}
-				std::ranges::sort(_.get_underlying_arr(), std::greater{});
-				return _.get_underlying_arr();
+				std::ranges::sort(_.arr_, std::greater{});
+				return _.arr_;
 			}
 		}};
 		// TODO.try doing bookkeeping in the engine to avoid re-computation. (keep a guess-count for each house). slightly more relevant now that large fields of guess stack frames aren't heap-allocated (ie. the guess field of each stack entry are farther apart).

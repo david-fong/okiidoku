@@ -121,6 +121,9 @@ things I got wrong before which I couldn't understand based on gcc's error messa
 
 ## reminders
 
+- https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Rc-struct
+  > Use `class` if the class has an invariant; use `struct` if the data members can vary independently
+
 - for [`[[gnu::const]]`](https://gcc.gnu.org/onlinedocs/gcc/Common-Function-Attributes.html#index-const-function-attribute):
   > Note that \[...\] In general, since a function cannot distinguish data that might change from data that cannot, **const functions should never take pointer or, in C++, reference arguments**. Likewise, a function that calls a non-const function usually must not be const itself.
 - for [`[[gnu::pure]]`](https://gcc.gnu.org/onlinedocs/gcc/Common-Function-Attributes.html#index-pure-function-attribute):
