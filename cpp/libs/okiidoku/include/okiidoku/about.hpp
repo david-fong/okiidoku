@@ -4,12 +4,11 @@
 #define HPP_OKIIDOKU_ABOUT
 
 #include <string_view>
-#include <array>
 #include <cstdint>
 
 namespace okiidoku::about {
 
-	struct SemanticVersion final {
+	struct [[gnu::designated_init]] SemanticVersion final {
 		std::uint32_t major;
 		std::uint32_t minor;
 		std::uint32_t patch;
@@ -17,7 +16,7 @@ namespace okiidoku::about {
 	};
 	OKIIDOKU_EXPORT extern const SemanticVersion semver;
 
-	struct GitInfo final {
+	struct [[gnu::designated_init]] GitInfo final {
 		std::string_view remotes;
 		std::string_view branch;
 		std::string_view commit;

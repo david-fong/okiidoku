@@ -10,7 +10,7 @@ block()
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include <okiidoku/about.hpp>
 namespace okiidoku::about {
-	const SemanticVersion semver {
+	constinit const SemanticVersion semver {
 		.major = ${okiidoku_VERSION_MAJOR},
 		.minor = ${okiidoku_VERSION_MINOR},
 		.patch = ${okiidoku_VERSION_PATCH},

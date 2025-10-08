@@ -38,7 +38,7 @@ file(CONFIGURE OUTPUT ${OUTPUT} CONTENT
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include <okiidoku/about.hpp>
 namespace okiidoku::about {
-	const GitInfo git_info {
+	constinit const GitInfo git_info {
 		.remotes {R\"${delim}(${OKIIDOKU_GIT_REMOTES})${delim}\"},
 		.branch {R\"${delim}(${OKIIDOKU_GIT_BRANCH})${delim}\"},
 		.commit {R\"${delim}(${OKIIDOKU_GIT_COMMIT})${delim}\"},
