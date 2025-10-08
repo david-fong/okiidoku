@@ -150,6 +150,10 @@ things I got wrong before which I couldn't understand based on gcc's error messa
 - [constness and logical-vs-physical state](https://isocpp.org/wiki/faq/const-correctness#logical-vs-physical-state)
 - [misuse of the gnu const attribute on functions](https://github.com/OSGeo/PROJ/issues/1224)
 
+- LLVM blog on reproducible builds: https://blog.llvm.org/2019/11/deterministic-builds-with-clang-and-lld.html
+
+- https://en.wikipedia.org/wiki/Restrict I tried adding `__restrict` to some things, but it didn't seem to measurably improve performance.
+
 - [file open mode shorthands](https://en.cppreference.com/w/cpp/io/basic_filebuf/open)
 
 - [move simply - herb sutter](https://herbsutter.com/2020/02/17/move-simply/)

@@ -28,7 +28,7 @@ namespace okiidoku::mono {
 	public:
 		// TODO.low investigate ways to store small but expand to a fast(er) int type
 		// when doing bit-twiddling operations and whether the tradeoff is good pareto-wise.
-		using word_t = std::conditional_t<(O*O <= 32),
+		using word_t = std::conditional_t<(T::O2 <= 32u),
 			std::uint32_t,
 			std::uint64_t
 		>;

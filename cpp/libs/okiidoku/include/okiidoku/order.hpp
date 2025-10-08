@@ -29,17 +29,10 @@ namespace okiidoku {
 		return false;
 	}
 
-	namespace detail {
-		template<Order Ignored, Order... Orders>
-		consteval auto CompiledOrdersHelper_make_array() noexcept { return std::to_array<Order>({Orders...}); }
-	}
-	/// \internal exists because my template instantiation macro has no delimiter
-	/// argument, so I hack this to ignore a leading comma at a usage site.
-	inline constexpr auto compiled_orders {detail::CompiledOrdersHelper_make_array<
-		/* ignored: */Order{0u}
-		#define OKIIDOKU_FOREACH_O_EMIT(O_) , (O_)
+	inline constexpr auto compiled_orders {std::to_array<Order>({
+		#define OKIIDOKU_FOREACH_O_EMIT(O_) (O_),
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
-	>()};
+	})};
 }
 #endif

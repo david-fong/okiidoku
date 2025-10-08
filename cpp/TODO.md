@@ -33,6 +33,7 @@
 - Write comments for custom CMake commands and targets
 - toggle `--warn-uninitialized` CMake flag in settings.json and check warnings.
 - places to use `[[gnu::designated_init]]`
+- find places `<O>(` is used, and see if deduction guides can help. Ex. `template<typename _Type, size_t _ArrayExtent> span(array<_Type, _ArrayExtent>&) -> span<_Type, _ArrayExtent>;`
 
 Issues I'm watching:
 
@@ -53,8 +54,8 @@ Issues I'm watching:
 - https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Rc-struct
   > Use `class` if the class has an invariant; use `struct` if the data members can vary independently
 
+- instead of embedding git commit in binary, put it in some info file with the installation.
 - do some `static_assert` tests for types of deducing this member functions. just discovered that I was having a bug with one because I was using something after `std::forward`? maybe I _shouldn't_ have disabled that clang-tidy check... but then why did I see people doing this thing in example code? I guess because you need to be careful about copies with iterators?
-- find places `<O>(` is used, and see if deduction guides can help. Ex. `template<typename _Type, size_t _ArrayExtent> span(array<_Type, _ArrayExtent>&) -> span<_Type, _ArrayExtent>;`
 - make canon functions pure producers of a canonicalizing transformation. take grid by const reference. name `canon_sym` -> `get_sym_canon_map`.
 - see if helpful to add `/// \cond detail` wrapper to `detail` namespaces to suppress doxygen for them
 

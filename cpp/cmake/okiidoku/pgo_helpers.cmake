@@ -213,7 +213,7 @@ function(okiidoku_target_pgo
 		# https://gcc.gnu.org/onlinedocs/gcc/Developer-Options.html#index-frandom-seed "The string should be different for every file you compile"
 		get_target_property(trainee_sources ${trainee} SOURCES)
 		foreach(_file ${trainee_sources})
-			string(SHA256 hash "${_file}") # hash absolute path
+			string(SHA256 hash "${_file}") # hash absolute path # TODO resolve relative to file's project directory
 			# file(SHA256 "${_file}" hash) # alternatively, hash file contents (at configure-time). I'm hesitant about this. seems flaky.
 			# string(SUBSTRING "${hash}" 0 8 hash)
 			set_property(

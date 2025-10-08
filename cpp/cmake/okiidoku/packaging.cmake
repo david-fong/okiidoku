@@ -25,6 +25,7 @@ set(CPACK_SOURCE_IGNORE_FILES
 )
 set(CPACK_SOURCE_GENERATOR "TGZ")
 # TODO.low https://reproducible-builds.org/docs/archives/
+# https://cmake.org/cmake/help/latest/cpack_gen/archive.html
 
 
 # https://decovar.dev/blog/2021/09/23/cmake-cpack-package-deb-apt/
