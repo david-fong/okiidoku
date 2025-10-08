@@ -80,7 +80,7 @@ block()
 		)
 		install(FILES "${tools}/okiidoku-gdb.py"
 			RENAME "$<TARGET_SONAME_FILE_NAME:okiidoku>-gdb.py"
-			DESTINATION "${CMAKE_INSTALL_DATADIR}/gdb/auto-load/${CMAKE_INSTALL_PREFIX}"
+			DESTINATION "${CMAKE_INSTALL_DATADIR}/gdb/auto-load/${CMAKE_INSTALL_FULL_LIBDIR}"
 			COMPONENT okiidoku_development
 		)
 	endif()

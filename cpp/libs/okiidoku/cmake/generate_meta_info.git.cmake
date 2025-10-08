@@ -19,6 +19,7 @@ else()
 		OUTPUT_VARIABLE OKIIDOKU_GIT_REMOTES
 		OUTPUT_STRIP_TRAILING_WHITESPACE
 	)
+	string(REPLACE "\n" "\n  " OKIIDOKU_GIT_REMOTES "${OKIIDOKU_GIT_REMOTES}")
 	execute_process(
 		COMMAND "${GIT_EXECUTABLE}" rev-parse --abbrev-ref --symbolic-full-name @{u}
 		OUTPUT_VARIABLE OKIIDOKU_GIT_BRANCH
@@ -32,15 +33,23 @@ else()
 	)
 endif()
 
-set(delim "\"'\"'")
-file(CONFIGURE OUTPUT ${OUTPUT} CONTENT
-"// SPDX-FileCopyrightText: 2020 David Fong
-// SPDX-License-Identifier: AGPL-3.0-or-later
-#include <okiidoku/about.hpp>
-namespace okiidoku::about {
-	constinit const GitInfo git_info {
-		.remotes {R\"${delim}(${OKIIDOKU_GIT_REMOTES})${delim}\"},
-		.branch {R\"${delim}(${OKIIDOKU_GIT_BRANCH})${delim}\"},
-		.commit {R\"${delim}(${OKIIDOKU_GIT_COMMIT})${delim}\"},
-	};
-}")
+# include(GNUInstallDirs) # want to use DATADIR, but get warning about enabling a language, and `enable_language` also gives a warning :/
+file(CONFIGURE OUTPUT ${CMAKE_INSTALL_PREFIX}/share/okiidoku/about.git.md CONTENT
+"<!-- SPDX-FileCopyrightText: 2020 David Fong -->
+<!-- SPDX-License-Identifier: CC0-1.0 -->
+
+- git remotes:
+  ```none
+  ${OKIIDOKU_GIT_REMOTES}
+  ```
+
+- git branch:
+  ```none
+  ${OKIIDOKU_GIT_BRANCH}
+  ```
+
+- git commit:
+  ```none
+  ${OKIIDOKU_GIT_COMMIT}
+  ```
+")

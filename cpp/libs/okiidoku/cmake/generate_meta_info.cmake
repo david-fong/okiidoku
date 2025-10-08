@@ -4,8 +4,8 @@
 include_guard(DIRECTORY)
 
 block()
-	set(output "${CMAKE_CURRENT_BINARY_DIR}/src/okiidoku/about.semver.cpp")
-	file(CONFIGURE OUTPUT ${output} CONTENT
+set(output "${CMAKE_CURRENT_BINARY_DIR}/src/okiidoku/about.semver.cpp")
+file(CONFIGURE OUTPUT ${output} CONTENT
 "// SPDX-FileCopyrightText: 2020 David Fong
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include <okiidoku/about.hpp>
@@ -18,31 +18,11 @@ namespace okiidoku::about {
 		.tweak = 0,
 	};
 }")
-	target_sources(okiidoku PRIVATE "${output}")
+target_sources(okiidoku PRIVATE "${output}")
 endblock()
 
-
-block()
-	find_package(Git QUIET)
-	set(output "${CMAKE_CURRENT_BINARY_DIR}/src/okiidoku/about.git.cpp")
-	set(script "${CMAKE_CURRENT_SOURCE_DIR}/cmake/generate_meta_info.git.cmake")
-	if(Git_FOUND)
-		execute_process(
-			COMMAND "${GIT_EXECUTABLE}" rev-parse --show-toplevel
-			OUTPUT_VARIABLE GIT_TOP_LEVEL
-			OUTPUT_STRIP_TRAILING_WHITESPACE
-		)
-		# note: need to use add_custom_command instead of configure_file to execute at build-time.
-		add_custom_command(
-			COMMENT "generating git info source file"
-			OUTPUT  "${output}"
-			COMMAND "${CMAKE_COMMAND}" "-D OUTPUT=${output}" -P "${script}"
-			DEPENDS "${script}" "${GIT_TOP_LEVEL}/.git/index"
-			VERBATIM CODEGEN
-		)
-	endif()
-	# execute at configure time in case we also need to get/set properties of the file or read it then:
-	execute_process(COMMAND "${CMAKE_COMMAND}" "-D OUTPUT=${output}" -P "${script}")
-
-	target_sources(okiidoku PRIVATE "${output}")
-endblock()
+install(
+	SCRIPT "${CMAKE_CURRENT_LIST_DIR}/generate_meta_info.git.cmake"
+	COMPONENT okiidoku_about
+	OPTIONAL
+)

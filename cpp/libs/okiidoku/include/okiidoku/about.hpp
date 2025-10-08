@@ -15,13 +15,6 @@ namespace okiidoku::about {
 		std::uint32_t tweak;
 	};
 	OKIIDOKU_EXPORT extern const SemanticVersion semver;
-
-	struct [[gnu::designated_init]] GitInfo final {
-		std::string_view remotes;
-		std::string_view branch;
-		std::string_view commit;
-	};
-	OKIIDOKU_EXPORT extern const GitInfo git_info;
 }
 
 #endif
