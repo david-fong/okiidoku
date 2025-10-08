@@ -57,21 +57,21 @@ namespace okiidoku::mono {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	auto O2BitArr<O>::first_set_bit_require_exists() const noexcept -> typename O2BitArr<O>::o2xs_t {
-		// Note: without the non-empty-mask assumption, we'd have to
-		//  handle discounting excess top zeros in the empty-mask case.
+	auto O2BitArr<O>::first_set_bit() const noexcept -> typename O2BitArr<O>::o2i_t {
 		OKIIDOKU_ASSERT(count() > 0u);
 		if constexpr (num_words == 1u) {
-			const o2xs_t count {std::countr_zero(words_.front())};
+			if (words_.front() == 0u) [[unlikely]] { return T::O2; }
+			const o2i_t count {std::countr_zero(words_.front())};
 			OKIIDOKU_CONTRACT(count < T::O2);
 			return count;
 		} else {
-			const auto word {std::find_if(OKIIDOKU_UNSEQ
+			const auto word_it {std::find_if(OKIIDOKU_UNSEQ
 				words_.cbegin(), words_.cend(), [][[gnu::const]](const auto w)noexcept{ return w != 0u; }
 			)};
-			/*RVO*/o2xs_t count {
-				(word_t_num_bits * std::distance(words_.cbegin(), word))
-				+ std::countr_zero(*word)
+			if (word_it == words_.cend()) [[unlikely]] { return T::O2; }
+			/*RVO*/o2i_t count {
+				(word_t_num_bits * std::distance(words_.cbegin(), word_it))
+				+ std::countr_zero(*word_it)
 			};
 			OKIIDOKU_CONTRACT(count < T::O2);
 			return count;
@@ -146,10 +146,10 @@ namespace okiidoku::mono {
 
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 		static_assert(std::input_iterator<O2BitArr<(O_)>::Iter>); \
-		template typename O2BitArr<(O_)>::o2i_t  O2BitArr<(O_)>::count() const noexcept; \
-		template typename O2BitArr<(O_)>::o2x_t  O2BitArr<(O_)>::count_below(typename O2BitArr<(O_)>::o2x_t) const noexcept; \
-		template typename O2BitArr<(O_)>::o2xs_t O2BitArr<(O_)>::first_set_bit_require_exists() const noexcept; \
-		template typename O2BitArr<(O_)>::o2x_t  O2BitArr<(O_)>::get_index_of_nth_set_bit(O2BitArr<(O_)>::o2x_t) const noexcept; \
+		template typename O2BitArr<(O_)>::o2i_t O2BitArr<(O_)>::count() const noexcept; \
+		template typename O2BitArr<(O_)>::o2x_t O2BitArr<(O_)>::count_below(typename O2BitArr<(O_)>::o2x_t) const noexcept; \
+		template typename O2BitArr<(O_)>::o2i_t O2BitArr<(O_)>::first_set_bit() const noexcept; \
+		template typename O2BitArr<(O_)>::o2x_t O2BitArr<(O_)>::get_index_of_nth_set_bit(O2BitArr<(O_)>::o2x_t) const noexcept; \
 		template std::strong_ordering O2BitArr<(O_)>::cmp_differences(const O2BitArr<(O_)>&, const O2BitArr<(O_)>&) noexcept; \
 		template std::array<char, Ints<(O_)>::O2> O2BitArr<(O_)>::to_chars() const noexcept;
 	OKIIDOKU_FOREACH_O_DO_EMIT

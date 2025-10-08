@@ -48,6 +48,7 @@ namespace okiidoku::mono::detail::solver {
 			// TODO.low consider whether resizing down is a good idea here?
 		}
 
+		// TODO implement as a template function requiring that type is in queues_t
 		void push_back(found::CellClaimSym  <O>&& desc) noexcept { std::get<queue_t<found::CellClaimSym  <O>>>(tup_).emplace_back(std::move(desc)); }
 		void push_back(found::SymClaimCell  <O>&& desc) noexcept { std::get<queue_t<found::SymClaimCell  <O>>>(tup_).emplace_back(std::move(desc)); }
 		void push_back(found::Subset        <O>&& desc) noexcept { std::get<queue_t<found::Subset        <O>>>(tup_).emplace_back(std::move(desc)); }

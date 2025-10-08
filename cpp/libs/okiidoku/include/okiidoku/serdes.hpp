@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #ifndef HPP_OKIIDOKU_SERDES
 #define HPP_OKIIDOKU_SERDES
+/** \file
+serialization utilities for grids. see also the provided archive abstractions. */
 
 #include <okiidoku/order.hpp>
 namespace okiidoku::mono { template <Order O> requires (is_order_compiled(O)) struct Grid; }
@@ -10,11 +12,6 @@ namespace okiidoku::visitor { struct Grid; }
 #include <iosfwd>
 #include <cstddef> // size_t
 
-/**
-these are low-level serialization utilities for portable, efficient data-streaming.
-you likely want the provided archive abstraction instead.
-but you could use these for direct streaming over a network.
-*/
 namespace okiidoku::mono {
 
 	// [[nodiscard, gnu::const]] constexpr unsigned get_min_bytes_to_store(const unsigned max_value) {
@@ -59,16 +56,16 @@ namespace okiidoku::mono {
 
 namespace okiidoku::visitor {
 
-	/** see `write_solved`. */
+	/** see `okiidoku::mono::write_solved<O>`. */
 	OKIIDOKU_EXPORT std::size_t write_solved(const Grid&, std::ostream& sink);
 
-	/** see `read_solved`. */
+	/** see `okiidoku::mono::read_solved<O>`. */
 	OKIIDOKU_EXPORT std::size_t read_solved(Grid&, std::istream& src);
 
-	/** see `write_puzzle`. */
+	/** see `okiidoku::mono::write_puzzle<O>`. */
 	OKIIDOKU_EXPORT std::size_t write_puzzle(const Grid&, std::ostream& sink);
 
-	/** see `read_puzzle`. */
+	/** see `okiidoku::mono::read_puzzle<O>`. */
 	OKIIDOKU_EXPORT std::size_t read_puzzle(Grid&, std::istream& src);
 }
 #endif

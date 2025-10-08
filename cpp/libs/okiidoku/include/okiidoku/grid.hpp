@@ -133,6 +133,7 @@ namespace okiidoku::mono {
 
 namespace okiidoku::visitor {
 
+	/// \cond detail
 	namespace detail {
 		struct GridAdaptor {
 			static constexpr bool is_borrow_type = false;
@@ -140,6 +141,7 @@ namespace okiidoku::visitor {
 		};
 		static_assert(MonoToVisitorAdaptor<GridAdaptor>);
 	}
+	/// \endcond detail
 
 	/**
 	\note it is not recommended to directly make collections containing instances

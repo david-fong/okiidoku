@@ -40,8 +40,8 @@ void test_o2_bit_arr() {
 		for (const auto i : T::O2) { CAPTURE(i);
 			REQUIRE_EQ(ones.count_below(i), 0u);
 			REQUIRE_EQ(ones.get_index_of_nth_set_bit(0u), i);
-			REQUIRE_UNARY(ones[ones.first_set_bit_require_exists()]);
-			ones.unset(ones.first_set_bit_require_exists());
+			REQUIRE_UNARY(ones[*ones.first_set_bit()]);
+			ones.unset(*ones.first_set_bit());
 		}
 	}
 	INFO("part 3");
@@ -54,7 +54,7 @@ void test_o2_bit_arr() {
 		REQUIRE_EQ(count, T::O2);
 	}
 	INFO("part 4");
-	// TODO test consistency between `first_set_bit_require_exists` and `count_below`. generate some random `O2BitArr`s. to naively get a random number of set bits, start by getting a number of bits to try to set in [0,O2).
+	// TODO test consistency between `first_set_bit` and `count_below`. generate some random `O2BitArr`s. to naively get a random number of set bits, start by getting a number of bits to try to set in [0,O2).
 }}
 
 TEST_CASE("okiidoku.o2_bit_arr") {

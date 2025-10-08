@@ -65,7 +65,7 @@ namespace okiidoku::mono::detail::solver {
 		for (const auto rmi : T::O4) {
 			const auto& cell_cands {cells_cands()[rmi]};
 			OKIIDOKU_CONTRACT(cell_cands.count() == 1u);
-			soln[rmi] = cell_cands.first_set_bit_require_exists();
+			soln[rmi] = *cell_cands.first_set_bit();
 		}
 		OKIIDOKU_ASSERT(soln.is_filled());
 		OKIIDOKU_ASSERT(soln.follows_rule());
@@ -154,7 +154,7 @@ namespace okiidoku::mono::detail::solver {
 		OKIIDOKU_CONTRACT(frame_.num_unsolved > 0u);
 		const auto& cell_cands {cells_cands()[rmi]};
 		OKIIDOKU_CONTRACT(cell_cands.count() == 1u);
-		const auto sym {cell_cands.first_set_bit_require_exists()};
+		const auto sym {*cell_cands.first_set_bit()};
 		OKIIDOKU_ASSERT(cell_cands[sym]);
 		found_queues_.push_back(found::CellClaimSym<O>{.rmi{rmi},.sym{sym}});
 		--frame_.num_unsolved;

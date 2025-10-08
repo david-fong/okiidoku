@@ -48,7 +48,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 				const auto match_cands {cell_cands & syms_claiming_a_cell};
 				if (match_cands.count() > 0u) [[unlikely]] {
 					if (match_cands.count() > 1u) [[unlikely]] { return true; } // multiple syms want same cell.
-					const auto sym {match_cands.first_set_bit_require_exists()};
+					const auto sym {*match_cands.first_set_bit()};
 					if (cell_cands.count() > 1u) [[likely]] {
 						found_queues.push_back(found::SymClaimCell<O>{
 							.rmi{rmi},
@@ -203,7 +203,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 		} else {
 			auto non_first_members {O2BitArr_ones<O>};
 			non_first_members.remove(subs.is_begin);
-			const auto second_non_single_member {non_first_members.first_set_bit_require_exists()};
+			const auto second_non_single_member {*non_first_members.first_set_bit()};
 			sub_a = second_non_single_member.prev();
 		}
 

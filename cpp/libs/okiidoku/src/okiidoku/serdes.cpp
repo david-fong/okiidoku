@@ -200,7 +200,7 @@ namespace okiidoku::mono {
 			for (const auto box_col : T::O1) {
 				const auto cands {~main_diag_box_cands[box][box_row][box_col]};
 				OKIIDOKU_ASSERT(cands.count() == 1u);
-				const auto sym {cands.first_set_bit_require_exists()};
+				const auto sym {*cands.first_set_bit()};
 				grid[box_cell_to_rmi<O>((box*T::O1)+box, (T::O1*box_row)+box_col)] = sym;
 			}}}
 		}

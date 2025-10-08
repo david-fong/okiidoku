@@ -64,7 +64,7 @@ namespace okiidoku::mono::detail {
 			[[nodiscard, gnu::pure]] TieRange operator*() const noexcept { return TieRange{ix_t{begin_}, i_t::unchecked_from(*it_)}; }
 			Iter& operator++()    noexcept { ++it_; begin_ = ix_t::unchecked_from(*it_); ++it_; return *this; }
 			Iter  operator++(int) noexcept { Iter tmp {*this}; operator++(); return tmp; }
-			[[nodiscard, gnu::pure]] constexpr friend bool operator!=(const Iter& i, [[maybe_unused]] const std::default_sentinel_t s) noexcept { return  i.it_.not_end(); }
+			[[nodiscard, gnu::pure]] constexpr friend bool operator!=(const Iter& i, [[maybe_unused]] const std::default_sentinel_t s) noexcept { return i.it_.not_end(); }
 		};
 
 	private:
@@ -80,7 +80,7 @@ namespace okiidoku::mono::detail {
 		}
 
 		[[nodiscard, gnu::pure]] friend bool operator==(const Ties&, const Ties&) noexcept = default;
-		[[nodiscard, gnu::pure]] auto begin() const noexcept { return Iter(bookends_); }
+		[[nodiscard, gnu::pure]] auto begin() const noexcept { return Iter{bookends_}; }
 		[[nodiscard, gnu::pure]] auto end()   const noexcept { return std::default_sentinel; }
 
 		[[nodiscard, gnu::pure]] bool none_resolved()  const noexcept { return bookends_.count() == 2u && bookends_[ix_t{0u}] && bookends_[ix_t{size_-1u}]; }

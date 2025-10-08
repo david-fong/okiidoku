@@ -14,7 +14,8 @@
 
 #define TO static_cast
 
-/** \todo.low I pondered moving some stuff into a base class, like item_count_, byte_count, buf_radixx_
+/*
+\todo.low I pondered moving some stuff into a base class, like item_count_, byte_count, buf_radixx_
 and some of the logic like overflow anticipation calculation, and calculation of radix_0, but then I
 think I wouldn't have control over member layout w.r.t. the inheritence boundary... am I just being too
 picky?

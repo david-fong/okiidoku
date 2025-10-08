@@ -25,7 +25,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 	*/
 
 	template<Order O> requires(is_order_compiled(O)) [[nodiscard, gnu::pure]]
-	Ints<O>::o2xs_t find_good_guess_sym_for_cell(
+	Ints<O>::o2x_t find_good_guess_sym_for_cell(
 		const CandsGrid<O>& cells_cands,
 		const typename Ints<O>::o4x_t rmi
 	) noexcept {
@@ -42,7 +42,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 			}
 			return num_other_cand_cells;
 		}};
-		auto best_sym {best_cell_cands.first_set_bit_require_exists()};
+		auto best_sym {*best_cell_cands.first_set_bit()};
 		o3i_t best_sym_num_other_cand_cells {0u};
 		for (const auto sym : best_cell_cands.set_bits()) {
 			const auto sym_num_other_cand_cells {get_sym_num_other_cand_cells(sym)};

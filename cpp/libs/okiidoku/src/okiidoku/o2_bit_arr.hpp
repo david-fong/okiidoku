@@ -179,10 +179,8 @@ namespace okiidoku::mono {
 			return inv;
 		}
 
-		/** \pre this mask has at least one set bit.
-		\note an ugly name for a "sharp knife". */
-		// TODO I don't like the ugly name or "sharp knife"-ness. make this return O2 if not-exists, relax(remove) that precondition, and leave it to the caller to use operator* if they know it exists.
-		[[nodiscard, gnu::pure]] o2xs_t first_set_bit_require_exists() const noexcept;
+		/** \returns `O2` if no bits are set. otherwise, the index of the first set bit. */
+		[[nodiscard, gnu::pure]] o2i_t first_set_bit() const noexcept;
 
 		/**
 		\pre `set_bit_i < O2` and there are at least `set_bit_i+1` set bits.
@@ -213,7 +211,7 @@ namespace okiidoku::mono {
 			\post has advanced to the bit index of the next set bit. */
 			void advance() noexcept {
 				OKIIDOKU_CONTRACT(i_ < T::O2);
-				const word_i_t word_i {[&]{
+				const word_i_t word_i {[&]noexcept{
 					if constexpr (num_words == 1u) {
 						if (arr_.words_.front() == 0u) [[unlikely]] { return 1u; }
 						else { return 0u; }
