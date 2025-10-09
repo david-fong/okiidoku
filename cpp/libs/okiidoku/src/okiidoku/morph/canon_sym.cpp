@@ -83,7 +83,7 @@ namespace okiidoku::mono { namespace {
 		// 		const auto boxcell_b {sym_box_to_boxcell_map[sym_b, box]};
 		// 	}
 		// }}
-		OKIIDOKU_DEFER_INIT sym_map_t<O> tiebreak_map;
+		sym_map_t<O> tiebreak_map OKIIDOKU_DEFER_INIT;
 		std::iota(tiebreak_map.begin(), tiebreak_map.end(), to_t{0u});
 		// for (const auto tie : s.ties) {
 		// 	if (tie.size() == 1) [[likely]] { continue; }
@@ -117,7 +117,7 @@ namespace okiidoku::mono { namespace {
 	template<Order O> requires(is_order_compiled(O))
 	sym_map_t<O> CanonSym<O>::do_it(Grid<O>& grid) noexcept {
 		const sym_map_t<O> sym_og_to_canon {[&](){
-			OKIIDOKU_DEFER_INIT State s(grid);
+			State s {grid};
 			while (s.has_ties()) {
 				auto old_ties {s.ties};
 				do_a_pass_(s);
@@ -131,7 +131,7 @@ namespace okiidoku::mono { namespace {
 				}
 			}
 
-			OKIIDOKU_DEFER_INIT sym_map_t<O> map;
+			sym_map_t<O> map OKIIDOKU_DEFER_INIT;
 			for (const auto canon_i : T::O2) {
 				map[s.to_og[canon_i]] = canon_i;
 			}

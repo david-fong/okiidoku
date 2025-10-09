@@ -14,7 +14,7 @@ namespace okiidoku::about {
 		std::uint32_t patch;
 		std::uint32_t tweak;
 	};
-	OKIIDOKU_EXPORT extern const SemanticVersion semver;
+	OKIIDOKU_EXPORT extern constinit const SemanticVersion semver;
 }
 
 #endif

@@ -34,7 +34,7 @@ namespace okiidoku::test {
 		// TODO write and read multiple ints to the same stringstream per round.
 
 		static constexpr std::size_t max_num_places {1024u};
-		OKIIDOKU_DEFER_INIT std::array<typename writer_t::Item, max_num_places> places_buf; // NOLINT(*-init)
+		std::array<typename writer_t::Item, max_num_places> places_buf OKIIDOKU_DEFER_INIT; // NOLINT(*-init)
 		const std::size_t num_places {uidist_t<std::size_t>{0u, max_num_places}(rng)}; CAPTURE(num_places);
 
 		std::size_t byte_count {0uz};

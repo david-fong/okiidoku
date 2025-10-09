@@ -11,7 +11,7 @@
 namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
-	void Transformation<O>::apply_from_to(const Grid<O>& src_grid, Grid<O>& dest_grid) const noexcept {
+	void Transformation<O>::apply_from_to(const Grid<O>&__restrict src_grid, Grid<O>&__restrict dest_grid) const noexcept {
 		OKIIDOKU_CONTRACT(&src_grid != &dest_grid);
 		// TODO experimental optimization: linearize row_map and col_map, and copy sym_map to an extended version with map[O2] = O2
 		for (const auto src_row : T::O2) {
@@ -36,7 +36,7 @@ namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
 	Transformation<O> Transformation<O>::inverted() const noexcept {
-		OKIIDOKU_DEFER_INIT Transformation<O> inv;
+		Transformation<O> inv OKIIDOKU_DEFER_INIT;
 		for (const auto i : T::O2) {
 			inv.sym_map[sym_map[i]] = i;
 		}
@@ -46,7 +46,7 @@ namespace okiidoku::mono {
 			inv.row_map[row_inv/T::O1][row_inv%T::O1] = i;
 			inv.col_map[col_inv/T::O1][col_inv%T::O1] = i;
 		}
-		if (post_transpose) {
+		if (post_transpose) [[unlikely]] {
 			// do the equivalent of a pre_transpose
 			std::swap(inv.row_map, inv.col_map);
 			inv.post_transpose = true;
@@ -64,7 +64,8 @@ namespace okiidoku::mono {
 
 namespace okiidoku::visitor {
 
-	void Transformation::apply_from_to(const Grid& vis_src, Grid& vis_dest) const noexcept {
+	void Transformation::apply_from_to(const Grid&__restrict vis_src, Grid&__restrict vis_dest) const noexcept {
+		OKIIDOKU_CONTRACT(&vis_src != &vis_dest);
 		if (this->get_order() != vis_src.get_order()) {
 			return;
 		}

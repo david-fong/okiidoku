@@ -39,7 +39,7 @@ namespace okiidoku::mono::detail::solver {
 	UnwindInfo unwind_one_stack_frame_of_(EngineImpl<O>& engine) noexcept;
 
 
-	struct [[nodiscard]] UnwindInfo {
+	struct [[nodiscard]] UnwindInfo final {
 		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 		friend UnwindInfo unwind_one_stack_frame_of_<(O_)>(EngineImpl<(O_)>&) noexcept;
 		OKIIDOKU_FOREACH_O_DO_EMIT
@@ -69,7 +69,7 @@ namespace okiidoku::mono::detail::solver {
 	using CandsGrid = detail::Gridlike<O, O2BitArr<O>>;
 
 	template<Order O> requires(is_order_compiled(O))
-	struct [[gnu::designated_init]] Guess {
+	struct [[gnu::designated_init]] Guess final {
 		Ints<O>::o4xs_t rmi;
 		Ints<O>::o2xs_t sym;
 	};
@@ -86,8 +86,8 @@ namespace okiidoku::mono::detail::solver {
 		using sym_t = T::o2xs_t;
 		using rmi_t = T::o4xs_t;
 	public:
-		struct HouseSubsets {
-			struct [[gnu::designated_init]] CellTag {
+		struct HouseSubsets final {
+			struct [[gnu::designated_init]] CellTag final {
 				rmi_t rmi;
 				Ints<O>::o2is_t count_cache;
 			};
@@ -98,7 +98,7 @@ namespace okiidoku::mono::detail::solver {
 			std::array<HouseSubsets, T::O2>
 		>;
 
-		struct [[gnu::designated_init]] Frame {
+		struct [[gnu::designated_init]] Frame final {
 			o4i_t num_unsolved;
 			CandsGrid<O> cells_cands;
 			houses_subsets_t houses_subsets;
@@ -108,7 +108,7 @@ namespace okiidoku::mono::detail::solver {
 		// entry of the guess_stack_. no_more_solns_ is implied when the guess stack size is zero.
 		//  This would make the EngineImpl struct size small enough to probably justify no longer wrapping
 		//   Engine with unique_ptr in the Solver classes.
-		struct GuessStackFrame {
+		struct GuessStackFrame final {
 			Frame frame;
 			Guess<O> guess;
 			constexpr GuessStackFrame(const Frame& frame_, const Guess<O> guess_) noexcept:
@@ -216,7 +216,7 @@ namespace okiidoku::mono::detail::solver {
 	// Note: The current usage of inheritance (rather than composition) is _only_
 	// done to reduce boilerplate in writing the delegating member functions.
 	template<Order O> requires(is_order_compiled(O))
-	class Engine : private EngineImpl<O> {
+	class Engine final : private EngineImpl<O> {
 		friend class CandElimFind<O>;  // the class wraps implementations that can only see what they need.
 		friend class CandElimApply<O>;
 		friend class CandElimApplyImpl<O>;

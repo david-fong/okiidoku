@@ -26,6 +26,7 @@
 - Examine contents of exported symbols (`nm -nCD build/<config>/lib/libokiidoku.so | less`) and make sure nothing is exported that isn't intended to be.
 - Ensure dependencies that should be private to the library implementation aren't exposed in any way to the library interface.
 - Check if any `NOLINT` comments are no longer needed
+- Check if GCC suggest attribute `pure` or `const` anywhere (disabled for default dev flags because GCC14 is noisy for `[[assume(expr)]]`).
 - Check if any `static_cast`s are no longer needed
 - Check which `#ifdef __EMSCRIPTEN__` / `__cpp_lib_...` blocks can be removed as emscripten updates its sysroot libc++.
 - https://en.cppreference.com/w/cpp/language/rule_of_three
@@ -108,6 +109,7 @@ Issues I'm watching:
     - https://en.cppreference.com/w/cpp/language/contracts.html
     - https://en.cppreference.com/w/cpp/language/contract_assert.html
     - https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2025/p2900r14.pdf supported for defaulted special member functions! see section 3.3.3.
+    - `-fcontract-evaluation-semantic`
   - with reflection, I might be able to do what I'm currently doing with macros like `OKIIDOKU_FOREACH_O_EMIT` and `OKIIDOKU_FOREACH_O_DO_EMIT`, and be in a better position to use C++ modules :O.
   - try using `pre` and `post()` on default and copy constructors of `Int<...>` to describe pre and postconditions
   - https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2025/p2786r13.html#introduction relocatability

@@ -12,16 +12,17 @@ namespace okiidoku::mono {
 
 	/**
 	result is a function of the seed and the input state.
-	\pre `sink` is filled and rows follow the one rule.
-	\post `sink` is filled and follows the one rule. */
+	\pre `grid` is filled and rows follow the one rule.
+	\post `grid` is filled and follows the one rule. */
 	template<Order O> requires(is_order_compiled(O))
-	[[gnu::hot]] OKIIDOKU_EXPORT void shuffle(Grid<O>& sink, rng_seed_t rng_seed) noexcept;
+	[[gnu::hot]] OKIIDOKU_EXPORT
+	void shuffle(Grid<O>& grid, rng_seed_t rng_seed) noexcept;
 
 	/** \return a random filled grid that follows the one rule. */
 	template<Order O> requires(is_order_compiled(O)) [[nodiscard]]
 	inline Grid<O> generate_shuffled(const rng_seed_t rng_seed) noexcept {
 		using T = Ints<O>;
-		OKIIDOKU_DEFER_INIT Grid<O> grid;
+		Grid<O> grid OKIIDOKU_DEFER_INIT;
 		for (const auto row : T::O2) {
 		for (const auto col : T::O2) {
 			grid[row, col] = col;

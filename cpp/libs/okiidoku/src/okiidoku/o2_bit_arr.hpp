@@ -19,7 +19,7 @@
 namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
-	struct O2BitArr {
+	struct O2BitArr final {
 	private:
 		using T = Ints<O>;
 		using o2xs_t = T::o2xs_t;
@@ -173,7 +173,7 @@ namespace okiidoku::mono {
 
 		[[nodiscard, gnu::pure]] constexpr
 		O2BitArr operator~() const noexcept {
-			OKIIDOKU_DEFER_INIT O2BitArr inv; // NOLINT(*-init)
+			O2BitArr inv OKIIDOKU_DEFER_INIT; // NOLINT(*-init)
 			for (const auto i : num_words) { inv.words_[i] = ~words_[i]; };
 			inv.words_.back() &= ~word_t{0u} >> num_excess_bits;
 			return inv;
@@ -189,7 +189,7 @@ namespace okiidoku::mono {
 
 
 		/** use to iterate through set bits of a snapshot of an `O2BitArr`. */
-		class Iter {
+		class Iter final {
 		public:
 			using iterator_category = std::input_iterator_tag;
 			using difference_type = ::okiidoku::detail::int_fast_for_max_t<T::O2>;
@@ -261,8 +261,8 @@ namespace okiidoku::mono {
 	inline constexpr O2BitArr<O> O2BitArr_ones {~O2BitArr<O>{}};
 
 
-	template<Order O>
-	struct ChuteBoxMasks {
+	template<Order O> requires(is_order_compiled(O))
+	struct ChuteBoxMasks final {
 		using T = Ints<O>;
 		/// `[111'000'000, 000'111'000, 000'000'111]`
 		static constexpr std::array<O2BitArr<O>, O> row {[]{

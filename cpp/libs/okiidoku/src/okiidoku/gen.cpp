@@ -24,7 +24,6 @@ namespace okiidoku::mono { namespace {
 		using ch_t  = T::o1x_t;
 		using sym_t = T::o2x_t;
 		using count_t = typename T::o1is_t;
-		// constexpr SymCountsForChuteHouses() noexcept { store_.fill(count_t{0u}); }
 		[[nodiscard, gnu::pure]] o3i_t count_num_missing_syms() const noexcept {
 			return stdr::count(store_, count_t{0u});
 		}
@@ -42,7 +41,7 @@ namespace okiidoku::mono { namespace {
 		laid out this way for cache locality: common operation is symbol moving to
 			a different block: decrement and increment.
 		\todo experiment with https://en.cppreference.com/w/cpp/thread/hardware_destructive_interference_size.html */
-		std::array<count_t, T::O3> store_ {};
+		std::array<count_t, T::O3> store_ {}; // zero-init
 	};
 
 	template<Order O> requires(is_order_compiled(O))
@@ -53,6 +52,7 @@ namespace okiidoku::mono { namespace {
 		SymCountsForChuteHouses<O> boxes_has {};
 		#pragma clang loop unroll(disable)
 		for (const auto chute_row : T::O1) {
+		// #pragma clang loop vectorize(enable) interleave(enable)
 		for (const auto col : T::O2) {
 			auto& count {boxes_has.ch_count_sym(
 				col/T::O1,
@@ -63,11 +63,11 @@ namespace okiidoku::mono { namespace {
 		}}
 		o3i_t num_missing_syms {boxes_has.count_num_missing_syms()};
 		while (num_missing_syms != 0u) [[likely]] {
-			const auto a_col {(rng() - rng_t::min()) % T::O2};
-			const auto b_col {(rng() - rng_t::min()) % T::O2};
+			const auto a_col {  (rng() - rng_t::min()) % T::O2}; // TODO try using uniform_int_distribution for this.
+			const auto b_col {(((rng() - rng_t::min()) % T::O2.prev()).val()+1u+a_col) % T::O2}; // TODO.high make these different _boxes_
+			// const auto b_col {(((rng() - rng_t::min()) % T::O2.prev())+int1+a_col) % T::O2};
 			const auto a_box {a_col/T::O1};
 			const auto b_box {b_col/T::O1};
-			if (a_box == b_box) [[unlikely]] { continue; }
 			OKIIDOKU_CONTRACT(a_col != b_col);
 			const auto row {h_chute + ((rng() - rng_t::min()) % T::O1)};
 			auto& a_sym {grid[row,a_col]}; // ↰ will swap these later,
@@ -81,7 +81,7 @@ namespace okiidoku::mono { namespace {
 			)};
 			OKIIDOKU_CONTRACT(num_resolved <=  2);
 			OKIIDOKU_CONTRACT(num_resolved >= -2);
-			if (num_resolved >= 0) [[unlikely]] { // TODO.low for fun: find out on average at what op_count it starts being unlikely
+			if (num_resolved > 0) [[unlikely]] { // TODO.low for fun: find out on average at what op_count it starts being unlikely
 				OKIIDOKU_CONTRACT2(num_missing_syms >= Int<2u>{num_resolved});
 				num_missing_syms -= Int<2u>{num_resolved};
 				--boxes_has.ch_count_sym(a_box,*a_sym);
@@ -113,9 +113,9 @@ namespace okiidoku::mono { namespace {
 		}}
 		o3i_t num_missing_syms {cols_has.count_num_missing_syms()};
 		while (num_missing_syms != 0) [[likely]] {
-			const auto a_col {(rng() - rng_t::min()) % T::O1};
-			const auto b_col {(rng() - rng_t::min()) % T::O1};
-			if (a_col == b_col) [[unlikely]] { continue; }
+			const auto a_col {  (rng() - rng_t::min()) % T::O1};
+			const auto b_col {(((rng() - rng_t::min()) % T::O1.prev()).val()+1u+a_col) % T::O1};
+			OKIIDOKU_CONTRACT(a_col != b_col);
 			const auto row {(rng() - rng_t::min()) % T::O2};
 			auto& a_sym {grid[row, v_chute + a_col]}; // ↰ will swap these later
 			auto& b_sym {grid[row, v_chute + b_col]}; // ↲ so need reference type
@@ -151,7 +151,7 @@ namespace okiidoku::mono {
 		// TODO.low assert that rows follow the rule.
 
 		rng_t rng {rng_seed};
-		// #pragma clang loop unroll(disable)
+		#pragma clang loop unroll(disable)
 		for (const auto row : T::O2) {
 			const auto row_sp {grid.row_span_at(row)};
 			std::shuffle(row_sp.begin(), row_sp.end(), rng);

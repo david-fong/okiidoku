@@ -11,7 +11,7 @@
 namespace okiidoku::emoji {
 
 	template<std::size_t size>
-	struct Set {
+	struct Set final {
 		std::string_view name;
 		std::array<std::string_view, size> entries;
 	};

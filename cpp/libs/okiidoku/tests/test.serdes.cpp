@@ -27,7 +27,7 @@ void test_serdes(
 	OKIIDOKU_MONO_INT_TS_TYPEDEFS
 	std::minstd_rand rng {static_cast<std::uint_fast32_t>(rng_seed)};
 
-	OKIIDOKU_DEFER_INIT std::array<Grid<O>, 8uz> grid_buf; // NOLINT(*init*)
+	std::array<Grid<O>, 8uz> grid_buf OKIIDOKU_DEFER_INIT; // NOLINT(*init*)
 	const std::size_t num_grids {std::uniform_int_distribution{1uz, grid_buf.size()}(rng)};
 	// const std::size_t num_grids {1uz};
 

@@ -22,7 +22,7 @@ namespace okiidoku::mono::detail {
 	an externally-driven cache of subranges of an external array which are tied with
 	each other by some externally-defined ordering (see `Ties::update`). assumes
 	that tied sections will only be further broken down and do not "move around". */
-	struct Ties {
+	struct Ties final {
 		using T = Ints<O>;
 		using i_t  = std::conditional_t<(O1_OR_O2 == 1), typename T::o1i_t, typename T::o2is_t>;
 		using ix_t = std::conditional_t<(O1_OR_O2 == 1), typename T::o1x_t, typename T::o2xs_t>;
@@ -30,7 +30,7 @@ namespace okiidoku::mono::detail {
 
 		/** defines a range in `[begin_, end_)`.
 		\invariant `begin_ < size_`, `begin_+1 < end_`, `end_ <= size_`, `end_ > 0`. */
-		class TieRange {
+		class TieRange final {
 		public:
 			ix_t begin_;
 			i_t  end_;
@@ -48,7 +48,7 @@ namespace okiidoku::mono::detail {
 			}
 		};
 
-		class Iter {
+		class Iter final {
 		public:
 			using iterator_category = std::input_iterator_tag;
 			using difference_type = std::ptrdiff_t;

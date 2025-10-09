@@ -13,19 +13,19 @@ namespace okiidoku::mono::detail::solver::found {
 	// TODO.mid consider making the constructors private and friending to the corresponding finder. will need to forward declare the finders here.
 
 	template<Order O> requires(is_order_compiled(O))
-	struct [[gnu::designated_init]] CellClaimSym {
+	struct [[gnu::designated_init]] CellClaimSym final {
 		Ints<O>::o4xs_t rmi;
 		Ints<O>::o2xs_t sym;
 	};
 
 	template<Order O> requires(is_order_compiled(O))
-	struct [[gnu::designated_init]] SymClaimCell {
+	struct [[gnu::designated_init]] SymClaimCell final {
 		Ints<O>::o4xs_t rmi;
 		Ints<O>::o2xs_t sym;
 	};
 
 	template<Order O> requires(is_order_compiled(O))
-	struct [[gnu::designated_init]] Subset {
+	struct [[gnu::designated_init]] Subset final {
 	};
 
 	/**
@@ -34,7 +34,7 @@ namespace okiidoku::mono::detail::solver::found {
 	containing isec because in the other house type can only (i.e. must)
 	have them in that isec. */
 	template<Order O> requires(is_order_compiled(O))
-	struct [[gnu::designated_init]] LockedCands {
+	struct [[gnu::designated_init]] LockedCands final {
 		O2BitArr<O> syms; // TODO: change this into array<o2i_t, O1>, where items that are O2 are nulls. much better space usage. move field lower
 		Ints<O>::o3xs_t isec;
 		LineType line_type;
@@ -42,7 +42,7 @@ namespace okiidoku::mono::detail::solver::found {
 	};
 
 	template<Order O> requires(is_order_compiled(O))
-	struct [[gnu::designated_init]] Fish {
+	struct [[gnu::designated_init]] Fish final {
 		O2BitArr<O> syms;
 		O2BitArr<O> lines;
 		LineType elim_from_line_type;

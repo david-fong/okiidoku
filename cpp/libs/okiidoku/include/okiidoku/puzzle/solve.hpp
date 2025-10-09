@@ -26,12 +26,12 @@ namespace okiidoku::mono {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	class OKIIDOKU_EXPORT FastSolver {
+	class OKIIDOKU_EXPORT FastSolver final {
 	public:
 		FastSolver() noexcept;
 		~FastSolver() noexcept;
 
-		struct [[gnu::designated_init]] CandSymToIgnore {
+		struct [[gnu::designated_init]] CandSymToIgnore final {
 			Ints<O>::o4xs_t rmi;
 			Ints<O>::o2x_t sym;
 		};

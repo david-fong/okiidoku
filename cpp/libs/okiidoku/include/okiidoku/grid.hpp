@@ -19,6 +19,7 @@ namespace okiidoku::mono {
 	struct Grid;
 
 	namespace detail {
+	/** a wrapper of `std::array<T, O4>`, with row-major 2D subscript operators. */
 	template<Order O, class CellType>
 		requires(is_order_compiled(O) && !std::is_reference_v<CellType>)
 	struct Gridlike {
@@ -39,13 +40,13 @@ namespace okiidoku::mono {
 
 		/** \pre `rmi` is in `[0, O4)`. */
 		[[nodiscard, gnu::pure]] constexpr
-		decltype(auto) operator[](this auto&& self, const T::o4x_t rmi) noexcept {
+		decltype(auto) operator[](this auto&& __restrict self, const T::o4x_t rmi) noexcept {
 			rmi.check();
 			return std::forward_like<decltype(self)>(self.Gridlike::arr[rmi]);
 		}
 		/** \pre `row` and `col` are in `[0, O2)`. */
 		[[nodiscard, gnu::pure]] constexpr
-		decltype(auto) operator[](this auto&& self, const T::o2x_t row, const T::o2x_t col) noexcept {
+		decltype(auto) operator[](this auto&& __restrict self, const T::o2x_t row, const T::o2x_t col) noexcept {
 			row.check(); col.check();
 			return std::forward_like<decltype(self)>(self.Gridlike::arr[row_col_to_rmi<O>(row, col)]);
 		}
@@ -78,7 +79,7 @@ namespace okiidoku::mono {
 	\note a numerically encoded value of `O2` symbolizes an empty (non-given/puzzle) cell.
 	\note not exported. all public members are defined inline in this header. */
 	template<Order O> requires(is_order_compiled(O))
-	struct Grid : public detail::Gridlike<O, grid_sym_t<O>> {
+	struct Grid final : public detail::Gridlike<O, grid_sym_t<O>> {
 	private:
 		OKIIDOKU_MONO_INT_TS_TYPEDEFS
 		using B = detail::Gridlike<O, grid_sym_t<O>>;
@@ -135,7 +136,7 @@ namespace okiidoku::visitor {
 
 	/// \cond detail
 	namespace detail {
-		struct GridAdaptor {
+		struct GridAdaptor final {
 			static constexpr bool is_borrow_type = false;
 			template<Order O> using type = mono::Grid<O>;
 		};
@@ -149,7 +150,7 @@ namespace okiidoku::visitor {
 	is that of the largest member type. large collections could be space wasteful.
 	either prefer streaming, or write a collection wrapper that handles that. */
 	// TODO.mid make collection wrapper template that stores the mono version and returns variant version from accessors.
-	struct OKIIDOKU_EXPORT Grid : public detail::ContainerBase<detail::GridAdaptor> {
+	struct OKIIDOKU_EXPORT Grid final : public detail::ContainerBase<detail::GridAdaptor> {
 	public:
 		using ContainerBase<detail::GridAdaptor>::ContainerBase;
 		using sym_t = grid_sym_t;

@@ -44,7 +44,7 @@ int main(const int argc, char const *const argv[]) {
 	okiidoku::util::setup_console();
 
 	// NOLINTBEGIN(*-avoid-c-arrays, cppcoreguidelines-pro-bounds-pointer-arithmetic)
-	const auto srand_key {[&]() -> std::uint_fast64_t {
+	const auto rng_seed {[&]() -> std::uint_fast64_t {
 		if (argc > 1) {
 			const std::string_view arg {argv[1uz]};
 			std::uint_fast64_t parsed {};
@@ -58,10 +58,10 @@ int main(const int argc, char const *const argv[]) {
 	// NOLINTEND(*-avoid-c-arrays, cppcoreguidelines-pro-bounds-pointer-arithmetic)
 
 	std::cout << "\nparsed arguments:"
-	<< "\n- arg 1 (srand key)  : " << std::hex << srand_key << std::dec // TODO.mid ugh. it's using my numpunct grouping.
+	<< "\n- arg 1 (srand key)  : " << std::hex << rng_seed << std::dec // TODO.mid ugh. it's using my numpunct grouping.
 	<< std::endl;
 
-	okiidoku::util::SharedRng shared_rng(srand_key);
+	okiidoku::util::SharedRng shared_rng(rng_seed);
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 	do_training<(O_)>(shared_rng, 1000);
 	OKIIDOKU_FOREACH_O_DO_EMIT

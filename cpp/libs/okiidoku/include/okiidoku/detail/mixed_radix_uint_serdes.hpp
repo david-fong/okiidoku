@@ -42,11 +42,11 @@ namespace okiidoku::detail {
 	template<Radix RadixType_, std::unsigned_integral BufType_ = std::uintmax_t>
 		requires(std::numeric_limits<RadixType_>::max()-1u <= std::numeric_limits<BufType_>::max())
 		// ^this greatly simplifies implementation. if this restriction is changed, overflow handling and int casts will need to change.
-	class MixedRadixUintWriter { // NOLINT(*-member-init) `queue_`
+	class MixedRadixUintWriter final { // NOLINT(*-member-init) `queue_`
 	public:
 		using radix_t = RadixType_;
 		using buf_t = BufType_;
-		struct [[gnu::designated_init]] Item {
+		struct [[gnu::designated_init]] Item final {
 			radix_t radix;
 			radix_t digit;
 		};
@@ -176,7 +176,7 @@ namespace okiidoku::detail {
 	template<Radix RadixType_, std::unsigned_integral BufType_ = std::uintmax_t>
 		requires(std::numeric_limits<RadixType_>::max()-1u <= std::numeric_limits<BufType_>::max())
 		// ^this greatly simplifies implementation. if this restriction is changed, overflow handling and int casts will need to change.
-	class MixedRadixUintReader {
+	class MixedRadixUintReader final {
 	public:
 		using radix_t = RadixType_;
 		using buf_t = BufType_;
@@ -207,7 +207,7 @@ namespace okiidoku::detail {
 				byte_count = TO<std::size_t>(is.gcount());
 			} else {
 				for (auto i {0uz}; i < sizeof(buf_t); ++i) {
-					OKIIDOKU_DEFER_INIT char c; // NOLINT(*init*)
+					char c OKIIDOKU_DEFER_INIT; // NOLINT(*init*)
 					is.get(c); if (is) [[likely]] {
 						buf_ |= (buf_t{c} << (i*CHAR_BIT));
 						++byte_count;

@@ -13,13 +13,13 @@ namespace okiidoku::mono::detail::solver2 {
 	// for "subsets", each house has a `Set`.
 	// for "fish", each symbol has a `Set`.
 	template<Order O> requires(is_order_compiled(O))
-	struct CandPartitions {
+	struct CandPartitions final {
 	private:
 		using T = Ints<O>;
 		using o2i_t = T::o2i_t;
 	public:
-		struct [[gnu::designated_init]] Set {
-			struct [[gnu::designated_init]] Tag {
+		struct [[gnu::designated_init]] Set final {
+			struct [[gnu::designated_init]] Tag final {
 				// for house cell, how many cand syms - 1?
 				// for house sym, how many cand cells - 1?
 				// for sym line,  how many cand cells - 1?

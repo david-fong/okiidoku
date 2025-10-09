@@ -29,7 +29,7 @@ namespace okiidoku::mono { namespace {
 		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
 		OKIIDOKU_CONTRACT(chute < T::O1);
 		const auto chute_lines_sym_to_cell {[&][[gnu::pure]](){
-			OKIIDOKU_DEFER_INIT chute_lines_sym_to_cell_t<O> map;
+			chute_lines_sym_to_cell_t<O> map OKIIDOKU_DEFER_INIT;
 			for (const auto chute_line : T::O1) {
 			for (const auto house_cell : T::O2) {
 				const auto chute_cell_i {(T::O2*chute_line)+house_cell};

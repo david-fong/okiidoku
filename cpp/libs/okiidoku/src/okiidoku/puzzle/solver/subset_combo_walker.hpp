@@ -11,7 +11,7 @@ namespace okiidoku::mono::detail::solver {
 
 	// Helper for finding candidate eliminations using the subset techniques.
 	template<Order O> requires(is_order_compiled(O))
-	class SubsetComboWalker {
+	class SubsetComboWalker final {
 	private:
 		using T = Ints<O>;
 		using o2xs_t = T::o2xs_t;

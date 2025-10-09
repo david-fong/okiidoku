@@ -95,7 +95,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 		std::sort(
 			std::next(subs.cell_tags.begin(), sub_a),
 			std::next(subs.cell_tags.begin(), sub_z),
-			[&][[gnu::pure]](const auto& tag_a, const auto& tag_b){
+			[&][[gnu::pure]](const auto& tag_a, const auto& tag_b)noexcept{
 				return tag_a.count_cache < tag_b.count_cache;
 			}
 		);

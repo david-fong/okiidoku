@@ -8,7 +8,7 @@
 
 namespace okiidoku::util {
 
-	class MyNumPunct : public std::numpunct<char> {
+	class MyNumPunct final : public std::numpunct<char> {
 	public: void set_grouping(char grouping) noexcept { grouping_.front() = grouping; }
 	protected: [[nodiscard, gnu::pure]] std::string do_grouping() const noexcept override { return grouping_; }
 	private: std::string grouping_ {"\003"};

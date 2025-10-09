@@ -31,7 +31,7 @@ namespace okiidoku::cli {
 			{ "",             E::gen_single },
 			{ "gen",          E::gen_multiple },
 		};
-		inline constexpr std::string_view helpMessage {"\nCOMMAND MENU:"
+		inline constexpr std::string_view help_message {"\nCOMMAND MENU:"
 		"\n- help                  print this help menu"
 		"\n- quit                  cleanly exit this program"
 		"\n"
@@ -44,10 +44,14 @@ namespace okiidoku::cli {
 	}
 
 
-	class Repl {
+	class Repl final {
 	public:
 		// TODO: consider taking ownership of rng? or if we can get a space-cheap implementation, doesn't matter
-		explicit Repl(Order O, util::SharedRng& rng);
+		explicit Repl(const Order order_input, util::SharedRng& rng):
+			shared_rng_(rng)
+		{
+			config_.order(order_input);
+		}
 
 		// disallow copies and moves:
 		Repl(const Repl&) = delete;

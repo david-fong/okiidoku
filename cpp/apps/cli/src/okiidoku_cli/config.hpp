@@ -10,7 +10,7 @@
 
 namespace okiidoku::cli {
 
-	struct Config {
+	struct Config final {
 	public:
 		[[nodiscard, gnu::pure]]
 		Order order() const noexcept { return order_; }

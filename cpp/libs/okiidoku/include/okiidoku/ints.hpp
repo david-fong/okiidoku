@@ -33,7 +33,7 @@ namespace okiidoku {
 		HouseType::box,
 	})};
 	template<typename V> requires(!std::is_reference_v<V>)
-	struct HouseTypeMap {
+	struct HouseTypeMap final {
 		std::array<V, house_types.size()> arr {};
 		[[nodiscard, gnu::pure]]
 		decltype(auto) operator[](this auto&& self, const HouseType key) noexcept {
@@ -49,7 +49,7 @@ namespace okiidoku {
 		LineType::col,
 	})};
 	template<typename V> requires(!std::is_reference_v<V>)
-	struct LineTypeMap {
+	struct LineTypeMap final {
 		std::array<V, line_types.size()> arr {};
 		[[nodiscard, gnu::pure]]
 		decltype(auto) operator[](this auto&& self, const LineType key) noexcept {
@@ -149,8 +149,10 @@ namespace okiidoku {
 	/// \endcond detail
 
 
+	/** this tag determines the space usage and valid operations for an `Int`. */
 	enum class IntKind : unsigned char {
 		constant,
+		// TODO consider another type "argument", (only-)which has the implicit constructor from builtin type.
 		small,
 		fast,
 	};
@@ -159,16 +161,16 @@ namespace okiidoku {
 		using enum IntKind;
 		if (k1 == constant) { return k2; }
 		if (k2 == constant) { return k1; }
-		if (k1 == fast || k2 == fast) { return fast; }
-		return small;
+		if (k1 == small && k2 == small) { return small; }
+		return fast;
 	}
 	/// \endcond detail
 
-	/** integer wrapper class with inclusive upper bound.
+	/** unsigned integer wrapper class with inclusive upper bound.
 	iterable with the upper bound as an excluded sentinel.
 	\note for `std::ostream` support, `#include <okiidoku/ints_io.hpp>`. */
 	template<std::uintmax_t max_, IntKind kind_ = IntKind::fast>
-	class Int {
+	class Int final {
 		template<std::uintmax_t M2, IntKind K2> friend class Int;
 		friend struct emscripten::internal::BindingType<Int, std::true_type>;
 		using max_t = std::uintmax_t;
@@ -242,13 +244,12 @@ namespace okiidoku {
 		/** \pre `val() < max`. */ constexpr auto  operator++(int) & noexcept requires(kind != IntKind::constant) { auto old {*this}; operator++(); return old; }
 		/** \pre `val() > 0u`.  */ constexpr auto  operator--(int) & noexcept requires(kind != IntKind::constant) { auto old {*this}; operator--(); return old; }
 
-		// TODO move this into dedicated iter_x class?
 		[[nodiscard, gnu::const]] constexpr auto begin(this const Int self) noexcept { self.check(); return Int<max,IntKind::fast>{0u}; }
 		[[nodiscard, gnu::const]] constexpr auto end  (this const Int self) noexcept { self.check(); return self.as_fast(); }
-		/** \pre `val() < max`. */
-		[[nodiscard, gnu::const]] constexpr auto next (this const Int self) noexcept requires(kind != IntKind::constant) { self.check(); OKIIDOKU_CONTRACT(self.val() < max); return Int{self.val()+1u}; }
+		/** \pre `val() < max`. \note for increment that also increments capacity, `+ int1`. */
+		[[nodiscard, gnu::const]] constexpr auto next (this const Int self) noexcept requires(kind != IntKind::constant) { self.check(); OKIIDOKU_CONTRACT(self.val_ < max); return Int{self.val()+1u}; }
 		/** \pre `val() > 0u`. */
-		[[nodiscard, gnu::const]] constexpr auto prev (this const Int self) noexcept requires(kind != IntKind::constant) { self.check(); OKIIDOKU_CONTRACT(self.val() >= val_t{0u}); static_assert(max > 0u); return Int<max-1u,kind>{self.val()-1u}; }
+		[[nodiscard, gnu::const]] constexpr auto prev (this const Int self) noexcept requires(max > 0u) { if constexpr (kind != IntKind::constant) { self.check(); OKIIDOKU_CONTRACT(self.val() >= val_t{0u}); return Int<max-1u,kind>{self.val()-1u}; } else { return Int<max-1u,kind>(); } }
 		/** \pre `val() < max`. */
 		[[nodiscard, gnu::const]] constexpr Int<max-1u,kind> operator*(this const Int self) noexcept requires(kind != IntKind::constant) {
 			static_assert(max > 0u);
@@ -258,7 +259,7 @@ namespace okiidoku {
 
 		/** \pre `val() + other.val() <= max` */
 		template<max_t MR, IntKind KR>
-		constexpr Int& operator+=(const Int<MR,KR>& other) & noexcept requires(kind != IntKind::constant && MR <= max) {
+		constexpr Int& operator+=(const Int<MR,KR> other) & noexcept requires(kind != IntKind::constant && MR <= max) {
 			check(); other.check();
 			OKIIDOKU_CONTRACT(max_t{other.val()} <= max);
 			OKIIDOKU_CONTRACT(max_t{val()} <= max_t{max - max_t{other.val()}}); // (no) overflow check. i.e. `val() + other.val() <= max`
@@ -270,7 +271,7 @@ namespace okiidoku {
 
 		/** \pre `val() >= >= other.val()` */
 		template<max_t MR, IntKind KR>
-		constexpr Int& operator-=(const Int<MR,KR>& other) & noexcept requires(kind != IntKind::constant && MR <= max) {
+		constexpr Int& operator-=(const Int<MR,KR> other) & noexcept requires(kind != IntKind::constant && MR <= max) {
 			check(); other.check(); OKIIDOKU_CONTRACT(other.val() <= val());
 			val_ -= other.val();
 			check();
@@ -279,7 +280,7 @@ namespace okiidoku {
 
 		/** \pre `other.val() != 0` */
 		template<max_t MR, IntKind KR>
-		constexpr Int& operator/=(const Int<MR,KR>& other) & noexcept requires(kind != IntKind::constant && MR > 0u && MR <= max) {
+		constexpr Int& operator/=(const Int<MR,KR> other) & noexcept requires(kind != IntKind::constant && MR > 0u && MR <= max) {
 			check(); other.check(); OKIIDOKU_CONTRACT(other.val() != val_t{0u});
 			val_ /= other.val();
 			check();
@@ -311,11 +312,12 @@ namespace okiidoku {
 	template<std::uintmax_t ML, IntKind KL, std::uintmax_t MR, IntKind KR> [[gnu::const]] constexpr bool operator>  (const Int<ML,KL> lhs, const Int<MR,KR> rhs) noexcept { lhs.check(); rhs.check(); return lhs.val() >  rhs.val(); }
 
 	template<std::uintmax_t ML, IntKind KL, std::uintmax_t MR, IntKind KR>
-	[[gnu::const]] constexpr auto operator+(const Int<ML,KL> lhs, const Int<MR,KR> rhs) noexcept {
+	[[gnu::const]] constexpr auto operator+(const Int<ML,KL> lhs, const Int<MR,KR> rhs) noexcept requires(ML <= std::numeric_limits<std::uintmax_t>::max() - MR) {
 		lhs.check(); rhs.check();
 		static constexpr auto KO {pick_int_op_result_kind(KL,KR)};
 		return Int<ML+MR,KO>{lhs.val() + rhs.val()};
 	}
+	// TODO what happens if it would overflow? does the compiler implicitly convert the ints to the builtin types? how could I test against that, and prevent it?
 
 	/**
 	\pre `lhs >= rhs`
@@ -329,7 +331,7 @@ namespace okiidoku {
 	}
 
 	template<std::uintmax_t ML, IntKind KL, std::uintmax_t MR, IntKind KR>
-	[[gnu::const]] constexpr auto operator*(const Int<ML,KL> lhs, const Int<MR,KR> rhs) noexcept {
+	[[gnu::const]] constexpr auto operator*(const Int<ML,KL> lhs, const Int<MR,KR> rhs) noexcept requires(ML==0u || MR==0u || ML <= std::numeric_limits<std::uintmax_t>::max() / MR) {
 		lhs.check(); rhs.check();
 		static constexpr auto KO {pick_int_op_result_kind(KL,KR)};
 		Int<ML*MR,KO> ret {lhs.val() * rhs.val()};
@@ -340,6 +342,7 @@ namespace okiidoku {
 		OKIIDOKU_CONTRACT((rhs.val() >  1u && lhs.val() >  0u) == (ret.val() >  lhs.val()));
 		return ret;
 	}
+	// TODO what happens if it would overflow? does the compiler implicitly convert the ints to the builtin types? how could I test against that, and prevent it?
 
 	template<std::uintmax_t ML, IntKind KL, std::uintmax_t MR>
 	[[gnu::const]] constexpr auto operator/(const Int<ML,KL> lhs, const Int<MR,IntKind::constant> rhs) noexcept requires(MR > 0u) {
@@ -369,6 +372,8 @@ namespace okiidoku {
 		OKIIDOKU_CONTRACT(ret < rhs);
 		return ret;
 	}
+
+	inline constexpr Int<1u, IntKind::constant> int1 {};
 
 	namespace detail {
 		/** helper for `is_int_wrapper`. */
@@ -409,7 +414,7 @@ namespace okiidoku::mono {
 	/** a class acting as a namespace of sized int types and constants.
 	\details do `using T = Ints<O>;`. */
 	template<Order O> requires(is_order_compiled(O))
-	struct Ints {
+	struct Ints final {
 		Ints() = delete;
 
 		#define DEFINE_OX_TYPES(P_, SUFFIX_, MAX_) \

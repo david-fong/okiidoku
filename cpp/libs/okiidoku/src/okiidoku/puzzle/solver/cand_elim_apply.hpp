@@ -11,7 +11,7 @@
 namespace okiidoku::mono::detail::solver {
 
 	template<Order O> requires(is_order_compiled(O))
-	class CandElimApply {
+	class CandElimApply final {
 	public:
 		/**
 		\pre `engine.has_queued_cand_elims` returns `true`. */
@@ -22,7 +22,7 @@ namespace okiidoku::mono::detail::solver {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	class CandElimApplyImpl {
+	class CandElimApplyImpl final {
 	private:
 		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
 		// Important implementation reminder: if any candidate elimination done

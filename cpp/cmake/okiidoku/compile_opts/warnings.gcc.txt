@@ -12,7 +12,7 @@
 -Wnoexcept
 -Wsuggest-final-types
 -Wsuggest-final-methods
--Wsuggest-attribute=pure
--Wsuggest-attribute=const
+-Wno-suggest-attribute=pure
+-Wno-suggest-attribute=const
 -Wsuggest-attribute=noreturn
 -Wnrvo

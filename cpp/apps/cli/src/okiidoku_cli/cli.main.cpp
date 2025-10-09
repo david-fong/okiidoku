@@ -22,8 +22,8 @@
 
 /**
 ARGUMENTS
-1: grid order
-2: RNG seed (default: get from device)
+[1]: grid order
+[2]: PRNG seed (default: get from device)
 */
 int main(const int argc, char const *const argv[]) {
 	namespace ok = ::okiidoku;
@@ -38,7 +38,7 @@ int main(const int argc, char const *const argv[]) {
 		? static_cast<ok::Order>(std::stoi(argv[1uz]))
 		: ok::compiled_orders.front()
 	};
-	const auto srand_key {[&]() -> std::uint_fast64_t {
+	const auto rng_seed {[&]() -> std::uint_fast64_t {
 		if (argc > 2) {
 			const std::string_view arg {argv[2uz]};
 			std::uint_fast64_t parsed {}; // NOLINT(misc-const-correctness) seems like a clang-tidy bug :/
@@ -54,14 +54,14 @@ int main(const int argc, char const *const argv[]) {
 	#pragma GCC diagnostic pop
 	#endif
 
-	std::cout << "\nparsed arguments:"
-		<< "\n- arg 1 (grid order) : " << user_order
-		<< "\n- arg 2 (srand key)  : " << std::hex;
-			numpunct->set_grouping(0); std::cout << srand_key;
+	std::cout << "parsed arguments:"
+		<< "\n- [1] (grid order) : " << user_order
+		<< "\n- [2] (prng seed)  : " << std::hex;
+			numpunct->set_grouping(0); std::cout << rng_seed;
 			numpunct->set_grouping(3); std::cout << std::dec;
 	std::cout << std::endl;
 
-	ok::util::SharedRng shared_rng {srand_key};
+	ok::util::SharedRng shared_rng {rng_seed};
 
 	ok::cli::Repl repl {user_order, shared_rng};
 	repl.start();

@@ -38,14 +38,14 @@ namespace okiidoku::mono::detail::solver2 {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	struct Guess {
+	struct  [[gnu::designated_init]] Guess final {
 		Ints<O>::o4xs_t rmi;
 		Ints<O>::o2xs_t sym;
 	};
 
 
 	template<Order O> requires(is_order_compiled(O))
-	struct EngineImpl {
+	struct EngineImpl final {
 		friend FindStat unwind_one_stack_frame_of_<O>(EngineImpl<O>&) noexcept;
 	private:
 		OKIIDOKU_MONO_INT_TS_TYPEDEFS
@@ -53,7 +53,7 @@ namespace okiidoku::mono::detail::solver2 {
 		using rmi_t = T::o4xs_t;
 	public:
 
-		struct [[gnu::designated_init]] Frame {
+		struct [[gnu::designated_init]] Frame final {
 			CandsPovs<O> cands_povs;
 			FindCacheForSubsets<O> find_cache_subsets;
 			FindCacheForFish<O> find_cache_fish;
@@ -63,8 +63,8 @@ namespace okiidoku::mono::detail::solver2 {
 		\todo consider a different design: cands_povs_ and num_unsolved_ are just the top
 			entry of the guess_stack_. no_more_solns_ is implied when the guess stack size is zero.
 			this would make the EngineImpl struct size small enough to probably justify no longer wrapping */
-		Engine with unique_ptr in the Solver classes.
-		struct GuessStackFrame {
+		/** Engine with unique_ptr in the Solver classes. */
+		struct GuessStackFrame final {
 			Frame frame;
 			Guess<O> guess;
 			GuessStackFrame(const Frame& frame_, const Guess<O> guess_) noexcept:
@@ -157,7 +157,7 @@ namespace okiidoku::mono::detail::solver2 {
 	// Note: The current usage of inheritance (rather than composition) is _only_
 	// done to reduce boilerplate in writing the delegating member functions.
 	template<Order O> requires(is_order_compiled(O))
-	class Engine : private EngineImpl<O> {
+	class Engine final : private EngineImpl<O> {
 		friend class CandElimFind<O>;
 	public:
 		// Engine() noexcept = default; // TODO was this ever needed? why was it written?

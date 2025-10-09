@@ -135,7 +135,7 @@ namespace okiidoku::mono {
 
 	template<Order O> requires(is_order_compiled(O))
 	auto O2BitArr<O>::to_chars() const noexcept -> std::array<char, Ints<O>::O2> {
-		OKIIDOKU_DEFER_INIT std::array<char, T::O2> _; // NOLINT(*-init)
+		std::array<char, T::O2> _ OKIIDOKU_DEFER_INIT; // NOLINT(*-init)
 		_.fill('.');
 		for (const auto i : set_bits()) {
 			_[i] = '1';

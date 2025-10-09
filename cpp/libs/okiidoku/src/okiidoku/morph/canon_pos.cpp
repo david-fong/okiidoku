@@ -65,7 +65,7 @@ namespace okiidoku::mono { namespace {
 		const PolarState& row_state,
 		const PolarState& col_state
 	) noexcept {
-		OKIIDOKU_DEFER_INIT Grid<O> table; {
+		Grid<O> table OKIIDOKU_DEFER_INIT; {
 			const Transformation<O> t {
 				.row_map {row_state.to_og},
 				.col_map {col_state.to_og},
@@ -94,7 +94,7 @@ namespace okiidoku::mono { namespace {
 						}
 					);
 				}
-				OKIIDOKU_DEFER_INIT std::array<sym_t, T::O2> copy; // NOLINT(*-init)
+				std::array<sym_t, T::O2> copy OKIIDOKU_DEFER_INIT; // NOLINT(*-init)
 				std::copy(row_sp.begin(), row_sp.end(), copy.begin());
 				for (const auto i : T::O1) {
 					std::copy(
@@ -110,7 +110,7 @@ namespace okiidoku::mono { namespace {
 
 	template<Order O> requires(is_order_compiled(O))
 	void CanonPlace<O>::PolarState::do_a_pass(const Grid<O>& table) noexcept {
-		OKIIDOKU_DEFER_INIT std::array<to_t, T::O2> to_tied; // NOLINT(*-init)
+		std::array<to_t, T::O2> to_tied OKIIDOKU_DEFER_INIT; // NOLINT(*-init)
 		std::iota(to_tied.begin(), to_tied.end(), to_t{0u});
 		for (const auto tie : line_ties) {
 			// Note: intentionally do not skip ties here since updated table
@@ -152,7 +152,7 @@ namespace okiidoku::mono { namespace {
 
 		{
 			// update s.to_og:
-			OKIIDOKU_DEFER_INIT std::array<to_t, T::O2> tied_to_og; // NOLINT(*-init)
+			std::array<to_t, T::O2> tied_to_og OKIIDOKU_DEFER_INIT; // NOLINT(*-init)
 			for (const auto i : T::O2) {
 				tied_to_og[i] = to_og[i/T::O1][i%T::O1];
 			}

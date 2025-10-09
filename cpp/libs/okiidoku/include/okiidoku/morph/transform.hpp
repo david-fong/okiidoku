@@ -19,7 +19,7 @@ namespace okiidoku::mono {
 	\note `pre_transpose == post_transpose + swap(row_map, col_map)`.
 	*/
 	template<Order O> requires(is_order_compiled(O))
-	struct OKIIDOKU_EXPORT [[gnu::designated_init]] Transformation {
+	struct OKIIDOKU_EXPORT [[gnu::designated_init]] Transformation final {
 	private:
 		using T = Ints<O>;
 		using o1i_t = T::o1i_t;
@@ -68,7 +68,7 @@ namespace okiidoku::mono {
 
 
 namespace okiidoku::visitor::detail {
-	class TransformationAdaptor {
+	class TransformationAdaptor final {
 	public:
 		static constexpr bool is_borrow_type = false;
 		template<Order O>
@@ -77,7 +77,7 @@ namespace okiidoku::visitor::detail {
 }
 namespace okiidoku::visitor {
 
-	struct OKIIDOKU_EXPORT Transformation : public detail::ContainerBase<detail::TransformationAdaptor> {
+	struct OKIIDOKU_EXPORT Transformation final : public detail::ContainerBase<detail::TransformationAdaptor> {
 		using ContainerBase::ContainerBase;
 
 		[[nodiscard, gnu::pure]] friend bool operator==(const Transformation&, const Transformation&) noexcept = default;

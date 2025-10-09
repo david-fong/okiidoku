@@ -20,26 +20,19 @@
 #include <string>
 #include <charconv>
 #include <ctime>        // clock, CLOCKS_PER_SEC
+#include <cstdint>      // uint_fastN_t
 #include <system_error> // errc
 
 namespace okiidoku::cli {
 
 	namespace str = ::okiidoku::util::str;
-
-	constexpr std::string_view welcome_message {};
-
-
-	Repl::Repl(const Order order_input, util::SharedRng& rng):
-		shared_rng_(rng)
-	{
-		config_.order(order_input);
+	namespace {
+		constexpr std::string_view welcome_message {"run `help` to get usage info"};
 	}
-
 
 	void Repl::start() {
 		std::cout
-		<< '\n' << str::dim.on << welcome_message << str::dim.off
-		<< '\n' << Command::helpMessage
+		<< str::dim.on << welcome_message << str::dim.off
 		<< std::endl;
 
 		while (true) {
@@ -79,7 +72,7 @@ namespace okiidoku::cli {
 			using Command::E;
 			case E::help: [[unlikely]] {
 				std::cout
-				<< Command::helpMessage /* << str::dim.on
+				<< Command::help_message /* << str::dim.on
 				important subcommand help messages can go here if needed
 				<< str::dim.off */ << std::endl;
 				break;
@@ -121,7 +114,7 @@ namespace okiidoku::cli {
 		const Timer timer{};
 		{
 			// std::filesystem::create_directories("gen");
-			const std::string file_path {std::string{"gen/"} + std::to_string(uint_fast32_t{config_.order()}) + ".bin"};
+			const auto file_path {std::string{"gen/"} + std::to_string(uint_fast32_t{config_.order()}) + ".bin"};
 			std::cout << "output file path: " << file_path << std::endl;
 			// std::ofstream of(file_path, std::ios::binary|std::ios::ate);
 			// TODO.wait change this to use the archiving operations.
@@ -130,14 +123,16 @@ namespace okiidoku::cli {
 			// } catch (const std::ios_base::failure& fail) {
 			// 	std::cout << str::red.on << fail.what() << str::red.off << std::endl;
 			// }
+			// alignas(std::uint_fast64_t)
 			Grid grid {config_.order()};
 			grid.init_most_canonical();
+			const bool should_canonicalize {config_.canonicalize()};
 			for (std::uintmax_t prog {0u}; prog < how_many; ++prog) {
 				shuffle(grid, shared_rng_());
-				if (config_.canonicalize()) {
+				if (should_canonicalize) {
 					canonicalize(grid);
 				}
-				// write_solved(grid, of); // TODO this is currently crashing with floating point error :/
+				(void)grid;// write_solved(grid, of); // TODO this is currently crashing with floating point error :/
 				// TODO.mid print a progress bar
 			}
 		}
@@ -160,14 +155,14 @@ namespace okiidoku::cli {
 
 	void Repl::gen_multiple(const std::string_view how_many_str) {
 		std::uintmax_t how_many {};
-		if (util::str::from_chars(how_many_str, how_many).ec == std::errc{}) [[likely]] {
-			if (how_many <= 0u) {
+		if (util::str::from_chars(how_many_str, how_many).ec == std::errc{}) {
+			if (how_many <= 0u) [[unlikely]] {
 				std::cout << str::red.on
 					<< "please provide a non-zero, positive integer."
 					<< str::red.off << std::endl;
 				return;
 			}
-		} else {
+		} else [[unlikely]] {
 			std::cout << str::red.on
 				<< "could not convert \"" << how_many_str << "\" to an integer."
 				<< str::red.off << std::endl;
