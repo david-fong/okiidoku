@@ -52,6 +52,7 @@ Issues I'm watching:
 
 ## Misc List
 
+- make O2BitArr take `IntKind` param and not be limited to O2. make it take width as a param.
 - move `okiidoku_translator` to `extras/`.
 - do some `static_assert` tests for types of deducing this member functions. just discovered that I was having a bug with one because I was using something after `std::forward`? maybe I _shouldn't_ have disabled that clang-tidy check... but then why did I see people doing this thing in example code? I guess because you need to be careful about copies with iterators?
 - make canon functions pure producers of a canonicalizing transformation. take grid by const reference. name `canon_sym` -> `get_sym_canon_map`.
@@ -83,12 +84,8 @@ Issues I'm watching:
 - https://youtu.be/zCzD9uSDI8c?t=620
 
 - CMake 3.31:
-  - once no longer experimental: https://cmake.org/cmake/help/latest/command/install.html#package-info
   - presets `$comment`
   - `CMAKE_EXPORT_BUILD_DATABASE`
-- CMake 4.1:
-  - `EXPORT_PACKAGE_DEPENDENCIES` in `export()` and `install` once no longer experimental
-  - `project(COMPAT_VERSION)` (`CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_INFO`)
 - GCC 15:
   - try benchmarking with https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html#index-fipa-reorder-for-locality
   - `import std` at least in source files? https://www.kitware.com/import-std-in-cmake-3-30/

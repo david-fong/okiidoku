@@ -1,14 +1,19 @@
 # SPDX-FileCopyrightText: 2020 David Fong
 # SPDX-License-Identifier: GPL-3.0-or-later
 cmake_minimum_required(VERSION 4.1)
+set(CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_DEPENDENCIES [[1942b4fa-b2c5-4546-9385-83f254070067]])
+set(CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_INFO [[b80be207-778e-46ba-8080-b23bba22639e]])
+set(CMAKE_EXPERIMENTAL_FIND_CPS_PACKAGES   [[e82e467b-f997-4464-8ace-b00808fff261]])
+set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD      [[d0edc3af-4c50-42ea-a356-e2862fe7a444]])
+
 project(okiidoku
 	VERSION 0.0.1
+	COMPAT_VERSION 0.0.1
 	DESCRIPTION [[david fong's variable-grid-size sudoku toolkit]]
 	HOMEPAGE_URL [[https://github.com/david-fong/okiidoku]]
 	LANGUAGES CXX
 )
 list(APPEND CMAKE_MODULE_PATH "${okiidoku_SOURCE_DIR}/cmake")
-set(_OKIIDOKU_COMPAT_VERSION "${okiidoku_VERSION}") # see `cmake/installation.cmake`
 # ^consider switching to support `SameMajorVersion` starting at v1.0.0.
 set(CMAKE_CXX_SCAN_FOR_MODULES NO) # I'm not using C++ modules... yet. see https://cmake.org/cmake/help/latest/manual/cmake-cxxmodules.7.html, https://crascit.com/2024/04/04/cxx-modules-cmake-shared-libraries/, ccache docs section on C++ Modules if/when transitioning.
 include(okiidoku/default_output_dirs)
