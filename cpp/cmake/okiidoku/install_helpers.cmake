@@ -10,7 +10,7 @@ endif()
 
 function(okiidoku_install_target target)
 	install(TARGETS ${target}
-		EXPORT okiidoku_installation_targets
+		EXPORT okiidoku_targets
 		# RUNTIME_DEPENDENCIES # currently there are none to bundle.
 		${ARGN}
 		RUNTIME  COMPONENT okiidoku_runtime

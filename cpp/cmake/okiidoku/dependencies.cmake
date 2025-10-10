@@ -12,18 +12,20 @@ set(OKIIDOKU_EMSCRIPTEN_MIN_VERSION "4.0.15") # \internal whatever I last pulled
 
 # https://docs.github.com/en/repositories/working-with-files/using-files/downloading-source-code-archives#source-code-archive-urls
 
+
 CPMAddPackage(NAME range-v3
 	# https://github.com/ericniebler/range-v3/tags
 	URL [[https://github.com/ericniebler/range-v3/archive/refs/tags/0.12.0.tar.gz]]
 	DOWNLOAD_ONLY YES
 )
 if(range-v3_ADDED)
-	add_library(range-v3 INTERFACE IMPORTED)
-	add_library(range-v3::range-v3 ALIAS range-v3)
-	target_include_directories(range-v3 SYSTEM INTERFACE "${range-v3_SOURCE_DIR}/include")
+	add_library(range-v3::range-v3 INTERFACE IMPORTED)
+	set_target_properties(range-v3::range-v3 PROPERTIES EXPORT_FIND_PACKAGE_NAME range-v3)
+	target_include_directories(range-v3::range-v3 SYSTEM INTERFACE "${range-v3_SOURCE_DIR}/include")
 	# original CMake options I might care about:
 	#  RANGES_MODULES, RANGES_POLLY, RANGES_DEEP_STL_INTEGRATION
 endif()
+
 
 
 CPMAddPackage(NAME pcg
@@ -34,26 +36,28 @@ CPMAddPackage(NAME pcg
 	DOWNLOAD_ONLY YES
 )
 if(pcg_ADDED)
-	add_library(pcg INTERFACE IMPORTED)
-	add_library(pcg::pcg ALIAS pcg)
-	target_include_directories(pcg SYSTEM INTERFACE "${pcg_SOURCE_DIR}/include")
+	add_library(pcg::pcg INTERFACE IMPORTED)
+	set_target_properties(pcg::pcg PROPERTIES EXPORT_FIND_PACKAGE_NAME pcg)
+	target_include_directories(pcg::pcg SYSTEM INTERFACE "${pcg_SOURCE_DIR}/include")
 endif()
+
 
 
 if(OKIIDOKU_BUILD_TESTING)
 	# https://github.com/catchorg/Catch2/blob/devel/docs/cmake-integration.md
 	CPMAddPackage(NAME doctest
 		# https://github.com/doctest/doctest/blob/master/CHANGELOG.md
-		URL [[https://github.com/doctest/doctest/archive/refs/tags/v2.4.12.tar.gz]] # take latest
+		URL [[https://github.com/doctest/doctest/archive/7079daafbe5baf5018fcca39add3e1c0b4b99687.tar.gz]] # waiting for v2.4.13 :(
 		DOWNLOAD_ONLY YES
 	)
 	if(doctest_ADDED)
-		add_library(doctest INTERFACE IMPORTED)
-		add_library(doctest::doctest ALIAS doctest)
-		target_include_directories(doctest SYSTEM INTERFACE "${doctest_SOURCE_DIR}/doctest")
+		add_library(doctest::doctest INTERFACE IMPORTED)
+		set_target_properties(doctest::doctest PROPERTIES EXPORT_FIND_PACKAGE_NAME doctest)
+		target_include_directories(doctest::doctest SYSTEM INTERFACE "${doctest_SOURCE_DIR}/doctest")
 	endif()
 	include("${doctest_SOURCE_DIR}/scripts/cmake/doctest.cmake")
 endif()
+
 
 
 if(OKIIDOKU_BUILD_BINDINGS_FOR_PYTHON)
@@ -79,6 +83,7 @@ if(OKIIDOKU_BUILD_BINDINGS_FOR_PYTHON)
 	nanobind_build_library("${NB_CORE_LIBNAME}" AS_SYSINCLUDE)
 	unset(NB_CORE_LIBNAME)
 endif()
+
 
 
 if(OKIIDOKU_BUILD_DOCS)

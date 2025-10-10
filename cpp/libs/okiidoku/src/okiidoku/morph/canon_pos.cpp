@@ -113,6 +113,7 @@ namespace okiidoku::mono { namespace {
 		std::array<to_t, T::O2> to_tied OKIIDOKU_DEFER_INIT; // NOLINT(*-init)
 		std::iota(to_tied.begin(), to_tied.end(), to_t{0u});
 		for (const auto tie : line_ties) {
+			tie.check();
 			// Note: intentionally do not skip ties here since updated table
 			// rows could (and likely will) be used by chute tie resolution.
 
@@ -132,7 +133,7 @@ namespace okiidoku::mono { namespace {
 		}};
 		// try to resolve tied chute ranges:
 		for (const auto tie : chute_ties) {
-			if (tie.size() == 1) [[likely]] { continue; }
+			tie.check();
 			std::sort(
 				std::next(to_tied.begin(), tie.begin_), // TODO.high THIS IS WRONG.
 				std::next(to_tied.begin(), tie.end_),

@@ -61,12 +61,6 @@
 		"TODO",
 	],
 
-	// "explorer.sortOrder": "default",
-	"C_Cpp.autoAddFileAssociations": false,
-	"C_Cpp.intelliSenseCacheSize": 0,
-	"cmake.ignoreCMakeListsMissing": true,
-	"cmake.useCMakePresets": "always",
-
 	// https://code.visualstudio.com/docs/cpp/faq-cpp
 	"C_Cpp.default.cStandard": "c17",
 	"C_Cpp.default.cppStandard": "c++23",
@@ -80,12 +74,15 @@
 	"C_Cpp.default.browse.limitSymbolsToIncludedHeaders": true,
 	// "C_Cpp.default.browse.path": ["${workspaceFolder}"],
 	"C_Cpp.default.browse.path": [],
+	"C_Cpp.autoAddFileAssociations": false,
 	"C_Cpp.commentContinuationPatterns": [
 		{ "begin": "/\\*\\*", "continue": "" },
 	],
 
 	// https://vector-of-bool.github.io/docs/vscode-cmake-tools/settings.html
 
+	"cmake.useCMakePresets": "always",
+	"cmake.ignoreCMakeListsMissing": true,
 	"cmake.sourceDirectory": ["${workspaceFolder}/cpp"],
 	// the following line is only needed when using kits, but this project uses presets.
 	"cmake.buildDirectory": "${sourceDirectory}/out/build/${command:cmake.activeConfigurePresetName}",
@@ -95,15 +92,15 @@
 		"args": [],
 		"setupCommands": [
 			{"text": "add-auto-load-safe-path ${workspaceFolder}/cpp/tools"},
-			{"text": "add-auto-load-safe-path ${command:cmake.getLaunchTargetDirectory}/.."}, // doing in one line means working with OS-specific list separators
-			// {"text": "set auto-load script-path ${command:cmake.getLaunchTargetDirectory}/../share"},
-			{"text": "directory ${workspaceFolder}/cpp"}, // add to source search path
+			{"text": "add-auto-load-safe-path ${command:cmake.getLaunchTargetDirectory}/.."},
+			// ^trying to do the above in one line would mean working with OS-specific list separators ":"/";".
+			{"text": "directory ${workspaceFolder}/cpp"}, // add to source search path. allows loading tools/okiidoku-gdb.py.
 		],
 		"stopAtEntry": true,
 		// "visualizerFile": "${workspaceFolder}/tools/okiidoku.natvis", // TODO.try is this needed if already specified in CMake?
 		// "showDisplayString": true, // https://code.visualstudio.com/docs/cpp/launch-json-reference#_showdisplaystring
 		"sourceFileMap": { // https://code.visualstudio.com/docs/cpp/launch-json-reference#_sourcefilemap
-			"/okiidoku": "${workspaceFolder}/cpp" // -ffile-prefix-map=${okiidoku_SOURCE_DIR}=/okiidoku
+			"/okiidoku": "${workspaceFolder}/cpp" // since `-ffile-prefix-map=${okiidoku_SOURCE_DIR}=/okiidoku`
 		},
 		"cwd": "${command:cmake.getLaunchTargetDirectory}/.." // see OKIIDOKU_TEST_WORKING_DIRECTORY. sets gdb pwd. "inferior" (debuggee) program inherits.
 	},

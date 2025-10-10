@@ -1,3 +1,8 @@
+-Wbidi-chars=any
+-Wnormalized
+-Wno-unknown-pragmas
+-Wno-attributes=clang::
+
 -Wtrampolines
 -Wimplicit-fallthrough=5
 

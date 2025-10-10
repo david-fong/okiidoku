@@ -13,9 +13,9 @@
 ## Project Style Guide
 
 - Try to follow pitchfork layout conventions
-- Use Stroustrup naming conventions. In general, use lower-snake with `_t` suffix for type aliases.
+- Use Stroustrup naming conventions. In general, use lower-snake with `_t` suffix for type aliases. <!-- TODO: is _t suffix reserved by POSIX? -->
 - Use `struct` for things where the primary purpose is to _store_ things. Use `class` for where the primary purpose is to _do_ things.
-- If an optional CMake target requires fetching large dependencies, guard the `add_subdirectory` with a cmake option; otherwise, mark with EXCLUDE_FROM_ALL.
+- If an optional CMake target requires fetching large dependencies, guard the `add_subdirectory` with a cmake option, so the same option can be used to avoid `FetchContent` of the dependency; otherwise, mark with EXCLUDE_FROM_ALL.
 
 ## Snippets
 

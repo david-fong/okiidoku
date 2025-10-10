@@ -17,12 +17,12 @@ namespace okiidoku::util {
 
 	namespace {
 		#ifdef _WIN32
-		std::optional<DWORD> old_con_mode {std::nullopt};
-		std::optional<UINT> old_con_input_codepage {std::nullopt};
-		std::optional<UINT> old_con_output_codepage {std::nullopt};
+		constinit std::optional<DWORD> old_con_mode            {std::nullopt};
+		constinit std::optional<UINT>  old_con_input_codepage  {std::nullopt};
+		constinit std::optional<UINT>  old_con_output_codepage {std::nullopt};
 		#endif
 
-		void restore_console_config_() {
+		void restore_console_config() {
 			#ifdef _WIN32
 			if (old_con_mode) { SetConsoleMode(GetStdHandle(STD_OUTPUT_HANDLE), old_con_mode.value()); }
 			if (old_con_input_codepage) { SetConsoleCP(old_con_input_codepage.value()); }
@@ -32,7 +32,7 @@ namespace okiidoku::util {
 	}
 
 	MyNumPunct* setup_console() {
-		// My implementation specifies this as safe:
+		// libokiidoku specifies this as safe:
 		std::ios_base::sync_with_stdio(false);
 		auto* numpunct {new MyNumPunct};
 		const auto pushed_locale {std::cout.imbue(std::locale(std::cout.getloc(), numpunct))};
@@ -53,9 +53,8 @@ namespace okiidoku::util {
 		}
 		#endif
 
-		const auto registration_failure {std::atexit(&restore_console_config_)};
-		if (registration_failure != 0) {
-			restore_console_config_(); // just undo the console things immediately.
+		if (std::atexit(&restore_console_config) != 0) {
+			restore_console_config(); // just undo the console things immediately.
 		}
 		return numpunct;
 	}

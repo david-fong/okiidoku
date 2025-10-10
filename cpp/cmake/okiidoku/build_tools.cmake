@@ -1,20 +1,45 @@
 # SPDX-FileCopyrightText: 2020 David Fong
 # SPDX-License-Identifier: GPL-3.0-or-later
 include_guard(DIRECTORY)
-if(NOT okiidoku_IS_TOP_LEVEL)
-	return()
-endif()
 
 # see also tools/cmake_top_project_include.cmake
 # do not wrap these with `block()`
 
-if(UNIX AND NOT EMSCRIPTEN)
-	add_link_options(
-		LINKER:--package-metadata=JSON # https://systemd.io/PACKAGE_METADATA_FOR_EXECUTABLE_FILES/
-		LINKER:--build-id
-		LINKER:--compress-debug-sections=zstd
-	)
+
+if(EMSCRIPTEN AND okiidoku_IS_TOP_LEVEL)
+	# https://emscripten.org/docs/tools_reference/emcc.html#emcc-gsource-map
+	add_link_options("$<${debug_configs}:-gsource-map>")
 endif()
+
+
+# related to reproducible builds / deterministic compilation:
+if(NOT MSVC)
+	add_compile_options(
+		# "-Werror=date-time" # error to use __TIME__, __DATE__ or __TIMESTAMP__
+		"-fno-record-gcc-switches" "-gno-record-gcc-switches"
+		"-ffile-prefix-map=${okiidoku_SOURCE_DIR}=/okiidoku"
+		#  see also gdb: set substitute-path, lldb: target.source-map, vscode: "sourceFileMap"
+		# TODO: why am I still getting absolute paths in debug builds for GCC?
+	)
+	if(EMSCRIPTEN AND okiidoku_IS_TOP_LEVEL)
+		# https://emscripten.org/docs/tools_reference/settings_reference.html#source-map-prefixes
+		# https://github.com/emscripten-core/emscripten/blob/main/ChangeLog.md#406---032625
+		add_link_options("$<${debug_configs}:-sSOURCE_MAP_PREFIXES=${okiidoku_SOURCE_DIR}=/okiidoku>") # TODO.low this doesn't seem to be working. it's using relative paths...
+	endif()
+endif()
+if((CMAKE_CXX_COMPILER_ID MATCHES [[Clang]]) OR EMSCRIPTEN)
+	add_compile_options("-fno-record-command-line")
+endif()
+
+
+if(UNIX AND NOT EMSCRIPTEN)
+add_link_options(
+	LINKER:--package-metadata=JSON # https://systemd.io/PACKAGE_METADATA_FOR_EXECUTABLE_FILES/
+	LINKER:--build-id
+	LINKER:--compress-debug-sections=zstd
+)
+endif()
+
 
 # link-time optimization things
 include(CheckIPOSupported)
@@ -34,7 +59,8 @@ if(NOT "${CMAKE_CXX_COMPILER_LINKER_FRONTEND_VARIANT}" STREQUAL "MSVC")
 	add_link_options("LINKER:--gc-sections")
 endif()
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-	#add_compile_options("-fipa-reorder-for-locality") # TODO.wait GCC v15
+	# add_compile_options("-fipa-reorder-for-locality") # doesn't seem to make a difference :.
+	# add_link_options("-fipa-reorder-for-locality") # not sure if this is needed
 	# https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html#index-fipa-reorder-for-locality
 	# If using this option it is recommended to also use profile feedback
 	# otherwise https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html#index-freorder-functions default for -O2, -O3, -Os.
@@ -43,26 +69,28 @@ endif()
 
 # ccache
 if(NOT DEFINED CMAKE_CXX_COMPILER_LAUNCHER)
-	find_program(CCACHE_EXE NAMES ccache DOC "Path to ccache executable")
-	if(NOT "${CCACHE_EXE}" STREQUAL "CCACHE_EXE-NOTFOUND")
-		set(CMAKE_CXX_COMPILER_LAUNCHER "${CCACHE_EXE}"
-			# "--config-path" "${okiidoku_SOURCE_DIR}/tools/ccache.conf"
-			# man ccache @"COMPILING IN DIFFERENT DIRECTORIES":
-			# "base_dir=${okiidoku_SOURCE_DIR}/.." "hash_dir=false"
-			# "run_second_cpp=false"
-		)
-		# add_compile_options( # see run_second_cpp docs
-		# 	"$<$<CXX_COMPILER_ID:GNU>:-fdirectives-only>"
-		# 	"$<$<CXX_COMPILER_ID:Clang>:-frewrite-includes>"
-		# )
-		set(CMAKE_C_COMPILER_LAUNCHER "${CMAKE_CXX_COMPILER_LAUNCHER}")
-	endif()
+find_program(CCACHE_EXE NAMES ccache DOC "Path to ccache executable")
+if(NOT "${CCACHE_EXE}" STREQUAL "CCACHE_EXE-NOTFOUND")
+	message("using ccache with namespace `okiidoku.${CMAKE_CXX_COMPILER_ID}.$<CONFIG>`") # (for `ccache --evict-namespace`)
+	set(CMAKE_CXX_COMPILER_LAUNCHER "${CCACHE_EXE}"
+		"namespace = okiidoku.${CMAKE_CXX_COMPILER_ID}.$<CONFIG>"
+		"ignore_options = /w* /W* -W* -ftabstop=*"
+		# man ccache @"COMPILING IN DIFFERENT DIRECTORIES":
+		"base_dir = ${okiidoku_SOURCE_DIR}/.." "hash_dir=false"
+		# "run_second_cpp=false"
+	)
+	# add_compile_options( # see run_second_cpp docs
+	# 	"$<$<CXX_COMPILER_ID:GNU>:-fdirectives-only>"
+	# 	"$<$<CXX_COMPILER_ID:Clang>:-frewrite-includes>"
+	# )
+	set(CMAKE_C_COMPILER_LAUNCHER "${CMAKE_CXX_COMPILER_LAUNCHER}")
+endif()
 endif()
 
 
 # ninjatracing
 # TODO.wait https://www.kitware.com/new-cmake-instrumentation-feature-provides-detailed-timing-of-builds/  https://www.kitware.com/tag/cmake/
-if(CMAKE_GENERATOR MATCHES [[^Ninja]])
+if(okiidoku_IS_TOP_LEVEL AND (CMAKE_GENERATOR MATCHES [[^Ninja]]))
 install(CODE #[[build perf data]] "
 file(MAKE_DIRECTORY \"${OKIIDOKU_DATA_OUTPUT_DIRECTORY}\")
 execute_process(

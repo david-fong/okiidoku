@@ -3,7 +3,7 @@
 # cspell:dictionaries cpp-refined
 cmake_minimum_required(VERSION 4.1)
 if(CMAKE_SCRIPT_MODE_FILE STREQUAL "")
-	message(FATAL_ERROR "this should be called as a script")
+	message(FATAL_ERROR "this should be called as an install script")
 endif()
 
 find_package(Git QUIET)
@@ -34,7 +34,7 @@ else()
 endif()
 
 # include(GNUInstallDirs) # want to use DATADIR, but get warning about enabling a language, and `enable_language` also gives a warning :/
-file(CONFIGURE OUTPUT ${CMAKE_INSTALL_PREFIX}/share/okiidoku/about.git.md CONTENT
+file(CONFIGURE OUTPUT "${CMAKE_INSTALL_PREFIX}/share/okiidoku/about.git.md" CONTENT
 "<!-- SPDX-FileCopyrightText: 2020 David Fong -->
 <!-- SPDX-License-Identifier: CC0-1.0 -->
 

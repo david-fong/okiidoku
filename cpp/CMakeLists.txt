@@ -8,7 +8,7 @@ project(okiidoku
 	LANGUAGES CXX
 )
 list(APPEND CMAKE_MODULE_PATH "${okiidoku_SOURCE_DIR}/cmake")
-set(_OKIIDOKU_VERSION_COMPATIBILITY ExactVersion) # see `cmake/installation.cmake`
+set(_OKIIDOKU_COMPAT_VERSION "${okiidoku_VERSION}") # see `cmake/installation.cmake`
 # ^consider switching to support `SameMajorVersion` starting at v1.0.0.
 set(CMAKE_CXX_SCAN_FOR_MODULES NO) # I'm not using C++ modules... yet. see https://cmake.org/cmake/help/latest/manual/cmake-cxxmodules.7.html, https://crascit.com/2024/04/04/cxx-modules-cmake-shared-libraries/, ccache docs section on C++ Modules if/when transitioning.
 include(okiidoku/default_output_dirs)

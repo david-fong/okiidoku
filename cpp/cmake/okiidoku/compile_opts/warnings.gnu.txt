@@ -1,6 +1,6 @@
 -Wall -Wextra -Wpedantic -pedantic-errors
 -Wold-style-cast
--Wvla
+-Wvla -Wabi
 -Wconversion -Wsign-conversion
 -Wdouble-promotion
 -Wsign-promo

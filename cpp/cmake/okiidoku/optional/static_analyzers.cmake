@@ -7,14 +7,14 @@ if(NOT OKIIDOKU_BUILD_WITH_STATIC_ANALYZERS)
 endif()
 
 if(MSVC)
-	target_compile_options(okiidoku_compiler_warnings INTERFACE "/analyze")
+	target_compile_options(okiidoku::compiler_warnings INTERFACE "/analyze")
 	#^ https://docs.microsoft.com/en-us/cpp/build/reference/analyze-code-analysis
 else()
-	target_compile_options(okiidoku_compiler_warnings INTERFACE "$<$<COMPILE_LANGUAGE:C>:-fanalyzer>")
+	target_compile_options(okiidoku::compiler_warnings INTERFACE "$<$<COMPILE_LANGUAGE:C>:-fanalyzer>")
 	#^ https://gcc.gnu.org/onlinedocs/gcc/Static-Analyzer-Options.html
 	#  it's intended for C code and unlikely to be useful for C++ (see https://gcc.gnu.org/gcc-13/changes.html)
 	#  https://gcc.gnu.org/gcc-15/changes.html says that still the case
-	target_compile_definitions(okiidoku_compiler_warnings INTERFACE
+	target_compile_definitions(okiidoku::compiler_warnings INTERFACE
 		"$<${debug_configs}:_GLIBCXX_CONCEPT_CHECKS>"
 	)
 endif()

@@ -6,12 +6,13 @@
 # TODO.low try Alex's tutorial things for installation utilities.
 
 add_library(okiidoku #[[ uses BUILD_SHARED_LIBS ]] "")
-add_library("${PROJECT_NAME}::okiidoku" ALIAS okiidoku)
+add_library("okiidoku::lib" ALIAS okiidoku)
 target_compile_features(okiidoku PUBLIC cxx_std_23)
 set_target_properties(okiidoku PROPERTIES
-	# https://www.youtube.com/watch?v=m0DwB4OvDXk&ab_channel=CppCon&t=17m13s
+	# https://youtu.be/m0DwB4OvDXk?t=17m13s
 	VERSION   "${okiidoku_VERSION}"
 	SOVERSION "${okiidoku_VERSION_MAJOR}"
+	EXPORT_NAME lib
 	CXX_STANDARD_REQUIRED TRUE
 	CXX_EXTENSIONS OFF
 	CXX_VISIBILITY_PRESET hidden
@@ -74,7 +75,6 @@ block()
 		# https://sourceware.org/gdb/current/onlinedocs/gdb.html/objfile_002dgdbdotext-file.html
 		add_custom_command(TARGET okiidoku POST_BUILD
 			COMMENT "symlinking okiidoku-gdb.py to build directory"
-			# COMMAND "${c};make_directory;${OKIIDOKU_DATA_OUTPUT_DIRECTORY}/gdb/auto-load"
 			COMMAND "${c};create_symlink;${tools}/okiidoku-gdb.py;$<TARGET_SONAME_FILE:okiidoku>-gdb.py"
 			VERBATIM COMMAND_EXPAND_LISTS
 		)

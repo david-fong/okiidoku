@@ -40,7 +40,7 @@ endif()
 # 	DEPENDS
 # 		okiidoku_nb
 # 		okiidoku # for good measure
-# 		okiidoku_compiler_warnings # necessary for nanobind v2.7.0's very basic sanitizer detection. I attach sanitizer flags to this target.
+# 		okiidoku::compiler_warnings # necessary for nanobind v2.7.0's very basic sanitizer detection. I attach sanitizer flags to this target.
 # )
 endblock()
 

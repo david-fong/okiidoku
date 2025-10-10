@@ -52,14 +52,10 @@ Issues I'm watching:
 
 ## Misc List
 
-- https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Rc-struct
-  > Use `class` if the class has an invariant; use `struct` if the data members can vary independently
-
+- move `okiidoku_translator` to `extras/`.
 - do some `static_assert` tests for types of deducing this member functions. just discovered that I was having a bug with one because I was using something after `std::forward`? maybe I _shouldn't_ have disabled that clang-tidy check... but then why did I see people doing this thing in example code? I guess because you need to be careful about copies with iterators?
 - make canon functions pure producers of a canonicalizing transformation. take grid by const reference. name `canon_sym` -> `get_sym_canon_map`.
 - see if helpful to add `/// \cond detail` wrapper to `detail` namespaces to suppress doxygen for them
-
-- reconsider trying to follow c++coreguideline https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#c139-use-final-on-classes-sparingly. see https://www.foonathan.net/2016/05/final2/ "narrow contract". I don't think the C++coreguideline even applies to most cases where I tried to follow it, since my classes mostly don't have any virtual stuff.
 
 - https://www.pcg-random.org/using-pcg-cpp.html
   https://github.com/imneme/pcg-cpp/tags
@@ -75,7 +71,7 @@ Issues I'm watching:
   `BuildPassReferences:true`
 
 - https://developer.chrome.com/blog/faster-wasm-debugging/
-- reevaluate doctest vs Catch2 choice. doctest is ~10 seconds to compile the grid test without -Og, and 21 seconds with -Og. I'm not actually sure that doctest is the reason, but I wonder if it is.
+- reevaluate doctest vs Catch2 choice. doctest is ~10 seconds to compile the grid test without -Og, and 21 seconds with -Og. I'm not actually sure that doctest is the reason, but I wonder if it is. maybe more importantly, doctest doesn't seem to be very actively maintained
 
 - can emscripten just install/package the runtime component? or how can I make it not include headers in the package? https://cmake.org/cmake/help/book/mastering-cmake/chapter/Packaging%20With%20CPack.html#cpack-and-cmake-install-commands
 - make repl support custom streams? or should that just be handled by caller of the progam? related: support saving session history files that can be later passed as program stdin to repro.
