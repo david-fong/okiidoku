@@ -150,6 +150,7 @@ namespace okiidoku::mono {
 
 
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
+		template struct BitArray<(O_)     , IntKind::fast >; \
 		template struct BitArray<(O_)*(O_), IntKind::small>; \
 		template struct BitArray<(O_)*(O_), IntKind::fast >; \
 		static_assert(std::input_iterator<BitArray<(O_)*(O_)>::Iter>);

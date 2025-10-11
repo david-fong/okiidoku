@@ -27,7 +27,7 @@ namespace okiidoku::mono {
 
 			const auto sym_ {operator[](row,col)}; sym_.check();
 			if (sym_ == T::O2) { continue; }
-			const o2x_t sym {sym_};
+			const o2x_t sym {*sym_};
 
 			auto& col_has {cols_has[col]};
 			auto& box_has {h_chute_boxes_has[col / T::O1]};

@@ -24,22 +24,22 @@ namespace okiidoku::cli {
 			gen_multiple,
 		};
 		inline const std::map<std::string_view, Command::E> command_str_to_enum_map {
-			{ "help",         E::help },
-			{ "quit",         E::quit },
-			{ "order",        E::config_order },
-			{ "canonicalize", E::config_auto_canonicalize },
-			{ "",             E::gen_single },
-			{ "gen",          E::gen_multiple },
+			{ "help",  E::help },
+			{ "quit",  E::quit },
+			{ "order", E::config_order },
+			{ "canon", E::config_auto_canonicalize },
+			{ "",      E::gen_single },
+			{ "gen",   E::gen_multiple },
 		};
 		inline constexpr std::string_view help_message {"\nCOMMAND MENU:"
-		"\n- help                  print this help menu"
-		"\n- quit                  cleanly exit this program"
+		"\n- help               print this help menu"
+		"\n- quit               cleanly exit this program"
 		"\n"
-		"\n- order [<order>]       get/set order (sqrt of grid length)"
-		"\n- canonicalize [<y/n>]  get/set canonicalization"
+		"\n- order [<order>]    get/set order (sqrt of grid length)"
+		"\n- canon [<y/n>]      get/set canonicalization"
 		"\n"
-		"\n- {enter}               generate a single solution"
-		"\n- gen <n>               generate <n> solutions"
+		"\n- {enter}            generate a single solution"
+		"\n- gen <n>            generate <n> solutions"
 		};
 	}
 

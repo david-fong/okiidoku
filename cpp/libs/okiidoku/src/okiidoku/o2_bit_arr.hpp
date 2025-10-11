@@ -224,9 +224,9 @@ namespace okiidoku::mono {
 			[[gnu::pure]] pointer   operator->() const noexcept { return value(); }
 			Iter& operator++()    noexcept { advance(); return *this; }
 			Iter  operator++(int) noexcept { Iter tmp = *this; ++(*this); return tmp; }
-			[[nodiscard, gnu::pure]] friend bool operator!=(const Iter& i, [[maybe_unused]] const std::default_sentinel_t s) noexcept { return  i.not_end(); }
+			[[nodiscard, gnu::pure]] friend bool operator!=(const Iter& i, [[maybe_unused]] const std::default_sentinel_t s) noexcept { return i.not_end(); }
 			[[nodiscard, gnu::pure]] auto& begin() { return *this; }
-			[[nodiscard, gnu::pure]] auto  end()   { return std::default_sentinel; }
+			[[nodiscard, gnu::const]] auto end()   { return std::default_sentinel; }
 		};
 		[[nodiscard, gnu::pure]] Iter set_bits() const noexcept {
 			return Iter(*this);

@@ -53,7 +53,6 @@ Issues I'm watching:
 
 ## Misc List
 
-- make O2BitArr take `IntKind` param and not be limited to O2. make it take width as a param.
 - move `okiidoku_translator` to `extras/`.
 - do some `static_assert` tests for types of deducing this member functions. just discovered that I was having a bug with one because I was using something after `std::forward`? maybe I _shouldn't_ have disabled that clang-tidy check... but then why did I see people doing this thing in example code? I guess because you need to be careful about copies with iterators?
 - make canon functions pure producers of a canonicalizing transformation. take grid by const reference. name `canon_sym` -> `get_sym_canon_map`.

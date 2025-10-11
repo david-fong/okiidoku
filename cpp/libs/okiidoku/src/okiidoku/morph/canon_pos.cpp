@@ -143,10 +143,10 @@ namespace okiidoku::mono { namespace {
 			);
 		}
 
-		line_ties.update([&][[gnu::pure]](o2is_t a, o2is_t b){
+		line_ties.update([&][[gnu::pure]](o2xs_t a, o2xs_t b){
 			return ranges::equal(table.row_span_at(to_tied[a]), table.row_span_at(to_tied[b]));
 		});
-		chute_ties.update([&][[gnu::pure]](o1i_t a, o1i_t b){
+		chute_ties.update([&][[gnu::pure]](o1x_t a, o1x_t b){
 			return ranges::equal(chute_tie_data(a), chute_tie_data(b));
 		});
 		// TODO.high tie data for lines in chute currently are not updated after updates to chute ordering...

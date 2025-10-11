@@ -54,11 +54,12 @@ namespace okiidoku::mono { namespace {
 			Grid<O> sym_box_to_boxcell_map;
 			sym_map_t<O> to_og; ///< `map[sym_new] -> sym_orig`.
 			detail::Ties<O, 2> ties {};
+			/** \pre grid is filled and follows the one rule. */
 			explicit constexpr State(const Grid<O>& grid) noexcept {
 				for (const auto row : T::O2) {
 				for (const auto col : T::O2) {
+					const auto sym {*grid[row, col]};
 					const auto box {row_col_to_box<O>(row, col)};
-					const o2x_t sym {grid[row, col]};
 					const auto box_cell = row_col_to_box_cell<O>(row, col);
 					sym_box_to_boxcell_map[sym, box] = box_cell;
 				}}

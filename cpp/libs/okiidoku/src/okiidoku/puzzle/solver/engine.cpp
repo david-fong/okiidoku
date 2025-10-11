@@ -51,7 +51,7 @@ namespace okiidoku::mono::detail::solver {
 			const auto& sym {puzzle[rmi]};
 			sym.check();
 			if (sym < T::O2) [[likely]] {
-				register_new_given_(rmi, sym_t{sym});
+				register_new_given_(rmi, *sym);
 			}
 		}
 	}

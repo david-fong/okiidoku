@@ -215,12 +215,8 @@ namespace okiidoku {
 		constexpr Int(const Int<M_from,K_from> other) noexcept requires(kind != IntKind::constant && M_from <= max): // NOLINT(*-explicit-constructor)
 			val_{static_cast<val_t>(other.val())} { check(); }
 
-		/** explicit conversion from `Int` higher in capacity by one,
-		to allow cast to sentinel-exclusive-bound `Int` when iterating. */
-		// TODO.high can this be removed? we already have operator*, right? can't that just use the builtin type constructor?
-		template<IntKind K_from>
-		explicit constexpr Int(const Int<max+1u,K_from> other) noexcept requires(kind != IntKind::constant): Int{other.val()} { check(); }
-
+		/** construct from another bounded int with higher capacity.
+		\pre `other.val() <= max`. */
 		template<max_t M_from, IntKind K_from> [[gnu::const]]
 		static constexpr Int unchecked_from(const Int<M_from,K_from> other) noexcept requires(kind != IntKind::constant) {
 			OKIIDOKU_CONTRACT(other.val() <= max);
@@ -257,7 +253,7 @@ namespace okiidoku {
 		[[nodiscard, gnu::const]] constexpr Int<max-1u,kind> operator*(this const Int self) noexcept requires(kind != IntKind::constant) {
 			static_assert(max > 0u);
 			self.check(); OKIIDOKU_CONTRACT(self.val() < max);
-			return Int<max-1u,kind>{self};
+			return Int<max-1u,kind>{self.val()};
 		}
 
 		/** \pre `val() + other.val() <= max` */
@@ -444,10 +440,10 @@ namespace okiidoku::mono {
 		static_assert(!std::is_nothrow_convertible_v<Int<std::uintmax_t{(MAX_)+1u}>,o##P_##SUFFIX_##s_t>, "no implicit conversion from sentinel type"); \
 		static_assert(!std::is_nothrow_convertible_v<Int<std::uintmax_t{(MAX_)+1u},IntKind::small>,o##P_##SUFFIX_## _t>, "no implicit conversion from sentinel type"); \
 		static_assert(!std::is_nothrow_convertible_v<Int<std::uintmax_t{(MAX_)+1u},IntKind::small>,o##P_##SUFFIX_##s_t>, "no implicit conversion from sentinel type"); \
-		static_assert( std::is_nothrow_constructible_v<o##P_##SUFFIX_## _t,Int<std::uintmax_t{(MAX_)+1u}>>, "explicit conversion from sentinel type"); \
-		static_assert( std::is_nothrow_constructible_v<o##P_##SUFFIX_##s_t,Int<std::uintmax_t{(MAX_)+1u}>>, "explicit conversion from sentinel type"); \
-		static_assert( std::is_nothrow_constructible_v<o##P_##SUFFIX_## _t,Int<std::uintmax_t{(MAX_)+1u},IntKind::small>>, "explicit conversion from sentinel type"); \
-		static_assert( std::is_nothrow_constructible_v<o##P_##SUFFIX_##s_t,Int<std::uintmax_t{(MAX_)+1u},IntKind::small>>, "explicit conversion from sentinel type"); \
+		static_assert(!std::is_nothrow_constructible_v<o##P_##SUFFIX_## _t,Int<std::uintmax_t{(MAX_)+1u}>>, "explicit conversion from sentinel type"); \
+		static_assert(!std::is_nothrow_constructible_v<o##P_##SUFFIX_##s_t,Int<std::uintmax_t{(MAX_)+1u}>>, "explicit conversion from sentinel type"); \
+		static_assert(!std::is_nothrow_constructible_v<o##P_##SUFFIX_## _t,Int<std::uintmax_t{(MAX_)+1u},IntKind::small>>, "explicit conversion from sentinel type"); \
+		static_assert(!std::is_nothrow_constructible_v<o##P_##SUFFIX_##s_t,Int<std::uintmax_t{(MAX_)+1u},IntKind::small>>, "explicit conversion from sentinel type"); \
 		static_assert( std::is_nothrow_assignable_v<o##P_##SUFFIX_## _t,unsigned char>); \
 		static_assert( std::is_nothrow_assignable_v<o##P_##SUFFIX_## _t,unsigned short>); \
 		static_assert( std::is_nothrow_assignable_v<o##P_##SUFFIX_## _t,unsigned int>); \

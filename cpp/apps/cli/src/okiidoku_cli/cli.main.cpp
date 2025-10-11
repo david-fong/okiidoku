@@ -55,8 +55,8 @@ int main(const int argc, char const *const argv[]) {
 	#endif
 
 	std::cout << "parsed arguments:"
-		<< "\n- [1] (grid order) : " << user_order
-		<< "\n- [2] (prng seed)  : " << std::hex;
+		<< "\n[1] (grid order) : " << user_order
+		<< "\n[2] (prng seed)  : " << std::hex;
 			numpunct->set_grouping(0); std::cout << rng_seed;
 			numpunct->set_grouping(3); std::cout << std::dec;
 	std::cout << std::endl;
