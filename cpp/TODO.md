@@ -27,6 +27,7 @@
 - Ensure dependencies that should be private to the library implementation aren't exposed in any way to the library interface.
 - Check if any `NOLINT` comments are no longer needed
 - Check if GCC suggest attribute `pure` or `const` anywhere (disabled for default dev flags because GCC14 is noisy for `[[assume(expr)]]`).
+- Check if any `OKIIDOKU_CONTRACT2` can be changed to `OKIIDOKU_CONTRACT` (see if Clang warns about potential side effects in `[[assume(expr)]]`).
 - Check if any `static_cast`s are no longer needed
 - Check which `#ifdef __EMSCRIPTEN__` / `__cpp_lib_...` blocks can be removed as emscripten updates its sysroot libc++.
 - https://en.cppreference.com/w/cpp/language/rule_of_three

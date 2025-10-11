@@ -45,11 +45,11 @@
 	#define OKIIDOKU_DETAIL_UNREACHABLE_     static_cast<void>(0)
 #endif
 
-#ifdef NDEBUG
+#ifdef NDEBUG // release:
 	#define OKIIDOKU_CONTRACT( expr) OKIIDOKU_DETAIL_CONTRACT_(expr)
 	#define OKIIDOKU_CONTRACT2(expr) OKIIDOKU_DETAIL_CONTRACT2_(expr)
 	#define OKIIDOKU_UNREACHABLE     OKIIDOKU_DETAIL_UNREACHABLE_
-#else
+#else // debug:
 	// NOLINTBEGIN(cert-dcl03-c,misc-static-assert) runtime abort desirable here.
 	#define OKIIDOKU_CONTRACT( expr) OKIIDOKU_ASSERT_(expr);  OKIIDOKU_DETAIL_CONTRACT_(expr)
 	#define OKIIDOKU_CONTRACT2(expr) OKIIDOKU_ASSERT_(expr);  OKIIDOKU_DETAIL_CONTRACT2_(expr)

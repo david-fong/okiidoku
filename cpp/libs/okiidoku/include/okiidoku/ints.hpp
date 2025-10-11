@@ -189,7 +189,8 @@ namespace okiidoku {
 		using difference_type = detail::int_fast_for_max_t<static_cast<std::intmax_t>(max)>;
 	private:
 		/** underlying storage. */
-		[[no_unique_address]] std::conditional_t<kind == IntKind::constant, bool, val_t> val_ {0u};
+		[[no_unique_address]] std::conditional_t<(kind==IntKind::constant), bool, val_t> val_ {0u};
+		consteval Int([[maybe_unused]] const std::uintmax_t val) noexcept requires(kind == IntKind::constant): val_{false} { OKIIDOKU_CONTRACT(val == max); }
 	public:
 		[[gnu::always_inline]] constexpr void check() const noexcept requires(kind == IntKind::constant) {}
 		[[gnu::always_inline]] constexpr void check() const noexcept requires(kind != IntKind::constant) {
@@ -216,6 +217,7 @@ namespace okiidoku {
 
 		/** explicit conversion from `Int` higher in capacity by one,
 		to allow cast to sentinel-exclusive-bound `Int` when iterating. */
+		// TODO.high can this be removed? we already have operator*, right? can't that just use the builtin type constructor?
 		template<IntKind K_from>
 		explicit constexpr Int(const Int<max+1u,K_from> other) noexcept requires(kind != IntKind::constant): Int{other.val()} { check(); }
 
@@ -232,9 +234,10 @@ namespace okiidoku {
 		// template<class T> requires(std::unsigned_integral<T> && std::numeric_limits<T>::max() >= max)
 		// constexpr operator T() const noexcept { check(); return val(); }
 		[[nodiscard, gnu::const]] constexpr val_t val     ([[maybe_unused]] this const Int self) noexcept requires(kind == IntKind::constant) { return max; }
-		[[nodiscard, gnu::const]] constexpr val_t val     (this const Int self) noexcept requires(kind != IntKind::constant) { self.check(); return self.val_; }
+		[[nodiscard, gnu::const]] constexpr val_t val     (                 this const Int self) noexcept requires(kind != IntKind::constant) { self.check(); return self.val_; }
 		[[nodiscard, gnu::const]] constexpr auto  as_fast (this const Int self) noexcept { self.check(); return Int<max, IntKind::fast> {self.val()}; }
 		[[nodiscard, gnu::const]] constexpr auto  as_small(this const Int self) noexcept { self.check(); return Int<max, IntKind::small>{self.val()}; }
+		using constant_t = Int<max_, IntKind::constant>;
 
 		// see ints_io.hpp
 		// friend std::ostream& operator<<(std::ostream& os, const Int& i) noexcept;
@@ -297,7 +300,7 @@ namespace okiidoku {
 		template<max_t ML, IntKind KL, max_t MR, IntKind KR> constexpr friend bool operator> (Int<ML,KL> lhs, Int<MR,KR> rhs) noexcept;
 		template<max_t ML, IntKind KL, max_t MR, IntKind KR> constexpr friend auto operator+ (Int<ML,KL> lhs, Int<MR,KR> rhs) noexcept;
 		template<max_t ML, IntKind KL, max_t MR, IntKind KR> constexpr friend auto operator- (Int<ML,KL> lhs, Int<MR,KR> rhs) noexcept requires(ML >= MR);
-		template<max_t ML, IntKind KL, max_t MR, IntKind KR> constexpr friend auto operator* (Int<ML,KL> lhs, Int<MR,KR> rhs) noexcept;
+		template<max_t ML, IntKind KL, max_t MR, IntKind KR> constexpr friend auto operator* (Int<ML,KL> lhs, Int<MR,KR> rhs) noexcept requires(ML==0u || MR==0u || ML <= std::numeric_limits<std::uintmax_t>::max() / MR);
 		template<max_t ML, IntKind KL, max_t MR            > constexpr friend auto operator/ (Int<ML,KL> lhs, Int<MR,IntKind::constant>   rhs) noexcept requires(MR > 0u);
 		template<max_t ML, IntKind KL, max_t MR, IntKind KR> constexpr friend auto operator% (Int<ML,KL> lhs, Int<MR,KR>                  rhs) noexcept requires(MR > 0u);
 		template<                      max_t MR, IntKind KR> constexpr friend auto operator% (std::unsigned_integral auto lhs, Int<MR,KR> rhs) noexcept requires(MR > 0u);
@@ -334,7 +337,7 @@ namespace okiidoku {
 	[[gnu::const]] constexpr auto operator*(const Int<ML,KL> lhs, const Int<MR,KR> rhs) noexcept requires(ML==0u || MR==0u || ML <= std::numeric_limits<std::uintmax_t>::max() / MR) {
 		lhs.check(); rhs.check();
 		static constexpr auto KO {pick_int_op_result_kind(KL,KR)};
-		Int<ML*MR,KO> ret {lhs.val() * rhs.val()};
+		Int<ML*MR,KO> ret {static_cast<Int<ML*MR,KO>::val_t>(lhs.val() * rhs.val())};
 		OKIIDOKU_CONTRACT((lhs.val() == 0u || rhs.val() == 0u) == (ret.val() == 0u));
 		OKIIDOKU_CONTRACT((lhs.val() == 1u || rhs.val() == 0u) == (ret.val() == rhs.val()));
 		OKIIDOKU_CONTRACT((rhs.val() == 1u || lhs.val() == 0u) == (ret.val() == lhs.val()));

@@ -93,6 +93,7 @@ namespace okiidoku::mono {
 		/** \note default initialize as an empty grid (to be safe). */
 		Grid() noexcept: B{T::O2} {}
 
+		/** get underlying array */ // TODO why don't I just make the field public if I'm going to do this? unless I'm going to make grid classes smarter and have a tag type about whether they're solved or not
 		[[nodiscard, gnu::pure]] OKIIDOKU_EXPORT constexpr
 		decltype(auto) arr(this auto&& self) noexcept { return std::forward_like<decltype(self)>(self.B::arr); }
 

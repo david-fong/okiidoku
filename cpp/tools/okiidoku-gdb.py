@@ -34,7 +34,7 @@ class IntPrinter:
 class O2BitArrPrinter:
 	__name_pattern = re.compile(r"^okiidoku::mono::O2BitArr<(?<order>\d+?)>$")
 	def __init__(self, val: gdb.Value):
-		# self.word_t_num_bits = gdb.parse_and_eval('okiidoku::mono::O2BitArr<'+str(order)+'>::word_t_num_bits')
+		# self.num_word_bits = gdb.parse_and_eval('okiidoku::mono::O2BitArr<'+str(order)+'>::num_word_bits')
 		# self.num_words = gdb.parse_and_eval('okiidoku::mono::O2BitArr<'+str(order)+'>::num_words')
 		self.__order: gdb.Value = val.type.template_argument(0) # type:ignore (my typeshed doesn't have the right signature)
 		self.__val = val

@@ -17,19 +17,19 @@
 
 namespace okiidoku::mono { namespace {
 
-	template<Order O, bool is_writer> requires(is_order_compiled(O))
+	template<Order O, bool is_writer, IntKind bitarray_kind> requires(is_order_compiled(O))
 	class SerdesBase {
 	protected:
 		OKIIDOKU_MONO_INT_TS_TYPEDEFS
-		using cands_t = O2BitArr<O>;
+		using cands_t = O2BitArr<O,bitarray_kind>;
 		using sym_t = o2x_t; // TODO what about puzzles then? separate bitmap of populated/empty cells?
 
 	private:
 		/** hypothetical candidates remaining for future cells
 		based on already encountered (printed/parsed) cells. */
-		/*      */ cands_t /*   */ row_cands_         {O2BitArr_ones<O>};
-		std::array<cands_t, T::O1> h_chute_box_cands_ {[]{ std::array<cands_t, T::O1> _; _.fill(O2BitArr_ones<O>); return _; }()};
-		std::array<cands_t, T::O2> cols_cands_        {[]{ std::array<cands_t, T::O2> _; _.fill(O2BitArr_ones<O>); return _; }()};
+		/*      */ cands_t /*   */ row_cands_         {~cands_t{}};
+		std::array<cands_t, T::O1> h_chute_box_cands_ {[]{ std::array<cands_t, T::O1> _; _.fill(~cands_t{}); return _; }()};
+		std::array<cands_t, T::O2> cols_cands_        {[]{ std::array<cands_t, T::O2> _; _.fill(~cands_t{}); return _; }()};
 		o4i_t cell_rmi_ {0u};
 
 		// \internal not protected <- to control member layout.
@@ -78,14 +78,14 @@ namespace okiidoku::mono { namespace {
 			OKIIDOKU_CONTRACT(cell_rmi_ < T::O4); OKIIDOKU_CONTRACT(!done());
 			++cell_rmi_;
 			if (done()) [[unlikely]] { return; }
-			if (cell_rmi_ % T::O2 == 0u) [[unlikely]] { row_cands_ = O2BitArr_ones<O>; }
-			if (cell_rmi_ % T::O3 == 0u) [[unlikely]] { h_chute_box_cands_.fill(O2BitArr_ones<O>); }
+			if (cell_rmi_ % T::O2 == 0u) [[unlikely]] { row_cands_ = ~cands_t{}; }
+			if (cell_rmi_ % T::O3 == 0u) [[unlikely]] { h_chute_box_cands_.fill(~cands_t{}); }
 		}
 	};
 
 
 	template<Order O> requires(is_order_compiled(O))
-	class Writer final : public SerdesBase<O,true> {
+	class Writer final : public SerdesBase<O,true,IntKind::small> { // TODO benchmark with ::fast and compare.
 	private:
 		using sym_t = typename Ints<O>::o2x_t; // TODO what about puzzles then? separate bitmap of populated/empty cells?
 	public:
@@ -112,7 +112,7 @@ namespace okiidoku::mono { namespace {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	class Reader final : public SerdesBase<O, false> {
+	class Reader final : public SerdesBase<O,false,IntKind::fast> {
 	private:
 		using sym_t = typename Ints<O>::o2x_t; // TODO what about puzzles then? separate bitmap of populated/empty cells?
 	public:

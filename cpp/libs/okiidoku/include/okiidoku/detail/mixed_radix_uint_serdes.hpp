@@ -83,7 +83,7 @@ namespace okiidoku::detail {
 				// handle overflow of `flush` buffer...
 				OKIIDOKU_CONTRACT(buf_radixx_ != 0u); // (see template params constraint)
 				// try to use remaining space in buf:
-				const auto radix_0 {TO<radix_t>(buf_t_max / (buf_radixx_+1u))}; // TODO should divisor have +1?
+				const auto radix_0 {TO<radix_t>(buf_t_max / (buf_radixx_+1u))};
 				OKIIDOKU_CONTRACT(radix_0 <= radix_t_max);
 				OKIIDOKU_CONTRACT(radix_0 < in.radix);
 				if (radix_0 >= 2u) [[likely]] {
