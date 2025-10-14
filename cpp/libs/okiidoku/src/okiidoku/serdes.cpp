@@ -166,7 +166,7 @@ namespace okiidoku::mono {
 	template<Order O> requires(is_order_compiled(O))
 	std::size_t read_solved(Grid<O>& grid, std::istream& is) {
 		using T = Ints<O>;
-		std::size_t bytes_read {[&]{
+		const std::size_t bytes_read {[&]{
 			// parse out bulk of content (skip what can be reconstructed later):
 			Reader<O> reader {};
 			for (; !reader.done(); reader.advance()) {

@@ -11,7 +11,6 @@
 #include <okiidoku/print_2d.hpp>
 // #include <okiidoku/serdes.hpp> TODO
 #include <okiidoku/grid.hpp>
-#include <okiidoku/order.hpp>
 
 #include <iostream>     // cout, endl,
 // #include <fstream>

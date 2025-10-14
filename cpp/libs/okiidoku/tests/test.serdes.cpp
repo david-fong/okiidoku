@@ -13,6 +13,7 @@
 #include <sstream>
 #include <random>
 #include <array>
+#include <memory>  // iwyu says I need this for `allocator`?
 #include <cstdint>
 #include <cstddef> // size_t
 

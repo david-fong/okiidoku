@@ -48,7 +48,7 @@ endif()
 add_subdirectory(libs/okiidoku) # target: okiidoku
 add_subdirectory(libs/cli_utils EXCLUDE_FROM_ALL) # (internal)
 add_subdirectory(apps/cli) # target: okiidoku_cli
-add_subdirectory(tools/okiidoku_translator EXCLUDE_FROM_ALL)
+add_subdirectory(extras/okiidoku_translator EXCLUDE_FROM_ALL)
 if(EMSCRIPTEN)
 	add_subdirectory(extras/emscripten) # target: okiidoku_js
 endif()

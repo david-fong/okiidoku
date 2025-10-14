@@ -220,8 +220,8 @@ namespace okiidoku::mono {
 					i_ = width;
 				}
 			}
-			[[gnu::pure]] reference operator* () const noexcept { return value(); }
-			[[gnu::pure]] pointer   operator->() const noexcept { return value(); }
+			[[gnu::pure]] reference operator* () const noexcept { OKIIDOKU_CONTRACT(not_end()); return value(); }
+			[[gnu::pure]] pointer   operator->() const noexcept { OKIIDOKU_CONTRACT(not_end()); return value(); }
 			Iter& operator++()    noexcept { advance(); return *this; }
 			Iter  operator++(int) noexcept { Iter tmp = *this; ++(*this); return tmp; }
 			[[nodiscard, gnu::pure]] friend bool operator!=(const Iter& i, [[maybe_unused]] const std::default_sentinel_t s) noexcept { return i.not_end(); }
@@ -241,18 +241,18 @@ namespace okiidoku::mono {
 	};
 
 	template<Order O, IntKind kind_ = IntKind::small> requires(is_order_compiled(O))
-	using O2BitArr = BitArray<O*O, kind_>;
+	using O2BitArr = BitArray<std::uintmax_t{O*O}, kind_>;
 
 	template<Order O> requires(is_order_compiled(O))
-	inline constexpr BitArray<O*O> O2BitArr_ones {~(BitArray<O*O>{})};
+	inline constexpr BitArray<std::uintmax_t{O*O}> O2BitArr_ones {~(BitArray<std::uintmax_t{O*O}>{})};
 
 
 	template<Order O> requires(is_order_compiled(O))
 	struct ChuteBoxMasks final {
 		using T = Ints<O>;
 		/// `[111'000'000, 000'111'000, 000'000'111]`
-		static constexpr std::array<BitArray<O*O>, O> row {[]{
-			std::array<BitArray<O*O>, O> mask;
+		static constexpr std::array<BitArray<std::uintmax_t{O*O}>, O> row {[]{
+			std::array<BitArray<std::uintmax_t{O*O}>, O> mask;
 			for (const auto chute : T::O1) {
 				for (const auto i : T::O1) {
 					mask[chute].set((O*chute) + i);
@@ -260,7 +260,7 @@ namespace okiidoku::mono {
 			return mask;
 		}()};
 		/// `[100'100'100, 010'010'010, 001'001'001]`
-		static constexpr std::array<BitArray<O*O>, O> col {[]{
+		static constexpr std::array<BitArray<std::uintmax_t{O*O}>, O> col {[]{
 			std::array<BitArray<O>, O> mask;
 			for (const auto chute : T::O1) {
 				for (const auto i : T::O1) {

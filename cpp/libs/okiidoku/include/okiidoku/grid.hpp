@@ -15,9 +15,6 @@
 
 namespace okiidoku::mono {
 
-	template<Order O> requires(is_order_compiled(O))
-	struct Grid;
-
 	namespace detail {
 	/** a wrapper of `std::array<T, O4>`, with row-major 2D subscript operators. */
 	template<Order O, class CellType>

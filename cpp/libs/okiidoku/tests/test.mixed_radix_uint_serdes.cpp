@@ -4,6 +4,7 @@
 #include <doctest.h>
 
 #include <okiidoku/detail/mixed_radix_uint_serdes.hpp>
+#include <okiidoku/detail/util.hpp>
 
 #include <fstream>
 #include <sstream>
@@ -21,8 +22,7 @@ namespace okiidoku::test {
 	template <detail::Radix radix_t, std::unsigned_integral buf_t = std::uintmax_t>
 	OKIIDOKU_KEEP_FOR_DEBUG // NOLINTNEXTLINE(*-internal-linkage)
 	void test_mixed_radix_uint_serdes_one_round(
-		const std::uintmax_t rng_seed,
-		[[maybe_unused]] const std::uintmax_t round // for conditional breakpoints
+		const std::uintmax_t rng_seed
 	) {
 		CAPTURE(rng_seed);
 		INFO("sizeof(radix_t) := ", sizeof(radix_t));
@@ -38,8 +38,7 @@ namespace okiidoku::test {
 		const std::size_t num_places {uidist_t<std::size_t>{0u, max_num_places}(rng)}; CAPTURE(num_places);
 
 		std::size_t byte_count {0uz};
-		const auto written_data {[&,round]{
-			(void)round; // for conditional breakpoint
+		const auto written_data {[&]{
 			// serialize data to `std::string`:
 			writer_t writer;
 			std::ostringstream os;
@@ -104,9 +103,9 @@ TEST_CASE("okiidoku.mixed_radix_uint_serdes") {
 		using u16_t = std::uint_least16_t;
 		using u32_t = std::uint_least32_t;
 		using u64_t = std::uint_least64_t;
-		okiidoku::test::test_mixed_radix_uint_serdes_one_round<u8_t, u8_t >(rng(), round); // TODO unwrap these to each their own TEST_CASE
-		okiidoku::test::test_mixed_radix_uint_serdes_one_round<u8_t, u16_t>(rng(), round);
-		okiidoku::test::test_mixed_radix_uint_serdes_one_round<u8_t, u32_t>(rng(), round);
-		okiidoku::test::test_mixed_radix_uint_serdes_one_round<u8_t, u64_t>(rng(), round);
+		okiidoku::test::test_mixed_radix_uint_serdes_one_round<u8_t, u8_t >(rng()); // TODO unwrap these to each their own TEST_CASE
+		okiidoku::test::test_mixed_radix_uint_serdes_one_round<u8_t, u16_t>(rng());
+		okiidoku::test::test_mixed_radix_uint_serdes_one_round<u8_t, u32_t>(rng());
+		okiidoku::test::test_mixed_radix_uint_serdes_one_round<u8_t, u64_t>(rng());
 	}
 }

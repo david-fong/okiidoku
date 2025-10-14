@@ -7,7 +7,6 @@
 #include <okiidoku/morph/scramble.hpp>
 #include "okiidoku/morph/transform.hpp"
 #include <okiidoku/gen.hpp>
-#include <okiidoku/print_2d.hpp>
 #include <okiidoku/grid.hpp>
 #include <okiidoku/ints_io.hpp>
 #include <okiidoku/order.hpp>

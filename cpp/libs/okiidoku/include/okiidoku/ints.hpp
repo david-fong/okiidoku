@@ -190,7 +190,7 @@ namespace okiidoku {
 	private:
 		/** underlying storage. */
 		[[no_unique_address]] std::conditional_t<(kind==IntKind::constant), bool, val_t> val_ {0u};
-		consteval Int([[maybe_unused]] const std::uintmax_t val) noexcept requires(kind == IntKind::constant): val_{false} { OKIIDOKU_CONTRACT(val == max); }
+		explicit consteval Int([[maybe_unused]] const std::uintmax_t val) noexcept requires(kind == IntKind::constant) { OKIIDOKU_CONTRACT(val == max); }
 	public:
 		[[gnu::always_inline]] constexpr void check() const noexcept requires(kind == IntKind::constant) {}
 		[[gnu::always_inline]] constexpr void check() const noexcept requires(kind != IntKind::constant) {

@@ -10,7 +10,6 @@
 
 #include <array>
 #include <utility>     // declval
-#include <typeinfo>
 #include <type_traits>
 
 namespace okiidoku::mono {
@@ -25,7 +24,7 @@ template<Order O> OKIIDOKU_KEEP_FOR_DEBUG // NOLINTNEXTLINE(*-internal-linkage)
 void test_grid() {
 	using namespace ::okiidoku::mono;
 	OKIIDOKU_MONO_INT_TS_TYPEDEFS
-	// std::cout<<(typeid(decltype(std::declval<Grid<3>>().arr).name())<<'\n';
+	// std::cout<<(typeid(decltype(std::declval<Grid<3>>().arr).name())<<'\n'; // #include <typeinfo>
 
 	for (const auto i : T::O2) { CAPTURE(i);
 	for (const auto j : T::O2) { CAPTURE(j);

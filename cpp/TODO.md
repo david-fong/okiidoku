@@ -9,7 +9,7 @@
 - draft archive
 - refactor and improve canonicalization
 - compare backtracking and stochastic search statistics
-- implement an extras module for serdes of different string formats of grids that other people use
+- implement an extras module for serdes of different string formats of grids that other people use (translator)
 - refine archive
 - create a separate github repo for data. add as submodule?
 - emscripten build and website
@@ -53,7 +53,6 @@ Issues I'm watching:
 
 ## Misc List
 
-- move `okiidoku_translator` to `extras/`.
 - do some `static_assert` tests for types of deducing this member functions. just discovered that I was having a bug with one because I was using something after `std::forward`? maybe I _shouldn't_ have disabled that clang-tidy check... but then why did I see people doing this thing in example code? I guess because you need to be careful about copies with iterators?
 - make canon functions pure producers of a canonicalizing transformation. take grid by const reference. name `canon_sym` -> `get_sym_canon_map`.
 - see if helpful to add `/// \cond detail` wrapper to `detail` namespaces to suppress doxygen for them
