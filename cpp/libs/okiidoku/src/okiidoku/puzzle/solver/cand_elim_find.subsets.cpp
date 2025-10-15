@@ -5,7 +5,7 @@
 #include "okiidoku/puzzle/solver/engine.hpp" // UnwindInfo
 #include <okiidoku/puzzle/solver/subset_combo_walker.hpp>
 #include <okiidoku/puzzle/solver/found.hpp>
-#include <okiidoku/o2_bit_arr.hpp>
+#include <okiidoku/bit_array.hpp>
 #include <okiidoku/order.hpp>
 #include <okiidoku/ints.hpp>
 

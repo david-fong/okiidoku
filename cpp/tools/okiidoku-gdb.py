@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # cspell:dictionaries cpp-refined
 # cspell:words objfile _M_elems
-import re
+import typing, re
 import gdb, gdb.printing
 # https://sourceware.org/gdb/onlinedocs/gdb/Writing-a-Pretty_002dPrinter.html
 # https://sourceware.org/gdb/onlinedocs/gdb/gdb_002eprinting.html
@@ -19,13 +19,13 @@ import gdb, gdb.printing
 # - https://sourceware.org/gdb/current/onlinedocs/gdb.html/Writing-a-Pretty_002dPrinter.html
 
 
-def _call_member_fn(val: gdb.Value, fn_name: str):
+def _call_member_fn(val: gdb.Value, fn_name: str, *args):
 	# https://stackoverflow.com/a/22798055/11107541
 	# 17.5.1 "Calling functions with no debug info" https://sourceware.org/gdb/current/onlinedocs/gdb.html/Calling.html
 	# ret_v = val[fn_name]() # <- we want to do this, but GDB isn't cooperating :(
 	ret_t  = val[fn_name].type.target()
 	val_pt = val.type.strip_typedefs().pointer()
-	ret_v  = gdb.parse_and_eval(f"({ret_t})((({val_pt}){val.address})->{fn_name}())")
+	ret_v  = gdb.parse_and_eval(f"({ret_t})((({val_pt}){val.address})->{fn_name}({', '.join(args)}))")
 	return ret_v
 
 
@@ -41,26 +41,26 @@ class IntPrinter:
 
 
 class BitArrayPrinter(gdb.ValuePrinter):
-	__name_pattern = re.compile(r"^okiidoku::mono::BitArray<(?P<width>[^>]+?),\s*?(?P<kind>[^>]+?)>$")
+	__name_pattern = re.compile(r"^okiidoku::BitArray<(?P<width>[^>]+?),\s*?(?P<kind>[^>]+?)>$")
 	def __init__(self, val: gdb.Value):
 		self.__val = val
 		self.__width = int(val.type.template_argument(0)) # type:ignore (typeshed signature)
 		# self.__kind:  gdb.Value = val.type.template_argument(1) # type:ignore (typeshed signature)
 	def to_string(self):
 		v = self.__val
-		# count = gdb.parse_and_eval(f"(({self.__val.type}*)({self.__val.address}))->count()")
+		# count = _call_member_fn(v,"count")["_M_elems"]
 		chars = _call_member_fn(v,"to_chars")["_M_elems"]
 		# TODO respect `gdb.print_options()['max_elements']` ?
-		# return str(f"{count}/{self.__order}:{chars}")
 		return f"{self.__width}:{chars}"
-	def display_hint(self):
-		return "array"
-	def num_children(self):
-		return self.__width
-	def child(self, n: int):
-		return (n, self.__val["operator[]"](n))
-	def children(self):
-		return (self.child(n) for n in range(self.num_children()))
+	# def display_hint(self):
+	# 	return "array"
+	# def num_children(self):
+	# 	return self.__width
+	# def child(self, n: int):
+	# 	bit = _call_member_fn(self.__val, "operator[]", n)
+	# 	return (str(n), bit)
+	# def children(self):
+	# 	return (self.child(n) for n in range(self.num_children()))
 
 
 class MonoGridPrinter(gdb.ValuePrinter):
@@ -76,7 +76,8 @@ class MonoGridPrinter(gdb.ValuePrinter):
 	# def num_children(self):
 	# 	return self.__size
 	# def child(self, n: int):
-	# 	return (n, self.__val["operator[]"](n))
+	# 	O2 = self.__order ** 2
+	# 	return (f"{n//O2},{n%O2}", self.__val["operator[]"](n))
 	# def children(self):
 	# 	return (self.child(n) for n in range(self.num_children()))
 

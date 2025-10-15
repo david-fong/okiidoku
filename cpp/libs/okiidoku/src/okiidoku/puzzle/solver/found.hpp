@@ -3,7 +3,7 @@
 #ifndef HPP_OKIIDOKU_PUZZLE_SOLVER_FOUND
 #define HPP_OKIIDOKU_PUZZLE_SOLVER_FOUND
 
-#include <okiidoku/o2_bit_arr.hpp>
+#include <okiidoku/bit_array.hpp>
 #include <okiidoku/ints.hpp>
 
 #include <type_traits>

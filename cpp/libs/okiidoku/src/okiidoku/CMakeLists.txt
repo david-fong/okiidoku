@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # https://cmake.org/cmake/help/latest/command/target_sources.html
 target_sources(okiidoku PRIVATE
-	o2_bit_arr.cpp
+	bit_array.cpp
 	grid.cpp
 	print_2d.cpp
 

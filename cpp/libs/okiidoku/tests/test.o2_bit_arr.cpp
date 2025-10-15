@@ -3,8 +3,8 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest.h>
 
-#include <okiidoku/o2_bit_arr.hpp>
-#include <okiidoku/o2_bit_arr.cpp> // NOLINT(*include*) implementations aren't exported in libokiidoku.
+#include <okiidoku/bit_array.hpp>
+#include <okiidoku/bit_array.cpp> // NOLINT(*include*) implementations aren't exported in libokiidoku.
 #include <okiidoku/ints_io.hpp>
 #include <okiidoku/ints.hpp>
 #include <okiidoku/order.hpp>
@@ -35,6 +35,7 @@ void test_o2_bit_arr_ones() {
 			REQUIRE_UNARY(!arr[i]);
 			arr.set(i);
 			REQUIRE_UNARY(arr[i]);
+			FAIL("");
 		}
 	}{
 		auto ones {O2BitArr_ones<O>};

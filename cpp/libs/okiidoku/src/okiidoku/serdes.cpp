@@ -3,7 +3,7 @@
 #include <okiidoku/serdes.hpp>
 
 #include <okiidoku/grid.hpp>
-#include <okiidoku/o2_bit_arr.hpp>
+#include <okiidoku/bit_array.hpp>
 #include <okiidoku/ints.hpp>
 #include <okiidoku/order.hpp>
 

@@ -4,7 +4,7 @@
 #define HPP_OKIIDOKU_PUZZLE_SOLVER2_CANDS
 
 #include <okiidoku/grid.hpp>
-#include <okiidoku/o2_bit_arr.hpp>
+#include <okiidoku/bit_array.hpp>
 
 #include <vector>
 #include <array>

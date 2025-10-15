@@ -4,7 +4,7 @@
 
 #include "okiidoku/puzzle/solver/engine.hpp" // CandsGrid
 #include <okiidoku/puzzle/solver/found.hpp>
-#include <okiidoku/o2_bit_arr.hpp>
+#include <okiidoku/bit_array.hpp>
 #include <okiidoku/order.hpp>
 
 // #include <algorithm>

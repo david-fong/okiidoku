@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2020 David Fong
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#ifndef HPP_OKIIDOKU_O2_BIT_ARR
-#define HPP_OKIIDOKU_O2_BIT_ARR
+#ifndef HPP_OKIIDOKU_BIT_ARRAY
+#define HPP_OKIIDOKU_BIT_ARRAY
 #include <okiidoku/detail/util.hpp>
 
 #include <okiidoku/ints.hpp>
@@ -15,7 +15,7 @@
 // #include <compare>     // strong_ordering
 #include <type_traits> // conditional_t
 
-namespace okiidoku::mono {
+namespace okiidoku {
 
 	template<std::uintmax_t width_, IntKind kind_ = IntKind::small>
 		requires((width_ <= INTMAX_MAX) && (kind_ == IntKind::small || kind_ == IntKind::fast))
@@ -240,6 +240,10 @@ namespace okiidoku::mono {
 		// least-significant bit is the front character.
 		[[nodiscard, gnu::pure]] OKIIDOKU_KEEP_FOR_DEBUG std::array<char, width_> to_chars() const noexcept;
 	};
+}
+
+
+namespace okiidoku::mono {
 
 	template<Order O, IntKind kind_ = IntKind::small> requires(is_order_compiled(O))
 	using O2BitArr = BitArray<std::uintmax_t{O*O}, kind_>;

@@ -10,7 +10,7 @@
 		<DisplayString>{val_}/{max}</DisplayString>
 	</Type>
 
-	<Type Name="okiidoku::mono::BitArray&lt;*&gt;">
+	<Type Name="okiidoku::BitArray&lt;*&gt;">
 	</Type>
 
 	<Type Name="...">

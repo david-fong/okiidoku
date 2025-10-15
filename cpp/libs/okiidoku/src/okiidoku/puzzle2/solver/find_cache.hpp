@@ -3,7 +3,7 @@
 #ifndef HPP_OKIIDOKU_PUZZLE_SOLVER2_FIND_CACHE
 #define HPP_OKIIDOKU_PUZZLE_SOLVER2_FIND_CACHE
 
-#include <okiidoku/o2_bit_arr.hpp>
+#include <okiidoku/bit_array.hpp>
 
 #include <utility> // forward_like
 

@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2020 David Fong
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#include <okiidoku/o2_bit_arr.hpp>
+#include <okiidoku/bit_array.hpp>
 
 #include <okiidoku/ints.hpp>
 #include <okiidoku/order.hpp>
@@ -15,7 +15,7 @@
 #include <execution>
 #include <type_traits> // is_aggregate_v
 
-namespace okiidoku::mono {
+namespace okiidoku {
 
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 		static_assert(!std::is_aggregate_v<BitArray<(O_)*(O_)>>);
