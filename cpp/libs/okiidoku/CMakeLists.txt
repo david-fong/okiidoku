@@ -51,7 +51,7 @@ install(DIRECTORY # includes
 
 # keep inline functions for debugging purposes:
 # TODO clang doesn't support -fkeep-inline-functions, need to use something else... maybe -fno-inline-functions... :(
-# TODO do we even want to keep doing this now that we have `OKIIDOKU_KEEP_FOR_DEBUG`?
+# TODO do we even want to keep doing this now that we have `OKIIDOKU_KEEP_FOR_DEBUG`? but that doesn't seem to be working...
 add_compile_options("$<${debug_configs}:$<$<CXX_COMPILER_ID:GNU>:-fkeep-inline-functions>>")
 
 

@@ -22,14 +22,14 @@ namespace okiidoku::test {
 	template <detail::Radix radix_t, std::unsigned_integral buf_t = std::uintmax_t>
 	OKIIDOKU_KEEP_FOR_DEBUG // NOLINTNEXTLINE(*-internal-linkage)
 	void test_mixed_radix_uint_serdes_one_round(
-		const std::uintmax_t rng_seed
+		const std::uint_fast32_t rng_seed
 	) {
 		CAPTURE(rng_seed);
 		INFO("sizeof(radix_t) := ", sizeof(radix_t));
 		INFO("sizeof(buf_t)   := ", sizeof(buf_t));
 		using writer_t = detail::MixedRadixUintWriter<radix_t,buf_t>;
 		using reader_t = detail::MixedRadixUintReader<radix_t,buf_t>;
-		std::minstd_rand rng {static_cast<std::uint_fast32_t>(rng_seed)};
+		std::minstd_rand rng {rng_seed};
 
 		// TODO write and read multiple ints to the same stringstream per round.
 
@@ -85,8 +85,8 @@ namespace okiidoku::test {
 TEST_CASE("okiidoku.mixed_radix_uint_serdes") {
 	// okiidoku::test_mixed_radix_uint_serdes<std::uint_least8_t, std::uint_least16_t>(3316611681754028984uLL, 10u);
 	static constexpr std::uintmax_t num_rounds {1024u};
-	// std::mt19937_64 rng {0u};
-	std::mt19937_64 rng {std::random_device{}()};
+	// std::mt19937 rng {0u};
+	std::mt19937 rng {std::random_device{}()};
 	// TODO write logic to restore from failure_checkpoint file? but how to delete it afterward?... does doctest have a way to hook into a TEST_CASE passing?
 	//   also... isn't there an easier way given that I'm only using the mersenne twister to generate seeds? if a round fails, write the seed that was passed to the round. :P way simpler.
 	for (std::uintmax_t round {0u}; round < num_rounds; ++round) { CAPTURE(round);

@@ -10,7 +10,7 @@ function(okiidoku_test_add name #[[ ARGN are correctness_deps ]])
 		INTERPROCEDURAL_OPTIMIZATION NO # links way faster and runs about same speed
 	)
 	okiidoku_add_compiler_options("${target}")
-	target_compile_options("${target}" PRIVATE "$<$<CXX_COMPILER_ID:GNU>:-fwhole-program>") # TODO... when did I add this? how much slower does it make the build? how much faster does it make tests run? did I forget that I explicitly turned of LTO just a few lines above because it make link run slow? could try adding `$<$<NOT:${debug_configs}>:...>`
+	target_compile_options("${target}" PRIVATE "$<$<CXX_COMPILER_ID:GNU>:-fwhole-program>")
 	target_link_libraries("${target}"
 		PRIVATE okiidoku_cli_utils
 		PRIVATE doctest::doctest
@@ -45,9 +45,13 @@ function(okiidoku_test_add name #[[ ARGN are correctness_deps ]])
 	# TODO is there a way to make dependents short-circuit build if this fails to compile? (I'm thinking of compile-time tests like static_asserts+constexpr)
 endfunction()
 
+set(gdb_support_cpp "${CMAKE_CURRENT_LIST_DIR}/../src/okiidoku/debug/gdb_support.cpp")
 
 okiidoku_test_add(mixed_radix_uint_serdes #[[ DEPS ]])
+target_sources(okiidoku_test.mixed_radix_uint_serdes PRIVATE "${gdb_support_cpp}")
+
 okiidoku_test_add(o2_bit_arr #[[ DEPS ]])
+target_sources(okiidoku_test.o2_bit_arr PRIVATE "${gdb_support_cpp}")
 
 okiidoku_test_add(grid #[[ DEPS ]] o2_bit_arr)
 target_link_libraries(okiidoku_test.grid PRIVATE okiidoku)

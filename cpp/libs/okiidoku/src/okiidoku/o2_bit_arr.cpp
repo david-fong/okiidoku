@@ -67,7 +67,6 @@ namespace okiidoku::mono {
 	template<std::uintmax_t width_, IntKind kind_>
 		requires((width_ <= INTMAX_MAX) && (kind_ == IntKind::small || kind_ == IntKind::fast))
 	auto BitArray<width_,kind_>::first_set_bit() const noexcept -> typename BitArray::bit_ii_t {
-		OKIIDOKU_ASSERT(count() > 0u);
 		if constexpr (num_words == 1u) {
 			if (words_.front() == 0u) [[unlikely]] { return width; }
 			const bit_ii_t count {std::countr_zero(words_.front())};
@@ -90,7 +89,7 @@ namespace okiidoku::mono {
 
 	template<std::uintmax_t width_, IntKind kind_>
 		requires((width_ <= INTMAX_MAX) && (kind_ == IntKind::small || kind_ == IntKind::fast))
-	auto BitArray<width_,kind_>::get_index_of_nth_set_bit(BitArray::bit_ix_t set_bit_index) const noexcept -> typename BitArray::bit_ix_t {
+	auto BitArray<width_,kind_>::nth_set_bit(BitArray::bit_ix_t set_bit_index) const noexcept -> typename BitArray::bit_ix_t {
 		set_bit_index.check();
 		OKIIDOKU_ASSERT(count() > set_bit_index);
 		const word_ix_t word_i {[&](){
@@ -139,7 +138,7 @@ namespace okiidoku::mono {
 
 	template<std::uintmax_t width_, IntKind kind_>
 		requires((width_ <= INTMAX_MAX) && (kind_ == IntKind::small || kind_ == IntKind::fast))
-	auto BitArray<width_,kind_>::to_chars() const noexcept -> std::array<char,width_> {
+	std::array<char,width_> BitArray<width_,kind_>::to_chars() const noexcept {
 		std::array<char,width_> _ OKIIDOKU_DEFER_INIT; // NOLINT(*-init)
 		_.fill('.');
 		for (const auto i : set_bits()) {

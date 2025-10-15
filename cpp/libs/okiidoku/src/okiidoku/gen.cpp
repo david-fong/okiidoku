@@ -81,7 +81,7 @@ namespace okiidoku::mono { namespace {
 			)};
 			OKIIDOKU_CONTRACT(num_resolved <=  2);
 			OKIIDOKU_CONTRACT(num_resolved >= -2);
-			if (num_resolved > 0) [[unlikely]] { // TODO.low for fun: find out on average at what op_count it starts being unlikely
+			if (num_resolved >= 0) [[unlikely]] { // TODO.low for fun: find out on average at what op_count it starts being unlikely. I'm confused about whether this could simply be `>`. it makes release builds perform slightly faster for this procedure, but in makes some debug-build tests hang??
 				OKIIDOKU_CONTRACT2(num_missing_syms >= Int<2u>{num_resolved});
 				num_missing_syms -= Int<2u>{num_resolved};
 				--boxes_has.ch_count_sym(a_box,*a_sym);

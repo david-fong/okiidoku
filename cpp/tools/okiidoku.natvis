@@ -2,9 +2,18 @@
 <!-- SPDX-License-Identifier: GPL-3.0-or-later -->
 <?xml version="1.0" encoding="utf-8"?>
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
-	<Type Name="okiidoku::mono::O2BitArr&lt;*&gt;">
+
+	<Type Name="okiidoku::Int&lt;*&gt;">
+		<DisplayString Condition="kind == okiidoku::IntKind::fast"    >{val_}/{max}f</DisplayString>
+		<DisplayString Condition="kind == okiidoku::IntKind::small"   >{val_}/{max}s</DisplayString>
+		<DisplayString Condition="kind == okiidoku::IntKind::constant">{val_}/{max}c</DisplayString>
+		<DisplayString>{val_}/{max}</DisplayString>
+	</Type>
+
+	<Type Name="okiidoku::mono::BitArray&lt;*&gt;">
 	</Type>
 
 	<Type Name="...">
 	</Type>
+
 </AutoVisualizer>

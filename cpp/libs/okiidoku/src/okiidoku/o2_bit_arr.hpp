@@ -69,7 +69,7 @@ namespace okiidoku::mono {
 		std::array<word_t, num_words> words_ {}; // zero-init
 
 	public:
-		constexpr BitArray() noexcept = default;
+		OKIIDOKU_KEEP_FOR_DEBUG constexpr BitArray() noexcept = default;
 
 		[[nodiscard, gnu::pure]]  constexpr friend bool operator==(const BitArray& a, const BitArray& b) noexcept requires(num_words >  1u) = default;
 		[[nodiscard, gnu::const]] constexpr friend bool operator==(      BitArray  a,       BitArray  b) noexcept requires(num_words == 1u) = default;
@@ -79,11 +79,12 @@ namespace okiidoku::mono {
 
 		/** count the number of set bits below the specified bit index.
 		\pre `end < O2`.
-		\post `get_index_of_nth_set_bit(count_below(end)) == end`. */
+		\post `nth_set_bit(count_below(end)) == end`. */
 		[[nodiscard, gnu::pure]] bit_ix_t count_below(bit_ix_t end) const noexcept;
 
 		/** \pre `at < O2`. */
-		[[nodiscard, gnu::pure]] constexpr bool operator[](const bit_ix_t at) const noexcept {
+		[[nodiscard, gnu::pure]] constexpr
+		bool operator[](const bit_ix_t at) const noexcept {
 			at.check();
 			const word_t word_bit_mask {word_bit_mask_for_bit_i(at)};
 			return (words_[bit_i_to_word_i(at)] & word_bit_mask) != word_t{0u};
@@ -174,8 +175,8 @@ namespace okiidoku::mono {
 
 		/**
 		\pre `set_bit_i < O2` and there are at least `set_bit_i+1` set bits.
-		\post `count_below(get_index_of_nth_set_bit(set_bit_i)) == set_bit_i`. */
-		[[nodiscard, gnu::pure]] bit_ix_t get_index_of_nth_set_bit(bit_ix_t set_bit_i) const noexcept;
+		\post `count_below(nth_set_bit(set_bit_i)) == set_bit_i`. */
+		[[nodiscard, gnu::pure]] bit_ix_t nth_set_bit(bit_ix_t set_bit_i) const noexcept;
 
 
 		/** use to iterate through set bits of a snapshot of an `BitArray`. */

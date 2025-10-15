@@ -8,4 +8,5 @@
 # info auto-load python-scripts
 
 # set substitute-path /okiidoku # TODO
+set breakpoint pending on
 b __sanitizer::Die # https://github.com/google/sanitizers/wiki/AddressSanitizerAndDebugger#gdb

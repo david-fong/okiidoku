@@ -89,7 +89,7 @@ alias of standard `assert` */
 	- `gnu::used`: for functions -> emit code even if function appears to not be used.
 	- `gnu::externally_visible`: "nullifies the effect of the `-fwhole-program`
 		command-line option, so the object remains visible outside the current compilation unit." */
-	#define OKIIDOKU_KEEP_FOR_DEBUG [[maybe_unused]] [[using gnu: retain, used, noinline, externally_visible]]
+	#define OKIIDOKU_KEEP_FOR_DEBUG [[maybe_unused]] [[using gnu: retain, used, externally_visible]]
 #else
 	#define OKIIDOKU_KEEP_FOR_DEBUG
 #endif

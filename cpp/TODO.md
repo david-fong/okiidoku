@@ -37,7 +37,7 @@
 - places to use `[[gnu::designated_init]]`
 - find places `<O>(` is used, and see if deduction guides can help. Ex. `template<typename _Type, size_t _ArrayExtent> span(array<_Type, _ArrayExtent>&) -> span<_Type, _ArrayExtent>;`
 
-Issues I'm watching:
+## Issues I'm watching:
 
 - https://github.com/emscripten-core/emscripten/discussions/25314 embind value types for C++ integer wrapper classes.
   - related: https://github.com/emscripten-core/emscripten/discussions/18813. try out writing it myself?
@@ -53,6 +53,7 @@ Issues I'm watching:
 
 ## Misc List
 
+- move BitArray class up out of `mono` ns. update okiidoku-gdb.py.
 - do some `static_assert` tests for types of deducing this member functions. just discovered that I was having a bug with one because I was using something after `std::forward`? maybe I _shouldn't_ have disabled that clang-tidy check... but then why did I see people doing this thing in example code? I guess because you need to be careful about copies with iterators?
 - make canon functions pure producers of a canonicalizing transformation. take grid by const reference. name `canon_sym` -> `get_sym_canon_map`.
 - see if helpful to add `/// \cond detail` wrapper to `detail` namespaces to suppress doxygen for them

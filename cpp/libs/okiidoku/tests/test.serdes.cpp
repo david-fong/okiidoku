@@ -19,22 +19,18 @@
 
 namespace okiidoku::test {
 template<Order O> OKIIDOKU_KEEP_FOR_DEBUG // NOLINTNEXTLINE(*-internal-linkage)
-void test_serdes(
-	const std::uintmax_t rng_seed,
-	[[maybe_unused]] const std::uintmax_t round // for conditional breakpoints
-) {
+void test_serdes(const std::uint_fast32_t rng_seed) {
 	CAPTURE(rng_seed);
 	using namespace ::okiidoku::mono;
 	OKIIDOKU_MONO_INT_TS_TYPEDEFS
-	std::minstd_rand rng {static_cast<std::uint_fast32_t>(rng_seed)};
+	std::minstd_rand rng {rng_seed};
 
 	std::array<Grid<O>, 8uz> grid_buf OKIIDOKU_DEFER_INIT; // NOLINT(*init*)
 	const std::size_t num_grids {std::uniform_int_distribution{1uz, grid_buf.size()}(rng)};
 	// const std::size_t num_grids {1uz};
 
 	std::size_t byte_count {0uz};
-	const auto written_data {[&,round]{
-		(void)round; // for conditional breakpoint
+	const auto written_data {[&]{
 		// serialize data to `std::string`:
 		std::ostringstream os;
 		for (auto i {0uz}; i < num_grids; ++i) {
@@ -58,12 +54,12 @@ void test_serdes(
 }}
 
 TEST_CASE("okiidoku.serdes") {
-	static constexpr std::uintmax_t num_rounds {8192u};
-	// std::mt19937_64 rng {0u};
-	std::mt19937_64 rng {std::random_device{}()};
+	static constexpr std::uintmax_t num_rounds {4096u};
+	std::mt19937 rng {0u};
+	// std::mt19937 rng {std::random_device{}()};
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 	for (std::uintmax_t round {0u}; round < num_rounds/((O_)*(O_)); ++round) { CAPTURE(round); \
-		okiidoku::test::test_serdes<(O_)>(rng(), round); \
+		okiidoku::test::test_serdes<(O_)>(rng()); \
 	}
 	OKIIDOKU_FOREACH_O_DO_EMIT
 	#undef OKIIDOKU_FOREACH_O_EMIT

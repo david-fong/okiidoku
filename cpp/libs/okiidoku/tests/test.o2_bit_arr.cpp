@@ -9,57 +9,126 @@
 #include <okiidoku/ints.hpp>
 #include <okiidoku/order.hpp>
 
+#include <random>
+#include <cstdint>
+#include <cstddef> // size_t
+
 #if __has_include(<immintrin.h>)
 #include <immintrin.h>
 #endif
 
 namespace okiidoku::test {
+	namespace { template<class T> using uidist_t = std::uniform_int_distribution<T>; }
+
 template<Order O> OKIIDOKU_KEEP_FOR_DEBUG // NOLINTNEXTLINE(*-internal-linkage)
-void test_o2_bit_arr() {
+void test_o2_bit_arr_ones() {
 	using namespace ::okiidoku::mono;
 	OKIIDOKU_MONO_INT_TS_TYPEDEFS
 
-	INFO("part 0");
 	REQUIRE_EQ(O2BitArr_ones<O>.count(), T::O2);
 	for (const auto i : T::O2) { CAPTURE(i);
 		REQUIRE_EQ(O2BitArr_ones<O>.count_below(i), i);
-		REQUIRE_EQ(O2BitArr_ones<O>.get_index_of_nth_set_bit(i), i);
-	}
-	INFO("part 1");
-	{
+		REQUIRE_EQ(O2BitArr_ones<O>.nth_set_bit(i), i);
+	}{
 		O2BitArr<O> arr {}; CAPTURE(arr);
 		for (const auto i : T::O2) { CAPTURE(i);
 			REQUIRE_UNARY(!arr[i]);
 			arr.set(i);
 			REQUIRE_UNARY(arr[i]);
 		}
-	}
-	INFO("part 2");
-	{
+	}{
 		auto ones {O2BitArr_ones<O>};
 		for (const auto i : T::O2) { CAPTURE(i);
 			REQUIRE_EQ(ones.count_below(i), 0u);
-			REQUIRE_EQ(ones.get_index_of_nth_set_bit(0u), i);
+			REQUIRE_EQ(ones.nth_set_bit(0u), i);
 			REQUIRE_UNARY(ones[*ones.first_set_bit()]);
 			ones.unset(*ones.first_set_bit());
 		}
-	}
-	INFO("part 3");
-	{
+	}{
 		o2i_t count {0u};
-		for (const auto sym : O2BitArr_ones<O>.set_bits()) { CAPTURE(sym);
-			REQUIRE_EQ(sym, count);
+		for (const auto i : O2BitArr_ones<O>.set_bits()) { CAPTURE(i);
+			REQUIRE_EQ(i, count);
 			++count;
 		}
 		REQUIRE_EQ(count, T::O2);
 	}
-	INFO("part 4");
-	// TODO test consistency between `first_set_bit` and `count_below`. generate some random `O2BitArr`s. to naively get a random number of set bits, start by getting a number of bits to try to set in [0,O2).
+}
+
+
+template<Order O, IntKind kind_> OKIIDOKU_KEEP_FOR_DEBUG // NOLINTNEXTLINE(*-internal-linkage)
+void test_o2_bit_arr_basic() {
+	using namespace ::okiidoku::mono;
+	OKIIDOKU_MONO_INT_TS_TYPEDEFS
+
+	{
+		O2BitArr<O,kind_> a;
+		REQUIRE_EQ(a.count(), 0u);
+		REQUIRE_EQ(a.first_set_bit(), T::O2);
+		for (const auto i : T::O2) { REQUIRE_UNARY_FALSE(a[i]); }
+		for ([[maybe_unused]] const auto b : a.set_bits()) [[unlikely]] { FAIL("no bits set"); }
+	}
+
+	for (const auto i_set : T::O2) {
+		O2BitArr<O,kind_> a;
+		REQUIRE_EQ(a.count(), 0u);
+		a.set(i_set);
+		REQUIRE_EQ(a.count(), 1u);
+		for (const auto i : T::O2) { REQUIRE_EQ(a[i], (i == i_set)); }
+		for (const auto i : a.set_bits()) { REQUIRE_EQ(i, i_set); }
+		REQUIRE_EQ(a.first_set_bit(), i_set);
+		REQUIRE_EQ(a.count_below(i_set), 0u);
+		REQUIRE_EQ(a.nth_set_bit(0u), i_set);
+	}
+}
+
+
+template<Order O, IntKind kind_> OKIIDOKU_KEEP_FOR_DEBUG // NOLINTNEXTLINE(*-internal-linkage)
+void test_o2_bit_arr_rand(const std::uint_fast32_t rng_seed) {
+	CAPTURE(rng_seed);
+	using namespace ::okiidoku::mono;
+	OKIIDOKU_MONO_INT_TS_TYPEDEFS
+	std::minstd_rand rng {rng_seed};
+
+	const auto num_set_bits {uidist_t<std::size_t>{1uz, T::O2}(rng)};
+	O2BitArr<O,kind_> a;
+	for (const auto i_ : o2i_t{num_set_bits}) {
+		const auto a_inv {~a};
+		{
+			auto a2 {a};
+			a2.retain_only(a_inv);
+			REQUIRE_EQ(a2.count(), 0u);
+		}
+		REQUIRE_EQ(a_inv.count(), T::O2-a.count());
+		const auto i_set {a_inv.nth_set_bit(uidist_t<std::size_t>{0uz, a_inv.count()-1uz}(rng))};
+		REQUIRE_UNARY_FALSE(a[i_set]);
+		a.set(i_set);
+		REQUIRE_UNARY(a[i_set]);
+		REQUIRE_EQ(a.count(), i_+int1);
+	}
+	{
+		REQUIRE_EQ(a.count(), num_set_bits);
+		for (const auto i : a.set_bits()) {
+			REQUIRE_EQ(a.nth_set_bit(a.count_below(i)), i);
+		}
+		for (const auto i : o2i_t{a.count()}) {
+			REQUIRE_EQ(a.count_below(a.nth_set_bit(i)), i);
+		}
+	}
 }}
 
 TEST_CASE("okiidoku.o2_bit_arr") {
+	static constexpr std::uintmax_t num_rounds {4096u};
+	// std::mt19937 rng {0u};
+	std::mt19937 rng {std::random_device{}()};
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-	okiidoku::test::test_o2_bit_arr<(O_)>();
+	okiidoku::test::test_o2_bit_arr_ones<(O_)>(); \
+	for (std::uintmax_t round {0u}; round < num_rounds; ++round) { CAPTURE(round); \
+		const auto seed {rng()}; \
+		okiidoku::test::test_o2_bit_arr_basic<(O_),okiidoku::IntKind::fast >(); \
+		okiidoku::test::test_o2_bit_arr_basic<(O_),okiidoku::IntKind::small>(); \
+		okiidoku::test::test_o2_bit_arr_rand<(O_),okiidoku::IntKind::fast >(seed); \
+		okiidoku::test::test_o2_bit_arr_rand<(O_),okiidoku::IntKind::small>(seed); \
+	}
 	OKIIDOKU_FOREACH_O_DO_EMIT
 	#undef OKIIDOKU_FOREACH_O_EMIT
 }

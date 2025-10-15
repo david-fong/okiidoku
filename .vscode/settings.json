@@ -91,10 +91,18 @@
 		"environment": [],
 		"args": [],
 		"setupCommands": [
-			{"text": "add-auto-load-safe-path ${workspaceFolder}/cpp/tools"},
-			{"text": "add-auto-load-safe-path ${command:cmake.getLaunchTargetDirectory}/.."},
+			{"text": "add-auto-load-safe-path ${workspaceFolder}/cpp/tools", "ignoreFailures": true,},
+			{"text": "add-auto-load-safe-path ${command:cmake.getLaunchTargetDirectory}/..", "ignoreFailures": true,},
 			// ^trying to do the above in one line would mean working with OS-specific list separators ":"/";".
-			{"text": "directory ${workspaceFolder}/cpp"}, // add to source search path. allows loading tools/okiidoku-gdb.py.
+			{"text": "directory ${workspaceFolder}/cpp", "ignoreFailures": true,}, // add to source search path. allows loading :/cpp/tools/okiidoku-gdb.py.
+			{"text": "set print pretty on", "ignoreFailures": true,},
+			{"text": "set print array on", "ignoreFailures": true,}, // pretty-print arrays
+			{	// https://sourceware.org/gdb/current/onlinedocs/gdb.html/GDB_002fMI-Variable-Objects.html#:~:text=The%20%2Denable%2Dpretty%2Dprinting%20Command
+				"description": "allow python-based visualizers to affect the output of the MI variable object commands",
+				"text": "-enable-pretty-printing",
+				"ignoreFailures": true,
+			},
+			{"text": "set print static-members off", "ignoreFailures": true,},
 		],
 		"stopAtEntry": true,
 		// "visualizerFile": "${workspaceFolder}/tools/okiidoku.natvis", // TODO.try is this needed if already specified in CMake?

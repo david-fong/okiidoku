@@ -89,15 +89,16 @@ namespace okiidoku::mono { namespace {
 	private:
 		using sym_t = typename Ints<O>::o2x_t; // TODO what about puzzles then? separate bitmap of populated/empty cells?
 	public:
-		// automatically removes printed `sym` as a candidate of future cells.
+		// \note automatically removes printed `sym` as a candidate of future cells.
 		void operator()(std::ostream& os, const sym_t sym) {
 			OKIIDOKU_CONTRACT(!this->done()); sym.check();
 			const auto ctx_cands {this->cands()};
 				OKIIDOKU_ASSERT(ctx_cands[sym]); // consistency with precondition that grid follows the one rule.
-			const auto cands_count {ctx_cands.count()};
-				OKIIDOKU_CONTRACT(cands_count > 0u); // implied by contract (follows_rule)
-			const auto compressed_sym {ctx_cands.count_below(sym)};
-			if (!this->serdes().accept({.radix{cands_count}, .digit{compressed_sym}})) [[unlikely]] {
+				OKIIDOKU_CONTRACT(ctx_cands.count() > 0u); // implied by contract (follows_rule)
+			if (!this->serdes().accept({
+				.radix {ctx_cands.count()},
+				.digit {ctx_cands.count_below(sym)}
+			})) [[unlikely]] {
 				this->serdes().flush(os);
 			}
 			this->remove_cand_at_current_rmi(sym);
@@ -116,17 +117,16 @@ namespace okiidoku::mono { namespace {
 	private:
 		using sym_t = typename Ints<O>::o2x_t; // TODO what about puzzles then? separate bitmap of populated/empty cells?
 	public:
-		// automatically removes parsed `sym` as a candidate of future cells.
+		// \note automatically removes parsed `sym` as a candidate of future cells.
 		[[nodiscard]] sym_t operator()(std::istream& is) {
 			OKIIDOKU_CONTRACT(!this->done());
 			const auto ctx_cands {this->cands()};
-			// The number of possible different values that this cell could be
-			// based on the values that have already been encountered.
-			const auto cands_count {ctx_cands.count()};
-				OKIIDOKU_CONTRACT(cands_count > 0u); // implied by contract (follows_rule)
+				// the number of possible different values that this cell could be
+				// based on the values that have already been encountered.
+				OKIIDOKU_CONTRACT(ctx_cands.count() > 0u); // implied by contract (follows_rule)
 
-			const auto compressed_sym {*this->serdes().read(is, cands_count)};
-			const auto sym {ctx_cands.get_index_of_nth_set_bit(compressed_sym)};
+			const auto compressed_sym {*this->serdes().read(is, ctx_cands.count())};
+			const auto sym {ctx_cands.nth_set_bit(compressed_sym)};
 				OKIIDOKU_ASSERT(ctx_cands[sym]);
 			this->remove_cand_at_current_rmi(sym);
 			return sym;
