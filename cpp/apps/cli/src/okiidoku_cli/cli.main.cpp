@@ -10,6 +10,7 @@
 #include <okiidoku/about.hpp>
 
 #include <iostream>     // cout
+#include <iomanip>      // setw
 #include <ios>          // hex
 #include <charconv>
 #include <string>       // stoi
@@ -27,7 +28,9 @@ ARGUMENTS
 */
 int main(const int argc, char const *const argv[]) {
 	namespace ok = ::okiidoku;
-	auto* numpunct {ok::util::setup_console()};
+	const auto loc1 {std::cout.getloc()};
+	ok::util::setup_console();
+	const auto loc2 {std::cout.getloc()};
 
 	#if defined(__clang__) or defined(__EMSCRIPTEN__)
 	#pragma GCC diagnostic push
@@ -56,9 +59,9 @@ int main(const int argc, char const *const argv[]) {
 
 	std::cout << "parsed arguments:"
 		<< "\n[1] (grid order) : " << user_order
-		<< "\n[2] (prng seed)  : " << std::hex;
-			numpunct->set_grouping(0); std::cout << rng_seed;
-			numpunct->set_grouping(3); std::cout << std::dec;
+		<< "\n[2] (prng seed)  : ";
+	std::cout.imbue(loc1); std::cout << std::hex << std::setw(2*sizeof(rng_seed)) << rng_seed;
+	std::cout.imbue(loc2); std::cout << std::dec << std::setw(0);
 	std::cout << std::endl;
 
 	ok::util::SharedRng shared_rng {rng_seed};

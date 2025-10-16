@@ -9,7 +9,7 @@
 #include <okiidoku/order.hpp>
 
 #include <array>
-#include <utility>     // declval
+#include <utility>     // declval, swap
 #include <type_traits>
 
 namespace okiidoku::mono {
@@ -42,12 +42,21 @@ void test_grid() {
 		}
 	}}
 
-	Grid<O> gen_grid; CAPTURE(gen_grid);
-	CHECK_UNARY(gen_grid.is_empty()); // expected default ctor behaviour
+	Grid<O> grid; CAPTURE(grid);
+	CHECK_UNARY(grid.is_empty()); // expected default ctor behaviour
 
-	gen_grid.init_most_canonical();
-	CHECK_UNARY(gen_grid.is_filled());
-	CHECK_UNARY(gen_grid.follows_rule());
+	grid.init_most_canonical();
+	CHECK_UNARY(grid.is_filled());
+	CHECK_UNARY(grid.follows_rule());
+
+	std::swap(grid[0,0], grid[0,1]);
+	CHECK_UNARY(grid.is_filled());
+	CHECK_UNARY_FALSE(grid.follows_rule());
+
+	// put that thing back where it came from, or so help me-
+	std::swap(grid[0,0], grid[0,1]);
+	CHECK_UNARY(grid.is_filled());
+	CHECK_UNARY(grid.follows_rule());
 }}
 
 TEST_CASE("okiidoku.grid") {

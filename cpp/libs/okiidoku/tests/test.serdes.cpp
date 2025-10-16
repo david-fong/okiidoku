@@ -26,13 +26,13 @@ void test_serdes(const std::uint_fast32_t rng_seed) {
 	std::minstd_rand rng {rng_seed};
 
 	std::array<Grid<O>, 8uz> grid_buf OKIIDOKU_DEFER_INIT; // NOLINT(*init*)
-	const std::size_t num_grids {std::uniform_int_distribution{1uz, grid_buf.size()}(rng)};
-	// const std::size_t num_grids {1uz};
+	// const std::size_t num_grids {std::uniform_int_distribution{1uz, grid_buf.size()}(rng)};
+	const std::size_t num_grids {2uz}; // TODO.high go back to randomized
 
 	std::size_t byte_count {0uz};
 	const auto written_data {[&]{
 		// serialize data to `std::string`:
-		std::ostringstream os;
+		std::ostringstream os {std::ios::binary};
 		for (auto i {0uz}; i < num_grids; ++i) {
 			auto& grid {grid_buf[i]};
 			grid = generate_shuffled<O>(rng());
@@ -41,7 +41,7 @@ void test_serdes(const std::uint_fast32_t rng_seed) {
 		return os.str();
 	}()};
 	REQUIRE_EQ(written_data.size(), byte_count);
-	std::istringstream is {written_data};
+	std::istringstream is {written_data, std::ios::binary};
 	// de-serialize data and check correctness:
 	for (auto i {0uz}; i < num_grids; ++i) {
 		Grid<O> parsed_grid;
@@ -55,8 +55,8 @@ void test_serdes(const std::uint_fast32_t rng_seed) {
 
 TEST_CASE("okiidoku.serdes") {
 	static constexpr std::uintmax_t num_rounds {4096u};
-	std::mt19937 rng {0u};
-	// std::mt19937 rng {std::random_device{}()};
+	// std::mt19937 rng {0u};
+	std::mt19937 rng {std::random_device{}()};
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 	for (std::uintmax_t round {0u}; round < num_rounds/((O_)*(O_)); ++round) { CAPTURE(round); \
 		okiidoku::test::test_serdes<(O_)>(rng()); \

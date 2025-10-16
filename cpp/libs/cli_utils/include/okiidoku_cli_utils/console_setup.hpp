@@ -20,6 +20,6 @@ namespace okiidoku::util {
 	On Windows, this enables VT sequences and changes the input and
 	output codepages to UTF-8.
 	*/
-	[[gnu::cold]] MyNumPunct* setup_console();
+	[[gnu::cold]] void setup_console();
 }
 #endif

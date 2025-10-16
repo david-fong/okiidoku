@@ -45,7 +45,7 @@ namespace okiidoku::mono { namespace {
 		/** \pre `!done()` */
 		void remove_cand_at_current_rmi(const sym_t cand) noexcept {
 			OKIIDOKU_CONTRACT(cell_rmi_ < T::O4); OKIIDOKU_CONTRACT(!done()); cand.check();
-			auto& box_cands {h_chute_box_cands_[(rmi()%T::O2) / T::O1]};
+			auto& box_cands {h_chute_box_cands_[rmi_to_col<O>(rmi()) / T::O1]};
 			auto& col_cands {cols_cands_[rmi_to_col<O>(rmi())]};
 			cands_t::unset3(cand, row_cands_, box_cands, col_cands);
 		}
@@ -67,9 +67,9 @@ namespace okiidoku::mono { namespace {
 		/** get symbol candidates at current `rmi()`.
 		\pre `!done()` */
 		[[nodiscard, gnu::pure]]
-		auto cands() const noexcept {
+		cands_t cands() const noexcept {
 			OKIIDOKU_CONTRACT(cell_rmi_ < T::O4); OKIIDOKU_CONTRACT(!done());
-			auto& box_cands {h_chute_box_cands_[(rmi()%T::O2) / T::O1]};
+			auto& box_cands {h_chute_box_cands_[rmi_to_col<O>(rmi()) / T::O1]};
 			auto& col_cands {cols_cands_[rmi_to_col<O>(rmi())]};
 			return row_cands_ & col_cands & box_cands;
 		}
@@ -125,7 +125,7 @@ namespace okiidoku::mono { namespace {
 				// based on the values that have already been encountered.
 				OKIIDOKU_CONTRACT(ctx_cands.count() > 0u); // implied by contract (follows_rule)
 
-			const auto compressed_sym {*this->serdes().read(is, ctx_cands.count())};
+			const auto compressed_sym {*(this->serdes().read(is, ctx_cands.count()))};
 			const auto sym {ctx_cands.nth_set_bit(compressed_sym)};
 				OKIIDOKU_ASSERT(ctx_cands[sym]);
 			this->remove_cand_at_current_rmi(sym);
@@ -152,7 +152,7 @@ namespace okiidoku::mono {
 		for (; !writer.done(); writer.advance()) {
 			const auto row {writer.rmi() / T::O2};
 			const auto col {writer.rmi() % T::O2};
-			if ((row/T::O1) == (col/T::O1)) {
+			if ((row/T::O1) == (col/T::O1)) [[unlikely]] {
 				// skip cells in main-diagonal boxes. they can be losslessly reconstructed.
 				continue;
 			}

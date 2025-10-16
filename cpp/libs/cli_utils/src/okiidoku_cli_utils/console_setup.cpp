@@ -31,11 +31,11 @@ namespace okiidoku::util {
 		}
 	}
 
-	MyNumPunct* setup_console() {
+	void setup_console() {
 		// libokiidoku specifies this as safe:
 		std::ios_base::sync_with_stdio(false);
 		auto* numpunct {new MyNumPunct};
-		const auto pushed_locale {std::cout.imbue(std::locale(std::cout.getloc(), numpunct))};
+		std::cout.imbue(std::locale{std::cout.getloc(), numpunct});
 
 		#ifdef _WIN32
 		{
@@ -56,6 +56,5 @@ namespace okiidoku::util {
 		if (std::atexit(&restore_console_config) != 0) {
 			restore_console_config(); // just undo the console things immediately.
 		}
-		return numpunct;
 	}
 }

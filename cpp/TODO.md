@@ -56,6 +56,7 @@
 - do some `static_assert` tests for types of deducing this member functions. just discovered that I was having a bug with one because I was using something after `std::forward`? maybe I _shouldn't_ have disabled that clang-tidy check... but then why did I see people doing this thing in example code? I guess because you need to be careful about copies with iterators?
 - make canon functions pure producers of a canonicalizing transformation. take grid by const reference. name `canon_sym` -> `get_sym_canon_map`.
 - see if helpful to add `/// \cond detail` wrapper to `detail` namespaces to suppress doxygen for them
+- investigate https://github.com/doctest/doctest/blob/master/examples/all_features/templated_test_cases.cpp
 
 - https://www.pcg-random.org/using-pcg-cpp.html
   https://github.com/imneme/pcg-cpp/tags
@@ -81,6 +82,10 @@
 - figure out if it's possible to config gdb to not show `DOCTEST_CAPTURE_N` things in variables view?
 
 - https://youtu.be/zCzD9uSDI8c?t=620
+
+- investigate https://gcc.gnu.org/onlinedocs/libstdc++/manual/parallel_mode_using.html
+
+### waiting
 
 - CMake 3.31:
   - presets `$comment`
@@ -108,6 +113,8 @@
   - https://en.cppreference.com/w/cpp/utility/from_chars_result.html `operator bool`
 - C++29:
   - class invariants?: https://youtu.be/gtFFTjQ4eFU?t=873
+
+### cont.
 
 - https://youtu.be/7QNtiH5wTAs?t=7003 -Wl,--gc-sections does this help? does it mess with my SO interface?
   - what about functions that I want defined only for debugging? see also
@@ -154,9 +161,7 @@ usage docs for CMake:
 
 consider making cand masks have two lanes: one storing full O2BitArr, one storing just a byte. the byte lane is intended for use with subset finding and needs an additional array of o2x\_t where indices (relative to the index of the beginning of the subset) correspond to bits of the byte mask, and the value is the value of the candidate (candidate tags). Then to remove a given candidate, can use simd to scan the candidate tags and get a byte where bits are set if the corresponding tag value matched the cand to remove, and then remove set bits of that byte from the byte storing subset candidates. <https://stackoverflow.com/questions/54897297/check-all-bytes-of-a-m128i-for-a-match-of-a-single-byte-using-sse-avx-avx2>
 
-- Currently avoiding using `OKIIDOKU_MONO_INT_TS_TYPEDEFS` in headers in classes.
-  - Was worried about the "header size" cost. I think I'm probably prematurely optimizing.
-  - give this a try [](https://crascit.com/2022/06/24/build-performance-insights/)
+- give this a try [](https://crascit.com/2022/06/24/build-performance-insights/)
 
 - Come up with a precondition-checking strategy for language bindings. Options:
   - Leave it as a user responsibility to know and follow contracts.

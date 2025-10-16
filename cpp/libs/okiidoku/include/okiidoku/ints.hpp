@@ -375,8 +375,8 @@ namespace okiidoku {
 	inline constexpr Int<1u, IntKind::constant> int1 {};
 
 	namespace detail {
-		/** helper for `is_int_wrapper`. */
-		template<std::uintmax_t max_, IntKind kind_>
+		/** compile-time helper for `is_int_wrapper`. */
+		template<std::uintmax_t max_, IntKind kind_> [[gnu::unavailable]]
 		consteval void accept_int_wrapper([[maybe_unused]] Int<max_, kind_>) noexcept {}
 
 		// used by emscripten bindings for "value type" definition

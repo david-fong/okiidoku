@@ -35,7 +35,6 @@ void test_o2_bit_arr_ones() {
 			REQUIRE_UNARY(!arr[i]);
 			arr.set(i);
 			REQUIRE_UNARY(arr[i]);
-			FAIL("");
 		}
 	}{
 		auto ones {O2BitArr_ones<O>};
@@ -94,12 +93,36 @@ void test_o2_bit_arr_rand(const std::uint_fast32_t rng_seed) {
 	O2BitArr<O,kind_> a;
 	for (const auto i_ : o2i_t{num_set_bits}) {
 		const auto a_inv {~a};
-		{
-			auto a2 {a};
-			a2.retain_only(a_inv);
-			REQUIRE_EQ(a2.count(), 0u);
-		}
 		REQUIRE_EQ(a_inv.count(), T::O2-a.count());
+		{
+			auto to_zero {a};
+			to_zero.retain_only(a_inv);
+			REQUIRE_EQ(to_zero.count(), 0u);
+		}{
+			auto to_zero {a_inv};
+			to_zero.retain_only(a);
+			REQUIRE_EQ(to_zero.count(), 0u);
+		}{
+			auto same {a};
+			same.remove(a_inv);
+			REQUIRE_EQ(same, a);
+		}{
+			auto same {a_inv};
+			same.remove(a);
+			REQUIRE_EQ(same, a_inv);
+		}{
+			const auto zeroes {a & a_inv};
+			REQUIRE_EQ(zeroes.count(), 0u);
+		}{
+			const auto zeroes {a_inv & a};
+			REQUIRE_EQ(zeroes.count(), 0u);
+		}{
+			const auto ones {a | a_inv};
+			REQUIRE_EQ(ones.count(), T::O2);
+		}{
+			const auto ones {a_inv | a};
+			REQUIRE_EQ(ones.count(), T::O2);
+		}
 		const auto i_set {a_inv.nth_set_bit(uidist_t<std::size_t>{0uz, a_inv.count()-1uz}(rng))};
 		REQUIRE_UNARY_FALSE(a[i_set]);
 		a.set(i_set);

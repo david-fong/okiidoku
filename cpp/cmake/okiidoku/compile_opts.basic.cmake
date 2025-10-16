@@ -82,6 +82,13 @@ endif()
 # features (change emitted / possible-emitted code- not just diagnostics):
 if(MSVC)
 else()
+	if(okiidoku_IS_TOP_LEVEL)
+		target_compile_definitions(okiidoku::compiler_warnings INTERFACE
+			# https://gcc.gnu.org/onlinedocs/libstdc++/manual/using_macros.html
+			"$<${debug_configs}:_GLIBCXX_DEBUG>" # implies _GLIBCXX_ASSERTIONS
+			"$<${debug_configs}:_GLIBCXX_DEBUG_PEDANTIC>" # usage of libstdc++ extensions are errors
+		)
+	endif()
 	if(OKIIDOKU_BUILD_DEBUG_WITH_SANITIZERS)
 		# AddressSanitizer doesn't play well with `_FORTIFY_SOURCE`.
 		# see https://github.com/google/sanitizers/wiki/AddressSanitizer#faq
@@ -111,9 +118,6 @@ if(MSVC)
 else()
 	set(flag_file_dir "${okiidoku_SOURCE_DIR}/cmake/okiidoku/compile_opts")
 	# set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${flags_file}")
-	target_compile_definitions(okiidoku::compiler_warnings INTERFACE
-		"$<${debug_configs}:_GLIBCXX_ASSERTIONS>"
-	)
 	target_compile_options(okiidoku::compiler_warnings INTERFACE
 		-Wfatal-errors # stop compilation on first error. I found it hard to read multiple.
 		"@${flag_file_dir}/warnings.gnu.txt"

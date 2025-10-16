@@ -70,16 +70,18 @@ class MonoGridPrinter(gdb.ValuePrinter):
 		self.__size = int(self.__order) ** 4
 		self.__val = val
 	def to_string(self):
-		return str(gdb.parse_and_eval(f"okiidoku::mono::print_2d(std::cout, 0, {self.__val})"))
-	# def display_hint(self):
-	# 	return "array"
-	# def num_children(self):
-	# 	return self.__size
-	# def child(self, n: int):
-	# 	O2 = self.__order ** 2
-	# 	return (f"{n//O2},{n%O2}", self.__val["operator[]"](n))
-	# def children(self):
-	# 	return (self.child(n) for n in range(self.num_children()))
+		return f"Grid<{int(self.__order)}>"
+		# return str(gdb.parse_and_eval(f"okiidoku::mono::print_2d(std::cout, 0, {self.__val})"))
+	def display_hint(self):
+		return "array"
+	def num_children(self):
+		return self.__size
+	def child(self, n: int):
+		v = self.__val
+		O2 = int(self.__order ** 2)
+		return (f"{n//O2},{n%O2}", v["arr"][n])
+	def children(self):
+		return (self.child(n) for n in range(self.num_children()))
 
 
 def pp_lookup_function(val: gdb.Value):
@@ -100,11 +102,11 @@ def register_printers(objfile: gdb.Objfile | None):
 	if (objfile is None):
 		return
 	if (objfile.filename is not None and "okiidoku" not in objfile.filename):
-		print(f"not loading okiidoku-gdb.py for {objfile.filename}")
+		gdb.write(f"not loading okiidoku-gdb.py for {objfile.filename}", gdb.STDOUT)
 		return
-	# print(gdb.parse_and_eval("okiidoku::mono::compiled_orders")) # not possible currently (not exported)
+	# gdb.write(gdb.parse_and_eval("okiidoku::mono::compiled_orders"), gdb.STDOUT) # not possible currently (not exported)
 	objfile.pretty_printers.append(pp_lookup_function)
 
 
 register_printers(gdb.current_objfile()) # https://sourceware.org/gdb/current/onlinedocs/gdb.html/Objfiles-In-Python.html#Objfiles-In-Python
-print(f"successfully loaded okiidoku-gdb.py for {gdb.current_objfile()}")
+gdb.write(f"successfully loaded okiidoku-gdb.py for {gdb.current_objfile()}\n", gdb.STDOUT)

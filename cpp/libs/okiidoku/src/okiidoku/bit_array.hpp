@@ -17,6 +17,9 @@
 
 namespace okiidoku {
 
+	/**
+	\internal when deciding when to use intrinsics, check the width of `word_t` instead of `width`/`width_`/`kind`/`kind_`.
+	*/
 	template<std::uintmax_t width_, IntKind kind_ = IntKind::small>
 		requires((width_ <= INTMAX_MAX) && (kind_ == IntKind::small || kind_ == IntKind::fast))
 	struct BitArray final {
@@ -27,6 +30,7 @@ namespace okiidoku {
 		using bit_ix_t = Int<width_-1u, IntKind::fast>;
 		using word_t =
 			std::conditional_t<(kind == IntKind::small && width_ <= static_cast<std::uintmax_t>(std::bit_width(UINTMAX_MAX))), ::okiidoku::detail::uint_small_for_width_t<width_>,
+			// TODO when `::small` and `width+ > 64u`, consider using 32-bit instead of 64-bit if that's more compact.
 			std::conditional_t<(width_ <= 32u), std::uint32_t, std::uint64_t
 		>>;
 	private:
@@ -83,7 +87,7 @@ namespace okiidoku {
 		[[nodiscard, gnu::pure]] bit_ix_t count_below(bit_ix_t end) const noexcept;
 
 		/** \pre `at < O2`. */
-		[[nodiscard, gnu::pure]] constexpr
+		[[nodiscard, gnu::pure]] OKIIDOKU_KEEP_FOR_DEBUG constexpr
 		bool operator[](const bit_ix_t at) const noexcept {
 			at.check();
 			const word_t word_bit_mask {word_bit_mask_for_bit_i(at)};

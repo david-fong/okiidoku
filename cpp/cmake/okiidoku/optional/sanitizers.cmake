@@ -32,6 +32,7 @@ block()
 	else()
 		# TODO.wait see https://gcc.gnu.org/gcc-12/changes.html#uninitialized
 		#  would this be compatible with sanitizers? or no?
+		# TODO investigate _GLIBCXX_SANITIZE_VECTOR https://gcc.gnu.org/onlinedocs/libstdc++/manual/using_macros.html. must be set for all translation units or none.
 		set(flags
 			"-fsanitize=address,undefined"
 			"-fno-omit-frame-pointer" # for nicer stack traces
