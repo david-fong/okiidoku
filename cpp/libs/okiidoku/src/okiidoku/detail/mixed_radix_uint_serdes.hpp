@@ -111,8 +111,8 @@ namespace okiidoku::detail {
 				== ((buf_radixx_ & buf_t{buf_t{1u}<<(sizeof(buf_t)*CHAR_BIT-1u)}) == 0u)
 			);
 			return (buf_radixx_ & buf_t{buf_t{1u}<<(sizeof(buf_t)*CHAR_BIT-1u)}) == 0u;
-			// a minimal, non-trivial `accept` could happen without overflow.
-			// i.e. `buf_radixx_ <= buf_t_max/2u`
+			// ^whether a minimal, non-trivial `accept` could happen without overflow.
+			//  i.e. `buf_radixx_ <= buf_t_max/2u`
 		}
 
 		/**
@@ -122,6 +122,7 @@ namespace okiidoku::detail {
 		\pre the previous call to `accept` indicated a need to flush, or there is no more data. */
 		void flush(std::ostream& os) {
 			if (queue_end_ == 0u) [[unlikely]] { return; }
+			OKIIDOKU_CONTRACT(buf_radixx_ > 0u);
 
 			// prepare the real write buffer:
 			buf_t buf {0u};
@@ -140,13 +141,13 @@ namespace okiidoku::detail {
 			OKIIDOKU_CONTRACT(num_bytes > 0u);
 			byte_count_ += num_bytes;
 			if constexpr (std::endian::native == std::endian::little) {
+				static_assert(alignof(buf_t) >= alignof(char));
 				os.write(reinterpret_cast<char*>(&buf), num_bytes); // NOLINT(*-cast)
-			} else {
-				for (auto i {0uz}; i < num_bytes; ++i) {
-					os.put(TO<char>(buf));
-					buf >>= CHAR_BIT;
-				}
 			}
+			else { for (auto i {0uz}; i < num_bytes; ++i) {
+				os.put(TO<char>(buf));
+				buf >>= CHAR_BIT;
+			}}
 
 			if (did_overflow_) [[likely]] {
 				did_overflow_ = false;
@@ -191,52 +192,74 @@ namespace okiidoku::detail {
 		buf_t buf_ {0u}; //< buffer of data from input stream. downwards-depleting.
 
 		/** read `sizeof(buf_t)` bytes from `is`.
+		\pre `is.good()` and `is.exceptions() == std::ios::goodbit`.
+		\post iff no data could be read from `is`, `is` has `eofbit` and `failbit`.
 		\internal conditions to call this correspond to conditions where writer `accept`
 			indicates need for caller to `flush`. */
-		void read_buf(std::istream& is) {
-			// TODO do we need to do anything to handle failbit/eofbit? like unset it and maybe set it back in `finish`?
+		void read_buf(std::istream& is) noexcept {
+			OKIIDOKU_CONTRACT(is.good());
+			OKIIDOKU_CONTRACT(is.exceptions() == std::ios::goodbit);
+			if (is.rdbuf() != nullptr && is.rdbuf()->in_avail() < static_cast<long>(sizeof(buf_t))) [[unlikely]] {
+				is.sync();
+				/* I'm not sure if this is necessary, but hoping that it prevents issues
+				which could be caused by the `seekg()` in `finish` if overread data crosses
+				a rdbuf boundary, and stream sequence can't remember past-buffer data,
+				if that's a thing, like with a network stream sequence. or maybe instead
+				of seekg, the putback functions could address this? */
+			}
 			buf_radixx_ = 0u;
 			std::size_t byte_count {0uz};
 			buf_ = 0u;
+			// note: `is.read` and `is.get` set `eofbit|failbit` if can't read expected count.
 			if constexpr (std::endian::native == std::endian::little) {
+				static_assert(alignof(buf_t) >= alignof(char));
 				is.read(reinterpret_cast<char*>(&buf_), sizeof(buf_t)); // NOLINT(*-cast)
 				byte_count = TO<std::size_t>(is.gcount());
-			} else if constexpr (std::endian::native == std::endian::big) {
+			}
+			else if constexpr (std::endian::native == std::endian::big) {
+				static_assert(alignof(buf_t) >= alignof(char));
 				is.read(reinterpret_cast<char*>(&buf_), sizeof(buf_t)); // NOLINT(*-cast)
 				std::byteswap(buf_);
 				byte_count = TO<std::size_t>(is.gcount());
-			} else {
-				for (auto i {0uz}; i < sizeof(buf_t); ++i) {
-					char c OKIIDOKU_DEFER_INIT; // NOLINT(*init*)
-					is.get(c); if (is) [[likely]] {
-						buf_ |= (buf_t{c} << (i*CHAR_BIT));
-						++byte_count;
-					} else { break; }
-				}
 			}
+			else { for (auto i {0uz}; i < sizeof(buf_t); ++i) {
+				char c OKIIDOKU_DEFER_INIT; // NOLINT(*init*)
+				is.get(c); if (is) [[likely]] {
+					buf_ |= (buf_t{c} << (i*CHAR_BIT));
+					++byte_count;
+				} else { break; }
+			}}
+			if (byte_count > 0u && !is) [[likely]] { is.clear(); }
+			/* ^unless we failed to read _anything_, swallow `eofbit` and `failbit`, if set.
+			it's the caller's job to know expected end. we don't know here if overreading. */
 			OKIIDOKU_CONTRACT(byte_count <= sizeof(buf_t));
 			byte_count_ += byte_count; // TODO.high what if bytes read is 0? return error val here? make `read()` return `std::expected`?
 		}
 
 	public:
 		/**
-		\returns the previously written `n`th digit.
+		\returns the previously written `n`th digit, or `radix` upon unexpected EOF.
 		digit visitation order is up to the caller to determine and keep consistent between read/write.
 		\pre the data being read was written by a writer with the same type parameters.
 		\pre if this is the `n`th call, it is for the `n`th digit, and `radix` is the
 			same value that was passed to write this digit.
 		\pre `is` is a binary stream- not a text stream.
+		\pre `is.good()` and `is.exceptions() == std::ios::goodbit`.
 		\pre `radix > 0`.
-		\post return value is less than `radix`. */
-		[[nodiscard]] radix_t read(std::istream& is, radix_t radix) {
+		\post if hit unexpected EOF, `is` has `eofbit|failbit` set.
+		\post if didn't hit unexpected EOF, the return value is less than `radix`. */
+		[[nodiscard]] radix_t read(std::istream& is, radix_t radix) noexcept {
 			OKIIDOKU_CONTRACT(buf_t_max-buf_radixx_ >= buf_);
+			OKIIDOKU_CONTRACT(is.good());
+			OKIIDOKU_CONTRACT(is.exceptions() == std::ios::goodbit);
 			OKIIDOKU_CONTRACT(radix <= radix_t_max);
 			OKIIDOKU_CONTRACT(radix > 0u);
 			[[maybe_unused]] const auto radix_orig {radix};
 			++item_count_;
 			if (radix < 2u) [[unlikely]] { return 0u; }
-			if (buf_radixx_ & buf_t{buf_t{1u}<<(sizeof(buf_t)*CHAR_BIT-1u)}) [[unlikely]] {
+			if (buf_radixx_ & buf_t{buf_t{1u}<<(sizeof(buf_t)*CHAR_BIT-1u)}) [[unlikely]] { // is top bit set (buf exhausted)
 				read_buf(is);
+				if (!is) [[unlikely]] { return radix; }
 			}
 			OKIIDOKU_CONTRACT(buf_radixx_ <= buf_t_max/2u);
 			OKIIDOKU_CONTRACT(buf_t_max-buf_radixx_ >= buf_);
@@ -252,6 +275,7 @@ namespace okiidoku::detail {
 				digit += TO<radix_t>(buf_);
 				OKIIDOKU_CONTRACT(digit < radix_orig);
 				read_buf(is);
+				if (!is) [[unlikely]] { return radix; }
 			}
 			OKIIDOKU_CONTRACT(radix >= 2u);
 			OKIIDOKU_CONTRACT(buf_t_max-buf_radixx_ >= buf_);
@@ -263,9 +287,13 @@ namespace okiidoku::detail {
 			return digit;
 		}
 
-		/** call this once there are no more digits to be read.
-		do not call again afterwards. */
-		void finish(std::istream& is) {
+		/** call this once when there are no more digits to be read.
+		do not call again afterwards.
+		\pre all expected data has been fully, successfully read.
+		\pre `is.good()` and `is.exceptions() == std::ios::goodbit`. */
+		void finish(std::istream& is) noexcept {
+			OKIIDOKU_CONTRACT(is.good());
+			OKIIDOKU_CONTRACT(is.exceptions() == std::ios::goodbit);
 			using u8_t = std::uint_fast8_t;
 
 			const auto bytes_last_read {[&]{
@@ -273,20 +301,24 @@ namespace okiidoku::detail {
 				if (v == 0u) [[likely]] { v = sizeof(buf_t); }
 				return v;
 			}()};
-			OKIIDOKU_CONTRACT(bytes_last_read >  0u);
+			OKIIDOKU_CONTRACT(bytes_last_read > 0u);
 			OKIIDOKU_CONTRACT(bytes_last_read <= sizeof(buf_t));
 
 			const auto buf_bytes_used {[&]{
-				const auto unused_buf_bytes {TO<u8_t>(std::countl_zero(buf_radixx_) / CHAR_BIT)};
-				OKIIDOKU_CONTRACT(unused_buf_bytes < sizeof(buf_t));
-				return TO<u8_t>(sizeof(buf_t) - unused_buf_bytes);
+				OKIIDOKU_CONTRACT(buf_radixx_ > 0u); // `read_buf` always followed by some buffer consumption.
+				// const auto buf_bytes_unused {TO<u8_t>(std::countl_zero(buf_radixx_) / CHAR_BIT)};
+				// OKIIDOKU_CONTRACT(buf_bytes_unused < sizeof(buf_t));
+				// return TO<u8_t>(sizeof(buf_t) - buf_bytes_unused);
+				return TO<u8_t>((std::bit_width(buf_radixx_)+(CHAR_BIT-1)) / CHAR_BIT);
 			}()};
 			OKIIDOKU_CONTRACT(buf_bytes_used > 0u);
+			OKIIDOKU_CONTRACT(buf_bytes_used <= bytes_last_read);
 
 			const auto unused_read_bytes {TO<u8_t>(bytes_last_read - buf_bytes_used)};
 			OKIIDOKU_CONTRACT(unused_read_bytes < sizeof(buf_t));
 
-			is.seekg(-unused_read_bytes, std::ios_base::cur);
+			is.seekg(-unused_read_bytes, std::ios::cur); // (clears `eofbit`)
+			OKIIDOKU_CONTRACT(byte_count_ >= unused_read_bytes);
 			byte_count_ -= unused_read_bytes;
 		}
 

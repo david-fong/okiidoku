@@ -30,7 +30,7 @@ namespace okiidoku::mono { namespace {
 		/*      */ cands_t /*   */ row_cands_         {~cands_t{}};
 		std::array<cands_t, T::O1> h_chute_box_cands_ {[]{ std::array<cands_t, T::O1> _; _.fill(~cands_t{}); return _; }()};
 		std::array<cands_t, T::O2> cols_cands_        {[]{ std::array<cands_t, T::O2> _; _.fill(~cands_t{}); return _; }()};
-		o4i_t cell_rmi_ {0u};
+		o4i_t cell_rmi_ {0u}; // TODO change to o4is_t? measure performance difference.
 
 		// \internal not protected <- to control member layout.
 		std::conditional_t<is_writer,
@@ -56,7 +56,7 @@ namespace okiidoku::mono { namespace {
 		[[nodiscard, gnu::pure]] constexpr
 		bool done() const noexcept {
 			cell_rmi_.check();
-			return cell_rmi_ == T::O4; // or maybe more appropriately/easily- if want to have non-rmi cell-visitation order, `writer_.item_count()`?
+			return cell_rmi_ == T::O4;
 		}
 		/** get current row-major index of a grid to print/parse.
 		\pre `!done()` */
@@ -77,7 +77,7 @@ namespace okiidoku::mono { namespace {
 		void advance() noexcept {
 			OKIIDOKU_CONTRACT(cell_rmi_ < T::O4); OKIIDOKU_CONTRACT(!done());
 			++cell_rmi_;
-			if (done()) [[unlikely]] { return; }
+			if (done()) [[unlikely]] { return; } // TODO measure: is this short-circuit worth it?
 			if (cell_rmi_ % T::O2 == 0u) [[unlikely]] { row_cands_ = ~cands_t{}; }
 			if (cell_rmi_ % T::O3 == 0u) [[unlikely]] { h_chute_box_cands_.fill(~cands_t{}); }
 		}
@@ -115,25 +115,38 @@ namespace okiidoku::mono { namespace {
 	template<Order O> requires(is_order_compiled(O))
 	class Reader final : public SerdesBase<O,false,IntKind::fast> {
 	private:
-		using sym_t = typename Ints<O>::o2x_t; // TODO what about puzzles then? separate bitmap of populated/empty cells?
+		using T = Ints<O>;
+		using sym_t = typename Ints<O>::o2i_t; // uses `O2` as a null value on stream read error.
+		// TODO ^what about puzzles then? separate bitmap of populated/empty cells?
 	public:
-		// \note automatically removes parsed `sym` as a candidate of future cells.
-		[[nodiscard]] sym_t operator()(std::istream& is) {
+		/**
+		\pre `is.good()` and `is.exceptions() == std::ios::goodbit`.
+		\note automatically removes parsed `sym` as a candidate of future cells. */
+		[[nodiscard]] sym_t operator()(std::istream& is) noexcept {
 			OKIIDOKU_CONTRACT(!this->done());
+			OKIIDOKU_CONTRACT(is.good());
+			OKIIDOKU_CONTRACT(is.exceptions() == std::ios::goodbit);
 			const auto ctx_cands {this->cands()};
 				// the number of possible different values that this cell could be
 				// based on the values that have already been encountered.
 				OKIIDOKU_CONTRACT(ctx_cands.count() > 0u); // implied by contract (follows_rule)
 
-			const auto compressed_sym {*(this->serdes().read(is, ctx_cands.count()))};
-			const auto sym {ctx_cands.nth_set_bit(compressed_sym)};
+			const auto compressed_sym {this->serdes().read(is, ctx_cands.count())};
+			if (!is) [[unlikely]] {
+				return T::O2;
+			}
+			const auto sym {ctx_cands.nth_set_bit(*compressed_sym)};
 				OKIIDOKU_ASSERT(ctx_cands[sym]);
 			this->remove_cand_at_current_rmi(sym);
 			return sym;
 		}
-		/** \returns number of bytes read. */
-		std::size_t finish(std::istream& is) {
+		/**
+		\pre `is.good()` and `is.exceptions() == std::ios::goodbit`.
+		\returns number of bytes read. */
+		std::size_t finish(std::istream& is) noexcept {
 			OKIIDOKU_CONTRACT(this->done());
+			OKIIDOKU_CONTRACT(is.good());
+			OKIIDOKU_CONTRACT(is.exceptions() == std::ios::goodbit);
 			this->serdes().finish(is);
 			return this->serdes().byte_count();
 		}
@@ -164,8 +177,11 @@ namespace okiidoku::mono {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	std::size_t read_solved(Grid<O>& grid, std::istream& is) {
+	std::size_t read_solved(Grid<O>& grid, std::istream& is) noexcept {
+		OKIIDOKU_CONTRACT(is.good());
 		using T = Ints<O>;
+		const auto is_exceptions_orig {is.exceptions()};
+		is.exceptions(std::ios::goodbit); // disable any exception mask bits (restore before `return`)
 		const std::size_t bytes_read {[&]{
 			// parse out bulk of content (skip what can be reconstructed later):
 			Reader<O> reader {};
@@ -176,10 +192,14 @@ namespace okiidoku::mono {
 					continue; // skip cells in the main-diagonal boxes
 				}
 				const auto sym {reader(is)};
+				if (!is) [[unlikely]] { return 0uz; }
 				grid[reader.rmi()] = sym;
 			}
 			return reader.finish(is);
-		}()};{
+		}()};
+		is.exceptions(is_exceptions_orig); // done using `is` now.
+		if (!is) [[unlikely]] { return 0uz; }
+		{
 			// reconstruct cells in main-diagonal boxes:
 			std::array<std::array<std::array<O2BitArr<O>, T::O1>, T::O1>, T::O1> main_diag_box_cands {};
 			for (const auto rmi : T::O4) {

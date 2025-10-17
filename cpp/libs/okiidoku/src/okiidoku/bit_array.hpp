@@ -67,6 +67,11 @@ namespace okiidoku {
 				return static_cast<word_t>(word_t{1u} << (bit_i % num_word_bits));
 			}
 		}
+		/** annoyingly, `operator~` for builtin unsigned ints changes to signed. */
+		[[nodiscard, gnu::const]]
+		static constexpr word_t wflip(const word_t word) noexcept {
+			return static_cast<word_t>(~word);
+		}
 
 	private:
 		/** \internal If user follows contracts, excess top bits are always zero. */
@@ -101,7 +106,7 @@ namespace okiidoku {
 		/** \pre `at < O2`. */
 		constexpr void unset(const bit_ix_t at) noexcept {
 			at.check();
-			words_[bit_i_to_word_i(at)] &= static_cast<word_t>(~word_bit_mask_for_bit_i(at));
+			words_[bit_i_to_word_i(at)] &= wflip(word_bit_mask_for_bit_i(at));
 		}
 		/** \pre `at < O2`. */
 		constexpr void flip(const bit_ix_t at) noexcept {
@@ -111,7 +116,7 @@ namespace okiidoku {
 
 		void remove(const BitArray& to_remove) noexcept {
 			for (const auto i : num_words) {
-				words_[i] &= static_cast<word_t>(~to_remove.words_[i]);
+				words_[i] &= wflip(to_remove.words_[i]);
 			}
 		}
 		void retain_only(const BitArray& to_retain) noexcept {
@@ -146,9 +151,9 @@ namespace okiidoku {
 			at.check();
 			const auto word_i {bit_i_to_word_i(at)};
 			const word_t word_bit_mask {word_bit_mask_for_bit_i(at)};
-			a.words_[word_i] &= static_cast<word_t>(~word_bit_mask);
-			b.words_[word_i] &= static_cast<word_t>(~word_bit_mask);
-			c.words_[word_i] &= static_cast<word_t>(~word_bit_mask);
+			a.words_[word_i] &= wflip(word_bit_mask);
+			b.words_[word_i] &= wflip(word_bit_mask);
+			c.words_[word_i] &= wflip(word_bit_mask);
 		}
 
 		BitArray& operator|=(const BitArray& rhs) noexcept {
@@ -169,8 +174,8 @@ namespace okiidoku {
 		[[nodiscard, gnu::pure]] constexpr
 		BitArray operator~() const noexcept {
 			BitArray inv OKIIDOKU_DEFER_INIT; // NOLINT(*-init)
-			for (const auto i : num_words) { inv.words_[i] = ~words_[i]; };
-			inv.words_.back() &= static_cast<word_t>(static_cast<word_t>(~word_t{0u}) >> num_excess_bits);
+			for (const auto i : num_words) { inv.words_[i] = wflip(words_[i]); };
+			inv.words_.back() &= static_cast<word_t>( wflip(word_t{0u}) >> num_excess_bits );
 			return inv;
 		}
 

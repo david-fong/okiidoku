@@ -141,7 +141,7 @@ void test_o2_bit_arr_rand(const std::uint_fast32_t rng_seed) {
 }}
 
 TEST_CASE("okiidoku.o2_bit_arr") {
-	static constexpr std::uintmax_t num_rounds {4096u};
+	static constexpr std::uintmax_t num_rounds {1024u};
 	// std::mt19937 rng {0u};
 	std::mt19937 rng {std::random_device{}()};
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \

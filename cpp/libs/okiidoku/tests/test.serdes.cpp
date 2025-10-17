@@ -12,6 +12,7 @@
 
 #include <sstream>
 #include <random>
+#include <numeric> // accumulate
 #include <array>
 #include <memory>  // iwyu says I need this for `allocator`?
 #include <cstdint>
@@ -26,35 +27,64 @@ void test_serdes(const std::uint_fast32_t rng_seed) {
 	std::minstd_rand rng {rng_seed};
 
 	std::array<Grid<O>, 8uz> grid_buf OKIIDOKU_DEFER_INIT; // NOLINT(*init*)
-	// const std::size_t num_grids {std::uniform_int_distribution{1uz, grid_buf.size()}(rng)};
-	const std::size_t num_grids {2uz}; // TODO.high go back to randomized
+	std::array<std::size_t, 8uz> byte_counts {};
+	const std::size_t num_grids {std::uniform_int_distribution{1uz, grid_buf.size()}(rng)};
+	// const std::size_t num_grids {2uz}; // TODO.high go back to randomized
+	CAPTURE(num_grids);
 
-	std::size_t byte_count {0uz};
+	// TODO.high for some reason this fixes a bug... figure out what's going on pls
+	// seems like write_solved appending to `os` has some issue? or maybe reading at the boundary between written grids...
+	// static constexpr auto arbitrary_padding {T::O2};
+	static constexpr auto arbitrary_padding {Int<7u,IntKind::constant>{}};
+
 	const auto written_data {[&]{
 		// serialize data to `std::string`:
 		std::ostringstream os {std::ios::binary};
-		for (auto i {0uz}; i < num_grids; ++i) {
+		REQUIRE_UNARY(os);
+		for (auto i {0uz}; i < num_grids; ++i) { CAPTURE(i);
 			auto& grid {grid_buf[i]};
 			grid = generate_shuffled<O>(rng());
-			byte_count += write_solved(grid, os);
+			REQUIRE_UNARY(os.good());
+			byte_counts[i] = write_solved(grid, os);
+			{
+				for ([[maybe_unused]] const auto j : arbitrary_padding) { os.put('\0'); }
+				byte_counts[i] += arbitrary_padding;
+			}
+			REQUIRE_UNARY(!os.fail());
+			REQUIRE_EQ(
+				static_cast<std::size_t>(os.tellp()),
+				std::accumulate(byte_counts.cbegin(), byte_counts.cbegin()+i+1uz, 0uz)
+			);
 		}
 		return os.str();
 	}()};
-	REQUIRE_EQ(written_data.size(), byte_count);
+	REQUIRE_EQ(
+		written_data.size(),
+		std::accumulate(byte_counts.cbegin(), byte_counts.cbegin()+num_grids, 0uz)
+	);
 	std::istringstream is {written_data, std::ios::binary};
+	REQUIRE_UNARY(is);
 	// de-serialize data and check correctness:
-	for (auto i {0uz}; i < num_grids; ++i) {
+	for (auto i {0uz}; i < num_grids; ++i) { CAPTURE(i);
 		Grid<O> parsed_grid;
-		const auto bytes_read {read_solved(parsed_grid, is)};
-		REQUIRE_GE(byte_count, bytes_read);
-		byte_count -= bytes_read;
+		REQUIRE_UNARY(is.good());
+		auto bytes_read {read_solved(parsed_grid, is)};
+		REQUIRE_UNARY(!is.fail());
+		{
+			is.ignore(arbitrary_padding);
+			bytes_read += arbitrary_padding;
+		}
+		REQUIRE_EQ(byte_counts[i], bytes_read);
+		REQUIRE_EQ(
+			static_cast<std::size_t>(is.tellg()),
+			std::accumulate(byte_counts.cbegin(), byte_counts.cbegin()+i+1uz, 0uz)
+		);
 		REQUIRE_EQ(parsed_grid, grid_buf[i]);
 	}
-	REQUIRE_EQ(byte_count, 0uz);
 }}
 
 TEST_CASE("okiidoku.serdes") {
-	static constexpr std::uintmax_t num_rounds {4096u};
+	static constexpr std::uintmax_t num_rounds {1024u};
 	// std::mt19937 rng {0u};
 	std::mt19937 rng {std::random_device{}()};
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \

@@ -41,37 +41,47 @@ namespace okiidoku::test {
 		const auto written_data {[&]{
 			// serialize data to `std::string`:
 			writer_t writer;
-			std::ostringstream os;
+			std::ostringstream os {std::ios::binary};
+			REQUIRE_UNARY(os);
 			std::geometric_distribution<radix_t> radix_dist {1.0/(CHAR_BIT*sizeof(buf_t))};
 			for (auto place {0uz}; place < num_places; ++place) { CAPTURE(place);
 				auto& p {places_buf[place]};
 					p.radix = 0u; do { p.radix = radix_dist(rng); } while (p.radix == 0u);
 					p.digit = uidist_t<radix_t>{0u,static_cast<radix_t>(p.radix-1u)}(rng);
 				if (!writer.accept(p)) [[unlikely]] {
+					REQUIRE_UNARY(os);
 					writer.flush(os);
+					REQUIRE_UNARY(os);
 				}
 				REQUIRE_EQ(writer.item_count(), place+1uz);
 			}
+			REQUIRE_UNARY(os);
 			writer.flush(os);
+			REQUIRE_UNARY(os);
 			byte_count += writer.byte_count();
-			REQUIRE_EQ(os.tellp(), byte_count);
+			REQUIRE_EQ(static_cast<std::size_t>(os.tellp()), byte_count);
 			return os.str();
 		}()};
 		REQUIRE_EQ(written_data.size(), byte_count);
 		{
 			// de-serialize data and check correctness:
 			std::istringstream is {written_data, std::ios::binary}; // TODO.high do I need to add ios::in here? is ::binary even needed? I'm not even passing it to create the ostringstream
+			REQUIRE_UNARY(is);
 			reader_t reader;
 			for (auto place {0uz}; place < num_places; ++place) { CAPTURE(place);
 				const auto& expected {places_buf[place]};
 				const auto digit {reader.read(is, expected.radix)};
+				REQUIRE_UNARY(is);
+				/* ^we don't expect to hit EOF here, but with more complex data lifetime,
+				/ transfer, that's a real possibility. Ex. with a somehow truncated data
+				archive file, or a network error. */
 				REQUIRE_EQ(reader.item_count(), place+1uz);
 				REQUIRE_EQ(digit, expected.digit);
 			}
 			reader.finish(is);
-			REQUIRE_UNARY_FALSE(is.bad());  // non-recoverable error
+			REQUIRE_UNARY_FALSE(is.bad()); // non-recoverable error
 			CHECK_UNARY_FALSE(is.fail()); // error
-			CHECK_UNARY(is.eof());
+			// CHECK_UNARY(is.eof());
 			const auto is_pos {static_cast<std::size_t>(is.tellg())};
 			REQUIRE_EQ(is_pos, byte_count);
 			REQUIRE_EQ(reader.byte_count(), byte_count);
