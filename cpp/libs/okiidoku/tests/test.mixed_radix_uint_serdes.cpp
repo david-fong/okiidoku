@@ -49,15 +49,15 @@ namespace okiidoku::test {
 					p.radix = 0u; do { p.radix = radix_dist(rng); } while (p.radix == 0u);
 					p.digit = uidist_t<radix_t>{0u,static_cast<radix_t>(p.radix-1u)}(rng);
 				if (!writer.accept(p)) [[unlikely]] {
-					REQUIRE_UNARY(os);
+					REQUIRE_UNARY(os.good());
 					writer.flush(os);
-					REQUIRE_UNARY(os);
+					REQUIRE_UNARY_FALSE(os.fail());
 				}
 				REQUIRE_EQ(writer.item_count(), place+1uz);
 			}
-			REQUIRE_UNARY(os);
+			REQUIRE_UNARY(os.good());
 			writer.flush(os);
-			REQUIRE_UNARY(os);
+			REQUIRE_UNARY_FALSE(os.fail());
 			byte_count += writer.byte_count();
 			REQUIRE_EQ(static_cast<std::size_t>(os.tellp()), byte_count);
 			return os.str();
@@ -69,9 +69,10 @@ namespace okiidoku::test {
 			REQUIRE_UNARY(is);
 			reader_t reader;
 			for (auto place {0uz}; place < num_places; ++place) { CAPTURE(place);
-				const auto& expected {places_buf[place]};
+				const auto& expected {places_buf[place]}; CAPTURE(expected.radix);
+				REQUIRE_UNARY(is.good());
 				const auto digit {reader.read(is, expected.radix)};
-				REQUIRE_UNARY(is);
+				REQUIRE_UNARY_FALSE(is.fail());
 				/* ^we don't expect to hit EOF here, but with more complex data lifetime,
 				/ transfer, that's a real possibility. Ex. with a somehow truncated data
 				archive file, or a network error. */
@@ -98,6 +99,21 @@ namespace okiidoku::test {
 	// }
 }
 
+
+TEST_CASE("okiidoku.uint_serdes") {
+	const std::uint64_t i {0xFEDC'BA98'7654'3210uLL};
+	std::ostringstream os {std::ios::binary};
+	os.write(reinterpret_cast<const char*>(&i), sizeof(i));
+	REQUIRE_UNARY(!os.fail());
+	const auto str {os.str()};
+	std::istringstream is {str, std::ios::binary};
+	std::uint64_t i2 {~i};
+	is.read(reinterpret_cast<char*>(&i2), sizeof(i));
+	REQUIRE_UNARY(!is.fail());
+	CHECK_EQ(i, i2);
+}
+
+
 TEST_CASE("okiidoku.mixed_radix_uint_serdes") {
 	// okiidoku::test_mixed_radix_uint_serdes<std::uint_least8_t, std::uint_least16_t>(3316611681754028984uLL, 10u);
 	static constexpr std::uintmax_t num_rounds {1024u};
@@ -106,7 +122,7 @@ TEST_CASE("okiidoku.mixed_radix_uint_serdes") {
 	// TODO write logic to restore from failure_checkpoint file? but how to delete it afterward?... does doctest have a way to hook into a TEST_CASE passing?
 	//   also... isn't there an easier way given that I'm only using the mersenne twister to generate seeds? if a round fails, write the seed that was passed to the round. :P way simpler.
 	for (std::uintmax_t round {0u}; round < num_rounds; ++round) { CAPTURE(round);
-		[[maybe_unused]] const auto rng_bak {rng}; // make a copy of PRNG's state before usage.
+		/*[[maybe_unused]] const auto rng_bak {rng}; // make a copy of PRNG's state before usage.
 		INFO("writing backup of PRNG state for this test round to file ", [&]{ // `INFO` is lazy (only on failure).
 			std::string file_path {"okiidoku.mixed_radix_uint_serdes.failure_checkpoint."};
 				// file_path += std::to_string(sizeof(radix_t)) + "." + std::to_string(sizeof(buf_t)); /// \todo
@@ -114,7 +130,7 @@ TEST_CASE("okiidoku.mixed_radix_uint_serdes") {
 			std::ofstream of {file_path};
 			of << rng_bak;
 			return file_path;
-		}());
+		}());*/
 		using u8_t  = std::uint_least8_t ;
 		using u16_t = std::uint_least16_t;
 		using u32_t = std::uint_least32_t;

@@ -15,7 +15,8 @@ endif()
 set(CPACK_VERBATIM_VARIABLES YES) # NO is the default for legacy reasons. new projects should use YES.
 set(CPACK_PACKAGE_VENDOR "david-fong")
 set(CPACK_RESOURCE_FILE_LICENSE "${okiidoku_SOURCE_DIR}/../LICENSE.txt")
-set(CPACK_RESOURCE_FILE_README "${okiidoku_SOURCE_DIR}/readme.md") # TODO is this an appropriate readme for an installer?
+set(CPACK_RESOURCE_FILE_README  "${okiidoku_SOURCE_DIR}/../README.md")
+# set(CPACK_PACKAGE_INSTALL_DIRECTORY okiidoku)
 #set(CPACK_PACKAGE_ICON )
 set(CPACK_SOURCE_IGNORE_FILES
 	# see https://github.com/CLIUtils/CLI11/blob/main/CMakeLists.txt for reference

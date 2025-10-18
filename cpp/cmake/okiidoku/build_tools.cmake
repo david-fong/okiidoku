@@ -76,9 +76,16 @@ if(NOT "${CCACHE_EXE}" STREQUAL "CCACHE_EXE-NOTFOUND")
 		"namespace = okiidoku.${CMAKE_CXX_COMPILER_ID}.$<CONFIG>"
 		"ignore_options = /w* /W* -W* -ftabstop=*"
 		# man ccache @"COMPILING IN DIFFERENT DIRECTORIES":
-		"base_dir = ${okiidoku_SOURCE_DIR}/.." "hash_dir=false"
+		"base_dir = ${okiidoku_SOURCE_DIR}/.."
+		"absolute_paths_in_stderr = true"
+		"hash_dir = false"
 		# "run_second_cpp=false"
 	)
+	if(NOT OKIIDOKU_BUILD_REPRODUCIBLE)
+		list(APPEND CMAKE_CXX_COMPILER_LAUNCHER
+			"sloppiness = locale,random_seed,time_macros"
+		)
+	endif()
 	# add_compile_options( # see run_second_cpp docs
 	# 	"$<$<CXX_COMPILER_ID:GNU>:-fdirectives-only>"
 	# 	"$<$<CXX_COMPILER_ID:Clang>:-frewrite-includes>"

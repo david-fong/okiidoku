@@ -10,8 +10,14 @@ namespace okiidoku::mono { template <Order O> requires (is_order_compiled(O)) st
 namespace okiidoku::visitor { struct Grid; }
 
 #include <iosfwd>
-#include <cstddef> // size_t
+#include <cstddef>  // size_t
 
+namespace okiidoku {
+	using serdes_res_t = std::size_t;
+	// \internal ^if there could be IO errors other than EOF, we'd use `std::expected`,
+	//  and if it were possible that a grid could encode to zero bytes (it's not), we'd
+	//  use `std::optional`. but those aren't the case, so EOF can be `0uz` with `[[nodiscard]]`.
+}
 namespace okiidoku::mono {
 
 	// [[nodiscard, gnu::const]] constexpr unsigned get_min_bytes_to_store(const unsigned max_value) {
@@ -36,9 +42,10 @@ namespace okiidoku::mono {
 	\pre `is`'s next bytes contain the result of a call to `write_solved`.
 	\pre `is` will not be used by another thread for the duration of this call.
 	\post parsed grid is filled and follows the one rule.
-	\returns the number of bytes read, or `0uz` on stream read error. */
+	\post `is.tellg()` is at end of data, or where EOF occurred.
+	\returns the number of bytes read, or `0uz` on unexpected EOF. */
 	template<Order O> requires(is_order_compiled(O))
-	OKIIDOKU_EXPORT std::size_t read_solved(Grid<O>&, std::istream& is) noexcept; // TODO make the others noexcept?
+	OKIIDOKU_EXPORT [[nodiscard]] serdes_res_t read_solved(Grid<O>&, std::istream& is) noexcept; // TODO make the others noexcept?
 
 	/**
 	best used with sparse (close to minimal) puzzles.
@@ -58,7 +65,7 @@ namespace okiidoku::mono {
 	\post the grid follows the one rule.
 	\returns the number of bytes read. */
 	template<Order O> requires(is_order_compiled(O))
-	OKIIDOKU_EXPORT std::size_t read_puzzle(Grid<O>&, std::istream& is);
+	OKIIDOKU_EXPORT [[nodiscard]] std::size_t read_puzzle(Grid<O>&, std::istream& is);
 }
 
 
@@ -68,12 +75,12 @@ namespace okiidoku::visitor {
 	OKIIDOKU_EXPORT std::size_t write_solved(const Grid&, std::ostream& os);
 
 	/** see `okiidoku::mono::read_solved<O>`. */
-	OKIIDOKU_EXPORT std::size_t read_solved(Grid&, std::istream& is);
+	[[nodiscard]] OKIIDOKU_EXPORT serdes_res_t read_solved(Grid&, std::istream& is);
 
 	/** see `okiidoku::mono::write_puzzle<O>`. */
 	OKIIDOKU_EXPORT std::size_t write_puzzle(const Grid&, std::ostream& os);
 
 	/** see `okiidoku::mono::read_puzzle<O>`. */
-	OKIIDOKU_EXPORT std::size_t read_puzzle(Grid&, std::istream& is);
+	[[nodiscard]] OKIIDOKU_EXPORT std::size_t read_puzzle(Grid&, std::istream& is);
 }
 #endif

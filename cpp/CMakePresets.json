@@ -83,6 +83,8 @@
 				"CMAKE_DEFAULT_BUILD_TYPE": "Release",
 				"CMAKE_BUILD_RPATH_USE_ORIGIN": true,
 				"CPM_SOURCE_CACHE": { "type":"PATH", "value":"${sourceDir}/external" },
+				"OKIIDOKU_BUILD_REPRODUCIBLE": true,
+				"OKIIDOKU_BUILD_DEBUG_WITH_SANITIZERS": false,
 				"OKIIDOKU_BUILD_OPTIMIZE_LOCAL_NON_PORTABLE": false,
 				"CPACK_PACKAGE_DIRECTORY": { "type":"PATH", "value":"${sourceDir}/out/package/" }
 			}

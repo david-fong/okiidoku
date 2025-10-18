@@ -57,8 +57,8 @@ namespace okiidoku::detail {
 
 		std::size_t item_count_ {0uz};
 		std::size_t byte_count_ {0uz};
-		buf_t buf_radixx_   {0u};   //< write buffer if all digits were maxed-out. upwards-growing. "x" := "exclusive"
-		bool  did_overflow_ {false};
+		buf_t buf_radixx_   {0u};    //< write buffer if all digits were maxed-out. upwards-growing. "x" := "exclusive"
+		bool  did_overflow_ {false}; // TODO is it possible to express this by whether `queue[queue_end_].radix == 0u`?
 		std::uint_fast8_t queue_end_ {0u};
 		std::array<Item, (sizeof(buf_t)*CHAR_BIT)+1uz> queue_; // lower indices are for earlier-passed items
 
@@ -83,7 +83,8 @@ namespace okiidoku::detail {
 				// handle overflow of `flush` buffer...
 				OKIIDOKU_CONTRACT(buf_radixx_ != 0u); // (see template params constraint)
 				// try to use remaining space in buf:
-				const auto radix_0 {TO<radix_t>(buf_t_max / (buf_radixx_+1u))};
+				const auto radix_0 {TO<radix_t>(buf_t_max / (buf_radixx_+1u))}; // won't overflow (buf_radixx_ <= buf_t_max/2u)
+					// TODO ^investigate would this always be a power of 2?
 				OKIIDOKU_CONTRACT(radix_0 <= radix_t_max);
 				OKIIDOKU_CONTRACT(radix_0 < in.radix);
 				if (radix_0 >= 2u) [[likely]] {
@@ -102,15 +103,18 @@ namespace okiidoku::detail {
 				OKIIDOKU_CONTRACT2(queue_end_ < queue_.size());
 				queue_[queue_end_] = in;
 				did_overflow_ = true;
+
 				return false;
 			}
 			buf_radixx_ = TO<buf_t>((buf_radixx_*in.radix)+(in.radix-1u));
 			queue_[queue_end_++] = in;
+
+			static constexpr buf_t buf_t_top_bit_mask {buf_t{1u} << (sizeof(buf_t)*CHAR_BIT-1u)};
 			OKIIDOKU_CONTRACT(
 				(buf_radixx_ <= buf_t_max/2u)
-				== ((buf_radixx_ & buf_t{buf_t{1u}<<(sizeof(buf_t)*CHAR_BIT-1u)}) == 0u)
+				== ((buf_radixx_ & buf_t_top_bit_mask) == 0u)
 			);
-			return (buf_radixx_ & buf_t{buf_t{1u}<<(sizeof(buf_t)*CHAR_BIT-1u)}) == 0u;
+			return (buf_radixx_ & buf_t_top_bit_mask) == 0u;
 			// ^whether a minimal, non-trivial `accept` could happen without overflow.
 			//  i.e. `buf_radixx_ <= buf_t_max/2u`
 		}
@@ -121,12 +125,15 @@ namespace okiidoku::detail {
 		\pre `os` is a binary stream- not a text stream.
 		\pre the previous call to `accept` indicated a need to flush, or there is no more data. */
 		void flush(std::ostream& os) {
+			OKIIDOKU_CONTRACT2(os.good());
+			OKIIDOKU_CONTRACT(queue_end_ < queue_.size());
 			if (queue_end_ == 0u) [[unlikely]] { return; }
 			OKIIDOKU_CONTRACT(buf_radixx_ > 0u);
 
 			// prepare the real write buffer:
 			buf_t buf {0u};
 			for (auto i {0uz}; i < queue_end_; ++i) {
+				OKIIDOKU_CONTRACT(i+1uz <= queue_end_);
 				const auto& qi {queue_[queue_end_-1uz-i]};
 				OKIIDOKU_CONTRACT(qi.radix > 0u);
 				OKIIDOKU_CONTRACT(qi.digit < qi.radix);
@@ -142,8 +149,9 @@ namespace okiidoku::detail {
 			byte_count_ += num_bytes;
 			if constexpr (std::endian::native == std::endian::little) {
 				static_assert(alignof(buf_t) >= alignof(char));
-				os.write(reinterpret_cast<char*>(&buf), num_bytes); // NOLINT(*-cast)
+				os.write(reinterpret_cast<const char*>(&buf), num_bytes); // NOLINT(*-cast)
 			}
+			// if (false) {}
 			else { for (auto i {0uz}; i < num_bytes; ++i) {
 				os.put(TO<char>(buf));
 				buf >>= CHAR_BIT;
@@ -197,8 +205,8 @@ namespace okiidoku::detail {
 		\internal conditions to call this correspond to conditions where writer `accept`
 			indicates need for caller to `flush`. */
 		void read_buf(std::istream& is) noexcept {
-			OKIIDOKU_CONTRACT(is.good());
-			OKIIDOKU_CONTRACT(is.exceptions() == std::ios::goodbit);
+			OKIIDOKU_CONTRACT2(is.good());
+			OKIIDOKU_CONTRACT2(is.exceptions() == std::ios::goodbit);
 			if (is.rdbuf() != nullptr && is.rdbuf()->in_avail() < static_cast<long>(sizeof(buf_t))) [[unlikely]] {
 				is.sync();
 				/* I'm not sure if this is necessary, but hoping that it prevents issues
@@ -222,14 +230,14 @@ namespace okiidoku::detail {
 				std::byteswap(buf_);
 				byte_count = TO<std::size_t>(is.gcount());
 			}
+			// if (false) {}
 			else { for (auto i {0uz}; i < sizeof(buf_t); ++i) {
-				char c OKIIDOKU_DEFER_INIT; // NOLINT(*init*)
-				is.get(c); if (is) [[likely]] {
-					buf_ |= (buf_t{c} << (i*CHAR_BIT));
+				if (char c OKIIDOKU_DEFER_INIT; is.get(c), is) [[likely]] { // NOLINT(*init*)
+					buf_ |= TO<buf_t>( TO<buf_t>(TO<unsigned char>(c)) << (i*CHAR_BIT) ); // good grief- the casting needed here =_=
 					++byte_count;
 				} else { break; }
 			}}
-			if (byte_count > 0u && !is) [[likely]] { is.clear(); }
+			if (byte_count > 0u && !is) [[unlikely]] { is.clear(); }
 			/* ^unless we failed to read _anything_, swallow `eofbit` and `failbit`, if set.
 			it's the caller's job to know expected end. we don't know here if overreading. */
 			OKIIDOKU_CONTRACT(byte_count <= sizeof(buf_t));
@@ -250,14 +258,15 @@ namespace okiidoku::detail {
 		\post if didn't hit unexpected EOF, the return value is less than `radix`. */
 		[[nodiscard]] radix_t read(std::istream& is, radix_t radix) noexcept {
 			OKIIDOKU_CONTRACT(buf_t_max-buf_radixx_ >= buf_);
-			OKIIDOKU_CONTRACT(is.good());
-			OKIIDOKU_CONTRACT(is.exceptions() == std::ios::goodbit);
+			OKIIDOKU_CONTRACT2(is.good());
+			OKIIDOKU_CONTRACT2(is.exceptions() == std::ios::goodbit);
 			OKIIDOKU_CONTRACT(radix <= radix_t_max);
 			OKIIDOKU_CONTRACT(radix > 0u);
 			[[maybe_unused]] const auto radix_orig {radix};
 			++item_count_;
 			if (radix < 2u) [[unlikely]] { return 0u; }
-			if (buf_radixx_ & buf_t{buf_t{1u}<<(sizeof(buf_t)*CHAR_BIT-1u)}) [[unlikely]] { // is top bit set (buf exhausted)
+			static constexpr buf_t buf_t_top_bit_mask {buf_t{1u} << (sizeof(buf_t)*CHAR_BIT-1u)};
+			if (buf_radixx_ & buf_t_top_bit_mask) [[unlikely]] { // is top bit set (buf exhausted)
 				read_buf(is);
 				if (!is) [[unlikely]] { return radix; }
 			}
@@ -292,8 +301,8 @@ namespace okiidoku::detail {
 		\pre all expected data has been fully, successfully read.
 		\pre `is.good()` and `is.exceptions() == std::ios::goodbit`. */
 		void finish(std::istream& is) noexcept {
-			OKIIDOKU_CONTRACT(is.good());
-			OKIIDOKU_CONTRACT(is.exceptions() == std::ios::goodbit);
+			OKIIDOKU_CONTRACT2(is.good());
+			OKIIDOKU_CONTRACT2(is.exceptions() == std::ios::goodbit);
 			using u8_t = std::uint_fast8_t;
 
 			const auto bytes_last_read {[&]{
@@ -317,7 +326,7 @@ namespace okiidoku::detail {
 			const auto unused_read_bytes {TO<u8_t>(bytes_last_read - buf_bytes_used)};
 			OKIIDOKU_CONTRACT(unused_read_bytes < sizeof(buf_t));
 
-			is.seekg(-unused_read_bytes, std::ios::cur); // (clears `eofbit`)
+			is.seekg(-std::istream::off_type{unused_read_bytes}, std::ios::cur); // (clears `eofbit`)
 			OKIIDOKU_CONTRACT(byte_count_ >= unused_read_bytes);
 			byte_count_ -= unused_read_bytes;
 		}

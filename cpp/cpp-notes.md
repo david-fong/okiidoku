@@ -138,6 +138,12 @@ things I got wrong before which I couldn't understand based on gcc's error messa
   - https://gcc.gnu.org/wiki/Visibility
   - https://www.cs.miami.edu/home/burt/learning/Csc521.091/docs/dsohowto.pdf
 
+- on shared libraries
+  - https://tldp.org/HOWTO/Program-Library-HOWTO/shared-libraries.html
+  - https://learn.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-search-order
+
+- windows packaged vs unpackaged app (ie. using MSIX): https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/#advantages-and-disadvantages-of-packaging-your-app
+
 - on Template instantiation
   - https://gcc.gnu.org/onlinedocs/gcc/Template-Instantiation.html
   - https://arne-mertz.de/2019/02/extern-template-reduce-compile-times/

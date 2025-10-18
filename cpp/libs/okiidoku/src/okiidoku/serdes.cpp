@@ -124,8 +124,8 @@ namespace okiidoku::mono { namespace {
 		\note automatically removes parsed `sym` as a candidate of future cells. */
 		[[nodiscard]] sym_t operator()(std::istream& is) noexcept {
 			OKIIDOKU_CONTRACT(!this->done());
-			OKIIDOKU_CONTRACT(is.good());
-			OKIIDOKU_CONTRACT(is.exceptions() == std::ios::goodbit);
+			OKIIDOKU_CONTRACT2(is.good());
+			OKIIDOKU_CONTRACT2(is.exceptions() == std::ios::goodbit);
 			const auto ctx_cands {this->cands()};
 				// the number of possible different values that this cell could be
 				// based on the values that have already been encountered.
@@ -142,12 +142,13 @@ namespace okiidoku::mono { namespace {
 		}
 		/**
 		\pre `is.good()` and `is.exceptions() == std::ios::goodbit`.
-		\returns number of bytes read. */
+		\returns number of bytes read (`> 0uz`). */
 		std::size_t finish(std::istream& is) noexcept {
 			OKIIDOKU_CONTRACT(this->done());
-			OKIIDOKU_CONTRACT(is.good());
-			OKIIDOKU_CONTRACT(is.exceptions() == std::ios::goodbit);
+			OKIIDOKU_CONTRACT2(is.good());
+			OKIIDOKU_CONTRACT2(is.exceptions() == std::ios::goodbit);
 			this->serdes().finish(is);
+			OKIIDOKU_CONTRACT(this->serdes().byte_count() > 0u);
 			return this->serdes().byte_count();
 		}
 	};
@@ -177,12 +178,16 @@ namespace okiidoku::mono {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	std::size_t read_solved(Grid<O>& grid, std::istream& is) noexcept {
-		OKIIDOKU_CONTRACT(is.good());
+	serdes_res_t read_solved(Grid<O>& grid, std::istream& is) noexcept {
+		OKIIDOKU_CONTRACT2(is.good());
+		#ifndef NDEBUG
+			grid.clear();
+		#endif
 		using T = Ints<O>;
+
 		const auto is_exceptions_orig {is.exceptions()};
 		is.exceptions(std::ios::goodbit); // disable any exception mask bits (restore before `return`)
-		const std::size_t bytes_read {[&]{
+		const std::size_t bytes_read {[&] noexcept {
 			// parse out bulk of content (skip what can be reconstructed later):
 			Reader<O> reader {};
 			for (; !reader.done(); reader.advance()) {
@@ -196,17 +201,29 @@ namespace okiidoku::mono {
 				grid[reader.rmi()] = sym;
 			}
 			return reader.finish(is);
-		}()};
-		is.exceptions(is_exceptions_orig); // done using `is` now.
-		if (!is) [[unlikely]] { return 0uz; }
-		{
+		}()}; {
+			const auto failed {is.fail()};
+			is.clear(), is.exceptions(is_exceptions_orig);
+			if (failed) [[unlikely]] { return 0uz; }
+			// done using `is` now.
+		}{
 			// reconstruct cells in main-diagonal boxes:
 			std::array<std::array<std::array<O2BitArr<O>, T::O1>, T::O1>, T::O1> main_diag_box_cands {};
+			#ifndef NDEBUG
+				for (const auto box     : T::O1) {
+				for (const auto box_row : T::O1) {
+				for (const auto box_col : T::O1) {
+					OKIIDOKU_ASSERT(main_diag_box_cands[box][box_row][box_col].count() == 0u);
+				}}}
+			#endif
 			for (const auto rmi : T::O4) {
 				// get the data needed to losslessly reconstruct:
 				const auto row {rmi / T::O2};
 				const auto col {rmi % T::O2};
 				if ((row/T::O1) == col/T::O1) [[unlikely]] {
+					#ifndef NDEBUG
+						OKIIDOKU_ASSERT(grid[rmi] == T::O2);
+					#endif
 					continue; // skip cells that need reconstructing
 				}
 				for (const auto atom_cell : T::O1) {
@@ -221,6 +238,9 @@ namespace okiidoku::mono {
 				const auto cands {~main_diag_box_cands[box][box_row][box_col]};
 				OKIIDOKU_ASSERT(cands.count() == 1u);
 				const auto sym {*cands.first_set_bit()};
+				#ifndef NDEBUG
+					OKIIDOKU_ASSERT(grid[box_cell_to_rmi<O>((box*T::O1)+box, (T::O1*box_row)+box_col)] == T::O2);
+				#endif
 				grid[box_cell_to_rmi<O>((box*T::O1)+box, (T::O1*box_row)+box_col)] = sym;
 			}}}
 		}
@@ -250,7 +270,7 @@ namespace okiidoku::mono {
 
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 		template std::size_t write_solved<(O_)>(const Grid<(O_)>&, std::ostream&); \
-		template std::size_t read_solved <(O_)>(      Grid<(O_)>&, std::istream&); \
+		template serdes_res_t read_solved <(O_)>(      Grid<(O_)>&, std::istream&); \
 		template std::size_t write_puzzle<(O_)>(const Grid<(O_)>&, std::ostream&); \
 		template std::size_t read_puzzle <(O_)>(      Grid<(O_)>&, std::istream&);
 	OKIIDOKU_FOREACH_O_DO_EMIT
@@ -270,7 +290,7 @@ namespace okiidoku::visitor {
 		}
 	}
 
-	std::size_t read_solved(Grid& vis_sink, std::istream& is) {
+	serdes_res_t read_solved(Grid& vis_sink, std::istream& is) {
 		switch (vis_sink.get_order()) {
 		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 		case (O_): return mono::read_solved(vis_sink.unchecked_get_mono_exact<(O_)>(), is);

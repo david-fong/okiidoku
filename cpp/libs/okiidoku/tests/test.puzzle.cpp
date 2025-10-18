@@ -20,10 +20,10 @@
 namespace okiidoku::test {
 template<Order O> OKIIDOKU_KEEP_FOR_DEBUG // NOLINTNEXTLINE(*-internal-linkage)
 void test_puzzle(okiidoku::util::SharedRng& shared_rng, const std::uintmax_t num_rounds) {
+	INFO("testing for order ", O);
 	if constexpr (O >= 4) { return; } // TODO.mid enable when solver for order=5 is faster?
 	using namespace ::okiidoku::mono;
 	// OKIIDOKU_MONO_INT_TS_TYPEDEFS
-	INFO("testing for order " << O);
 
 	Grid<O> gen_grid;
 	gen_grid.init_most_canonical();
@@ -35,7 +35,7 @@ void test_puzzle(okiidoku::util::SharedRng& shared_rng, const std::uintmax_t num
 		shuffle(gen_grid, shared_rng());
 		REQUIRE_UNARY(gen_grid.follows_rule());
 
-		INFO("making puzzle #" << int(round));
+		INFO("making puzzle #", round);
 		Grid<O> puz_grid {gen_grid};
 		auto ua_sets {find_size_4_minimal_unavoidable_sets(puz_grid)};
 		// CAPTURE(unsigned(ua_sets.ua_set_4s.size());

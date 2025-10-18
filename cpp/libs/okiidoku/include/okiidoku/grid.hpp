@@ -94,7 +94,7 @@ namespace okiidoku::mono {
 		[[nodiscard, gnu::pure]] OKIIDOKU_EXPORT constexpr
 		decltype(auto) arr(this auto&& self) noexcept { return std::forward_like<decltype(self)>(self.B::arr); }
 
-		void clear() noexcept { B::arr.fill(T::O1); }
+		void clear() noexcept { B::arr.fill(T::O2); }
 
 		[[nodiscard, gnu::pure]] OKIIDOKU_EXPORT
 		/** \return `true` if _all_ of the cells are empty (equal to `O2`). */

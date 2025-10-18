@@ -88,7 +88,7 @@
 	"cmake.buildDirectory": "${sourceDirectory}/out/build/${command:cmake.activeConfigurePresetName}",
 	"cmake.installPrefix": "${sourceDirectory}/out/install/${command:cmake.activeBuildPresetName}", // doesn't work (?) :(
 	"cmake.debugConfig": {
-		// // https://code.visualstudio.com/docs/cpp/launch-json-reference
+		// https://code.visualstudio.com/docs/cpp/launch-json-reference
 		"environment": [],
 		"args": [],
 		"setupCommands": [
@@ -106,18 +106,16 @@
 			{"text": "add-auto-load-safe-path ${command:cmake.getLaunchTargetDirectory}/..", "ignoreFailures": true,},
 			// ^trying to do the above in one line would mean working with OS-specific list separators ":"/";".
 			{"text": "directory ${workspaceFolder}/cpp", "ignoreFailures": true,}, // add to source search path. allows loading :/cpp/tools/okiidoku-gdb.py.
+			{"text": "set substitute-path /okiidoku ${workspaceFolder}/cpp", "ignoreFailures": true,},
 		],
 		// "stopAtEntry": true,
 		// "visualizerFile": "${workspaceFolder}/tools/okiidoku.natvis", // TODO.try is this needed if already specified in CMake?
 		"showDisplayString": true, // for natvis
-		"sourceFileMap": {
-			"/okiidoku": "${workspaceFolder}/cpp" // since `-ffile-prefix-map=${okiidoku_SOURCE_DIR}=/okiidoku`
-		},
-		"cwd": "${command:cmake.getLaunchTargetDirectory}/.." // see OKIIDOKU_TEST_WORKING_DIRECTORY. sets gdb pwd. "inferior" (debuggee) program inherits.
+		"cwd": "${command:cmake.getLaunchTargetDirectory}/.." // see CMAKE_DEBUGGER_WORKING_DIRECTORY. sets gdb pwd. "inferior" (debuggee) program inherits.
 	},
 	"cmake.configureArgs": [
 		// "--warn-uninitialized",
-		"-D OKIIDOKU_BUILD_WITH_STATIC_ANALYZERS:BOOL=NO",
+		"-D OKIIDOKU_BUILD_WITH_STATIC_ANALYZERS:BOOL=YES",
 	],
 
 	"python.analysis.typeCheckingMode": "standard",

@@ -45,6 +45,7 @@
 - https://github.com/doxygen/doxygen/issues/8159 copydoc with templated functions
 - https://gitlab.kitware.com/cmake/cmake/-/issues/26118 cmake non-config presets don't implicitly inherit their config preset condition.
 - [Use CMAKE_CROSSCOMPILING_EMULATOR to run cross compiled executables #554](https://github.com/microsoft/vscode-cmake-tools/issues/554)
+- [When debugging a target, use debugger.workingDirectory from the CMake file API #4595](https://github.com/microsoft/vscode-cmake-tools/issues/4595)
 - https://gitlab.kitware.com/cmake/cmake/-/issues/15179 -Og default for debug build configuration
 - https://gitlab.kitware.com/cmake/cmake/-/issues/26092 cmake refer to build preset name in preset for installDir
 - `std::ranges::iota()` clang libc++ doesn't have it yet :( (which impacts emscripten build) https://github.com/llvm/llvm-project/issues/105184
@@ -53,6 +54,7 @@
 
 ## Misc List
 
+- try deleting array subscript operator for bounded `Int` that would be out of range? test if it actually helps, or if `Int`'s implicit conversion to builtin int subverts it from being meaningful.
 - do some `static_assert` tests for types of deducing this member functions. just discovered that I was having a bug with one because I was using something after `std::forward`? maybe I _shouldn't_ have disabled that clang-tidy check... but then why did I see people doing this thing in example code? I guess because you need to be careful about copies with iterators?
 - make canon functions pure producers of a canonicalizing transformation. take grid by const reference. name `canon_sym` -> `get_sym_canon_map`.
 - see if helpful to add `/// \cond detail` wrapper to `detail` namespaces to suppress doxygen for them
@@ -87,6 +89,8 @@
 
 ### waiting
 
+- CMake 4.2
+  - [`$<TARGET_INTERMEDIATE_DIR:tgt>`](https://cmake.org/cmake/help/latest/manual/cmake-generator-expressions.7.html#genex:TARGET_INTERMEDIATE_DIR). can probably be used for lto cache dir (see default_output_dirs.cmake), and for PGO training data (see pgo_helpers.cmake, where setting `objects_dir` variable).
 - CMake 3.31:
   - presets `$comment`
   - `CMAKE_EXPORT_BUILD_DATABASE`

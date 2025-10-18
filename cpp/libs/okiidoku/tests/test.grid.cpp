@@ -22,6 +22,7 @@ namespace okiidoku::mono {
 namespace okiidoku::test {
 template<Order O> OKIIDOKU_KEEP_FOR_DEBUG // NOLINTNEXTLINE(*-internal-linkage)
 void test_grid() {
+	INFO("testing for order ", O);
 	using namespace ::okiidoku::mono;
 	OKIIDOKU_MONO_INT_TS_TYPEDEFS
 	// std::cout<<(typeid(decltype(std::declval<Grid<3>>().arr).name())<<'\n'; // #include <typeinfo>
@@ -49,12 +50,12 @@ void test_grid() {
 	CHECK_UNARY(grid.is_filled());
 	CHECK_UNARY(grid.follows_rule());
 
-	std::swap(grid[0,0], grid[0,1]);
+	std::swap(grid[0u,0u], grid[0u,1u]);
 	CHECK_UNARY(grid.is_filled());
 	CHECK_UNARY_FALSE(grid.follows_rule());
 
 	// put that thing back where it came from, or so help me-
-	std::swap(grid[0,0], grid[0,1]);
+	std::swap(grid[0u,0u], grid[0u,1u]);
 	CHECK_UNARY(grid.is_filled());
 	CHECK_UNARY(grid.follows_rule());
 }}

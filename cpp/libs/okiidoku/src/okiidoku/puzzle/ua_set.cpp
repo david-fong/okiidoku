@@ -67,7 +67,7 @@ namespace okiidoku::mono {
 	MinimalUnavoidableSets<O> find_size_4_minimal_unavoidable_sets(const Grid<O>& soln_grid) noexcept {
 		OKIIDOKU_CAND_ELIM_FINDER_TYPEDEFS
 		MinimalUnavoidableSets<O> found {}; // TODO actually populate with found UA sets.
-		found.ua_set_4s.reserve(1u << (O+2u));
+		found.ua_set_4s.reserve(1uz << (O+2u));
 		for (const auto line_type : line_types) {
 			for (const auto chute : T::O1) {
 				find_size_4_minimal_unavoidable_sets_in_chute(

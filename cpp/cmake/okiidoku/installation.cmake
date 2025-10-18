@@ -26,7 +26,6 @@ install(PACKAGE_INFO okiidoku
 	EXPORT okiidoku_targets
 	VERSION "${okiidoku_VERSION}"
 	COMPAT_VERSION "${okiidoku_COMPAT_VERSION}"
-	# COMPAT_VERSION "${_OKIIDOKU_COMPAT_VERSION}"
 	DEFAULT_TARGETS lib
 	DEFAULT_CONFIGURATIONS Release MinSizeRel RelWithDebInfo Debug
 )

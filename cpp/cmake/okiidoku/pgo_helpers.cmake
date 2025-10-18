@@ -105,6 +105,7 @@ if(NOT _OKIIDOKU_BUILD_IS_PGO_GEN) # is PgoUse
 			"-D OKIIDOKU_BUILD_SHARED_LIBS:BOOL=${OKIIDOKU_BUILD_SHARED_LIBS}"
 			"-D OKIIDOKU_BUILD_WITH_STATIC_ANALYZERS:BOOL=NO"
 			"-D OKIIDOKU_BUILD_DEBUG_WITH_SANITIZERS:BOOL=NO"
+			"-D OKIIDOKU_BUILD_REPRODUCIBLE:BOOL=${OKIIDOKU_BUILD_REPRODUCIBLE}"
 			"-D OKIIDOKU_BUILD_TESTING:BOOL=NO"
 			"-D OKIIDOKU_BUILD_DOCS:BOOL=NO"
 			"-D OKIIDOKU_BUILD_OPTIMIZE_LOCAL_NON_PORTABLE:BOOL=${OKIIDOKU_BUILD_OPTIMIZE_LOCAL_NON_PORTABLE}"
@@ -196,7 +197,6 @@ function(okiidoku_target_pgo
 	elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 		# https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html
 		# https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html
-		# TODO issue warning about -fprofile-prefix-path if generator has not been tested by me.
 
 		# get per-config root dir for objects for `-fprofile-prefix-path`. relies on CMake internals.
 		block(PROPAGATE objects_dir)
