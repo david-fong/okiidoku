@@ -6,7 +6,7 @@
 #include <okiidoku/detail/mixed_radix_uint_serdes.hpp>
 #include <okiidoku/detail/util.hpp>
 
-#include <fstream>
+// #include <fstream>
 #include <sstream>
 #include <random>
 #include <string>
@@ -103,12 +103,12 @@ namespace okiidoku::test {
 TEST_CASE("okiidoku.uint_serdes") {
 	const std::uint64_t i {0xFEDC'BA98'7654'3210uLL};
 	std::ostringstream os {std::ios::binary};
-	os.write(reinterpret_cast<const char*>(&i), sizeof(i));
+	os.write(reinterpret_cast<const char*>(&i), sizeof(i)); // NOLINT(*-cast)
 	REQUIRE_UNARY(!os.fail());
 	const auto str {os.str()};
 	std::istringstream is {str, std::ios::binary};
 	std::uint64_t i2 {~i};
-	is.read(reinterpret_cast<char*>(&i2), sizeof(i));
+	is.read(reinterpret_cast<char*>(&i2), sizeof(i)); // NOLINT(*-cast)
 	REQUIRE_UNARY(!is.fail());
 	CHECK_EQ(i, i2);
 }

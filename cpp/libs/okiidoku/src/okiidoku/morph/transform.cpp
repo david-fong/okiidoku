@@ -6,6 +6,7 @@
 #include <okiidoku/ints.hpp>
 #include <okiidoku/order.hpp>
 
+#include <variant>
 #include <utility> // swap
 
 namespace okiidoku::mono {

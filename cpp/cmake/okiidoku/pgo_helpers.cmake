@@ -16,10 +16,13 @@ include_guard(DIRECTORY)
 #  does each component need to have a different profile-data path? I'm guessing yes?
 # I don't really care about PGO for anything but the core library
 
-# TODO look into Ninja Multi-Config "Cross-Config" and see if it can help?
-# https://cmake.org/cmake/help/latest/generator/Ninja%20Multi-Config.html
-# https://cmake.org/cmake/help/latest/command/add_custom_target.html#ninja-multi-config
-# https://cmake.org/cmake/help/latest/command/add_custom_command.html#ninja-multi-config
+#[[
+TODO look into Ninja Multi-Config "Cross-Config" and see if it can help?
+- https://cmake.org/cmake/help/latest/generator/Ninja%20Multi-Config.html
+  - https://cmake.org/cmake/help/latest/variable/CMAKE_CROSS_CONFIGS.html
+  - https://cmake.org/cmake/help/latest/command/add_custom_target.html#ninja-multi-config
+  - https://cmake.org/cmake/help/latest/command/add_custom_command.html#ninja-multi-config
+]]
 
 # MARK: input validation and context query
 set(_config_types "${CMAKE_CONFIGURATION_TYPES}")
@@ -104,6 +107,7 @@ if(NOT _OKIIDOKU_BUILD_IS_PGO_GEN) # is PgoUse
 			"-D _OKIIDOKU_PGO_DIR:INTERNAL=${_OKIIDOKU_PGO_DIR}"
 			"-D OKIIDOKU_BUILD_SHARED_LIBS:BOOL=${OKIIDOKU_BUILD_SHARED_LIBS}"
 			"-D OKIIDOKU_BUILD_WITH_STATIC_ANALYZERS:BOOL=NO"
+				"-D CMAKE_SKIP_LINTING:BOOL=YES" # (redundant?)
 			"-D OKIIDOKU_BUILD_DEBUG_WITH_SANITIZERS:BOOL=NO"
 			"-D OKIIDOKU_BUILD_REPRODUCIBLE:BOOL=${OKIIDOKU_BUILD_REPRODUCIBLE}"
 			"-D OKIIDOKU_BUILD_TESTING:BOOL=NO"

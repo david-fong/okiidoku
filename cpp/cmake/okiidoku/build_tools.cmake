@@ -6,6 +6,10 @@ include_guard(DIRECTORY)
 # do not wrap these with `block()`
 
 
+if(EMSCRIPTEN)
+	add_compile_options(-sSTRICT=1)
+	add_link_options(-sSTRICT=1)
+endif()
 if(EMSCRIPTEN AND okiidoku_IS_TOP_LEVEL)
 	# https://emscripten.org/docs/tools_reference/emcc.html#emcc-gsource-map
 	add_link_options("$<${debug_configs}:-gsource-map>")
@@ -26,8 +30,11 @@ if(NOT MSVC)
 		# https://github.com/emscripten-core/emscripten/blob/main/ChangeLog.md#406---032625
 		add_link_options("$<${debug_configs}:-sSOURCE_MAP_PREFIXES=${okiidoku_SOURCE_DIR}=/okiidoku>") # TODO.low this doesn't seem to be working. it's using relative paths...
 	endif()
+	# TODO -frandom-seed
+	# https://cmake.org/cmake/help/latest/command/cmake_path.html resolve paths relative to CMAKE_SOURCE_DIR and CMAKE_BINARY_DIR and take the shorter.
 endif()
 if((CMAKE_CXX_COMPILER_ID MATCHES [[Clang]]) OR EMSCRIPTEN)
+	add_compile_options("-fdebug-compilation-dir=${okiidoku_SOURCE_DIR}")
 	add_compile_options("-fno-record-command-line")
 endif()
 

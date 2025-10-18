@@ -115,7 +115,7 @@
 	},
 	"cmake.configureArgs": [
 		// "--warn-uninitialized",
-		"-D OKIIDOKU_BUILD_WITH_STATIC_ANALYZERS:BOOL=YES",
+		"-D OKIIDOKU_BUILD_WITH_STATIC_ANALYZERS:BOOL=NO",
 	],
 
 	"python.analysis.typeCheckingMode": "standard",

@@ -10,7 +10,6 @@
 #include <okiidoku/ints.hpp>
 #include <okiidoku/order.hpp>
 
-#include <iostream>
 #include <sstream>
 #include <random>
 #include <algorithm>  // fold_left
@@ -38,7 +37,7 @@ void test_serdes(const std::uint_fast32_t rng_seed) {
 	// TODO.high for some reason this fixes a bug... figure out what's going on pls
 	// specifically, adding padding of `sizeof(buf_t)-1uz` null (`'\0'`) characters.
 	// seems like write_solved appending to `os` has some issue? or maybe reading at the boundary between written grids...
-	static constexpr auto arbitrary_padding {Int<1u,IntKind::constant>{}};
+	static constexpr auto arbitrary_padding {Int<1u,IntKind::fixed>{}};
 
 	const auto written_data {[&]{
 		// serialize data to `std::string`:

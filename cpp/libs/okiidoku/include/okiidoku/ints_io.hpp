@@ -8,13 +8,18 @@
 #include <ostream>
 #include <cstdint>
 
-template<std::uintmax_t max_, okiidoku::IntKind kind_>
-std::ostream& operator<<(std::ostream& os, const okiidoku::Int<max_,kind_>& i) noexcept {
-	using val_t = okiidoku::Int<max_,kind_>::val_t;
-	if constexpr(std::is_same_v<val_t, unsigned char>) {
+std::ostream& operator<<(std::ostream& os, const okiidoku::detail::bounded_int auto i) noexcept {
+	using I = decltype(i);
+	if constexpr(sizeof(I::val_t) == 1uz) {
 		return os << std::uint_fast16_t{i.val()};
 	} else {
 		return os << i.val();
+	}
+	os << '/' << I::max; {
+		using enum okiidoku::IntKind;
+		if constexpr (I::kind == fixed) { os << 'c'; }
+		if constexpr (I::kind == small) { os << 's'; }
+		if constexpr (I::kind == fast ) { os << 'f'; }
 	}
 }
 #endif

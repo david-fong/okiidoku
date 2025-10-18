@@ -18,15 +18,19 @@ list(APPEND CMAKE_MODULE_PATH "${okiidoku_SOURCE_DIR}/cmake")
 set(CMAKE_CXX_SCAN_FOR_MODULES NO) # I'm not using C++ modules... yet. see https://cmake.org/cmake/help/latest/manual/cmake-cxxmodules.7.html, https://crascit.com/2024/04/04/cxx-modules-cmake-shared-libraries/, ccache docs section on C++ Modules if/when transitioning.
 include(okiidoku/default_output_dirs)
 
-include(okiidoku/options) # see this file for more info & defaults. summary:
-# - OKIIDOKU_BUILD_SHARED_LIBS
-# - OKIIDOKU_BUILD_WITH_STATIC_ANALYZERS
-# - OKIIDOKU_BUILD_DEBUG_WITH_SANITIZERS
-# - OKIIDOKU_BUILD_TESTING
-# - OKIIDOKU_BUILD_DOCS
-# - OKIIDOKU_BUILD_REPRODUCIBLE
-# - OKIIDOKU_BUILD_OPTIMIZE_LOCAL_NON_PORTABLE
-# - OKIIDOKU_BUILD_BINDINGS_FOR_PYTHON
+include(okiidoku/options) #[[
+^^^ see this file for more info & defaults.
+summary:
+- OKIIDOKU_BUILD_SHARED_LIBS
+- OKIIDOKU_BUILD_WITH_SUGGESTED_WARNINGS
+- OKIIDOKU_BUILD_WITH_STATIC_ANALYZERS
+- OKIIDOKU_BUILD_DEBUG_WITH_SANITIZERS
+- OKIIDOKU_BUILD_REPRODUCIBLE
+- OKIIDOKU_BUILD_TESTING
+- OKIIDOKU_BUILD_DOCS
+- OKIIDOKU_BUILD_OPTIMIZE_LOCAL_NON_PORTABLE
+- OKIIDOKU_BUILD_BINDINGS_FOR_PYTHON
+]]
 
 include(okiidoku/pgo_helpers)
 okiidoku_check_needs_short_circuit_pgo_gen_externalproject()

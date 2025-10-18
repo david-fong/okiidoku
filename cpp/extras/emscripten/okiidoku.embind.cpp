@@ -61,7 +61,7 @@ namespace okiidoku::visitor { namespace {
 // see https://github.com/emscripten-core/emscripten/blob/main/test/embind/test_custom_marshal.cpp
 namespace emscripten::internal {
 
-	template<okiidoku::detail::is_int_wrapper T>
+	template<okiidoku::detail::bounded_int T>
 	struct BindingType<T> {
 		using IntBinding = BindingType<typename T::val_t>;
 		using WireType = IntBinding::WireType;
@@ -75,7 +75,7 @@ namespace emscripten::internal {
 			return T{IntBinding::fromWireType(value)};
 		}
 	};
-	template<okiidoku::detail::is_int_wrapper T>
+	template<okiidoku::detail::bounded_int T>
 	struct TypeID<T> {
 		static constexpr TYPEID get() {
 			return TypeID<typename T::val_t>::get();
@@ -101,7 +101,7 @@ EMSCRIPTEN_BINDINGS(okiidoku) {
 		.function("seed", &oki::em::Rng::seed)
 		.function("get",  &oki::em::Rng::get)
 		;
-	em::constant("rng", oki::em::rng); // TODO figure out why this isn't working
+	em::fixed("rng", oki::em::rng); // TODO figure out why this isn't working
 
 	em::class_<oki_v::Grid>("Grid")
 		.constructor<oki::Order>()

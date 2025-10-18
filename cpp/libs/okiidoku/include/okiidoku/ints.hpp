@@ -151,7 +151,7 @@ namespace okiidoku {
 
 	/** this tag determines the space usage and valid operations for an `Int`. */
 	enum class IntKind : unsigned char {
-		constant,
+		fixed,
 		// TODO consider another type "argument", (only-)which has the implicit constructor from builtin type.
 		small,
 		fast,
@@ -159,8 +159,8 @@ namespace okiidoku {
 	/// \cond detail
 	consteval IntKind pick_int_op_result_kind(const IntKind k1, const IntKind k2) noexcept {
 		using enum IntKind;
-		if (k1 == constant) { return k2; }
-		if (k2 == constant) { return k1; }
+		if (k1 == fixed) { return k2; }
+		if (k2 == fixed) { return k1; }
 		if (k1 == small && k2 == small) { return small; }
 		return fast;
 	}
@@ -179,7 +179,7 @@ namespace okiidoku {
 		static constexpr IntKind kind {kind_};
 		/** underlying value type. */
 		using val_t =
-			std::conditional_t<kind == IntKind::constant, detail::uint_fast_for_max_t <max>,
+			std::conditional_t<kind == IntKind::fixed, detail::uint_fast_for_max_t <max>,
 			std::conditional_t<kind == IntKind::small,    detail::uint_small_for_max_t<max>,
 			std::conditional_t<kind == IntKind::fast,     detail::uint_fast_for_max_t <max>,
 			void
@@ -189,11 +189,11 @@ namespace okiidoku {
 		using difference_type = detail::int_fast_for_max_t<static_cast<std::intmax_t>(max)>;
 	private:
 		/** underlying storage. */
-		[[no_unique_address]] std::conditional_t<(kind==IntKind::constant), bool, val_t> val_ {0u};
-		explicit consteval Int([[maybe_unused]] const std::uintmax_t val) noexcept requires(kind == IntKind::constant) { OKIIDOKU_CONTRACT(val == max); }
+		[[no_unique_address]] std::conditional_t<(kind==IntKind::fixed), bool, val_t> val_ {0u};
+		explicit consteval Int([[maybe_unused]] const std::uintmax_t val) noexcept requires(kind == IntKind::fixed) { OKIIDOKU_CONTRACT(val == max); }
 	public:
-		[[gnu::always_inline]] constexpr void check() const noexcept requires(kind == IntKind::constant) {}
-		[[gnu::always_inline]] constexpr void check() const noexcept requires(kind != IntKind::constant) {
+		[[gnu::always_inline]] constexpr void check() const noexcept requires(kind == IntKind::fixed) {}
+		[[gnu::always_inline]] constexpr void check() const noexcept requires(kind != IntKind::fixed) {
 			OKIIDOKU_CONTRACT(val_ <= static_cast<val_t>(max));
 			OKIIDOKU_CONTRACT(val_ <= max);
 		}
@@ -202,7 +202,7 @@ namespace okiidoku {
 		/** construct from builtin int type.
 		\pre `0 <= in <= max` */
 		template<std::integral T_in>
-		constexpr Int(const T_in in) noexcept requires(kind != IntKind::constant): val_{static_cast<val_t>(in)} { // NOLINT(*-explicit-constructor)
+		constexpr Int(const T_in in) noexcept requires(kind != IntKind::fixed): val_{static_cast<val_t>(in)} { // NOLINT(*-explicit-constructor)
 			if constexpr (std::is_signed_v<T_in>) {
 				OKIIDOKU_CONTRACT(in >= 0);
 			}
@@ -212,13 +212,13 @@ namespace okiidoku {
 
 		/** implicit conversion from narrower / same-capacity `Int`. */
 		template<max_t M_from, IntKind K_from>
-		constexpr Int(const Int<M_from,K_from> other) noexcept requires(kind != IntKind::constant && M_from <= max): // NOLINT(*-explicit-constructor)
+		constexpr Int(const Int<M_from,K_from> other) noexcept requires(kind != IntKind::fixed && M_from <= max): // NOLINT(*-explicit-constructor)
 			val_{static_cast<val_t>(other.val())} { check(); }
 
 		/** construct from another bounded int with higher capacity.
 		\pre `other.val() <= max`. */
 		template<max_t M_from, IntKind K_from> [[gnu::const]]
-		static constexpr Int unchecked_from(const Int<M_from,K_from> other) noexcept requires(kind != IntKind::constant) {
+		static constexpr Int unchecked_from(const Int<M_from,K_from> other) noexcept requires(kind != IntKind::fixed) {
 			OKIIDOKU_CONTRACT(other.val() <= max);
 			return Int{other.val()};
 		}
@@ -229,28 +229,28 @@ namespace okiidoku {
 		}
 		// template<class T> requires(std::unsigned_integral<T> && std::numeric_limits<T>::max() >= max)
 		// constexpr operator T() const noexcept { check(); return val(); }
-		[[nodiscard, gnu::const]] constexpr val_t val     ([[maybe_unused]] this const Int self) noexcept requires(kind == IntKind::constant) { return max; }
-		[[nodiscard, gnu::const]] constexpr val_t val     (                 this const Int self) noexcept requires(kind != IntKind::constant) { self.check(); return self.val_; }
+		[[nodiscard, gnu::const]] constexpr val_t val     ([[maybe_unused]] this const Int self) noexcept requires(kind == IntKind::fixed) { return max; }
+		[[nodiscard, gnu::const]] constexpr val_t val     (                 this const Int self) noexcept requires(kind != IntKind::fixed) { self.check(); return self.val_; }
 		[[nodiscard, gnu::const]] constexpr auto  as_fast (this const Int self) noexcept { self.check(); return Int<max, IntKind::fast> {self.val()}; }
 		[[nodiscard, gnu::const]] constexpr auto  as_small(this const Int self) noexcept { self.check(); return Int<max, IntKind::small>{self.val()}; }
-		using constant_t = Int<max_, IntKind::constant>;
+		using constant_t = Int<max_, IntKind::fixed>;
 
 		// see ints_io.hpp
 		// friend std::ostream& operator<<(std::ostream& os, const Int& i) noexcept;
 
-		/** \pre `val() < max`. */ constexpr auto& operator++(   ) & noexcept requires(kind != IntKind::constant) { OKIIDOKU_CONTRACT(val() < max);       ++val_; check(); return *this; }
-		/** \pre `val() > 0u`.  */ constexpr auto& operator--(   ) & noexcept requires(kind != IntKind::constant) { OKIIDOKU_CONTRACT(val() > val_t{0u}); --val_; check(); return *this; }
-		/** \pre `val() < max`. */ constexpr auto  operator++(int) & noexcept requires(kind != IntKind::constant) { auto old {*this}; operator++(); return old; }
-		/** \pre `val() > 0u`.  */ constexpr auto  operator--(int) & noexcept requires(kind != IntKind::constant) { auto old {*this}; operator--(); return old; }
+		/** \pre `val() < max`. */ constexpr auto& operator++(   ) & noexcept requires(kind != IntKind::fixed) { OKIIDOKU_CONTRACT(val() < max);       ++val_; check(); return *this; }
+		/** \pre `val() > 0u`.  */ constexpr auto& operator--(   ) & noexcept requires(kind != IntKind::fixed) { OKIIDOKU_CONTRACT(val() > val_t{0u}); --val_; check(); return *this; }
+		/** \pre `val() < max`. */ constexpr auto  operator++(int) & noexcept requires(kind != IntKind::fixed) { auto old {*this}; operator++(); return old; }
+		/** \pre `val() > 0u`.  */ constexpr auto  operator--(int) & noexcept requires(kind != IntKind::fixed) { auto old {*this}; operator--(); return old; }
 
 		[[nodiscard, gnu::const]] constexpr auto begin(this const Int self) noexcept { self.check(); return Int<max,IntKind::fast>{0u}; }
 		[[nodiscard, gnu::const]] constexpr auto end  (this const Int self) noexcept { self.check(); return self.as_fast(); }
 		/** \pre `val() < max`. \note for increment that also increments capacity, `+ int1`. */
-		[[nodiscard, gnu::const]] constexpr auto next (this const Int self) noexcept requires(kind != IntKind::constant) { self.check(); OKIIDOKU_CONTRACT(self.val_ < max); return Int{self.val()+1u}; }
+		[[nodiscard, gnu::const]] constexpr auto next (this const Int self) noexcept requires(kind != IntKind::fixed) { self.check(); OKIIDOKU_CONTRACT(self.val_ < max); return Int{self.val()+1u}; }
 		/** \pre `val() > 0u`. */
-		[[nodiscard, gnu::const]] constexpr auto prev (this const Int self) noexcept requires(max > 0u) { if constexpr (kind != IntKind::constant) { self.check(); OKIIDOKU_CONTRACT(self.val() >= val_t{0u}); return Int<max-1u,kind>{self.val()-1u}; } else { return Int<max-1u,kind>(); } }
+		[[nodiscard, gnu::const]] constexpr auto prev (this const Int self) noexcept requires(max > 0u) { if constexpr (kind != IntKind::fixed) { self.check(); OKIIDOKU_CONTRACT(self.val() >= val_t{0u}); return Int<max-1u,kind>{self.val()-1u}; } else { return Int<max-1u,kind>(); } }
 		/** \pre `val() < max`. */
-		[[nodiscard, gnu::const]] constexpr Int<max-1u,kind> operator*(this const Int self) noexcept requires(kind != IntKind::constant) {
+		[[nodiscard, gnu::const]] constexpr Int<max-1u,kind> operator*(this const Int self) noexcept requires(kind != IntKind::fixed) {
 			static_assert(max > 0u);
 			self.check(); OKIIDOKU_CONTRACT(self.val() < max);
 			return Int<max-1u,kind>{self.val()};
@@ -258,7 +258,7 @@ namespace okiidoku {
 
 		/** \pre `val() + other.val() <= max` */
 		template<max_t MR, IntKind KR>
-		constexpr Int& operator+=(const Int<MR,KR> other) & noexcept requires(kind != IntKind::constant && MR <= max) {
+		constexpr Int& operator+=(const Int<MR,KR> other) & noexcept requires(kind != IntKind::fixed && MR <= max) {
 			check(); other.check();
 			OKIIDOKU_CONTRACT(max_t{other.val()} <= max);
 			OKIIDOKU_CONTRACT(max_t{val()} <= max_t{max - max_t{other.val()}}); // (no) overflow check. i.e. `val() + other.val() <= max`
@@ -270,7 +270,7 @@ namespace okiidoku {
 
 		/** \pre `val() >= >= other.val()` */
 		template<max_t MR, IntKind KR>
-		constexpr Int& operator-=(const Int<MR,KR> other) & noexcept requires(kind != IntKind::constant && MR <= max) {
+		constexpr Int& operator-=(const Int<MR,KR> other) & noexcept requires(kind != IntKind::fixed && MR <= max) {
 			check(); other.check(); OKIIDOKU_CONTRACT(other.val() <= val());
 			val_ -= other.val();
 			check();
@@ -279,7 +279,7 @@ namespace okiidoku {
 
 		/** \pre `other.val() != 0` */
 		template<max_t MR, IntKind KR>
-		constexpr Int& operator/=(const Int<MR,KR> other) & noexcept requires(kind != IntKind::constant && MR > 0u && MR <= max) {
+		constexpr Int& operator/=(const Int<MR,KR> other) & noexcept requires(kind != IntKind::fixed && MR > 0u && MR <= max) {
 			check(); other.check(); OKIIDOKU_CONTRACT(other.val() != val_t{0u});
 			val_ /= other.val();
 			check();
@@ -297,7 +297,7 @@ namespace okiidoku {
 		template<max_t ML, IntKind KL, max_t MR, IntKind KR> constexpr friend auto operator+ (Int<ML,KL> lhs, Int<MR,KR> rhs) noexcept;
 		template<max_t ML, IntKind KL, max_t MR, IntKind KR> constexpr friend auto operator- (Int<ML,KL> lhs, Int<MR,KR> rhs) noexcept requires(ML >= MR);
 		template<max_t ML, IntKind KL, max_t MR, IntKind KR> constexpr friend auto operator* (Int<ML,KL> lhs, Int<MR,KR> rhs) noexcept requires(ML==0u || MR==0u || ML <= std::numeric_limits<std::uintmax_t>::max() / MR);
-		template<max_t ML, IntKind KL, max_t MR            > constexpr friend auto operator/ (Int<ML,KL> lhs, Int<MR,IntKind::constant>   rhs) noexcept requires(MR > 0u);
+		template<max_t ML, IntKind KL, max_t MR            > constexpr friend auto operator/ (Int<ML,KL> lhs, Int<MR,IntKind::fixed>   rhs) noexcept requires(MR > 0u);
 		template<max_t ML, IntKind KL, max_t MR, IntKind KR> constexpr friend auto operator% (Int<ML,KL> lhs, Int<MR,KR>                  rhs) noexcept requires(MR > 0u);
 		template<                      max_t MR, IntKind KR> constexpr friend auto operator% (std::unsigned_integral auto lhs, Int<MR,KR> rhs) noexcept requires(MR > 0u);
 	};
@@ -344,7 +344,7 @@ namespace okiidoku {
 	// TODO what happens if it would overflow? does the compiler implicitly convert the ints to the builtin types? how could I test against that, and prevent it?
 
 	template<std::uintmax_t ML, IntKind KL, std::uintmax_t MR>
-	[[gnu::const]] constexpr auto operator/(const Int<ML,KL> lhs, const Int<MR,IntKind::constant> rhs) noexcept requires(MR > 0u) {
+	[[gnu::const]] constexpr auto operator/(const Int<ML,KL> lhs, const Int<MR,IntKind::fixed> rhs) noexcept requires(MR > 0u) {
 		lhs.check(); rhs.check();
 		OKIIDOKU_CONTRACT(rhs.val() == MR);
 		OKIIDOKU_CONTRACT(rhs.val() > 0u);
@@ -372,16 +372,16 @@ namespace okiidoku {
 		return ret;
 	}
 
-	inline constexpr Int<1u, IntKind::constant> int1 {};
+	inline constexpr Int<1u, IntKind::fixed> int1 {};
 
 	namespace detail {
-		/** compile-time helper for `is_int_wrapper`. */
+		/** compile-time helper for `bounded_int`. */
 		template<std::uintmax_t max_, IntKind kind_> [[gnu::unavailable]]
 		consteval void accept_int_wrapper([[maybe_unused]] Int<max_, kind_>) noexcept {}
 
 		// used by emscripten bindings for "value type" definition
 		template<typename T>
-		concept is_int_wrapper = requires { accept_int_wrapper(std::declval<T>()); };
+		concept bounded_int = requires { accept_int_wrapper(std::declval<T>()); };
 	}
 }
 namespace std {
@@ -394,11 +394,15 @@ namespace std {
 	in the primary template, in such a way that they are usable as integral constant expressions.
 	https://en.cppreference.com/w/cpp/language/extending_std.html
 	*/
-	template<okiidoku::detail::is_int_wrapper I>
+	template<okiidoku::detail::bounded_int I>
 	struct numeric_limits<I> : public numeric_limits<typename I::val_t> { // NOLINT(cert-dcl58-cpp)
 		static constexpr bool is_modulo {false}; // I haven't implemented that wrapping
 		static constexpr I max() noexcept { return I{I::max}; }
 	};
+}
+namespace Catch {
+	template<okiidoku::detail::bounded_int T>
+	struct is_range { static constexpr bool value {false}; };
 }
 
 
@@ -422,8 +426,8 @@ namespace okiidoku::mono {
 		\
 		static_assert(sizeof(o##P_##SUFFIX_## _t) == sizeof(typename o##P_##SUFFIX_## _t::val_t)); \
 		static_assert(sizeof(o##P_##SUFFIX_##s_t) == sizeof(typename o##P_##SUFFIX_##s_t::val_t)); \
-		static_assert(detail::is_int_wrapper<o##P_##SUFFIX_## _t>); \
-		static_assert(detail::is_int_wrapper<o##P_##SUFFIX_##s_t>); \
+		static_assert(detail::bounded_int<o##P_##SUFFIX_## _t>); \
+		static_assert(detail::bounded_int<o##P_##SUFFIX_##s_t>); \
 		static_assert( std::is_trivially_copyable_v<o##P_##SUFFIX_## _t>); \
 		static_assert( std::is_trivially_copyable_v<o##P_##SUFFIX_##s_t>); \
 		static_assert( std::is_standard_layout_v<o##P_##SUFFIX_## _t>); \
@@ -469,10 +473,10 @@ namespace okiidoku::mono {
 		DEFINE_OX_TYPES(4, x2, (O*O*O*O) - (O*O))
 		#undef DEFINE_OX_TYPES
 
-		static constexpr Int<static_cast<uintmax_t>(O      ), IntKind::constant> O1 {};
-		static constexpr Int<static_cast<uintmax_t>(O*O    ), IntKind::constant> O2 {};
-		static constexpr Int<static_cast<uintmax_t>(O*O*O  ), IntKind::constant> O3 {};
-		static constexpr Int<static_cast<uintmax_t>(O*O*O*O), IntKind::constant> O4 {};
+		static constexpr Int<static_cast<uintmax_t>(O      ), IntKind::fixed> O1 {};
+		static constexpr Int<static_cast<uintmax_t>(O*O    ), IntKind::fixed> O2 {};
+		static constexpr Int<static_cast<uintmax_t>(O*O*O  ), IntKind::fixed> O3 {};
+		static constexpr Int<static_cast<uintmax_t>(O*O*O*O), IntKind::fixed> O4 {};
 	};
 
 

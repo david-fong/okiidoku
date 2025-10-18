@@ -31,12 +31,13 @@ def _call_member_fn(val: gdb.Value, fn_name: str, *args):
 
 class IntPrinter:
 	__name_pattern = re.compile(r"^okiidoku::Int<[^>]+?>$")
+	__suffix = {"fixed":"c","small":"s","fast":"f"}
 	def __init__(self, val: gdb.Value):
 		self.__val = val
 	def to_string(self):
 		v = self.__val
 		val_ = v["val_"].cast(gdb.lookup_type("unsigned long long"))
-		k_ = str(v["kind"]).split("::")[-1][0]
+		k_ = IntPrinter.__suffix.get(str(v["kind"]), "?")
 		return f"{val_}/{v['max']}{k_}"
 
 

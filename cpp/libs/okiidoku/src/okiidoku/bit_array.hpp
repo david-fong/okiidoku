@@ -40,7 +40,7 @@ namespace okiidoku {
 		using word_bit_ii_t = Int<(width_ < word_width) ? width_ : word_width>;
 		static constexpr     word_ii_t::constant_t num_words     {};
 		static constexpr word_bit_ii_t::constant_t num_word_bits {};
-		static constexpr Int<(num_words*word_width)-width_,IntKind::constant> num_excess_bits {};
+		static constexpr Int<(num_words*word_width)-width_,IntKind::fixed> num_excess_bits {};
 		static_assert(  num_words > 0u);
 		static_assert(( num_words     * num_word_bits) >= width_, "enough words"   );
 		static_assert(((num_words-1u) * num_word_bits)  < width_, "no excess words");

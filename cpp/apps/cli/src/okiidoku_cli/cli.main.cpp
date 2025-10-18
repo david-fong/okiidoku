@@ -11,7 +11,6 @@
 
 #include <iostream>     // cout
 #include <iomanip>      // setw
-#include <ios>          // hex
 #include <charconv>
 #include <string>       // stoi
 #include <string_view>
