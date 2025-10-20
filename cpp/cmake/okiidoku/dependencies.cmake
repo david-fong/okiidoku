@@ -9,7 +9,7 @@ include(okiidoku/get_cpm)
 
 # \internal CPM does auto EXCLUDE_FROM_ALL and SYSTEM when using shorthand add
 
-set(OKIIDOKU_EMSCRIPTEN_MIN_VERSION "4.0.15") # \internal whatever I last pulled onto my machine
+set(OKIIDOKU_EMSCRIPTEN_MIN_VERSION "4.0.16") # \internal whatever I last pulled onto my machine
 
 # https://docs.github.com/en/repositories/working-with-files/using-files/downloading-source-code-archives#source-code-archive-urls
 
@@ -46,17 +46,19 @@ endif()
 
 if(OKIIDOKU_BUILD_TESTING)
 	# https://github.com/catchorg/Catch2/blob/devel/docs/cmake-integration.md
-	CPMAddPackage(NAME doctest
-		# https://github.com/doctest/doctest/blob/master/CHANGELOG.md
-		URL [[https://github.com/doctest/doctest/archive/7079daafbe5baf5018fcca39add3e1c0b4b99687.tar.gz]] # waiting for v2.4.13 :(
-		DOWNLOAD_ONLY YES
+	CPMAddPackage(NAME Catch2
+		# https://github.com/catchorg/Catch2/releases
+		URL [[https://github.com/catchorg/Catch2/archive/31ee3beb0a474463e0101674c22f2fef0311d601.tar.gz]] # v3.11.0++
+		OPTIONS
+			BUILD_TESTING NO
+			CATCH_INSTALL_DOCS NO
+			# CATCH_ENABLE_REPRODUCIBLE_BUILD "${OKIIDOKU_BUILD_REPRODUCIBLE}" # not helpful to us
+		EXCLUDE_FROM_ALL YES
+		SYSTEM YES
 	)
-	if(doctest_ADDED)
-		add_library(doctest::doctest INTERFACE IMPORTED)
-		set_target_properties(doctest::doctest PROPERTIES EXPORT_FIND_PACKAGE_NAME doctest)
-		target_include_directories(doctest::doctest SYSTEM INTERFACE "${doctest_SOURCE_DIR}/doctest")
+	if(Catch2_ADDED)
+		list(APPEND CMAKE_MODULE_PATH "${Catch2_SOURCE_DIR}/extras")
 	endif()
-	include("${doctest_SOURCE_DIR}/scripts/cmake/doctest.cmake")
 endif()
 
 

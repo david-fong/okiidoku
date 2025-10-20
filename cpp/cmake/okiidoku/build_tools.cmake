@@ -34,7 +34,6 @@ if(NOT MSVC)
 	# https://cmake.org/cmake/help/latest/command/cmake_path.html resolve paths relative to CMAKE_SOURCE_DIR and CMAKE_BINARY_DIR and take the shorter.
 endif()
 if((CMAKE_CXX_COMPILER_ID MATCHES [[Clang]]) OR EMSCRIPTEN)
-	add_compile_options("-fdebug-compilation-dir=${okiidoku_SOURCE_DIR}")
 	add_compile_options("-fno-record-command-line")
 endif()
 

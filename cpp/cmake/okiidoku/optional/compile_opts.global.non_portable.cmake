@@ -27,9 +27,6 @@ if(NOT MSVC)
 	# 	# ^abusing okiidoku::compiler_warnings to scope to okiidou targets
 	# 	-fno-exceptions
 	# )
-	# target_compile_definitions(okiidoku::compiler_warnings INTERFACE
-	# 	DOCTEST_CONFIG_NO_EXCEPTIONS_BUT_WITH_ALL_ASSERTS # https://github.com/doctest/doctest/blob/master/doc/markdown/configuration.md#doctest_config_no_exceptions_but_with_all_asserts
-	# )
 endif()
 
 

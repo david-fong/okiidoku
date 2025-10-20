@@ -11,9 +11,12 @@ function(okiidoku_test_add name #[[ ARGN are correctness_deps ]])
 	)
 	okiidoku_add_compiler_options("${target}")
 	target_compile_options("${target}" PRIVATE "$<$<NOT:${debug_configs}>:$<$<CXX_COMPILER_ID:GNU>:-fwhole-program>>")
+	target_compile_definitions("${target}" PRIVATE
+		"CATCH_CONFIG_FAST_COMPILE" # https://github.com/catchorg/Catch2/blob/devel/docs/configuration.md#catch_config_fast_compile
+	)
 	target_link_libraries("${target}"
 		PRIVATE okiidoku_cli_utils
-		PRIVATE doctest::doctest
+		PRIVATE Catch2::Catch2WithMain
 	)
 	if(EMSCRIPTEN)
 		target_link_options("${target}" PRIVATE --executable)
@@ -23,9 +26,6 @@ function(okiidoku_test_add name #[[ ARGN are correctness_deps ]])
 		"${CMAKE_CURRENT_LIST_DIR}/../include"
 		"${CMAKE_CURRENT_LIST_DIR}/../src"
 	)
-	target_compile_definitions("${target}" PRIVATE
-		DOCTEST_CONFIG_SUPER_FAST_ASSERTS # https://github.com/doctest/doctest/blob/master/doc/markdown/configuration.md#doctest_config_super_fast_asserts
-	)
 	# https://crascit.com/2016/10/18/test-fixtures-with-cmake-ctest/
 	# tests of things this test depends upon to function correctly.
 	# if they fail, this will (probably) fail too.
@@ -34,9 +34,10 @@ function(okiidoku_test_add name #[[ ARGN are correctness_deps ]])
 		list(APPEND correctness_deps "okiidoku_test.${dependency}")
 	endforeach()
 
-	# https://github.com/catchorg/Catch2/blob/devel/docs/cmake-integration.md#customization
-	# https://github.com/doctest/doctest/blob/master/scripts/cmake/doctest.cmake#L8
-	doctest_discover_tests("${target}"
+	# https://github.com/catchorg/Catch2/blob/devel/docs/cmake-integration.md#catch_discover_tests
+	# https://github.com/catchorg/Catch2/blob/devel/extras/Catch.cmake#L158
+	include(Catch)
+	catch_discover_tests("${target}"
 		WORKING_DIRECTORY "${OKIIDOKU_TEST_WORKING_DIRECTORY}"
 		PROPERTIES # https://cmake.org/cmake/help/latest/manual/cmake-properties.7.html#properties-on-tests
 			FIXTURES_SETUP "${target}"

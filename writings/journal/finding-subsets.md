@@ -1,5 +1,3 @@
-<!-- SPDX-FileCopyrightText: 2020 David Fong -->
-<!-- SPDX-License-Identifier: CC0-1.0 -->
 # Finding Subsets
 
 Date: 2022/June/13

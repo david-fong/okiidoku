@@ -1,6 +1,3 @@
-<!-- SPDX-FileCopyrightText: 2020 David Fong -->
-<!-- SPDX-License-Identifier: CC0-1.0 -->
-
 - I have zero experience or background in rust.
 - But I have constant haunting fear that everything would have been / be better for me if I had just started by using it instead of c++.
 - Certainly it's nice to have a single compiler, package manager, and standard library implementation (at least I _think_ that's how it is with rust?), and have them all installable and upgradable together with a single tool.

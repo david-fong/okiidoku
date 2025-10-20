@@ -7,6 +7,13 @@
 # set auto-load python-scripts on # on by default
 # info auto-load python-scripts
 
+set print pretty on
+set print array on
+set print array-indexes on
+set print static-members off
+
 # set substitute-path /okiidoku # TODO
 set breakpoint pending on
 b __sanitizer::Die # https://github.com/google/sanitizers/wiki/AddressSanitizerAndDebugger#gdb
+
+skip -rfu ^Catch::

@@ -54,14 +54,12 @@
 
 ## Misc List
 
-- reevaluate doctest vs Catch2 choice. doctest is ~10 seconds to compile the grid test without -Og, and 21 seconds with -Og. I'm not actually sure that doctest is the reason, but I wonder if it is. maybe more importantly, doctest doesn't seem to be very actively maintained
 - try deleting array subscript operator for bounded `Int` that would be out of range? test if it actually helps, or if `Int`'s implicit conversion to builtin int subverts it from being meaningful.
 - I wonder if [CMake deferred command calls](https://cmake.org/cmake/help/latest/command/cmake_language.html#deferring-calls) could be useful for anything...
 - Would it be useful to try to abuse https://cmake.org/cmake/help/latest/prop_sf/OBJECT_OUTPUTS.html for files created by custom commands/targets? Ex. .d.ts, .wasm, .wasm.map, .pyi
   - is there a way to test this constexpr? maybe with a `requires` clause or expression in a `static_assert`?
 - make canon functions pure producers of a canonicalizing transformation. take grid by const reference. name `canon_sym` -> `get_sym_canon_map`.
 - see if helpful to add `/// \cond detail` wrapper to `detail` namespaces to suppress doxygen for them
-- investigate https://github.com/doctest/doctest/blob/master/examples/all_features/templated_test_cases.cpp
 
 - https://www.pcg-random.org/using-pcg-cpp.html
   https://github.com/imneme/pcg-cpp/tags

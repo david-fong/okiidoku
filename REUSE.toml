@@ -6,7 +6,7 @@ SPDX-PackageSupplier = "David Fong <davidfong19@gmail.com>"
 SPDX-PackageDownloadLocation = "https://github.com/david-fong/okiidoku"
 
 [[annotations]]
-path = [".vscode/settings.json", "**/pnpm-lock.yaml", "sample-output/**.txt", "sample-output/**.png", "writings/journal/**.json", "**/warnings.*.txt"]
+path = [".vscode/settings.json", "**/pnpm-lock.yaml", "sample-output/**.txt", "sample-output/**.png", "writings/journal/**.json", "writings/journal/**.md", "**/warnings.*.txt"]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2020 David Fong"
 SPDX-License-Identifier = "CC0-1.0"

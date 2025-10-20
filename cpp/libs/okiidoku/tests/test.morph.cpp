@@ -1,7 +1,6 @@
 // SPDX-FileCopyrightText: 2020 David Fong
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
-#include <doctest.h>
+#include <catch2/catch_test_macros.hpp>
 
 #include <okiidoku/morph/canon.hpp>
 #include <okiidoku/morph/scramble.hpp>
@@ -19,7 +18,7 @@
 namespace okiidoku::test {
 template<Order O> OKIIDOKU_KEEP_FOR_DEBUG // NOLINTNEXTLINE(*-internal-linkage)
 void test_morph(okiidoku::util::SharedRng& shared_rng, const std::uintmax_t num_rounds) {
-	INFO("testing for order ", O);
+	INFO("testing for order " << unsigned{O});
 	if constexpr (O >= 4) { return; } // TODO.mid enable when solver for order=5 is faster?
 	using namespace ::okiidoku::mono;
 	// OKIIDOKU_MONO_INT_TS_TYPEDEFS
@@ -29,26 +28,26 @@ void test_morph(okiidoku::util::SharedRng& shared_rng, const std::uintmax_t num_
 
 	Grid<O> canon_grid;
 	Transformation<O> scramble_xform {};
-	CHECK_EQ(scramble_xform.inverted().inverted(), scramble_xform);
+	CHECK(scramble_xform.inverted().inverted() == scramble_xform);
 
 	for (std::uintmax_t round {0u}; round < num_rounds; ++round) { CAPTURE(round);
 		shuffle(gen_grid, shared_rng());
-		CHECK_UNARY(gen_grid.follows_rule());
+		CHECK(gen_grid.follows_rule());
 
 		const auto gen_canon_xform {canonicalize(gen_grid)};
-		CHECK_EQ(gen_canon_xform.inverted().inverted(), gen_canon_xform);
+		CHECK(gen_canon_xform.inverted().inverted() == gen_canon_xform);
 		// TODO: test that performing various transforms and then performing the invert truly reverts the transform.
 
 		scramble(scramble_xform, shared_rng());
-		CHECK_EQ(scramble_xform.inverted().inverted(), scramble_xform);
+		CHECK(scramble_xform.inverted().inverted() == scramble_xform);
 		scramble_xform.apply_from_to(gen_grid, canon_grid);
 
 		const auto scramble_canon_xform {canonicalize(canon_grid)};
-		CHECK_EQ(scramble_canon_xform.inverted().inverted(), scramble_canon_xform);
-		CHECK_EQ(scramble_canon_xform.inverted(), scramble_xform);
-		CHECK_EQ(scramble_xform.inverted(), scramble_canon_xform);
+		CHECK(scramble_canon_xform.inverted().inverted() == scramble_canon_xform);
+		CHECK(scramble_canon_xform.inverted() == scramble_xform);
+		CHECK(scramble_xform.inverted() == scramble_canon_xform);
 
-		CHECK_EQ(gen_grid, canon_grid);
+		CHECK(gen_grid == canon_grid);
 	}
 }}
 

@@ -190,6 +190,7 @@ namespace okiidoku {
 	private:
 		/** underlying storage. */
 		[[no_unique_address]] std::conditional_t<(kind==IntKind::fixed), bool, val_t> val_ {0u};
+
 		explicit consteval Int([[maybe_unused]] const std::uintmax_t val) noexcept requires(kind == IntKind::fixed) { OKIIDOKU_CONTRACT(val == max); }
 	public:
 		[[gnu::always_inline]] constexpr void check() const noexcept requires(kind == IntKind::fixed) {}
@@ -400,10 +401,10 @@ namespace std {
 		static constexpr I max() noexcept { return I{I::max}; }
 	};
 }
-namespace Catch {
-	template<okiidoku::detail::bounded_int T>
-	struct is_range { static constexpr bool value {false}; };
-}
+// namespace Catch {
+// 	template<typename T> requires(::okiidoku::detail::bounded_int<T>)
+// 	static constexpr bool is_range<T>::value {false};
+// }
 
 
 /**

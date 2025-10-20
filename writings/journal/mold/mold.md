@@ -1,3 +1,1 @@
-<!-- SPDX-FileCopyrightText: 2020 David Fong -->
-<!-- SPDX-License-Identifier: CC0-1.0 -->
 https://github.com/rui314/mold/issues/117 maintainer says that build tools assume compiler and linker are both non-parallel, which used to work, but is a flawed assumption. current workaround is to try to tell build tools to only run one instance of mold at a time. see MOLD_JOBS env variable, and CMAKE_JOB_POOL_LINK. anyhow, disappointingly, at least for release builds, I didn't get faster build.

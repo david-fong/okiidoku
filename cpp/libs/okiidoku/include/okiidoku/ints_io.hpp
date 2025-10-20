@@ -8,12 +8,13 @@
 #include <ostream>
 #include <cstdint>
 
-std::ostream& operator<<(std::ostream& os, const okiidoku::detail::bounded_int auto i) noexcept {
+namespace okiidoku {
+::std::ostream& operator<<(::std::ostream& os, const ::okiidoku::detail::bounded_int auto i) {
 	using I = decltype(i);
-	if constexpr(sizeof(I::val_t) == 1uz) {
-		return os << std::uint_fast16_t{i.val()};
+	if constexpr(sizeof(typename I::val_t) == 1uz) {
+		os << std::uint_fast16_t{i.val()};
 	} else {
-		return os << i.val();
+		os << i.val();
 	}
 	os << '/' << I::max; {
 		using enum okiidoku::IntKind;
@@ -21,5 +22,7 @@ std::ostream& operator<<(std::ostream& os, const okiidoku::detail::bounded_int a
 		if constexpr (I::kind == small) { os << 's'; }
 		if constexpr (I::kind == fast ) { os << 'f'; }
 	}
+	return os;
+}
 }
 #endif

@@ -1,12 +1,10 @@
 // SPDX-FileCopyrightText: 2020 David Fong
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
-#include <doctest.h>
+#include <catch2/catch_test_macros.hpp>
 
 #include <okiidoku/detail/mixed_radix_uint_serdes.hpp>
 #include <okiidoku/detail/util.hpp>
 
-// #include <fstream>
 #include <sstream>
 #include <random>
 #include <string>
@@ -24,8 +22,8 @@ namespace okiidoku::test {
 	void test_mixed_radix_uint_serdes_one_round(
 		const std::uint_fast32_t rng_seed
 	) {
-		INFO("sizeof(radix_t) := ", sizeof(radix_t));
-		INFO("sizeof(buf_t)   := ", sizeof(buf_t));
+		INFO("sizeof(radix_t) := " << sizeof(radix_t));
+		INFO("sizeof(buf_t)   := " << sizeof(buf_t));
 		CAPTURE(rng_seed);
 		using writer_t = detail::MixedRadixUintWriter<radix_t,buf_t>;
 		using reader_t = detail::MixedRadixUintReader<radix_t,buf_t>;
@@ -42,50 +40,50 @@ namespace okiidoku::test {
 			// serialize data to `std::string`:
 			writer_t writer;
 			std::ostringstream os {std::ios::binary};
-			REQUIRE_UNARY(os);
+			REQUIRE(os);
 			std::geometric_distribution<radix_t> radix_dist {1.0/(CHAR_BIT*sizeof(buf_t))};
 			for (auto place {0uz}; place < num_places; ++place) { CAPTURE(place);
 				auto& p {places_buf[place]};
 					p.radix = 0u; do { p.radix = radix_dist(rng); } while (p.radix == 0u);
 					p.digit = uidist_t<radix_t>{0u,static_cast<radix_t>(p.radix-1u)}(rng);
 				if (!writer.accept(p)) [[unlikely]] {
-					REQUIRE_UNARY(os.good());
+					REQUIRE(os.good());
 					writer.flush(os);
-					REQUIRE_UNARY_FALSE(os.fail());
+					REQUIRE_FALSE(os.fail());
 				}
-				REQUIRE_EQ(writer.item_count(), place+1uz);
+				REQUIRE(writer.item_count() == place+1uz);
 			}
-			REQUIRE_UNARY(os.good());
+			REQUIRE(os.good());
 			writer.flush(os);
-			REQUIRE_UNARY_FALSE(os.fail());
+			REQUIRE_FALSE(os.fail());
 			byte_count += writer.byte_count();
-			REQUIRE_EQ(static_cast<std::size_t>(os.tellp()), byte_count);
+			REQUIRE(static_cast<std::size_t>(os.tellp()) == byte_count);
 			return os.str();
 		}()};
-		REQUIRE_EQ(written_data.size(), byte_count);
+		REQUIRE(written_data.size() == byte_count);
 		{
 			// de-serialize data and check correctness:
 			std::istringstream is {written_data, std::ios::binary}; // TODO.high do I need to add ios::in here? is ::binary even needed? I'm not even passing it to create the ostringstream
-			REQUIRE_UNARY(is);
+			REQUIRE(is);
 			reader_t reader;
 			for (auto place {0uz}; place < num_places; ++place) { CAPTURE(place);
 				const auto& expected {places_buf[place]}; CAPTURE(expected.radix);
-				REQUIRE_UNARY(is.good());
+				REQUIRE(is.good());
 				const auto digit {reader.read(is, expected.radix)};
-				REQUIRE_UNARY_FALSE(is.fail());
+				REQUIRE_FALSE(is.fail());
 				/* ^we don't expect to hit EOF here, but with more complex data lifetime,
 				/ transfer, that's a real possibility. Ex. with a somehow truncated data
 				archive file, or a network error. */
-				REQUIRE_EQ(reader.item_count(), place+1uz);
-				REQUIRE_EQ(digit, expected.digit);
+				REQUIRE(reader.item_count() == place+1uz);
+				REQUIRE(digit == expected.digit);
 			}
 			reader.finish(is);
-			REQUIRE_UNARY_FALSE(is.bad()); // non-recoverable error
-			CHECK_UNARY_FALSE(is.fail()); // error
-			// CHECK_UNARY(is.eof());
+			REQUIRE_FALSE(is.bad()); // non-recoverable error
+			CHECK_FALSE(is.fail()); // error
+			// CHECK(is.eof());
 			const auto is_pos {static_cast<std::size_t>(is.tellg())};
-			REQUIRE_EQ(is_pos, byte_count);
-			REQUIRE_EQ(reader.byte_count(), byte_count);
+			REQUIRE(is_pos == byte_count);
+			REQUIRE(reader.byte_count() == byte_count);
 		}
 	}
 
@@ -104,13 +102,13 @@ TEST_CASE("okiidoku.uint_serdes") {
 	const std::uint64_t i {0xFEDC'BA98'7654'3210uLL};
 	std::ostringstream os {std::ios::binary};
 	os.write(reinterpret_cast<const char*>(&i), sizeof(i)); // NOLINT(*-cast)
-	REQUIRE_UNARY(!os.fail());
+	REQUIRE(!os.fail());
 	const auto str {os.str()};
 	std::istringstream is {str, std::ios::binary};
 	std::uint64_t i2 {~i};
 	is.read(reinterpret_cast<char*>(&i2), sizeof(i)); // NOLINT(*-cast)
-	REQUIRE_UNARY(!is.fail());
-	CHECK_EQ(i, i2);
+	REQUIRE(!is.fail());
+	CHECK(i == i2);
 }
 
 
@@ -119,18 +117,7 @@ TEST_CASE("okiidoku.mixed_radix_uint_serdes") {
 	static constexpr std::uintmax_t num_rounds {1024u};
 	// std::mt19937 rng {0u};
 	std::mt19937 rng {std::random_device{}()};
-	// TODO write logic to restore from failure_checkpoint file? but how to delete it afterward?... does doctest have a way to hook into a TEST_CASE passing?
-	//   also... isn't there an easier way given that I'm only using the mersenne twister to generate seeds? if a round fails, write the seed that was passed to the round. :P way simpler.
 	for (std::uintmax_t round {0u}; round < num_rounds; ++round) { CAPTURE(round);
-		/*[[maybe_unused]] const auto rng_bak {rng}; // make a copy of PRNG's state before usage.
-		INFO("writing backup of PRNG state for this test round to file ", [&]{ // `INFO` is lazy (only on failure).
-			std::string file_path {"okiidoku.mixed_radix_uint_serdes.failure_checkpoint."};
-				// file_path += std::to_string(sizeof(radix_t)) + "." + std::to_string(sizeof(buf_t)); /// \todo
-				file_path += ".txt";
-			std::ofstream of {file_path};
-			of << rng_bak;
-			return file_path;
-		}());*/
 		using u8_t  = std::uint_least8_t ;
 		using u16_t = std::uint_least16_t;
 		using u32_t = std::uint_least32_t;

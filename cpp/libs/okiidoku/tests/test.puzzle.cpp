@@ -1,7 +1,6 @@
 // SPDX-FileCopyrightText: 2020 David Fong
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
-#include <doctest.h>
+#include <catch2/catch_test_macros.hpp>
 
 #include <okiidoku/puzzle/make.hpp>
 #include <okiidoku/puzzle/solve.hpp>
@@ -20,7 +19,7 @@
 namespace okiidoku::test {
 template<Order O> OKIIDOKU_KEEP_FOR_DEBUG // NOLINTNEXTLINE(*-internal-linkage)
 void test_puzzle(okiidoku::util::SharedRng& shared_rng, const std::uintmax_t num_rounds) {
-	INFO("testing for order ", O);
+	INFO("testing for order " << unsigned{O});
 	if constexpr (O >= 4) { return; } // TODO.mid enable when solver for order=5 is faster?
 	using namespace ::okiidoku::mono;
 	// OKIIDOKU_MONO_INT_TS_TYPEDEFS
@@ -33,20 +32,19 @@ void test_puzzle(okiidoku::util::SharedRng& shared_rng, const std::uintmax_t num
 	FastSolver<O> solver;
 	for (std::uintmax_t round {0u}; round < num_rounds; ++round) { CAPTURE(round);
 		shuffle(gen_grid, shared_rng());
-		REQUIRE_UNARY(gen_grid.follows_rule());
+		REQUIRE(gen_grid.follows_rule());
 
-		INFO("making puzzle #", round);
 		Grid<O> puz_grid {gen_grid};
 		auto ua_sets {find_size_4_minimal_unavoidable_sets(puz_grid)};
 		// CAPTURE(unsigned(ua_sets.ua_set_4s.size());
 		make_minimal_puzzle(puz_grid, shared_rng());
 		solver.reinit_with_puzzle(puz_grid);
 		auto soln {solver.get_next_solution()};
-		CHECK_UNARY(soln.has_value());
+		CHECK(soln.has_value());
 		if (soln.has_value()) {
-			CHECK_EQ(soln.value(), gen_grid);
+			CHECK(soln.value() == gen_grid);
 		}
-		CHECK_UNARY(!solver.get_next_solution().has_value());
+		CHECK(!solver.get_next_solution().has_value());
 		// #ifndef OKIIDOKU_NO_LOGGING
 		// print_2d(std::clog, shared_rng(), gen_grid, puz_grid);
 		// #endif

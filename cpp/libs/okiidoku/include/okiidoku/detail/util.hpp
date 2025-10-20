@@ -17,10 +17,6 @@
 	cases, or benchmark carefully, or check codegen. see `OKIIDOKU_ASSERT`.
 
 	note: C++23 has `std::unreachable` in `<utility>`, but it might be good to keep this header slim
-
-	TODO.low would it be legal ODR-wise to define the contract stuff as
-	doctest CHECK/REQUIRE `#ifdef DOCTEST_VERSION`? maybe at least for OKIIDOKU_ASSERT?
-	https://github.com/doctest/doctest/blob/master/doc/markdown/assertions.md#using-asserts-out-of-a-testing-context
 	*/
 
 #ifndef NDEBUG
