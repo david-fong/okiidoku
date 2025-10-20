@@ -6,7 +6,7 @@ if(NOT OKIIDOKU_BUILD_OPTIMIZE_LOCAL_NON_PORTABLE)
 	return()
 endif()
 
-if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+if(NOT MSVC)
 	add_compile_options(
 		-fstrict-enums # assume that only declared values are possible
 		-fno-semantic-interposition # disable ELF external overrides for more optimization (on by default for LLVM)

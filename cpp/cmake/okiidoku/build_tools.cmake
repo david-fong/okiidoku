@@ -16,6 +16,21 @@ if(EMSCRIPTEN AND okiidoku_IS_TOP_LEVEL)
 endif()
 
 
+# `-D _GLIBCXX_DEBUG` for libstdc++
+include(CheckCXXSymbolExists)
+if(NOT DEFINED CACHE{_OKIIDOKU_IS_LIBSTDCXX})
+	check_cxx_symbol_exists("__GLIBCXX__" "version" _OKIIDOKU_IS_LIBSTDCXX)
+	# (libc++ from LLVM would check for `_LIBCPP_VERSION`)
+endif()
+if("$CACHE{_OKIIDOKU_IS_LIBSTDCXX}")
+	add_compile_definitions(
+		# https://gcc.gnu.org/onlinedocs/libstdc++/manual/using_macros.html
+		"$<${debug_configs}:_GLIBCXX_DEBUG>" # implies _GLIBCXX_ASSERTIONS
+		"$<${debug_configs}:_GLIBCXX_DEBUG_PEDANTIC>" # usage of libstdc++ extensions are errors
+	)
+endif()
+
+
 # related to reproducible builds / deterministic compilation:
 if(NOT MSVC)
 	add_compile_options(
@@ -30,8 +45,7 @@ if(NOT MSVC)
 		# https://github.com/emscripten-core/emscripten/blob/main/ChangeLog.md#406---032625
 		add_link_options("$<${debug_configs}:-sSOURCE_MAP_PREFIXES=${okiidoku_SOURCE_DIR}=/okiidoku>") # TODO.low this doesn't seem to be working. it's using relative paths...
 	endif()
-	# TODO -frandom-seed
-	# https://cmake.org/cmake/help/latest/command/cmake_path.html resolve paths relative to CMAKE_SOURCE_DIR and CMAKE_BINARY_DIR and take the shorter.
+	# see also :/cpp/cmake/okiidoku/source_file_random_seed.cmake.
 endif()
 if((CMAKE_CXX_COMPILER_ID MATCHES [[Clang]]) OR EMSCRIPTEN)
 	add_compile_options("-fno-record-command-line")

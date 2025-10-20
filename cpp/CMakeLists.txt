@@ -64,6 +64,7 @@ endif()
 
 okiidoku_target_pgo(okiidoku #[[trainer:]] okiidoku_pgo_trainer_default)
 
+include(okiidoku/source_file_random_seed)
 include(okiidoku/optional/doxygen)
 include(okiidoku/installation)
 include(okiidoku/packaging)

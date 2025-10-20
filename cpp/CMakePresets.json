@@ -35,7 +35,8 @@
 			"cacheVariables": {
 				"CMAKE_BUILD_TYPE": "Release",
 				"CMAKE_DEFAULT_BUILD_TYPE": "Release",
-				"CPACK_INCLUDE_TOPLEVEL_DIRECTORY": false
+				"CPACK_INCLUDE_TOPLEVEL_DIRECTORY": false,
+				"CPACK_COMPONENT_INCLUDE_TOPLEVEL_DIRECTORY": false
 			}
 		},
 		{
@@ -57,8 +58,9 @@
 				"OKIIDOKU_BUILD_WITH_SUGGESTED_WARNINGS": true,
 				"OKIIDOKU_BUILD_TESTING": true,
 				"OKIIDOKU_BUILD_BINDINGS_FOR_PYTHON": true,
-				"CPACK_PACKAGE_DIRECTORY": { "type":"PATH", "value":"${sourceDir}/out/package/" },
-				"CPACK_INCLUDE_TOPLEVEL_DIRECTORY": false
+				"CPACK_PACKAGE_DIRECTORY": { "type":"PATH", "value":"${sourceDir}/out/dev.package/" },
+				"CPACK_INCLUDE_TOPLEVEL_DIRECTORY": false,
+				"CPACK_COMPONENT_INCLUDE_TOPLEVEL_DIRECTORY": false
 			},
 			"warnings": {
 				"dev": true,
@@ -69,7 +71,8 @@
 			"name": "base:pkg",
 			"description": "for packaging",
 			"hidden": true,
-			"inherits": ["base:dev"],
+			"inherits": ["base:any"],
+			"generator": "Ninja Multi-Config",
 			"binaryDir": "${sourceDir}/out/pkg.build/${presetName}",
 			"installDir": "${sourceDir}/out/pkg.install/${presetName}",
 			"environment": {
@@ -79,14 +82,20 @@
 				"CMAKE_INSTALL_MODE": null
 			},
 			"cacheVariables": {
+				"CMAKE_PROJECT_TOP_LEVEL_INCLUDES": "${sourceDir}/tools/cmake_top_project_include.cmake",
 				"CMAKE_BUILD_TYPE": "Release",
 				"CMAKE_DEFAULT_BUILD_TYPE": "Release",
+				"CMAKE_OPTIMIZE_DEPENDENCIES": true,
 				"CMAKE_BUILD_RPATH_USE_ORIGIN": true,
 				"CPM_SOURCE_CACHE": { "type":"PATH", "value":"${sourceDir}/external" },
+				"OKIIDOKU_BUILD_WITH_SUGGESTED_WARNINGS": true,
 				"OKIIDOKU_BUILD_REPRODUCIBLE": true,
 				"OKIIDOKU_BUILD_DEBUG_WITH_SANITIZERS": false,
 				"OKIIDOKU_BUILD_OPTIMIZE_LOCAL_NON_PORTABLE": false,
-				"CPACK_PACKAGE_DIRECTORY": { "type":"PATH", "value":"${sourceDir}/out/package/" }
+				"OKIIDOKU_BUILD_BINDINGS_FOR_PYTHON": true,
+				"CPACK_PACKAGE_DIRECTORY": { "type":"PATH", "value":"${sourceDir}/out/package/" },
+				"CPACK_INCLUDE_TOPLEVEL_DIRECTORY": false,
+				"CPACK_COMPONENT_INCLUDE_TOPLEVEL_DIRECTORY": false
 			}
 		},
 		{

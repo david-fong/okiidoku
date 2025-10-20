@@ -22,7 +22,7 @@ if(okiidoku_example_IS_TOP_LEVEL)
 endif()
 
 
-add_executable(okiidoku_example_mono using_mono.main.cpp)
+add_executable(okiidoku_example_mono "using_mono.main.cpp")
 if(NOT okiidoku_example_IS_TOP_LEVEL)
 	okiidoku_add_compiler_options(okiidoku_example_mono) # you don't need this.
 endif()

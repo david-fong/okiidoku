@@ -14,11 +14,12 @@ endif()
 
 # https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/RPATH-handling
 # https://docs.conan.io/en/latest/howtos/manage_shared_libraries/rpaths.html
-# see man ld. $ORIGIN and @executable_path expand to directory containing the program that contains the directive
+# see `man ld`. `$ORIGIN` and `@executable_path` expand to directory containing the program that contains the directive
 # https://itwenty.me/posts/01-understanding-rpath/ and CMP0042
-# TODO: does this not assume that bindir is exactly one level deep? can we be more robust?
+file(RELATIVE_PATH bin_to_lib_relpath "${CMAKE_INSTALL_FULL_BINDIR}" "${CMAKE_INSTALL_FULL_LIBDIR}")
 if(APPLE) # when the target system is an Apple platform
-	list(APPEND CMAKE_INSTALL_RPATH "@executable_path/../${CMAKE_INSTALL_LIBDIR}")
-else()
-	list(APPEND CMAKE_INSTALL_RPATH "\$ORIGIN/../${CMAKE_INSTALL_LIBDIR}")
+	list(APPEND CMAKE_INSTALL_RPATH "@executable_path/${bin_to_lib_relpath}")
+elseif(UNIX) # when target system is UNIX
+	list(APPEND CMAKE_INSTALL_RPATH "\$ORIGIN/${bin_to_lib_relpath}")
 endif()
+unset(bin_to_lib_relpath)

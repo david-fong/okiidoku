@@ -213,20 +213,6 @@ function(okiidoku_target_pgo
 			set(objects_dir "${trainee_binary_dir}/CMakeFiles/${trainee}.dir/${int_dir}")
 		endblock()
 
-		# reproducible(-enough) generated name for things with internal linkage
-		# https://gcc.gnu.org/onlinedocs/gcc/Developer-Options.html#index-frandom-seed "The string should be different for every file you compile"
-		get_target_property(trainee_sources ${trainee} SOURCES)
-		foreach(_file ${trainee_sources})
-			string(SHA256 hash "${_file}") # hash absolute path # TODO resolve relative to file's project directory
-			# file(SHA256 "${_file}" hash) # alternatively, hash file contents (at configure-time). I'm hesitant about this. seems flaky.
-			# string(SUBSTRING "${hash}" 0 8 hash)
-			set_property(
-				SOURCE "${_file}" TARGET_DIRECTORY ${trainee}
-				APPEND PROPERTY COMPILE_OPTIONS "$<${if_pgo}:-frandom-seed=0x${hash}>"
-			)
-		endforeach()
-		unset(trainee_sources)
-
 		target_compile_options(${trainee} PRIVATE
 			"$<${if_pgo}:-fprofile-prefix-path=${objects_dir}>"
 			"$<${if_gen}:-fprofile-generate=${data_dir}>"

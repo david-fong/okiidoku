@@ -108,13 +108,16 @@ namespace okiidoku {
 			}
 		}()};
 		const auto& word {words_[word_i]};
-		if constexpr (OKIIDOKU_TARGET_SUPPORTS_X86_BMI2 && sizeof(word_t) == sizeof(std::uint64_t)) {
+		#ifdef OKIIDOKU_TARGET_SUPPORTS_X86_BMI2
+		if constexpr (sizeof(word_t) == sizeof(std::uint64_t)) {
 			const auto bit_mask {_pdep_u64(static_cast<word_t>(word_t{1u} << set_bit_index), word)};
 			return (num_word_bits*word_i) + std::countr_zero(bit_mask);
-		} else if constexpr (OKIIDOKU_TARGET_SUPPORTS_X86_BMI2 && sizeof(word_t) == sizeof(std::uint32_t)) {
+		}
+		if constexpr (sizeof(word_t) == sizeof(std::uint32_t)) {
 			const auto bit_mask {_pdep_u32(static_cast<word_t>(word_t{1u} << set_bit_index), word)};
 			return (num_word_bits*word_i) + std::countr_zero(bit_mask);
 		}
+		#endif
 		for (const auto word_bit_i : num_word_bits) { // TODO.mid possible optimization: skip consecutive set bits by somehow using std::countr_<>
 			const auto bit_mask {static_cast<word_t>(word_t{1u} << word_bit_i)};
 			OKIIDOKU_CONTRACT(bit_mask != 0u);

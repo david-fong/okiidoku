@@ -3,7 +3,7 @@
 # cspell:ignoreRegExp -[W][a-z-]+\b
 include_guard(DIRECTORY)
 
-add_library(okiidoku::compiler_warnings INTERFACE IMPORTED)
+add_library(okiidoku::compiler_warnings INTERFACE IMPORTED) # TODO.wait could we use INTERFACE SYMBOLIC?
 set_target_properties(okiidoku::compiler_warnings PROPERTIES EXPORT_FIND_PACKAGE_NAME okiidoku) # ugly hack to make it not need to be exported
 
 # \param file - what you would want to write in `#include <...>`.
@@ -70,13 +70,6 @@ endif()
 # features (change emitted / possible-emitted code- not just diagnostics):
 if(MSVC)
 else()
-	if(okiidoku_IS_TOP_LEVEL)
-		target_compile_definitions(okiidoku::compiler_warnings INTERFACE
-			# https://gcc.gnu.org/onlinedocs/libstdc++/manual/using_macros.html
-			"$<${debug_configs}:_GLIBCXX_DEBUG>" # implies _GLIBCXX_ASSERTIONS
-			"$<${debug_configs}:_GLIBCXX_DEBUG_PEDANTIC>" # usage of libstdc++ extensions are errors
-		)
-	endif()
 	if(OKIIDOKU_BUILD_DEBUG_WITH_SANITIZERS)
 		# AddressSanitizer doesn't play well with `_FORTIFY_SOURCE`.
 		# see https://github.com/google/sanitizers/wiki/AddressSanitizer#faq

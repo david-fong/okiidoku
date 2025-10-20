@@ -17,6 +17,7 @@ nanobind_add_module(
 set_target_properties(okiidoku_nb PROPERTIES
 	OUTPUT_NAME "okiidoku" # doesn't work. nanobind chokes. :'(
 	EXPORT_NAME nanobind
+	ADDITIONAL_CLEAN_FILES "$<TARGET_FILE_DIR:okiidoku_nb>/okiidoku.pyi"
 )
 okiidoku_add_compiler_options(okiidoku_nb)
 target_link_libraries(okiidoku_nb

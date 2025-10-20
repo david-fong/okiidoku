@@ -8,6 +8,7 @@ function(okiidoku_test_add name #[[ ARGN are correctness_deps ]])
 	set_target_properties("${target}" PROPERTIES
 		EXPORT_NAME "test_${name}"
 		INTERPROCEDURAL_OPTIMIZATION NO # links way faster and runs about same speed
+		FOLDER "okiidoku/test" # for listing in IDE
 	)
 	okiidoku_add_compiler_options("${target}")
 	target_compile_options("${target}" PRIVATE "$<$<NOT:${debug_configs}>:$<$<CXX_COMPILER_ID:GNU>:-fwhole-program>>")

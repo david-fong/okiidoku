@@ -126,7 +126,7 @@ namespace okiidoku::detail {
 		\pre the previous call to `accept` indicated a need to flush, or there is no more data. */
 		void flush(std::ostream& os) {
 			OKIIDOKU_CONTRACT2(os.good());
-			OKIIDOKU_CONTRACT(queue_end_ < queue_.size());
+			OKIIDOKU_CONTRACT2(queue_end_ < queue_.size());
 			if (queue_end_ == 0u) [[unlikely]] { return; }
 			OKIIDOKU_CONTRACT(buf_radixx_ > 0u);
 

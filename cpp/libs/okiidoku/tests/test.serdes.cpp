@@ -55,7 +55,7 @@ void test_serdes(const std::uint_fast32_t rng_seed) {
 			}
 			REQUIRE(
 				static_cast<std::size_t>(os.tellp()) ==
-				std::ranges::fold_left_first(std::span{byte_counts}.subspan(0uz,i+1uz), std::plus{})
+				std::ranges::fold_left(std::span{byte_counts}.subspan(0uz,i+1uz), 0uz, std::plus{})
 				// std::accumulate(byte_counts.cbegin(), byte_counts.cbegin()+i+1uz, 0uz)
 			);
 		}
@@ -63,7 +63,7 @@ void test_serdes(const std::uint_fast32_t rng_seed) {
 	}()};
 	REQUIRE(
 		written_data.size() ==
-		std::ranges::fold_left_first(std::span{byte_counts}.subspan(0uz,num_grids), std::plus{})
+		std::ranges::fold_left(std::span{byte_counts}.subspan(0uz,num_grids), 0uz, std::plus{})
 		// std::accumulate(byte_counts.cbegin(), byte_counts.cbegin()+num_grids, 0uz)
 	);
 	std::istringstream is {written_data, std::ios::binary};
@@ -82,7 +82,7 @@ void test_serdes(const std::uint_fast32_t rng_seed) {
 		REQUIRE(byte_counts[i] == bytes_read);
 		REQUIRE(
 			static_cast<std::size_t>(is.tellg()) ==
-			std::ranges::fold_left_first(std::span{byte_counts}.subspan(0uz,i+1uz), std::plus{})
+			std::ranges::fold_left(std::span{byte_counts}.subspan(0uz,i+1uz), 0uz, std::plus{})
 			// std::accumulate(byte_counts.cbegin(), byte_counts.cbegin()+i+1uz, 0uz)
 		);
 		REQUIRE(parsed_grid == grid_buf[i]);

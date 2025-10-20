@@ -18,6 +18,9 @@ set_target_properties(okiidoku_js PROPERTIES
 	OUTPUT_NAME "okiidoku"
 	SUFFIX ".mjs" # https://emscripten.org/docs/tools_reference/settings_reference.html#export-es6. EMSDK toolchain defaults to ".js"
 )
+set_source_files_properties(okiidoku.embind.cpp PROPERTIES
+	OBJECT_OUTPUTS "okiidoku.d.ts;okiidoku.wasm;$<${debug_configs}:okiidoku.wasm.map>"
+)
 # https://emsettings.surma.technology/
 # https://raw.githubusercontent.com/emscripten-core/emscripten/refs/heads/main/src/settings.js
 # https://raw.githubusercontent.com/emscripten-core/emscripten/refs/heads/main/docs/emcc.txt
@@ -65,14 +68,10 @@ install(DIRECTORY examples TYPE DOC COMPONENT okiidoku_development
 	PATTERN "node_modules" EXCLUDE
 	PATTERN "*pnpm*"       EXCLUDE
 )
+
 # make a symlink so the examples can use prettier paths.
-# too bad can't use execute_process or file(CREATE_LINK) because there's a generator expression in CMAKE_LIBRARY_OUTPUT_DIRECTORY.
-set(dest "${CMAKE_CURRENT_SOURCE_DIR}/examples/node/build")
-set(c "${CMAKE_COMMAND};-E")
-add_custom_command(TARGET okiidoku_js POST_BUILD
-	COMMENT "symlinking outputs to examples dir for convenience"
-	BYPRODUCTS "${dest}/$<CONFIG>"
-	COMMAND "${c};make_directory;${dest}"
-	COMMAND "${c};create_symlink;$<TARGET_FILE_DIR:okiidoku_js>;${dest}/$<CONFIG>"
-	VERBATIM COMMAND_EXPAND_LISTS
+file(CREATE_LINK
+	"${CMAKE_BINARY_DIR}/build"
+	"${CMAKE_CURRENT_SOURCE_DIR}/examples/node/build"
+	SYMBOLIC
 )

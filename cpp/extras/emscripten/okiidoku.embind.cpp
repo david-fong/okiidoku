@@ -101,7 +101,7 @@ EMSCRIPTEN_BINDINGS(okiidoku) {
 		.function("seed", &oki::em::Rng::seed)
 		.function("get",  &oki::em::Rng::get)
 		;
-	em::fixed("rng", oki::em::rng); // TODO figure out why this isn't working
+	em::constant("rng", oki::em::rng); // TODO figure out why this isn't working
 
 	em::class_<oki_v::Grid>("Grid")
 		.constructor<oki::Order>()

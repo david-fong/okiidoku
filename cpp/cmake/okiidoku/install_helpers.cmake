@@ -4,10 +4,6 @@
 include_guard(DIRECTORY)
 include(GNUInstallDirs)
 
-if(NOT DEFINED OKIIDOKU_INSTALL_CMAKEDIR)
-	set(OKIIDOKU_INSTALL_CMAKEDIR "${CMAKE_INSTALL_LIBDIR}/cmake/okiidoku")
-endif()
-
 function(okiidoku_install_target target)
 	install(TARGETS ${target}
 		EXPORT okiidoku_targets
