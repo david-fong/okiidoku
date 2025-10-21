@@ -32,9 +32,17 @@ endif()
 
 
 # related to reproducible builds / deterministic compilation:
+if(OKIIDOKU_BUILD_REPRODUCIBLE AND NOT DEFINED ENV{SOURCE_DATE_EPOCH})
+	message(WARNING [[hint: for reproducible builds, set SOURCE_DATE_EPOCH in your CMake configure or build preset]])
+endif()
 if(NOT MSVC)
 	add_compile_options(
 		# "-Werror=date-time" # error to use __TIME__, __DATE__ or __TIMESTAMP__
+		# ^I don't want to finagle patching pcg after FetchContent. let's use SOURCE_DATE_EPOCH in CMake preset
+		# https://github.com/imneme/pcg-cpp/issues/59
+		# https://reproducible-builds.org/docs/source-date-epoch/#tool-support
+		# https://gcc.gnu.org/onlinedocs/cpp/Environment-Variables.html#index-SOURCE_005fDATE_005fEPOCH
+
 		"-fno-record-gcc-switches" "-gno-record-gcc-switches"
 		"-ffile-prefix-map=${okiidoku_SOURCE_DIR}=/okiidoku"
 		#  see also gdb: set substitute-path, lldb: target.source-map, vscode: "sourceFileMap"
@@ -54,7 +62,7 @@ endif()
 
 if(UNIX AND NOT EMSCRIPTEN)
 add_link_options(
-	LINKER:--package-metadata=JSON # https://systemd.io/PACKAGE_METADATA_FOR_EXECUTABLE_FILES/
+	# LINKER:--package-metadata=JSON # https://systemd.io/PACKAGE_METADATA_FOR_EXECUTABLE_FILES/
 	LINKER:--build-id
 	LINKER:--compress-debug-sections=zstd
 )
@@ -111,6 +119,14 @@ if(NOT "${CCACHE_EXE}" STREQUAL "CCACHE_EXE-NOTFOUND")
 	# 	"$<$<CXX_COMPILER_ID:Clang>:-frewrite-includes>"
 	# )
 	set(CMAKE_C_COMPILER_LAUNCHER "${CMAKE_CXX_COMPILER_LAUNCHER}")
+
+	add_custom_target(ccache_clear
+		"${CCACHE_EXE}" --evict-namespace "okiidoku.${CMAKE_CXX_COMPILER_ID}.$<CONFIG>"
+		VERBATIM COMMAND_EXPAND_LISTS
+	)
+	if(TARGET clean)
+		add_dependencies(ccache_clear clean)
+	endif()
 endif()
 endif()
 

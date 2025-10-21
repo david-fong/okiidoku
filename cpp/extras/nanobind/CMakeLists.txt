@@ -15,8 +15,9 @@ nanobind_add_module(
 	okiidoku.nanobind.cpp
 )
 set_target_properties(okiidoku_nb PROPERTIES
-	OUTPUT_NAME "okiidoku" # doesn't work. nanobind chokes. :'(
+	OUTPUT_NAME okiidoku
 	EXPORT_NAME nanobind
+	SPDX_LICENSE [[AGPL-3.0-or-later]]
 	ADDITIONAL_CLEAN_FILES "$<TARGET_FILE_DIR:okiidoku_nb>/okiidoku.pyi"
 )
 okiidoku_add_compiler_options(okiidoku_nb)

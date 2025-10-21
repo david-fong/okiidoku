@@ -17,6 +17,7 @@ add_executable(okiidoku_js okiidoku.embind.cpp)
 set_target_properties(okiidoku_js PROPERTIES
 	OUTPUT_NAME "okiidoku"
 	SUFFIX ".mjs" # https://emscripten.org/docs/tools_reference/settings_reference.html#export-es6. EMSDK toolchain defaults to ".js"
+	SPDX_LICENSE [[AGPL-3.0-or-later]]
 )
 set_source_files_properties(okiidoku.embind.cpp PROPERTIES
 	OBJECT_OUTPUTS "okiidoku.d.ts;okiidoku.wasm;$<${debug_configs}:okiidoku.wasm.map>"

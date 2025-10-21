@@ -7,9 +7,9 @@ set(CMAKE_SKIP_LINTING YES)
 # copy the latest release's get_cpm.cmake file
 include(okiidoku/get_cpm)
 
-# \internal CPM does auto EXCLUDE_FROM_ALL and SYSTEM when using shorthand add
+# note: CPM does auto EXCLUDE_FROM_ALL and SYSTEM when using shorthand add
 
-set(OKIIDOKU_EMSCRIPTEN_MIN_VERSION "4.0.16") # \internal whatever I last pulled onto my machine
+set(OKIIDOKU_EMSCRIPTEN_MIN_VERSION "4.0.17") # whatever I last pulled onto my machine
 
 # https://docs.github.com/en/repositories/working-with-files/using-files/downloading-source-code-archives#source-code-archive-urls
 

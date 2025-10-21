@@ -9,6 +9,7 @@ set_target_properties(okiidoku PROPERTIES
 	VERSION   "${okiidoku_VERSION}"
 	SOVERSION "${okiidoku_VERSION_MAJOR}"
 	EXPORT_NAME lib
+	SPDX_LICENSE [[AGPL-3.0-or-later]]
 	CXX_STANDARD_REQUIRED TRUE
 	CXX_EXTENSIONS OFF
 	CXX_VISIBILITY_PRESET hidden

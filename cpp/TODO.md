@@ -54,6 +54,7 @@
 
 ## Misc List
 
+- try using pcg again
 - try deleting array subscript operator for bounded `Int` that would be out of range? test if it actually helps, or if `Int`'s implicit conversion to builtin int subverts it from being meaningful.
 - I wonder if [CMake deferred command calls](https://cmake.org/cmake/help/latest/command/cmake_language.html#deferring-calls) could be useful for anything...
 - make canon functions pure producers of a canonicalizing transformation. take grid by const reference. name `canon_sym` -> `get_sym_canon_map`.

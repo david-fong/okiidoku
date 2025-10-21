@@ -5,6 +5,7 @@ add_executable(okiidoku_translator #[[EXCLUDE_FROM_ALL]]
 )
 set_target_properties(okiidoku_translator PROPERTIES
 	EXPORT_NAME translator
+	SPDX_LICENSE [[AGPL-3.0-or-later]]
 )
 target_include_directories(okiidoku_translator PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
 okiidoku_add_compiler_options(okiidoku_translator)

@@ -3,7 +3,7 @@
 #ifndef HPP_OKIIDOKU_RNG
 #define HPP_OKIIDOKU_RNG
 
-//#include <pcg_random.hpp>
+#include <pcg_random.hpp>
 
 #include <random>
 #include <mutex>

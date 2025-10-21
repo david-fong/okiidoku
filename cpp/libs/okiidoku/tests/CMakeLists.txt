@@ -5,6 +5,7 @@
 function(okiidoku_test_add name #[[ ARGN are correctness_deps ]])
 	set(target "okiidoku_test.${name}")
 	add_executable("${target}" "test.${name}.cpp")
+	target_compile_features("${target}" PRIVATE cxx_std_23)
 	set_target_properties("${target}" PROPERTIES
 		EXPORT_NAME "test_${name}"
 		INTERPROCEDURAL_OPTIMIZATION NO # links way faster and runs about same speed
