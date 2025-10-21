@@ -7,6 +7,7 @@
 #include "okiidoku/puzzle/solver/found.hpp"       // CellClaimSym, Lock...
 #include <okiidoku/ints.hpp>
 #include <okiidoku/order.hpp>
+#include <okiidoku/detail/util.hpp>
 
 #include <algorithm>
 #include <tuple>       // apply, get

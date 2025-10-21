@@ -6,6 +6,7 @@
 
 #include <okiidoku/ints.hpp>
 #include <okiidoku/order.hpp>
+#include <okiidoku/detail/util.hpp>
 
 #include <array>
 #include <iterator>    // input_iterator_tag, default_sentinel

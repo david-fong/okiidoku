@@ -5,6 +5,7 @@
 #include <okiidoku/puzzle/solver/engine.hpp>
 #include <okiidoku/ints.hpp>
 #include <okiidoku/order.hpp>
+#include <okiidoku/detail/util.hpp>
 
 #include <numeric>    // transform_reduce <- will not be needed if we do the get_guess_grouping bookkeeping optimization
 #include <algorithm>  // sort

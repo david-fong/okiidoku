@@ -53,3 +53,4 @@ file(CONFIGURE OUTPUT "${CMAKE_INSTALL_PREFIX}/share/okiidoku/about.git.md" CONT
   ${OKIIDOKU_GIT_COMMIT}
   ```
 ")
+install(FILES "${CMAKE_INSTALL_PREFIX}/share/okiidoku/about.git.md" TYPE DOC COMPONENT okiidoku_about)

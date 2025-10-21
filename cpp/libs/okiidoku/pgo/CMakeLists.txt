@@ -15,3 +15,10 @@ if(_OKIIDOKU_BUILD_IS_PGO_GEN)
 		COMPONENT okiidoku_pgo_trainers
 	)
 endif()
+
+cmake_language(DEFER
+	DIRECTORY "${okiidoku_SOURCE_DIR}"
+	CALL okiidoku_target_pgo
+		#[[trainee:]] okiidoku
+		#[[trainer:]] okiidoku_pgo_trainer_default
+)

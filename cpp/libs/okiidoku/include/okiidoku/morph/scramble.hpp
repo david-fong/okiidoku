@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #ifndef HPP_OKIIDOKU_MORPH_SCRAMBLE
 #define HPP_OKIIDOKU_MORPH_SCRAMBLE
+#include <okiidoku/detail/export.h>
 
 #include <okiidoku/ints.hpp>
 #include <okiidoku/order.hpp>

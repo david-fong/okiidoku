@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #ifndef HPP_OKIIDOKU_ARCHIVE
 #define HPP_OKIIDOKU_ARCHIVE
+#include <okiidoku/detail/export.h>
 
 #include <okiidoku/order.hpp>
 

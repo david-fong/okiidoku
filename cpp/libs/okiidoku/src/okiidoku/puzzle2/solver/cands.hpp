@@ -5,6 +5,7 @@
 
 #include <okiidoku/grid.hpp>
 #include <okiidoku/bit_array.hpp>
+#include <okiidoku/detail/util.hpp>
 
 #include <vector>
 #include <array>

@@ -7,6 +7,7 @@
 #include <okiidoku/grid.hpp>
 #include <okiidoku/ints.hpp>
 #include <okiidoku/order.hpp>
+#include <okiidoku/detail/util.hpp>
 
 // TODO prune
 #include <algorithm>  // swap, sort, ranges::next_permutation

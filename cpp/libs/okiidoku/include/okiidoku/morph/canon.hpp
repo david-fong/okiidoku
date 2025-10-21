@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #ifndef HPP_OKIIDOKU_MORPH_CANON
 #define HPP_OKIIDOKU_MORPH_CANON
+#include <okiidoku/detail/export.h>
 
 #include <okiidoku/morph/transform.hpp>
 #include <okiidoku/order.hpp>

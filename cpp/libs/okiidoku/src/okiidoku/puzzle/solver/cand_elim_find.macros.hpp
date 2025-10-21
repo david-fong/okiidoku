@@ -5,6 +5,7 @@
 
 #include <okiidoku/ints.hpp>
 #include <okiidoku/order.hpp>
+#include <okiidoku/detail/util.hpp>
 
 // yes, I know macros are generally recommended against.
 // yes, I know macros do not get scoped to namespaces.

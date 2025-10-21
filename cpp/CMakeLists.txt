@@ -33,7 +33,6 @@ summary:
 ]]
 
 include(okiidoku/pgo_helpers)
-okiidoku_check_needs_short_circuit_pgo_gen_externalproject()
 
 include(okiidoku/build_tools)
 include(okiidoku/install_helpers)
@@ -49,6 +48,12 @@ include(okiidoku/optional/static_analyzers)
 if(OKIIDOKU_BUILD_TESTING)
 	enable_testing() # not `include(CTest)` because I don't use CDash.
 endif()
+# keep inline functions for debugging purposes:
+# TODO clang doesn't support -fkeep-inline-functions, need to use something else... maybe -fno-inline-functions... :(
+# TODO do we even want to keep doing this now that we have `OKIIDOKU_KEEP_FOR_DEBUG`? but that doesn't seem to be working...
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+	add_compile_options("$<${debug_configs}:-fkeep-inline-functions>")
+endif()
 
 add_subdirectory(libs/okiidoku) # target: okiidoku
 add_subdirectory(libs/cli_utils EXCLUDE_FROM_ALL) # (internal)
@@ -61,8 +66,6 @@ if(OKIIDOKU_BUILD_BINDINGS_FOR_PYTHON)
 	# add_subdirectory(extras/python) # target: okiidoku_py
 	add_subdirectory(extras/nanobind) # target: okiidoku_nb
 endif()
-
-okiidoku_target_pgo(okiidoku #[[trainer:]] okiidoku_pgo_trainer_default)
 
 include(okiidoku/source_file_random_seed)
 include(okiidoku/optional/doxygen)

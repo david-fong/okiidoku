@@ -3,8 +3,10 @@
 #ifndef HPP_OKIIDOKU_PUZZLE_SOLVER_SUBSET_COMBO_WALKER
 #define HPP_OKIIDOKU_PUZZLE_SOLVER_SUBSET_COMBO_WALKER
 
-#include <okiidoku/ints.hpp>
 #include <okiidoku/puzzle/solver/cand_elim_find.macros.hpp>
+#include <okiidoku/ints.hpp>
+#include <okiidoku/detail/util.hpp>
+
 #include <array>
 
 namespace okiidoku::mono::detail::solver {

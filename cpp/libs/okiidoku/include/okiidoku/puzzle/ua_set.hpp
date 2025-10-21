@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #ifndef HPP_OKIIDOKU_PUZZLE_UNAVOIDABLE_SET
 #define HPP_OKIIDOKU_PUZZLE_UNAVOIDABLE_SET
+#include <okiidoku/detail/export.h>
 
 #include <okiidoku/ints.hpp>
 #include <okiidoku/order.hpp>

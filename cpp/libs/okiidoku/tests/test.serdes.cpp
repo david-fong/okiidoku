@@ -8,6 +8,7 @@
 #include <okiidoku/ints_io.hpp>
 #include <okiidoku/ints.hpp>
 #include <okiidoku/order.hpp>
+#include <okiidoku/detail/util.hpp>
 
 #include <sstream>
 #include <random>

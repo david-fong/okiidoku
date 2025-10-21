@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #ifndef HPP_OKIIDOKU_MORPH_TRANSFORM
 #define HPP_OKIIDOKU_MORPH_TRANSFORM
+#include <okiidoku/detail/export.h>
 
 #include <okiidoku/ints.hpp>
 #include <okiidoku/detail/visitor.hpp>

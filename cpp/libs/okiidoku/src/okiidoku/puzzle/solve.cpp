@@ -6,6 +6,7 @@
 #include <okiidoku/puzzle/solver/cand_elim_find.hpp>
 #include <okiidoku/puzzle/solver/engine.hpp>
 #include <okiidoku/order.hpp>
+#include <okiidoku/detail/util.hpp>
 namespace okiidoku::mono { template <Order O> requires (is_order_compiled(O)) struct Grid; }
 
 #include <functional> // cref

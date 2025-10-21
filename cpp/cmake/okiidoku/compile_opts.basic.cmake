@@ -8,6 +8,8 @@ set_target_properties(okiidoku::compiler_warnings PROPERTIES EXPORT_FIND_PACKAGE
 
 # \param file - what you would want to write in `#include <...>`.
 #  it's up to you to set up any supporting include path flags.
+# don't add these as INTERFACE compile options on exported targets-
+#  it assumes the host compiler's flag style.
 function(okiidoku_make_include_flag file return_var_name)
 	# intentionally leaves target_compile_options and target_sources up to the caller.
 	# things like wrapping with generator expression(s) is hard to do in a CMake function.
@@ -16,7 +18,6 @@ function(okiidoku_make_include_flag file return_var_name)
 	else() # TODO warn on unsupported compiler?
 		set("${return_var_name}" "SHELL:-include '${file}'" PARENT_SCOPE)
 	endif()
-	# TODO for install/package/CPS use-case, this assumes consumer's compiler flag style... but generator expression usage is an error? maybe I should just give up on this and write the `#include`s like a normal person :/
 endfunction()
 
 function(okiidoku_add_compiler_options target)

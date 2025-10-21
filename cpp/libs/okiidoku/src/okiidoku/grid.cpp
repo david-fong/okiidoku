@@ -5,6 +5,7 @@
 #include <okiidoku/bit_array.hpp>
 #include <okiidoku/ints.hpp>
 #include <okiidoku/order.hpp>
+#include <okiidoku/detail/util.hpp>
 
 #include <algorithm> // none_of, all_of
 #include <array>

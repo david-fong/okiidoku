@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #ifndef HPP_OKIIDOKU_PUZZLE_MAKE
 #define HPP_OKIIDOKU_PUZZLE_MAKE
+#include <okiidoku/detail/export.h>
 
 #include <okiidoku/ints.hpp>
 #include <okiidoku/order.hpp>

@@ -5,6 +5,7 @@
 
 #include <okiidoku/puzzle/solver/found.hpp>
 #include <okiidoku/order.hpp>
+#include <okiidoku/detail/util.hpp>
 
 #include <deque>
 #include <tuple>
@@ -49,6 +50,7 @@ namespace okiidoku::mono::detail::solver {
 		}
 
 		// TODO implement as a template function requiring that type is in queues_t
+		// TODO.wait I wonder if C++26 expansion statements ("template for") could come in handy here?
 		void push_back(found::CellClaimSym  <O>&& desc) noexcept { std::get<queue_t<found::CellClaimSym  <O>>>(tup_).emplace_back(std::move(desc)); }
 		void push_back(found::SymClaimCell  <O>&& desc) noexcept { std::get<queue_t<found::SymClaimCell  <O>>>(tup_).emplace_back(std::move(desc)); }
 		void push_back(found::Subset        <O>&& desc) noexcept { std::get<queue_t<found::Subset        <O>>>(tup_).emplace_back(std::move(desc)); }

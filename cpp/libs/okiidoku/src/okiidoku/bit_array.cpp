@@ -4,6 +4,7 @@
 
 #include <okiidoku/ints.hpp>
 #include <okiidoku/order.hpp>
+#include <okiidoku/detail/util.hpp>
 
 #if __has_include(<immintrin.h>)
 #include <immintrin.h>

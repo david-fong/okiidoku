@@ -5,6 +5,7 @@
 
 #include <okiidoku/config/defaults.hpp>
 #include <okiidoku/detail/order_templates.macros.hpp>
+#include <okiidoku/detail/util.hpp>
 
 #include <array>
 

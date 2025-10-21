@@ -6,8 +6,9 @@
 #include <okiidoku/puzzle/solver/subset_combo_walker.hpp>
 #include <okiidoku/puzzle/solver/found.hpp>
 #include <okiidoku/bit_array.hpp>
-#include <okiidoku/order.hpp>
 #include <okiidoku/ints.hpp>
+#include <okiidoku/order.hpp>
+#include <okiidoku/detail/util.hpp>
 
 #include <functional> // bit_or
 #include <numeric>    // transform_reduce

@@ -5,6 +5,7 @@
 #include <okiidoku/grid.hpp>
 #include <okiidoku/ints.hpp>
 #include <okiidoku/order.hpp>
+#include <okiidoku/detail/util.hpp>
 
 #include <random>    // minstd_rand
 #include <algorithm> // ranges::count, shuffle

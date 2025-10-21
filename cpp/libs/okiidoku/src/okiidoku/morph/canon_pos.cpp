@@ -7,6 +7,7 @@
 #include <okiidoku/grid.hpp>
 #include <okiidoku/ints.hpp>
 #include <okiidoku/order.hpp>
+#include <okiidoku/detail/util.hpp>
 
 #include <range/v3/view/common.hpp>
 #include <range/v3/view/drop.hpp>

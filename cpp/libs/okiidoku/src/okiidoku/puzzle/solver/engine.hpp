@@ -8,6 +8,7 @@
 #include <okiidoku/bit_array.hpp>
 #include <okiidoku/ints.hpp>
 #include <okiidoku/order.hpp>
+#include <okiidoku/detail/util.hpp>
 
 // #include <stack>
 #include <vector>

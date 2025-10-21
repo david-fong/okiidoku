@@ -5,6 +5,7 @@
 #include <okiidoku/morph/transform.hpp> // Transformation
 #include <okiidoku/ints.hpp>            // rng_seed_t, Ints, o1i_t
 #include <okiidoku/order.hpp>
+#include <okiidoku/detail/util.hpp>
 
 #include <algorithm> // ranges::shuffle
 #include <random>    // minstd_rand

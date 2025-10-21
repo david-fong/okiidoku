@@ -54,7 +54,6 @@
 
 ## Misc List
 
-- tools/cmake_project_include.cmake
 - try deleting array subscript operator for bounded `Int` that would be out of range? test if it actually helps, or if `Int`'s implicit conversion to builtin int subverts it from being meaningful.
 - I wonder if [CMake deferred command calls](https://cmake.org/cmake/help/latest/command/cmake_language.html#deferring-calls) could be useful for anything...
 - make canon functions pure producers of a canonicalizing transformation. take grid by const reference. name `canon_sym` -> `get_sym_canon_map`.
@@ -91,6 +90,7 @@
 - CMake 4.2
   - [`$<TARGET_INTERMEDIATE_DIR:tgt>`](https://cmake.org/cmake/help/latest/manual/cmake-generator-expressions.7.html#genex:TARGET_INTERMEDIATE_DIR). can probably be used for lto cache dir (see default_output_dirs.cmake), and for PGO training data (see pgo_helpers.cmake, where setting `objects_dir` variable).
   - Should I define `_UNICODE`? See [CMP0204](https://cmake.org/cmake/help/latest/policy/CMP0204.html).
+  - `project(SPDX_LICENSE)`
 - CMake 3.31:
   - presets `$comment`
   - `CMAKE_EXPORT_BUILD_DATABASE`

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #ifndef HPP_OKIIDOKU_GEN
 #define HPP_OKIIDOKU_GEN
+#include <okiidoku/detail/export.h>
 
 #include <okiidoku/grid.hpp>
 #include <okiidoku/ints.hpp>

@@ -4,6 +4,7 @@
 #define HPP_OKIIDOKU_INTS
 
 #include <okiidoku/order.hpp> // Order, largest_compiled_order
+#include <okiidoku/detail/util.hpp>
 
 #include <array>
 #include <utility>     // forward_like, to_underlying

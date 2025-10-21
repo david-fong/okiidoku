@@ -5,6 +5,7 @@
 
 #include <okiidoku/detail/order_templates.macros.hpp>
 #include <okiidoku/order.hpp>
+#include <okiidoku/detail/util.hpp>
 
 #include <variant>
 #include <compare>
