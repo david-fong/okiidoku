@@ -10,13 +10,11 @@ block()
 
 	# gdb python extension
 	# https://sourceware.org/gdb/current/onlinedocs/gdb.html/Which-flavor-to-choose_003f.html
-	if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-		target_sources(okiidoku PRIVATE
-			# add `.debug_gdb_scripts` to cover for build as a static lib:
-			"$<${debug_configs}:${CMAKE_CURRENT_SOURCE_DIR}/src/okiidoku/debug/gdb_support.cpp>"
-			# note: alternatively to the `debug_configs` generator expression, could probably use `NDEBUG` in the cpp file.
-		)
-	endif()
+	target_sources(okiidoku PRIVATE
+		# add `.debug_gdb_scripts` to cover for build as a static lib:
+		"$<${debug_configs}:${CMAKE_CURRENT_SOURCE_DIR}/src/okiidoku/debug/gdb_support.cpp>"
+		# note: alternatively to the `debug_configs` generator expression, could probably use `NDEBUG` in the cpp file.
+	)
 	if(BUILD_SHARED_LIBS)
 		# https://sourceware.org/gdb/current/onlinedocs/gdb.html/objfile_002dgdbdotext-file.html
 		# note: I give up trying to cleanly create `$<TARGET_SONAME_FILE:okiidoku>-gdb.py` for the build tree. every option has some bit that doesn't work well.

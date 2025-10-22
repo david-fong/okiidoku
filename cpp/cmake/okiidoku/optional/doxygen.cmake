@@ -29,6 +29,8 @@ if(Doxygen_FOUND)
 	block() # generate user-facing docs
 		list(APPEND DOXYGEN_FILE_PATTERNS "*.hpp")
 		list(APPEND DOXYGEN_EXCLUDE_PATTERNS "*/src/*")
+		list(APPEND DOXYGEN_EXCLUDE_SYMBOLS "detail")
+		set(DOXYGEN_EXCLUDE_SYMLINKS YES)
 		# list(APPEND DOXYGEN_EXTRACT_ALL YES)
 		doxygen_add_docs(okiidoku_docs
 				"${okiidoku_SOURCE_DIR}"

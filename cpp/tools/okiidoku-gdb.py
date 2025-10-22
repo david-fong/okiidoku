@@ -30,19 +30,24 @@ def _call_member_fn(val: gdb.Value, fn_name: str, *args):
 
 
 class IntPrinter:
-	__name_pattern = re.compile(r"^okiidoku::Int<[^>]+?>$")
+	__name_pattern = re.compile(r"^okiidoku::Int<[^>]+?>[^:]*$")
+	# __name_pattern = re.compile(r"^okiidoku::Int<[^>]+?>$")
 	__suffix = {"fixed":"c","small":"s","fast":"f"}
 	def __init__(self, val: gdb.Value):
 		self.__val = val
+		self.__kind = str(val["kind"]).split("::")[-1]
 	def to_string(self):
 		v = self.__val
 		val_ = v["val_"].cast(gdb.lookup_type("unsigned long long"))
-		k_ = IntPrinter.__suffix.get(str(v["kind"]), "?")
+		k_ = IntPrinter.__suffix.get(self.__kind, "?")
+		if self.__kind == "fixed":
+			return f"{v['max']}{k_}"
 		return f"{val_}/{v['max']}{k_}"
 
 
 class BitArrayPrinter(gdb.ValuePrinter):
-	__name_pattern = re.compile(r"^okiidoku::BitArray<(?P<width>[^>]+?),\s*?(?P<kind>[^>]+?)>$")
+	__name_pattern = re.compile(r"^okiidoku::BitArray<(?P<width>[^>]+?),\s*?(?P<kind>[^>]+?)>[^:]*$")
+	# __name_pattern = re.compile(r"^okiidoku::BitArray<(?P<width>[^>]+?),\s*?(?P<kind>[^>]+?)>$")
 	def __init__(self, val: gdb.Value):
 		self.__val = val
 		self.__width = int(val.type.template_argument(0)) # type:ignore (typeshed signature)
@@ -65,7 +70,8 @@ class BitArrayPrinter(gdb.ValuePrinter):
 
 
 class MonoGridPrinter(gdb.ValuePrinter):
-	__name_pattern = re.compile(r"^okiidoku::mono::Grid<(?P<order>[^>]+?)>$")
+	__name_pattern = re.compile(r"^okiidoku::mono::Grid<(?P<order>[^>]+?)>[^:]*$")
+	# __name_pattern = re.compile(r"^okiidoku::mono::Grid<(?P<order>[^>]+?)>$")
 	def __init__(self, val: gdb.Value):
 		self.__order: gdb.Value = val.type.template_argument(0) # type:ignore (typeshed signature)
 		self.__size = int(self.__order) ** 4

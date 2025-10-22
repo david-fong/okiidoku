@@ -75,10 +75,9 @@ namespace okiidoku::mono::detail::solver {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	template<class F> requires(std::is_invocable_v<F, O2BitArr<O>&>)
 	UnwindInfo EngineImpl<O>::do_elim_generic_(
 		const EngineImpl<O>::rmi_t rmi,
-		F elim_fn
+		std::invocable<O2BitArr<O>&> auto elim_fn
 	) noexcept {
 		OKIIDOKU_ASSERT(!no_more_solns());
 		auto& cell_cands {mut_cells_cands()[rmi]};

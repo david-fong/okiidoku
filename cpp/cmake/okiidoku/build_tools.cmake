@@ -16,6 +16,11 @@ if(EMSCRIPTEN AND okiidoku_IS_TOP_LEVEL)
 endif()
 
 
+if(CMAKE_LINKER_TYPE STREQUAL "LLD")
+	add_link_options(LINKER:--gdb-index)
+endif()
+
+
 # `-D _GLIBCXX_DEBUG` for libstdc++
 include(CheckCXXSymbolExists)
 if(NOT DEFINED CACHE{_OKIIDOKU_IS_LIBSTDCXX})

@@ -298,8 +298,7 @@ function(okiidoku_target_pgo
 		VERBATIM COMMAND_EXPAND_LISTS
 	)
 	endblock()
-	add_dependencies("run_${trainer}" "okiidoku_pgo_gen-build") # must build trainee before training
-	# add_dependencies("run_${trainer}" "okiidoku_pgo_gen-build-${trainer}") # must build trainee before training
+	add_dependencies("run_${trainer}" "okiidoku_pgo_gen-build-${trainer}") # must build trainee before training
 	# build will stop if run_trainer fails
 	# TODO.wait use generator expression once `add_dependencies` supports them (so dependency only exists for PgoUse config). https://gitlab.kitware.com/cmake/cmake/-/issues/19467. currently doing workaround in the custom step COMMANDs.
 	add_dependencies(${trainee} "run_${trainer}")

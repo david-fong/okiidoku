@@ -46,13 +46,14 @@ endif()
 
 if(OKIIDOKU_BUILD_TESTING)
 	# https://github.com/catchorg/Catch2/blob/devel/docs/cmake-integration.md
+	set(CMAKE_PROJECT_Catch2_INCLUDE "${okiidoku_SOURCE_DIR}/cmake/okiidoku/dep_project_include.cmake")
 	CPMAddPackage(NAME Catch2
 		# https://github.com/catchorg/Catch2/releases
 		URL [[https://github.com/catchorg/Catch2/archive/31ee3beb0a474463e0101674c22f2fef0311d601.tar.gz]] # v3.11.0++
 		OPTIONS
 			BUILD_TESTING NO
 			CATCH_INSTALL_DOCS NO
-			# CATCH_ENABLE_REPRODUCIBLE_BUILD "${OKIIDOKU_BUILD_REPRODUCIBLE}" # not helpful to us
+			CATCH_ENABLE_REPRODUCIBLE_BUILD "NO" # not helpful to us
 		EXCLUDE_FROM_ALL YES
 		SYSTEM YES
 	)

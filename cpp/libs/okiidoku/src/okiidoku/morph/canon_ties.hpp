@@ -10,8 +10,9 @@
 
 #include <array>
 #include <iterator>    // input_iterator_tag
-#include <cstddef>     // ptrdiff_t
 #include <functional>  // invoke
+#include <cstddef>     // ptrdiff_t
+#include <concepts>    // equivalence_relation
 #include <type_traits> // conditional_t
 
 namespace okiidoku::mono::detail {
@@ -92,9 +93,7 @@ namespace okiidoku::mono::detail {
 		/**
 		pass a function that compares consecutive values in a range to update
 		the record of which ranges' values are still tied. */
-		template<class IsEq>
-			requires (std::regular_invocable<IsEq, ix_t, ix_t>)
-		void update(const IsEq&& is_eq) noexcept { // TODO test that && is okay here.
+		void update(const std::equivalence_relation<ix_t,ix_t> auto&& is_eq) noexcept { // TODO test that && is okay here.
 			for (const auto&& cached_tie : *this) {
 				for (ii_t i {cached_tie.begin_}; i.next() != cached_tie.end_; ++i) {
 					OKIIDOKU_CONTRACT(i.next() < size);

@@ -10,7 +10,9 @@
 
 // #include <stack>
 #include <vector>
-#include <type_traits>
+#include <cstdint>
+#include <cstddef>  // size_t
+#include <concepts> // invocable
 
 /**
 The "engine" is a primitive for building a solver capable of finding all
@@ -130,8 +132,7 @@ namespace okiidoku::mono::detail::solver2 {
 
 	private:
 		// the specified candidate-symbol is allowed to already be removed.
-		template<class F> requires(std::is_invocable_v<F, O2BitArr<O>&>)
-		FindStat do_elim_generic_(rmi_t rmi, F elim_fn) noexcept;
+		FindStat do_elim_generic_(rmi_t rmi, std::invocable<O2BitArr<O>&> auto elim_fn) noexcept;
 
 		/**
 		\pre must be called immediately when a cell's candidate-symbol count _changes_ to one.

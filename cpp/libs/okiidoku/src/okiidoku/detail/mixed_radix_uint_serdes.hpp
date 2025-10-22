@@ -180,6 +180,11 @@ namespace okiidoku::detail {
 	};
 
 
+	// TODO.high fix bug. for the last read_buf, reader needs to know how many bytes need to be read and not overread.
+	// it worked when I tested only one logical MRUI to a stream because reading would hit EOF. there are various ways
+	// I could address this (ex. reserving a bit per byte to signal whether the byte is the last one, or making a zero-
+	// byte instead be a zero byte plus a following byte with such a signal bit, or by making the caller give the reader
+	// the length of data to read up-front).
 	/** for reading a [mixed-radix](https://wikipedia.org/wiki/Mixed_radix) unsigned
 	integer from a data stream written by a writer with the same type parameters. */
 	template<Radix RadixType_, std::unsigned_integral BufType_ = std::uintmax_t>

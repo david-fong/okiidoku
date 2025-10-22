@@ -97,6 +97,7 @@
 				"text": "-enable-pretty-printing",
 			},
 			{"text": "source ${workspaceFolder}/cpp/tools/.gdbinit"},
+			{"text": "skip -gfi ${workspaceFolder}/cpp/external/catch2/*"},
 
 			{"text": "add-auto-load-safe-path ${workspaceFolder}/cpp/tools"},
 			{"text": "add-auto-load-safe-path ${command:cmake.getLaunchTargetDirectory}/.."},

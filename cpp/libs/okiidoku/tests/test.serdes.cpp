@@ -92,8 +92,8 @@ void test_serdes(const std::uint_fast32_t rng_seed) {
 
 TEST_CASE("okiidoku.serdes") {
 	static constexpr std::uintmax_t num_rounds {1024u};
-	// std::mt19937 rng {0u};
-	std::mt19937 rng {std::random_device{}()};
+	std::mt19937 rng {0u};
+	// std::mt19937 rng {std::random_device{}()};
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 	for (std::uintmax_t round {0u}; round < num_rounds/((O_)*(O_)); ++round) { CAPTURE(round); \
 		okiidoku::test::test_serdes<(O_)>(rng()); \

@@ -33,7 +33,7 @@ void test_o2_bit_arr_ones() {
 	}{
 		O2BitArr<O> arr {}; CAPTURE(arr);
 		for (const auto i : T::O2) { CAPTURE(i);
-			REQUIRE(!arr[i]);
+			REQUIRE_FALSE(arr[i]);
 			arr.set(i);
 			REQUIRE(arr[i]);
 		}

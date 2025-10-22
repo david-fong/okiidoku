@@ -102,13 +102,23 @@ TEST_CASE("okiidoku.uint_serdes") {
 	const std::uint64_t i {0xFEDC'BA98'7654'3210uLL};
 	std::ostringstream os {std::ios::binary};
 	os.write(reinterpret_cast<const char*>(&i), sizeof(i)); // NOLINT(*-cast)
-	REQUIRE(!os.fail());
+	REQUIRE_FALSE(os.fail());
 	const auto str {os.str()};
 	std::istringstream is {str, std::ios::binary};
-	std::uint64_t i2 {~i};
-	is.read(reinterpret_cast<char*>(&i2), sizeof(i)); // NOLINT(*-cast)
-	REQUIRE(!is.fail());
-	CHECK(i == i2);
+	{
+		std::uint64_t i2 {~i};
+		is.read(reinterpret_cast<char*>(&i2), sizeof(i)); // NOLINT(*-cast)
+		REQUIRE_FALSE(is.fail());
+		CHECK(i == i2);
+	}
+	// try seeking the stream backward and extracting it again:
+	is.seekg(0u);
+	{
+		std::uint64_t i2 {~i};
+		is.read(reinterpret_cast<char*>(&i2), sizeof(i)); // NOLINT(*-cast)
+		REQUIRE_FALSE(is.fail());
+		CHECK(i == i2);
+	}
 }
 
 

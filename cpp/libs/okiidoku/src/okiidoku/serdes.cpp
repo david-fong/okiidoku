@@ -48,6 +48,9 @@ namespace okiidoku::mono { namespace {
 			OKIIDOKU_CONTRACT(cell_rmi_ < T::O4); OKIIDOKU_CONTRACT(!done()); cand.check();
 			auto& box_cands {h_chute_box_cands_[rmi_to_col<O>(rmi()) / T::O1]};
 			auto& col_cands {cols_cands_[rmi_to_col<O>(rmi())]};
+			OKIIDOKU_ASSERT(row_cands_[cand]);
+			OKIIDOKU_ASSERT(box_cands [cand]);
+			OKIIDOKU_ASSERT(col_cands [cand]);
 			cands_t::unset3(cand, row_cands_, box_cands, col_cands);
 		}
 

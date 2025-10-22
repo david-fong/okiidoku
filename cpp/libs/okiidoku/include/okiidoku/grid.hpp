@@ -133,15 +133,13 @@ namespace okiidoku::mono {
 
 namespace okiidoku::visitor {
 
-	/// \cond detail
 	namespace detail {
 		struct GridAdaptor final {
-			static constexpr bool is_borrow_type = false;
+			static constexpr bool is_borrow_type {false};
 			template<Order O> using type = mono::Grid<O>;
 		};
 		static_assert(MonoToVisitorAdaptor<GridAdaptor>);
 	}
-	/// \endcond detail
 
 	/**
 	\note it is not recommended to directly make collections containing instances

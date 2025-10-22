@@ -70,7 +70,6 @@ namespace okiidoku {
 
 namespace okiidoku {
 
-	/// \cond detail
 	namespace detail {
 
 		template<int W> requires(W <= 64)
@@ -147,7 +146,6 @@ namespace okiidoku {
 		// 	void
 		// >>>>;
 	}
-	/// \endcond detail
 
 
 	/** this tag determines the space usage and valid operations for an `Int`. */
@@ -181,8 +179,8 @@ namespace okiidoku {
 		/** underlying value type. */
 		using val_t =
 			std::conditional_t<kind == IntKind::fixed, detail::uint_fast_for_max_t <max>,
-			std::conditional_t<kind == IntKind::small,    detail::uint_small_for_max_t<max>,
-			std::conditional_t<kind == IntKind::fast,     detail::uint_fast_for_max_t <max>,
+			std::conditional_t<kind == IntKind::small, detail::uint_small_for_max_t<max>,
+			std::conditional_t<kind == IntKind::fast,  detail::uint_fast_for_max_t <max>,
 			void
 		>>>;
 			static_assert(std::is_unsigned_v<val_t>);
@@ -231,9 +229,9 @@ namespace okiidoku {
 		}
 		// template<class T> requires(std::unsigned_integral<T> && std::numeric_limits<T>::max() >= max)
 		// constexpr operator T() const noexcept { check(); return val(); }
-		[[nodiscard, gnu::const]] constexpr val_t val     ([[maybe_unused]] this const Int self) noexcept requires(kind == IntKind::fixed) { return max; }
-		[[nodiscard, gnu::const]] constexpr val_t val     (                 this const Int self) noexcept requires(kind != IntKind::fixed) { self.check(); return self.val_; }
-		[[nodiscard, gnu::const]] constexpr auto  as_fast (this const Int self) noexcept { self.check(); return Int<max, IntKind::fast> {self.val()}; }
+		[[nodiscard, gnu::const]] constexpr val_t val([[maybe_unused]] this const Int self) noexcept requires(kind == IntKind::fixed) { return max; }
+		[[nodiscard, gnu::const]] constexpr val_t val(                 this const Int self) noexcept requires(kind != IntKind::fixed) { self.check(); return self.val_; }
+		[[nodiscard, gnu::const]] constexpr auto   as_fast(this const Int self) noexcept { self.check(); return Int<max, IntKind::fast> {self.val()}; }
 		[[nodiscard, gnu::const]] constexpr auto  as_small(this const Int self) noexcept { self.check(); return Int<max, IntKind::small>{self.val()}; }
 		using constant_t = Int<max_, IntKind::fixed>;
 

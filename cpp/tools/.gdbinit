@@ -4,7 +4,8 @@
 # https://sourceware.org/gdb/current/onlinedocs/gdb.html/Init-File-in-the-Current-Directory.html#Init-File-in-the-Current-Directory
 # https://sourceware.org/gdb/current/onlinedocs/gdb.html/Auto_002dloading-safe-path.html#Auto_002dloading-safe-path
 
-set auto-load python-scripts on # on by default
+# on by default
+# set auto-load python-scripts on
 # info auto-load python-scripts
 
 set print pretty on
@@ -14,6 +15,8 @@ set print static-members off
 
 # set substitute-path /okiidoku :/cpp # done in settings.json
 set breakpoint pending on
+b abort
 b __sanitizer::Die # https://github.com/google/sanitizers/wiki/AddressSanitizerAndDebugger#gdb
 
-skip -rfu ^Catch::
+skip -rfu '^std::'
+skip -rfu '^Catch::'
