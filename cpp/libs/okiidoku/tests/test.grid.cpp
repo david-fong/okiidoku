@@ -1,8 +1,8 @@
 // SPDX-FileCopyrightText: 2020 David Fong
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#include <okiidoku/grid.hpp>
 #include <catch2/catch_test_macros.hpp>
 
-#include <okiidoku/grid.hpp>
 #include <okiidoku/ints_io.hpp>
 #include <okiidoku/ints.hpp>
 #include <okiidoku/order.hpp>

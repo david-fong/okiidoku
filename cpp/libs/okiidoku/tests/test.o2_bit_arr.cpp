@@ -1,9 +1,9 @@
 // SPDX-FileCopyrightText: 2020 David Fong
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#include <catch2/catch_test_macros.hpp>
-
 #include <okiidoku/bit_array.hpp>
 #include <okiidoku/bit_array.cpp> // NOLINT(*include*) implementations aren't exported in libokiidoku.
+#include <catch2/catch_test_macros.hpp>
+
 #include <okiidoku/ints_io.hpp>
 #include <okiidoku/ints.hpp>
 #include <okiidoku/order.hpp>

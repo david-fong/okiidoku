@@ -40,10 +40,10 @@ namespace okiidoku::mono { namespace {
 		> serdes_;
 
 	protected:
-		explicit SerdesBase(const std::size_t byte_count) requires(!is_writer): serdes_{byte_count} {}
+		explicit SerdesBase(const std::size_t byte_count) noexcept requires(!is_writer): serdes_{byte_count} {}
 
 		/** \internal I could just make the field protected, but then I can't nit over member layout :P */
-		[[nodiscard, gnu::pure]] auto& serdes() & noexcept { return serdes_; }
+		[[nodiscard, gnu::pure]] constexpr auto& serdes() & noexcept { return serdes_; }
 
 		/** \pre `!done()` */
 		void remove_cand_at_current_rmi(const sym_t cand) noexcept {
@@ -125,7 +125,7 @@ namespace okiidoku::mono { namespace {
 		using sym_t = typename Ints<O>::o2i_t; // uses `O2` as a null value on stream read error.
 		// TODO ^what about puzzles then? separate bitmap of populated/empty cells?
 	public:
-		explicit Reader(const std::size_t byte_count): Reader::SerdesBase{byte_count} {}
+		explicit Reader(const std::size_t byte_count) noexcept: Reader::SerdesBase{byte_count} {}
 		/**
 		\pre `is.good()` and `is.exceptions() == std::ios::goodbit`.
 		\note automatically removes parsed `sym` as a candidate of future cells. */
@@ -149,6 +149,7 @@ namespace okiidoku::mono { namespace {
 		}
 	};
 }}
+
 
 namespace okiidoku::mono {
 

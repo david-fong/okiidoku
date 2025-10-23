@@ -1,8 +1,8 @@
 // SPDX-FileCopyrightText: 2020 David Fong
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#include <okiidoku/serdes.hpp>
 #include <catch2/catch_test_macros.hpp>
 
-#include <okiidoku/serdes.hpp>
 #include <okiidoku/gen.hpp>
 #include <okiidoku/grid.hpp>
 #include <okiidoku/ints_io.hpp>
@@ -13,7 +13,7 @@
 #include <sstream>
 #include <random>
 #include <algorithm>  // fold_left
-#include <functional> // plus, cref
+#include <functional> // plus
 #include <array>
 #include <span>
 #include <memory>     // iwyu says I need this for `allocator`?
@@ -73,8 +73,8 @@ void test_serdes(const std::uint_fast32_t rng_seed) {
 
 TEST_CASE("okiidoku.serdes") {
 	static constexpr std::uintmax_t num_rounds {1024u};
-	std::mt19937 rng {0u};
-	// std::mt19937 rng {std::random_device{}()};
+	// std::mt19937 rng {0u};
+	std::mt19937 rng {std::random_device{}()};
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 	for (std::uintmax_t round {0u}; round < num_rounds/((O_)*(O_)); ++round) { CAPTURE(round); \
 		okiidoku::test::test_serdes<(O_)>(rng()); \

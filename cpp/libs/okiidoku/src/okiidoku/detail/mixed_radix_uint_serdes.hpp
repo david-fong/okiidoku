@@ -5,12 +5,13 @@
 #include <okiidoku/detail/util.hpp>
 
 #include <iosfwd>
-#include <concepts>
+#include <algorithm> // min
 #include <utility>
-#include <limits>   // numeric_limits, ...
-#include <bit>      // byteswap, bit_width
+#include <limits>    // numeric_limits, ...
+#include <bit>       // byteswap, bit_width
 #include <cstdint>
-#include <climits>  // CHAR_BIT
+#include <climits>   // CHAR_BIT
+#include <concepts>
 
 #define TO static_cast
 
@@ -180,11 +181,6 @@ namespace okiidoku::detail {
 	};
 
 
-	// TODO.high fix bug. for the last read_buf, reader needs to know how many bytes need to be read and not overread.
-	// it worked when I tested only one logical MRUI to a stream because reading would hit EOF. there are various ways
-	// I could address this (ex. reserving a bit per byte to signal whether the byte is the last one, or making a zero-
-	// byte instead be a zero byte plus a following byte with such a signal bit, or by making the caller give the reader
-	// the length of data to read up-front).
 	/** for reading a [mixed-radix](https://wikipedia.org/wiki/Mixed_radix) unsigned
 	integer from a data stream written by a writer with the same type parameters. */
 	template<Radix RadixType_, std::unsigned_integral BufType_ = std::uintmax_t>
@@ -194,7 +190,7 @@ namespace okiidoku::detail {
 	public:
 		using radix_t = RadixType_;
 		using buf_t = BufType_;
-		explicit MixedRadixUintReader(const std::size_t byte_count): byte_count_ {byte_count} {}
+		explicit constexpr MixedRadixUintReader(const std::size_t byte_count) noexcept: byte_count_{byte_count} {}
 	private:
 		static constexpr radix_t radix_t_max {std::numeric_limits<radix_t>::max()};
 		static constexpr buf_t   buf_t_max   {std::numeric_limits<buf_t  >::max()};
@@ -205,8 +201,8 @@ namespace okiidoku::detail {
 		buf_t buf_radixx_ {buf_t_max}; //< write buffer if all digits were maxed-out. upwards-growing. "x" := "exclusive".
 		buf_t buf_ {0u}; //< buffer of data from input stream. downwards-depleting.
 
-
 		/** read `sizeof(buf_t)` bytes from `is`.
+		\pre `is` is a binary stream- not a text stream.
 		\pre `is.good()` and `is.exceptions() == std::ios::goodbit`.
 		\post iff no data could be read from `is`, `is` has `eofbit` and `failbit`.
 		\internal conditions to call this correspond to conditions where writer `accept`
@@ -240,14 +236,11 @@ namespace okiidoku::detail {
 					++byte_count;
 				} else { break; }
 			}}
-			if (byte_count > 0u && !is) [[unlikely]] { is.clear(); }
-			/* ^unless we failed to read _anything_, swallow `eofbit` and `failbit`, if set.
-			it's the caller's job to know expected end. we don't know here if overreading. */
+			if (!is) [[unlikely]] { return; }
 			OKIIDOKU_CONTRACT(byte_count <= bytes_to_read);
 			OKIIDOKU_CONTRACT(byte_count <= byte_count_);
 			byte_count_ -= byte_count;
 		}
-
 	public:
 		/**
 		\returns the previously written `n`th digit, or `radix` upon unexpected EOF.
@@ -303,6 +296,7 @@ namespace okiidoku::detail {
 		[[nodiscard, gnu::pure]] std::size_t item_count() const noexcept {
 			return item_count_;
 		}
+		/** \returns number of bytes remaining to be read. */
 		[[nodiscard, gnu::pure]] std::size_t byte_count() const noexcept {
 			return byte_count_;
 		}

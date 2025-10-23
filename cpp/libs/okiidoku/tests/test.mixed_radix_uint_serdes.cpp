@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: 2020 David Fong
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#include <iostream>
+#include <okiidoku/detail/mixed_radix_uint_serdes.hpp>
 #include <catch2/catch_test_macros.hpp>
 
-#include <okiidoku/detail/mixed_radix_uint_serdes.hpp>
 #include <okiidoku/detail/util.hpp>
 
 #include <sstream>
