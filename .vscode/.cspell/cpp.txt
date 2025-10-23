@@ -1,3 +1,27 @@
 # SPDX-FileCopyrightText: 2020 David Fong
 # SPDX-License-Identifier: CC0-1.0
+
 doctest
+pybind
+nanobind
+stdr
+
+# gcc
+noinit # attribute
+
+# doxygen
+cond
+endcond
+copydoc
+
+# clang-tidy
+NOLINT
+NOLINTNEXTLINE
+NOLINTBEGIN
+NOLINTEND
+
+# C++ standard library
+__cplusplus
+tellp
+
+immintrin.h

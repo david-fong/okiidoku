@@ -1,6 +1,6 @@
 <!-- SPDX-FileCopyrightText: 2020 David Fong -->
 <!-- SPDX-License-Identifier: CC0-1.0 -->
-<!-- cspell:dictionaries cpp-refined -->
+<!-- cspell:dictionaries cpp-refined, okiidoku-cmake, okiidoku-cpp -->
 # Things To Do
 
 ## Roadmap
@@ -67,7 +67,7 @@
 
 - reproducible builds for msvc: /experimental:deterministic, /d1nodatetime, /Brepro
 
-- mscv presets: https://gitlab.kitware.com/cmake/cmake/-/issues/21567#note_1141922
+- MSVC presets: https://gitlab.kitware.com/cmake/cmake/-/issues/21567#note_1141922
   `UseMultiToolTask:true`
   `EnforceProcessCountAcrossBuilds:true`
   `EnableClServerMode:true`
@@ -76,7 +76,7 @@
 - https://developer.chrome.com/blog/faster-wasm-debugging/
 
 - can emscripten just install/package the runtime component? or how can I make it not include headers in the package? https://cmake.org/cmake/help/book/mastering-cmake/chapter/Packaging%20With%20CPack.html#cpack-and-cmake-install-commands
-- make repl support custom streams? or should that just be handled by caller of the progam? related: support saving session history files that can be later passed as program stdin to repro.
+- make repl support custom streams? or should that just be handled by caller of the program? related: support saving session history files that can be later passed as program stdin to repro.
 
 - pgo external project check cache args defined or not to mirror
 
@@ -196,8 +196,6 @@ consider making cand masks have two lanes: one storing full O2BitArr, one storin
 - cppcoreguidelines C.2: use class if there is an invariant, and struct otherwise.
   - hm. I mean- for a lot of my really simple structs there are invariants on integer bounds. Seems like judgement is required to choose where to draw the line with this guideline.
 
-- look into cppitertools for writing my raw loops. see if people say anything about performance overhead.
-
 - CI/CD
   - [CPM notes](https://github.com/cpm-cmake/CPM.cmake/wiki/Caching-with-CPM.cmake-and-ccache-on-GitHub-Actions#caching-with-github-actions)
   - [catch2 notes](https://github.com/catchorg/Catch2/blob/devel/docs/ci-and-misc.md)
@@ -221,7 +219,7 @@ consider making cand masks have two lanes: one storing full O2BitArr, one storin
 
 - move the emoji definitions out of the program binary and externalize as a configurable data read in at runtime?
 
-- Go back and try the old canonicalization by rel row prob, but break ties by doing some brute force: try each tied permutation and valuate it according to some reduction of how it pushes rarer rel counts to the top left. Just be careful to shift to get rid of the main diagonal seam.
+- Go back and try the old canonicalization by rel row probability, but break ties by doing some brute force: try each tied permutation and valuate it according to some reduction of how it pushes rarer rel counts to the top left. Just be careful to shift to get rid of the main diagonal seam.
   - If there are multiple puddles of ties, the resolution of a puddle shouldn't depend on the resolution of any other puddle- only on the non-tied rows/columns. A consequence of this is that this resolution algorithm will not work if there are no non-tied rows/columns.
 
 1. Consider: The current relabelling canonicalization method may have a big weakness: I think ties can be easily crafted: consider the "Most Canonical" solution grid- it would be all ties. How can this be addressed? (Or perhaps the "Most Canonical" grid is the only weakness?)

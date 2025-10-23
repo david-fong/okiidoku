@@ -3,13 +3,17 @@
 alts # alternates
 analyzer
 analyzers
+bitarray
 cand # candidate
 cands
 cmake
+codegen
 codepage # a windows console thing
+CTYPE # LC_CTYPE
 delim # delimiter
 deserialization
 desmos
+diag
 distrib # distribution
 elim # elimination
 elims
@@ -17,22 +21,28 @@ emscripten
 Fong
 genpath
 gridlike
+inparam
 isec # intersection
 isecs
 libokiidoku
 ōkiidoku
 opcount
+outparam
 pdep # an x86 BMI instruction
 Povs
 prefetch
 proc # process
 puzcell # puzzle cell
 puzcells
+radixx
 reinit
+repro
 serdes
 smol # small
 soln # solution
 solns
 speedup
 syms # symbols
+tiebreak
+tradeoff
 unsat

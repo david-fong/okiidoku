@@ -1,5 +1,6 @@
 # SPDX-FileCopyrightText: 2020 David Fong
 # SPDX-License-Identifier: GPL-3.0-or-later
+# cspell:dictionaries okiidoku-cpp
 include_guard(DIRECTORY)
 set(CMAKE_SKIP_LINTING YES)
 

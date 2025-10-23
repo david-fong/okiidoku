@@ -52,7 +52,27 @@ MSVC
 RPATH
 CPPCHECK
 
+CROSSCOMPILING
+
 
 # ecosystem
+asan
+libasan
+ubsan
+libubsan
+readelf
+ccache
 CPM
+embind
 emscripten
+EMSDK
+
+# doxygen
+COLORSTYLE
+STYLESHEET
+TREEVIEW
+
+# nanobind
+wjakob
+LIBNAME
+SYSINCLUDE

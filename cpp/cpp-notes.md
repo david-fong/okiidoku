@@ -1,6 +1,6 @@
 <!-- SPDX-FileCopyrightText: 2020 David Fong -->
 <!-- SPDX-License-Identifier: CC0-1.0 -->
-<!-- cspell:dictionaries cpp-refined -->
+<!-- cspell:dictionaries cpp-refined, okiidoku-cpp, okiidoku-cmake -->
 # C++ Notes
 
 ## Coding Guides

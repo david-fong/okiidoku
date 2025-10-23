@@ -409,7 +409,7 @@ namespace std {
 /**
 this namespace is for the per-grid-order definitions of okiidoku library features.
 most things are templatized based on grid order to optimize memory usage (at the
-expense of generating code for each grid order seleted by the user). to choose what
+expense of generating code for each grid order selected by the user). to choose what
 grid orders to generate, create a [tweak header](https://vector-of-bool.github.io/2020/10/04/lib-configuration.html#providing-a-tweak-header)
 for `./libs/okiidoku/include/okiidoku/config/defaults.hpp`.
 */
@@ -630,7 +630,7 @@ namespace okiidoku::mono {
 
 /**
 this namespace generally mirrors `::okiidoku::mono`, except it wraps the per-grid-order
-templates into algebraic types (tagged unions) for convience for applications which
+templates into algebraic types (tagged unions) for convenience for applications which
 work with grid orders selected at runtime. it's named `visitor` because it uses the
 visitor pattern to dispatch to the right template instantiations of function calls.
 */
