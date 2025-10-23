@@ -25,20 +25,20 @@ namespace okiidoku::test {
 		INFO("sizeof(radix_t) := " << sizeof(radix_t));
 		INFO("sizeof(buf_t)   := " << sizeof(buf_t));
 		CAPTURE(rng_seed);
-		using writer_t = detail::MixedRadixUintWriter<radix_t,buf_t>;
-		using reader_t = detail::MixedRadixUintReader<radix_t,buf_t>;
+		using Writer = detail::MixedRadixUintWriter<radix_t,buf_t>;
+		using Reader = detail::MixedRadixUintReader<radix_t,buf_t>;
 		std::minstd_rand rng {rng_seed};
 
 		// TODO write and read multiple ints to the same stringstream per round.
 
 		static constexpr std::size_t max_num_places {1024u};
-		std::array<typename writer_t::Item, max_num_places> places_buf OKIIDOKU_DEFER_INIT; // NOLINT(*-init)
+		std::array<typename Writer::Item, max_num_places> places_buf OKIIDOKU_DEFER_INIT; // NOLINT(*-init)
 		const std::size_t num_places {uidist_t<std::size_t>{0u, max_num_places}(rng)}; CAPTURE(num_places);
 
 		std::size_t byte_count {0uz}; CAPTURE(byte_count);
 		const auto written_data {[&]{
 			// serialize data to `std::string`:
-			writer_t writer;
+			Writer writer;
 			std::ostringstream os {std::ios::binary};
 			REQUIRE(os);
 			std::geometric_distribution<radix_t> radix_dist {1.0/(CHAR_BIT*sizeof(buf_t))};
@@ -65,7 +65,7 @@ namespace okiidoku::test {
 			// de-serialize data and check correctness:
 			std::istringstream is {written_data, std::ios::binary}; // TODO.high do I need to add ios::in here? is ::binary even needed? I'm not even passing it to create the ostringstream
 			REQUIRE(is);
-			reader_t reader;
+			Reader reader {byte_count};
 			for (auto place {0uz}; place < num_places; ++place) { CAPTURE(place);
 				const auto& expected {places_buf[place]}; CAPTURE(expected.radix);
 				REQUIRE(is.good());
@@ -77,13 +77,12 @@ namespace okiidoku::test {
 				REQUIRE(reader.item_count() == place+1uz);
 				REQUIRE(digit == expected.digit);
 			}
-			reader.finish(is);
+			REQUIRE(reader.byte_count() == 0uz);
 			REQUIRE_FALSE(is.bad()); // non-recoverable error
 			CHECK_FALSE(is.fail()); // error
 			// CHECK(is.eof());
 			const auto is_pos {static_cast<std::size_t>(is.tellg())};
 			REQUIRE(is_pos == byte_count);
-			REQUIRE(reader.byte_count() == byte_count);
 		}
 	}
 

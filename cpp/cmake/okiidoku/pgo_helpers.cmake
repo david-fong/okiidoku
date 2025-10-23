@@ -273,7 +273,7 @@ function(okiidoku_target_pgo
 		endif()
 		okiidoku_make_include_flag("${include_subdir}/${trainer}.timestamp.hpp" training_stamp_include_flag)
 		target_compile_options("${trainee}" PRIVATE "$<${if_use}:$<BUILD_INTERFACE:${training_stamp_include_flag}>>")
-		target_sources(${trainee} PRIVATE "$<${if_use}:${training_stamp_file}>") # TODO why is this done? just to show up in some IDEs?
+		target_sources(${trainee} PRIVATE "$<${if_use}:${training_stamp_file}>") # just to show up in some IDEs
 	endblock()
 
 	block()

@@ -29,7 +29,6 @@ void test_grid() {
 
 	for (const auto i : T::O2) { CAPTURE(i);
 	for (const auto j : T::O2) { CAPTURE(j);
-		REQUIRE(i == 0u);
 		{
 			const auto box_cell_rmi {box_cell_to_rmi<O>(i,j)}; CAPTURE(box_cell_rmi);
 			REQUIRE(rmi_to_box<O>(box_cell_rmi) == i);

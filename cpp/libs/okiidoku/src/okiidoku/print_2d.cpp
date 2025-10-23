@@ -19,7 +19,7 @@
 namespace okiidoku { namespace {
 
 	void make_random_emoji_set(const rng_seed_t rng_seed, const std::span<std::string_view> sink) noexcept {
-		thread_local constinit auto sets_ {emoji::sets};
+		thread_local constinit auto sets_ {emoji::sets}; ///< mutable underlying storage that `sets` hold views into.
 		thread_local static auto sets {std::apply([](auto& ...args)noexcept{
 			return std::to_array({(std::span<std::string_view>{args.entries})...});
 			// TODO when trying to make `sets` constinit and this lambda consteval, it fails. is it due to span constructor? or because sets_ is constinit and not constexpr?

@@ -20,3 +20,4 @@ b __sanitizer::Die # https://github.com/google/sanitizers/wiki/AddressSanitizerA
 
 skip -rfu '^std::'
 skip -rfu '^Catch::'
+skip -rfu '^okiidoku::mono::Int<[^>]+?>::Int\b'

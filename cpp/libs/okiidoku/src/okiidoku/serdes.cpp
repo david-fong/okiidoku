@@ -37,9 +37,11 @@ namespace okiidoku::mono { namespace {
 		std::conditional_t<is_writer,
 			::okiidoku::detail::MixedRadixUintWriter<o2is_t, std::uint64_t>,
 			::okiidoku::detail::MixedRadixUintReader<o2is_t, std::uint64_t>
-		> serdes_ {};
+		> serdes_;
 
 	protected:
+		explicit SerdesBase(const std::size_t byte_count) requires(!is_writer): serdes_{byte_count} {}
+
 		/** \internal I could just make the field protected, but then I can't nit over member layout :P */
 		[[nodiscard, gnu::pure]] auto& serdes() & noexcept { return serdes_; }
 
@@ -123,6 +125,7 @@ namespace okiidoku::mono { namespace {
 		using sym_t = typename Ints<O>::o2i_t; // uses `O2` as a null value on stream read error.
 		// TODO ^what about puzzles then? separate bitmap of populated/empty cells?
 	public:
+		explicit Reader(const std::size_t byte_count): Reader::SerdesBase{byte_count} {}
 		/**
 		\pre `is.good()` and `is.exceptions() == std::ios::goodbit`.
 		\note automatically removes parsed `sym` as a candidate of future cells. */
@@ -143,17 +146,6 @@ namespace okiidoku::mono { namespace {
 				OKIIDOKU_ASSERT(ctx_cands[sym]);
 			this->remove_cand_at_current_rmi(sym);
 			return sym;
-		}
-		/**
-		\pre `is.good()` and `is.exceptions() == std::ios::goodbit`.
-		\returns number of bytes read (`> 0uz`). */
-		std::size_t finish(std::istream& is) noexcept {
-			OKIIDOKU_CONTRACT(this->done());
-			OKIIDOKU_CONTRACT2(is.good());
-			OKIIDOKU_CONTRACT2(is.exceptions() == std::ios::goodbit);
-			this->serdes().finish(is);
-			OKIIDOKU_CONTRACT(this->serdes().byte_count() > 0u);
-			return this->serdes().byte_count();
 		}
 	};
 }}
@@ -182,7 +174,7 @@ namespace okiidoku::mono {
 
 
 	template<Order O> requires(is_order_compiled(O))
-	serdes_res_t read_solved(Grid<O>& grid, std::istream& is) noexcept {
+	bool read_solved(Grid<O>& grid, std::istream& is, const std::size_t byte_count) noexcept {
 		OKIIDOKU_CONTRACT2(is.good());
 		#ifndef NDEBUG
 			grid.clear();
@@ -191,27 +183,25 @@ namespace okiidoku::mono {
 
 		const auto is_exceptions_orig {is.exceptions()};
 		is.exceptions(std::ios::goodbit); // disable any exception mask bits (restore before `return`)
-		const std::size_t bytes_read {[&] noexcept {
-			// parse out bulk of content (skip what can be reconstructed later):
-			Reader<O> reader {};
-			for (; !reader.done(); reader.advance()) {
-				const auto row {reader.rmi() / T::O2};
-				const auto col {reader.rmi() % T::O2};
-				if ((row/T::O1) == col/T::O1) [[unlikely]] {
-					continue; // skip cells in the main-diagonal boxes
-				}
-				const auto sym {reader(is)};
-				if (!is) [[unlikely]] { return 0uz; }
-				grid[reader.rmi()] = sym;
+		// parse out bulk of content (skip what can be reconstructed later):
+		for (Reader<O> reader {byte_count}; !reader.done(); reader.advance()) {
+			const auto row {reader.rmi() / T::O2};
+			const auto col {reader.rmi() % T::O2};
+			if ((row/T::O1) == col/T::O1) [[unlikely]] {
+				continue; // skip cells in the main-diagonal boxes
 			}
-			return reader.finish(is);
-		}()}; {
-			const auto failed {is.fail()};
-			is.clear(), is.exceptions(is_exceptions_orig);
-			if (failed) [[unlikely]] { return 0uz; }
+			const auto sym {reader(is)};
+			if (!is) [[unlikely]] { break; }
+			grid[reader.rmi()] = sym;
+		}{
+			const auto failed {!is};
+			is.clear(); // clear state bits
+			is.exceptions(is_exceptions_orig); // restore exception flags
+			if (failed) [[unlikely]] { return false; }
 			// done using `is` now.
 		}{
 			// reconstruct cells in main-diagonal boxes:
+			// TODO is it possible to initialize this while reading the data? how would that affect perf?
 			std::array<std::array<std::array<O2BitArr<O>, T::O1>, T::O1>, T::O1> main_diag_box_cands {};
 			#ifndef NDEBUG
 				for (const auto box     : T::O1) {
@@ -250,7 +240,7 @@ namespace okiidoku::mono {
 		}
 		OKIIDOKU_ASSERT(grid.is_filled());
 		OKIIDOKU_ASSERT(grid.follows_rule());
-		return bytes_read;
+		return true;
 	}
 
 
@@ -274,7 +264,7 @@ namespace okiidoku::mono {
 
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 		template std::size_t write_solved<(O_)>(const Grid<(O_)>&, std::ostream&); \
-		template serdes_res_t read_solved <(O_)>(      Grid<(O_)>&, std::istream&); \
+		template bool read_solved <(O_)>(Grid<(O_)>&, std::istream&, std::size_t); \
 		template std::size_t write_puzzle<(O_)>(const Grid<(O_)>&, std::ostream&); \
 		template std::size_t read_puzzle <(O_)>(      Grid<(O_)>&, std::istream&);
 	OKIIDOKU_FOREACH_O_DO_EMIT
@@ -294,10 +284,10 @@ namespace okiidoku::visitor {
 		}
 	}
 
-	serdes_res_t read_solved(Grid& vis_sink, std::istream& is) {
+	bool read_solved(Grid& vis_sink, std::istream& is, const std::size_t byte_count) noexcept {
 		switch (vis_sink.get_order()) {
 		#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-		case (O_): return mono::read_solved(vis_sink.unchecked_get_mono_exact<(O_)>(), is);
+		case (O_): return mono::read_solved(vis_sink.unchecked_get_mono_exact<(O_)>(), is, byte_count);
 		OKIIDOKU_FOREACH_O_DO_EMIT
 		#undef OKIIDOKU_FOREACH_O_EMIT
 		default: OKIIDOKU_UNREACHABLE;

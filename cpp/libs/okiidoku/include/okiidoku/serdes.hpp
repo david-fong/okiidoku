@@ -40,13 +40,14 @@ namespace okiidoku::mono {
 	/**
 	\pre `is` is a binary stream- not a text stream.
 	\pre `is.good()`.
-	\pre `is`'s next bytes contain the result of a call to `write_solved`.
+	\pre `is`'s next `byte_count` bytes contain the result of a call to `write_solved`.
 	\pre `is` will not be used by another thread for the duration of this call.
 	\post parsed grid is filled and follows the one rule.
 	\post `is.tellg()` is at end of data, or where EOF occurred.
-	\returns the number of bytes read, or `0uz` on unexpected EOF. */
+	\returns `true` if read completed successfully, or `false` on unexpected EOF. */
 	template<Order O> requires(is_order_compiled(O))
-	OKIIDOKU_EXPORT [[nodiscard]] serdes_res_t read_solved(Grid<O>&, std::istream& is) noexcept; // TODO make the others noexcept?
+	OKIIDOKU_EXPORT [[nodiscard]] bool read_solved(Grid<O>&, std::istream& is, std::size_t byte_count) noexcept;
+	// TODO make the others noexcept?
 
 	/**
 	best used with sparse (close to minimal) puzzles.
@@ -76,7 +77,7 @@ namespace okiidoku::visitor {
 	OKIIDOKU_EXPORT std::size_t write_solved(const Grid&, std::ostream& os);
 
 	/** see `okiidoku::mono::read_solved<O>`. */
-	[[nodiscard]] OKIIDOKU_EXPORT serdes_res_t read_solved(Grid&, std::istream& is);
+	[[nodiscard]] OKIIDOKU_EXPORT bool read_solved(Grid&, std::istream& is, std::size_t byte_count) noexcept;
 
 	/** see `okiidoku::mono::write_puzzle<O>`. */
 	OKIIDOKU_EXPORT std::size_t write_puzzle(const Grid&, std::ostream& os);

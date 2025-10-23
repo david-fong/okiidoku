@@ -17,7 +17,7 @@
 /*
 \todo.low I pondered moving some stuff into a base class, like item_count_, byte_count, buf_radixx_
 and some of the logic like overflow anticipation calculation, and calculation of radix_0, but then I
-think I wouldn't have control over member layout w.r.t. the inheritence boundary... am I just being too
+think I wouldn't have control over member layout w.r.t. the inheritance boundary... am I just being too
 picky?
 
 \internal the binary stream requirement is because the C++ standard has tight requirements for written
@@ -194,15 +194,17 @@ namespace okiidoku::detail {
 	public:
 		using radix_t = RadixType_;
 		using buf_t = BufType_;
+		explicit MixedRadixUintReader(const std::size_t byte_count): byte_count_ {byte_count} {}
 	private:
 		static constexpr radix_t radix_t_max {std::numeric_limits<radix_t>::max()};
 		static constexpr buf_t   buf_t_max   {std::numeric_limits<buf_t  >::max()};
 			static_assert(radix_t_max-1u <= buf_t_max);
 
 		std::size_t item_count_ {0uz};
-		std::size_t byte_count_ {0uz};
+		std::size_t byte_count_; // take from caller. decrease as reading data.
 		buf_t buf_radixx_ {buf_t_max}; //< write buffer if all digits were maxed-out. upwards-growing. "x" := "exclusive".
 		buf_t buf_ {0u}; //< buffer of data from input stream. downwards-depleting.
+
 
 		/** read `sizeof(buf_t)` bytes from `is`.
 		\pre `is.good()` and `is.exceptions() == std::ios::goodbit`.
@@ -212,31 +214,27 @@ namespace okiidoku::detail {
 		void read_buf(std::istream& is) noexcept {
 			OKIIDOKU_CONTRACT2(is.good());
 			OKIIDOKU_CONTRACT2(is.exceptions() == std::ios::goodbit);
-			if (is.rdbuf() != nullptr && is.rdbuf()->in_avail() < static_cast<long>(sizeof(buf_t))) [[unlikely]] {
-				is.sync();
-				/* I'm not sure if this is necessary, but hoping that it prevents issues
-				which could be caused by the `seekg()` in `finish` if overread data crosses
-				a rdbuf boundary, and stream sequence can't remember past-buffer data,
-				if that's a thing, like with a network stream sequence. or maybe instead
-				of seekg, the putback functions could address this? */
-			}
 			buf_radixx_ = 0u;
 			std::size_t byte_count {0uz};
 			buf_ = 0u;
+			const auto bytes_to_read {TO<std::uint_fast8_t>(std::min(sizeof(buf_t), byte_count_))};
+				OKIIDOKU_CONTRACT(bytes_to_read <= sizeof(buf_t));
+				OKIIDOKU_CONTRACT(bytes_to_read <= byte_count_);
 			// note: `is.read` and `is.get` set `eofbit|failbit` if can't read expected count.
-			if constexpr (std::endian::native == std::endian::little) {
+			using endian = std::endian;
+			if constexpr (endian::native == endian::little) {
 				static_assert(alignof(buf_t) >= alignof(char));
-				is.read(reinterpret_cast<char*>(&buf_), sizeof(buf_t)); // NOLINT(*-cast)
+				is.read(reinterpret_cast<char*>(&buf_), bytes_to_read); // NOLINT(*-cast)
 				byte_count = TO<std::size_t>(is.gcount());
 			}
-			else if constexpr (std::endian::native == std::endian::big) {
+			else if constexpr (endian::native == endian::big) {
 				static_assert(alignof(buf_t) >= alignof(char));
-				is.read(reinterpret_cast<char*>(&buf_), sizeof(buf_t)); // NOLINT(*-cast)
+				is.read(reinterpret_cast<char*>(&buf_), bytes_to_read); // NOLINT(*-cast)
 				std::byteswap(buf_);
 				byte_count = TO<std::size_t>(is.gcount());
 			}
 			// if (false) {}
-			else { for (auto i {0uz}; i < sizeof(buf_t); ++i) {
+			else { for (auto i {0uz}; i < bytes_to_read; ++i) {
 				if (char c OKIIDOKU_DEFER_INIT; is.get(c), is) [[likely]] { // NOLINT(*init*)
 					buf_ |= TO<buf_t>( TO<buf_t>(TO<unsigned char>(c)) << (i*CHAR_BIT) ); // good grief- the casting needed here =_=
 					++byte_count;
@@ -245,8 +243,9 @@ namespace okiidoku::detail {
 			if (byte_count > 0u && !is) [[unlikely]] { is.clear(); }
 			/* ^unless we failed to read _anything_, swallow `eofbit` and `failbit`, if set.
 			it's the caller's job to know expected end. we don't know here if overreading. */
-			OKIIDOKU_CONTRACT(byte_count <= sizeof(buf_t));
-			byte_count_ += byte_count; // TODO.high what if bytes read is 0? return error val here? make `read()` return `std::expected`?
+			OKIIDOKU_CONTRACT(byte_count <= bytes_to_read);
+			OKIIDOKU_CONTRACT(byte_count <= byte_count_);
+			byte_count_ -= byte_count;
 		}
 
 	public:
@@ -301,45 +300,9 @@ namespace okiidoku::detail {
 			return digit;
 		}
 
-		/** call this once when there are no more digits to be read.
-		do not call again afterwards.
-		\pre all expected data has been fully, successfully read.
-		\pre `is.good()` and `is.exceptions() == std::ios::goodbit`. */
-		void finish(std::istream& is) noexcept {
-			OKIIDOKU_CONTRACT2(is.good());
-			OKIIDOKU_CONTRACT2(is.exceptions() == std::ios::goodbit);
-			using u8_t = std::uint_fast8_t;
-
-			const auto bytes_last_read {[&]{
-				auto v {TO<u8_t>(byte_count_ % sizeof(buf_t))};
-				if (v == 0u) [[likely]] { v = sizeof(buf_t); }
-				return v;
-			}()};
-			OKIIDOKU_CONTRACT(bytes_last_read > 0u);
-			OKIIDOKU_CONTRACT(bytes_last_read <= sizeof(buf_t));
-
-			const auto buf_bytes_used {[&]{
-				OKIIDOKU_CONTRACT(buf_radixx_ > 0u); // `read_buf` always followed by some buffer consumption.
-				// const auto buf_bytes_unused {TO<u8_t>(std::countl_zero(buf_radixx_) / CHAR_BIT)};
-				// OKIIDOKU_CONTRACT(buf_bytes_unused < sizeof(buf_t));
-				// return TO<u8_t>(sizeof(buf_t) - buf_bytes_unused);
-				return TO<u8_t>((std::bit_width(buf_radixx_)+(CHAR_BIT-1)) / CHAR_BIT);
-			}()};
-			OKIIDOKU_CONTRACT(buf_bytes_used > 0u);
-			OKIIDOKU_CONTRACT(buf_bytes_used <= bytes_last_read);
-
-			const auto unused_read_bytes {TO<u8_t>(bytes_last_read - buf_bytes_used)};
-			OKIIDOKU_CONTRACT(unused_read_bytes < sizeof(buf_t));
-
-			is.seekg(-std::istream::off_type{unused_read_bytes}, std::ios::cur); // (clears `eofbit`)
-			OKIIDOKU_CONTRACT(byte_count_ >= unused_read_bytes);
-			byte_count_ -= unused_read_bytes;
-		}
-
 		[[nodiscard, gnu::pure]] std::size_t item_count() const noexcept {
 			return item_count_;
 		}
-		/** \pre this reader has been `finish()`ed. */
 		[[nodiscard, gnu::pure]] std::size_t byte_count() const noexcept {
 			return byte_count_;
 		}

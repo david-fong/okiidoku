@@ -13,7 +13,7 @@
 #include <sstream>
 #include <random>
 #include <algorithm>  // fold_left
-#include <functional> // plus
+#include <functional> // plus, cref
 #include <array>
 #include <span>
 #include <memory>     // iwyu says I need this for `allocator`?
@@ -31,17 +31,16 @@ void test_serdes(const std::uint_fast32_t rng_seed) {
 
 	std::array<Grid<O>, 8uz> grid_buf OKIIDOKU_DEFER_INIT; // NOLINT(*init*)
 	std::array<std::size_t, 8uz> byte_counts {};
+	const auto sum_byte_counts {[&byte_counts](const std::size_t num_grids) noexcept -> std::size_t {
+		OKIIDOKU_CONTRACT2(num_grids <= byte_counts.size());
+		const auto sp {std::span{byte_counts}.subspan(0uz, num_grids)};
+		return std::ranges::fold_left(sp, 0uz, std::plus{});
+	}};
 	const std::size_t num_grids {std::uniform_int_distribution{7uz, grid_buf.size()}(rng)};
 	CAPTURE(num_grids);
 
-	// TODO.high for some reason this fixes a bug... figure out what's going on pls
-	// specifically, adding padding of `sizeof(buf_t)-1uz` null (`'\0'`) characters.
-	// seems like write_solved appending to `os` has some issue? or maybe reading at the boundary between written grids...
-	static constexpr auto arbitrary_padding {Int<1u,IntKind::fixed>{}};
-
 	const auto written_data {[&]{
 		// serialize data to `std::string`:
-		// { std::cin.get(); } // poor-person breakpoint. my bindings aren't working :(
 		std::ostringstream os {std::ios::binary};
 		REQUIRE(os);
 		for (auto i {0uz}; i < num_grids; ++i) { CAPTURE(i);
@@ -49,43 +48,25 @@ void test_serdes(const std::uint_fast32_t rng_seed) {
 			grid = generate_shuffled<O>(rng());
 			REQUIRE(os.good());
 			byte_counts[i] += write_solved(grid, os);
+
 			REQUIRE_FALSE(os.fail());
-			{
-				for ([[maybe_unused]] const auto j : arbitrary_padding) { os.put('\0'); }
-				byte_counts[i] += arbitrary_padding;
-			}
-			REQUIRE(
-				static_cast<std::size_t>(os.tellp()) ==
-				std::ranges::fold_left(std::span{byte_counts}.subspan(0uz,i+1uz), 0uz, std::plus{})
-				// std::accumulate(byte_counts.cbegin(), byte_counts.cbegin()+i+1uz, 0uz)
-			);
+			REQUIRE(static_cast<std::size_t>(os.tellp()) == sum_byte_counts(i+1uz));
 		}
 		return os.str();
 	}()};
-	REQUIRE(
-		written_data.size() ==
-		std::ranges::fold_left(std::span{byte_counts}.subspan(0uz,num_grids), 0uz, std::plus{})
-		// std::accumulate(byte_counts.cbegin(), byte_counts.cbegin()+num_grids, 0uz)
-	);
-	std::istringstream is {written_data, std::ios::binary};
-	REQUIRE(is);
+	REQUIRE(written_data.size() == sum_byte_counts(num_grids));
+
 	// de-serialize data and check correctness:
+	std::istringstream is {written_data, std::ios::binary};
+	REQUIRE(is.good());
 	for (auto i {0uz}; i < num_grids; ++i) { CAPTURE(i);
 		Grid<O> parsed_grid;
-		std::size_t bytes_read {0uz};
 		REQUIRE(is.good());
-		bytes_read += read_solved(parsed_grid, is);
+		const auto read_ok {read_solved(parsed_grid, is, byte_counts[i])};
+
+		REQUIRE(read_ok);
 		REQUIRE_FALSE(is.fail());
-		{
-			is.ignore(arbitrary_padding);
-			bytes_read += arbitrary_padding;
-		}
-		REQUIRE(byte_counts[i] == bytes_read);
-		REQUIRE(
-			static_cast<std::size_t>(is.tellg()) ==
-			std::ranges::fold_left(std::span{byte_counts}.subspan(0uz,i+1uz), 0uz, std::plus{})
-			// std::accumulate(byte_counts.cbegin(), byte_counts.cbegin()+i+1uz, 0uz)
-		);
+		REQUIRE(static_cast<std::size_t>(is.tellg()) == sum_byte_counts(i+1uz));
 		REQUIRE(parsed_grid == grid_buf[i]);
 	}
 }}
