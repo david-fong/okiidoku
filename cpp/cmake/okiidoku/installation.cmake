@@ -14,8 +14,8 @@ install(DIRECTORY ../LICENSES TYPE DOC COMPONENT okiidoku_about)
 # https://cmake.org/cmake/help/latest/guide/importing-exporting/index.html#exporting-targets-from-the-build-tree
 export(
 	EXPORT okiidoku_targets
-	FILE "${PROJECT_BINARY_DIR}/cmake/okiidoku-targets.cmake"
-	NAMESPACE "${PROJECT_NAME}::"
+	FILE "${okiidoku_BINARY_DIR}/cmake/okiidoku-targets.cmake"
+	NAMESPACE "okiidoku::"
 	EXPORT_PACKAGE_DEPENDENCIES
 )
 

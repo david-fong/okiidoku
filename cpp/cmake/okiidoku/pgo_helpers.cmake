@@ -58,7 +58,7 @@ unset(_config_types)
 list(PREPEND CMAKE_CXX_FLAGS_PGOGEN ${CMAKE_CXX_FLAGS_RELEASE})
 list(PREPEND CMAKE_CXX_FLAGS_PGOUSE ${CMAKE_CXX_FLAGS_RELEASE})
 if(NOT _OKIIDOKU_BUILD_IS_PGO_GEN)
-	set(_OKIIDOKU_PGO_DIR "${PROJECT_BINARY_DIR}/_pgo")
+	set(_OKIIDOKU_PGO_DIR "${okiidoku_BINARY_DIR}/_pgo")
 	set(okiidoku_pgo_gen_cmake_generator "${CMAKE_GENERATOR}")
 	if(okiidoku_pgo_gen_cmake_generator STREQUAL "Ninja Multi-Config")
 		set(okiidoku_pgo_gen_cmake_generator "Ninja")
@@ -140,24 +140,37 @@ function(okiidoku_target_pgo
 	trainee # name of target to train for PGO
 	trainer # name of a executable target to use for training PGO
 )
-	# basic input validation
-	if(NOT CMAKE_CURRENT_BINARY_DIR STREQUAL PROJECT_BINARY_DIR)
-		message(FATAL_ERROR "for some reason, custom steps for ExternalProject need to be registered in the same directory as the ExternalProject was registered.")
+	set(if_pgo "$<CONFIG:PgoGen,PgoUse>")
+	set(if_gen "$<CONFIG:PgoGen>")
+	set(if_use "$<CONFIG:PgoUse>")
+	if(NOT DEFINED "_OKIIDOKU_PGO_DIR" OR "${_OKIIDOKU_PGO_DIR}" STREQUAL "")
+		message(FATAL_ERROR "_OKIIDOKU_PGO_DIR is not defined!!!!!!!!!!")
+	endif()
+	set(trainer_binary "${_OKIIDOKU_PGO_DIR}/out/${trainer}${CMAKE_EXECUTABLE_SUFFIX}")
+
+	if(NOT CMAKE_CURRENT_BINARY_DIR STREQUAL okiidoku_BINARY_DIR)
+		# (for CMake reasons I don't fully understand, custom steps for ExternalProject must be registered...)
+		message(FATAL_ERROR "okiidoku_target_pgo must be called in the ${okiidoku_SOURCE_DIR} directory scope.")
+	endif()
+	if(NOT TARGET "${trainee}")
+		message(FATAL_ERROR "PGO trainee must be a target, but '${trainee}' is not.")
 	endif()
 	if(_OKIIDOKU_BUILD_IS_PGO_GEN)
-		block()
+		if(NOT TARGET "${trainer}")
+			message(FATAL_ERROR "PGO trainer must be a target, but '${trainer}' is not.")
+		endif()
 		get_target_property(trainer_target_type ${trainer} TYPE)
 		if(NOT trainer_target_type STREQUAL "EXECUTABLE")
-			message(FATAL_ERROR "pgo trainer must be an EXECUTABLE target, but '${trainer}' is a ${trainer_target_type}")
+			message(FATAL_ERROR "PGO trainer must be an EXECUTABLE target, but '${trainer}' is a ${trainer_target_type}.")
 		endif()
-		endblock()
+		unset(trainer_target_type)
 		# TODO: assert that trainer has link dependency on trainee
 	else()
 		ExternalProject_Add_Step(okiidoku_pgo_gen "build-${trainer}" EXCLUDE_FROM_MAIN YES
-			COMMENT "build ${trainer} (to train ${trainee})"
+			COMMENT "build '${trainer}:PgoGen' (to train '${trainee}:PgoUse')"
 			WORKING_DIRECTORY "<BINARY_DIR>"
-			COMMAND "${CMAKE_COMMAND}" --build "<BINARY_DIR>" --config PgoGen --target "${trainer}"
-			BYPRODUCTS "${_OKIIDOKU_PGO_DIR}/out/${trainer}${CMAKE_EXECUTABLE_SUFFIX}"
+			COMMAND "${CMAKE_COMMAND}" --build . --config PgoGen --target "${trainer}"
+			BYPRODUCTS "$<${if_use}:${trainer_binary}>"
 			DEPENDEES configure
 			# JOB_SERVER_AWARE YES # ?
 			LOG YES
@@ -165,11 +178,18 @@ function(okiidoku_target_pgo
 			ENVIRONMENT_MODIFICATION # TODO inherit "LANG" "LC_ALL" "TZ" ("LC_CTYPE"?)
 		)
 		ExternalProject_Add_StepTargets(okiidoku_pgo_gen "build-${trainer}")
+		# we're doing this weirdness with `BYPRODUCTS` and `mock_build...` because
+		# generator expressions aren't supported in `DEPENDS` or `add_dependencies`. sigh.
+		add_custom_target("mock_build-${trainer}"
+			"${CMAKE_COMMAND}" -E "$<IF:${if_use},true,touch;${trainer_binary}>"
+			COMMENT [[🦗]]
+			BYPRODUCTS "$<$<NOT:${if_use}>:${trainer_binary}>"
+			COMMAND_EXPAND_LISTS
+		)
 	endif()
 
-	set(if_pgo "$<CONFIG:PgoGen,PgoUse>")
-	set(if_gen "$<CONFIG:PgoGen>")
-	set(if_use "$<CONFIG:PgoUse>")
+	set(data_dir "${_OKIIDOKU_PGO_DIR}/data/${trainer}")
+	file(MAKE_DIRECTORY "${data_dir}")
 
 	if(MSVC)
 	block()
@@ -184,10 +204,6 @@ function(okiidoku_target_pgo
 		)
 	endblock()
 	endif()
-
-
-	set(data_dir "${_OKIIDOKU_PGO_DIR}/data/${trainer}")
-	file(MAKE_DIRECTORY "${data_dir}")
 
 	if((CMAKE_CXX_COMPILER_ID MATCHES [[Clang]]) OR EMSCRIPTEN)
 		# TODO test this and fix problems
@@ -204,7 +220,6 @@ function(okiidoku_target_pgo
 		target_link_options(${trainee} PRIVATE
 			"$<${if_gen}:-fprofile-generate=${data_dir}>"
 		)
-
 
 	elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 		# https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html
@@ -235,13 +250,13 @@ function(okiidoku_target_pgo
 		)
 		# https://gcc.gnu.org/wiki/AutoFDO/Tutorial
 
-
 	# elseif(CMAKE_CXX_COMPILER_ID MATCHES [[Intel]])
 		# https://www.intel.com/content/www/us/en/develop/documentation/cpp-compiler-developer-guide-and-reference/top/optimization-and-programming/profile-guided-optimization-pgo.html
 		# https://www.intel.com/content/www/us/en/develop/documentation/cpp-compiler-developer-guide-and-reference/top/optimization-and-programming/profile-guided-optimization-pgo/profile-an-application-with-instrumentation.html
 	endif()
 
-
+	# the rest of what follows is to make the `PgoUse` config run training.
+	# trainer and trainee for the `PgoGen` side are done being configured now.
 	if(_OKIIDOKU_BUILD_IS_PGO_GEN)
 		return()
 	endif()
@@ -269,7 +284,7 @@ function(okiidoku_target_pgo
 		"-D trainee=${trainee}"
 		"-D trainer=${trainer}"
 		"-D trainee_binary=${_OKIIDOKU_PGO_DIR}/out/$<TARGET_FILE_NAME:${trainee}>"
-		"-D trainer_binary=${_OKIIDOKU_PGO_DIR}/out/${trainer}${CMAKE_EXECUTABLE_SUFFIX}"
+		"-D trainer_binary=${trainer_binary}"
 		"-D data_dir=${data_dir}"
 		"-D training_stamp_file=${training_stamp_file}"
 	)
@@ -291,14 +306,15 @@ function(okiidoku_target_pgo
 	endif()
 	list(APPEND command "-P" "${okiidoku_SOURCE_DIR}/cmake/okiidoku/pgo.run_training.cmake")
 	add_custom_target("run_${trainer}"
-		COMMAND "\$<IF:${if_use},${command},${CMAKE_COMMAND};-E;true>"
-		BYPRODUCTS "\$<IF:${if_use},${byproducts},>"
-		WORKING_DIRECTORY "${data_dir}"
-		COMMENT "\$<IF:${if_use},PGO: checking if '${trainer}' needs to be re-run to train '${trainee}',>"
+		COMMAND "$<IF:${if_use},${command},${CMAKE_COMMAND};-E;true>"
+		DEPENDS "${trainer_binary}"
+		BYPRODUCTS "$<IF:${if_use},${byproducts},>"
+		WORKING_DIRECTORY "$<IF:${if_use},${data_dir},${okiidoku_SOURCE_DIR}>"
+		COMMENT "$<IF:${if_use},PGO: checking if '${trainer}' needs to be re-run to train '${trainee}',>"
 		VERBATIM COMMAND_EXPAND_LISTS
 	)
 	endblock()
-	add_dependencies("run_${trainer}" "okiidoku_pgo_gen-build-${trainer}") # must build trainee before training
+	# add_dependencies("run_${trainer}" "okiidoku_pgo_gen-build-${trainer}") # must build trainee before training
 	# build will stop if run_trainer fails
 	# TODO.wait use generator expression once `add_dependencies` supports them (so dependency only exists for PgoUse config). https://gitlab.kitware.com/cmake/cmake/-/issues/19467. currently doing workaround in the custom step COMMANDs.
 	add_dependencies(${trainee} "run_${trainer}")
