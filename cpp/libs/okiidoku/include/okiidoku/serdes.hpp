@@ -20,12 +20,6 @@ namespace okiidoku {
 	//  use `std::optional`. but those aren't the case, so EOF can be `0uz` with `[[nodiscard]]`.
 }
 namespace okiidoku::mono {
-
-	// [[nodiscard, gnu::const]] constexpr unsigned get_min_bytes_to_store(const unsigned max_value) {
-	// 	return (std::bit_width(max_value) + (CHAR_BIT-1)) / CHAR_BIT;
-	// }
-
-	// TODO efficient mechanism to opt-in/out of error-checking in the parsing functions.
 	// TODO Grid member function `write(os)` and free function that returns Grid instead of taking `os`. can make these inline, and non-exported? (to keep symbol table small) (make an \internal note to self about not exporting them if decide to do that.)
 
 	/**
@@ -33,9 +27,9 @@ namespace okiidoku::mono {
 	\pre `os` is a binary stream- not a text stream.
 	\pre `os.good()`.
 	\pre `os` will not be used by another thread for the duration of this call.
-	\returns the number of bytes written. */
+	\returns the number of bytes written, or `0uz` if there were stream writing errors. */
 	template<Order O> requires(is_order_compiled(O))
-	OKIIDOKU_EXPORT std::size_t write_solved(const Grid<O>&, std::ostream& os);
+	OKIIDOKU_EXPORT std::size_t write_solved(const Grid<O>&, std::ostream& os) noexcept;
 
 	/**
 	\pre `is` is a binary stream- not a text stream.
@@ -47,7 +41,6 @@ namespace okiidoku::mono {
 	\returns `true` if read completed successfully, or `false` on unexpected EOF. */
 	template<Order O> requires(is_order_compiled(O))
 	OKIIDOKU_EXPORT [[nodiscard]] bool read_solved(Grid<O>&, std::istream& is, std::size_t byte_count) noexcept;
-	// TODO make the others noexcept?
 
 	/**
 	best used with sparse (close to minimal) puzzles.
@@ -55,9 +48,9 @@ namespace okiidoku::mono {
 	\pre `os` is a binary stream- not a text stream.
 	\pre `os.good()`.
 	\pre `os` will not be used by another thread for the duration of this call.
-	\returns the number of bytes written. */
+	\returns the number of bytes written, or `0uz` if there were stream writing errors. */
 	template<Order O> requires(is_order_compiled(O))
-	OKIIDOKU_EXPORT std::size_t write_puzzle(const Grid<O>&, std::ostream& os);
+	OKIIDOKU_EXPORT std::size_t write_puzzle(const Grid<O>&, std::ostream& os) noexcept;
 
 	/**
 	\pre `is` is a binary stream- not a text stream.
@@ -65,24 +58,24 @@ namespace okiidoku::mono {
 	\pre `is`'s next bytes contain the result of a call to `write_puzzle`.
 	\pre `is` will not be used by another thread for the duration of this call.
 	\post the grid follows the one rule.
-	\returns the number of bytes read. */
+	\returns `true` if read completed successfully, or `false` on unexpected EOF. */
 	template<Order O> requires(is_order_compiled(O))
-	OKIIDOKU_EXPORT [[nodiscard]] std::size_t read_puzzle(Grid<O>&, std::istream& is);
+	OKIIDOKU_EXPORT [[nodiscard]] bool read_puzzle(Grid<O>&, std::istream& is, std::size_t byte_count) noexcept;
 }
 
 
 namespace okiidoku::visitor {
 
 	/** see `okiidoku::mono::write_solved<O>`. */
-	OKIIDOKU_EXPORT std::size_t write_solved(const Grid&, std::ostream& os);
+	OKIIDOKU_EXPORT std::size_t write_solved(const Grid&, std::ostream& os) noexcept;
 
 	/** see `okiidoku::mono::read_solved<O>`. */
 	[[nodiscard]] OKIIDOKU_EXPORT bool read_solved(Grid&, std::istream& is, std::size_t byte_count) noexcept;
 
 	/** see `okiidoku::mono::write_puzzle<O>`. */
-	OKIIDOKU_EXPORT std::size_t write_puzzle(const Grid&, std::ostream& os);
+	OKIIDOKU_EXPORT std::size_t write_puzzle(const Grid&, std::ostream& os) noexcept;
 
 	/** see `okiidoku::mono::read_puzzle<O>`. */
-	[[nodiscard]] OKIIDOKU_EXPORT std::size_t read_puzzle(Grid&, std::istream& is);
+	[[nodiscard]] OKIIDOKU_EXPORT bool read_puzzle(Grid&, std::istream& is, std::size_t byte_count) noexcept;
 }
 #endif

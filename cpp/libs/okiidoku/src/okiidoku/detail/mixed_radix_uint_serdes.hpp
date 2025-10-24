@@ -124,9 +124,11 @@ namespace okiidoku::detail {
 		call this exactly once when the previous call to `accept` indicated a need to flush.
 		separately, call this exactly once after `accept()`ing the final digit.
 		\pre `os` is a binary stream- not a text stream.
+		\pre `os.good()` and `os.exceptions() == std::ios::goodbit`.
 		\pre the previous call to `accept` indicated a need to flush, or there is no more data. */
-		void flush(std::ostream& os) {
+		void flush(std::ostream& os) noexcept {
 			OKIIDOKU_CONTRACT2(os.good());
+			OKIIDOKU_CONTRACT2(os.exceptions() == std::ios::goodbit);
 			OKIIDOKU_CONTRACT2(queue_end_ < queue_.size());
 			if (queue_end_ == 0u) [[unlikely]] { return; }
 			OKIIDOKU_CONTRACT(buf_radixx_ > 0u);
