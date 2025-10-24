@@ -75,7 +75,7 @@ void test_o2_bit_arr_basic() {
 		O2BitArr<O,kind_> a;
 		REQUIRE(a.count() == 0u);
 		for (const auto i : T::O2) { REQUIRE_FALSE(a[i]); }
-		for ([[maybe_unused]] const auto i : a.set_bits()) { FAIL(""); }
+		for ([[maybe_unused]] const auto i : a.set_bits()) [[unlikely]] { FAIL(""); }
 
 		a.set(i_set);
 		REQUIRE(a[i_set]);
@@ -90,7 +90,7 @@ void test_o2_bit_arr_basic() {
 		REQUIRE_FALSE(a[i_set]);
 		REQUIRE(a.count() == 0u);
 		for (const auto i : T::O2) { REQUIRE_FALSE(a[i]); }
-		for ([[maybe_unused]] const auto i : a.set_bits()) { FAIL(""); }
+		for ([[maybe_unused]] const auto i : a.set_bits()) [[unlikely]] { FAIL(""); }
 
 		a.flip(i_set);
 		REQUIRE(a[i_set]);

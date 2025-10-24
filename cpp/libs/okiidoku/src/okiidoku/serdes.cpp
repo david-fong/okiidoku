@@ -217,6 +217,7 @@ namespace okiidoku::mono {
 			grid.clear();
 		#endif
 		using T = Ints<O>;
+		std::array<std::array<std::array<O2BitArr<O>, T::O1>, T::O1>, T::O1> main_diag_box_has {};
 		{
 			// parse out bulk of content (skip what can be reconstructed later):
 			typename Writer<O>::IOGuard io_guard {is};
@@ -229,45 +230,24 @@ namespace okiidoku::mono {
 				const auto sym {reader(is)};
 				if (!is) [[unlikely]] { return false; }
 				grid[reader.rmi()] = sym;
-			}
-			// done using `is` now.
-		}{
-			// reconstruct cells in main-diagonal boxes:
-			// TODO is it possible to initialize this while reading the data? how would that affect perf?
-			std::array<std::array<std::array<O2BitArr<O>, T::O1>, T::O1>, T::O1> main_diag_box_cands {};
-			#ifndef NDEBUG
-				for (const auto box     : T::O1) {
-				for (const auto box_row : T::O1) {
-				for (const auto box_col : T::O1) {
-					OKIIDOKU_ASSERT(main_diag_box_cands[box][box_row][box_col].count() == 0u);
-				}}}
-			#endif
-			for (const auto rmi : T::O4) {
-				// get the data needed to losslessly reconstruct:
-				const auto row {rmi / T::O2};
-				const auto col {rmi % T::O2};
-				if ((row/T::O1) == col/T::O1) [[unlikely]] {
-					#ifndef NDEBUG
-						OKIIDOKU_ASSERT(grid[rmi] == T::O2);
-					#endif
-					continue; // skip cells that need reconstructing
-				}
+
 				for (const auto atom_cell : T::O1) {
 					// every cell outside the ones needing constructing can see two of those boxes
-					(main_diag_box_cands [row/T::O1] [row%T::O1] [atom_cell]).set(*grid[row,col]);
-					(main_diag_box_cands [col/T::O1] [atom_cell] [col%T::O1]).set(*grid[row,col]);
+					(main_diag_box_has [row/T::O1] [row%T::O1] [atom_cell]).set(*sym);
+					(main_diag_box_has [col/T::O1] [atom_cell] [col%T::O1]).set(*sym);
 				}
 			}
+		}{
+			// reconstruct cells in main-diagonal boxes:
 			for (const auto box     : T::O1) {
 			for (const auto box_row : T::O1) {
 			for (const auto box_col : T::O1) {
-				const auto cands {~main_diag_box_cands[box][box_row][box_col]};
+				const auto cands {~main_diag_box_has[box][box_row][box_col]};
 				OKIIDOKU_ASSERT(cands.count() == 1u);
 				const auto sym {*cands.first_set_bit()};
-				#ifndef NDEBUG
-					OKIIDOKU_ASSERT(grid[box_cell_to_rmi<O>((box*T::O1)+box, (T::O1*box_row)+box_col)] == T::O2);
-				#endif
-				grid[box_cell_to_rmi<O>((box*T::O1)+box, (T::O1*box_row)+box_col)] = sym;
+				const auto rmi {box_cell_to_rmi<O>((box*T::O1)+box, (T::O1*box_row)+box_col)};
+				OKIIDOKU_ASSERT(grid[rmi] == T::O2);
+				grid[rmi] = sym;
 			}}}
 		}
 		OKIIDOKU_ASSERT(grid.is_filled());
