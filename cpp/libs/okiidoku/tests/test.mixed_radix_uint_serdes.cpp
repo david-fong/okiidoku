@@ -6,6 +6,7 @@
 
 #include <okiidoku/detail/util.hpp>
 
+// import std;
 #include <sstream>
 #include <random>
 #include <string>
@@ -41,7 +42,7 @@ namespace okiidoku::test {
 			// serialize data to `std::string`:
 			Writer writer;
 			std::ostringstream os {std::ios::binary};
-			REQUIRE(os);
+			REQUIRE(os.good());
 			std::geometric_distribution<radix_t> radix_dist {1.0/(CHAR_BIT*sizeof(buf_t))};
 			for (auto place {0uz}; place < num_places; ++place) { CAPTURE(place);
 				auto& p {places_buf[place]};

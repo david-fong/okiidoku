@@ -1,6 +1,8 @@
 # SPDX-FileCopyrightText: 2020 David Fong
 # SPDX-License-Identifier: GPL-3.0-or-later
 cmake_minimum_required(VERSION 4.1)
+
+# https://raw.githubusercontent.com/Kitware/CMake/refs/heads/master/Help/dev/experimental.rst
 set(CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_DEPENDENCIES [[1942b4fa-b2c5-4546-9385-83f254070067]])
 set(CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_INFO [[b80be207-778e-46ba-8080-b23bba22639e]])
 set(CMAKE_EXPERIMENTAL_FIND_CPS_PACKAGES   [[e82e467b-f997-4464-8ace-b00808fff261]])

@@ -233,7 +233,7 @@ namespace okiidoku {
 		[[nodiscard, gnu::const]] constexpr val_t val(                 this const Int self) noexcept requires(kind != IntKind::fixed) { self.check(); return self.val_; }
 		[[nodiscard, gnu::const]] constexpr auto   as_fast(this const Int self) noexcept { self.check(); return Int<max, IntKind::fast> {self.val()}; }
 		[[nodiscard, gnu::const]] constexpr auto  as_small(this const Int self) noexcept { self.check(); return Int<max, IntKind::small>{self.val()}; }
-		using constant_t = Int<max_, IntKind::fixed>;
+		using fixed_t = Int<max_, IntKind::fixed>;
 
 		// see ints_io.hpp
 		// friend std::ostream& operator<<(std::ostream& os, const Int& i) noexcept;

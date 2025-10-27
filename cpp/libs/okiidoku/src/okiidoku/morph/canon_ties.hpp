@@ -17,20 +17,18 @@
 
 namespace okiidoku::mono::detail {
 
-	template<Order O, unsigned O1_OR_O2>
-		requires (is_order_compiled(O) && ((O1_OR_O2 == 1) || (O1_OR_O2 == 2)))
+	template<std::size_t size_> requires(size_ > 0uz)
 	/**
 	an externally-driven cache of subranges of an external array which are tied with
 	each other by some externally-defined ordering (see `Ties::update`). assumes
 	that tied sections will only be further broken down and do not "move around". */
 	struct Ties final {
-		using T = Ints<O>;
-		using ii_t = std::conditional_t<(O1_OR_O2 == 1), typename T::o1i_t, typename T::o2is_t>;
-		using ix_t = std::conditional_t<(O1_OR_O2 == 1), typename T::o1x_t, typename T::o2xs_t>;
-		static constexpr ii_t size {ii_t::max};
+		static constexpr std::size_t size {size_};
+		using ii_t = Int<size_    , IntKind::small>;
+		using ix_t = Int<size_-1uz, IntKind::small>;
 	private:
 		using bookends_t = BitArray<ii_t::max,IntKind::fast>;
-		/** each pair of set bits index the first and last position of an unresolved tied range. */
+		/** each pair of set bits index the first and last included positions in an unresolved tied range. */
 		bookends_t bookends_ {};
 
 	public:
@@ -39,15 +37,15 @@ namespace okiidoku::mono::detail {
 		class TieRange final {
 		public:
 			ix_t begin_;
-			ii_t end_;
-			TieRange(const ix_t begin, const ii_t end) noexcept: begin_{begin}, end_{end} { check(); }
-			[[nodiscard, gnu::pure]] ii_t size()  const noexcept { check(); ii_t sz {end_ - begin_}; OKIIDOKU_CONTRACT(sz >= 2u); return sz; }
-			[[nodiscard, gnu::pure]] ii_t begin() const noexcept { check(); return ii_t{0u}; }
-			[[nodiscard, gnu::pure]] ii_t end()   const noexcept { check(); return end_; }
+			ii_t end_; // one-past the last included position in the tied range.
+			constexpr TieRange(const ix_t begin, const ii_t end) noexcept: begin_{begin}, end_{end} { check(); }
+			[[nodiscard, gnu::pure]] constexpr ii_t size()  const noexcept { check(); ii_t sz {end_ - begin_}; OKIIDOKU_CONTRACT(sz >= 2u); return sz; }
+			[[nodiscard, gnu::pure]] constexpr ii_t begin() const noexcept { check(); return ii_t{begin_}; }
+			[[nodiscard, gnu::pure]] constexpr ii_t end()   const noexcept { check(); return end_; }
 			[[gnu::always_inline]] constexpr void check() const noexcept {
 				begin_.check(); end_.check();
 				OKIIDOKU_CONTRACT(begin_ < Ties::size);
-				OKIIDOKU_CONTRACT(begin_ < end_);
+				OKIIDOKU_CONTRACT(begin_ < end_.prev());
 				OKIIDOKU_CONTRACT(begin_.next() < end_);
 				OKIIDOKU_CONTRACT(end_ <= Ties::size);
 				OKIIDOKU_CONTRACT(end_ > 0u);
@@ -65,12 +63,12 @@ namespace okiidoku::mono::detail {
 			bookends_t::Iter it_;
 			ii_t begin_;
 		public:
-			explicit Iter(const bookends_t& bookends) noexcept: it_{bookends.set_bits()}, begin_{*it_} { ++it_; }
+			explicit constexpr Iter(const bookends_t& bookends) noexcept: it_{bookends.set_bits()}, begin_{*it_} { ++it_; }
 
-			[[nodiscard, gnu::pure]] TieRange operator*() const noexcept { OKIIDOKU_CONTRACT(it_.not_end()); return TieRange{*begin_, *it_}; }
-			Iter& operator++()    noexcept { ++it_; begin_ = *it_; ++it_; return *this; }
-			// Iter  operator++(int) noexcept { Iter tmp {*this}; operator++(); return tmp; } // TODO is this needed?
 			[[nodiscard, gnu::pure]] constexpr friend bool operator!=(const Iter& i, [[maybe_unused]] const std::default_sentinel_t s) noexcept { return i.it_.not_end(); }
+			[[nodiscard, gnu::pure]] constexpr TieRange operator*() const noexcept { OKIIDOKU_CONTRACT(it_.not_end()); return TieRange{*begin_, (*it_)+int1}; }
+			constexpr Iter& operator++() noexcept { ++it_; begin_ = *it_; ++it_; return *this; }
+			// Iter  operator++(int) noexcept { Iter tmp {*this}; operator++(); return tmp; } // TODO is this needed?
 		};
 
 	public:
@@ -83,17 +81,17 @@ namespace okiidoku::mono::detail {
 		}
 
 		[[nodiscard, gnu::pure]] friend bool operator==(const Ties&, const Ties&) noexcept = default;
-		[[nodiscard, gnu::pure]]  auto begin() const noexcept { return Iter{bookends_}; }
-		[[nodiscard, gnu::const]] auto end()   const noexcept { return std::default_sentinel; }
+		[[nodiscard, gnu::pure]]  constexpr auto begin() const noexcept { return Iter{bookends_}; }
+		[[nodiscard, gnu::const]] constexpr auto end()   const noexcept { return std::default_sentinel; }
 
-		[[nodiscard, gnu::pure]] bool none_resolved()  const noexcept { return bookends_.count() == 2u && bookends_[ix_t{0u}] && bookends_[ix_t{size-1u}]; }
-		[[nodiscard, gnu::pure]] bool has_unresolved() const noexcept { return bookends_.count() <  0u; }
-		[[nodiscard, gnu::pure]] bool all_resolved()   const noexcept { return bookends_.count() == 0u; }
+		[[nodiscard, gnu::pure]] constexpr bool none_resolved()  const noexcept { return bookends_.count() == 2u && bookends_[0u] && bookends_[ix_t{size-1u}]; }
+		[[nodiscard, gnu::pure]] constexpr bool has_unresolved() const noexcept { return bookends_.count() >  0u; }
+		[[nodiscard, gnu::pure]] constexpr bool all_resolved()   const noexcept { return bookends_.count() == 0u; }
 
 		/**
 		pass a function that compares consecutive values in a range to update
 		the record of which ranges' values are still tied. */
-		void update(const std::equivalence_relation<ix_t,ix_t> auto&& is_eq) noexcept { // TODO test that && is okay here.
+		void update(const std::equivalence_relation<ix_t,ix_t> auto& is_eq) noexcept {
 			for (const auto&& cached_tie : *this) {
 				for (ii_t i {cached_tie.begin_}; i.next() != cached_tie.end_; ++i) {
 					OKIIDOKU_CONTRACT(i.next() < size);

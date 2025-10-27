@@ -1,5 +1,7 @@
 // SPDX-FileCopyrightText: 2020 David Fong
 // SPDX-License-Identifier: AGPL-3.0-or-later
+/** \file
+symbol canonicalization. see :/writings/design/morph.md#Symbol-Canonicalization. */
 #include <okiidoku/detail/canon_stages.hpp>
 
 #include <okiidoku/morph/transform.hpp>
@@ -15,26 +17,6 @@
 #include <numeric>    // iota
 #include <compare>    // is_eq
 
-/** for each pair of symbols, given something like this (each item place is for a box,
-showing whether, and in what orientation the two symbols cohabit an atom in that box):
-```none
-- | |
-| | 0
-0 0 -
-```
-find some way to transform it into something placement and letter-agnostic.
-each O2*O2 symbol pair (excluding self-pairs) will have such a table, and
-when all overlayed together, each position will have O*(O-1)/2 of each of `a`
-and `b`, and `O^2 * (O-1)^2` blanks.
-- how many boxes do the two symbols cohabit an atom in? sort desc.
-- of the atom cohabitations, how many point the same way? sort desc lexicographically of desc sorted per direction
-- of the atom cohabitations, how many
-- first try to normalize -/|.
-	- for each cell,
-		- how many cells does it see "pointing to" it?
-		- how many cells does it see "orthogonal to" it?
-*/
-
 namespace okiidoku::mono { namespace {
 
 	template<Order O>
@@ -47,35 +29,45 @@ namespace okiidoku::mono { namespace {
 		OKIIDOKU_MONO_INT_TS_TYPEDEFS
 		using to_t = typename Transformation<O>::to_t;
 
-		struct State final {
-			/** for a given grid, sym (AKA "label"), and box, what boxcell is the sym in?
-			\internal alternatively:
-			O^2 * O^2 * [2*log2(O)] foreach sym, foreach box, which boxatoms is it in?
-			O^2 * 2*O * O^2 - foreach sym, for each boxatom, in which boxes is it in that boxatom? */
-			Grid<O> sym_box_to_boxcell_map;
-			sym_map_t<O> to_og; ///< `map[sym_new] -> sym_orig`.
-			detail::Ties<O, 2> ties {};
+		struct SymRel final {};
+
+		/** for a given grid, sym (AKA "label"), and box, what boxcell is the sym in? */
+		struct SymBoxToBoxcellMap final : public detail::Gridlike<O,to_t> {
+			using B = SymBoxToBoxcellMap::Gridlike;
+			using B::operator[];
+
 			/** \pre grid is filled and follows the one rule. */
-			explicit constexpr State(const Grid<O>& grid) noexcept {
+			explicit constexpr SymBoxToBoxcellMap(const Grid<O>& grid) noexcept {
+				OKIIDOKU_ASSERT(grid.is_filled());
+				OKIIDOKU_ASSERT(grid.follows_rule());
 				for (const auto row : T::O2) {
 				for (const auto col : T::O2) {
 					const auto sym {*grid[row, col]};
 					const auto box {row_col_to_box<O>(row, col)};
-					const auto box_cell = row_col_to_box_cell<O>(row, col);
-					sym_box_to_boxcell_map[sym, box] = box_cell;
+					const auto box_cell {row_col_to_box_cell<O>(row, col)};
+					operator[](sym, box) = box_cell;
 				}}
-				std::iota(to_og.begin(), to_og.end(), to_t{0u});
 			}
-			[[nodiscard, gnu::pure]] bool has_ties() const noexcept { return ties.has_unresolved(); }
+			[[nodiscard, gnu::pure]] SymRel quantify_sym_relationship(const to_t a, const to_t b) noexcept {
+				a.check(); b.check();
+				SymRel ret {};
+				return ret;
+			}
 		};
-		static void do_a_pass_(State& s) noexcept;
+
+		sym_map_t<O> to_og_; ///< `map[sym_new] -> sym_orig`.
+		detail::Ties<T::O2> ties_ {};
+		constexpr CanonSym() noexcept {
+			std::iota(to_og_.begin(), to_og_.end(), to_t{0u});
+		}
+		void do_a_pass(const SymBoxToBoxcellMap&) noexcept;
 
 	public:
-		static sym_map_t<O> do_it(Grid<O>& grid) noexcept;
+		[[nodiscard, gnu::pure]] static sym_map_t<O> get_map(const Grid<O>& grid) noexcept;
 	};
 
 	template<Order O> requires(is_order_compiled(O))
-	void CanonSym<O>::do_a_pass_(CanonSym<O>::State& s) noexcept {
+	void CanonSym<O>::do_a_pass(const SymBoxToBoxcellMap& sym_box_to_boxcell_map) noexcept {
 		// for (const auto sym_a : T::O2) {
 		// for (const auto sym_b : T::O2) {
 		// 	O2BitArr<O> r_atom, col_atom;
@@ -85,77 +77,54 @@ namespace okiidoku::mono { namespace {
 		// 		const auto boxcell_b {sym_box_to_boxcell_map[sym_b, box]};
 		// 	}
 		// }}
-		sym_map_t<O> tiebreak_map OKIIDOKU_DEFER_INIT;
-		std::iota(tiebreak_map.begin(), tiebreak_map.end(), to_t{0u});
-		// for (const auto tie : s.ties) {
-		// 	if (tie.size() == 1) [[likely]] { continue; }
-		// 	for (const auto rel_i : tie) {
-		// 	}
-		// 	// std::sort(
-		// 	// 	std::next(tiebreak_map.begin(), tie.begin_),
-		// 	// 	std::next(tiebreak_map.begin(), tie.end_),
-		// 	// 	[&](auto a, auto b){ return std::lexicographical_compare(
-		// 	// 		scratch.row_span_at(a).begin(), scratch.row_span_at(a).end(),
-		// 	// 		scratch.row_span_at(b).begin(), scratch.row_span_at(b).end()
-		// 	// 	); } // TODO.low why doesn't the ranges version work?
-		// 	// );
-		// }
-		// s.ties.update([&](auto a, auto b){
+		for (const auto tie : ties_) {
+			// std::sort(
+			// 	std::next(tiebreak_map.begin(), tie.begin_),
+			// 	std::next(tiebreak_map.begin(), tie.end_),
+			// 	[&](auto a, auto b){ return std::lexicographical_compare(
+			// 		scratch.row_span_at(a).begin(), scratch.row_span_at(a).end(),
+			// 		scratch.row_span_at(b).begin(), scratch.row_span_at(b).end()
+			// 	); } // TODO.low why doesn't the ranges version work?
+			// );
+		}
+		// ties_.update([&](auto a, auto b){
 		// 	const auto a_row_sp {scratch.row_span_at(tiebreak_map[a])};
 		// 	const auto b_row_sp {scratch.row_span_at(tiebreak_map[b])};
 		// 	return std::equal(a_row_sp.begin(), a_row_sp.end(), b_row_sp.begin(), b_row_sp.end());
 		// });
-
-		{
-			// update s.to_og:
-			sym_map_t<O> to_og {s.to_og};
-			for (const auto i : T::O2) {
-				s.to_og[i] = to_og[tiebreak_map[i]];
-			}
-		}
 	}
 
 
 	template<Order O> requires(is_order_compiled(O))
-	sym_map_t<O> CanonSym<O>::do_it(Grid<O>& grid) noexcept {
-		const sym_map_t<O> sym_og_to_canon {[&](){
-			State s {grid};
-			while (s.has_ties()) {
-				auto old_ties {s.ties};
-				do_a_pass_(s);
-				if (s.ties.none_resolved()) {
-					// encountered the most canonical grid.
-					break;
-				}
-				if (old_ties == s.ties) {
-					// TODO.mid stalemate... current design insufficient?
-					break;
-				}
+	sym_map_t<O> CanonSym<O>::get_map(const Grid<O>& grid) noexcept {
+		const SymBoxToBoxcellMap sym_box_to_boxcell_map {grid};
+		CanonSym s {};
+		while (s.ties_.has_unresolved()) {
+			auto old_ties {s.ties_};
+			s.do_a_pass(sym_box_to_boxcell_map);
+			if (s.ties_.none_resolved()) [[unlikely]] {
+				// encountered the most canonical grid?
+				break;
 			}
-
-			sym_map_t<O> map OKIIDOKU_DEFER_INIT;
-			for (const auto canon_i : T::O2) {
-				map[s.to_og[canon_i]] = canon_i;
+			if (old_ties == s.ties_) {
+				// TODO.mid stalemate... current design insufficient?
+				break;
 			}
-			return map;
-		}()};
-
-		for (const auto i : T::O4) {
-			grid[i] = sym_og_to_canon[grid[i]];
 		}
-		OKIIDOKU_ASSERT(grid.follows_rule());
-		return sym_og_to_canon;
+		sym_map_t<O> map OKIIDOKU_DEFER_INIT;
+		for (const auto canon_i : T::O2) { map[s.to_og_[canon_i]] = canon_i; } // (invert map)
+		return map;
 	}
 }}
 namespace okiidoku::mono::detail {
 
-	template<Order O> requires(is_order_compiled(O))
-	sym_map_t<O> canon_sym(Grid<O>& grid) noexcept {
-		return CanonSym<O>::do_it(grid);
+	template<Order O> requires(is_order_compiled(O)) [[nodiscard, gnu::pure]]
+	sym_map_t<O> canon_sym(const Grid<O>& grid) noexcept {
+		return CanonSym<O>::get_map(grid);
 	}
 
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-		template sym_map_t<(O_)> canon_sym<(O_)>(Grid<(O_)>&) noexcept;
+		template sym_map_t<(O_)> canon_sym<(O_)>(const Grid<(O_)>&) noexcept;
 	OKIIDOKU_FOREACH_O_DO_EMIT
 	#undef OKIIDOKU_FOREACH_O_EMIT
 }

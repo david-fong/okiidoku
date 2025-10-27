@@ -10,6 +10,8 @@ function(okiidoku_test_add name #[[ ARGN are correctness_deps ]])
 		EXPORT_NAME "test_${name}"
 		INTERPROCEDURAL_OPTIMIZATION NO # links way faster and runs about same speed
 		FOLDER "okiidoku/test" # for listing in IDE
+		# CXX_SCAN_FOR_MODULES ON
+		# CXX_MODULE_STD ON
 	)
 	okiidoku_add_compiler_options("${target}")
 	target_compile_options("${target}" PRIVATE "$<$<NOT:${debug_configs}>:$<$<CXX_COMPILER_ID:GNU>:-fwhole-program>>")

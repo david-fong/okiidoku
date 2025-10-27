@@ -32,7 +32,7 @@ void test_serdes(const std::uint_fast32_t rng_seed) {
 	std::array<Grid<O>, 8uz> grid_buf OKIIDOKU_DEFER_INIT; // NOLINT(*init*)
 	std::array<std::size_t, 8uz> byte_counts {};
 	const auto sum_byte_counts {[&byte_counts](const std::size_t num_grids) noexcept -> std::size_t {
-		OKIIDOKU_CONTRACT2(num_grids <= byte_counts.size());
+		OKIIDOKU_CONTRACT(num_grids <= byte_counts.size());
 		const auto sp {std::span{byte_counts}.subspan(0uz, num_grids)};
 		return std::ranges::fold_left(sp, 0uz, std::plus{});
 	}};
@@ -47,6 +47,7 @@ void test_serdes(const std::uint_fast32_t rng_seed) {
 			auto& grid {grid_buf[i]};
 			grid = generate_shuffled<O>(rng());
 			REQUIRE(os.good());
+
 			byte_counts[i] += write_solved(grid, os);
 
 			REQUIRE_FALSE(os.fail());
@@ -62,6 +63,7 @@ void test_serdes(const std::uint_fast32_t rng_seed) {
 	for (auto i {0uz}; i < num_grids; ++i) { CAPTURE(i);
 		Grid<O> parsed_grid;
 		REQUIRE(is.good());
+
 		const auto read_ok {read_solved(parsed_grid, is, byte_counts[i])};
 
 		REQUIRE(read_ok);

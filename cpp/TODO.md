@@ -5,18 +5,16 @@
 
 ## Roadmap
 
+- canonicalization
+- puzzle serdes
+- archiving
 - improve solver and puzzle-maker for order=5
-- draft archive
-- refactor and improve canonicalization
 - compare backtracking and stochastic search statistics
 - implement an extras module for serdes of different string formats of grids that other people use (translator)
-- refine archive
 - create a separate github repo for data. add as submodule?
 - emscripten build and website
 - puzzle creation experiments (see [research-questions.md](../writings/research-questions.md))
 - write some example programs using `std::async`.
-- minlexing canonicalization
-- compare canonicalization methods (performance / time-complexity)
 - language bindings for other languages [see dedicated todo-file](./extras/todo.md)
 
 ## Periodic Checkups
@@ -96,8 +94,8 @@
   - presets `$comment`
   - `CMAKE_EXPORT_BUILD_DATABASE`
 - GCC 15:
-  - try benchmarking with https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html#index-fipa-reorder-for-locality
   - `import std` at least in source files? https://www.kitware.com/import-std-in-cmake-3-30/
+    - tried on 251024 and ran into issues. presumably because module support is still experimental in my compilers.
 - C++23:
   - http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/p2214r0.html#does-adjacent-mean-2-or-n
   - `std::ranges::iota()` see above note in issues watching

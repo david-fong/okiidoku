@@ -38,8 +38,8 @@ namespace okiidoku::mono { namespace {
 
 		struct PolarState final {
 			line_map_t<O> to_og {Transformation<O>{}.row_map};
-			detail::Ties<O,2> line_ties {};
-			detail::Ties<O,1> chute_ties {};
+			detail::Ties<T::O2> line_ties {};
+			detail::Ties<T::O1> chute_ties {};
 
 			explicit PolarState() noexcept {
 				line_ties.update([][[gnu::const]](auto a, auto b)noexcept{

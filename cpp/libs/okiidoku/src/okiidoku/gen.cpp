@@ -83,8 +83,8 @@ namespace okiidoku::mono { namespace {
 			OKIIDOKU_CONTRACT(num_resolved <=  2);
 			OKIIDOKU_CONTRACT(num_resolved >= -2);
 			if (num_resolved >= 0) [[unlikely]] { // TODO.low for fun: find out on average at what op_count it starts being unlikely. I'm confused about whether this could simply be `>`. it makes release builds perform slightly faster for this procedure, but in makes some debug-build tests hang??
-				OKIIDOKU_CONTRACT2(num_missing_syms >= Int<2u>{num_resolved});
-				num_missing_syms -= Int<2u>{num_resolved};
+				OKIIDOKU_CONTRACT2(num_missing_syms >= Int<2u>{static_cast<unsigned char>(num_resolved)});
+				num_missing_syms -= Int<2u>{static_cast<unsigned char>(num_resolved)};
 				--boxes_has.ch_count_sym(a_box,*a_sym);
 				++boxes_has.ch_count_sym(b_box,*a_sym);
 				--boxes_has.ch_count_sym(b_box,*b_sym);
@@ -130,8 +130,8 @@ namespace okiidoku::mono { namespace {
 			OKIIDOKU_CONTRACT(num_resolved <=  2);
 			OKIIDOKU_CONTRACT(num_resolved >= -2);
 			if (num_resolved >= 0) [[unlikely]] {
-				OKIIDOKU_CONTRACT2(num_missing_syms >= Int<2u>{num_resolved});
-				num_missing_syms -= Int<2u>{num_resolved};
+				OKIIDOKU_CONTRACT2(num_missing_syms >= Int<2u>{static_cast<unsigned char>(num_resolved)});
+				num_missing_syms -= Int<2u>{static_cast<unsigned char>(num_resolved)};
 				--cols_has.ch_count_sym(a_col,*a_sym);
 				++cols_has.ch_count_sym(a_col,*b_sym);
 				--cols_has.ch_count_sym(b_col,*b_sym);

@@ -12,8 +12,8 @@ namespace okiidoku::mono::detail {
 
 	/** implemented in canon_sym.cpp.
 	\pre the grid is filled and follows the one rule. */
-	template<Order O> requires(is_order_compiled(O))
-	typename Transformation<O>::sym_map_t canon_sym(Grid<O>&) noexcept;
+	template<Order O> requires(is_order_compiled(O)) [[nodiscard, gnu::pure]]
+	typename Transformation<O>::sym_map_t canon_sym(const Grid<O>&) noexcept;
 
 	/** implemented in canon_pos.cpp.
 	\pre the grid is filled and follows the one rule. */

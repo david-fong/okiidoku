@@ -106,7 +106,7 @@ find_program(CCACHE_EXE NAMES ccache DOC "Path to ccache executable")
 if(NOT "${CCACHE_EXE}" STREQUAL "CCACHE_EXE-NOTFOUND")
 	message("using ccache with namespace `okiidoku.${CMAKE_CXX_COMPILER_ID}.$<CONFIG>`") # (for `ccache --evict-namespace`)
 	set(CMAKE_CXX_COMPILER_LAUNCHER "${CCACHE_EXE}"
-		"namespace = okiidoku.${CMAKE_CXX_COMPILER_ID}.$<CONFIG>"
+		"namespace = $<LOWER_CASE:okiidoku.${CMAKE_CXX_COMPILER_ID}.$<CONFIG>>"
 		"ignore_options = /w* /W* -W* -ftabstop=*"
 		# man ccache @"COMPILING IN DIFFERENT DIRECTORIES":
 		"base_dir = ${okiidoku_SOURCE_DIR}/.."
@@ -116,7 +116,7 @@ if(NOT "${CCACHE_EXE}" STREQUAL "CCACHE_EXE-NOTFOUND")
 	)
 	if(NOT OKIIDOKU_BUILD_REPRODUCIBLE)
 		list(APPEND CMAKE_CXX_COMPILER_LAUNCHER
-			"sloppiness = locale,random_seed,time_macros"
+			"sloppiness = locale,random_seed,time_macros,modules"
 		)
 	endif()
 	# add_compile_options( # see run_second_cpp docs

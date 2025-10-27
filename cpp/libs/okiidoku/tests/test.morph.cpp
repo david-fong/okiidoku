@@ -54,7 +54,7 @@ void test_morph(okiidoku::util::SharedRng& shared_rng, const std::uintmax_t num_
 
 TEST_CASE("okiidoku.morph") {
 	constexpr auto default_num_rounds {100u};
-	okiidoku::util::SharedRng shared_rng {std::random_device{}()}; // look into using Catch2 GENERATE and random() features
+	okiidoku::util::SharedRng shared_rng {std::random_device{}()};
 
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 	okiidoku::test::test_morph<(O_)>(shared_rng, default_num_rounds);

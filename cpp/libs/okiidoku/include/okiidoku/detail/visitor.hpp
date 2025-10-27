@@ -92,7 +92,7 @@ namespace okiidoku::visitor::detail {
 		decltype(auto) unchecked_get_mono_exact(this auto&& self) noexcept {
 			using T_var = typename Adaptor::template type<O>;
 			OKIIDOKU_CONTRACT2(std::holds_alternative<T_var>(self.variant_));
-			decltype(auto) var {std::get_if<T_var>(&std::forward_like<decltype(self)>(self.variant_))};
+			decltype(auto) var {std::get_if<T_var>(&self.variant_)};
 			OKIIDOKU_CONTRACT(var != nullptr);
 			return std::forward_like<decltype(self)>(*var);
 		}

@@ -8,6 +8,8 @@ add_executable(okiidoku_cli
 set_target_properties(okiidoku_cli PROPERTIES
 	EXPORT_NAME cli
 	SPDX_LICENSE [[AGPL-3.0-or-later]]
+	# CXX_SCAN_FOR_MODULES ON
+	# CXX_MODULE_STD ON
 )
 target_compile_features(okiidoku PRIVATE cxx_std_23)
 okiidoku_add_compiler_options(okiidoku_cli)

@@ -74,7 +74,7 @@ namespace okiidoku::detail {
 		[[nodiscard]] bool accept(Item in) noexcept {
 			OKIIDOKU_CONTRACT(!did_overflow_);              // caller `flush`ed as needed.
 			OKIIDOKU_CONTRACT(buf_radixx_ <= buf_t_max/2u); // caller `flush`ed as needed.
-			OKIIDOKU_CONTRACT2(queue_end_ < queue_.size());
+			OKIIDOKU_CONTRACT(queue_end_ < queue_.size());
 			OKIIDOKU_CONTRACT(in.radix <= radix_t_max);
 			OKIIDOKU_CONTRACT(in.radix > 0u);
 			OKIIDOKU_CONTRACT(in.digit < in.radix);
@@ -90,7 +90,7 @@ namespace okiidoku::detail {
 				OKIIDOKU_CONTRACT(radix_0 < in.radix);
 				if (radix_0 >= 2u) [[likely]] {
 					buf_radixx_ = TO<buf_t>((buf_radixx_*radix_0)+(radix_0-1u));
-					OKIIDOKU_CONTRACT2(queue_end_ < queue_.size()-1uz);
+					OKIIDOKU_CONTRACT(queue_end_ < queue_.size()-1uz);
 					auto& qi {queue_[queue_end_++]};
 					qi.radix = radix_0;
 					qi.digit = std::min(in.digit, TO<radix_t>(radix_0 - radix_t{1u}));
@@ -101,7 +101,7 @@ namespace okiidoku::detail {
 				OKIIDOKU_CONTRACT(in.digit < in.radix);
 				// save overflow and return:
 				// buf_radixx_ = // <- don't! see `flush` uses and resets it.
-				OKIIDOKU_CONTRACT2(queue_end_ < queue_.size());
+				OKIIDOKU_CONTRACT(queue_end_ < queue_.size());
 				queue_[queue_end_] = in;
 				did_overflow_ = true;
 

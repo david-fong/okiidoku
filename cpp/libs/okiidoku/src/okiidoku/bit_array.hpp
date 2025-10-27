@@ -39,8 +39,8 @@ namespace okiidoku {
 		using word_ii_t = Int<(width_ + (word_width-1u)) / word_width>; // i.e. `round_up(width / word_width)`
 		using word_ix_t = Int<word_ii_t::max-1u>;
 		using word_bit_ii_t = Int<(width_ < word_width) ? width_ : word_width>;
-		static constexpr     word_ii_t::constant_t num_words     {};
-		static constexpr word_bit_ii_t::constant_t num_word_bits {};
+		static constexpr     word_ii_t::fixed_t num_words     {};
+		static constexpr word_bit_ii_t::fixed_t num_word_bits {};
 		static constexpr Int<(num_words*word_width)-width_,IntKind::fixed> num_excess_bits {};
 		static_assert(  num_words > 0u);
 		static_assert(( num_words     * num_word_bits) >= width_, "enough words"   );
@@ -201,7 +201,7 @@ namespace okiidoku {
 			BitArray arr_;
 			bit_ii_t i_;
 		public:
-			explicit Iter(const BitArray& arr) noexcept: arr_{arr} { advance(); }
+			explicit constexpr Iter(const BitArray& arr) noexcept: arr_{arr} { advance(); }
 			[[nodiscard, gnu::pure]] constexpr bool not_end() const noexcept { return i_ < width; }
 			/** \pre `not_end()` */
 			[[nodiscard, gnu::pure]] constexpr bit_ix_t value() const noexcept {
@@ -210,7 +210,7 @@ namespace okiidoku {
 			/**
 			\pre `not_end()`
 			\post has advanced to the bit index of the next set bit. */
-			void advance() noexcept {
+			constexpr void advance() noexcept {
 				OKIIDOKU_CONTRACT(i_ < width); OKIIDOKU_CONTRACT(not_end());
 				const word_ii_t word_i {[&]noexcept{
 					if constexpr (num_words == 1u) {
@@ -231,15 +231,15 @@ namespace okiidoku {
 					i_ = width;
 				}
 			}
-			[[gnu::pure]] reference operator* () const noexcept { OKIIDOKU_CONTRACT(not_end()); return value(); }
-			[[gnu::pure]] pointer   operator->() const noexcept { OKIIDOKU_CONTRACT(not_end()); return value(); }
-			Iter& operator++()    noexcept { advance(); return *this; }
-			Iter  operator++(int) noexcept { Iter tmp = *this; ++(*this); return tmp; }
-			[[nodiscard, gnu::pure]] friend bool operator!=(const Iter& i, [[maybe_unused]] const std::default_sentinel_t s) noexcept { return i.not_end(); }
-			[[nodiscard, gnu::pure]] auto& begin() { return *this; }
-			[[nodiscard, gnu::const]] auto end()   { return std::default_sentinel; }
+			[[nodiscard, gnu::pure]]  constexpr auto& begin() const noexcept { return *this; }
+			[[nodiscard, gnu::const]] constexpr auto  end()   const noexcept { return std::default_sentinel; }
+			[[nodiscard, gnu::pure]] friend constexpr bool operator!=(const Iter& i, [[maybe_unused]] const std::default_sentinel_t s) noexcept { return i.not_end(); }
+			[[gnu::pure]] constexpr reference operator* () const noexcept { OKIIDOKU_CONTRACT(not_end()); return value(); }
+			[[gnu::pure]] constexpr pointer   operator->() const noexcept { OKIIDOKU_CONTRACT(not_end()); return value(); }
+			constexpr Iter& operator++()    noexcept { advance(); return *this; }
+			constexpr Iter  operator++(int) noexcept { Iter tmp = *this; ++(*this); return tmp; }
 		};
-		[[nodiscard, gnu::pure]] Iter set_bits() const noexcept {
+		[[nodiscard, gnu::pure]] constexpr Iter set_bits() const noexcept {
 			return Iter(*this);
 		}
 

@@ -24,8 +24,8 @@ Scrambling cannot:
 
 - Swap cells between 1xO1 (vertical or horizontal) box-aligned slices (I will call this an "atom").
 - Swap cells or atoms between houses.
-- Swap boxes between chutes.
-- Change the vertical/horizontal orientation of an atom without doing so for all atoms (transposing the grid).
+- Swap boxes between chutes except by swapping entire chutes.
+- Change the vertical/horizontal orientation of an atom except by transposing the whole grid.
 
 ### Partial Imbalance Analysis
 
@@ -35,28 +35,45 @@ Once source of chute_imbalance is in the distribution of same-atom relations bet
 
 I decided not to try to support direct canonicalization of puzzles. I don't know how much time it would take to adapt the current algorithm to work for that, and there's another way to do it which is much simpler to _understand_: simply solve the puzzle, canonicalize the solution, and apply the same canonicalizing transformations to the puzzle. While it comes with the cost of solving, there is elegance in that this approach is easy to implement outside of any canonicalization algorithm's specific implementation details, and that when the puzzle is solved, the solution will be in canonical form.
 
-### High Level Approach
+### Symbol Canonicalization
 
-- base the canonicalization on comparing measures of chute_imbalance in the grid's scramble-invariant properties.
+Given a grid `G` and a pair of symbols `a` and `b`, for each box `B` of `G`, we can observe whether, and in what orientation `a` and `b` cohabit an atom in `B`.
 
-- default to factoring as many cells as possible into the sorting bases, and only factoring them out when necessary to break ties instead of vice versa.
+Given `G`, `a`, and `b`, this could be visualized like so, in an `O1 x O1` grid of `B`s, where "0" represents no atom-cohabitation, "|" represents cohabitation of a vertical atom, and "-" represents cohabitation of a horizontal atom:
+```none
+- | |
+| | 0
+0 0 -
+```
+This is still a positional frame of observation (because of the grid of `B`s). but we want to observe qualities that are position-agnostic.
+
+<!--
+\internal I wrote this below sentence in the past and don't understand now what it means or why I wrote it.
+each O2*O2 symbol pair (excluding self-pairs) will have such a table, and
+when all overlayed together, each position will have O*(O-1)/2 of each of `a`
+and `b`, and `O^2 * (O-1)^2` blanks.
+-->
+
+Here are some position-agnostic qualities we can extract from this frame of observation:
+- How many boxes do the two symbols cohabit an atom in? [0,O2] sort desc.
+- Try to normalize "-" / "|".
+	- For each cohabitation-orientation cell,
+		- How many other cells does it see "pointing to" it?
+		- How many other cells does it see "orthogonal to" it?
+- Of the atom cohabitations, how many point the same way? [0,O2] sort desc lexicographically of desc sorted per direction
+- Of the atom cohabitations, how many
+
+Now that we can assign quantitative measures to relationships between pairs of symbols, we can try to provide an ordering between two symbols based on their relationships with all other symbols.
+
+### Position Canonicalization
+
+This depends on first performing symbol canonicalization.
+
+<!-- TODO -->
 
 ### Time Complexity
 
 TODO: update this.
-
-If anyone would like to verify my evaluation here it would be much appreciated. Take a look at [`canon_sym.cpp`](./canon_sym.cpp) and [`canon_pos.cpp`](./canon_pos.cpp).
-
-- label
-  - getting rel mask table: iterate atoms (`O3`). for each atom, iterate pairs of labels (`nCr(O1,2) = O1!/(2*(O1-2)!)`). total: `O3 * O1!/(2*(O1-2)!)`.
-  - iterate rel mask table (`O4`). for each rel mask, get polar counts (`O1`), and sort them (`O1*log(O1)`). total: `O4 * O1*log(O1)`.
-  - iterate placeless info table (`O4`) and if polarities should be swapped, do it (`O4`). total: `O4`.
-  - sort rows of placeless info table (`O2 * O2*log(O2)`).
-  - reduce rows of placeless info table (`O2 * O2`).
-  - optional: transpose placeless info table for a possible cache optimization. I'm not sure if this is actually effective. needs benchmarking. (`O4`).
-  - sort the placeless info table lexicographically. I don't know what the time complexity for this is. definitely less than `O2*log(O2) * O2` (if every lexicographical compare gets worst-case tie-breaking).
-
-Time complexity isn't everything. There's also space usage and caching. I've tried to carefully take those into account as well.
 
 ### Result
 

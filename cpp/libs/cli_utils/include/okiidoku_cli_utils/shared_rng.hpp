@@ -5,7 +5,7 @@
 
 #include <pcg_random.hpp>
 
-#include <random>
+// #include <random>
 #include <mutex>
 #include <cstdint>
 
@@ -16,7 +16,8 @@ namespace okiidoku::util {
 		// \internal
 		// - consider not using this for any hot-loop operations.
 		// - this is not thread-safe. guard with mutex where necessary.
-		using rng_t = std::mt19937_64;
+		// using rng_t = std::mt19937_64;
+		using rng_t = pcg64_fast;
 
 		explicit SharedRng(rng_t::result_type seed) noexcept: rng_{seed} {}
 
