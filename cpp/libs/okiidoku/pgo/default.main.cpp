@@ -13,7 +13,7 @@
 #include <cstdlib>   // EXIT_SUCCESS
 
 template<okiidoku::Order O>
-void do_training(okiidoku::util::SharedRng& shared_rng, const unsigned num_rounds) {
+void do_training(okiidoku::util::Prng& shared_rng, const unsigned num_rounds) {
 	// 3: 30k, 4: 40k, 5: 700,
 	using namespace ::okiidoku;
 	using namespace ::okiidoku::mono;
@@ -59,9 +59,9 @@ int main(const int argc, char const *const argv[]) {
 
 	std::cout << "\nparsed arguments:"
 	<< "\n- arg 1 (srand key)  : " << std::hex << rng_seed << std::dec // TODO.mid ugh. it's using my numpunct grouping.
-	<< std::endl;
+	<< '\n';
 
-	okiidoku::util::SharedRng shared_rng(rng_seed);
+	okiidoku::util::Prng shared_rng(rng_seed);
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 	do_training<(O_)>(shared_rng, 1000);
 	OKIIDOKU_FOREACH_O_DO_EMIT

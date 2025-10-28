@@ -12,7 +12,7 @@
 // #include <okiidoku/serdes.hpp> TODO
 #include <okiidoku/grid.hpp>
 
-#include <iostream>     // cout, endl,
+#include <iostream>     // cout
 // #include <fstream>
 // #include <filesystem>   // create_directories
 #include <iomanip>      // setw,
@@ -30,9 +30,7 @@ namespace okiidoku::cli {
 	}
 
 	void Repl::start() {
-		std::cout
-		<< str::dim.on << welcome_message << str::dim.off
-		<< std::endl;
+		std::cout << str::dim.on << welcome_message << str::dim.off << '\n';
 
 		while (true) {
 			std::cout << "\n[" << std::dec << uint_fast32_t{config_.order()} << "]: ";
@@ -48,23 +46,23 @@ namespace okiidoku::cli {
 				break;
 			}
 		}
+		std::cout.flush();
 	}
 
 
 	bool Repl::run_command(const std::string_view cmd_line) {
 		const auto token_pos {cmd_line.find(' ')};
-		// Very simple parsing: Assumes no leading spaces, and does not
+		// very simple parsing: assumes no leading spaces, and does not
 		// trim leading or trailing spaces from the arguments substring.
 		const std::string_view cmd_name {cmd_line.substr(0u, token_pos)};
-		const std::string_view cmd_args {(token_pos == std::string_view::npos)
-			? ""
-			:  cmd_line.substr(token_pos + 1u, std::string_view::npos)}
-			;
+		const std::string_view cmd_args {(token_pos != std::string_view::npos)
+			? cmd_line.substr(token_pos + 1u, std::string_view::npos)
+			: std::string_view{}
+		};
 		const auto it {Command::command_str_to_enum_map.find(cmd_name)};
 		if (it == Command::command_str_to_enum_map.end()) [[unlikely]] {
-			// No command name was matched.
 			std::cout << str::red.on << "command \"" << cmd_line << "\" not found."
-				" enter \"help\" for the help menu." << str::red.off << std::endl;
+				" enter \"help\" for the help menu." << str::red.off << '\n';
 			return true;
 		}
 		switch (it->second) {
@@ -73,14 +71,14 @@ namespace okiidoku::cli {
 				std::cout
 				<< Command::help_message /* << str::dim.on
 				important subcommand help messages can go here if needed
-				<< str::dim.off */ << std::endl;
+				<< str::dim.off */ << '\n';
 				break;
 			}
 			case E::quit: [[unlikely]] {
 				return false;
 			}
 			case E::config_order: [[unlikely]] { config_.order(cmd_args); break; }
-			case E::config_auto_canonicalize: [[unlikely]] { config_.canonicalize(cmd_args); break; }
+			case E::config_auto_canonicalize: [[unlikely]] { config_.canon(cmd_args); break; }
 			case E::gen_single: { gen_single(); break; }
 			case E::gen_multiple: { gen_multiple(cmd_args); break; }
 		}
@@ -90,21 +88,19 @@ namespace okiidoku::cli {
 
 	void Repl::gen_single() {
 		using namespace ::okiidoku::visitor;
-		const clock_t clock_start {std::clock()};
-		Grid grid(config_.order());
+		const Timer timer {};
+		Grid grid {config_.order()};
 		grid.init_most_canonical();
-		shuffle(grid, shared_rng_());
-		const double processor_time {(static_cast<double>(std::clock() - clock_start)) / CLOCKS_PER_SEC};
-		{
-			if (config_.canonicalize()) {
-				canonicalize(grid); // should we make a copy and print as a second grid image?
-			}
-			print_2d(std::cout, shared_rng_(), grid);
+		shuffle(grid, prng_());
+		if (config_.canon()) {
+			canonicalize(grid); // should we make a copy and print as a second grid image?
 		}
+		print_2d(std::cout, prng_(), grid);
+		const auto elapsed {timer.read_elapsed()};
 		std::cout << std::setprecision(4)
-			<< "\nprocessor time: " << processor_time << " seconds"
-			;
-		std::cout << std::endl;
+			<< "\nprocess time (s):    " << elapsed.proc_seconds
+			<< "\nwall-clock time (s): " << elapsed.wall_seconds
+			<< '\n';
 	}
 
 
@@ -114,20 +110,20 @@ namespace okiidoku::cli {
 		{
 			// std::filesystem::create_directories("gen");
 			const auto file_path {std::string{"gen/"} + std::to_string(uint_fast32_t{config_.order()}) + ".bin"};
-			std::cout << "output file path: " << file_path << std::endl;
+			std::cout << "output file path: " << file_path << '\n';
 			// std::ofstream of(file_path, std::ios::binary|std::ios::ate);
 			// TODO.wait change this to use the archiving operations.
 			// try {
 			// 	of.exceptions()
 			// } catch (const std::ios_base::failure& fail) {
-			// 	std::cout << str::red.on << fail.what() << str::red.off << std::endl;
+			// 	std::cout << str::red.on << fail.what() << str::red.off << '\n';
 			// }
 			// alignas(std::uint_fast64_t)
 			Grid grid {config_.order()};
 			grid.init_most_canonical();
-			const bool should_canonicalize {config_.canonicalize()};
+			const bool should_canonicalize {config_.canon()};
 			for (std::uintmax_t prog {0u}; prog < how_many; ++prog) {
-				shuffle(grid, shared_rng_());
+				shuffle(grid, prng_());
 				if (should_canonicalize) {
 					canonicalize(grid);
 				}
@@ -141,14 +137,12 @@ namespace okiidoku::cli {
 			<< "\nhow_many:            " << how_many
 			// << "\nnum threads:        " << params.num_threads
 			<< "\nprocess time (s):    " << elapsed.proc_seconds
-			<< "\nwall-clock time (s): " << elapsed.wall_seconds
-			;
+			<< "\nwall-clock time (s): " << elapsed.wall_seconds;
 
 		if (elapsed.wall_seconds > 10.0) [[unlikely]] {
-			// Emit a beep sound if the trials took longer than ten processor seconds:
-			std::cout << '\a' << std::flush;
+			std::cout << '\a';
 		}
-		std::cout << std::endl;
+		std::cout << '\n';
 	}
 
 
@@ -158,13 +152,13 @@ namespace okiidoku::cli {
 			if (how_many <= 0u) [[unlikely]] {
 				std::cout << str::red.on
 					<< "please provide a non-zero, positive integer."
-					<< str::red.off << std::endl;
+					<< str::red.off << '\n';
 				return;
 			}
 		} else [[unlikely]] {
 			std::cout << str::red.on
 				<< "could not convert \"" << how_many_str << "\" to an integer."
-				<< str::red.off << std::endl;
+				<< str::red.off << '\n';
 			return;
 		}
 		this->gen_multiple(how_many);

@@ -52,6 +52,7 @@ target_link_options(okiidoku_js PRIVATE
 okiidoku_add_compiler_options(okiidoku_js)
 # TODO: look into emscripten issue ticket #23035 about SIMD targetting
 target_link_libraries(okiidoku_js
+	PRIVATE pcg::pcg
 	PRIVATE okiidoku
 	PRIVATE embind
 )

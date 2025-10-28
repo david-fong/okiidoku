@@ -14,9 +14,10 @@ static_assert(__EMSCRIPTEN__); // https://emscripten.org/docs/compiling/Building
 #include <okiidoku/print_2d.hpp>
 #include <okiidoku/grid.hpp>
 
+#include <pcg_random.hpp>
+
 #include <sstream>
 #include <string>
-#include <random>  // mt19937_64
 #include <cstdint>
 #include <type_traits>
 
@@ -30,7 +31,7 @@ namespace okiidoku::em { namespace {
 
 	class Rng final {
 	public:
-		std::mt19937_64 rng_ {};
+		pcg32_fast rng_ {};
 		void seed(const std::uint_fast64_t seed) noexcept {
 			rng_.seed(seed);
 		}

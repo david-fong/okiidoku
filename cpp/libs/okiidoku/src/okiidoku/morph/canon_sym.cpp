@@ -33,7 +33,7 @@ namespace okiidoku::mono { namespace {
 
 		/** for a given grid, sym (AKA "label"), and box, what boxcell is the sym in? */
 		struct SymBoxToBoxcellMap final : public detail::Gridlike<O,to_t> {
-			using B = SymBoxToBoxcellMap::Gridlike;
+			using B = detail::Gridlike<O,to_t>;
 			using B::operator[];
 
 			/** \pre grid is filled and follows the one rule. */

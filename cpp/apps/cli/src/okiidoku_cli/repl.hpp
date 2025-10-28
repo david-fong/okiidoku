@@ -4,8 +4,8 @@
 #define HPP_OKIIDOKU_CLI_REPL
 
 #include <okiidoku_cli/config.hpp>
+#include <okiidoku_cli_utils/shared_rng.hpp>
 #include <okiidoku/order.hpp>
-namespace okiidoku::util { class SharedRng; }
 
 #include <map>
 #include <string_view>
@@ -46,24 +46,19 @@ namespace okiidoku::cli {
 
 	class Repl final {
 	public:
-		// TODO: consider taking ownership of rng? or if we can get a space-cheap implementation, doesn't matter
-		explicit Repl(const Order order_input, util::SharedRng& rng):
-			shared_rng_(rng)
+		explicit Repl(const Order order_input, ::okiidoku::util::Prng prng):
+			prng_ {prng}
 		{
 			config_.order(order_input);
 		}
 
-		// disallow copies and moves:
-		Repl(const Repl&) = delete;
-		Repl& operator=(const Repl&) = delete;
-		// Note to self: move operations are not implicitly declared if copy operations are user-declared.
-		// TODO pretty sure I only did this because rng is a reference. would wrapping cref or non-owning smart pointer type help? or just switching to a PRNG with good characteristics and small state size... (PCG?)
-
 		void start();
-		bool run_command(std::string_view cmd_line);
+
+		/** \return `false` if command requested to end REPL. */
+		[[nodiscard]] bool run_command(std::string_view cmd_line);
 
 	private:
-		util::SharedRng& shared_rng_;
+		::okiidoku::util::Prng prng_;
 		Config config_;
 
 		void gen_single();

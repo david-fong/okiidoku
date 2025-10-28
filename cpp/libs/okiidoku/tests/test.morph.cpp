@@ -18,7 +18,7 @@
 
 namespace okiidoku::test {
 template<Order O> OKIIDOKU_KEEP_FOR_DEBUG // NOLINTNEXTLINE(*-internal-linkage)
-void test_morph(okiidoku::util::SharedRng& shared_rng, const std::uintmax_t num_rounds) {
+void test_morph(okiidoku::util::Prng& shared_rng, const std::uintmax_t num_rounds) {
 	INFO("testing for order " << unsigned{O});
 	if constexpr (O >= 4) { return; } // TODO.mid enable when solver for order=5 is faster?
 	using namespace ::okiidoku::mono;
@@ -54,7 +54,7 @@ void test_morph(okiidoku::util::SharedRng& shared_rng, const std::uintmax_t num_
 
 TEST_CASE("okiidoku.morph") {
 	constexpr auto default_num_rounds {100u};
-	okiidoku::util::SharedRng shared_rng {std::random_device{}()};
+	okiidoku::util::Prng shared_rng {std::random_device{}()};
 
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
 	okiidoku::test::test_morph<(O_)>(shared_rng, default_num_rounds);

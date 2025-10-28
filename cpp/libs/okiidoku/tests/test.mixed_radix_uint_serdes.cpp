@@ -4,6 +4,7 @@
 #include <okiidoku/detail/mixed_radix_uint_serdes.hpp>
 #include <catch2/catch_test_macros.hpp>
 
+#include <okiidoku_cli_utils/shared_rng.hpp>
 #include <okiidoku/detail/util.hpp>
 
 // import std;
@@ -126,8 +127,8 @@ TEST_CASE("okiidoku.uint_serdes") {
 TEST_CASE("okiidoku.mixed_radix_uint_serdes") {
 	// okiidoku::test_mixed_radix_uint_serdes<std::uint_least8_t, std::uint_least16_t>(3316611681754028984uLL, 10u);
 	static constexpr std::uintmax_t num_rounds {1024u};
-	// std::mt19937 rng {0u};
-	std::mt19937 rng {std::random_device{}()};
+	// ::okiidoku::util::Prng rng {0u};
+	::okiidoku::util::Prng rng {std::random_device{}()};
 	for (std::uintmax_t round {0u}; round < num_rounds; ++round) { CAPTURE(round);
 		using u8_t  = std::uint_least8_t ;
 		using u16_t = std::uint_least16_t;

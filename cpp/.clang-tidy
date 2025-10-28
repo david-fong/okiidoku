@@ -11,7 +11,6 @@ Checks: "
     -readability-named-parameter,
     -readability-redundant-access-specifiers,
   performance-*,
-    -performance-avoid-endl,
   modernize-*,
     -modernize-use-trailing-return-type,
 

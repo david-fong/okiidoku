@@ -20,7 +20,7 @@ int main(const int argc, char const *const argv[]) {
 
 	// std::cout << "\nPARSED ARGUMENTS:"
 	// << "\n- ARG 1 [[ grid order ]] : " << user_order
-	// << std::endl;
+	// << '\n';
 
 	(void)argc; (void)argv; // TODO
 

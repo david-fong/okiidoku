@@ -5,36 +5,7 @@
 
 #include <pcg_random.hpp>
 
-// #include <random>
-#include <mutex>
-#include <cstdint>
-
 namespace okiidoku::util {
-
-	class SharedRng final {
-	public:
-		// \internal
-		// - consider not using this for any hot-loop operations.
-		// - this is not thread-safe. guard with mutex where necessary.
-		// using rng_t = std::mt19937_64;
-		using rng_t = pcg64_fast;
-
-		explicit SharedRng(rng_t::result_type seed) noexcept: rng_{seed} {}
-
-		[[nodiscard]] std::uint_fast32_t operator()() noexcept {
-			const std::scoped_lock scoped_lock {mutex_};
-			#ifndef __clang__
-			#pragma GCC diagnostic push
-			#pragma GCC diagnostic ignored "-Wuseless-cast" // not useless on MSVC
-			#endif
-			return static_cast<std::uint_fast32_t>(rng_() - decltype(rng_)::min());
-			#ifndef __clang__
-			#pragma GCC diagnostic pop
-			#endif
-		}
-	private:
-		rng_t rng_;
-		mutable std::mutex mutex_;
-	};
+	using Prng = pcg64_fast;
 }
 #endif

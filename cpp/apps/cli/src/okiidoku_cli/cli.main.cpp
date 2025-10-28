@@ -61,11 +61,9 @@ int main(const int argc, char const *const argv[]) {
 		<< "\n[2] (prng seed)  : ";
 	std::cout.imbue(loc1); std::cout << std::hex << std::setw(2*sizeof(rng_seed)) << rng_seed;
 	std::cout.imbue(loc2); std::cout << std::dec << std::setw(0);
-	std::cout << std::endl;
+	std::cout << '\n';
 
-	ok::util::SharedRng shared_rng {rng_seed};
-
-	ok::cli::Repl repl {user_order, shared_rng};
+	ok::cli::Repl repl {user_order, ok::util::Prng{rng_seed}};
 	repl.start();
 
 	std::cout << "\nbye bye!\n\n";
