@@ -47,23 +47,19 @@ Given `G`, `a`, and `b`, this could be visualized like so, in an `O1 x O1` grid 
 ```
 This is still a positional frame of observation (because of the grid of `B`s). but we want to observe qualities that are position-agnostic.
 
-<!--
-\internal I wrote this below sentence in the past and don't understand now what it means or why I wrote it.
-each O2*O2 symbol pair (excluding self-pairs) will have such a table, and
-when all overlayed together, each position will have O*(O-1)/2 of each of `a`
-and `b`, and `O^2 * (O-1)^2` blanks.
--->
-
 Here are some position-agnostic qualities we can extract from this frame of observation:
 - How many boxes do the two symbols cohabit an atom in? [0,O2] sort desc.
+- Of the atom cohabitations, how many are horizontal, and how many are vertical? [0,O2] sort desc lexicographically of desc sorted per direction
 - Try to normalize "-" / "|".
 	- For each cohabitation-orientation cell,
-		- How many other cells does it see "pointing to" it?
-		- How many other cells does it see "orthogonal to" it?
-- Of the atom cohabitations, how many point the same way? [0,O2] sort desc lexicographically of desc sorted per direction
-- Of the atom cohabitations, how many
+		- How many other cells does it see "pointing to" it? Ex. `121 011 231`
+		- How many other cells does it see "orthogonal to" it? Ex. `212 213 100`
+    - How many other "occupied" cells can it see? notice the information redundancy in that the arraysum of the above two equals this.
+    - Could try to maxlex these by performing chute rearrangement and transposition to factor out positionality from it.
 
-Now that we can assign quantitative measures to relationships between pairs of symbols, we can try to provide an ordering between two symbols based on their relationships with all other symbols.
+Note that for a given symbol `a`, the number of atom-cohabitations it has with symbols other than itself is always exactly `O2 * (O1-1)*2`, and the number of times it cohabits an atom with some other symbol `b` is in the range [0,O2], with an average of `(O1-1)*2`.
+
+Now that we can assign quantitative measures to relationships between pairs of symbols, we can try to provide an ordering between two symbols based on their relationships with all other symbols (for each `a` and `b`, performing some kind of sorting or normalization of the quanitifcations of its relationships with other symbols `S-{a}` and `S-{b}` respectively to make them symbol-agnostic as entities that can be compared to produce an ordering).
 
 ### Position Canonicalization
 

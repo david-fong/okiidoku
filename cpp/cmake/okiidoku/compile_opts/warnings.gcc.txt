@@ -2,6 +2,7 @@
 -Wnormalized
 -Wno-unknown-pragmas
 -Wno-attributes=clang::
+-Wno-attributes=msvc::
 
 -Wtrampolines
 -Wimplicit-fallthrough=5

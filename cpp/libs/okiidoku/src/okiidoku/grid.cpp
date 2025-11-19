@@ -46,7 +46,7 @@ namespace okiidoku::mono {
 	bool Grid<O>::is_filled() const noexcept {
 		return std::all_of(OKIIDOKU_UNSEQ
 			B::arr.cbegin(), B::arr.cend(),
-			[][[gnu::const]](const auto sym)noexcept{ sym.check(); return sym < T::O2; }
+			[][[gnu::const]](const auto sym)static noexcept{ sym.check(); return sym < T::O2; }
 		);
 	}
 
@@ -55,7 +55,7 @@ namespace okiidoku::mono {
 	bool Grid<O>::is_empty() const noexcept {
 		return std::all_of(OKIIDOKU_UNSEQ
 			B::arr.begin(), B::arr.end(),
-			[][[gnu::const]](const auto sym)noexcept{ sym.check(); return sym == T::O2; }
+			[][[gnu::const]](const auto sym)static noexcept{ sym.check(); return sym == T::O2; }
 		);
 	}
 

@@ -42,7 +42,7 @@ namespace okiidoku::mono { namespace {
 			detail::Ties<T::O1> chute_ties {};
 
 			explicit PolarState() noexcept {
-				line_ties.update([][[gnu::const]](auto a, auto b)noexcept{
+				line_ties.update([][[gnu::const]](auto a, auto b)static noexcept{
 					return (a%T::O1) == (b%T::O1);
 				});
 			}

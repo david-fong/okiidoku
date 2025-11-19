@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: 2020 David Fong
 # SPDX-License-Identifier: GPL-3.0-or-later
-cmake_minimum_required(VERSION 4.1)
+cmake_minimum_required(VERSION 4.2)
 
 # https://raw.githubusercontent.com/Kitware/CMake/refs/heads/master/Help/dev/experimental.rst
 set(CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_DEPENDENCIES [[1942b4fa-b2c5-4546-9385-83f254070067]])
@@ -11,6 +11,7 @@ set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD      [[d0edc3af-4c50-42ea-a356-e2862fe7a44
 project(okiidoku
 	VERSION 0.0.1
 	COMPAT_VERSION 0.0.1
+	SPDX_LICENSE [[AGPL-3.0-or-later]]
 	DESCRIPTION [[david fong's variable-grid-size sudoku toolkit]]
 	HOMEPAGE_URL [[https://github.com/david-fong/okiidoku]]
 	LANGUAGES CXX

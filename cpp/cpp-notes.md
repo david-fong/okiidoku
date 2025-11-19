@@ -114,6 +114,7 @@ things I got wrong before which I couldn't understand based on gcc's error messa
 - For defining global mutable variables (not constants!) shared between cpp files, declare prefixed with `extern` in a hpp files, and then define it in one of the cpp files. Functions always have external linkage. Note: but is there a good design argument for having that global mutable variable?
 
 - `inline` means a name can have multiple _identical_ definitions. For declaring _and defining_ global constants in headers with a single memory address, prefix the definition with `inline`. Same for functions in headers. For functions, if the function makes sense to make constexpr, use constexpr instead.
+  `constexpr` implies `inline` for functions and constructors, but [not for variables](https://stackoverflow.com/a/57407675).
 
 - Do not use `static` inside a member function to hold a lambda that captures `this`, since `this` is not always at the same address. Seems obvious in retrospect.
 
@@ -129,6 +130,9 @@ things I got wrong before which I couldn't understand based on gcc's error messa
 - for [`[[gnu::pure]]`](https://gcc.gnu.org/onlinedocs/gcc/Common-Function-Attributes.html#index-pure-function-attribute):
   > `int hash (char *) __attribute__ ((pure));`
   > tells GCC that subsequent calls to the function hash with the same string can be replaced by the result of the first call provided the state of the program observable by hash, including the contents of the array itself, does not change in between. **Even though hash takes a non-const pointer argument it must not modify the array it points to**, or any other object whose value the rest of the program may depend on. However, the caller may safely change the contents of the array between successive calls to the function (doing so disables the optimization). **The restriction also applies to member objects referenced by the this pointer** in C++ non-static member functions.
+
+- a lambda that has no captures can be marked `static`. Ex. `[](...) static {...}`. ([related c++weekly](https://youtu.be/M_AUMiSbAwQ)). may or may not also be a candidate for `[[gnu::const]]`. Ex. `[][[gnu::const]](...) static {...}`.
+- a lambda that is captureless and doesn't take arguments can be probably be `consteval` ([jason turner talk](https://youtu.be/q7OmdusczC8?t=4774)). in this case, I'm pretty sure there's not much point in adding `static` (or at least, no benefit for runtime performance, since it's done at compile-time) or `noexcept`, since if an exception happens in constant evaluation, I'll get a compiler diagnostic.
 
 ## more
 

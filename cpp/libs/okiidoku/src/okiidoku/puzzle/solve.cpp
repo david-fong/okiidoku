@@ -53,14 +53,14 @@ namespace okiidoku::mono {
 		}
 		// using T = Ints<O>;
 		using Find = detail::solver::CandElimFind<O>;
-		static constexpr auto find_intersections {[]([[maybe_unused]] detail::solver::Engine<O>& e_) noexcept {
+		static constexpr auto find_intersections {[]([[maybe_unused]] detail::solver::Engine<O>& e_) static noexcept {
 			if constexpr (O < 4u) {
 				return detail::solver::UnwindInfo::make_no_unwind();
 			} else {
 				return Find::locked_cands(e_);
 			}
 		}};
-		static constexpr auto find_subsets {[]([[maybe_unused]] detail::solver::Engine<O>& e_) noexcept {
+		static constexpr auto find_subsets {[]([[maybe_unused]] detail::solver::Engine<O>& e_) static noexcept {
 			if constexpr (O < 5u) { // NOLINT(readability-magic-numbers)
 				return detail::solver::UnwindInfo::make_no_unwind();
 			} else {

@@ -52,6 +52,10 @@
 
 ## Misc List
 
+- try to consteval default constructors? and copy constructors? parameterless functions.
+- try https://clang.llvm.org/docs/AttributeReference.html#regcall if optimizing in a non-portable way. look for a flag to make it default?
+- try adding https://clang.llvm.org/docs/AttributeReference.html#noescape to function params where implementation is in separate unit from header.
+- try https://clang.llvm.org/docs/AttributeReference.html#nodebug
 - try using pcg again
 - try deleting array subscript operator for bounded `Int` that would be out of range? test if it actually helps, or if `Int`'s implicit conversion to builtin int subverts it from being meaningful.
 - I wonder if [CMake deferred command calls](https://cmake.org/cmake/help/latest/command/cmake_language.html#deferring-calls) could be useful for anything...
@@ -87,9 +91,7 @@
 ### waiting
 
 - CMake 4.2
-  - [`$<TARGET_INTERMEDIATE_DIR:tgt>`](https://cmake.org/cmake/help/latest/manual/cmake-generator-expressions.7.html#genex:TARGET_INTERMEDIATE_DIR). can probably be used for lto cache dir (see default_output_dirs.cmake), and for PGO training data (see pgo_helpers.cmake, where setting `objects_dir` variable).
-  - Should I define `_UNICODE`? See [CMP0204](https://cmake.org/cmake/help/latest/policy/CMP0204.html).
-  - `project(SPDX_LICENSE)`
+  - Should I define `_UNICODE` or `_SBCS`? See [CMP0204](https://cmake.org/cmake/help/latest/policy/CMP0204.html) and [MFC docs](https://learn.microsoft.com/en-us/cpp/atl-mfc-shared/unicode-and-multibyte-character-set-mbcs-support). Should it be left to user?
 - CMake 3.31:
   - presets `$comment`
   - `CMAKE_EXPORT_BUILD_DATABASE`
@@ -110,11 +112,13 @@
     - https://en.cppreference.com/w/cpp/language/contract_assert.html
     - https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2025/p2900r14.pdf supported for defaulted special member functions! see section 3.3.3.
     - `-fcontract-evaluation-semantic`
-    - `to_chars_result::operator bool`
+  - `to_chars_result::operator bool`
   - with reflection, I might be able to do what I'm currently doing with macros like `OKIIDOKU_FOREACH_O_EMIT` and `OKIIDOKU_FOREACH_O_DO_EMIT`, and be in a better position to use C++ modules :O.
   - try using `pre` and `post()` on default and copy constructors of `Int<...>` to describe pre and postconditions
   - https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2025/p2786r13.html#introduction relocatability
+    - https://en.cppreference.com/w/cpp/language/class_property_specifiers.html
   - https://en.cppreference.com/w/cpp/utility/from_chars_result.html `operator bool`
+  - [`inplace_vector`](https://en.cppreference.com/w/cpp/container/inplace_vector.html)
 - C++29:
   - class invariants?: https://youtu.be/gtFFTjQ4eFU?t=873
 

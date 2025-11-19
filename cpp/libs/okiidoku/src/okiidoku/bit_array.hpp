@@ -266,7 +266,7 @@ namespace okiidoku::mono {
 	struct ChuteBoxMasks final {
 		using T = Ints<O>;
 		/// `[111'000'000, 000'111'000, 000'000'111]`
-		static constexpr std::array<BitArray<std::uintmax_t{O*O}>, O> row {[]{
+		static constexpr std::array<BitArray<std::uintmax_t{O*O}>, O> row {[]static consteval{
 			std::array<BitArray<std::uintmax_t{O*O}>, O> mask;
 			for (const auto chute : T::O1) {
 				for (const auto i : T::O1) {
@@ -275,7 +275,7 @@ namespace okiidoku::mono {
 			return mask;
 		}()};
 		/// `[100'100'100, 010'010'010, 001'001'001]`
-		static constexpr std::array<BitArray<std::uintmax_t{O*O}>, O> col {[]{
+		static constexpr std::array<BitArray<std::uintmax_t{O*O}>, O> col {[]static consteval{
 			std::array<BitArray<O>, O> mask;
 			for (const auto chute : T::O1) {
 				for (const auto i : T::O1) {

@@ -36,9 +36,9 @@ namespace okiidoku::mono {
 		using line_map_t = std::array<std::array<to_t, T::O1>, T::O1>;
 
 	public:
-		sym_map_t  sym_map {[]noexcept{ sym_map_t  _; for (const auto i : T::O2) { _[i] = i; } return _; }()}; //!< `map[sym_orig] -> sym_new`.
-		line_map_t row_map {[]noexcept{ line_map_t _; for (const auto i : T::O2) { _[i/T::O1][i%T::O1] = i; } return _; }()}; //!< `map[chute_orig][chute_cell_orig] -> line_new`.
-		line_map_t col_map {[]noexcept{ line_map_t _; for (const auto i : T::O2) { _[i/T::O1][i%T::O1] = i; } return _; }()}; ///< `map[chute_orig][chute_cell_orig] -> line_new`.
+		sym_map_t  sym_map {[]static{ sym_map_t  _; for (const auto i : T::O2) { _[i] = i; } return _; }()}; //!< `map[sym_orig] -> sym_new`. // note: consteval lambda vs program size tradeoff
+		line_map_t row_map {[]static{ line_map_t _; for (const auto i : T::O2) { _[i/T::O1][i%T::O1] = i; } return _; }()}; //!< `map[chute_orig][chute_cell_orig] -> line_new`. // note: consteval lambda vs program size tradeoff
+		line_map_t col_map {[]static{ line_map_t _; for (const auto i : T::O2) { _[i/T::O1][i%T::O1] = i; } return _; }()}; ///< `map[chute_orig][chute_cell_orig] -> line_new`. // note: consteval lambda vs program size tradeoff
 		bool post_transpose {false}; ///< whether to transpose after line remapping
 
 		[[nodiscard, gnu::pure]] friend constexpr bool operator==(const Transformation&, const Transformation&) noexcept = default;

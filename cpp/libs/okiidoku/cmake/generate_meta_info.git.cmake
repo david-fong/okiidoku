@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2020 David Fong
 # SPDX-License-Identifier: GPL-3.0-or-later
 # cspell:dictionaries cpp-refined
-cmake_minimum_required(VERSION 4.1)
+cmake_minimum_required(VERSION 4.2)
 if(CMAKE_SCRIPT_MODE_FILE STREQUAL "")
 	message(FATAL_ERROR "this should be called as an install script")
 endif()

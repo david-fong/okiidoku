@@ -1,13 +1,14 @@
 {
-	"vendor": {
-		"david-fong.github.io/okiidoku/notes": [
-			"https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html",
-			"https://github.com/microsoft/vscode-cmake-tools/blob/main/docs/cmake-presets.md",
-			"put personal/local preset configs in a CMakeUserPresets.json file.",
-			"inherit `tool:<some_tool>` and `base:user` to build your own presets."
-		]
-	},
 	"version": 10,
+	"$comment": [
+		"https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html",
+		"https://github.com/microsoft/vscode-cmake-tools/blob/main/docs/cmake-presets.md",
+		"put personal/local preset configs in a CMakeUserPresets.json file.",
+		"inherit `tool:<some_tool>` and `base:user` to build your own presets."
+	],
+	"vendor": {
+		"david-fong.github.io/okiidoku": []
+	},
 	"configurePresets": [
 		{
 			"name": "base:any",

@@ -73,7 +73,7 @@ namespace okiidoku::mono {
 		o4i_t num_keepers {0u};
 
 		// Note: will remove the logging once I'm done working on solver (ie. far in the future)
-		static constexpr auto call_debug_log_fn {[]([[maybe_unused]] auto&& fn){
+		static constexpr auto call_debug_log_fn {[]([[maybe_unused]] auto&& fn)static{
 			if constexpr (O < 5) { // NOLINT(*-branch-clone, *magic-number*)
 				#ifndef NDEBUG
 				fn();

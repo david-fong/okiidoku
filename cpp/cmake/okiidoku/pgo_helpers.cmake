@@ -225,19 +225,8 @@ function(okiidoku_target_pgo
 		# https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html
 		# https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html
 
-		# get per-config root dir for objects for `-fprofile-prefix-path`. relies on CMake internals.
-		block(PROPAGATE objects_dir)
-			get_property(is_multi_config GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
-			set(int_dir "")
-			if(is_multi_config)
-				set(int_dir "$<CONFIG>")
-			endif()
-			get_target_property(trainee_binary_dir ${trainee} BINARY_DIR)
-			set(objects_dir "${trainee_binary_dir}/CMakeFiles/${trainee}.dir/${int_dir}")
-		endblock()
-
 		target_compile_options(${trainee} PRIVATE
-			"$<${if_pgo}:-fprofile-prefix-path=${objects_dir}>" # TODO.wait CMake 4.2: use $<TARGET_INTERMEDIATE_DIR:${trainee}> instead
+			"$<${if_pgo}:-fprofile-prefix-path=$<TARGET_INTERMEDIATE_DIR:${trainee}>>"
 			"$<${if_gen}:-fprofile-generate=${data_dir}>"
 			"$<${if_use}:-fprofile-use=${data_dir}>"
 			# "$<${if_use}:-fprofile-correction>

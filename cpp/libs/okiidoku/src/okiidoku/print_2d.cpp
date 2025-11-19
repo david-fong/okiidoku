@@ -18,13 +18,13 @@
 
 namespace okiidoku { namespace {
 
-	void make_random_emoji_set(const rng_seed_t rng_seed, const std::span<std::string_view> sink) noexcept {
+	void make_random_emoji_set(const rng_seed_t rng_salt, const std::span<std::string_view> sink) noexcept {
 		thread_local constinit auto sets_ {emoji::sets}; ///< mutable underlying storage that `sets` hold views into.
-		thread_local static auto sets {std::apply([](auto& ...args)noexcept{
+		thread_local static auto sets {std::apply([](auto& ...args)static noexcept{
 			return std::to_array({(std::span<std::string_view>{args.entries})...});
 			// TODO when trying to make `sets` constinit and this lambda consteval, it fails. is it due to span constructor? or because sets_ is constinit and not constexpr?
 		}, sets_)};
-		std::minstd_rand rng {rng_seed};
+		std::minstd_rand rng {rng_salt};
 		std::shuffle(sets.begin(), sets.end(), rng);
 		auto sink_it {sink.begin()};
 		for (const auto set : sets) {
@@ -47,7 +47,7 @@ namespace okiidoku {
 	void print_2d_base(
 		const Order O,
 		std::ostream& os,
-		const rng_seed_t rng_seed,
+		const rng_seed_t rng_salt,
 		const std::span<const print_2d_grid_view> grid_views
 	) noexcept {
 		OKIIDOKU_CONTRACT(O <= largest_compiled_order);
@@ -82,7 +82,7 @@ namespace okiidoku {
 		const auto emoji_set {[&]noexcept{
 			std::vector<std::string_view> set {O2};
 			OKIIDOKU_CONTRACT2(set.size() == O2);
-			make_random_emoji_set(rng_seed, set);
+			make_random_emoji_set(rng_salt, set);
 			return set;
 		}()};
 		OKIIDOKU_CONTRACT2(emoji_set.size() == O2);

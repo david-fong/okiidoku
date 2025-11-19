@@ -248,7 +248,7 @@ namespace okiidoku::mono::detail::solver {
 		return get_num_unsolved() == T::O4 - o4i_t{std::count_if(OKIIDOKU_UNSEQ
 			cells_cands().arr.cbegin(),
 			cells_cands().arr.cend(),
-			[][[gnu::pure]](const auto& c)noexcept{ return c.count() == 1u; }
+			[][[gnu::pure]](const auto& c)static noexcept{ return c.count() == 1u; }
 		)};
 	}
 

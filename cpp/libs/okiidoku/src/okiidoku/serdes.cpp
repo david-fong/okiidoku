@@ -30,12 +30,12 @@ namespace okiidoku::mono { namespace {
 		/** hypothetical candidates remaining for future cells
 		based on already encountered (printed/parsed) cells. */
 		/*      */ cands_t /*   */ row_cands_         {~cands_t{}};
-		std::array<cands_t, T::O1> h_chute_box_cands_ {[]{ std::array<cands_t, T::O1> _; _.fill(~cands_t{}); return _; }()};
-		std::array<cands_t, T::O2> cols_cands_        {[]{ std::array<cands_t, T::O2> _; _.fill(~cands_t{}); return _; }()};
+		std::array<cands_t, T::O1> h_chute_box_cands_ {[]static{ std::array<cands_t, T::O1> _; _.fill(~cands_t{}); return _; }()}; // note: consteval lambda vs program size tradeoff
+		std::array<cands_t, T::O2> cols_cands_        {[]static{ std::array<cands_t, T::O2> _; _.fill(~cands_t{}); return _; }()}; // note: consteval lambda vs program size tradeoff
 		o4i_t cell_rmi_ {0u}; // TODO change to o4is_t? measure performance difference.
 
 		// \internal not protected <- to control member layout.
-		std::conditional_t<is_writer,
+		[[no_unique_address, msvc::no_unique_address]] std::conditional_t<is_writer,
 			::okiidoku::detail::MixedRadixUintWriter<o2is_t, std::uint64_t>,
 			::okiidoku::detail::MixedRadixUintReader<o2is_t, std::uint64_t>
 		> serdes_;

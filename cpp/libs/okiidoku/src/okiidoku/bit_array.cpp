@@ -33,7 +33,7 @@ namespace okiidoku {
 		} else {
 			/*RVO*/bit_ii_t count {std::transform_reduce(OKIIDOKU_UNSEQ
 				words_.cbegin(), words_.cend(), bit_ii_t{0u}, std::plus<bit_ii_t>{},
-				[][[gnu::const]](const auto word)noexcept{ return bit_ii_t{std::popcount(word)}; }
+				[][[gnu::const]](const auto word)static noexcept{ return bit_ii_t{std::popcount(word)}; }
 			)};
 			count.check();
 			return count;
@@ -59,7 +59,7 @@ namespace okiidoku {
 					words_[end_at_int] & static_cast<word_t>(word_bit_mask_for_bit_i(end) - word_t{1u})
 				)},
 				std::plus<bit_ix_t>{},
-				[][[gnu::const]](const auto word)noexcept{ return bit_ix_t{std::popcount(word)}; }
+				[][[gnu::const]](const auto word)static noexcept{ return bit_ix_t{std::popcount(word)}; }
 			)};
 		}
 	}
@@ -75,7 +75,7 @@ namespace okiidoku {
 			return count;
 		} else {
 			const auto word_it {std::find_if(OKIIDOKU_UNSEQ
-				words_.cbegin(), words_.cend(), [][[gnu::const]](const auto w)noexcept{ return w != 0u; }
+				words_.cbegin(), words_.cend(), [][[gnu::const]](const auto w)static noexcept{ return w != 0u; }
 			)};
 			if (word_it == words_.cend()) [[unlikely]] { return width; }
 			/*RVO*/bit_ii_t count {

@@ -13,7 +13,7 @@ namespace okiidoku {
 
 	using Order = unsigned char;
 
-	inline constexpr Order largest_compiled_order {[]{
+	inline constexpr Order largest_compiled_order {[]static consteval{
 		Order largest {0u};
 		#define OKIIDOKU_FOREACH_O_EMIT(O_) largest = (O_);
 		OKIIDOKU_FOREACH_O_DO_EMIT
