@@ -105,8 +105,8 @@
 			"hidden": true,
 			"condition": {"type": "notEquals", "lhs": "${hostSystemName}", "rhs": "Darwin"},
 			"cacheVariables": {
-				"CMAKE_C_COMPILER": "clang-21",
-				"CMAKE_CXX_COMPILER": "clang++-21"
+				"CMAKE_C_COMPILER": "clang-22",
+				"CMAKE_CXX_COMPILER": "clang++-22"
 			}
 		},
 		{
@@ -127,8 +127,8 @@
 			"name": "tool:gcc",
 			"hidden": true,
 			"cacheVariables": {
-				"CMAKE_C_COMPILER": "gcc",
-				"CMAKE_CXX_COMPILER": "g++"
+				"CMAKE_C_COMPILER": "gcc-16",
+				"CMAKE_CXX_COMPILER": "g++-16"
 			}
 		},
 		{

@@ -96,6 +96,7 @@
 - GCC 15:
   - `import std` at least in source files? https://www.kitware.com/import-std-in-cmake-3-30/
     - tried on 251024 and ran into issues. presumably because module support is still experimental in my compilers.
+- GCC 16: https://gcc.gnu.org/gcc-16/changes.html#cxx
 - C++23:
   - http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/p2214r0.html#does-adjacent-mean-2-or-n
   - `std::ranges::iota()` see above note in issues watching
@@ -104,6 +105,7 @@
   - alternative to `std::chunk`, look into `mdspan` (multi-dimensional span). Seems like this is more of what I'm looking for.
   - multidimensional subscript operator
 - C++26:
+  - philox engine (supported in GCC 16)
   - https://wg21.link/P2169R4 placeholder variables with no name
   - [postcondition assertions](https://en.cppreference.com/w/cpp/language/function.html#Postcondition_assertions)
     - https://en.cppreference.com/w/cpp/language/contracts.html

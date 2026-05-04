@@ -17,7 +17,7 @@ set(OKIIDOKU_EMSCRIPTEN_MIN_VERSION "4.0.17") # whatever I last pulled onto my m
 
 CPMAddPackage(NAME range-v3
 	# https://github.com/ericniebler/range-v3/tags
-	URL [[https://github.com/ericniebler/range-v3/archive/refs/tags/0.12.0.tar.gz]]
+	URL [[https://github.com/ericniebler/range-v3/archive/108f93c279c8f9cec175dac361084983d0176e99.tar.gz]] # 0.12.0++
 	DOWNLOAD_ONLY YES
 )
 if(range-v3_ADDED)
@@ -50,7 +50,7 @@ if(OKIIDOKU_BUILD_TESTING)
 	set(CMAKE_PROJECT_Catch2_INCLUDE "${okiidoku_SOURCE_DIR}/cmake/okiidoku/dep_project_include.cmake")
 	CPMAddPackage(NAME Catch2
 		# https://github.com/catchorg/Catch2/releases
-		URL [[https://github.com/catchorg/Catch2/archive/31ee3beb0a474463e0101674c22f2fef0311d601.tar.gz]] # v3.11.0++
+		URL [[https://github.com/catchorg/Catch2/archive/11a96e186af8b2779d93e550217e9c95d3f89371.tar.gz]] # v3.14.0++
 		OPTIONS
 			BUILD_TESTING NO
 			CATCH_INSTALL_DOCS NO
@@ -73,7 +73,7 @@ if(OKIIDOKU_BUILD_BINDINGS_FOR_PYTHON)
 	find_package(Python COMPONENTS Interpreter Development.Module REQUIRED) # https://nanobind.readthedocs.io/en/latest/building.html#preliminaries
 	# https://github.com/wjakob/nanobind
 	# https://nanobind.readthedocs.io/en/latest/changelog.html
-	CPMAddPackage("gh:wjakob/nanobind@2.9.2")
+	CPMAddPackage("gh:wjakob/nanobind@2.12.0")
 		# git tag archive link doesn't work since submodule deps are required
 		# TODO https://github.com/wjakob/nanobind/issues/403 could run `git submodule status` to get robin_map commit and then fetch that tarball there.
 		#  https://nanobind.readthedocs.io/en/latest/api_cmake.html#submodule-dependencies https://github.com/wjakob/nanobind/blob/master/cmake/nanobind-config.cmake#L249

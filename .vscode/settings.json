@@ -106,7 +106,7 @@
 		// "stopAtEntry": true,
 		// "visualizerFile": "${workspaceFolder}/tools/okiidoku.natvis", // TODO.try is this needed if already specified in CMake?
 		"showDisplayString": true, // for natvis
-		"cwd": "${command:cmake.getLaunchTargetDirectory}/.." // see CMAKE_DEBUGGER_WORKING_DIRECTORY. sets gdb pwd. "inferior" (debuggee) program inherits.
+		"cwd": "${command:cmake.getLaunchTargetDirectory}/.." // see CMAKE_DEBUGGER_WORKING_DIRECTORY. sets gdb pwd. "inferior" (debuggee) program inherits. // TODO might not be needed anymore (https://github.com/microsoft/vscode-cmake-tools/pull/4753)
 	},
 	"cmake.configureArgs": [
 		// "--warn-uninitialized",
