@@ -8,7 +8,10 @@ include_guard(DIRECTORY)
 
 if(EMSCRIPTEN)
 	add_compile_options(-sSTRICT=1)
-	add_link_options(-sSTRICT=1)
+	add_link_options(-sSTRICT=1
+		# https://emscripten.org/docs/tools_reference/settings_reference.html#executable (makes emcc add a shebang line to the JS)
+		"$<$<STREQUAL:$<TARGET_PROPERTY:TYPE>,EXECUTABLE>:-sEXECUTABLE=1>"
+	)
 endif()
 if(EMSCRIPTEN AND okiidoku_IS_TOP_LEVEL)
 	# https://emscripten.org/docs/tools_reference/emcc.html#emcc-gsource-map

@@ -122,7 +122,7 @@ namespace okiidoku::cli {
 			Grid grid {config_.order()};
 			grid.init_most_canonical();
 			const bool should_canonicalize {config_.canon()};
-			for (std::uintmax_t prog {0u}; prog < how_many; ++prog) {
+			for (std::uintmax_t prog {0u}; prog < how_many; ++prog) [[likely]] {
 				shuffle(grid, prng_());
 				if (should_canonicalize) {
 					canonicalize(grid);

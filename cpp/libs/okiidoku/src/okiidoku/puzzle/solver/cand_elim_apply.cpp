@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include <okiidoku/puzzle/solver/cand_elim_apply.hpp>
 
-#include "okiidoku/puzzle/solver/engine.hpp"      // UnwindInfo, Engine...
-#include "okiidoku/puzzle/solver/found_queue.hpp" // FoundQueues
-#include "okiidoku/puzzle/solver/found.hpp"       // CellClaimSym, Lock...
+#include <okiidoku/puzzle/solver/engine.hpp>      // UnwindInfo, Engine...
+#include <okiidoku/puzzle/solver/found_queue.hpp> // FoundQueues
+#include <okiidoku/puzzle/solver/found.hpp>       // CellClaimSym, Lock...
 #include <okiidoku/ints.hpp>
 #include <okiidoku/order.hpp>
 #include <okiidoku/detail/util.hpp>
@@ -53,12 +53,12 @@ namespace okiidoku::mono::detail::solver {
 		// solving techniques. I chose the latter (sorry?).
 
 		// MSVC 19 seems to require logical_and_loop_body to be an lvalue for some reason.
-		const auto logical_and_loop_body {[&](auto& queue) -> bool {
+		const auto logical_and_loop_body {[&](auto& queue)noexcept -> bool {
 			if (queue.empty()) { return logical_and_loop_continue; }
 			queue_apply_one(engine, queue, check);
 			return logical_and_loop_break;
 		}};
-		std::apply([&](auto& ...queue){
+		std::apply([&](auto& ...queue)noexcept{
 			// see https://en.cppreference.com/w/cpp/language/eval_order
 			return (... && logical_and_loop_body(queue));
 		}, engine.get_found_queues_().tup_);
@@ -69,14 +69,14 @@ namespace okiidoku::mono::detail::solver {
 	template<Order O> requires(is_order_compiled(O))
 	UnwindInfo CandElimApply<O>::apply_all_queued(Engine<O>& engine) noexcept {
 		auto check {UnwindInfo::make_no_unwind()};
-		const auto logical_and_loop_body {[&](auto& queue) -> bool {
+		const auto logical_and_loop_body {[&](auto& queue)noexcept -> bool {
 			while (!queue.empty()) {
 				queue_apply_one(engine, queue, check);
 				if (check.did_unwind_root()) { return logical_and_loop_break; }
 			}
 			return logical_and_loop_continue;
 		}};
-		std::apply([&](auto& ...queue){
+		std::apply([&](auto& ...queue)noexcept{
 			return (... && logical_and_loop_body(queue));
 		}, engine.get_found_queues_().tup_);
 		if (check.did_unwind_root()) [[unlikely]] { return check; }
@@ -107,19 +107,19 @@ namespace okiidoku::mono::detail::solver {
 		{
 			const auto desc_row {rmi_to_row<O>(desc.rmi)};
 			for (const auto nb_col : T::O2) {
-				const auto nb_rmi {static_cast<rmi_t>(row_col_to_rmi<O>(desc_row, nb_col))};
+				const auto nb_rmi {row_col_to_rmi<O>(desc_row, nb_col)};
 				OKIIDOKU_TRY_ELIM_NB_CAND
 		}	}
 		{
 			const auto desc_col {rmi_to_col<O>(desc.rmi)};
 			for (const auto nb_row : T::O2) {
-				const auto nb_rmi {static_cast<rmi_t>(row_col_to_rmi<O>(nb_row, desc_col))};
+				const auto nb_rmi {row_col_to_rmi<O>(nb_row, desc_col)};
 				OKIIDOKU_TRY_ELIM_NB_CAND
 		}	}
 		{
 			const auto desc_box {rmi_to_box<O>(desc.rmi)};
 			for (const auto nb_box_cell : T::O2) {
-				const auto nb_rmi {static_cast<rmi_t>(box_cell_to_rmi<O>(desc_box, nb_box_cell))};
+				const auto nb_rmi {box_cell_to_rmi<O>(desc_box, nb_box_cell)};
 				OKIIDOKU_TRY_ELIM_NB_CAND
 		}	}
 		// for (const auto house_type : house_types) {

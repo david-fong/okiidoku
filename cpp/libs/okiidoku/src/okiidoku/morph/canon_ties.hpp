@@ -93,7 +93,7 @@ namespace okiidoku::mono::detail {
 		the record of which ranges' values are still tied. */
 		void update(const std::equivalence_relation<ix_t,ix_t> auto& is_eq) noexcept {
 			for (const auto&& cached_tie : *this) {
-				for (ii_t i {cached_tie.begin_}; i.next() != cached_tie.end_; ++i) {
+				for (ii_t i {cached_tie.begin_}; i.next() != cached_tie.end_; ++i) [[likely]] {
 					OKIIDOKU_CONTRACT(i.next() < size);
 					if (!std::invoke(is_eq, *i, *i.next())) [[likely]] {
 						bookends_.flip(*i);

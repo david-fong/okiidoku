@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include <okiidoku/puzzle/solver/cand_elim_find.hpp>
 
-#include "okiidoku/puzzle/solver/engine.hpp" // UnwindInfo
+#include <okiidoku/puzzle/solver/engine.hpp> // UnwindInfo
 #include <okiidoku/puzzle/solver/subset_combo_walker.hpp>
 #include <okiidoku/puzzle/solver/found.hpp>
 #include <okiidoku/bit_array.hpp>
@@ -113,7 +113,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 	}
 
 
-	enum class NakedOrHidden : unsigned char { naked, hidden };
+	enum class NakedOrHidden : char8_t { naked, hidden };
 
 	template<Order O> requires(is_order_compiled(O))
 	struct FoundSubsetInfo final {
@@ -147,7 +147,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 			}()};
 			OKIIDOKU_CONTRACT(sub_a+naked_subset_size+1u < sub_z);
 			// ^plus one to skip finding hidden singles. // TODO or also try to find them?
-			std::optional<FoundSubsetInfo<O>> found {{ // Note: wrap with optional to allow NRVO
+			std::optional<FoundSubsetInfo<O>> found {{ // NRVO
 				.combo_walker {
 					*sub_a,
 					[&][[gnu::pure]]{
@@ -190,7 +190,7 @@ namespace okiidoku::mono::detail::solver { namespace {
 		OKIIDOKU_CONTRACT2(max_subset_size <= o2x_t{(T::O2+1u)/2u});
 		o2i_t sub_a {0u};
 		o2i_t sub_z {0u};
-		const auto get_next_sub_a {[&][[gnu::pure]]{
+		const auto get_next_sub_a {[&][[gnu::pure]]noexcept{
 			OKIIDOKU_CONTRACT(sub_a < T::O2);
 			o2i_t next {sub_a.next()};
 			while (next < T::O2 && !subs.is_begin[*next]) { ++next; }

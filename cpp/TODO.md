@@ -46,9 +46,8 @@
 - [When debugging a target, use debugger.workingDirectory from the CMake file API #4595](https://github.com/microsoft/vscode-cmake-tools/issues/4595)
 - https://gitlab.kitware.com/cmake/cmake/-/issues/15179 -Og default for debug build configuration
 - https://gitlab.kitware.com/cmake/cmake/-/issues/26092 cmake refer to build preset name in preset for installDir
-- `std::ranges::iota()` clang libc++ doesn't have it yet :( (which impacts emscripten build) https://github.com/llvm/llvm-project/issues/105184
+- `std::ranges::iota()` clang libc++ doesn't have it yet :( (which impacts emscripten build) https://github.com/llvm/llvm-project/issues/105184. released in libc++23?
 - https://gitlab.kitware.com/cmake/cmake/-/issues/20256 CMake mechanism for split debug info. see also https://sourceware.org/gdb/current/onlinedocs/gdb.html/Separate-Debug-Files.html
-- https://github.com/emscripten-core/emscripten/issues/25490 emscripten emcc link `make_js_executable`.
 
 ## Misc List
 
@@ -93,8 +92,7 @@
 - CMake 4.2
   - Should I define `_UNICODE` or `_SBCS`? See [CMP0204](https://cmake.org/cmake/help/latest/policy/CMP0204.html) and [MFC docs](https://learn.microsoft.com/en-us/cpp/atl-mfc-shared/unicode-and-multibyte-character-set-mbcs-support). Should it be left to user?
 - CMake 3.31:
-  - presets `$comment`
-  - `CMAKE_EXPORT_BUILD_DATABASE`
+  - `CMAKE_EXPORT_BUILD_DATABASE` (only relevant when using C++ modules)
 - GCC 15:
   - `import std` at least in source files? https://www.kitware.com/import-std-in-cmake-3-30/
     - tried on 251024 and ran into issues. presumably because module support is still experimental in my compilers.
@@ -112,6 +110,8 @@
     - https://en.cppreference.com/w/cpp/language/contract_assert.html
     - https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2025/p2900r14.pdf supported for defaulted special member functions! see section 3.3.3.
     - `-fcontract-evaluation-semantic`
+    - for `contract_assert`, see https://youtu.be/mQI3B7ek9DU?t=2417. P1494. observable checkpoints... would this harm performance?
+      https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/p1494r1.html
   - `to_chars_result::operator bool`
   - with reflection, I might be able to do what I'm currently doing with macros like `OKIIDOKU_FOREACH_O_EMIT` and `OKIIDOKU_FOREACH_O_DO_EMIT`, and be in a better position to use C++ modules :O.
   - try using `pre` and `post()` on default and copy constructors of `Int<...>` to describe pre and postconditions
@@ -129,6 +129,8 @@
     - https://gcc.gnu.org/onlinedocs/gcc/Common-Variable-Attributes.html#index-retain-variable-attribute
     - https://gcc.gnu.org/onlinedocs/gcc/Common-Function-Attributes.html#index-retain-function-attribute and https://gcc.gnu.org/onlinedocs/gcc/Common-Function-Attributes.html#index-used-function-attribute
     - https://clang.llvm.org/docs/UsersManual.html#cmdoption-feliminate-unused-debug-types
+    - https://stackoverflow.com/a/61276017 try `--undefined=<symbol>` linker arg to keep for debug.
+      - or use attributes to put my debug functions in a `okiidoku_debug` section and write a linker script or something to tell the linker to not gc that section. https://stackoverflow.com/q/9827157/11107541
 - https://youtu.be/7QNtiH5wTAs?t=7200 -Wl,--icf=...
 - https://youtu.be/7QNtiH5wTAs?t=7322 -Wl,-s (strip-all)
 

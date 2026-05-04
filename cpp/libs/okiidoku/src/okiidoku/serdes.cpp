@@ -194,7 +194,7 @@ namespace okiidoku::mono {
 
 		typename Writer<O>::IOGuard io_guard {os};
 		Writer<O> writer {};
-		for (; !writer.done(); writer.advance()) {
+		for (; !writer.done(); writer.advance()) [[likely]] {
 			const auto row {writer.rmi() / T::O2};
 			const auto col {writer.rmi() % T::O2};
 			if ((row/T::O1) == (col/T::O1)) [[unlikely]] {
@@ -221,7 +221,7 @@ namespace okiidoku::mono {
 		{
 			// parse out bulk of content (skip what can be reconstructed later):
 			typename Writer<O>::IOGuard io_guard {is};
-			for (Reader<O> reader {byte_count}; !reader.done(); reader.advance()) {
+			for (Reader<O> reader {byte_count}; !reader.done(); reader.advance()) [[likely]] {
 				const auto row {reader.rmi() / T::O2};
 				const auto col {reader.rmi() % T::O2};
 				if ((row/T::O1) == col/T::O1) [[unlikely]] {

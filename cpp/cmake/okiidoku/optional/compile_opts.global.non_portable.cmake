@@ -1,10 +1,10 @@
 # SPDX-FileCopyrightText: 2020 David Fong
 # SPDX-License-Identifier: GPL-3.0-or-later
 include_guard(DIRECTORY)
-include(CheckCXXSourceCompiles)
 if(NOT OKIIDOKU_BUILD_OPTIMIZE_LOCAL_NON_PORTABLE)
 	return()
 endif()
+include(CheckCXXSourceCompiles)
 
 if(NOT MSVC)
 	add_compile_options(

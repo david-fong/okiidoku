@@ -15,7 +15,7 @@
 namespace okiidoku::cli {
 
 	namespace Command {
-		enum class E : unsigned char {
+		enum class E : char8_t {
 			help,
 			quit,
 			config_order,

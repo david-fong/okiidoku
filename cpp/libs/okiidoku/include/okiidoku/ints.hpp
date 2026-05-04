@@ -25,7 +25,7 @@ namespace okiidoku {
 
 	using rng_seed_t = std::uint_fast32_t; // see `std::minstd_rand`
 
-	enum class HouseType : unsigned char {
+	enum class HouseType : char8_t {
 		box, row, col,
 	};
 	inline constexpr auto house_types {std::to_array<HouseType>({
@@ -42,7 +42,7 @@ namespace okiidoku {
 		}
 	};
 
-	enum class LineType : unsigned char {
+	enum class LineType : char8_t {
 		row, col,
 	};
 	inline constexpr auto line_types {std::to_array<LineType>({
@@ -58,11 +58,11 @@ namespace okiidoku {
 		}
 	};
 
-	enum class BoxOrLine : unsigned char {
+	enum class BoxOrLine : char8_t {
 		box, line,
 	};
 
-	enum class CellOrSym : unsigned char {
+	enum class CellOrSym : char8_t {
 		cell, sym,
 	};
 }
@@ -75,7 +75,7 @@ namespace okiidoku {
 		template<int W> requires(W <= 64)
 		/// fast unsigned integer type that can fit at least `N` bits.
 		using uint_fast_for_width_t = typename
-			std::conditional_t<(W <= 8 ), std::uint_fast8_t ,
+			std::conditional_t<(W <= 8 ), std::uint_fast8_t , // changing to char8_t to avoid aliasing doesn't seem to improve overall perf. maybe due to `Int` wrapper type.
 			std::conditional_t<(W <= 16), std::uint_fast16_t,
 			std::conditional_t<(W <= 32), std::uint_fast32_t,
 			std::conditional_t<(W <= 64), std::uint_fast64_t,
@@ -149,7 +149,7 @@ namespace okiidoku {
 
 
 	/** this tag determines the space usage and valid operations for an `Int`. */
-	enum class IntKind : unsigned char {
+	enum class IntKind : char8_t {
 		fixed,
 		// TODO consider another type "argument", (only-)which has the implicit constructor from builtin type.
 		small,

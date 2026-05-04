@@ -170,7 +170,7 @@ namespace okiidoku::mono { namespace {
 		PolarState row_state {};
 		PolarState col_state {};
 
-		while (row_state.has_ties() || col_state.has_ties()) {
+		while (row_state.has_ties() || col_state.has_ties()) [[likely]] {
 			const auto old_row_state {row_state};
 			const auto old_col_state {col_state};
 			{ auto table_ {make_table_for_a_pass(src_grid, false, old_row_state, old_col_state)}; row_state.do_a_pass(table_); }

@@ -44,7 +44,7 @@ void test_serdes(const std::uint_fast32_t rng_seed) {
 		// serialize data to `std::string`:
 		std::ostringstream os {std::ios::binary};
 		REQUIRE(os);
-		for (auto i {0uz}; i < num_grids; ++i) { CAPTURE(i);
+		for (auto i {0uz}; i < num_grids; ++i) [[likely]] { CAPTURE(i);
 			auto& grid {grid_buf[i]};
 			grid = generate_shuffled<O>(rng());
 			REQUIRE(os.good());
@@ -61,7 +61,7 @@ void test_serdes(const std::uint_fast32_t rng_seed) {
 	// de-serialize data and check correctness:
 	std::istringstream is {written_data, std::ios::binary};
 	REQUIRE(is.good());
-	for (auto i {0uz}; i < num_grids; ++i) { CAPTURE(i);
+	for (auto i {0uz}; i < num_grids; ++i) [[likely]] { CAPTURE(i);
 		Grid<O> parsed_grid;
 		REQUIRE(is.good());
 

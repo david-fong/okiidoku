@@ -80,7 +80,7 @@ namespace okiidoku::mono::detail::solver {
 					return;
 				}
 			}
-			for (++i; i < naked_subset_size_; ++i) {
+			for (++i; i < naked_subset_size_; ++i) [[likely]] {
 				combo_[i] = combo_[i.prev()].next();
 			}
 			assert_is_state_valid_();
@@ -96,7 +96,7 @@ namespace okiidoku::mono::detail::solver {
 		// range [`begin`, `end`).
 		combo_t combo_ {}; // TODO consider intentionally not default initializing for performance. may need to add NOLINT. We have assertions. hm. did some naive benchmarks and can't really see a consistent difference.
 
-		void assert_is_state_valid_() const noexcept {
+		constexpr void assert_is_state_valid_() const noexcept {
 			#ifndef NDEBUG
 			if ((begin_ + naked_subset_size_) > end_) {
 				OKIIDOKU_ASSERT(!has_more_);

@@ -35,7 +35,7 @@ namespace okiidoku {
 			std::conditional_t<(width_ <= 32u), std::uint32_t, std::uint64_t
 		>>;
 	private:
-		static constexpr unsigned char word_width {sizeof(word_t) * std::size_t{CHAR_BIT}};
+		static constexpr char8_t word_width {sizeof(word_t) * std::size_t{CHAR_BIT}};
 		using word_ii_t = Int<(width_ + (word_width-1u)) / word_width>; // i.e. `round_up(width / word_width)`
 		using word_ix_t = Int<word_ii_t::max-1u>;
 		using word_bit_ii_t = Int<(width_ < word_width) ? width_ : word_width>;

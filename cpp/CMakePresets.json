@@ -1,5 +1,5 @@
 {
-	"version": 10,
+	"version": 11,
 	"$comment": [
 		"https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html",
 		"https://github.com/microsoft/vscode-cmake-tools/blob/main/docs/cmake-presets.md",
@@ -245,6 +245,13 @@
 			"configuration": "Release"
 		},
 		{
+			"name": "dev.clang.relsz",
+			"configurePreset": "dev.clang",
+			"displayName": "release min size",
+			"inherits": ["base:dev.clang"],
+			"configuration": "MinSizeRel"
+		},
+		{
 			"name": "dev.clang.pgo",
 			"configurePreset": "dev.clang",
 			"displayName": "pgo",
@@ -299,6 +306,13 @@
 			"displayName": "release",
 			"inherits": ["base:dev.gcc"],
 			"configuration": "Release"
+		},
+		{
+			"name": "dev.gcc.relsz",
+			"configurePreset": "dev.gcc",
+			"displayName": "release min size",
+			"inherits": ["base:dev.gcc"],
+			"configuration": "MinSizeRel"
 		},
 		{
 			"name": "dev.gcc.pgo",

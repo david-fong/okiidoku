@@ -84,7 +84,7 @@ namespace okiidoku::mono {
 		}};
 
 		FastSolver<O> solver {};
-		while (num_puzcell_cands > 0u) {
+		while (num_puzcell_cands > 0u) [[likely]] {
 			const auto puzcell_cand_i {(rng()-rng_t::min()) % num_puzcell_cands};
 			const auto rmi {puzcell_cand_rmis[puzcell_cand_i]};
 			const auto sym {std::exchange(grid[rmi], T::O2)};

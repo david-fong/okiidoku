@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include <okiidoku_cli_utils/shared_rng.hpp>
 #include <okiidoku_cli_utils/console_setup.hpp>
+#include <okiidoku_cli_utils/str.hpp>
 #include <okiidoku/gen.hpp>
 #include <okiidoku/grid.hpp>
 
@@ -24,7 +25,7 @@ void do_training(okiidoku::util::Prng& shared_rng, const unsigned num_rounds) {
 
 	// Grid<O> canon_grid;
 
-	for (unsigned round {0u}; round < num_rounds; ++round) {
+	for (unsigned round {0u}; round < num_rounds; ++round) [[likely]] {
 		shuffle(gen_grid, shared_rng());
 
 		/* const auto gen_canon_transform {canonicalize(gen_grid)};
@@ -41,14 +42,15 @@ ARGUMENTS
 1: RNG seed (default: get from device)
 */
 int main(const int argc, char const *const argv[]) {
-	okiidoku::util::setup_console();
+	namespace ok = ::okiidoku;
+	ok::util::setup_console();
 
 	// NOLINTBEGIN(*-avoid-c-arrays, cppcoreguidelines-pro-bounds-pointer-arithmetic)
 	const auto rng_seed {[&]() -> std::uint_fast64_t {
 		if (argc > 1) {
 			const std::string_view arg {argv[1uz]};
 			std::uint_fast64_t parsed {};
-			if (std::from_chars(arg.data(), arg.data()+arg.size(), parsed, 16).ec == std::errc{}) {
+			if (ok::util::str::from_chars(arg, parsed, 16).ec == std::errc{}) {
 				return parsed;
 			}
 			std::cerr << "\nfailed to parse rng seed argument (hex u64). using random_device instead.";
@@ -63,7 +65,7 @@ int main(const int argc, char const *const argv[]) {
 
 	okiidoku::util::Prng shared_rng(rng_seed);
 	#define OKIIDOKU_FOREACH_O_EMIT(O_) \
-	do_training<(O_)>(shared_rng, 1000);
+	do_training<(O_)>(shared_rng, 1000u);
 	OKIIDOKU_FOREACH_O_DO_EMIT
 	#undef OKIIDOKU_FOREACH_O_EMIT
 	return EXIT_SUCCESS;

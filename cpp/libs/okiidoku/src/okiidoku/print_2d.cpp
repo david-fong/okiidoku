@@ -20,9 +20,8 @@ namespace okiidoku { namespace {
 
 	void make_random_emoji_set(const rng_seed_t rng_salt, const std::span<std::string_view> sink) noexcept {
 		thread_local constinit auto sets_ {emoji::sets}; ///< mutable underlying storage that `sets` hold views into.
-		thread_local static auto sets {std::apply([](auto& ...args)static noexcept{
+		thread_local auto sets {std::apply([](auto& ...args)static noexcept{
 			return std::to_array({(std::span<std::string_view>{args.entries})...});
-			// TODO when trying to make `sets` constinit and this lambda consteval, it fails. is it due to span constructor? or because sets_ is constinit and not constexpr?
 		}, sets_)};
 		std::minstd_rand rng {rng_salt};
 		std::shuffle(sets.begin(), sets.end(), rng);
@@ -63,8 +62,8 @@ namespace okiidoku {
 			else if (border_i == O ) [[unlikely]] { os << (NOOK_B); } \
 			else                                  { os << (NOOK_C); }
 			M_NOOK(" ┌", " ├", " └")
-			for (auto box_col {0uL}; box_col < O; ++box_col) {
-				for (auto i {0uL}; i < 1uL + (2uL * O); ++i) { os << "─"; } // content
+			for (auto box_col {0uL}; box_col < O; ++box_col) [[likely]] {
+				for (auto i {0uL}; i < 1uL + (2uL * O); ++i) [[likely]] { os << "─"; } // content
 				if (box_col < O - 1uL) [[likely]] { M_NOOK("┬", "┼", "┴") } // separator
 			}
 			M_NOOK("┐", "┤", "┘")
@@ -87,13 +86,13 @@ namespace okiidoku {
 		}()};
 		OKIIDOKU_CONTRACT2(emoji_set.size() == O2);
 
-		for (o2i_t row {0u}; row < O2; ++row) {
+		for (o2i_t row {0u}; row < O2; ++row) [[likely]] {
 			if (row % O == 0u) [[unlikely]] {
 				print_box_row_sep_strings(row / O);
 			}
 			os << '\n';
-			for (auto grid_i {0uz}; grid_i < grid_views.size(); ++grid_i) {
-				for (o2i_t col {0u}; col < O2; ++col) {
+			for (auto grid_i {0uz}; grid_i < grid_views.size(); ++grid_i) [[likely]] {
+				for (o2i_t col {0u}; col < O2; ++col) [[likely]] {
 					if ((col % O) == 0u) [[unlikely]] { os << " │"; }
 
 					const o2i_t sym {grid_views[grid_i].operator()(

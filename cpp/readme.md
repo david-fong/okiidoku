@@ -20,9 +20,9 @@ ccache lld reuse clang-tidy iwyu # optional devtooling
 <!-- mold didn't make the cut. see related journal entry -->
 
 - Requirements to build from source:
-  - [CMake](https://cmake.org/install/) 4.2 or higher
+  - [CMake](https://cmake.org/install/) 4.3 or higher
   - a recent C++ compiler [supporting most of C++23](https://en.cppreference.com/w/cpp/compiler_support).
-    - I test on Clang 20, GCC 15, and (much less frequently,) Visual Studio 17 2022. I can't guarantee things will work for you.
+    - I test on Clang 21, GCC 15, and (much less frequently,) Visual Studio 17 2022. I can't guarantee things will work for you.
   - [a C++ build system](https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html) (ex. Ninja, Visual Studio, Make)
   - Note: My general policy on tooling version support is to try to support the lowest common denominator of versions that are easily installable on homebrew, apt, and chocolatey, and wait a bit for regressions in new major releases to get fixed.
     - For apt, I try to support the repository for the latest Ubuntu version supported with WSL2.

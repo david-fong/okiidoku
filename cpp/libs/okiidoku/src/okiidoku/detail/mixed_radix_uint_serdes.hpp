@@ -135,7 +135,7 @@ namespace okiidoku::detail {
 
 			// prepare the real write buffer:
 			buf_t buf {0u};
-			for (auto i {0uz}; i < queue_end_; ++i) {
+			for (auto i {0uz}; i < queue_end_; ++i) [[likely]] {
 				OKIIDOKU_CONTRACT(i+1uz <= queue_end_);
 				const auto& qi {queue_[queue_end_-1uz-i]};
 				OKIIDOKU_CONTRACT(qi.radix > 0u);
@@ -155,7 +155,7 @@ namespace okiidoku::detail {
 				os.write(reinterpret_cast<const char*>(&buf), num_bytes); // NOLINT(*-cast)
 			}
 			// if (false) {}
-			else { for (auto i {0uz}; i < num_bytes; ++i) {
+			else { for (auto i {0uz}; i < num_bytes; ++i) [[likely]] {
 				os.put(TO<char>(buf));
 				buf >>= CHAR_BIT;
 			}}
@@ -232,9 +232,9 @@ namespace okiidoku::detail {
 				byte_count = TO<std::size_t>(is.gcount());
 			}
 			// if (false) {}
-			else { for (auto i {0uz}; i < bytes_to_read; ++i) {
+			else { for (auto i {0uz}; i < bytes_to_read; ++i) [[likely]] {
 				if (char c OKIIDOKU_DEFER_INIT; is.get(c), is) [[likely]] { // NOLINT(*init*)
-					buf_ |= TO<buf_t>( TO<buf_t>(TO<unsigned char>(c)) << (i*CHAR_BIT) ); // good grief- the casting needed here =_=
+					buf_ |= TO<buf_t>( TO<buf_t>(TO<char8_t>(c)) << (i*CHAR_BIT) ); // good grief- the casting needed here =_=
 					++byte_count;
 				} else { break; }
 			}}

@@ -79,14 +79,12 @@
 		{ "begin": "/\\*\\*", "continue": "" },
 	],
 
-	// https://vector-of-bool.github.io/docs/vscode-cmake-tools/settings.html
-
 	"cmake.useCMakePresets": "always",
 	"cmake.ignoreCMakeListsMissing": true,
 	"cmake.sourceDirectory": ["${workspaceFolder}/cpp"],
 	// the following line is only needed when using kits, but this project uses presets.
 	"cmake.buildDirectory": "${sourceDirectory}/out/build/${command:cmake.activeConfigurePresetName}",
-	"cmake.installPrefix": "${sourceDirectory}/out/install/${command:cmake.activeBuildPresetName}", // doesn't work (?) :(
+	"cmake.installPrefix": "${sourceDirectory}/out/install/${command:cmake.activeBuildPresetName}", // doesn't work (?) :( or is it fixed now by https://github.com/microsoft/vscode-cmake-tools/issues/4358 ?
 	"cmake.debugConfig": {
 		// https://code.visualstudio.com/docs/cpp/launch-json-reference
 		"environment": [],

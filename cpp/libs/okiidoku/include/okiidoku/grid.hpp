@@ -33,8 +33,8 @@ namespace okiidoku::mono {
 
 		// note: making this constexpr results in a 1% speed gain, but 45% program
 		// size increase with GCC. that speed doesn't seem worth it.
-		explicit Gridlike(CellType fill_value) noexcept { arr.fill(fill_value); }
-		Gridlike() noexcept = default;
+		constexpr explicit Gridlike(CellType fill_value) noexcept { arr.fill(fill_value); }
+		constexpr Gridlike() noexcept = default;
 
 		/** \pre `rmi` is in `[0, O4)`. */
 		[[nodiscard, gnu::pure]] constexpr

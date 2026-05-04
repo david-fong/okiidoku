@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: 2020 David Fong
 # SPDX-License-Identifier: GPL-3.0-or-later
-cmake_minimum_required(VERSION 4.2)
+cmake_minimum_required(VERSION 4.3)
 project(okiidoku_example
 	VERSION 0.0.1
 	LANGUAGES CXX

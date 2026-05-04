@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include <okiidoku/puzzle/solver/cand_elim_find.hpp>
 
-#include "okiidoku/puzzle/solver/engine.hpp" // CandsGrid
+#include <okiidoku/puzzle/solver/engine.hpp> // CandsGrid
 #include <okiidoku/puzzle/solver/found.hpp>
 #include <okiidoku/bit_array.hpp>
 #include <okiidoku/order.hpp>

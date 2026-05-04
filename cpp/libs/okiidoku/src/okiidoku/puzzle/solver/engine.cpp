@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include <okiidoku/puzzle/solver/engine.hpp>
 
-#include "okiidoku/puzzle/solver/found_queue.hpp"
-#include "okiidoku/puzzle/solver/found.hpp" // CellClaimSym
+#include <okiidoku/puzzle/solver/found_queue.hpp>
+#include <okiidoku/puzzle/solver/found.hpp> // CellClaimSym
 #include <okiidoku/grid.hpp>
 #include <okiidoku/bit_array.hpp>
 #include <okiidoku/ints.hpp>

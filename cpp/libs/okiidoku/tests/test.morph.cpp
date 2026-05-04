@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include <okiidoku/morph/canon.hpp>
 #include <okiidoku/morph/scramble.hpp>
-#include "okiidoku/morph/transform.hpp"
+#include <okiidoku/morph/transform.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 #include <okiidoku/gen.hpp>

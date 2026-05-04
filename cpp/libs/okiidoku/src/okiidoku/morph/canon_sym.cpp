@@ -99,14 +99,14 @@ namespace okiidoku::mono { namespace {
 	sym_map_t<O> CanonSym<O>::get_map(const Grid<O>& grid) noexcept {
 		const SymBoxToBoxcellMap sym_box_to_boxcell_map {grid};
 		CanonSym s {};
-		while (s.ties_.has_unresolved()) {
+		while (s.ties_.has_unresolved()) [[likely]] {
 			auto old_ties {s.ties_};
 			s.do_a_pass(sym_box_to_boxcell_map);
 			if (s.ties_.none_resolved()) [[unlikely]] {
 				// encountered the most canonical grid?
 				break;
 			}
-			if (old_ties == s.ties_) {
+			if (old_ties == s.ties_) [[unlikely]] {
 				// TODO.mid stalemate... current design insufficient?
 				break;
 			}
