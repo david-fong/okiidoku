@@ -96,7 +96,9 @@
 - GCC 15:
   - `import std` at least in source files? https://www.kitware.com/import-std-in-cmake-3-30/
     - tried on 251024 and ran into issues. presumably because module support is still experimental in my compilers.
+    - figure out whether ccache is working
 - GCC 16: https://gcc.gnu.org/gcc-16/changes.html#cxx
+  - https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2025/p1306r5.html could this help with the solver methods?
 - C++23:
   - http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/p2214r0.html#does-adjacent-mean-2-or-n
   - `std::ranges::iota()` see above note in issues watching
@@ -111,6 +113,8 @@
     - https://en.cppreference.com/w/cpp/language/contracts.html
     - https://en.cppreference.com/w/cpp/language/contract_assert.html
     - https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2025/p2900r14.pdf supported for defaulted special member functions! see section 3.3.3.
+    - https://gcc.gnu.org/onlinedocs/gcc/C_002b_002b-Dialect-Options.html#index-fcontracts
+    - [Can I make GCC assume pre/post contracts hold on the callee/definition side?](https://stackoverflow.com/q/79947145)
     - `-fcontract-evaluation-semantic`
     - for `contract_assert`, see https://youtu.be/mQI3B7ek9DU?t=2417. P1494. observable checkpoints... would this harm performance?
       https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/p1494r1.html
@@ -120,7 +124,7 @@
   - https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2025/p2786r13.html#introduction relocatability
     - https://en.cppreference.com/w/cpp/language/class_property_specifiers.html
   - https://en.cppreference.com/w/cpp/utility/from_chars_result.html `operator bool`
-  - [`inplace_vector`](https://en.cppreference.com/w/cpp/container/inplace_vector.html)
+  - [`inplace_vector`](https://en.cppreference.com/w/cpp/container/inplace_vector.html). could be useful for some tests.
 - C++29:
   - class invariants?: https://youtu.be/gtFFTjQ4eFU?t=873
 

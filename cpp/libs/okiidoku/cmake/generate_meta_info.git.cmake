@@ -33,8 +33,8 @@ else()
 	)
 endif()
 
-# include(GNUInstallDirs) # want to use DATADIR, but get warning about enabling a language, and `enable_language` also gives a warning :/
-file(CONFIGURE OUTPUT "${CMAKE_INSTALL_PREFIX}/share/okiidoku/about.git.md" CONTENT
+# include(GNUInstallDirs) # want to use DOCDIR, but get warning about enabling a language, and `enable_language` also gives a warning :/
+file(CONFIGURE OUTPUT "${CMAKE_INSTALL_PREFIX}/share/doc/okiidoku/about.git.md" CONTENT
 "<!-- SPDX-FileCopyrightText: 2020 David Fong -->
 <!-- SPDX-License-Identifier: CC0-1.0 -->
 
@@ -53,4 +53,4 @@ file(CONFIGURE OUTPUT "${CMAKE_INSTALL_PREFIX}/share/okiidoku/about.git.md" CONT
   ${OKIIDOKU_GIT_COMMIT}
   ```
 ")
-install(FILES "${CMAKE_INSTALL_PREFIX}/share/okiidoku/about.git.md" TYPE DOC COMPONENT okiidoku_about)
+# install(FILES "${CMAKE_INSTALL_PREFIX}/share/okiidoku/about.git.md" TYPE DOC COMPONENT okiidoku_about)

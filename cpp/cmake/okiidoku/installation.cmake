@@ -19,6 +19,9 @@ export(
 	EXPORT_PACKAGE_DEPENDENCIES
 )
 
+# https://cmake.org/cmake/help/latest/command/install.html#sbom
+install(SBOM okiidoku EXPORT okiidoku_targets)
+
 # CPS / find_package support
 # https://youtu.be/Hk4fv4dD0UQ?t=2899
 # https://cmake.org/cmake/help/latest/command/install.html#package-info

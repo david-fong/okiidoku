@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # SPDX-FileCopyrightText: 2018 Nico Weber
 # SPDX-License-Identifier: Apache-2.0
-# Copied on 2024/07/06 from https://raw.githubusercontent.com/nico/ninjatracing/main/ninjatracing
+# Copied on 2026/05/26 from https://raw.githubusercontent.com/nico/ninjatracing/main/ninjatracing
 
 """Converts one (or several) .ninja_log files into chrome's about:tracing format.
 
@@ -36,24 +36,32 @@ def read_targets(log, show_all):
     m = re.search(r'^# ninja log v(\d+)\n$', header)
     assert m, "unrecognized ninja log version %r" % header
     version = int(m.group(1))
-    assert 5 <= version <= 6, "unsupported ninja log version %d" % version
-    if version == 6:
-        # Skip header line
-        next(log)
+    assert 5 <= version <= 7, "unsupported ninja log version %d" % version
 
     targets = {}
     last_end_seen = 0
+    # Start of the current (incremental) build.
+    build_start = 0
     for line in log:
         if line.startswith('#'):
             continue
         start, end, _, name, cmdhash = line.strip().split('\t') # Ignore restat.
-        if not show_all and int(end) < last_end_seen:
+        start = int(start)
+        end = int(end)
+        if end < last_end_seen:
             # An earlier time stamp means that this step is the first in a new
-            # build, possibly an incremental build. Throw away the previous data
-            # so that this new build will be displayed independently.
-            targets = {}
-        last_end_seen = int(end)
-        targets.setdefault(cmdhash, Target(start, end)).targets.append(name)
+            # build, possibly an incremental build.
+            if not show_all:
+                # Throw away the previous data so that only the last build will
+                # be displayed.
+                targets = {}
+            else:
+                # Assume that the next build starts directly after the previous one.
+                build_start += last_end_seen
+        last_end_seen = end
+        targets \
+            .setdefault(cmdhash, Target(build_start + start, build_start + end)) \
+            .targets.append(name)
     return sorted(targets.values(), key=lambda job: job.end, reverse=True)
 
 
@@ -112,6 +120,14 @@ def embed_time_trace(ninja_log_dir, target, pid, tid, options):
     time-trace file to be in .json file named based on .o file."""
     for t in target.targets:
         o_path = os.path.join(ninja_log_dir, t)
+
+        # We need to ignore auxillary json files in the .ninja_log. These can be
+        # files like CXXModules.json which do not have any corresponding clang json
+        # time trace.
+        (_,ext) = os.path.splitext(o_path)
+        if ext == ".json":
+            continue
+
         json_trace_path = os.path.splitext(o_path)[0] + '.json'
         try:
             with open(json_trace_path, 'r') as trace:
@@ -146,7 +162,7 @@ def log_to_dicts(log, pid, options):
                 yield time_trace
 
 
-def main(argv):
+def main():
     usage = __doc__
     parser = optparse.OptionParser(usage)
     parser.add_option('-a', '--showall', action='store_true', dest='showall',
@@ -177,4 +193,4 @@ def main(argv):
 
 
 if __name__ == '__main__':
-    sys.exit(main(sys.argv[1:]))
+    sys.exit(main())
